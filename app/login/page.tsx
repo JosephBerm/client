@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import InputTextBox from '@/components/InputTextBox'
+import InputTextBox from '@/src/components/InputTextBox'
 
 const Page = () => {
 	return (
