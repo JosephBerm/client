@@ -46,8 +46,36 @@
 	font-weight: 600;
 	font-style: normal;
 }
+/* Sans-Serif */
+@font-face {
+	font-family: 'Roboto';
+	src: url('Fonts/Sans-Serif/Roboto/Roboto-Bold.woff2') format('woff2');
+	font-weight: bold;
+	font-style: normal;
+}
 
-/* sans-serif */
+@font-face {
+	font-family: 'Roboto';
+	src: url('Fonts/Sans-Serif/Roboto/Roboto-Light.woff2') format('woff2');
+	font-weight: light;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Roboto';
+	src: url('Fonts/Sans-Serif/Roboto/Roboto-Italic.woff2') format('woff2');
+	font-weight: normal;
+	font-style: italic;
+}
+
+/* FiraCode */
+@font-face {
+	font-family: 'FiraCode';
+	src: url('Fonts/Monospace/FiraCode/firacode-regular-webfont.woff2') format('woff2'),
+		url('Fonts/Monospace/FiraCode/firacode-regular-webfont.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+}
 @font-face {
 	font-family: 'FiraSans';
 	src: url('Fonts/Sans-Serif/Fira_Sans/firasans-black-webfont.woff2') format('woff2'),

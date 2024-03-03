@@ -1,17 +1,19 @@
-@import '@/styles/normalize.css';
-@import '@/styles/fonts.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@import '@/styles/normalize.css';
+@import '@/styles/fonts.css';
+
 :root {
-	--main-color: #2e6083;
-	--main-color-tinted: #379683;
-	--second-color: #b1a296;
-	--extra-color: #424046;
-	--bg-color: var(--main-color);
-	--text-color: var(--extra-color);
+	--main-color: #a264ff;
+	--main-color-tint: #291147;
+	--accent-color: #fff;
+	--bg-color: #0d1224;
+	--text-color: #d3d8e8;
+	--section-bg-color: #181d2f;
+	--slate: #8892b0;
+	--dark-slate: #495670;
 	--fz-xxs: 1.2rem;
 	--fz-xs: 1.3rem;
 	--fz-s: 1.4rem;
@@ -23,16 +25,19 @@
 	--fz-heading: 27px;
 	--border-radius: 4px;
 	--font-mono: 'FiraCode', 'Courier New', Courier, monospace;
-	--font-sans: 'FiraSans', Arial, Helvetica, -apple-system, system-ui, sans-serif;
+	--font-sans: 'Roboto', 'FiraSans', Arial, Helvetica, -apple-system, system-ui, sans-serif;
 	--transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
+
+/*////////////////////////////////////
+				Elements     
+//////////////////////////////////// */
 
 html {
 	box-sizing: border-box;
 	font-size: 62.5%;
 	scroll-behavior: smooth;
-	scrollbar-color: #495670 #0a192f;
-	scrollbar-color: red green;
+	scrollbar-color: var(--dark-slate) var(--bg-color);
 	scrollbar-width: thin;
 	width: 100%;
 }
@@ -42,6 +47,9 @@ html {
 }
 ::-webkit-scrollbar-track {
 	background: #0a192f;
+}
+::-webkit-scrollbar-thumb {
+	border-radius: 10px;
 }
 
 *,
@@ -72,7 +80,7 @@ h5,
 h6 {
 	margin: 0px 0px 10px;
 	font-weight: 600;
-	color: var(--second-color);
+	color: var(--accent-color);
 	line-height: 1.1;
 }
 
@@ -83,11 +91,37 @@ a {
 	color: inherit;
 	position: relative;
 	transition: var(--transition);
+	color: var(--slate);
 }
 
 a:hover,
 a:focus {
-	color: var(--second-color);
+	color: var(--accent-color) !important;
+}
+
+a.inline-link {
+	color: var(--main-color);
+}
+a.inline-link:hover,
+a.inline-link:focus {
+	color: var(--main-color) !important;
+}
+
+a.inline-link:after {
+	background-color: var(--main-color);
+	bottom: 0.1em;
+	content: '';
+	display: block;
+	height: 1px;
+	opacity: 0.5;
+	position: relative;
+	width: 0;
+	transition: var(--transition);
+}
+
+a.inline-link:focus-visible:after,
+a.inline-link:hover:after {
+	width: 100%;
 }
 
 svg {
@@ -122,4 +156,43 @@ p {
 p:last-child,
 p:last-of-type {
 	margin: 0px;
+}
+
+/*////////////////////////////////////
+				General     
+//////////////////////////////////// */
+
+.page-title {
+	font-size: 2.5rem;
+}
+
+/*////////////////////////////////////
+				InputTextBox     
+//////////////////////////////////// */
+.InputTextBox {
+	font-size: 1.6rem;
+	font-family: var(--font-sans);
+	font-weight: normal;
+}
+.InputTextBox label {
+	font-size: 1em;
+	font-weight: bold;
+}
+.InputTextBox input {
+	border: 1px solid;
+	border-color: var(--accent-color);
+	border-radius: var(--border-radius);
+	background: transparent !important;
+	padding: 5px 7px;
+	transition: var(--transition);
+	font-size: 0.95em;
+	font-weight: 100;
+	width: 100%;
+	min-height: 35px;
+}
+
+.InputTextBox input:focus,
+.InputTextBox input:focus-visible {
+	outline: none;
+	border-color: var(--main-color);
 }

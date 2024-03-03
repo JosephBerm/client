@@ -1,0 +1,35 @@
+.Login {
+	height: 55vh;
+	width: 50vw;
+	min-height: 150px;
+	min-width: 250px;
+	top: 45%;
+}
+
+.Login fieldset {
+	padding: 10% 0;
+	min-width: 200px;
+	max-width: 300px;
+}
+
+.Login .forgot-password {
+	font-size: 0.65em;
+}
+
+@media screen and (min-width: 480px) {
+	.Login {
+		min-width: 350px;
+	}
+}
+
+@media screen and (min-width: 600px) {
+}
+
+@media screen and (min-width: 768px) {
+}
+
+@media screen and (min-width: 1024px) {
+}
+
+@media screen and (min-width: 1080px) {
+}
