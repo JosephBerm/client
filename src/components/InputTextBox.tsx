@@ -6,7 +6,14 @@ interface InputType {
 	type: string
 	value: string
 	label: string
-	isAutoFocused?: boolean
+	placeholder?: string
+	disabled?: boolean
+	readOnly?: boolean
+	autofocused?: boolean
+	// Error: ?
+	// Icon: ?
+	// VALIDATION: ?
+	maxLength?: number
 	handleChange: (value: string) => void
 	handleBlur: () => void
 	handleFocus: () => void
@@ -16,7 +23,11 @@ const InputTextBox: React.FC<InputType> = ({
 	type,
 	label,
 	value,
-	isAutoFocused = false,
+	placeholder,
+	disabled,
+	readOnly,
+	autofocused,
+	maxLength,
 	handleChange,
 	handleBlur,
 	handleFocus,
@@ -36,9 +47,13 @@ const InputTextBox: React.FC<InputType> = ({
 			</label>
 			<input
 				ref={inputRef}
-				autoFocus={isAutoFocused}
+				autoFocus={autofocused}
+				placeholder={placeholder}
 				type={type}
 				value={value}
+				disabled={disabled}
+				readOnly={readOnly}
+				maxLength={maxLength}
 				onChange={(e) => handleChange(e.target.value)}
 				onBlur={handleBlur}
 				onFocus={handleFocus}

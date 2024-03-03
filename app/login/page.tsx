@@ -41,7 +41,7 @@ const Page = () => {
 					handleChange={handleEmailChange}
 					handleBlur={handleBlur}
 					handleFocus={handleFocus}
-					isAutoFocused={true}
+					autofocused={true}
 				/>
 
 				<InputTextBox
