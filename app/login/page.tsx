@@ -1,12 +1,16 @@
 'use client'
 
 import React, { useState } from 'react'
+import Axios from '@/services/AxiosInstance'
+
 import InputTextBox from '@/src/components/InputTextBox'
+
 import '@/styles/login.css'
 
 const Page = () => {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+	const [isLoading, setIsLoading] = useState(false)
 
 	const handleEmailChange = (value: string) => {
 		setEmail(value)
@@ -28,6 +32,26 @@ const Page = () => {
 	const handleForgotPasswordClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
 		e.preventDefault()
 		console.log('Forgot password clicked')
+	}
+
+	const handleOnClickLogin = async (e: React.MouseEvent<HTMLButtonElement>) => {
+		try { 
+			setIsLoading(true)
+			const response = await Axios.post('/account/login', {
+				username: email,
+				password
+			})
+
+			if(response.data){
+				const JWTToken = response.data.payload 
+				// We must now save it in the cookies.
+			}
+		} catch(err){
+			console.log(err)
+		} finally {
+			setIsLoading(false)
+		}
+	
 	}
 
 	return (
@@ -54,7 +78,7 @@ const Page = () => {
 				/>
 
 				<div className='form-footer mt-10 flex flex-col items-center justify-center gap-10'>
-					<button className='submit'>Login</button>
+					<button className='submit' onClick={handleOnClickLogin}>Login</button>
 
 					<a href='#' className='forgot-password' onClick={handleForgotPasswordClick}>
 						Forgot Password?
