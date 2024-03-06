@@ -15,8 +15,8 @@ interface InputType {
 	// VALIDATION: ?
 	maxLength?: number
 	handleChange: (value: string) => void
-	handleBlur: () => void
-	handleFocus: () => void
+	handleBlur?: () => void
+	handleFocus?: () => void
 }
 
 const InputTextBox: React.FC<InputType> = ({
