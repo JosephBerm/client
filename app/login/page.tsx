@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 
+import { useAccountStore } from '@/src/stores/user'
 import LoginCredentials from '@/classes/LoginCredentials'
 import instance from '@/services/httpService'
 import API from '@/services/api'
@@ -16,6 +17,7 @@ const Page = () => {
 	const [credentials, setCredentials] = useState(new LoginCredentials())
 	const [isLoading, setIsLoading] = useState(false)
 	const router = useRouter()
+	const user = useAccountStore(state => state.User)
 
 	const handleChange = (key: keyof LoginCredentials, value: string) => {
 		setCredentials((prevCredentials) => ({

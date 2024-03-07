@@ -24,11 +24,11 @@ baseInstance.interceptors.response.use(
 	(response) => response,
 	(error: AxiosError) => {
 		if (error.response) {
-			const { status } = error.response
-			if (status === 401) {
-				deleteCookie('at')
-				window.location.reload()
-			}
+			// const { status } = error.response
+			// if (status === 401) {
+			// 	deleteCookie('at')
+			// 	window.location.reload()
+			// }
 		} else {
 			console.error('Network Error:', error)
 			// Log to the logger

@@ -7,8 +7,8 @@ import SignupForm from '@/classes/SignupForm'
 const httpService = new HttpService(baseInstance)
 
 const API = {
-	login: async (credentials: LoginCredentials) => await httpService.post<any>('/login', credentials),
-	signup: async (form: SignupForm) => await httpService.post<any>('/signup', form),
+	login: async (credentials: LoginCredentials) => await baseInstance.post<any>('/account/login', credentials),
+	signup: async (form: SignupForm) => await baseInstance.post<any>('/account/signup', form)
 }
 
 export default API
