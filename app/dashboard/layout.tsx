@@ -32,7 +32,6 @@ async function getUserData(token: string | null) {
 	return null;
 }
 
-
 export default async function RootLayout({
 	children,
 }: Readonly<{
@@ -41,17 +40,16 @@ export default async function RootLayout({
 	const cookiesStore = cookies()
 	const token = cookiesStore.get('at')
 
-	console.log("TOKEN", token)
 	// Load user data into state management library.
 
-	if (token == null) redirect('/login')
+	if (token == null) return redirect('/login')
 	const response = await getUserData(token.value)
 
-	if(response.data == null) redirect('/login')
+	if(response.payload == null) return redirect('/login')
 
 	return (
 		<html lang='en'>
-			<WrapperHandler User={response.data.payload as IUser}/> 
+			<WrapperHandler User={response.payload as IUser}/> 
 			<body>{children}</body>
 		</html>
 	)
