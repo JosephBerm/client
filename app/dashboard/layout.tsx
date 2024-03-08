@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { useAccountStore } from '@/src/stores/user'
 import API from '@/src/services/api'
 import WrapperHandler from '@/src/components/WrapperHandler'
+import NavBar from '@/src/components/NavBar'
 import { IUser } from '@/src/classes/User'
 
 export const metadata: Metadata = {
@@ -13,23 +14,22 @@ export const metadata: Metadata = {
 }
 
 async function getUserData(token: string | null) {
+	if (token == null) return token
 
-	if(token == null) return token
+	try {
+		const response = await fetch(process.env.API_URL + '/account/myuser', {
+			cache: 'no-store',
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		})
 
-	try{
-		const response = await fetch(process.env.API_URL +"/account/myuser", {
-		  cache: "no-store",
-		  headers: {
-			Authorization: `Bearer ${token}`
-		  }
-		});
-
-		if(response.ok) return await response.json();
-	} catch(err) {
+		if (response.ok) return await response.json()
+	} catch (err) {
 		console.log(err)
-	} 
+	}
 
-	return null;
+	return null
 }
 
 export default async function RootLayout({
@@ -41,16 +41,20 @@ export default async function RootLayout({
 	const token = cookiesStore.get('at')
 
 	// Load user data into state management library.
-
 	if (token == null) return redirect('/login')
 	const response = await getUserData(token.value)
-
-	if(response?.payload == null) return redirect('/login')
+	if (response?.payload == null) return redirect('/login')
 
 	return (
 		<html lang='en'>
-			<WrapperHandler User={response.payload as IUser}/> 
-			<body>{children}</body>
+			<WrapperHandler User={response.payload as IUser} />
+
+			<body>
+				<div className='App'>
+					<NavBar />
+					<div className='page-container'>{children}</div>
+				</div>
+			</body>
 		</html>
 	)
 }

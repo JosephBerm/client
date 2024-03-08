@@ -1,0 +1,189 @@
+header.header {
+	display: flex;
+	-webkit-box-pack: justify;
+	justify-content: space-between;
+	-webkit-box-align: center;
+	align-items: center;
+	position: fixed;
+	top: 0px;
+	z-index: 11;
+	padding: 0px 25px;
+	width: 100%;
+	min-width: 200px;
+	height: var(--nav-height);
+	background-color: var(--header-color);
+	backdrop-filter: blur(10px);
+	transition: var(--transition);
+	filter: none !important;
+	pointer-events: auto !important;
+	user-select: auto !important;
+}
+
+nav.navbar {
+	display: flex;
+	-webkit-box-pack: justify;
+	justify-content: space-between;
+	-webkit-box-align: center;
+	align-items: center;
+	position: relative;
+	width: 100%;
+	color: var(--lightest-slate);
+	font-family: var(--font-mono);
+	z-index: 12;
+}
+
+nav .burger-button,
+nav.navbar {
+	align-items: center;
+	display: flex;
+}
+
+nav .burger-button {
+	cursor: pointer;
+	font-size: 2.5rem;
+	z-index: 100;
+	color: var(--main-color);
+	width: 50px;
+	height: 50px;
+	box-sizing: border-box;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+nav .burger-button:hover {
+	border: 3px dashed var(--main-color);
+	border-radius: 5px;
+}
+
+.nav_StyledLinks {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	position: fixed;
+	right: 0;
+	top: 0;
+	height: 100vh;
+	width: 75%;
+	min-width: 200px;
+	background: #112240;
+	transform: translateX(100%);
+	visibility: hidden;
+
+	transition: var(--transition);
+}
+
+.nav_StyledLinks.opened {
+	transform: translateX(0);
+	visibility: visible;
+}
+
+.nav_StyledLinks ol {
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	font-weight: 400;
+	padding: 0;
+}
+
+.nav_StyledLinks ol li {
+	position: relative;
+	margin: 20px 0;
+	font-size: var(--fz-lg);
+	counter-increment: item 1;
+}
+.nav_StyledLinks ol li,
+.nav_StyledLinks .button-container {
+	opacity: 0.01;
+	animation: fadeInDown 0.3s var(--easing) forwards;
+}
+
+.nav_StyledLinks ol li button::before {
+	content: '0' counter(item) '.';
+	color: var(--main-color);
+	margin-right: 5px;
+	font-size: var(--fz-xs);
+	text-align: right;
+	position: absolute;
+	top: -15px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+.nav_StyledLinks .button-container .button {
+	padding: 1rem 1.5rem;
+	font-size: var(--fz-s);
+}
+
+.nav_StyledLinks ol li button {
+	color: var(--lightest-slate);
+	transition: var(--transition);
+	padding: 10px;
+	border: none;
+}
+.nav_StyledLinks ol li button:hover,
+.nav_StyledLinks ol li button:focus {
+	color: var(--main-color);
+	background: unset;
+}
+
+/* TODO: 375px ~ NavBar */
+@media screen and (min-width: 375px) {
+}
+
+/* TODO: 768px ~ NavBar */
+@media screen and (min-width: 768px) {
+	header.header {
+		padding: 0px 40px;
+	}
+	nav .burger-button {
+		display: none !important;
+	}
+
+	.nav_StyledLinks {
+		flex-direction: row;
+		justify-content: space-evenly;
+		align-items: center;
+		position: relative;
+		inset: unset;
+		height: auto;
+		width: auto;
+		background: none;
+		transform: none;
+		visibility: visible;
+	}
+	.nav_StyledLinks.closed,
+	.nav_StyledLinks.opened {
+		animation: none;
+	}
+
+	.nav_StyledLinks ol {
+		flex-direction: row;
+	}
+	.nav_StyledLinks ol li {
+		margin: 0 0 0 8px;
+		font-size: var(--fz-s);
+	}
+	.nav_StyledLinks ol li button::before {
+		position: relative;
+		top: unset;
+		left: unset;
+		transform: unset;
+		font-size: var(--fz-xxs);
+	}
+
+	.nav_StyledLinks .button-container {
+	}
+	.nav_StyledLinks .button-container .button {
+		margin-left: 15px;
+	}
+}
+
+/*////////////////////////////////////////////////////////// TODO: 1024px ~ NavBar.css
+////////////////////////////////////////////////////////// */
+@media screen and (min-width: 1024px) {
+	header.header {
+		padding: 0px 50px;
+	}
+}

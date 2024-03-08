@@ -17,7 +17,7 @@ const Page = () => {
 	const [credentials, setCredentials] = useState(new LoginCredentials())
 	const [isLoading, setIsLoading] = useState(false)
 	const router = useRouter()
-	const user = useAccountStore(state => state.User)
+	const user = useAccountStore((state) => state.User)
 
 	const handleChange = (key: keyof LoginCredentials, value: string) => {
 		setCredentials((prevCredentials) => ({

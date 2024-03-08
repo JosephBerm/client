@@ -24,6 +24,9 @@
 			"@/services/*": ["src/services/*"],
 			"@/classes/*": ["src/classes/*"],
 			"@/helpers/*": ["src/helpers/*"],
+			"@/context/*": ["src/context/*"],
+			"@/common/*": ["src/common/*"],
+			"@/assets/*": ["src/assets/*"],
 			"@/styles/*": ["src/styles/*"]
 		}
 	},
