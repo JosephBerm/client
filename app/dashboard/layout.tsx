@@ -45,7 +45,7 @@ export default async function RootLayout({
 	if (token == null) return redirect('/login')
 	const response = await getUserData(token.value)
 
-	if(response.payload == null) return redirect('/login')
+	if(response?.payload == null) return redirect('/login')
 
 	return (
 		<html lang='en'>
