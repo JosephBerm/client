@@ -17,6 +17,14 @@ const CRUDProducts = () => {
     const params = useParams()
     const [isLoading, setIsLoading] = React.useState<boolean>(false)
 
+    useEffect(() => {
+        if(params?.id != "create") {
+            getProduct()
+            // Fetch the product from the server
+            // and set the state with the product information
+        }
+    }, [params?.id])
+
     const getProduct = async () => {
         try {
             setIsLoading(true)
@@ -31,14 +39,6 @@ const CRUDProducts = () => {
             setIsLoading(false)
         }
     }
-
-    useEffect(() => {
-        if(params?.id != "create") {
-            getProduct()
-            // Fetch the product from the server
-            // and set the state with the product information
-        }
-    }, [params?.id])
 
     const createProduct = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
