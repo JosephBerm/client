@@ -58,7 +58,7 @@ const Page = () => {
 			} else {
 				toast.error(authenticated.message)
 			}
-		} catch (err) {
+		} catch (err: any) {
 			toast.error(err.message)
 		} finally {
 			setIsLoading(false)

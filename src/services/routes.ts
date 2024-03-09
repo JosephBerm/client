@@ -9,7 +9,7 @@ class Routes {
 		},
 		{
 			name: 'Store',
-			location: '/store',
+			location: '/dashboard/store',
 		},
 	]
 

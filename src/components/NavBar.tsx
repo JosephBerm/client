@@ -11,10 +11,6 @@ function NavBar() {
 
 	const [navStyleClassName, setNavStyleClassName] = useState('nav_StyledLinks')
 
-	const changeRoute = (urlEndpoint: string) => {
-		router.push(urlEndpoint)
-	}
-
 	const toggleNavbar = () => {
 		console.log('navbar toggled')
 		if (navStyleClassName.includes('opened')) {
@@ -38,7 +34,7 @@ function NavBar() {
 					<ol>
 						{Routes.navRoutes.map((route, index) => (
 							<li key={index} style={{ animationDelay: `${index * 0.1}s` }}>
-								<button className='clickable' onClick={() => changeRoute(route.location)}>
+								<button className='clickable' onClick={() => router.push(route.location)}>
 									{route.name}
 								</button>
 							</li>

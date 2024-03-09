@@ -4,7 +4,7 @@ header.header {
 	justify-content: space-between;
 	-webkit-box-align: center;
 	align-items: center;
-	position: fixed;
+	/* position: fixed; */
 	top: 0px;
 	z-index: 11;
 	padding: 0px 25px;
