@@ -1,11 +1,13 @@
 'use client'
 
 import React, { useState } from 'react'
+import { toast } from 'react-toastify'
 
 import { useAccountStore } from '@/src/stores/user'
 import LoginCredentials from '@/classes/LoginCredentials'
 import instance from '@/services/httpService'
 import API from '@/services/api'
+
 
 import { useRouter } from 'next/navigation'
 import { setCookie } from 'cookies-next'
@@ -44,8 +46,9 @@ const Page = () => {
 		try {
 			setIsLoading(true)
 			const { data: authenticated } = await API.login(credentials)
-			console.log('authenticated', authenticated)
 			if (authenticated.payload) {
+				toast.success('Logged in successfully')
+
 				const JWTToken = authenticated.payload
 				setCookie('at', JWTToken)
 				instance.defaults.headers.common['Authorization'] = `Bearer ${JWTToken}`
@@ -53,10 +56,10 @@ const Page = () => {
 				//route to dashboard
 				router.push('/dashboard')
 			} else {
-				console.log(authenticated.message)
+				toast.error(authenticated.message)
 			}
 		} catch (err) {
-			console.log(err)
+			toast.error(err.message)
 		} finally {
 			setIsLoading(false)
 		}
@@ -90,7 +93,7 @@ const Page = () => {
 					<a className='clickable forgot-password mb-7' onClick={handleForgotPasswordClick}>
 						Forgot Password?
 					</a>
-					<button type='submit' className='submit'>
+					<button type='submit' className='submit' disabled={isLoading}>
 						Login
 					</button>
 

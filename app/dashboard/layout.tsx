@@ -46,15 +46,10 @@ export default async function RootLayout({
 	if (response?.payload == null) return redirect('/login')
 
 	return (
-		<html lang='en'>
+		<div className='App'>
 			<WrapperHandler User={response.payload as IUser} />
-
-			<body>
-				<div className='App'>
-					<NavBar />
-					<div className='page-container'>{children}</div>
-				</div>
-			</body>
-		</html>
+			<NavBar />
+			<div className='page-container'>{children}</div>
+		</div>
 	)
 }
