@@ -37,7 +37,7 @@ const Page = () => {
 
 	return (
 		<div className='store-page'>
-			<h2>Products</h2>
+			<h2 className='page-title'>Products</h2>
 
 			{/* Must be a table. IK Style is shit. Tryna get the crud done. */}
 			<div className='products-container'>
