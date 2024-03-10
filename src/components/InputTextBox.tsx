@@ -2,7 +2,9 @@
 
 import React, { useRef } from 'react'
 
-interface InputType {
+type inputMode = 'search' | 'email' | 'tel' | 'text' | 'url' | 'none' | 'numeric' | 'decimal' | undefined
+
+export interface InputType {
 	type: string
 	value: string
 	label: string
@@ -10,11 +12,13 @@ interface InputType {
 	disabled?: boolean
 	readOnly?: boolean
 	autofocused?: boolean
+	pattern?: string
+	inputmode?: inputMode
 	// Error: ?
 	// Icon: ?
 	// VALIDATION: ?
 	maxLength?: number
-	handleChange: (value: string) => void
+	handleChange: (value: any) => void
 	handleBlur?: () => void
 	handleFocus?: () => void
 }
@@ -28,6 +32,8 @@ const InputTextBox: React.FC<InputType> = ({
 	readOnly,
 	autofocused,
 	maxLength,
+	inputmode,
+	pattern,
 	handleChange,
 	handleBlur,
 	handleFocus,
@@ -54,6 +60,8 @@ const InputTextBox: React.FC<InputType> = ({
 				disabled={disabled}
 				readOnly={readOnly}
 				maxLength={maxLength}
+				inputMode={inputmode}
+				pattern={pattern}
 				onChange={(e) => handleChange(e.target.value)}
 				onBlur={handleBlur}
 				onFocus={handleFocus}
