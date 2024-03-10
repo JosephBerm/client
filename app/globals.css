@@ -46,6 +46,20 @@ html {
 	scrollbar-width: thin;
 	width: 100%;
 }
+.App {
+	overflow: hidden;
+}
+main {
+	margin: 0 auto;
+	max-width: 1600px;
+	min-height: 100vh;
+	width: 100%;
+}
+
+main.page-container {
+	padding: 0 25px;
+	padding-top: var(--nav-height) !important;
+}
 
 ::-webkit-scrollbar {
 	width: 12px;
@@ -212,4 +226,28 @@ p:last-of-type {
 .InputTextBox input:focus-visible {
 	outline: none;
 	border-color: var(--main-color);
+}
+
+@media screen and (min-width: 480px) {
+	main.page-container {
+		padding: 0 50px;
+	}
+}
+
+@media screen and (min-width: 600px) {
+}
+
+@media screen and (min-width: 768px) {
+	main.page-container {
+		padding: 0 100px;
+	}
+}
+
+@media screen and (min-width: 1024px) {
+	main.page-container {
+		padding: 0 150px;
+	}
+}
+
+@media screen and (min-width: 1080px) {
 }
