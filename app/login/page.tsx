@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 
 import { useAccountStore } from '@/src/stores/user'
@@ -8,9 +8,8 @@ import LoginCredentials from '@/classes/LoginCredentials'
 import instance from '@/services/httpService'
 import API from '@/services/api'
 
-
 import { useRouter } from 'next/navigation'
-import { setCookie } from 'cookies-next'
+import { getCookies, setCookie } from 'cookies-next'
 
 import InputTextBox from '@/components/InputTextBox'
 import '@/styles/login.css'
@@ -20,6 +19,11 @@ const Page = () => {
 	const [isLoading, setIsLoading] = useState(false)
 	const router = useRouter()
 	const user = useAccountStore((state) => state.User)
+	useEffect(() => {
+		const cookies = getCookies()
+		const token = cookies['at']
+		if (token) router.push('/dashboard')
+	}, [])
 
 	const handleChange = (key: keyof LoginCredentials, value: string) => {
 		setCredentials((prevCredentials) => ({
@@ -42,8 +46,8 @@ const Page = () => {
 	}
 
 	const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault()
 		try {
+			e.preventDefault()
 			setIsLoading(true)
 			const { data: authenticated } = await API.login(credentials)
 			if (authenticated.payload) {
