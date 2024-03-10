@@ -3,7 +3,7 @@ import { getCookies, deleteCookie } from 'cookies-next'
 
 const baseInstance: AxiosInstance = axios.create({
 	baseURL: process.env.API_URL,
-	timeout: 5000,
+	timeout: 30000,
 	headers: {
 		'Content-Type': 'application/json',
 	},
@@ -55,6 +55,14 @@ export class HttpService {
 
 	public static post<T>(url: string, data: any): Promise<AxiosResponse<Response<T>>> {
 		return HttpService.instance.post<Response<T>>(url, data)
+	}
+
+	public static put<T>(url: string, data: any): Promise<AxiosResponse<Response<T>>> {
+		return HttpService.instance.put<Response<T>>(url, data)
+	}
+
+	public static delete<T>(url: string, data: any = null): Promise<AxiosResponse<Response<T>>> {
+		return HttpService.instance.delete<Response<T>>(url, data)
 	}
 
 	// Add other HTTP methods as needed

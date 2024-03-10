@@ -12,6 +12,8 @@ const API = {
 			getList: async <T>() => await HttpService.get<T>('/products'),
 			get: async <T>(productId: string) => await HttpService.get<T>(`/products/${productId}`),
 			create: async <T>(product: T) => await HttpService.post<T>(`/products`, product),
+			update: async <T>(product: T) => await HttpService.put<T>(`/products`, product),
+			delete: async <T>(productId: string) => await HttpService.delete<T>(`/products/${productId}`),
 		},
 	},
 }

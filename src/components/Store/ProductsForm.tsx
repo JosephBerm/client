@@ -53,9 +53,7 @@ const ProductsForm = () => {
 			}
 
 			const savedProduct = res.payload
-			toast.success(`Successfully created a product ${savedProduct.name}`)
-			console.log('server return id:', savedProduct.id)
-
+			toast.success(`Successfully created product ${savedProduct.name}`)
 			router.push('/dashboard/store')
 		} catch (error: any) {
 			toast.error(error.message)
@@ -65,7 +63,23 @@ const ProductsForm = () => {
 	}
 
 	const updateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
-		// Not implemented yet
+		try {
+			setIsLoading(true)
+			// const response = await API.store.createProduct(product);
+			const { data: res } = await API.store.products.update<Product>(product)
+			if (!res.payload || res.statusCode !== 200) {
+				toast.error(res.message)
+				return
+			}
+
+			const savedProduct = res.payload
+			toast.success(`Successfully updated product ${savedProduct.name}`)
+			router.push('/dashboard/store')
+		} catch (error: any) {
+			toast.error(error.message)
+		} finally {
+			setIsLoading(false)
+		}
 	}
 
 	const handleFormSubmission = (e: React.FormEvent<HTMLFormElement>) => {
@@ -119,7 +133,7 @@ const ProductsForm = () => {
                             required={true} /> */}
 
 			<button type='submit' disabled={isLoading}>
-				Add Product
+				{params?.id == 'create' ? "Add Product" : "Update Product"}
 			</button>
 		</form>
 	)

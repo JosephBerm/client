@@ -14,7 +14,7 @@ const Environments = {
 }
 
 const nextConfig = {
-    env: { ...Environments['development']},
+    env: { ...Environments['development']}
 };
 
 export default nextConfig;

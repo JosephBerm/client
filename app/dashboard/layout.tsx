@@ -18,7 +18,7 @@ async function getUserData(token: string | null) {
 	if (token == null) return token
 
 	try {
-		const response = await fetch(process.env.API_URL + '/account/myuser', {
+		const response = await fetch(process.env.API_URL + '/account', {
 			cache: 'no-store',
 			headers: {
 				Authorization: `Bearer ${token}`,

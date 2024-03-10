@@ -41,7 +41,7 @@ function NavBar() {
 						))}
 					</ol>
 					<div className='button-container' style={{ animationDelay: `${Routes.navRoutes.length * 0.1}s` }}>
-						<button className='button' rel='noopener noreferrer' onClick={() => {}}>
+						<button className='button' rel='noopener noreferrer' onClick={() => router.push("/dashboard/settings")}>
 							Settings Cog
 						</button>
 					</div>

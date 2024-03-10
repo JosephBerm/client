@@ -31,6 +31,26 @@ const Page = () => {
 		}
 	}
 
+	const deleteProduct = async (productId: string) => {	
+		try {
+			setIsLoading(true)
+			const { data: res } = await API.store.products.delete<string>(productId)
+			if (res.statusCode !== 200) {
+				toast.error(res.message)
+				return
+			} else {
+				toast.success(res.message)
+				const productsList = products.filter((product) => product.id !== productId)
+				setProducts(productsList)
+			}
+		} catch (err: any) {
+			toast.error(err.response.data.message)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+
 	useEffect(() => {
 		retrieveProducts()
 	}, [])
@@ -47,6 +67,7 @@ const Page = () => {
 						<p>{product.description}</p>
 						<p>${product.price}</p>
 						<Link href={`store/${product.id}`}>Edit</Link>
+						<button onClick={() => deleteProduct(product.id!)}>Delete</button>
 					</div>
 				))}
 			</div>

@@ -19,11 +19,14 @@ const Page = () => {
 	const [isLoading, setIsLoading] = useState(false)
 	const router = useRouter()
 	const user = useAccountStore((state) => state.User)
-	useEffect(() => {
-		const cookies = getCookies()
-		const token = cookies['at']
-		if (token) router.push('/dashboard')
-	}, [])
+
+	//Lets hold on this. I'm unable to get server actions to work on a Layout Component. Therefor if cookie cannot be validated; it ends in a endless loop.
+
+	// useEffect(() => {
+	// 	const cookies = getCookies()
+	// 	const token = cookies['at']
+	// 	if (token) router.push('/dashboard')
+	// }, [])
 
 	const handleChange = (key: keyof LoginCredentials, value: string) => {
 		setCredentials((prevCredentials) => ({
