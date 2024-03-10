@@ -47,15 +47,14 @@ interface Response<T> {
 }
 
 export class HttpService {
+	private static readonly instance: AxiosInstance = baseInstance
 
-	private static readonly instance: AxiosInstance = baseInstance;
-	
 	public static get<T>(url: string): Promise<AxiosResponse<Response<T>>> {
-		return HttpService.instance.get<Response<T>>(url);
+		return HttpService.instance.get<Response<T>>(url)
 	}
 
 	public static post<T>(url: string, data: any): Promise<AxiosResponse<Response<T>>> {
-		return HttpService.instance.post<Response<T>>(url, data);
+		return HttpService.instance.post<Response<T>>(url, data)
 	}
 
 	// Add other HTTP methods as needed
