@@ -1,1 +1,3 @@
-export class Enums {}
+export enum ProductsCategory {
+	ProductOne,
+}

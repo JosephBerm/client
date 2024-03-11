@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Product } from '@/src/classes/Product'
+import { Product } from '@/classes/Product'
 import { toast } from 'react-toastify'
 import Link from 'next/link'
 import API from '@/services/api'
@@ -31,7 +31,7 @@ const Page = () => {
 		}
 	}
 
-	const deleteProduct = async (productId: string) => {	
+	const deleteProduct = async (productId: string) => {
 		try {
 			setIsLoading(true)
 			const { data: res } = await API.store.products.delete<string>(productId)
@@ -49,7 +49,6 @@ const Page = () => {
 			setIsLoading(false)
 		}
 	}
-
 
 	useEffect(() => {
 		retrieveProducts()

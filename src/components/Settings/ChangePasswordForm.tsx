@@ -2,91 +2,56 @@
 
 import React from 'react'
 import InputTextBox from '../InputTextBox'
-import API from '@/src/services/api';
-import {toast} from 'react-toastify'
+import API from '@/services/api'
+import { toast } from 'react-toastify'
+
+import { Formik, Form } from 'formik'
+import FormInputTextBox from '@/components/FormInputTextbox'
+import Validations from '@/utilities/validationSchemas'
 
 class PasswordForm {
-    oldPassword: string = "";
-    newPassword: string = "";
-    confirmNewPassword: string = "";
+	oldPassword: string = ''
+	newPassword: string = ''
+	confirmNewPassword: string = ''
 }
 
 const ChangePasswordForm = () => {
+	const handleSubmit = async (e: PasswordForm) => {
+		try {
+			const response = await API.account.changePassword<Boolean>(e.oldPassword, e.newPassword)
 
-    const [passwordForm, setPasswordForm] = React.useState<PasswordForm>(new PasswordForm())
-    const [loading, setLoading] = React.useState<boolean>(false)
+			if (response && response.data.statusCode === 200) return toast.success(response.data.message)
+			else toast.error(response.data.message)
+		} catch (err: any) {
+			toast.error(err.message)
+		}
+	}
 
-    const handleChange = (field: string, value: string) => {
-        setPasswordForm((prev) => {
-            return {
-                ...prev,
-                [field]: value
-            }
-        })
-    }
+	return (
+		<div>
+			<h2>Account</h2>
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        
-        try{ 
-            setLoading(true)
-            if(passwordForm.newPassword !== passwordForm.confirmNewPassword){
-                throw new Error("Passwords do not match")
-            }
-            const response = await API.account.changePassword<Boolean>(passwordForm.oldPassword, passwordForm.newPassword)
+			<Formik
+				initialValues={new PasswordForm()}
+				validationSchema={Validations.loginSchema}
+				onSubmit={(values, { setSubmitting }) => {
+					handleSubmit(values)
+					setSubmitting(false)
+				}}>
+				{(form) => (
+					<Form className='min-h-96 flex flex-col gap-8 w-2/4 relative'>
+						<FormInputTextBox label='Old Password' name='oldPassword' />
+						<FormInputTextBox label='New Password' name='newPassword' />
+						<FormInputTextBox label='Confirm New Password' name='confirmNewPassword' />
 
-            if(response && response.data.statusCode === 200){
-                toast.success(response.data.message)
-                setPasswordForm(new PasswordForm())
-            } else {
-                toast.error(response.data.message)
-            }
-        } catch(err: any){
-            toast.error(err.message)
-        } finally { 
-            setLoading(false)
-        }
-
-    }
-
-    return (
-        <div>
-            <h2>Account</h2>
-        
-            <form onSubmit={handleSubmit}>
-                <InputTextBox
-                    
-                    label="Old Password"
-                    type="password"
-                    placeholder="Old Password"
-                    value={passwordForm.oldPassword}
-                    handleChange={(e: string) => handleChange("oldPassword", e)}
-                />
-
-                <InputTextBox
-                    
-                    label="New Password"
-                    type="password"
-                    placeholder="New Password"
-                    value={passwordForm.newPassword}
-                    handleChange={(e: string) => handleChange("newPassword", e)}
-                />
-                <InputTextBox
-                    
-                    label="Confirm New Password"
-                    type="password"
-                    placeholder="Confirm New Password"
-                    value={passwordForm.confirmNewPassword}
-                    handleChange={(e: string) => handleChange("confirmNewPassword", e)}
-                />
-
-                <button type="submit" disabled={loading}>Change Password</button>
-            </form>
-
-
-
-        </div>
-    )
+						<button type='submit' disabled={!form.isValid}>
+							Change Password
+						</button>
+					</Form>
+				)}
+			</Formik>
+		</div>
+	)
 }
 
 export default ChangePasswordForm

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Routes from '@/src/services/routes'
+import Routes from '@/services/routes'
 
 import { useRouter } from 'next/navigation'
 import '@/styles/navbar.css'

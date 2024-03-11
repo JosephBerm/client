@@ -1,3 +1,5 @@
+import { ProductsCategory } from '@/classes/Enums'
+
 export class Product {
 	id: string | null = null
 	sku: string = ''
@@ -10,8 +12,4 @@ export class Product {
 	toString(): string {
 		return `Product: ${this.name} - ${this.description} - ${this.price} - ${this.image} - ${this.category}`
 	}
-}
-
-export enum ProductsCategory {
-	ProductOne,
 }

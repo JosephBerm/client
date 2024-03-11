@@ -49,7 +49,7 @@ const Page = () => {
 			<h2 className='page-title'>Sign up</h2>
 			<Formik
 				initialValues={form}
-				validationSchema={Validations.signup}
+				validationSchema={Validations.signupSchema}
 				onSubmit={(values, { setSubmitting }) => {
 					handleLogin(values)
 					setSubmitting(false)
