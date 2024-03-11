@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef } from 'react'
-import { Formik, Form, Field, ErrorMessage } from 'formik'
+import { Field, ErrorMessage } from 'formik'
 
 type inputMode = 'search' | 'email' | 'tel' | 'text' | 'url' | 'none' | 'numeric' | 'decimal' | undefined
 
@@ -20,6 +20,7 @@ export interface InputType {
 	// Icon: ?
 	// VALIDATION: ?
 	maxLength?: number
+	cssClass?: string
 }
 
 const FormInputTextBox: React.FC<InputType> = ({
@@ -34,6 +35,7 @@ const FormInputTextBox: React.FC<InputType> = ({
 	maxLength,
 	inputmode,
 	pattern,
+	cssClass,
 }) => {
 	const inputRef = useRef<HTMLInputElement>(null)
 
@@ -43,11 +45,16 @@ const FormInputTextBox: React.FC<InputType> = ({
 		}
 	}
 
+	const getComponentClass = () => {
+		let className = 'InputTextBox'
+
+		if (cssClass) className += ` ${cssClass}`
+
+		return className
+	}
 	return (
-		<div className='InputTextBox flex flex-col'>
-			<label onClick={focusInput} className='m-2'>
-				{label}
-			</label>
+		<div className={`${getComponentClass()} flex flex-col items-center relative`}>
+			<label onClick={focusInput}>{label}</label>
 			<Field
 				name={name}
 				ref={inputRef}
@@ -63,7 +70,9 @@ const FormInputTextBox: React.FC<InputType> = ({
 				className='border-b border-gray-300'
 			/>
 
-			<ErrorMessage name={name} component='div' />
+			<div className='error-message-container'>
+				<ErrorMessage name={name} component='span' className='error-message two-line-limit' />
+			</div>
 		</div>
 	)
 }

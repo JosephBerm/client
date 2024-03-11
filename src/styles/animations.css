@@ -10,3 +10,15 @@
 		transform: translateY(0);
 	}
 }
+
+@keyframes flipDown {
+	from {
+		transform-origin: top;
+		opacity: 0;
+		transform: scaleY(0);
+	}
+	to {
+		opacity: 1;
+		transform: scaleY(1);
+	}
+}
