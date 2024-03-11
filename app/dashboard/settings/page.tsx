@@ -1,15 +1,13 @@
 import React from 'react'
+import ChangePasswordForm from '@/src/components/Settings/ChangePasswordForm';
+import UpdateProfileForm from '@/src/components/Settings/UpdateProfileForm';
 
 const Page = () => {
   return (
-    <div>
-        <h1>TODO</h1>
+    <div className='justify-center flex-column'>
 
-        <h3>Profile</h3>
-        <p>Change Profile Picture</p>
-        <p>Change First/Lastname</p>
-        <h3>Account</h3>
-        <p>Change Password</p>
+        <UpdateProfileForm/>
+        <ChangePasswordForm/>
 
     </div>
   )

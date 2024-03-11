@@ -1,12 +1,17 @@
-import baseInstance, { HttpService } from './httpService'
-import axios, { AxiosResponse, AxiosError } from 'axios'
+import { HttpService } from './httpService'
 
 import LoginCredentials from '@/classes/LoginCredentials'
 import SignupForm from '@/classes/SignupForm'
+import { User } from '../classes/User'
 
 const API = {
-	login: async (credentials: LoginCredentials) => await baseInstance.post<any>('/account/login', credentials),
-	signup: async (form: SignupForm) => await baseInstance.post<any>('/account/signup', form),
+	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
+	signup: async (form: SignupForm) => await HttpService.post<any>('/account/signup', form),
+	account: {
+		get: async <T>() => await HttpService.get<T>('/account'),
+		update: async <T>(account: User) => await HttpService.put<T>('/account', account),
+		changePassword: async <T>(oldPassword: string, newPassword: string) => await HttpService.put<T>('/account/changepassword', { oldPassword, newPassword }),
+	},
 	store: {
 		products: {
 			getList: async <T>() => await HttpService.get<T>('/products'),
