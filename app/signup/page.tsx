@@ -1,39 +1,26 @@
 'use client'
 
 import React, { useState } from 'react'
-
+import { useRouter } from 'next/navigation'
+import { setCookie } from 'cookies-next'
+import { Formik, Form } from 'formik'
+import Validations from '@/utilities/validationSchemas'
 import SignupForm from '@/classes/SignupForm'
 import instance from '@/services/httpService'
 import API from '@/services/api'
-
-import { useRouter } from 'next/navigation'
-import { setCookie } from 'cookies-next'
-
-import InputTextBox from '@/components/InputTextBox'
 import '@/styles/login.css'
+
+import FormInputTextBox from '@/components/FormInputTextbox'
 
 const Page = () => {
 	const [form, setForm] = useState(new SignupForm())
-	const [passwordConfirmation, setPasswordConfirmation] = useState('')
 	const [isLoading, setIsLoading] = useState(false)
 	const router = useRouter()
 
-	const handleChange = (key: keyof SignupForm, value: string) => {
-		setForm((prevCredentials) => ({
-			...prevCredentials,
-			[key]: value,
-		}))
-	}
-
-	const handlePasswordConfirmation = (value: string) => {
-		setPasswordConfirmation(value)
-	}
-
-	const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault()
+	const handleLogin = async (values: SignupForm) => {
 		try {
 			setIsLoading(true)
-			const { data: authenticated } = await API.signup(form)
+			const { data: authenticated } = await API.signup(values)
 			console.log('authenticated', authenticated)
 			if (authenticated.payload) {
 				const JWTToken = authenticated.payload
@@ -60,75 +47,54 @@ const Page = () => {
 	return (
 		<div className='Signup'>
 			<h2 className='page-title'>Sign up</h2>
+			<Formik
+				initialValues={form}
+				validationSchema={Validations.signup}
+				onSubmit={(values, { setSubmitting }) => {
+					handleLogin(values)
+					setSubmitting(false)
+				}}>
+				{({ isSubmitting }) => (
+					<Form className='min-h-96 flex flex-col w-full relative'>
+						<div className='two-sided'>
+							<FormInputTextBox label='Username' name='username' />
 
-			<form className='min-h-96 flex flex-col w-full relative' onSubmit={handleLogin}>
-				<div className='two-sided'>
-					<InputTextBox
-						type='text'
-						label='Username'
-						value={form.username}
-						handleChange={(value) => handleChange('username', value)}
-						autofocused={true}
-					/>
-					<InputTextBox
-						type='text'
-						label='Email'
-						value={form.email}
-						handleChange={(value) => handleChange('email', value)}
-					/>
-				</div>
-				<div className='two-sided'>
-					<InputTextBox
-						type='password'
-						label='Password'
-						value={form.password}
-						handleChange={(value) => handleChange('password', value)}
-					/>
+							<FormInputTextBox label='Email' name='email' />
+						</div>
+						<div className='two-sided'>
+							<FormInputTextBox label='Password' name='password' type='password' />
 
-					<InputTextBox
-						type='password'
-						label='Confirm Password'
-						value={passwordConfirmation}
-						handleChange={(value) => handlePasswordConfirmation(value)}
-					/>
-				</div>
+							<FormInputTextBox label='Confirm Password' name='confirmPassword' type='password' />
+						</div>
 
-				<div className='two-sided'>
-					<InputTextBox
-						type='text'
-						label='First Name'
-						value={form.firstName}
-						handleChange={(value) => handleChange('firstName', value)}
-					/>
+						<div className='two-sided'>
+							<FormInputTextBox label='Password' name='firstName' />
 
-					<InputTextBox
-						type='text'
-						label='Last Name'
-						value={form.lastName}
-						handleChange={(value) => handleChange('lastName', value)}
-					/>
-				</div>
+							<FormInputTextBox label='Password' name='lastName' />
+						</div>
 
-				{/* <InputTextBox
+						{/* <InputTextBox
 					type='text'
 					label='Date of Birth'
 					value={form.dateOfBirth}
 					handleChange={(value) => handleChange('dateOfBirth', value)}
 				/> */}
 
-				<div className='form-footer flex flex-col items-center justify-center gap-10'>
-					<button type='submit' className='submit'>
-						Login
-					</button>
+						<div className='form-footer flex flex-col items-center justify-center gap-10'>
+							<button type='submit' className='submit'>
+								Login
+							</button>
 
-					<span className='button-subtitle'>
-						Already have an account?&nbsp;
-						<a className='inline-link clickable' onClick={routeToLogin}>
-							Login!
-						</a>
-					</span>
-				</div>
-			</form>
+							<span className='button-subtitle'>
+								Already have an account?&nbsp;
+								<a className='inline-link clickable' onClick={routeToLogin}>
+									Login!
+								</a>
+							</span>
+						</div>
+					</Form>
+				)}
+			</Formik>
 		</div>
 	)
 }

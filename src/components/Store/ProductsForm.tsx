@@ -133,7 +133,7 @@ const ProductsForm = () => {
                             required={true} /> */}
 
 			<button type='submit' disabled={isLoading}>
-				{params?.id == 'create' ? "Add Product" : "Update Product"}
+				{params?.id == 'create' ? 'Add Product' : 'Update Product'}
 			</button>
 		</form>
 	)

@@ -21,6 +21,7 @@
 		"paths": {
 			"@/*": ["./*"],
 			"@/components/*": ["src/components/*"],
+			"@/utilities/*": ["src/utilities/*"],
 			"@/services/*": ["src/services/*"],
 			"@/classes/*": ["src/classes/*"],
 			"@/helpers/*": ["src/helpers/*"],
