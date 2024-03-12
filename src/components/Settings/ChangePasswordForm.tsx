@@ -32,17 +32,18 @@ const ChangePasswordForm = () => {
 			<h2>Account</h2>
 
 			<Formik
+				enableReinitialize={true}
 				initialValues={new PasswordForm()}
-				validationSchema={Validations.loginSchema}
+				validationSchema={Validations.changePasswordSchema}
 				onSubmit={(values, { setSubmitting }) => {
 					handleSubmit(values)
 					setSubmitting(false)
 				}}>
 				{(form) => (
 					<Form className='min-h-96 flex flex-col gap-8 w-2/4 relative'>
-						<FormInputTextBox label='Old Password' name='oldPassword' />
-						<FormInputTextBox label='New Password' name='newPassword' />
-						<FormInputTextBox label='Confirm New Password' name='confirmNewPassword' />
+						<FormInputTextBox label='Old Password' name='oldPassword' type='password' />
+						<FormInputTextBox label='New Password' name='newPassword' type='password' />
+						<FormInputTextBox label='Confirm New Password' name='confirmNewPassword' type='password' />
 
 						<button type='submit' disabled={!form.isValid}>
 							Change Password

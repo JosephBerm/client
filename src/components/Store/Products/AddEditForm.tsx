@@ -15,22 +15,26 @@ const AddEditForm = () => {
 	const router = useRouter()
 	const params = useParams()
 
-	const [product, setProduct] = useState(new Product())
+	const [product, setProduct] = useState( new Product())
 
 	const getProduct = async () => {
 		try {
 			const { data: res } = await API.store.products.get<Product>(params?.id.toString())
 
 			if (res.statusCode === 404) toast.error('The product with the given ID not found.')
-			else if (res.payload) setProduct(res.payload)
+			else if (res.payload) {
+				setProduct(res.payload)
+
+				console.log(res.payload)
+			}
 		} catch (err: any) {
 			toast.error(err?.message)
 		}
 	}
 
-	const createProduct = async (e: Product) => {
+	const createProduct = async (prdct: Product) => {
 		try {
-			const { data: res } = await API.store.products.create<Product>(product)
+			const { data: res } = await API.store.products.create<Product>(prdct)
 			if (!res.payload || res.statusCode !== 200) return toast.error(res.message)
 
 			toast.success(res.message)
@@ -40,9 +44,9 @@ const AddEditForm = () => {
 		}
 	}
 
-	const updateProduct = async (e: Product) => {
+	const updateProduct = async (prdct: Product) => {
 		try {
-			const { data: res } = await API.store.products.update<Product>(product)
+			const { data: res } = await API.store.products.update<Product>(prdct)
 			if (!res.payload || res.statusCode !== 200) return toast.error(res.message)
 
 			toast.success(res.message)
@@ -60,13 +64,13 @@ const AddEditForm = () => {
 
 	return (
 		<Formik
+			enableReinitialize={true}
 			initialValues={product}
 			validationSchema={Validations.store.productSchema}
-			onSubmit={(values, { setSubmitting }) => {
-				if (params?.id == 'create') createProduct(values)
-				else updateProduct(values)
+			onSubmit={async (values) => {
+				if (params?.id == 'create') await createProduct(values)
+				else await updateProduct(values)
 
-				setSubmitting(false)
 			}}>
 			{({ isSubmitting, isValid, values }) => (
 				<Form className='crudForm'>

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef } from 'react'
-import { Field, ErrorMessage } from 'formik'
+import { Field, ErrorMessage, useFormikContext } from 'formik'
 
 type inputMode = 'search' | 'email' | 'tel' | 'text' | 'url' | 'none' | 'numeric' | 'decimal' | undefined
 
@@ -37,31 +37,26 @@ const FormInputTextBox: React.FC<InputType> = ({
 	pattern,
 	cssClass,
 }) => {
-	const inputRef = useRef<HTMLInputElement>(null)
 
-	const focusInput = () => {
-		if (inputRef.current) {
-			inputRef.current.focus()
-		}
-	}
 
 	const getComponentClass = () => {
 		let className = 'InputTextBox'
 
-		if (cssClass) className += ` ${cssClass}`
+		// if (cssClass) className += ` ${cssClass}`
 
 		return className
 	}
+
+	const formikContext = useFormikContext()
 	return (
 		<div className={`${getComponentClass()} flex flex-col items-center relative`}>
-			<label onClick={focusInput}>{label}</label>
+			<label>{label}</label>
 			<Field
 				name={name}
-				ref={inputRef}
 				autoFocus={autofocused}
 				placeholder={placeholder}
 				type={type}
-				value={value}
+				value={(formikContext.values as Record<string, any>)[name]}
 				disabled={disabled}
 				readOnly={readOnly}
 				maxLength={maxLength}

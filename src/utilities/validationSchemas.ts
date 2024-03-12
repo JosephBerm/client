@@ -17,15 +17,20 @@ export default class Validations {
 		password: yup.string().required('Password is required'),
 	})
 
+	public static changePasswordSchema = yup.object().shape({
+		oldPassword: yup.string().required('Username is required'),
+		newPassword: yup.string().required('New Password is required').min(6, 'Password must be at least 6 characters'),
+		confirmNewPassword: yup.string().required('Confirm new Password is required').oneOf([yup.ref('newPassword')], 'Passwords must match')
+	})
+
 	public static store = {
-		productSchema: {
+		productSchema:  yup.object().shape({
 			sku: yup.string().required('SKU is required'),
 			name: yup.string().required('Name is required'),
 			description: yup.string().required('Description is required'),
 			price: yup.number().positive('Price must be a positive number').required('Price is required'),
-			image: yup.string().nullable(),
-			category: yup.mixed<ProductsCategory>().required('Category is required'),
-		},
+			//category: yup.mixed<ProductsCategory>().required('Category is required'),
+		}),
 	}
 
 	public static userSchema = yup.object().shape({
@@ -44,5 +49,12 @@ export default class Validations {
 		country: yup.string().notRequired(),
 		phone: yup.string().notRequired(),
 		mobile: yup.string().notRequired(),
+	})
+
+	public static profileSchema = yup.object().shape({
+
+		email: yup.string().email().required(),
+		firstName: yup.string().required(),
+		lastName: yup.string().required()
 	})
 }

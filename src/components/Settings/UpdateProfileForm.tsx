@@ -29,8 +29,9 @@ const UpdateProfileForm = () => {
 		<div>
 			<h2>Account</h2>
 			<Formik
+				enableReinitialize={true}
 				initialValues={UserFromStore}
-				validationSchema={Validations.userSchema}
+				validationSchema={Validations.profileSchema}
 				onSubmit={(values, { setSubmitting }) => {
 					handleSubmit(values)
 					setSubmitting(false)
