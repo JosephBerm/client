@@ -16,14 +16,19 @@ class PasswordForm {
 }
 
 const ChangePasswordForm = () => {
+	const [loading, setLoading] = React.useState(false)
+
 	const handleSubmit = async (e: PasswordForm) => {
 		try {
+			setLoading(true)
 			const response = await API.account.changePassword<Boolean>(e.oldPassword, e.newPassword)
 
 			if (response && response.data.statusCode === 200) return toast.success(response.data.message)
 			else toast.error(response.data.message)
 		} catch (err: any) {
 			toast.error(err.message)
+		} finally {
+			setLoading(false)
 		}
 	}
 
@@ -45,8 +50,8 @@ const ChangePasswordForm = () => {
 						<FormInputTextBox label='New Password' name='newPassword' type='password' />
 						<FormInputTextBox label='Confirm New Password' name='confirmNewPassword' type='password' />
 
-						<button type='submit' disabled={!form.isValid}>
-							Change Password
+						<button type='submit' disabled={!form.isValid || loading}>
+						{ loading ? <i className="fa-solid fa-spinner animate-spin"></i> : "Change Password"}
 						</button>
 					</Form>
 				)}

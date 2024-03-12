@@ -12,9 +12,11 @@ import Validations from '@/utilities/validationSchemas'
 
 const UpdateProfileForm = () => {
 	const { User: UserFromStore } = useAccountStore((state) => state)
+	const [loading, setLoading] = React.useState(false)
 
 	const handleSubmit = async (UserData: User) => {
 		try {
+			setLoading(true)
 			const response = await API.account.update<Boolean>(UserData)
 
 			if (response && response.data.statusCode != 200) return toast.error(response.data.message)
@@ -22,6 +24,8 @@ const UpdateProfileForm = () => {
 			useAccountStore.setState({ User: UserData })
 		} catch (err: any) {
 			toast.error(err.message)
+		} finally {
+			setLoading(false)
 		}
 	}
 
@@ -41,8 +45,9 @@ const UpdateProfileForm = () => {
 						<FormInputTextBox label='First Name' name='firstName' />
 						<FormInputTextBox label='Last Name' name='lastName' />
 						<FormInputTextBox label='Email Address' name='email' />
-						<button type='submit' className='btn btn-primary' disabled={!form.isValid}>
-							Update Profile
+						<button type='submit' className='btn btn-primary' disabled={!form.isValid || loading}>
+
+						{loading ? <i className="fa-solid fa-spinner animate-spin"></i> : "Update Profile" }
 						</button>
 					</Form>
 				)}

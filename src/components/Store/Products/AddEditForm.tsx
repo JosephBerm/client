@@ -16,9 +16,11 @@ const AddEditForm = () => {
 	const params = useParams()
 
 	const [product, setProduct] = useState( new Product())
+	const [loading, setLoading] = useState(false)
 
 	const getProduct = async () => {
 		try {
+			setLoading(true)
 			const { data: res } = await API.store.products.get<Product>(params?.id.toString())
 
 			if (res.statusCode === 404) toast.error('The product with the given ID not found.')
@@ -29,11 +31,15 @@ const AddEditForm = () => {
 			}
 		} catch (err: any) {
 			toast.error(err?.message)
+		} finally {
+			setLoading(false)
+		
 		}
 	}
 
 	const createProduct = async (prdct: Product) => {
 		try {
+			setLoading(true)
 			const { data: res } = await API.store.products.create<Product>(prdct)
 			if (!res.payload || res.statusCode !== 200) return toast.error(res.message)
 
@@ -41,11 +47,14 @@ const AddEditForm = () => {
 			router.push('/dashboard/store')
 		} catch (error: any) {
 			toast.error(error.message)
+		} finally {
+			setLoading(false)
 		}
 	}
 
 	const updateProduct = async (prdct: Product) => {
 		try {
+			setLoading(true)
 			const { data: res } = await API.store.products.update<Product>(prdct)
 			if (!res.payload || res.statusCode !== 200) return toast.error(res.message)
 
@@ -53,6 +62,8 @@ const AddEditForm = () => {
 			router.push('/dashboard/store')
 		} catch (error: any) {
 			toast.error(error.message)
+		} finally {
+			setLoading(false)
 		}
 	}
 
@@ -79,8 +90,13 @@ const AddEditForm = () => {
 					<FormInputTextBox label='Product Price' autofocused={true} name='price' />
 					<FormInputTextBox label='Product Description' autofocused={true} name='description' />
 
-					<button type='submit' disabled={isSubmitting || !isValid || !values.name}>
-						{params?.id == 'create' ? 'Add Product' : 'Update Product'}
+					<button type='submit' disabled={isSubmitting || !isValid || !values.name || loading}>
+
+						{loading ? 
+							<i className="fa-solid fa-spinner animate-spin"/> 
+								:
+							params?.id == 'create' ? 'Add Product' : 'Update Product'
+						}
 					</button>
 				</Form>
 			)}
