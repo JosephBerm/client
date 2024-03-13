@@ -19,6 +19,7 @@ export interface InputType {
 	// Error: ?
 	// Icon: ?
 	// VALIDATION: ?
+	// why do we need validation here? we can handle that in the validate() function inside the Formik element wrapping this component. Inside the validate method, when whatever condition is false, you would do something like form.error.username = "Invalid username because..."
 	maxLength?: number
 	cssClass?: string
 }
@@ -37,8 +38,6 @@ const FormInputTextBox: React.FC<InputType> = ({
 	pattern,
 	cssClass,
 }) => {
-
-
 	const getComponentClass = () => {
 		let className = 'InputTextBox'
 
