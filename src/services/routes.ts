@@ -1,4 +1,6 @@
 import { NextRouter } from 'next/router'
+import ProfilePreview from '@/components/ProfilePreview'
+import Route from '@/interfaces/Route'
 
 class Routes {
 	private static router: NextRouter
@@ -6,10 +8,23 @@ class Routes {
 		{
 			name: 'Dashboard',
 			location: '/dashboard',
+			icon: 'fa-solid fa-house',
 		},
 		{
 			name: 'Store',
 			location: '/dashboard/store',
+			icon: 'fa-solid fa-store',
+		},
+		{
+			name: 'Notifications',
+			location: '/dashboard/notifications',
+			icon: 'fa-solid fa-bell',
+		},
+		{
+			name: 'Profile',
+			location: '/dashboard/profile',
+			icon: 'fa-solid fa-user',
+			component: ProfilePreview,
 		},
 	]
 
@@ -21,11 +36,6 @@ class Routes {
 	}
 
 	// Add more route-related methods as needed
-}
-
-interface Route {
-	name: string
-	location: string
 }
 
 export default Routes

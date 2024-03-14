@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Routes from '@/services/routes'
+import Route from '@/interfaces/Route'
 
 import { useRouter } from 'next/navigation'
 import '@/styles/navbar.css'
@@ -28,23 +29,33 @@ function NavBar() {
 					<a href='/'>LOGO</a>
 				</div>
 				<div className='burger-button' onClick={toggleNavbar}>
-					click
+					<i className='fa-solid fa-bars' />
 				</div>
 				<div className={navStyleClassName}>
 					<ol>
 						{Routes.navRoutes.map((route, index) => (
 							<li key={index} style={{ animationDelay: `${index * 0.1}s` }}>
-								<button className='clickable' onClick={() => router.push(route.location)}>
-									{route.name}
-								</button>
+								{route.component ? (
+									<route.component />
+								) : (
+									<button
+										className='clickable titled'
+										onClick={() => router.push(route.location)}
+										data-title={route.name}>
+										<i className={route.icon} />
+									</button>
+								)}
 							</li>
 						))}
 					</ol>
-					<div className='button-container' style={{ animationDelay: `${Routes.navRoutes.length * 0.1}s` }}>
-						<button className='button' rel='noopener noreferrer' onClick={() => router.push("/dashboard/settings")}>
-							Settings Cog
+					{/* <div className='button-container' style={{ animationDelay: `${Routes.navRoutes.length * 0.1}s` }}>
+						<button
+							className='button p-2'
+							rel='noopener noreferrer'
+							onClick={() => router.push('/dashboard/notifications')}>
+							<i className='fa-regular fa-bell' />
 						</button>
-					</div>
+					</div> */}
 				</div>
 			</nav>
 		</header>

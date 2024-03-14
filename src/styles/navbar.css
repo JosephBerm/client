@@ -25,7 +25,7 @@ nav.navbar {
 	align-items: center;
 	position: relative;
 	width: 100%;
-	color: var(--lightest-slate);
+	color: var(--slate);
 	font-family: var(--font-mono);
 	z-index: 12;
 }
@@ -97,33 +97,53 @@ nav .burger-button:hover {
 	animation: fadeInDown 0.3s var(--easing) forwards;
 }
 
-.nav_StyledLinks ol li button::before {
-	content: '0' counter(item) '.';
-	color: var(--main-color);
-	margin-right: 5px;
-	font-size: var(--fz-xs);
-	text-align: right;
-	position: absolute;
-	top: -15px;
-	left: 50%;
-	transform: translateX(-50%);
-}
-
 .nav_StyledLinks .button-container .button {
-	padding: 1rem 1.5rem;
+	padding: 0.7rem 1rem;
 	font-size: var(--fz-s);
 }
 
-.nav_StyledLinks ol li button {
-	color: var(--lightest-slate);
-	transition: var(--transition);
+.nav_StyledLinks ol li .titled {
+	color: var(--slate);
 	padding: 10px;
 	border: none;
+	position: relative;
+	font-family: var(--font-sans);
+	background-color: unset !important;
 }
-.nav_StyledLinks ol li button:hover,
-.nav_StyledLinks ol li button:focus {
+.nav_StyledLinks ol li .titled:hover,
+.nav_StyledLinks ol li .titled:focus {
 	color: var(--main-color);
-	background: unset;
+}
+.nav_StyledLinks ol li .titled,
+.nav_StyledLinks ol li .titled::after,
+.nav_StyledLinks ol li .titled::after {
+	transition: var(--transition);
+	transition-duration: 0.2s;
+}
+
+.nav_StyledLinks ol li .titled::after,
+.nav_StyledLinks ol li .titled::after {
+	content: attr(data-title);
+	color: var(--slate);
+	width: fit-content;
+	font-size: 1rem;
+	padding: 0.5em 0.75em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	top: 110%;
+	left: 50%;
+	transform: translateX(-50%);
+	background-color: var(--tooltip-background);
+	pointer-events: none;
+	user-select: none;
+	opacity: 0;
+	border-radius: var(--border-radius);
+}
+.nav_StyledLinks ol li .titled:hover::after,
+.nav_StyledLinks ol li .titled:focus::after {
+	opacity: 1;
 }
 
 /* TODO: 375px ~ NavBar */
@@ -160,15 +180,17 @@ nav .burger-button:hover {
 		flex-direction: row;
 	}
 	.nav_StyledLinks ol li {
-		margin: 0 0 0 8px;
 		font-size: var(--fz-s);
 	}
-	.nav_StyledLinks ol li button::before {
+	.nav_StyledLinks ol li .titled::before {
 		position: relative;
 		top: unset;
 		left: unset;
 		transform: unset;
 		font-size: var(--fz-xxs);
+	}
+	.nav_StyledLinks ol li .titled {
+		min-width: 55px;
 	}
 
 	.nav_StyledLinks .button-container {
