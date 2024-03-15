@@ -21,6 +21,7 @@ export interface InputType {
 	handleChange: (value: any) => void
 	handleBlur?: () => void
 	handleFocus?: () => void
+	className?: string
 }
 
 const InputTextBox: React.FC<InputType> = ({
@@ -37,6 +38,7 @@ const InputTextBox: React.FC<InputType> = ({
 	handleChange,
 	handleBlur,
 	handleFocus,
+	className
 }) => {
 	const inputRef = useRef<HTMLInputElement>(null)
 
@@ -65,7 +67,7 @@ const InputTextBox: React.FC<InputType> = ({
 				onChange={(e) => handleChange(e.target.value)}
 				onBlur={handleBlur}
 				onFocus={handleFocus}
-				className='border-b border-gray-300'
+				className={`${className + " " ?? ""}border-b border-gray-300`}
 			/>
 		</div>
 	)

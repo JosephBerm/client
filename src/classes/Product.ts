@@ -13,3 +13,15 @@ export class Product {
 		return `Product: ${this.name} - ${this.description} - ${this.price} - ${this.image} - ${this.category}`
 	}
 }
+
+export class CartProduct {
+	product: IProduct
+	quantity: number
+
+	constructor(product: IProduct, quantity: number) {
+		this.product = product
+		this.quantity = quantity
+	}
+}
+
+export interface IProduct  extends Product {}

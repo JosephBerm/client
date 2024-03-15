@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import WrapperHandler from '@/components/WrapperHandler'
-import NavBar from '@/components/NavBar'
 import { IUser } from '@/classes/User'
 import '@/styles/store.css'
 
@@ -46,7 +45,6 @@ export default async function RootLayout({
 	return (
 		<div className='App'>
 			<WrapperHandler User={response.payload as IUser} />
-			<NavBar />
 			<main className='page-container'>{children}</main>
 		</div>
 	)

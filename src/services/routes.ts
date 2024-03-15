@@ -4,6 +4,7 @@ import Route from '@/interfaces/Route'
 
 class Routes {
 	private static router: NextRouter
+
 	public static navRoutes: Route[] = [
 		{
 			name: 'Dashboard',
@@ -26,6 +27,30 @@ class Routes {
 			icon: 'fa-solid fa-user',
 			component: ProfilePreview,
 		},
+	]
+
+	public static publicRoutes: Route[] = [
+		{
+			name: 'Home',
+			location: '/',
+			icon: 'fa-solid fa-house',
+		},
+		{
+			name: 'Products',
+			location: '/products',
+			icon: 'fa-solid fa-store',
+		},
+		{
+			name: 'Login',
+			location: '/login',
+			icon: 'fa-solid fa-door-closed',
+		},
+		{
+			name: 'Cart',
+			location: '/cart',
+			icon: 'fa-solid fa-cart-shopping',
+		},
+		
 	]
 
 	static getCurrentPath(): string {

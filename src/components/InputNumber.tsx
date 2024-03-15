@@ -1,5 +1,6 @@
 import React from 'react'
 import InputTextBox, { InputType } from './InputTextBox'
+import "@/styles/inputcomponents.css"
 
 interface InputNumberType extends Omit<InputType, 'type'> {
 	min?: number
@@ -28,6 +29,7 @@ const InputNumber: React.FC<InputNumberType> = ({
 			handleChange={handleInputChange}
 			inputmode='numeric'
 			pattern='[0-9]*'
+			className='inputNumber'
 		/>
 	)
 }
