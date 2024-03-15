@@ -45,7 +45,7 @@ export default async function RootLayout({
 	return (
 		<div className='App'>
 			<WrapperHandler User={response.payload as IUser} />
-			<main className='page-container'>{children}</main>
+			{children}
 		</div>
 	)
 }

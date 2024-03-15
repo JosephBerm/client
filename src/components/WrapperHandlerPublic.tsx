@@ -6,13 +6,13 @@ import React from 'react'
 import { useCartStore } from '@/src/stores/store'
 
 const WrapperHandlerPublic = () => {
-	const Cart = useCartStore((state) => state);
+	const Cart = useCartStore((state) => state)
 
 	useEffect(() => {
-		const itemsInLocalStorage = localStorage.getItem('cart');
-	
-		if (itemsInLocalStorage) Cart.setCart(JSON.parse(itemsInLocalStorage));
-	}, []);
+		const itemsInLocalStorage = localStorage.getItem('cart')
+
+		if (itemsInLocalStorage) Cart.setCart(JSON.parse(itemsInLocalStorage))
+	}, [])
 
 	return <></>
 }

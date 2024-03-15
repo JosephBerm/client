@@ -6,9 +6,8 @@ import { toast } from 'react-toastify'
 import ProductCard from '@/src/components/Store/Products/ProductCard'
 import '@/styles/publicstore.css'
 
-
 const Page = () => {
-    const [isLoading, setIsLoading] = React.useState<boolean>(false)
+	const [isLoading, setIsLoading] = React.useState<boolean>(false)
 	const [products, setProducts] = React.useState<Product[]>([])
 
 	const retrieveProducts = async () => {
@@ -26,25 +25,21 @@ const Page = () => {
 			setIsLoading(false)
 		}
 	}
-    
 
-    useEffect(() => {
-        retrieveProducts()
-    }, [])
+	useEffect(() => {
+		retrieveProducts()
+	}, [])
 
-  return (
-    <div style={{marginTop: 100}}>
-        <h2>Products</h2>
-        <div>
-            {products.map((product, index) => (
-                <ProductCard
-                    key={index}
-                    product={product}
-                />
-            ))}
-        </div>
-    </div>
-  )
+	return (
+		<div className='products-page'>
+			<h2>Products</h2>
+			<div>
+				{products.map((product, index) => (
+					<ProductCard key={index} product={product} />
+				))}
+			</div>
+		</div>
+	)
 }
 
 export default Page

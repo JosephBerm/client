@@ -50,7 +50,6 @@ class Routes {
 			location: '/cart',
 			icon: 'fa-solid fa-cart-shopping',
 		},
-		
 	]
 
 	static getCurrentPath(): string {

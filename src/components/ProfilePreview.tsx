@@ -1,6 +1,6 @@
 import React from 'react'
 
-function ProfilePreview(title: string) {
+function ProfilePreview() {
 	return (
 		<div className='ProfilePreview titled clickable flex justify-center items-center' data-title='Profile'>
 			<div className='picture-container'>pfp</div>

@@ -12,13 +12,12 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout(props: any) {
-
 	return (
 		<html lang='en'>
 			<body>
-				<WrapperHandlerPublic/>
+				<WrapperHandlerPublic />
 				<NavBar />
-				{props.children}
+				<main className='page-container'>{props.children}</main>
 				<ToastContainer />
 			</body>
 		</html>
