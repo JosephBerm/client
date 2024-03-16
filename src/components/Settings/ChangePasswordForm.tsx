@@ -46,12 +46,16 @@ const ChangePasswordForm = () => {
 				}}>
 				{(form) => (
 					<Form className='min-h-96 flex flex-col gap-8 w-2/4 relative'>
-						<FormInputTextBox label='Old Password' name='oldPassword' type='password' />
-						<FormInputTextBox label='New Password' name='newPassword' type='password' />
-						<FormInputTextBox label='Confirm New Password' name='confirmNewPassword' type='password' />
+						<FormInputTextBox<PasswordForm> label='Old Password' name='oldPassword' type='password' />
+						<FormInputTextBox<PasswordForm> label='New Password' name='newPassword' type='password' />
+						<FormInputTextBox<PasswordForm>
+							label='Confirm New Password'
+							name='confirmNewPassword'
+							type='password'
+						/>
 
 						<button type='submit' disabled={!form.isValid || loading}>
-						{ loading ? <i className="fa-solid fa-spinner animate-spin"></i> : "Change Password"}
+							{loading ? <i className='fa-solid fa-spinner animate-spin'></i> : 'Change Password'}
 						</button>
 					</Form>
 				)}

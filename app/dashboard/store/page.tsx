@@ -109,7 +109,8 @@ const Page = () => {
 			// const products = paginate(sorted, currentPage, pageSize)
 
 			// setFilteredProducts(products)
-		} /*[allProducts, currentPage, pageSize, searchQuery, sortColumn]*/
+		},
+		[] /*[allProducts, currentPage, pageSize, searchQuery, sortColumn]*/
 	)
 
 	return (

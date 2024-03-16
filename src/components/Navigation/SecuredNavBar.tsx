@@ -11,7 +11,7 @@ function NavBar() {
 	const router = useRouter()
 
 	const [navStyleClassName, setNavStyleClassName] = useState('nav_StyledLinks')
-	const SecuredPaths = ["dashboard"]
+	const SecuredPaths = ['dashboard']
 
 	const toggleNavbar = () => {
 		console.log('navbar toggled')

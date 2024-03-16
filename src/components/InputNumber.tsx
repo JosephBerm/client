@@ -1,6 +1,6 @@
 import React from 'react'
 import InputTextBox, { InputType } from './InputTextBox'
-import "@/styles/inputcomponents.css"
+import '@/styles/inputcomponents.css'
 
 interface InputNumberType extends Omit<InputType, 'type'> {
 	min?: number
@@ -15,9 +15,11 @@ const InputNumber: React.FC<InputNumberType> = ({
 	...rest
 }) => {
 	const handleInputChange = (newValue: string) => {
-		const parsedValue = parseFloat(newValue)
+		const parsedValue = parseInt(newValue)
 		if (!isNaN(parsedValue) && (parsedValue >= min || !min) && (parsedValue <= max || !max)) {
 			handleChange(parsedValue)
+		} else {
+			handleChange(null)
 		}
 	}
 

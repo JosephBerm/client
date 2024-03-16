@@ -19,7 +19,7 @@ export interface InputType {
 	// VALIDATION: ?
 	maxLength?: number
 	handleChange: (value: any) => void
-	handleBlur?: () => void
+	handleBlur?: (value: any) => void
 	handleFocus?: () => void
 	className?: string
 }
@@ -38,7 +38,7 @@ const InputTextBox: React.FC<InputType> = ({
 	handleChange,
 	handleBlur,
 	handleFocus,
-	className
+	className,
 }) => {
 	const inputRef = useRef<HTMLInputElement>(null)
 
@@ -67,7 +67,7 @@ const InputTextBox: React.FC<InputType> = ({
 				onChange={(e) => handleChange(e.target.value)}
 				onBlur={handleBlur}
 				onFocus={handleFocus}
-				className={`${className + " " ?? ""}border-b border-gray-300`}
+				className={`${className + ' ' ?? ''}border-b border-gray-300`}
 			/>
 		</div>
 	)
