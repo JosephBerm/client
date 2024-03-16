@@ -8,9 +8,12 @@ export interface TableColumn<T> {
 export interface TableProps<T> {
 	columns: TableColumn<T>[]
 	data: T[]
+	isSearchable?: Boolean
+	isSortable?: Boolean
+	isPaged?: Boolean
 	onSort?: (sortColumn: SortColumn<T>) => void
 	onDelete?: (id: string) => {}
-	sortColumn: SortColumn<T>
+	sortColumn?: SortColumn<T>
 }
 
 export type SortColumn<T> = {

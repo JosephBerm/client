@@ -1,0 +1,7 @@
+.table-container {
+	align-items: flex-end;
+	gap: 5px;
+}
+.table-container .InputTextBox {
+	max-width: 25%;
+}

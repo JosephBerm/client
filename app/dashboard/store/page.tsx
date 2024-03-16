@@ -16,14 +16,7 @@ const Page = () => {
 	const route = useRouter()
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [allProducts, setAllProducts] = useState<Product[]>([])
-	const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
-	const [currentPage, setCurrentPage] = useState(4)
-	const [pageSize, setPageSize] = useState(4)
-	const [searchQuery, setSearchQuery] = useState('')
-	const [sortColumn, setSortColumn] = useState<SortColumn<Product>>({
-		path: 'name',
-		order: 'asc',
-	})
+
 	const columns: TableColumn<Product>[] = [
 		{
 			path: 'name',
@@ -64,7 +57,6 @@ const Page = () => {
 			}
 			const productsList = res.payload
 			setAllProducts(productsList)
-			setFilteredProducts(productsList)
 		} catch (err: any) {
 			toast.error(err.message)
 		} finally {
@@ -91,41 +83,24 @@ const Page = () => {
 		}
 	}
 
-	const handleSort = (sortColumn: SortColumn<Product>) => {
-		setSortColumn(sortColumn)
-	}
-	useEffect(
-		() => {
-			retrieveProducts()
-
-			// let filtered = allProducts
-
-			// if (searchQuery) {
-			// 	filtered = allProducts.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-			// }
-
-			// const sorted = _.orderBy(filtered, [sortColumn.path], [sortColumn.order])
-
-			// const products = paginate(sorted, currentPage, pageSize)
-
-			// setFilteredProducts(products)
-		},
-		[] /*[allProducts, currentPage, pageSize, searchQuery, sortColumn]*/
-	)
+	useEffect(() => {
+		retrieveProducts()
+	}, [])
 
 	return (
 		<div className='store-page'>
 			<h2 className='page-title'>Products</h2>
 			<div className='products-container'>
-				{!filteredProducts.length ? (
+				{!allProducts.length ? (
 					<h3>No Items found for this search...</h3>
 				) : (
 					<Table<Product>
 						columns={columns}
-						data={filteredProducts}
+						data={allProducts}
+						isSortable={true}
+						isSearchable={true}
+						isPaged={true}
 						onDelete={deleteProduct}
-						onSort={handleSort}
-						sortColumn={sortColumn}
 					/>
 				)}
 			</div>

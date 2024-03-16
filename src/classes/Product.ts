@@ -25,4 +25,4 @@ export class CartProduct {
 	}
 }
 
-export interface IProduct  extends Product {}
+export interface IProduct extends Product {}
