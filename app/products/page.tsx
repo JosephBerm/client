@@ -20,7 +20,7 @@ const Page = () => {
 			}
 			setProducts(res.payload)
 		} catch (err: any) {
-			toast.error(err.response.data.message)
+			toast.error(err.message)
 		} finally {
 			setIsLoading(false)
 		}

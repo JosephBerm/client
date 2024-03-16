@@ -5,11 +5,11 @@ import { Field, ErrorMessage, useFormikContext } from 'formik'
 
 type inputMode = 'search' | 'email' | 'tel' | 'text' | 'url' | 'none' | 'numeric' | 'decimal' | undefined
 
-export interface InputType {
+export interface InputType<T> {
 	type?: string
 	value?: string
 	label: string
-	name: string
+	name: keyof T
 	placeholder?: string
 	disabled?: boolean
 	readOnly?: boolean
@@ -24,7 +24,7 @@ export interface InputType {
 	cssClass?: string
 }
 
-const FormInputTextBox: React.FC<InputType> = ({
+const FormInputTextBox: <T>(props: InputType<T>) => JSX.Element = ({
 	type = 'text',
 	label,
 	value,
@@ -55,7 +55,7 @@ const FormInputTextBox: React.FC<InputType> = ({
 				autoFocus={autofocused}
 				placeholder={placeholder}
 				type={type}
-				value={(formikContext.values as Record<string, any>)[name]}
+				value={(formikContext.values as Record<string, any>)[name as string]}
 				disabled={disabled}
 				readOnly={readOnly}
 				maxLength={maxLength}
@@ -65,7 +65,7 @@ const FormInputTextBox: React.FC<InputType> = ({
 			/>
 
 			<div className='error-message-container'>
-				<ErrorMessage name={name} component='span' className='error-message two-line-limit' />
+				<ErrorMessage name={name as string} component='span' className='error-message two-line-limit' />
 			</div>
 		</div>
 	)

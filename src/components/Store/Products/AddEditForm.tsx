@@ -15,7 +15,7 @@ const AddEditForm = () => {
 	const router = useRouter()
 	const params = useParams()
 
-	const [product, setProduct] = useState( new Product())
+	const [product, setProduct] = useState(new Product())
 	const [loading, setLoading] = useState(false)
 
 	const getProduct = async () => {
@@ -33,7 +33,6 @@ const AddEditForm = () => {
 			toast.error(err?.message)
 		} finally {
 			setLoading(false)
-		
 		}
 	}
 
@@ -81,22 +80,22 @@ const AddEditForm = () => {
 			onSubmit={async (values) => {
 				if (params?.id == 'create') await createProduct(values)
 				else await updateProduct(values)
-
 			}}>
 			{({ isSubmitting, isValid, values }) => (
 				<Form className='crudForm'>
-					<FormInputTextBox label='Product Name' autofocused={true} name='name' />
-					<FormInputTextBox label='SKU' autofocused={true} name='sku' />
-					<FormInputTextBox label='Product Price' autofocused={true} name='price' />
-					<FormInputTextBox label='Product Description' autofocused={true} name='description' />
+					<FormInputTextBox<Product> label='Product Name' autofocused={true} name='name' />
+					<FormInputTextBox<Product> label='SKU' name='sku' />
+					<FormInputTextBox<Product> label='Product Price' name='price' />
+					<FormInputTextBox<Product> label='Product Description' name='description' />
 
 					<button type='submit' disabled={isSubmitting || !isValid || !values.name || loading}>
-
-						{loading ? 
-							<i className="fa-solid fa-spinner animate-spin"/> 
-								:
-							params?.id == 'create' ? 'Add Product' : 'Update Product'
-						}
+						{loading ? (
+							<i className='fa-solid fa-spinner animate-spin' />
+						) : params?.id == 'create' ? (
+							'Add Product'
+						) : (
+							'Update Product'
+						)}
 					</button>
 				</Form>
 			)}

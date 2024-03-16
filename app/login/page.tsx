@@ -69,16 +69,19 @@ const Page = () => {
 				}}>
 				{(form) => (
 					<Form className='min-h-96 flex flex-col gap-8 w-2/4 relative'>
-						<FormInputTextBox label='Username / Email' autofocused={true} name='username' />
+						<FormInputTextBox<LoginCredentials>
+							label='Username / Email'
+							autofocused={true}
+							name='username'
+						/>
 
-						<FormInputTextBox type='password' label='Password' name='password' />
+						<FormInputTextBox<LoginCredentials> type='password' label='Password' name='password' />
 						<div className='form-footer flex flex-col items-center justify-center gap-10'>
 							<a className='clickable forgot-password mb-7' onClick={handleForgotPasswordClick}>
 								Forgot Password?
 							</a>
 							<button type='submit' className='submit' disabled={isMissingFields(form) || loading}>
-								{loading ?<i className="fa-solid fa-spinner animate-spin"></i> : "Login" }
-								
+								{loading ? <i className='fa-solid fa-spinner animate-spin'></i> : 'Login'}
 							</button>
 
 							<span className='button-subtitle'>

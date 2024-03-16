@@ -1,17 +1,57 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { SortColumn, TableColumn } from '@/interfaces/TableColumn'
 import { useRouter } from 'next/navigation'
 import { Product } from '@/classes/Product'
 import { toast } from 'react-toastify'
+import _ from 'lodash'
+
 import Link from 'next/link'
 import API from '@/services/api'
+import Table from '@/common/table'
+import paginate from '@/services/paginate'
 
 const Page = () => {
 	const route = useRouter()
-
 	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const [products, setProducts] = useState<Product[]>([])
+	const [allProducts, setAllProducts] = useState<Product[]>([])
+	const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
+	const [currentPage, setCurrentPage] = useState(4)
+	const [pageSize, setPageSize] = useState(4)
+	const [searchQuery, setSearchQuery] = useState('')
+	const [sortColumn, setSortColumn] = useState<SortColumn<Product>>({
+		path: 'name',
+		order: 'asc',
+	})
+	const columns: TableColumn<Product>[] = [
+		{
+			path: 'name',
+			label: 'Name',
+		},
+		{
+			path: 'description',
+			label: 'Description',
+		},
+		{
+			path: 'category',
+			label: 'Category',
+		},
+		{
+			path: 'price',
+			label: 'Price',
+		},
+		{
+			key: 'edit',
+			label: 'Edit',
+			content: (product) => <Link href={`store/${product.id}`}>Edit</Link>,
+		},
+		{
+			key: 'delete',
+			label: 'Delete',
+			content: (product) => <button onClick={() => deleteProduct(product.id!)}>Delete</button>,
+		},
+	]
 
 	const retrieveProducts = async () => {
 		try {
@@ -23,9 +63,10 @@ const Page = () => {
 				return
 			}
 			const productsList = res.payload
-			setProducts(productsList)
+			setAllProducts(productsList)
+			setFilteredProducts(productsList)
 		} catch (err: any) {
-			toast.error(err.response.data.message)
+			toast.error(err.message)
 		} finally {
 			setIsLoading(false)
 		}
@@ -40,35 +81,52 @@ const Page = () => {
 				return
 			} else {
 				toast.success(res.message)
-				const productsList = products.filter((product) => product.id !== productId)
-				setProducts(productsList)
+				const productsList = allProducts.filter((product) => product.id !== productId)
+				setAllProducts(productsList)
 			}
 		} catch (err: any) {
-			toast.error(err.response.data.message)
+			toast.error(err.message)
 		} finally {
 			setIsLoading(false)
 		}
 	}
 
-	useEffect(() => {
-		retrieveProducts()
-	}, [])
+	const handleSort = (sortColumn: SortColumn<Product>) => {
+		setSortColumn(sortColumn)
+	}
+	useEffect(
+		() => {
+			retrieveProducts()
+
+			// let filtered = allProducts
+
+			// if (searchQuery) {
+			// 	filtered = allProducts.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+			// }
+
+			// const sorted = _.orderBy(filtered, [sortColumn.path], [sortColumn.order])
+
+			// const products = paginate(sorted, currentPage, pageSize)
+
+			// setFilteredProducts(products)
+		} /*[allProducts, currentPage, pageSize, searchQuery, sortColumn]*/
+	)
 
 	return (
 		<div className='store-page'>
 			<h2 className='page-title'>Products</h2>
-
-			{/* Must be a table. IK Style is shit. Tryna get the crud done. */}
 			<div className='products-container'>
-				{products.map((product) => (
-					<div key={product.id} className='product'>
-						<h3>{product.name}</h3>
-						<p>{product.description}</p>
-						<p>${product.price}</p>
-						<Link href={`store/${product.id}`}>Edit</Link>
-						<button onClick={() => deleteProduct(product.id!)}>Delete</button>
-					</div>
-				))}
+				{!filteredProducts.length ? (
+					<h3>No Items found for this search...</h3>
+				) : (
+					<Table<Product>
+						columns={columns}
+						data={filteredProducts}
+						onDelete={deleteProduct}
+						onSort={handleSort}
+						sortColumn={sortColumn}
+					/>
+				)}
 			</div>
 			<button className='mt-7' onClick={() => route.push('store/create')}>
 				Create Product
