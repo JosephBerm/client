@@ -10,7 +10,7 @@ export interface TableProps<T> {
 	data: T[]
 	isSearchable?: Boolean
 	isSortable?: Boolean
-	isPaginated?: Boolean
+	isPaged?: Boolean
 	onSort?: (sortColumn: SortColumn<T>) => void
 	onDelete?: (id: string) => {}
 	sortColumn?: SortColumn<T>

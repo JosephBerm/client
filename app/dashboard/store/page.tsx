@@ -99,6 +99,7 @@ const Page = () => {
 						data={allProducts}
 						isSortable={true}
 						isSearchable={true}
+						isPaged={true}
 						onDelete={deleteProduct}
 					/>
 				)}

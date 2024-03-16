@@ -1,9 +1,11 @@
-import React, { Component } from 'react'
+import React from 'react'
 
 import { TableProps, TableColumn } from '@/interfaces/TableColumn'
 
 function TableHeader<T>(props: TableProps<T>) {
 	const callSort = (path: keyof T) => {
+		if (!props.sortColumn) return
+
 		const sortColumn = { ...props.sortColumn }
 		if (sortColumn.path === path) {
 			sortColumn.order = sortColumn.order === 'asc' ? 'desc' : 'asc'
@@ -16,6 +18,8 @@ function TableHeader<T>(props: TableProps<T>) {
 	}
 
 	const renderSortIcon = (column: TableColumn<T>) => {
+		if (!props.sortColumn) return
+
 		const { sortColumn } = props
 		if (column.path !== sortColumn.path) {
 			return null
