@@ -21,6 +21,9 @@ const API = {
 			delete: async <T>(productId: string) => await HttpService.delete<T>(`/products/${productId}`),
 		},
 	},
+	public: {
+		sendQuote: async <T>(quote: T) => await HttpService.post<T>('/quote', quote),
+	}
 }
 
 export default API

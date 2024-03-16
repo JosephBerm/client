@@ -9,14 +9,16 @@ import React from 'react'
 import InputNumber from '@/components/InputNumber'
 import { FormikProvider, useFormik, Form } from 'formik'
 import FormInputTextBox from '@/components/FormInputTextbox'
+import API from '@/src/services/api'
 
 class QuoteForm {
-	FacilityName: string = ''
-	EmailAddress: string = ''
-	ContactName: string = ''
-	PhoneNumber: string = ''
-	TypeOfBusiness: TypeOfBusiness | null = null
-	Comments: string = ''
+	facilityName: string = ''
+	emailAddress: string = ''
+	contactName: string = ''
+	phoneNumber: string = ''
+	typeOfBusiness: TypeOfBusiness | null = null
+	description: string = ''
+	products: CartProduct[] = []
 }
 
 enum TypeOfBusiness {
@@ -33,7 +35,7 @@ const Page = () => {
 	const formik = useFormik({
 		initialValues: new QuoteForm(),
 		onSubmit: (values) => {
-			console.log(values)
+			submitQuote(values)
 		},
 	})
 
@@ -41,20 +43,21 @@ const Page = () => {
 	const setCart = useCartStore((state) => state.setCart)
 	const deleteProdFromCart = useCartStore((state) => state.removeProduct)
 
-	const handleAddProductToCart = (productId: string, value: number) => {
-		const existingProduct = cartStore.find((p: CartProduct) => p.product.id === productId)
+	const [isLoading, setIsLoading] = React.useState<boolean>(false)
 
-		if (existingProduct && existingProduct.quantity + value <= 0) {
-			const productsToSet = cartStore.filter((p: CartProduct) => p.product.id !== productId)
-			setCart(productsToSet)
-			return
-		}
+	const submitQuote = async (values: QuoteForm) => {
+		values.products = cartStore;
+		values.typeOfBusiness = values.typeOfBusiness  ?? TypeOfBusiness.Other
 
-		if (existingProduct) {
-			const productsToSet = cartStore.map((p: CartProduct) =>
-				p.product.id === productId ? { ...p, quantity: p.quantity + value } : p
-			)
-			setCart(productsToSet)
+		try {
+			setIsLoading(true)
+			const response = await API.public.sendQuote<QuoteForm>(values)
+
+				console.log(response)
+		} catch(err) {
+			console.error(err)
+		} finally {
+			setIsLoading(false)
 		}
 	}
 
@@ -118,30 +121,30 @@ const Page = () => {
 					<Form onSubmit={formik.handleSubmit} className='FormContainer'>
 						<FormInputTextBox<QuoteForm>
 							label='Facility Name'
-							name='FacilityName'
-							value={formik.values.FacilityName}
+							name='facilityName'
+							value={formik.values.facilityName}
 						/>
 						<FormInputTextBox<QuoteForm>
 							label='Contact Name'
-							name='ContactName'
-							value={formik.values.ContactName}
+							name='contactName'
+							value={formik.values.contactName}
 						/>
 						<FormInputTextBox<QuoteForm>
 							label='Email Address'
-							name='EmailAddress'
-							value={formik.values.EmailAddress}
+							name='emailAddress'
+							value={formik.values.emailAddress}
 						/>
 						<FormInputTextBox<QuoteForm>
 							label='Phone Number'
-							name='PhoneNumber'
-							value={formik.values.PhoneNumber}
+							name='phoneNumber'
+							value={formik.values.phoneNumber}
 						/>
 						<FormInputTextBox<QuoteForm>
 							type='textarea'
 							rows={6}
 							label='Comments'
-							name='Comments'
-							value={formik.values.Comments}
+							name='description'
+							value={formik.values.description}
 						/>
 
 						<button type='submit' style={{ marginTop: 40 }}>
