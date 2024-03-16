@@ -224,6 +224,8 @@ p:last-of-type {
 	align-self: flex-start;
 	margin: 2px 1px;
 }
+
+.InputTextBox textarea,
 .InputTextBox input {
 	border: 1px solid;
 	border-color: var(--accent-color);
@@ -238,11 +240,15 @@ p:last-of-type {
 	z-index: 2;
 }
 
-.InputTextBox input:-webkit-autofill {
+.InputTextBox input:-webkit-autofill,
+.InputTextBox textarea:-webkit-autofill {
 	-webkit-text-fill-color: var(--text-color) !important;
 	transition: var(--transition), background-color 5000s ease-in-out 0s !important;
 }
 
+
+.InputTextBox textarea:focus,
+.InputTextBox textarea:focus-visible,
 .InputTextBox input:focus,
 .InputTextBox input:focus-visible {
 	outline: none;
