@@ -36,7 +36,7 @@ const ProductCard = ({product}: {product: IProduct}) => {
                 <button onClick={() => setQuantityToAdd(prev => prev > 0 ? prev - 1 : prev )} disabled={QuantityToAdd <= 0}>
                     <i className="fa-solid fa-minus"></i>
                 </button>
-                <InputNumber value={QuantityToAdd.toString()} label={""} handleChange={(e: string) => setQuantityToAdd(parseInt(e))} />
+                <InputNumber value={QuantityToAdd.toString()} label={""} handleChange={(e: number) => setQuantityToAdd(e)} />
                 <button onClick={() => setQuantityToAdd(prev => prev + 1 )}>
                     <i className="fa-solid fa-plus"></i>
                 </button>
