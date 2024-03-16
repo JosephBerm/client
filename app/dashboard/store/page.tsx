@@ -17,7 +17,7 @@ const Page = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [allProducts, setAllProducts] = useState<Product[]>([])
 	const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
-	const [currentPage, setCurrentPage] = useState(4)
+	const [currentPage, setCurrentPage] = useState(1)
 	const [pageSize, setPageSize] = useState(4)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [sortColumn, setSortColumn] = useState<SortColumn<Product>>({
@@ -64,7 +64,6 @@ const Page = () => {
 			}
 			const productsList = res.payload
 			setAllProducts(productsList)
-			setFilteredProducts(productsList)
 		} catch (err: any) {
 			toast.error(err.message)
 		} finally {
@@ -94,24 +93,27 @@ const Page = () => {
 	const handleSort = (sortColumn: SortColumn<Product>) => {
 		setSortColumn(sortColumn)
 	}
-	useEffect(
-		() => {
-			retrieveProducts()
 
-			// let filtered = allProducts
+	useEffect(() => {
+		retrieveProducts()
+	}, [])
 
-			// if (searchQuery) {
-			// 	filtered = allProducts.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-			// }
+	useEffect(() => {
+		let filtered = allProducts
 
-			// const sorted = _.orderBy(filtered, [sortColumn.path], [sortColumn.order])
+		if (searchQuery) {
+			filtered = allProducts.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+		}
+		console.log('filtered', filtered)
 
-			// const products = paginate(sorted, currentPage, pageSize)
+		const sorted = _.orderBy(filtered, [sortColumn.path], [sortColumn.order])
+		console.log('sorted', sorted)
 
-			// setFilteredProducts(products)
-		},
-		[] /*[allProducts, currentPage, pageSize, searchQuery, sortColumn]*/
-	)
+		const products = paginate<Product>(sorted, currentPage, pageSize)
+		console.log('products', products)
+
+		setFilteredProducts(products)
+	}, [allProducts, searchQuery, sortColumn, currentPage, pageSize])
 
 	return (
 		<div className='store-page'>
