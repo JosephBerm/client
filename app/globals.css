@@ -204,6 +204,9 @@ p:last-of-type {
 	-webkit-line-clamp: 2; /* Number of lines to show */
 	max-height: 3.6rem; /* (font-size + line-height) * number of lines */
 }
+table {
+	width: 100%;
+}
 
 /*////////////////////////////////////
 				InputTextBox     
@@ -246,7 +249,6 @@ p:last-of-type {
 	transition: var(--transition), background-color 5000s ease-in-out 0s !important;
 }
 
-
 .InputTextBox textarea:focus,
 .InputTextBox textarea:focus-visible,
 .InputTextBox input:focus,
@@ -277,6 +279,13 @@ p:last-of-type {
 	font-size: 0.75em;
 	font-weight: 700;
 	letter-spacing: 0.5px;
+}
+
+.table .InputTextBox {
+	position: absolute;
+	bottom: 105%;
+	right: 0;
+	max-width: 25%;
 }
 
 @media screen and (min-width: 480px) {

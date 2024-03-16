@@ -16,14 +16,7 @@ const Page = () => {
 	const route = useRouter()
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [allProducts, setAllProducts] = useState<Product[]>([])
-	const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
-	const [currentPage, setCurrentPage] = useState(1)
-	const [pageSize, setPageSize] = useState(4)
-	const [searchQuery, setSearchQuery] = useState('')
-	const [sortColumn, setSortColumn] = useState<SortColumn<Product>>({
-		path: 'name',
-		order: 'asc',
-	})
+
 	const columns: TableColumn<Product>[] = [
 		{
 			path: 'name',
@@ -90,44 +83,23 @@ const Page = () => {
 		}
 	}
 
-	const handleSort = (sortColumn: SortColumn<Product>) => {
-		setSortColumn(sortColumn)
-	}
-
 	useEffect(() => {
 		retrieveProducts()
 	}, [])
-
-	useEffect(() => {
-		let filtered = allProducts
-
-		if (searchQuery) {
-			filtered = allProducts.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-		}
-		console.log('filtered', filtered)
-
-		const sorted = _.orderBy(filtered, [sortColumn.path], [sortColumn.order])
-		console.log('sorted', sorted)
-
-		const products = paginate<Product>(sorted, currentPage, pageSize)
-		console.log('products', products)
-
-		setFilteredProducts(products)
-	}, [allProducts, searchQuery, sortColumn, currentPage, pageSize])
 
 	return (
 		<div className='store-page'>
 			<h2 className='page-title'>Products</h2>
 			<div className='products-container'>
-				{!filteredProducts.length ? (
+				{!allProducts.length ? (
 					<h3>No Items found for this search...</h3>
 				) : (
 					<Table<Product>
 						columns={columns}
-						data={filteredProducts}
+						data={allProducts}
+						isSortable={true}
+						isSearchable={true}
 						onDelete={deleteProduct}
-						onSort={handleSort}
-						sortColumn={sortColumn}
 					/>
 				)}
 			</div>
