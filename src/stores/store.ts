@@ -34,7 +34,8 @@ const useCartStore = create<State & Actions>((set, get) => ({
         localStorage.setItem('cart', JSON.stringify(get().Cart));
     },
     setCart: (cart: CartProduct[]) => {
-        set(() => ({ Cart: cart }));
+        set((state) => ({ Cart: cart }));
+        localStorage.setItem('cart', JSON.stringify(get().Cart));
     },
 }));
 
