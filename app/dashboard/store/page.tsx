@@ -10,6 +10,7 @@ import _ from 'lodash'
 import Link from 'next/link'
 import API from '@/services/api'
 import Table from '@/common/table'
+import IsBusyLoading from '@/src/components/isBusyLoading'
 
 const Page = () => {
 	const route = useRouter()
@@ -86,28 +87,36 @@ const Page = () => {
 		retrieveProducts()
 	}, [])
 
-	return (
-		<div className='store-page'>
-			<h2 className='page-title'>Products</h2>
-			<div className='products-container'>
-				{!allProducts.length ? (
-					<h3>No Items found for this search...</h3>
-				) : (
-					<Table<Product>
-						columns={columns}
-						data={allProducts}
-						isSortable={true}
-						isSearchable={true}
-						isPaged={true}
-						onDelete={deleteProduct}
-					/>
-				)}
+	if (isLoading)
+		return (
+			<div className='store-page'>
+				<h2 className='page-title'>Products</h2>
+				<IsBusyLoading />
 			</div>
-			<button className='mt-7' onClick={() => route.push('store/create')}>
-				Create Product
-			</button>
-		</div>
-	)
+		)
+	else
+		return (
+			<div className='store-page'>
+				<h2 className='page-title'>Products</h2>
+				<div className='products-container'>
+					{!allProducts.length ? (
+						<h3>No Items found for this search...</h3>
+					) : (
+						<Table<Product>
+							columns={columns}
+							data={allProducts}
+							isSortable={true}
+							isSearchable={true}
+							isPaged={true}
+							onDelete={deleteProduct}
+						/>
+					)}
+				</div>
+				<button className='mt-7' onClick={() => route.push('store/create')}>
+					Create Product
+				</button>
+			</div>
+		)
 }
 
 export default Page

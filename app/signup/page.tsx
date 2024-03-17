@@ -11,6 +11,7 @@ import API from '@/services/api'
 import '@/styles/login.css'
 
 import FormInputTextBox from '@/components/FormInputTextbox'
+import IsBusyLoading from '@/components/isBusyLoading'
 
 const Page = () => {
 	const [form, setForm] = useState(new SignupForm())
@@ -44,59 +45,67 @@ const Page = () => {
 		router.push('/login')
 	}
 
-	return (
-		<div className='Signup'>
-			<h2 className='page-title'>Sign up</h2>
-			<Formik
-				initialValues={form}
-				validationSchema={Validations.signupSchema}
-				onSubmit={(values, { setSubmitting }) => {
-					handleLogin(values)
-					setSubmitting(false)
-				}}>
-				{({ isSubmitting }) => (
-					<Form className='min-h-96 flex flex-col w-full relative'>
-						<div className='two-sided'>
-							<FormInputTextBox<SignupForm> label='Username' name='username' />
+	if (isLoading)
+		return (
+			<div className='Signup'>
+				<h2 className='page-title'>Sign up</h2>
+				<IsBusyLoading />
+			</div>
+		)
+	else
+		return (
+			<div className='Signup'>
+				<h2 className='page-title'>Sign up</h2>
+				<Formik
+					initialValues={form}
+					validationSchema={Validations.signupSchema}
+					onSubmit={(values, { setSubmitting }) => {
+						handleLogin(values)
+						setSubmitting(false)
+					}}>
+					{({ isSubmitting }) => (
+						<Form className='min-h-96 flex flex-col w-full relative'>
+							<div className='two-sided'>
+								<FormInputTextBox<SignupForm> label='Username' name='username' />
 
-							<FormInputTextBox<SignupForm> label='Email' name='email' />
-						</div>
-						<div className='two-sided'>
-							<FormInputTextBox<SignupForm> label='Password' name='password' type='password' />
+								<FormInputTextBox<SignupForm> label='Email' name='email' />
+							</div>
+							<div className='two-sided'>
+								<FormInputTextBox<SignupForm> label='Password' name='password' type='password' />
 
-							<FormInputTextBox label='Confirm Password' name='confirmPassword' type='password' />
-						</div>
+								<FormInputTextBox label='Confirm Password' name='confirmPassword' type='password' />
+							</div>
 
-						<div className='two-sided'>
-							<FormInputTextBox<SignupForm> label='First Name' name='firstName' />
+							<div className='two-sided'>
+								<FormInputTextBox<SignupForm> label='First Name' name='firstName' />
 
-							<FormInputTextBox<SignupForm> label='Last Name' name='lastName' />
-						</div>
+								<FormInputTextBox<SignupForm> label='Last Name' name='lastName' />
+							</div>
 
-						{/* <InputTextBox
+							{/* <InputTextBox
 					type='text'
 					label='Date of Birth'
 					value={form.dateOfBirth}
 					handleChange={(value) => handleChange('dateOfBirth', value)}
 				/> */}
 
-						<div className='form-footer flex flex-col items-center justify-center gap-10'>
-							<button type='submit' className='submit'>
-								Login
-							</button>
+							<div className='form-footer flex flex-col items-center justify-center gap-10'>
+								<button type='submit' className='submit'>
+									Login
+								</button>
 
-							<span className='button-subtitle'>
-								Already have an account?&nbsp;
-								<a className='inline-link clickable' onClick={routeToLogin}>
-									Login!
-								</a>
-							</span>
-						</div>
-					</Form>
-				)}
-			</Formik>
-		</div>
-	)
+								<span className='button-subtitle'>
+									Already have an account?&nbsp;
+									<a className='inline-link clickable' onClick={routeToLogin}>
+										Login!
+									</a>
+								</span>
+							</div>
+						</Form>
+					)}
+				</Formik>
+			</div>
+		)
 }
 
 export default Page

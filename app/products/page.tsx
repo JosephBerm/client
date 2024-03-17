@@ -5,6 +5,7 @@ import React, { useEffect } from 'react'
 import { toast } from 'react-toastify'
 import ProductCard from '@/src/components/Store/Products/ProductCard'
 import '@/styles/publicstore.css'
+import IsBusyLoading from '@/src/components/isBusyLoading'
 
 const Page = () => {
 	const [isLoading, setIsLoading] = React.useState<boolean>(false)
@@ -30,16 +31,24 @@ const Page = () => {
 		retrieveProducts()
 	}, [])
 
-	return (
-		<div className='products-page'>
-			<h2>Products</h2>
-			<div>
-				{products.map((product, index) => (
-					<ProductCard key={index} product={product} />
-				))}
+	if (isLoading)
+		return (
+			<div className='products-page'>
+				<h2 className='page-title'>Products</h2>
+				<IsBusyLoading />
 			</div>
-		</div>
-	)
+		)
+	else
+		return (
+			<div className='products-page'>
+				<h2>Products</h2>
+				<div>
+					{products.map((product, index) => (
+						<ProductCard key={index} product={product} />
+					))}
+				</div>
+			</div>
+		)
 }
 
 export default Page

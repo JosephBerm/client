@@ -2,18 +2,16 @@
 
 import '@/styles/cart.css'
 
+import React, { useEffect, useState } from 'react'
+import API from '@/services/api'
 import { CartProduct } from '@/classes/Product'
+import { FormikProvider, useFormik, Form } from 'formik'
+import { Quote, TypeOfBusiness } from '@/classes/Quote'
 import { useCartStore } from '@/src/stores/store'
-import React from 'react'
 
 import InputNumber from '@/components/InputNumber'
-import { FormikProvider, useFormik, Form } from 'formik'
 import FormInputTextBox from '@/components/FormInputTextbox'
-import API from '@/src/services/api'
-import { Quote, TypeOfBusiness } from '@/src/classes/Quote'
-const { v4: uuidv4 } = require('uuid');
-
-
+import IsBusyLoading from '@/components/isBusyLoading'
 
 const Page = () => {
 	const formik = useFormik({
@@ -26,19 +24,18 @@ const Page = () => {
 	const cartStore = useCartStore((state) => state.Cart)
 	const setCart = useCartStore((state) => state.setCart)
 	const deleteProdFromCart = useCartStore((state) => state.removeProduct)
-	const [submitted, setSubmitted] = React.useState<boolean>(false)
-
-	const [isLoading, setIsLoading] = React.useState<boolean>(false)
+	const [submitted, setSubmitted] = useState<boolean>(false)
+	const [isLoading, setIsLoading] = useState<boolean>(false)
 
 	const submitQuote = async (values: Quote) => {
 		values.products = cartStore.map((cartProduct) => {
-			const product = new CartProduct(null, cartProduct.quantity);
-			product.product = null;
+			const product = new CartProduct(null, cartProduct.quantity)
+			product.product = null
 			product.productId = cartProduct.product!.id
 			return product
-		});
-		values.typeOfBusiness = values.typeOfBusiness  ?? TypeOfBusiness.Other
-		values.id = uuidv4();
+		})
+		values.typeOfBusiness = values.typeOfBusiness ?? TypeOfBusiness.Other
+		values.id = crypto.randomUUID()
 
 		try {
 			setIsLoading(true)
@@ -48,7 +45,7 @@ const Page = () => {
 				setSubmitted(true)
 				setCart([])
 			}
-		} catch(err) {
+		} catch (err) {
 			console.error(err)
 		} finally {
 			setIsLoading(false)
@@ -56,7 +53,6 @@ const Page = () => {
 	}
 
 	const handleSetProductToCart = (productId: string, value: number) => {
-
 		const existingProduct = cartStore.find((p: CartProduct) => p.product!.id === productId)
 
 		if (existingProduct) {
@@ -73,84 +69,89 @@ const Page = () => {
 		})
 	}
 
-	React.useEffect(() => {
-		console.log(cartStore)
-	}, [cartStore])
+	useEffect(() => {}, [cartStore, isLoading])
 
-	return (
-		<div className='page-container'>
-			<div className='cart'>
-				<div style={{ position: 'relative', width: '100%' }}>
-					<div className='cart-item header'>
-						<p>Product</p>
-						<p>Quantity</p>
-						<p>Actions</p>
-					</div>
-					{cartStore.map((item, index) => (
-						<div key={index} className='cart-item'>
-							<p style={{ margin: 0 }}>{item.product!.name}</p>
-
-							<div className='flex flex-row mb-2'>
-								<InputNumber
-									value={item.quantity?.toString() ?? ''}
-									label={''}
-									handleChange={(e: number) => handleSetProductToCart(item.product!.id!, e)}
-									handleBlur={handleBlur}
-								/>
-							</div>
-
-							<button
-								style={{ border: 'none', height: 30, width: 30, padding: 0 }}
-								onClick={() => deleteProdFromCart(item)}>
-								<i className='fas fa-trash'></i>
-							</button>
+	if (isLoading)
+		return (
+			<div className='Cart'>
+				<h2 className='page-title'>Cart</h2>
+				<IsBusyLoading />
+			</div>
+		)
+	else
+		return (
+			<div className='Cart'>
+				<h2 className='page-title'>Cart</h2>
+				<div className='cart'>
+					<div style={{ position: 'relative', width: '100%' }}>
+						<div className='cart-item header'>
+							<p>Product</p>
+							<p>Quantity</p>
+							<p>Actions</p>
 						</div>
-					))}
+						{cartStore.map((item, index) => (
+							<div key={index} className='cart-item'>
+								<p style={{ margin: 0 }}>{item.product!.name}</p>
+
+								<div className='flex flex-row mb-2'>
+									<InputNumber
+										value={item.quantity?.toString() ?? ''}
+										label={''}
+										handleChange={(e: number) => handleSetProductToCart(item.product!.id!, e)}
+										handleBlur={handleBlur}
+									/>
+								</div>
+
+								<button
+									style={{ border: 'none', height: 30, width: 30, padding: 0 }}
+									onClick={() => deleteProdFromCart(item)}>
+									<i className='fas fa-trash'></i>
+								</button>
+							</div>
+						))}
+					</div>
+				</div>
+
+				<div className='quote'>
+					{submitted && (
+						<p>Thank you for contact us. One of our team members will be reaching out shortly.</p>
+					)}
+					{!submitted && (
+						<FormikProvider value={formik}>
+							<Form onSubmit={formik.handleSubmit} className='FormContainer'>
+								<FormInputTextBox<Quote> label='Facility Name' name='name' value={formik.values.name} />
+								<FormInputTextBox<Quote>
+									label='Contact Name'
+									name='contactName'
+									value={formik.values.contactName}
+								/>
+								<FormInputTextBox<Quote>
+									label='Email Address'
+									name='emailAddress'
+									value={formik.values.emailAddress}
+								/>
+								<FormInputTextBox<Quote>
+									label='Phone Number'
+									name='phoneNumber'
+									value={formik.values.phoneNumber}
+								/>
+								<FormInputTextBox<Quote>
+									type='textarea'
+									rows={6}
+									label='Comments'
+									name='description'
+									value={formik.values.description}
+								/>
+
+								<button type='submit' style={{ marginTop: 40 }}>
+									Submit
+								</button>
+							</Form>
+						</FormikProvider>
+					)}
 				</div>
 			</div>
-
-			<div className='quote'>
-				{submitted && <p>Thank you for contact us. One of our team members will be reaching out shortly.</p>}
-				{!submitted &&
-					<FormikProvider value={formik}>
-						<Form onSubmit={formik.handleSubmit} className='FormContainer'>
-							<FormInputTextBox<Quote>
-								label='Facility Name'
-								name='name'
-								value={formik.values.name}
-							/>
-							<FormInputTextBox<Quote>
-								label='Contact Name'
-								name='contactName'
-								value={formik.values.contactName}
-							/>
-							<FormInputTextBox<Quote>
-								label='Email Address'
-								name='emailAddress'
-								value={formik.values.emailAddress}
-							/>
-							<FormInputTextBox<Quote>
-								label='Phone Number'
-								name='phoneNumber'
-								value={formik.values.phoneNumber}
-							/>
-							<FormInputTextBox<Quote>
-								type='textarea'
-								rows={6}
-								label='Comments'
-								name='description'
-								value={formik.values.description}
-							/>
-
-							<button type='submit' style={{ marginTop: 40 }}>
-								Submit
-							</button>
-						</Form>
-					</FormikProvider>
-				}
-			</div>
-		</div>
-	)
+		)
 }
 
 export default Page
