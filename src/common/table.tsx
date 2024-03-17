@@ -13,7 +13,6 @@ import InputTextBox from '@/components/InputTextBox'
 
 const Table = <T extends { id: string | null; name: string }>(props: TableProps<T>) => {
 	const [pagedData, setPagedData] = useState<T[]>([])
-	const [totalCount, setTotalCount] = useState(0)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
 	const [pageSize, setPageSize] = useState(4)
@@ -56,7 +55,7 @@ const Table = <T extends { id: string | null; name: string }>(props: TableProps<
 		setSearchQuery(searchValue)
 	}
 
-	const renderSearch = (): JSX.Element => {
+	const tableSearch = (): JSX.Element => {
 		if (props.isSearchable) {
 			return <InputTextBox type='text' value={searchQuery} label='Search' handleChange={handleSearchQuery} />
 		}
@@ -67,7 +66,7 @@ const Table = <T extends { id: string | null; name: string }>(props: TableProps<
 		setCurrentPage(page)
 	}
 
-	const renderPagination = (): JSX.Element => {
+	const tablePagination = (): JSX.Element => {
 		if (props.isPaged) {
 			return (
 				<Pagination
@@ -80,14 +79,21 @@ const Table = <T extends { id: string | null; name: string }>(props: TableProps<
 		}
 		return <></>
 	}
+	const tableTitle = (): JSX.Element => {
+		if (props.title) {
+			return <caption>{props.title}</caption>
+		}
+		return <></>
+	}
 	return (
 		<div className='table-container relative flex flex-col items-end justify-center'>
-			{renderSearch()}
-			<table className='table table-striped table-dark'>
+			{tableSearch()}
+			<table className='table-dark'>
+				{tableTitle()}
 				<TableHeader<T> {...props} onSort={handleSort} sortColumn={sortColumn} />
 				<TableBody<T> {...props} data={props.isPaged ? pagedData : filteredItems} />
 			</table>
-			{renderPagination()}
+			{tablePagination()}
 		</div>
 	)
 }

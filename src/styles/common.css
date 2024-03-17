@@ -1,0 +1,29 @@
+nav ul.pagination {
+	display: flex;
+	gap: 3px;
+}
+nav ul.pagination li {
+	transition: var(--transition);
+}
+
+nav ul.pagination li.page-item,
+nav ul.pagination li.page-active {
+	padding: 5px;
+	border: 1px solid;
+	border-color: var(--dark-slate);
+	border-radius: var(--border-radius);
+}
+
+nav ul.pagination li.magnify:hover,
+nav ul.pagination li.magnify:hover,
+nav ul.pagination li.active {
+	transform: scale(1.1);
+	color: var(--main-color) !important;
+	background-color: var(--main-color-tint);
+	border-color: var(--main-slate) !important;
+}
+
+nav ul.pagination li.magnify:hover a,
+nav ul.pagination li.magnify:hover a {
+	color: var(--main-color) !important;
+}

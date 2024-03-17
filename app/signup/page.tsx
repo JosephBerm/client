@@ -68,9 +68,9 @@ const Page = () => {
 						</div>
 
 						<div className='two-sided'>
-							<FormInputTextBox<SignupForm> label='Password' name='firstName' />
+							<FormInputTextBox<SignupForm> label='First Name' name='firstName' />
 
-							<FormInputTextBox<SignupForm> label='Password' name='lastName' />
+							<FormInputTextBox<SignupForm> label='Last Name' name='lastName' />
 						</div>
 
 						{/* <InputTextBox

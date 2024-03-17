@@ -10,7 +10,6 @@ import _ from 'lodash'
 import Link from 'next/link'
 import API from '@/services/api'
 import Table from '@/common/table'
-import paginate from '@/services/paginate'
 
 const Page = () => {
 	const route = useRouter()

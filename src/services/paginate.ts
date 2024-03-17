@@ -6,7 +6,6 @@ export default function paginate<T>(items: T[], pageNumber: number, pageSize: nu
 }
 /*
 if lodash doesn't work, this implementation should work too:
-import _ from 'lodash'
 
 export default function paginate<T>(items: T[], pageNumber: number, pageSize: number) {
 	const startIndex = (pageNumber - 1) * pageSize

@@ -22,7 +22,9 @@ function TableBody<T extends { id: string | null }>(props: TableProps<T>) {
 			{props.data.map((item) => (
 				<tr key={item.id}>
 					{props.columns.map((column) => (
-						<td key={createKey(item, column)}>{renderCell(item, column)}</td>
+						<td key={createKey(item, column)} data-label={column.label}>
+							{renderCell(item, column)}
+						</td>
 					))}
 				</tr>
 			))}

@@ -8,6 +8,7 @@ export interface TableColumn<T> {
 export interface TableProps<T> {
 	columns: TableColumn<T>[]
 	data: T[]
+	title?: string
 	isSearchable?: Boolean
 	isSortable?: Boolean
 	isPaged?: Boolean
