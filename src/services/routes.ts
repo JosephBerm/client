@@ -17,6 +17,11 @@ class Routes {
 			icon: 'fa-solid fa-store',
 		},
 		{
+			name: 'Quotes',
+			location: '/dashboard/quotes',
+			icon: 'fa-solid fa-list-check',
+		},
+		{
 			name: 'Notifications',
 			location: '/dashboard/notifications',
 			icon: 'fa-solid fa-bell',

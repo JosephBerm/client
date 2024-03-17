@@ -21,6 +21,21 @@ const API = {
 			delete: async <T>(productId: string) => await HttpService.delete<T>(`/products/${productId}`),
 		},
 	},
+	quote: {
+		get: async <T>(id: string | null) => {
+			if (id !== null) {
+				return await HttpService.get<T>(`/quote/${id}`);
+			} else {
+				return await HttpService.get<T>('/quote');
+			}
+		},
+		create: async <T>(quote: T) => await HttpService.post<T>('/quote', quote),
+		update: async <T>(quote: T) => await HttpService.put<T>('/quote', quote),
+		delete: async <T>(quoteId: string) => await HttpService.delete<T>(`/quote/${quoteId}`),
+	},
+	public: {
+		sendQuote: async <T>(quote: T) => await HttpService.post<T>('/quote', quote),
+	}
 }
 
 export default API

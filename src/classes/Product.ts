@@ -15,10 +15,11 @@ export class Product {
 }
 
 export class CartProduct {
-	product: IProduct
+	product: IProduct | null
 	quantity: number
+	productId: string | null = null
 
-	constructor(product: IProduct, quantity: number) {
+	constructor(product: IProduct | null, quantity: number) {
 		this.product = product
 		this.quantity = quantity
 	}
