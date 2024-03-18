@@ -21,15 +21,14 @@ const Pagination = ({ itemsCount, pageSize, currentPage, onPageChange }: Paginat
 			<ul className='pagination'>
 				{pages.map((page) => (
 					<li
+						onClick={() => onPageChange(page)}
 						key={page}
 						className={
 							page === currentPage
 								? 'page-item active clickable magnify'
 								: 'page-active clickable magnify'
 						}>
-						<a onClick={() => onPageChange(page)} className='page-link'>
-							{page}
-						</a>
+						<a className='page-link'>{page}</a>
 					</li>
 				))}
 			</ul>

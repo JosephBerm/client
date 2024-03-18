@@ -15,12 +15,13 @@ const AddEditForm = () => {
 	const router = useRouter()
 	const params = useParams()
 
-	const [product, setProduct] = useState(new Product())
-	const [loading, setLoading] = useState(false)
+	const [product, setProduct] = useState<Product>(new Product())
+	const [isNewProduct, setIsNewProduct] = useState<Boolean>(params?.id == 'create')
+	const [isLoading, setIsLoading] = useState<Boolean>(false)
 
 	const getProduct = async () => {
 		try {
-			setLoading(true)
+			setIsLoading(true)
 			const { data: res } = await API.store.products.get<Product>(params?.id.toString())
 
 			if (res.statusCode === 404) toast.error('The product with the given ID not found.')
@@ -32,13 +33,13 @@ const AddEditForm = () => {
 		} catch (err: any) {
 			toast.error(err?.message)
 		} finally {
-			setLoading(false)
+			setIsLoading(false)
 		}
 	}
 
 	const createProduct = async (prdct: Product) => {
 		try {
-			setLoading(true)
+			setIsLoading(true)
 			const { data: res } = await API.store.products.create<Product>(prdct)
 			if (!res.payload || res.statusCode !== 200) return toast.error(res.message)
 
@@ -47,13 +48,13 @@ const AddEditForm = () => {
 		} catch (error: any) {
 			toast.error(error.message)
 		} finally {
-			setLoading(false)
+			setIsLoading(false)
 		}
 	}
 
 	const updateProduct = async (prdct: Product) => {
 		try {
-			setLoading(true)
+			setIsLoading(true)
 			const { data: res } = await API.store.products.update<Product>(prdct)
 			if (!res.payload || res.statusCode !== 200) return toast.error(res.message)
 
@@ -62,12 +63,12 @@ const AddEditForm = () => {
 		} catch (error: any) {
 			toast.error(error.message)
 		} finally {
-			setLoading(false)
+			setIsLoading(false)
 		}
 	}
 
 	useEffect(() => {
-		if (!params.id || params.id == 'create') return
+		if (!params.id || isNewProduct) return
 
 		getProduct()
 	}, [params.id])
@@ -88,10 +89,10 @@ const AddEditForm = () => {
 					<FormInputTextBox<Product> label='Product Price' name='price' />
 					<FormInputTextBox<Product> label='Product Description' name='description' />
 
-					<button type='submit' disabled={isSubmitting || !isValid || !values.name || loading}>
-						{loading ? (
+					<button type='submit' disabled={isSubmitting || !isValid || !values.name || isLoading == true}>
+						{isLoading ? (
 							<i className='fa-solid fa-spinner animate-spin' />
-						) : params?.id == 'create' ? (
+						) : isNewProduct ? (
 							'Add Product'
 						) : (
 							'Update Product'

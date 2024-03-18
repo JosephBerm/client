@@ -1,7 +1,8 @@
-import { CartProduct } from "./Product"
+import { TypeOfBusiness } from '@/classes/Enums'
+import { CartProduct } from '@/classes/Product'
 
-export class Quote {
-    id: string = ''
+export default class Quote {
+	id: string = ''
 	name: string = ''
 	emailAddress: string = ''
 	contactName: string = ''
@@ -9,14 +10,4 @@ export class Quote {
 	typeOfBusiness: TypeOfBusiness | null = null
 	description: string = ''
 	products: CartProduct[] = []
-}
-
-export enum TypeOfBusiness {
-	Dentist,
-	SurgeryCenter,
-	Hospital,
-	Veterinarian,
-	Restaurant,
-	Construction,
-	Other,
 }

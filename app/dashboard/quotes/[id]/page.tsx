@@ -1,58 +1,63 @@
 'use client'
-import { Quote } from '@/src/classes/Quote'
+import Quote from '@/classes/Quote'
+import IsBusyLoading from '@/src/components/isBusyLoading'
 import API from '@/src/services/api'
 import { useParams, useRouter } from 'next/navigation'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 
-const page = () => {
-    const params = useParams()
-    const route = useRouter()
-    const [quote, setQuote] = React.useState<Quote | null>(null)
-    const [loading, setLoading] = React.useState<boolean>(false)
+const Page = () => {
+	const params = useParams()
+	const route = useRouter()
+	const [quote, setQuote] = useState<Quote | null>(null)
+	const [isLoading, setIsLoading] = useState<boolean>(false)
 
+	const getQuote = async (id: string) => {
+		try {
+			setIsLoading(true)
+			const { data } = await API.quote.get<Quote>(id)
 
-    const getQuote = async (id: string) => {
-        try {
-            setLoading(true)
-            const response = await API.quote.get<Quote>(id)
+			if (data.statusCode == 200 && data.payload) {
+				setQuote(data.payload)
+			}
+		} catch (err) {
+			console.log(err)
+		} finally {
+			setIsLoading(false)
+		}
+	}
 
-            if (response.data.statusCode == 200) {
-                setQuote(response.data.payload!)
-            }
-        } catch(err) {
-            console.log(err)
-        } finally {
-            setLoading(false)
-        }
-    }
+	useEffect(() => {
+		if (params.id) {
+			getQuote(params.id as string)
+		}
+	}, [])
 
-    useEffect(() => {   
-        if(params.id){
-            getQuote(params.id as string)
-        }
-    }, [])
+	if (isLoading)
+		return (
+			<div className='EditQuoteForm'>
+				<h2 className='page-title'>Quote</h2>
+				<IsBusyLoading />
+			</div>
+		)
+	else {
+		return (
+			<div className='EditQuoteForm'>
+				<h2 className='page-title'>Quote</h2>
+				<button onClick={() => route.back()}>Go back</button>
+				{quote && (
+					<div>
+						<h4>{quote.name}</h4>
+						<p>{quote.contactName}</p>
+						<p>{quote.emailAddress}</p>
+						<p>{quote.phoneNumber}</p>
+						<p>{quote.typeOfBusiness}</p>
 
-
-
-    return (
-        <div>
-            <button onClick={() => route.back()}>Go back</button>
-            <h3>Quote</h3>
-            {loading && <p>Loading...</p>}
-            {quote && (
-                <div>
-                    <h4>{quote.name}</h4>
-                    <p>{quote.contactName}</p>
-                    <p>{quote.emailAddress}</p>
-                    <p>{quote.phoneNumber}</p>
-                    <p>{quote.typeOfBusiness}</p>
-
-                    <p>{quote.description}</p>
-                </div>
-            )}
-
-        </div>
-    )
+						<p>{quote.description}</p>
+					</div>
+				)}
+			</div>
+		)
+	}
 }
 
-export default page
+export default Page

@@ -3,11 +3,12 @@
 import '@/styles/cart.css'
 
 import React, { useEffect, useState } from 'react'
-import API from '@/services/api'
-import { CartProduct } from '@/classes/Product'
 import { FormikProvider, useFormik, Form } from 'formik'
-import { Quote, TypeOfBusiness } from '@/classes/Quote'
+import { CartProduct } from '@/classes/Product'
 import { useCartStore } from '@/src/stores/store'
+import { TypeOfBusiness } from '@/classes/Enums'
+import Quote from '@/classes/Quote'
+import API from '@/services/api'
 
 import InputNumber from '@/components/InputNumber'
 import FormInputTextBox from '@/components/FormInputTextbox'

@@ -16,11 +16,11 @@ class PasswordForm {
 }
 
 const ChangePasswordForm = () => {
-	const [loading, setLoading] = React.useState(false)
+	const [isLoading, setIsLoading] = React.useState(false)
 
 	const handleSubmit = async (e: PasswordForm) => {
 		try {
-			setLoading(true)
+			setIsLoading(true)
 			const response = await API.account.changePassword<Boolean>(e.oldPassword, e.newPassword)
 
 			if (response && response.data.statusCode === 200) return toast.success(response.data.message)
@@ -28,13 +28,13 @@ const ChangePasswordForm = () => {
 		} catch (err: any) {
 			toast.error(err.message)
 		} finally {
-			setLoading(false)
+			setIsLoading(false)
 		}
 	}
 
 	return (
-		<div>
-			<h2>Account</h2>
+		<div className='ChangePasswordForm'>
+			<h2 className='page-title'>Account</h2>
 
 			<Formik
 				enableReinitialize={true}
@@ -54,8 +54,8 @@ const ChangePasswordForm = () => {
 							type='password'
 						/>
 
-						<button type='submit' disabled={!form.isValid || loading}>
-							{loading ? <i className='fa-solid fa-spinner animate-spin'></i> : 'Change Password'}
+						<button type='submit' disabled={!form.isValid || isLoading}>
+							{isLoading ? <i className='fa-solid fa-spinner animate-spin'></i> : 'Change Password'}
 						</button>
 					</Form>
 				)}

@@ -19,7 +19,7 @@ const Page = () => {
 	const [credentials, setCredentials] = useState(new LoginCredentials())
 	const router = useRouter()
 	const user = useAccountStore((state) => state.User)
-	const [loading, setLoading] = useState(false)
+	const [isLoading, setIsLoading] = useState(false)
 
 	const handleForgotPasswordClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
 		e.preventDefault()
@@ -28,7 +28,7 @@ const Page = () => {
 
 	const handleLogin = async (credentials: LoginCredentials) => {
 		try {
-			setLoading(true)
+			setIsLoading(true)
 			const { data: authenticated } = await API.login(credentials)
 			if (authenticated.payload) {
 				toast.success('Logged in successfully')
@@ -45,7 +45,7 @@ const Page = () => {
 		} catch (err: any) {
 			toast.error(err.message)
 		} finally {
-			setLoading(false)
+			setIsLoading(false)
 		}
 	}
 
@@ -80,8 +80,8 @@ const Page = () => {
 							<a className='clickable forgot-password mb-7' onClick={handleForgotPasswordClick}>
 								Forgot Password?
 							</a>
-							<button type='submit' className='submit' disabled={isMissingFields(form) || loading}>
-								{loading ? <i className='fa-solid fa-spinner animate-spin'></i> : 'Login'}
+							<button type='submit' className='submit' disabled={isMissingFields(form) || isLoading}>
+								{isLoading ? <i className='fa-solid fa-spinner animate-spin' /> : 'Login'}
 							</button>
 
 							<span className='button-subtitle'>
