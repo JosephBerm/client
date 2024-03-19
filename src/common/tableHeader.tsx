@@ -25,9 +25,19 @@ function TableHeader<T>(props: TableProps<T>) {
 			return null
 		}
 		if (sortColumn.order === 'asc') {
-			return <i className='fa-solid fa-sort-up' />
+			return (
+				<div className='sort-container'>
+					<i className='fa-solid fa-sort-up active' />
+					<i className='fa-solid fa-sort-down' />
+				</div>
+			)
 		}
-		return <i className='fa-solid fa-sort-down' />
+		return (
+			<div className='sort-container'>
+				<i className='fa-solid fa-sort-up' />
+				<i className='fa-solid fa-sort-down active' />
+			</div>
+		)
 	}
 	const handleSorting = (column: TableColumn<T>) => {
 		if (column.path) {
