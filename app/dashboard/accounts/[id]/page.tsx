@@ -32,9 +32,8 @@ const page = () => {
     });
 
     const fetchUser = async () => {
-        console.log("XXX", userId)
         try {
-            const { data } = await API.account.get(userId);
+            const { data } = await API.account.get(userId as string);
             if (data.payload) {
                 setUser(data.payload);
             }
