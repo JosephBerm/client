@@ -1,5 +1,17 @@
 .accounts-page-container {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+
+.update-account-form-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    gap: 15px
+}
+
+.update-account-form-container .form-buttons-container {
+    grid-column: span 3; /* This will make the buttons take 4fr each */
 }

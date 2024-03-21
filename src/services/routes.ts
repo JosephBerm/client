@@ -27,16 +27,17 @@ class Routes {
 			icon: 'fa-solid fa-bell',
 		},
 		{
+			name: 'Accounts',
+			location: '/dashboard/accounts',
+			icon: 'fa-solid fa-users',
+
+		},
+		{
 			name: 'Profile',
 			location: '/dashboard/profile',
 			icon: 'fa-solid fa-user',
 		},
-		{
-			name: 'Accounts',
-			location: '/dashboard/accounts',
-			icon: 'fa-solid fa-user',
-			component: ProfilePreview,
-		},
+		
 	]
 
 	public static publicRoutes: Route[] = [

@@ -5,8 +5,9 @@ import { User } from '@/src/classes/User';
 import { TableColumn } from '@/src/interfaces/TableColumn';
 import API from '@/src/services/api';
 import { useRouter } from 'next/navigation';
-
 import dayjs from 'dayjs';
+import "@/styles/accounts.css"
+
 
 const page = () => {
 	const [tables, setTables] = React.useState<User[]>([]);
@@ -64,11 +65,10 @@ const page = () => {
 
 	return (
 		<div className='accounts-page-container'>
-			<h1>Accounts</h1>
+			<h1 style={{alignSelf:'flex-start', margin: 0}}>Accounts</h1>
 			
 			<Table<User>
 				columns={columns}
-				title='Active Accounts'
 				data={tables}
 			/>
 
