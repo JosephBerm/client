@@ -30,6 +30,11 @@ class Routes {
 			name: 'Profile',
 			location: '/dashboard/profile',
 			icon: 'fa-solid fa-user',
+		},
+		{
+			name: 'Accounts',
+			location: '/dashboard/accounts',
+			icon: 'fa-solid fa-user',
 			component: ProfilePreview,
 		},
 	]

@@ -2,7 +2,7 @@
  * Implementation of the server user class.
  */
 export class User {
-	public readonly id: number = 0
+	public readonly id: string = "0"
 	public username: string = ''
 	public password: string = ''
 
@@ -20,6 +20,8 @@ export class User {
 
 	public phone?: string
 	public mobile?: string
+
+	public name: string = ''
 
 	constructor(user: Partial<IUser>) {
 		Object.assign(this, user)
