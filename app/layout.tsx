@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 import NavBar from '@/components/NavBar'
 import WrapperHandlerPublic from '@/components/WrapperHandlerPublic'
+import Breadcrumb from '@/src/components/Navigation/BreadCrumb'
 
 export const metadata: Metadata = {
 	title: 'Create Next App',
@@ -17,7 +18,10 @@ export default function RootLayout(props: any) {
 			<body>
 				<WrapperHandlerPublic />
 				<NavBar />
-				<main className='page-container'>{props.children}</main>
+				
+				<main className='page-container'>
+					<Breadcrumb/>
+					{props.children}</main>
 				<ToastContainer />
 			</body>
 		</html>
