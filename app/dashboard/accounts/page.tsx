@@ -55,7 +55,9 @@ const page = () => {
 			label: 'actions',
 			content: (user: User) => (
 				<div className='flex gap-5'>
-					<button className='btn btn-danger btn-sm' onClick={() => route.push(`/dashboard/accounts/${user.id}`)}>Edit</button>
+					<button className='btn btn-danger btn-sm' onClick={() => {
+						route.push(`/dashboard/accounts/${user.id}`)
+					}}>Edit</button>
 					<button className='btn btn-danger btn-sm'>Delete</button>
 				</div>
 			),

@@ -8,7 +8,7 @@ const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
 	signup: async (form: SignupForm) => await HttpService.post<any>('/account/signup', form),
 	account: {
-		get: async <T>(id: string | null | undefined) => await HttpService.get<User>(`/account${id ? "/" + {id} : ''}`),
+		get: async <T>(id: string | null | undefined) => await HttpService.get<User>(`/account${id ? "/" + id : ''}`),
 		update: async <T>(account: User) => await HttpService.put<T>('/account', account),
 		changePassword: async <T>(oldPassword: string, newPassword: string) => await HttpService.put<T>('/account/changepassword', { oldPassword, newPassword }),
 		getAll: () => HttpService.get<User[]>('/account/all'),

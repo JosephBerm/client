@@ -6,12 +6,19 @@ import { useFormik } from 'formik';
 import UpdateAccountForm from '@/src/components/UpdateAccountForm';
 import "@/styles/accounts.css"
 import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
-const page = ({userId}: {userId: string}) => {
+const page = () => {
+
+    const params = useParams();
 
     const [user, setUser] = React.useState<User>(new User({}));
     const [loading, setLoading] = React.useState<boolean>(false);
     const route = useRouter();
+
+    const userId = params.id;
+
+    if(!userId) return route.back();
 
     const form = useFormik({
         initialValues: user,
@@ -25,6 +32,7 @@ const page = ({userId}: {userId: string}) => {
     });
 
     const fetchUser = async () => {
+        console.log("XXX", userId)
         try {
             const { data } = await API.account.get(userId);
             if (data.payload) {
