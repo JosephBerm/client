@@ -198,6 +198,10 @@ p:last-of-type {
 	cursor: pointer !important;
 }
 
+.header .navbar .clickable.titled.active i {
+	color: var(--main-color) !important;
+}
+
 .two-line-limit {
 	display: -webkit-box;
 	-webkit-box-orient: vertical;
