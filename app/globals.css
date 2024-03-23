@@ -284,6 +284,10 @@ p:last-of-type {
 	letter-spacing: 0.5px;
 }
 
+/*////////////////////////////////////
+				MEDIA QUERIES     
+//////////////////////////////////// */
+
 @media screen and (min-width: 480px) {
 	main.page-container {
 		padding: 0 50px;

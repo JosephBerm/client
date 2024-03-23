@@ -5,7 +5,6 @@ import Routes from '@/services/routes'
 import Route from '@/interfaces/Route'
 
 import { useRouter, usePathname } from 'next/navigation'
-import '@/styles/navbar.css'
 
 function NavBar() {
 	const router = useRouter()
@@ -13,18 +12,17 @@ function NavBar() {
 	const [navStyleClassName, setNavStyleClassName] = useState('nav_StyledLinks')
 	const SecuredPaths = ['dashboard']
 
-	const [pathSplit, setPathSplit] = React.useState<String[]>([]);
-	const [currentPath, setCurrentPath] = React.useState<String[]>([]);
-	const path = usePathname().toString();
+	const [pathSplit, setPathSplit] = React.useState<String[]>([])
+	const [currentPath, setCurrentPath] = React.useState<String[]>([])
+	const path = usePathname().toString()
 
-  
 	useEffect(() => {
-	  const regex = /(\/)|([^/]+)/g;
-	  const pathsplit = path.match(regex);
-	  const cleanSlashes = pathsplit?.filter((value) => value !== '/');
-	  const cleanDashboard = cleanSlashes?.filter((value) => value !== 'dashboard');
-	  setCurrentPath(cleanDashboard!);
-	}, [path]);
+		const regex = /(\/)|([^/]+)/g
+		const pathsplit = path.match(regex)
+		const cleanSlashes = pathsplit?.filter((value) => value !== '/')
+		const cleanDashboard = cleanSlashes?.filter((value) => value !== 'dashboard')
+		setCurrentPath(cleanDashboard!)
+	}, [path])
 
 	const toggleNavbar = () => {
 		console.log('navbar toggled')
@@ -36,11 +34,10 @@ function NavBar() {
 		document.body.classList.toggle('blur')
 	}
 
-	const isCurrentPath = (path: string) => { 
-		if(currentPath.length === 0 && path == "/dashboard") return true;
-		return path.includes(currentPath[0] as string);
+	const isCurrentPath = (path: string) => {
+		if (currentPath.length === 0 && path == '/dashboard') return true
+		return path.includes(currentPath[0] as string)
 	}
-
 
 	return (
 		<header className='header'>
@@ -59,7 +56,9 @@ function NavBar() {
 									<route.component />
 								) : (
 									<button
-										className={`clickable titled ${isCurrentPath(route.location) ? 'active' : 'inactive'}`}
+										className={`clickable titled ${
+											isCurrentPath(route.location) ? 'active' : 'inactive'
+										}`}
 										onClick={() => router.push(route.location)}
 										data-title={route.name}>
 										<i className={route.icon} />

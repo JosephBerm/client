@@ -85,14 +85,14 @@ const Page = () => {
 	if (isLoading) {
 		return (
 			<div className='Quotes'>
-				<h3 className='page-title'>Quotes</h3>
+				<h2 className='page-title'>Quotes</h2>
 				<IsBusyLoading />
 			</div>
 		)
 	} else {
 		return (
 			<div className='Quotes'>
-				<h3 className='page-title'>Quotes</h3>
+				<h2 className='page-title'>Quotes</h2>
 
 				<Table<Quote> data={quotes} columns={columns} isSortable={true} isPaged={true} isSearchable={true} />
 			</div>

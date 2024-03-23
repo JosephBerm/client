@@ -146,6 +146,33 @@ nav .burger-button:hover {
 	opacity: 1;
 }
 
+/*////////////////////////////////////
+				Breadcrumb     
+//////////////////////////////////// */
+
+.Breadcrumb {
+	display: flex;
+	align-items: center;
+	gap: 3px;
+	margin: 1.5rem 0 2rem 0;
+	font-size: var(--fz-md);
+	color: var(--dark-slate);
+}
+
+.Breadcrumb span.seperator {
+	scale: 1.25;
+	position: relative;
+	left: 1px;
+}
+
+.Breadcrumb span.active {
+	color: var(--accent-color);
+}
+
+/*////////////////////////////////////
+				MEDIA QUERIES     
+//////////////////////////////////// */
+
 /* TODO: 375px ~ NavBar */
 @media screen and (min-width: 375px) {
 }

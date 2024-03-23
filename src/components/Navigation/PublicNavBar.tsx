@@ -2,16 +2,14 @@
 
 import React, { useState, useEffect } from 'react'
 import Routes from '@/services/routes'
-import Route from '@/interfaces/Route'
 
 import { useRouter } from 'next/navigation'
-import '@/styles/navbar.css'
 
 function NavBar() {
 	const router = useRouter()
 
 	const [navStyleClassName, setNavStyleClassName] = useState('nav_StyledLinks')
-	const SecuredPaths = ["dashboard"]
+	const SecuredPaths = ['dashboard']
 
 	const toggleNavbar = () => {
 		console.log('navbar toggled')

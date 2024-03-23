@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
-import './globals.css'
 import { ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import '@fortawesome/fontawesome-free/css/all.min.css'
 import NavBar from '@/components/NavBar'
 import WrapperHandlerPublic from '@/components/WrapperHandlerPublic'
 import Breadcrumb from '@/src/components/Navigation/BreadCrumb'
+
+import '@fortawesome/fontawesome-free/css/all.min.css'
+import 'react-toastify/dist/ReactToastify.css'
+import './globals.css'
+import '@/styles/navigations.css'
 
 export const metadata: Metadata = {
 	title: 'Create Next App',
@@ -18,10 +20,11 @@ export default function RootLayout(props: any) {
 			<body>
 				<WrapperHandlerPublic />
 				<NavBar />
-				
+
 				<main className='page-container'>
-					<Breadcrumb/>
-					{props.children}</main>
+					<Breadcrumb />
+					{props.children}
+				</main>
 				<ToastContainer />
 			</body>
 		</html>
