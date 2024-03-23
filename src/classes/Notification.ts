@@ -1,7 +1,7 @@
 import User, { IUser } from '@/classes/User'
 import { NotificationType } from '@/classes/Enums'
 
-export default class Notifications {
+export default class Notification {
 	public readonly id: string = ''
 	public message: string = ''
 	public type: NotificationType = NotificationType.Info

@@ -11,7 +11,7 @@ import TableBody from '@/common/tableBody'
 import Pagination from '@/common/pagination'
 import InputTextBox from '@/components/InputTextBox'
 
-const Table = (props: TableProps) => {
+const Table = <T extends {}>(props: TableProps<T>) => {
 	const [pagedData, setPagedData] = useState<any[]>([])
 	const [searchQuery, setSearchQuery] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
@@ -25,9 +25,9 @@ const Table = (props: TableProps) => {
 	useEffect(() => {
 		let filtered = props.data
 
-		if (props.isSearchable && searchQuery) {
-			filtered = props.data.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-		}
+		// if (props.isSearchable && searchQuery) {
+		// 	filtered = props.data.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+		// }
 
 		if (props.isSortable) {
 			filtered = _.orderBy(filtered, [sortColumn.path], [sortColumn.order])
@@ -90,8 +90,8 @@ const Table = (props: TableProps) => {
 			{tableSearch()}
 			<table className='table-dark'>
 				{tableTitle()}
-				<TableHeader {...props} onSort={handleSort} sortColumn={sortColumn} />
-				<TableBody {...props} data={props.isPaged ? pagedData : filteredItems} />
+				<TableHeader<T> {...props} onSort={handleSort} sortColumn={sortColumn} />
+				<TableBody<T> {...props} data={props.isPaged ? pagedData : filteredItems} />
 			</table>
 			{tablePagination()}
 		</div>

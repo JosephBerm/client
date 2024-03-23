@@ -2,10 +2,9 @@
 
 import React, { useEffect, useState } from 'react'
 import API from '@/services/api'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { toast } from 'react-toastify'
 import { Product } from '@/classes/Product'
-import { useParams } from 'next/navigation'
 
 import { Formik, Form } from 'formik'
 import FormInputTextBox from '@/components/FormInputTextbox'

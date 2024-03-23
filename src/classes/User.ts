@@ -1,4 +1,4 @@
-import Notification from '@/classes/Notifications'
+import Notification from '@/src/classes/Notification'
 /**
  * Implementation of the server user class.
  */

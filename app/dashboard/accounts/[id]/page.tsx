@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react'
 import User from '@/src/classes/User'
 import API from '@/src/services/api'
 import UpdateAccountForm from '@/src/components/UpdateAccountForm'
-import { useRouter } from 'next/navigation'
-import { useParams } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import '@/styles/accounts.css'
 
 const Page = () => {

@@ -2,7 +2,7 @@ import React from 'react'
 
 import { TableProps, TableColumn } from '@/interfaces/TableColumn'
 
-function TableHeader<T>(props: TableProps) {
+function TableHeader<T>(props: TableProps<T>) {
 	const callSort = (path: keyof T) => {
 		if (!props.sortColumn) return
 
