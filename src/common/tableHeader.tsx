@@ -21,7 +21,7 @@ function TableHeader<T>(props: TableProps<T>) {
 		if (!props.sortColumn) return
 
 		const { sortColumn } = props
-		if (column.path !== sortColumn.path) {
+		if (column.name !== sortColumn.path) {
 			return null
 		}
 		if (sortColumn.order === 'asc') {
@@ -40,8 +40,8 @@ function TableHeader<T>(props: TableProps<T>) {
 		)
 	}
 	const handleSorting = (column: TableColumn<T>) => {
-		if (column.path) {
-			callSort(column.path)
+		if (column.name) {
+			callSort(column.name)
 		}
 		return
 	}
@@ -51,8 +51,8 @@ function TableHeader<T>(props: TableProps<T>) {
 			<tr>
 				{props.columns.map((column: TableColumn<T>) => (
 					<th
-						key={(column.path as string) || column.key}
-						className={column.path ? 'clickable' : ''}
+						key={(column.name as string) || column.key}
+						className={column.name ? 'clickable' : ''}
 						onClick={() => handleSorting(column)}>
 						{column.label}
 						{renderSortIcon(column)}

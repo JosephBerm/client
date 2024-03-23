@@ -19,19 +19,19 @@ const Page = () => {
 
 	const columns: TableColumn<Product>[] = [
 		{
-			path: 'name',
+			name: 'name',
 			label: 'Name',
 		},
 		{
-			path: 'description',
+			name: 'description',
 			label: 'Description',
 		},
 		{
-			path: 'category',
+			name: 'category',
 			label: 'Category',
 		},
 		{
-			path: 'price',
+			name: 'price',
 			label: 'Price',
 		},
 		{

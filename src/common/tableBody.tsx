@@ -8,7 +8,7 @@ function TableBody<T>(props: TableProps<T>) {
 		if (typeof column.content === 'function') {
 			const content = column.content(item)
 			return React.isValidElement(content) ? content : null
-		} else if (column.path) return _.get(item, column.path) as ReactNode
+		} else if (column.name) return _.get(item, column.name) as ReactNode
 
 		return <></>
 	}

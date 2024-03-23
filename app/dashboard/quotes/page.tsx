@@ -58,15 +58,15 @@ const Page = () => {
 
 	const columns: TableColumn<Quote>[] = [
 		{
-			path: 'name',
+			name: 'name',
 			label: 'Name',
 		},
 		{
-			path: 'contactName',
+			name: 'contactName',
 			label: 'Contact Name',
 		},
 		{
-			path: 'phoneNumber',
+			name: 'phoneNumber',
 			label: 'Phone Number',
 		},
 		{

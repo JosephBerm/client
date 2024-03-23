@@ -28,7 +28,7 @@ const Page = () => {
 
 	const columns: TableColumn<User>[] = [
 		{
-			path: 'firstName',
+			name: 'firstName',
 			label: 'Name',
 			content: (user: User) => (
 				<>
@@ -37,16 +37,16 @@ const Page = () => {
 			),
 		},
 		{
-			path: 'email',
+			name: 'email',
 			label: 'Email',
 		},
 		{
-			path: 'createdAt',
+			name: 'createdAt',
 			label: 'Date Created',
 			content: (user: User) => <>{format(new Date(user.createdAt), 'mm/dd/yyyy')}</>,
 		},
 		{
-			path: 'id',
+			name: 'id',
 			label: 'actions',
 			content: (user: User) => (
 				<div className='flex gap-5'>

@@ -1,5 +1,5 @@
 export interface TableColumn<T> {
-	path?: keyof T
+	name?: keyof T
 	label?: string
 	content?: (item: T) => JSX.Element
 	key?: string

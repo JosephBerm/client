@@ -12,16 +12,16 @@ import '@/styles/notifications.css'
 function Page() {
 	const columns: TableColumn<Notification>[] = [
 		{
-			path: 'read',
+			name: 'read',
 			label: 'Read/Unread',
 		},
 		{
-			path: 'createdAt',
+			name: 'createdAt',
 			label: 'Created',
 			content: (notification) => <>{format(new Date(notification.createdAt), 'mm/dd/yyyy')}</>,
 		},
 		{
-			path: 'message',
+			name: 'message',
 			label: 'Message',
 		},
 	]
