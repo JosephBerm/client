@@ -1,31 +1,30 @@
-"use client"
-import React from 'react'
+'use client'
+import React, { useState, useEffect } from 'react'
+import { User } from '@/src/classes/User'
+import { TableColumn } from '@/src/interfaces/TableColumn'
+import { useRouter } from 'next/navigation'
+import { format } from 'date-fns'
 import Table from '@/src/common/table'
-import { User } from '@/src/classes/User';
-import { TableColumn } from '@/src/interfaces/TableColumn';
-import API from '@/src/services/api';
-import { useRouter } from 'next/navigation';
-import dayjs from 'dayjs';
-import "@/styles/accounts.css"
+import API from '@/src/services/api'
+import '@/styles/accounts.css'
 
-
-const page = () => {
-	const [tables, setTables] = React.useState<User[]>([]);
-	const [loading, setLoaidng] = React.useState<boolean>(false);
-	const route = useRouter();
+const Page = () => {
+	const [tables, setTables] = useState<User[]>([])
+	const [isLoading, setIsLoading] = useState<boolean>(false)
+	const route = useRouter()
 
 	const fetchAccounts = async () => {
 		try {
-			const { data } = await API.account.getAll();
-			setTables(data.payload || []); // Handle null case by providing an empty array as the default value
+			const { data } = await API.account.getAll()
+			setTables(data.payload || []) // Handle null case by providing an empty array as the default value
 		} finally {
-			setLoaidng(true);
+			setIsLoading(true)
 		}
 	}
 
-	React.useEffect(() => {
-		fetchAccounts();
-	}, []);
+	useEffect(() => {
+		fetchAccounts()
+	}, [])
 
 	const columns: TableColumn<User>[] = [
 		{
@@ -44,38 +43,33 @@ const page = () => {
 		{
 			path: 'createdAt',
 			label: 'Date Created',
-			content: (user: User) => (
-				<>
-					{dayjs(user.createdAt).format('MM/DD/YYYY')}
-				</>
-			),
+			content: (user: User) => <>{format(new Date(user.createdAt), 'mm/dd/yyyy')}</>,
 		},
 		{
 			path: 'id',
 			label: 'actions',
 			content: (user: User) => (
 				<div className='flex gap-5'>
-					<button className='btn btn-danger btn-sm' onClick={() => {
-						route.push(`/dashboard/accounts/${user.id}`)
-					}}>Edit</button>
+					<button
+						className='btn btn-danger btn-sm'
+						onClick={() => {
+							route.push(`/dashboard/accounts/${user.id}`)
+						}}>
+						Edit
+					</button>
 					<button className='btn btn-danger btn-sm'>Delete</button>
 				</div>
 			),
 		},
-
 	]
 
 	return (
 		<div className='accounts-page-container'>
-			<h1 style={{alignSelf:'flex-start', margin: 0}}>Accounts</h1>
-			
-			<Table<User>
-				columns={columns}
-				data={tables}
-			/>
+			<h1 style={{ alignSelf: 'flex-start', margin: 0 }}>Accounts</h1>
 
+			<Table<User> columns={columns} data={tables} />
 		</div>
 	)
 }
 
-export default page
+export default Page
