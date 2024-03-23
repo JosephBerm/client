@@ -11,3 +11,8 @@ export enum TypeOfBusiness {
 	Construction,
 	Other,
 }
+
+export enum QuoteStatus {
+	Unread,
+	Read,
+}

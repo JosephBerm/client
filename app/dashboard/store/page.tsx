@@ -108,7 +108,6 @@ const Page = () => {
 							isSortable={true}
 							isSearchable={true}
 							isPaged={true}
-							onDelete={deleteProduct}
 						/>
 					)}
 				</div>

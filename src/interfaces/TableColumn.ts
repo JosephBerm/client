@@ -13,7 +13,6 @@ export interface TableProps<T> {
 	isSortable?: Boolean
 	isPaged?: Boolean
 	onSort?: (sortColumn: SortColumn<T>) => void
-	onDelete?: (id: string) => {}
 	sortColumn?: SortColumn<T>
 }
 

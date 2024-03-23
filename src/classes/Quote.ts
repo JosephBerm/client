@@ -1,4 +1,4 @@
-import { TypeOfBusiness } from '@/classes/Enums'
+import { TypeOfBusiness, QuoteStatus } from '@/classes/Enums'
 import { CartProduct } from '@/classes/Product'
 
 export default class Quote {
@@ -10,4 +10,6 @@ export default class Quote {
 	typeOfBusiness: TypeOfBusiness | null = null
 	description: string = ''
 	products: CartProduct[] = []
+	status: QuoteStatus = QuoteStatus.Unread
+	dateCreated: Date | null = null
 }
