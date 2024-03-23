@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import InputTextBox from '../InputTextBox'
 import API from '@/services/api'
 import { toast } from 'react-toastify'
@@ -9,19 +9,15 @@ import { Formik, Form } from 'formik'
 import FormInputTextBox from '@/components/FormInputTextbox'
 import Validations from '@/utilities/validationSchemas'
 
-class PasswordForm {
-	oldPassword: string = ''
-	newPassword: string = ''
-	confirmNewPassword: string = ''
-}
+import { PasswordForm } from '@/classes/User'
 
 const ChangePasswordForm = () => {
-	const [isLoading, setIsLoading] = React.useState(false)
+	const [isLoading, setIsLoading] = useState(false)
 
 	const handleSubmit = async (e: PasswordForm) => {
 		try {
 			setIsLoading(true)
-			const response = await API.account.changePassword<Boolean>(e.oldPassword, e.newPassword)
+			const response = await API.Accounts.changePassword<Boolean>(e.oldPassword, e.newPassword)
 
 			if (response && response.data.statusCode === 200) return toast.success(response.data.message)
 			else toast.error(response.data.message)

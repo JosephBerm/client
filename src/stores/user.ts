@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { User, IUser } from '@/classes/User'
+import User, { IUser } from '@/classes/User'
 
 type State = {
 	User: IUser

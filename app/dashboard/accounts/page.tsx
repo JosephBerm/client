@@ -1,11 +1,11 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { User } from '@/src/classes/User'
-import { TableColumn } from '@/src/interfaces/TableColumn'
+import User from '@/classes/User'
+import { TableColumn } from '@/interfaces/TableColumn'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
-import Table from '@/src/common/table'
-import API from '@/src/services/api'
+import Table from '@/common/table'
+import API from '@/services/api'
 import '@/styles/accounts.css'
 
 const Page = () => {
@@ -15,7 +15,7 @@ const Page = () => {
 
 	const fetchAccounts = async () => {
 		try {
-			const { data } = await API.account.getAll()
+			const { data } = await API.Accounts.getAll()
 			setTables(data.payload || []) // Handle null case by providing an empty array as the default value
 		} finally {
 			setIsLoading(true)

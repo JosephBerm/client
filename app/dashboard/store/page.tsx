@@ -49,7 +49,7 @@ const Page = () => {
 	const retrieveProducts = async () => {
 		try {
 			setIsLoading(true)
-			const { data: res } = await API.store.products.getList<Product[]>()
+			const { data: res } = await API.Store.Products.getList<Product[]>()
 
 			if (!res.payload || res.statusCode !== 200) {
 				toast.error(res.message)
@@ -67,7 +67,7 @@ const Page = () => {
 	const deleteProduct = async (productId: string) => {
 		try {
 			setIsLoading(true)
-			const { data: res } = await API.store.products.delete<string>(productId)
+			const { data: res } = await API.Store.Products.delete<string>(productId)
 			if (res.statusCode !== 200) {
 				toast.error(res.message)
 				return

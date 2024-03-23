@@ -14,7 +14,7 @@ const Page = () => {
 	const retrieveProducts = async () => {
 		try {
 			setIsLoading(true)
-			const { data: res } = await API.store.products.getList<Product[]>()
+			const { data: res } = await API.Store.Products.getList<Product[]>()
 
 			if (!res.payload || res.statusCode !== 200) {
 				return toast.error(res.message)

@@ -1,25 +1,25 @@
-"use client"
+'use client'
 
 import React from 'react'
-import { User } from '@/classes/User'
+import User from '@/classes/User'
 import { Form, Formik } from 'formik'
-import Validations from '../utilities/validationSchemas'
+import Validations from '@/utilities/validationSchemas'
 import API from '@/services/api'
 import { toast } from 'react-toastify'
 import FormInputTextBox from '@/src/components/FormInputTextbox'
 
-const UpdateAccountForm = ({user, onUserUpdate} : {user: User, onUserUpdate?: (User: User) => void }) => {
-    const [isLoading, setIsLoading] = React.useState(false)
+const UpdateAccountForm = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User: User) => void }) => {
+	const [isLoading, setIsLoading] = React.useState(false)
 
-    const handleSubmit = async (UserData: User) => {
+	const handleSubmit = async (UserData: User) => {
 		try {
 			setIsLoading(true)
-			const response = await API.account.update<Boolean>(UserData)
+			const { data } = await API.Accounts.update<Boolean>(UserData)
 
-			if (response && response.data.statusCode != 200) return toast.error(response.data.message)
-            if (!response?.data) return toast.error(response.data.message)
-			toast.success(response.data.message)
-            if (onUserUpdate) onUserUpdate(UserData)
+			if (data?.statusCode != 200) return toast.error(data.message)
+			toast.success(data.message)
+
+			if (onUserUpdate) onUserUpdate(UserData)
 		} catch (err: any) {
 			toast.error(err.message)
 		} finally {
@@ -27,31 +27,30 @@ const UpdateAccountForm = ({user, onUserUpdate} : {user: User, onUserUpdate?: (U
 		}
 	}
 
-    return (
-        <Formik
-            enableReinitialize={true}
-            initialValues={user}
-            validationSchema={Validations.profileSchema}
-            onSubmit={(values, { setSubmitting }) => {
-                handleSubmit(values)
-                setSubmitting(false)
-            }}>
-            {(form) => (
-                <Form className='update-account-form-container'>
-                    <FormInputTextBox<User> label='First Name' name='firstName' />
-                    <FormInputTextBox<User> label='Last Name' name='lastName' />
-                    <FormInputTextBox<User> label='Email Address' name='email' />
-                    
-                    
-                    <div className='form-buttons-container'>
-                        <button type='submit' className='btn btn-primary' disabled={!form.isValid || isLoading}>
-                            {isLoading ? <i className='fa-solid fa-spinner animate-spin'></i> : 'Update Profile'}
-                        </button>
-                    </div>
-                </Form>
-            )}
-        </Formik>
-    )
+	return (
+		<Formik
+			enableReinitialize={true}
+			initialValues={user}
+			validationSchema={Validations.profileSchema}
+			onSubmit={(values, { setSubmitting }) => {
+				handleSubmit(values)
+				setSubmitting(false)
+			}}>
+			{(form) => (
+				<Form className='update-account-form-container'>
+					<FormInputTextBox<User> label='First Name' name='firstName' />
+					<FormInputTextBox<User> label='Last Name' name='lastName' />
+					<FormInputTextBox<User> label='Email Address' name='email' />
+
+					<div className='form-buttons-container'>
+						<button type='submit' className='btn btn-primary' disabled={!form.isValid || isLoading}>
+							{isLoading ? <i className='fa-solid fa-spinner animate-spin'></i> : 'Update Profile'}
+						</button>
+					</div>
+				</Form>
+			)}
+		</Formik>
+	)
 }
 
 export default UpdateAccountForm

@@ -22,7 +22,7 @@ const AddEditForm = () => {
 	const getProduct = async () => {
 		try {
 			setIsLoading(true)
-			const { data: res } = await API.store.products.get<Product>(params?.id.toString())
+			const { data: res } = await API.Store.Products.get<Product>(params?.id.toString())
 
 			if (res.statusCode === 404) toast.error('The product with the given ID not found.')
 			else if (res.payload) {
@@ -40,7 +40,7 @@ const AddEditForm = () => {
 	const createProduct = async (prdct: Product) => {
 		try {
 			setIsLoading(true)
-			const { data: res } = await API.store.products.create<Product>(prdct)
+			const { data: res } = await API.Store.Products.create<Product>(prdct)
 			if (!res.payload || res.statusCode !== 200) return toast.error(res.message)
 
 			toast.success(res.message)
@@ -55,7 +55,7 @@ const AddEditForm = () => {
 	const updateProduct = async (prdct: Product) => {
 		try {
 			setIsLoading(true)
-			const { data: res } = await API.store.products.update<Product>(prdct)
+			const { data: res } = await API.Store.Products.update<Product>(prdct)
 			if (!res.payload || res.statusCode !== 200) return toast.error(res.message)
 
 			toast.success(res.message)
