@@ -23,7 +23,7 @@ async function getUserData(token: string | null) {
 
 		if (response.ok) return await response.json()
 	} catch (err) {
-		console.log(err)
+		console.error(err)
 	}
 
 	return null

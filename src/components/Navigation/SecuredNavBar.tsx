@@ -25,7 +25,6 @@ function NavBar() {
 	}, [path])
 
 	const toggleNavbar = () => {
-		console.log('navbar toggled')
 		if (navStyleClassName.includes('opened')) {
 			setNavStyleClassName('nav_StyledLinks closed')
 		} else {

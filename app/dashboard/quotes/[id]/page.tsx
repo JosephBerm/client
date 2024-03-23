@@ -20,7 +20,7 @@ const Page = () => {
 				setQuote(data.payload)
 			}
 		} catch (err) {
-			console.log(err)
+			console.error(err)
 		} finally {
 			setIsLoading(false)
 		}

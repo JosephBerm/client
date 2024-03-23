@@ -41,7 +41,6 @@ const Page = () => {
 		try {
 			setIsLoading(true)
 			const response = await API.Public.sendQuote<Quote>(values)
-			console.log(response.data)
 			if (response.data.statusCode == 200) {
 				setSubmitted(true)
 				setCart([])

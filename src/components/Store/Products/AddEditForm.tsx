@@ -27,8 +27,6 @@ const AddEditForm = () => {
 			if (res.statusCode === 404) toast.error('The product with the given ID not found.')
 			else if (res.payload) {
 				setProduct(res.payload)
-
-				console.log(res.payload)
 			}
 		} catch (err: any) {
 			toast.error(err?.message)

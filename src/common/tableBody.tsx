@@ -3,12 +3,14 @@ import { TableProps, TableColumn } from '@/interfaces/TableColumn'
 
 import _ from 'lodash'
 
-function TableBody<T extends { id: string | null }>(props: TableProps<T>) {
-	const createKey = (item: T, column: TableColumn<T>): string => {
+function TableBody(props: TableProps) {
+	
+	const createKey = (item: any, column: TableColumn<any>): string => {
 		if (item.id != null) return item.id + ((column.path as string) || column.key)
 		else return (column.path as string) || column.key || ''
 	}
-	const renderCell = (item: T, column: TableColumn<T>): ReactNode => {
+
+	const renderCell = (item: any, column: TableColumn<any>): ReactNode => {
 		if (typeof column.content === 'function') {
 			const content = column.content(item)
 			return React.isValidElement(content) ? content : null

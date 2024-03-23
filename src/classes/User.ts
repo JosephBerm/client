@@ -1,3 +1,4 @@
+import Notification from '@/classes/Notifications'
 /**
  * Implementation of the server user class.
  */
@@ -6,6 +7,7 @@ export default class User {
 	public username: string = ''
 	public password: string = ''
 
+	public notifications: Notification[] = []
 	public email: string = ''
 	public firstName: string = ''
 	public lastName: string = ''

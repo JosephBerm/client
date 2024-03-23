@@ -5,15 +5,15 @@ export interface TableColumn<T> {
 	key?: string
 }
 
-export interface TableProps<T> {
-	columns: TableColumn<T>[]
-	data: T[]
+export interface TableProps {
+	columns: TableColumn<any>[]
+	data: any[]
 	title?: string
 	isSearchable?: Boolean
 	isSortable?: Boolean
 	isPaged?: Boolean
-	onSort?: (sortColumn: SortColumn<T>) => void
-	sortColumn?: SortColumn<T>
+	onSort?: (sortColumn: SortColumn<any>) => void
+	sortColumn?: SortColumn<any>
 }
 
 export type SortColumn<T> = {

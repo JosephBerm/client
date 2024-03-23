@@ -1,7 +1,7 @@
 'use client'
+import React, { useState, useEffect } from 'react'
 import User from '@/src/classes/User'
 import API from '@/src/services/api'
-import React from 'react'
 import UpdateAccountForm from '@/src/components/UpdateAccountForm'
 import { useRouter } from 'next/navigation'
 import { useParams } from 'next/navigation'
@@ -10,8 +10,8 @@ import '@/styles/accounts.css'
 const Page = () => {
 	const params = useParams()
 
-	const [user, setUser] = React.useState<User>(new User({}))
-	const [loading, setLoading] = React.useState<boolean>(false)
+	const [user, setUser] = useState<User>(new User({}))
+	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const route = useRouter()
 
 	const userId = params.id
@@ -23,11 +23,11 @@ const Page = () => {
 				setUser(data.payload)
 			}
 		} finally {
-			setLoading(true)
+			setIsLoading(true)
 		}
 	}
 
-	React.useEffect(() => {
+	useEffect(() => {
 		fetchUser()
 	}, [])
 
@@ -39,7 +39,7 @@ const Page = () => {
 				Back
 			</button>
 			<h1>Account Page</h1>
-			{loading && user && (
+			{isLoading && user && (
 				<div>
 					<UpdateAccountForm user={user} />
 				</div>

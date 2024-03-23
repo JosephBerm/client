@@ -16,3 +16,9 @@ export enum QuoteStatus {
 	Unread,
 	Read,
 }
+
+export enum NotificationType {
+	Info,
+	Warning,
+	Error,
+}

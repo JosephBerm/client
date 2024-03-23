@@ -11,13 +11,13 @@ import TableBody from '@/common/tableBody'
 import Pagination from '@/common/pagination'
 import InputTextBox from '@/components/InputTextBox'
 
-const Table = <T extends { id: string | null; name: string }>(props: TableProps<T>) => {
-	const [pagedData, setPagedData] = useState<T[]>([])
+const Table = (props: TableProps) => {
+	const [pagedData, setPagedData] = useState<any[]>([])
 	const [searchQuery, setSearchQuery] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
 	const [pageSize, setPageSize] = useState(4)
-	const [filteredItems, setFilteredItems] = useState<T[]>([])
-	const [sortColumn, setSortColumn] = useState<SortColumn<T>>({
+	const [filteredItems, setFilteredItems] = useState<any[]>([])
+	const [sortColumn, setSortColumn] = useState<SortColumn<any>>({
 		path: 'name',
 		order: 'asc',
 	})
@@ -35,7 +35,7 @@ const Table = <T extends { id: string | null; name: string }>(props: TableProps<
 
 		setFilteredItems(filtered)
 
-		setPagedData(paginate<T>(filtered, currentPage, pageSize))
+		setPagedData(paginate<any>(filtered, currentPage, pageSize))
 	}, [
 		searchQuery,
 		sortColumn,
@@ -47,7 +47,7 @@ const Table = <T extends { id: string | null; name: string }>(props: TableProps<
 		props.isSortable,
 	])
 
-	const handleSort = (sortColumn: SortColumn<T>) => {
+	const handleSort = (sortColumn: SortColumn<any>) => {
 		setSortColumn(sortColumn)
 	}
 
@@ -90,8 +90,8 @@ const Table = <T extends { id: string | null; name: string }>(props: TableProps<
 			{tableSearch()}
 			<table className='table-dark'>
 				{tableTitle()}
-				<TableHeader<T> {...props} onSort={handleSort} sortColumn={sortColumn} />
-				<TableBody<T> {...props} data={props.isPaged ? pagedData : filteredItems} />
+				<TableHeader {...props} onSort={handleSort} sortColumn={sortColumn} />
+				<TableBody {...props} data={props.isPaged ? pagedData : filteredItems} />
 			</table>
 			{tablePagination()}
 		</div>

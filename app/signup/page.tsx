@@ -22,7 +22,6 @@ const Page = () => {
 		try {
 			setIsLoading(true)
 			const { data: authenticated } = await API.signup(values)
-			console.log('authenticated', authenticated)
 			if (authenticated.payload) {
 				const JWTToken = authenticated.payload
 				setCookie('at', JWTToken)
@@ -31,10 +30,10 @@ const Page = () => {
 				//route to dashboard
 				router.push('/dashboard')
 			} else {
-				console.log(authenticated.message)
+				console.error(authenticated.message)
 			}
 		} catch (err) {
-			console.log(err)
+			console.error(err)
 		} finally {
 			setIsLoading(false)
 		}

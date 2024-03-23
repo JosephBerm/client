@@ -41,7 +41,6 @@ const Page = () => {
 			setQuotes(newList)
 
 			const { data } = await API.Quote.delete(id)
-			console.log('data', data)
 			if (data.statusCode != 200) {
 				throw Error(data.message ?? 'Item Not Found.')
 			}
