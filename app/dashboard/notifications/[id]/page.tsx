@@ -34,7 +34,7 @@ function Page() {
 		if (params.id) {
 			getNotification(params.id as string)
 		}
-	})
+	}, [])
 	return (
 		<div className='Notification'>
 			<h2 className='page-title'>Notification</h2>
