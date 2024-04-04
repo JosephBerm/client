@@ -34,6 +34,18 @@ const API = {
 		update: async <T>(quote: T) => await HttpService.put<T>('/quote', quote),
 		delete: async <T>(quoteId: string) => await HttpService.delete<T>(`/quote/${quoteId}`),
 	},
+	Orders: {
+		get: async <Order>(id: number | null) => {
+			if (id !== null) {
+				return await HttpService.get<Order>(`/orders/${id}`)
+			} else {
+				return await HttpService.get<Order>('/orders')
+			}
+		},
+		create: async <Order>(quote: Order) => await HttpService.post<Order>('/orders', quote),
+		update: async <Order>(quote: Order) => await HttpService.put<Order>('/orders', quote),
+		delete: async <Boolean>(quoteId: number) => await HttpService.delete<Boolean>(`/orders/${quoteId}`),
+	},
 	Notifications: {
 		get: async <T>(id: string) => {
 			if (id !== null) {

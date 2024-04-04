@@ -22,6 +22,11 @@ class Routes {
 			icon: 'fa-solid fa-list-check',
 		},
 		{
+			name: 'Orders',
+			location: '/dashboard/orders',
+			icon: 'fa-solid fa-dollar-sign',
+		},
+		{
 			name: 'Notifications',
 			location: '/dashboard/notifications',
 			icon: 'fa-solid fa-bell',

@@ -2,6 +2,7 @@ import { ProductsCategory } from '@/classes/Enums'
 
 export class Product {
 	id: string | null = null
+	
 	sku: string = ''
 	name: string = ''
 	description: string = ''
@@ -12,6 +13,16 @@ export class Product {
 	toString(): string {
 		return `Product: ${this.name} - ${this.description} - ${this.price} - ${this.image} - ${this.category}`
 	}
+
+	constructor(product: Partial<Product>) {
+		this.id = product.id || null;
+		this.sku = product.sku || '';
+		this.name = product.name || '';
+		this.description = product.description || '';
+		this.price = product.price || 0;
+		this.image = product.image || null;
+		this.category = product.category || null;
+	}
 }
 
 export class CartProduct {
@@ -19,7 +30,7 @@ export class CartProduct {
 	quantity: number
 	productId: string | null = null
 
-	constructor(product: IProduct | null, quantity: number) {
+	constructor(product: Product | null, quantity: number) {
 		this.product = product
 		this.quantity = quantity
 	}
