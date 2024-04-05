@@ -17,6 +17,11 @@ export default class Validations {
 		password: yup.string().required('Password is required'),
 	})
 
+	public static customerSchema = yup.object().shape({
+		name: yup.string().required('name is required'),
+		email: yup.string().required('email is required'),
+	})
+
 	public static changePasswordSchema = yup.object().shape({
 		oldPassword: yup.string().required('Username is required'),
 		newPassword: yup.string().required('New Password is required').min(6, 'Password must be at least 6 characters'),

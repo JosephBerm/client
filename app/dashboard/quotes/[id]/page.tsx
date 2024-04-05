@@ -26,6 +26,21 @@ const Page = () => {
 		}
 	}
 
+	const createOrderFromQuote = async () => {
+		setIsLoading(true)
+		try {
+			const {data } = await API.Orders.createFromQuote<Quote>(params.id as string)
+
+			if (data.payload) {
+				route.push(`/dashboard/orders/${data.payload.id}`)
+			}
+		} catch(err ){
+			console.error(err)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
 	useEffect(() => {
 		if (params.id) {
 			getQuote(params.id as string)
@@ -44,6 +59,7 @@ const Page = () => {
 			<div className='EditQuoteForm'>
 				<h2 className='page-title'>Quote</h2>
 				<button onClick={() => route.back()}>Go back</button>
+				<button onClick={createOrderFromQuote}> Create Order</button>
 				{quote && (
 					<div>
 						<h4>{quote.name}</h4>

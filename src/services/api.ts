@@ -43,6 +43,7 @@ const API = {
 			}
 		},
 		create: async <Order>(quote: Order) => await HttpService.post<Order>('/orders', quote),
+		createFromQuote: async <Order>(quoteId: string) => await HttpService.post<Order>(`/orders/fromquote/${quoteId}`, null),
 		update: async <Order>(quote: Order) => await HttpService.put<Order>('/orders', quote),
 		delete: async <Boolean>(quoteId: number) => await HttpService.delete<Boolean>(`/orders/${quoteId}`),
 	},
@@ -61,6 +62,13 @@ const API = {
 	Public: {
 		sendQuote: async <T>(quote: T) => await HttpService.post<T>('/quote', quote),
 	},
+	Customers: {
+		get: async <Customer>(id: number) => await HttpService.get<Customer>(`/customer/${id}`),
+		getAll: async <Customer>() => await HttpService.get<Customer[]>('/customers'),
+		create: async <Customer>(customer: Customer) => await HttpService.post<Customer>('/customer', customer),
+		update: async <Customer>(quote: Customer) => await HttpService.put<Customer>('/customer', quote),
+		delete: async (customerId: number) => await HttpService.delete<number>(`/customer/${customerId}`),
+	}
 }
 
 export default API

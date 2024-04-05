@@ -38,6 +38,12 @@ class Routes {
 
 		},
 		{
+			name: 'Customers',
+			location: '/dashboard/customers',
+			icon: 'fa-solid fa-users',
+
+		},
+		{
 			name: 'Profile',
 			location: '/dashboard/profile',
 			icon: 'fa-solid fa-user',
