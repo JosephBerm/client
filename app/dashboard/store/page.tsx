@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { SortColumn, TableColumn } from '@/interfaces/TableColumn'
+import { SortColumn, TableColumn } from '@/interfaces/Table'
 import { useRouter } from 'next/navigation'
 import { Product } from '@/classes/Product'
 import { toast } from 'react-toastify'
@@ -10,7 +10,7 @@ import _ from 'lodash'
 import Link from 'next/link'
 import API from '@/services/api'
 import Table from '@/common/table'
-import IsBusyLoading from '@/src/components/isBusyLoading'
+import IsBusyLoading from '@/components/isBusyLoading'
 
 const Page = () => {
 	const route = useRouter()

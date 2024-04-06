@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { TableProps, TableColumn } from '@/interfaces/TableColumn'
+import { TableProps, TableColumn } from '@/interfaces/Table'
 
 function TableHeader<T>(props: TableProps<T>) {
 	const callSort = (path: keyof T) => {

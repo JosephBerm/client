@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { TableProps, SortColumn } from '@/interfaces/TableColumn'
+import { TableProps, SortColumn } from '@/interfaces/Table'
 import paginate from '@/services/paginate'
 import _ from 'lodash'
 import '@/styles/tables.css'

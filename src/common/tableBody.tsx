@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react'
-import { TableProps, TableColumn } from '@/interfaces/TableColumn'
+import { TableProps, TableColumn } from '@/interfaces/Table'
 
 import _ from 'lodash'
 

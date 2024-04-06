@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Quote from '@/classes/Quote'
-import { TableColumn } from '@/interfaces/TableColumn'
+import { TableColumn } from '@/interfaces/Table'
 import { toast } from 'react-toastify'
 import API from '@/services/api'
 import IsBusyLoading from '@/components/isBusyLoading'
