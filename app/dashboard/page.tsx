@@ -39,8 +39,10 @@ const Page = () => {
 			),
 			footer: (
 				<div className='footer'>
-					<span>See All</span>
-					<button> {'>'} </button>
+					<a className='inline-link text-sm'>
+						See All
+						<i className='fa-solid fa-arrow-right-long relative left-2' />
+					</a>
 				</div>
 			),
 		},
@@ -59,8 +61,10 @@ const Page = () => {
 			),
 			footer: (
 				<div className='footer'>
-					<span>See All</span>
-					<button> {'>'} </button>
+					<a className='inline-link text-sm'>
+						See All
+						<i className='fa-solid fa-arrow-right-long relative left-2' />
+					</a>
 				</div>
 			),
 		},
