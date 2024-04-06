@@ -51,9 +51,9 @@ html {
 	scrollbar-width: thin;
 	width: 100%;
 }
-.App {
+/* .App {
 	overflow: hidden;
-}
+} */
 main {
 	margin: 0 auto;
 	max-width: 1600px;
@@ -100,7 +100,7 @@ h3,
 h4,
 h5,
 h6 {
-	margin: 0px 0px 10px;
+	margin: 0px;
 	font-weight: 600;
 	color: var(--accent-color);
 	line-height: 1.1;
@@ -112,8 +112,9 @@ a {
 	text-decoration-skip-ink: auto;
 	color: inherit;
 	position: relative;
-	transition: var(--transition);
 	color: var(--slate);
+	cursor: pointer;
+	transition: var(--transition);
 }
 
 a:hover,
@@ -285,6 +286,139 @@ p:last-of-type {
 }
 
 /*////////////////////////////////////
+				SECTION PREVIEWER   
+//////////////////////////////////// */
+
+section.SectionPreviewer {
+	border: 1px solid var(--dark-slate);
+	border-radius: var(--border-radius);
+	height: min-content;
+	min-height: 100%;
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+	justify-items: center;
+}
+
+section.SectionPreviewer .section-header {
+	border-bottom: 1px solid var(--dark-slate);
+}
+
+section.SectionPreviewer .section-header .action {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+section.SectionPreviewer .section-header,
+section.SectionPreviewer .section-body,
+section.SectionPreviewer .section-footer {
+	padding: 10px;
+	width: 90%;
+}
+
+section.SectionPreviewer .section-header,
+section.SectionPreviewer .section-footer {
+	height: 100%;
+	gap: 10px;
+	align-items: center;
+}
+section.SectionPreviewer .section-footer {
+	display: flex;
+	justify-content: center;
+	border-top: 1px solid var(--dark-slate);
+}
+
+section.SectionPreviewer .section-header {
+	display: grid;
+	grid-template-columns: 65% 1fr;
+	justify-items: center;
+}
+
+section.SectionPreviewer .section-body {
+	height: 100%;
+}
+
+section.SectionPreviewer h4.title {
+	width: 100%;
+	justify-self: flex-start;
+}
+
+/*////////////////////////////////////
+				FLOATING MENU   
+//////////////////////////////////// */
+
+.FloatingMenu {
+	position: relative;
+	font-size: 0.85em;
+	width: 100%;
+	user-select: none;
+	background: transparent;
+	transition: var(--transition);
+}
+.FloatingMenu.isOpen {
+	background-color: var(--darker-slate);
+}
+
+.FloatingMenu .selected-container {
+	text-wrap: nowrap;
+	text-align: center;
+	transition: var(--transition);
+}
+.FloatingMenu.isOpen .selected-container {
+	color: var(--main-color);
+}
+
+.FloatingMenuTimeSelect,
+.FloatingMenu,
+.FloatingMenu .selected-container {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.FloatingMenu .option {
+	height: 100%;
+	width: 100%;
+	text-align: center;
+}
+
+.FloatingMenu .options-container {
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	background-color: var(--section-bg-color);
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	padding: 5px;
+	width: max-content;
+	z-index: 5;
+	opacity: 0;
+	outline: none;
+	animation: fadeIn 0.2s ease-out forwards;
+}
+
+.FloatingMenu .option {
+	transition: var(--transition);
+	padding: 5px 10px;
+}
+
+.FloatingMenu .option.selected {
+	color: var(--main-color);
+	background: var(--main-color-tint);
+}
+
+.FloatingMenu .option:hover {
+	color: var(--main-color);
+	background: var(--darker-slate);
+}
+
+/*////////////////////////////////////
 				MEDIA QUERIES     
 //////////////////////////////////// */
 
@@ -300,6 +434,14 @@ p:last-of-type {
 @media screen and (min-width: 768px) {
 	main.page-container {
 		padding: 0 100px;
+	}
+
+	/*////////////////////////////////////
+				SECTION PREVIEWER   
+//////////////////////////////////// */
+
+	section.SectionPreviewer.col-span {
+		grid-column-end: span var(--span);
 	}
 }
 
