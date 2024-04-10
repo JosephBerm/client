@@ -5,6 +5,8 @@ import Notification from '@/classes/Notification'
 import API from '@/services/api'
 import { useRouter, useParams } from 'next/navigation'
 import { toast } from 'react-toastify'
+import { NotificationType } from '@/classes/Enums'
+import { format } from 'date-fns'
 
 function Page() {
 	const [notification, setNotification] = useState<Notification>(new Notification())
@@ -38,6 +40,10 @@ function Page() {
 	return (
 		<div className='Notification'>
 			<h2 className='page-title'>Notification</h2>
+			
+			<h3>{NotificationType[notification.type]}</h3>
+			<p> {notification.message}</p>
+			<p>{format(notification.createdAt, "dd-MM-yyyy")}</p>
 		</div>
 	)
 }

@@ -1,26 +1,46 @@
 'use client'
 import Quote from '@/classes/Quote'
-import Order from '@/src/classes/Order'
+import Order, { OrderItem } from '@/src/classes/Order'
+import InputNumber from '@/src/components/InputNumber'
+import InputTextBox from '@/src/components/InputTextBox'
 import IsBusyLoading from '@/src/components/isBusyLoading'
 import API from '@/src/services/api'
 import { useParams, useRouter } from 'next/navigation'
+import { Input } from 'postcss'
 import React, { useEffect, useState } from 'react'
 
 const Page = () => {
 	const params = useParams()
 	const route = useRouter()
-	const [order, setOrder] = useState<Order>(new Order())
+	const [order, setOrder] = useState<Order>(new Order({}))
 	const [quotes, setQuotes] = useState<Quote[]>([])
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 
+	const updateOrder = async () => {
+		try {
+			setIsLoading(true)
+			const { data } = await API.Orders.update(order)
+
+			if (data.statusCode == 200) {
+				route.push('/dashboard/orders')
+			}
+		} catch (err) {
+			console.error(err)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
 	const getOrder = async (id: string) => {
-		if(id == "create") return;
+		if (id == "create") return;
+
 		try {
 			setIsLoading(true)
 			const { data } = await API.Orders.get<Order>(parseInt(id))
 
 			if (data.statusCode == 200 && data.payload) {
-				setOrder(data.payload)
+				console.log(new Order(data.payload))
+				setOrder(new Order(data.payload))
 			}
 		} catch (err) {
 			console.error(err)
@@ -29,49 +49,38 @@ const Page = () => {
 		}
 	}
 
-	const getQuotes = async () => {
-		try {
-			setIsLoading(true)
-			const { data } = await API.Quote.get<Quote[]>(null)
-
-			if (data.statusCode == 200 && data.payload) {
-				setQuotes(data.payload)
+	const handleQuantityChange = (orderItem: OrderItem, quantity: number) =>{
+		setOrder((prev) => {
+			const newOrder: Order = JSON.parse(JSON.stringify(prev));
+			
+			const index = newOrder.products.findIndex((p) => {
+				return p.product?.id === orderItem.product?.id;
+			});
+			if (index >= 0) {
+				newOrder.products[index].quantity = quantity
 			}
-		} catch (err) {
-			console.error(err)
-		} finally {
-			setIsLoading(false)
-		}
-	}
-	// This methods gets and sets. Set method should be away
-	const getQuote = async (id: string) => {
-		try {
-			setIsLoading(true)
-			const { data } = await API.Quote.get<Quote>(id)
 
-			if (data.statusCode == 200 && data.payload) {
-				return data.payload;
+			return newOrder
+		})
+	}
+	const handlePriceChange = (orderItem: OrderItem, price: number) =>{
+		setOrder((prev) => {
+			const newOrder: Order = JSON.parse(JSON.stringify(prev));
+			
+			const index = newOrder.products.findIndex((p) => {
+				return p.product?.id === orderItem.product?.id;
+			});
+			if (index >= 0) {
+				newOrder.products[index].sellPrice = price
 			}
-		} catch (err) {
-			console.error(err)
-		} finally {
-			setIsLoading(false)
-		}
-	}
 
-	const handleSelectQuote = async (event:React.FormEvent<HTMLSelectElement>) => {
-		const response = await getQuote(event.currentTarget.value)
-
-		if(response){
-			order.CreateFromQuote(response)
-			setOrder(order)
-		}
+			return newOrder
+		})
 	}
 
 	useEffect(() => {
 		if (params.id) {
 			getOrder(params.id as string)
-			getQuotes()
 		}
 	}, [])
 
@@ -85,30 +94,42 @@ const Page = () => {
 	else {
 		return (
 			<div className='EditQuoteForm'>
-				<h2 className='page-title'>Order</h2>
-				
-				
-								<select onChange={handleSelectQuote}>
-									<option value="">Select</option>
-									{quotes.map((quote) => (
-										<option key={quote.id} value={quote.id}>
-											{quote.name}
-										</option>
-									))}
-								</select>
-
-								{order && (
-									<div>
-										<h4>{order.id}</h4>
-										{order.products.map((product) => (
-											<div key={product.product?.id}>
-												{product.product?.name} - {product.quantity}
-											</div>
-										))}
+					{order && (
+						<div>
+							<h4 style={{marginBottom: 25}}>Order ID: {order.id}</h4>
+							{order.products.map((orderItem) => (
+								<div key={orderItem.product?.id} className='flex items-center gap-10 max-w-screen-md' >
+									<div className="m-2 min-w-96" >
+										<label>Product Name</label>
+										<p>
+											{orderItem.product?.name} 
+										</p>
 									</div>
-								)}
-							</div>
-						)
+											
+									<InputTextBox 
+										label="Quantity" 
+										type="number" 
+										value={orderItem.quantity.toString()} 
+										handleChange={(e:string) => handleQuantityChange(orderItem, parseInt(e))} 
+									/>
+									
+									<InputTextBox 
+											label="Price US$" 
+											type="number" 
+											value={orderItem.sellPrice.toString()} 
+											handleChange={(e:string) => handlePriceChange(orderItem, parseFloat(e))} 
+											/>
+								</div>
+							))}
+						</div>
+					)}
+
+					<div style={{marginTop: 50, display:'flex', gap: 25}}>
+						<button onClick={() => route.back()}>Back</button>
+						<button  onClick={updateOrder}>Save</button>
+					</div>
+				</div>
+			)
 	}
 }
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Quote from '@/classes/Quote'
-import { TableColumn } from '@/interfaces/TableColumn'
+import { TableColumn } from '@/interfaces/Table'
 import { toast } from 'react-toastify'
 import API from '@/services/api'
 import IsBusyLoading from '@/components/isBusyLoading'
@@ -10,6 +10,7 @@ import Table from '@/common/table'
 import Link from 'next/link'
 import Order from '@/src/classes/Order'
 import { useRouter } from 'next/navigation'
+import { formatNumber } from '@/src/services/utils'
 
 const Page = () => {
 	const [orders, setOrders] = useState<Order[]>([])
@@ -67,16 +68,17 @@ const Page = () => {
 		{
 			name: 'total',
 			label: 'Order Total',
+			content: (order: Order) => <span>US$ {formatNumber(order.total)}</span>,
 		},
 		{
 			key: 'edit',
 			label: 'Edit',
-			content: (order) => <Link href={`/dashboard/orders/${order.id}`}>Edit</Link>,
+			content: (order: Order) => <Link href={`/dashboard/orders/${order.id}`}>Edit</Link>,
 		},
 		{
 			key: 'delete',
 			label: 'Delete',
-			content: (product) => <button onClick={() => handleOrderDeletion(product.id!)}>Delete</button>,
+			content: (order:Order) => <button onClick={() => handleOrderDeletion(order.id!)}>Delete</button>,
 		},
 	]
 

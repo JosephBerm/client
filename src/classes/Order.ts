@@ -18,6 +18,11 @@ export default class Order {
         });
         this.total = this.products.reduce((acc, item) => acc + item.total, 0);
     }
+
+    constructor(init?: Partial<Order>) {
+        Object.assign(this, init);
+    }
+
 }
 
 export class OrderItem {
@@ -25,5 +30,12 @@ export class OrderItem {
     productId: string | null = null;
     product: Product | null = null;
     quantity: number = 0;
+    sellPrice: number = 0;
+    buyPrice: number = 0;
+    isSold: boolean = false;
     total: number = 0;
+
+    constructor(init?: Partial<OrderItem>) {
+        Object.assign(this, init);
+    }
 }

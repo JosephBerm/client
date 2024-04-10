@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { TableColumn } from '@/interfaces/TableColumn'
+import { TableColumn } from '@/interfaces/Table'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import Table from '@/common/table'
