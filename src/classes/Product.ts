@@ -1,7 +1,7 @@
 import { ProductsCategory } from '@/classes/Enums'
 
 export class Product {
-	id: string | null = null
+	id: string = "";
 	
 	sku: string = ''
 	name: string = ''
@@ -15,7 +15,7 @@ export class Product {
 	}
 
 	constructor(product: Partial<Product>) {
-		this.id = product.id || null;
+		this.id = product.id || '';
 		this.sku = product.sku || '';
 		this.name = product.name || '';
 		this.description = product.description || '';
