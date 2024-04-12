@@ -73,12 +73,16 @@ const Page = () => {
 		{
 			key: 'edit',
 			label: 'Edit',
-			content: (order: Order) => <Link href={`/dashboard/orders/${order.id}`}>Edit</Link>,
+			content: (order: Order) => (
+				<Link className='inline-link' href={`/dashboard/orders/${order.id}`}>
+					Edit
+				</Link>
+			),
 		},
 		{
 			key: 'delete',
 			label: 'Delete',
-			content: (order:Order) => <button onClick={() => handleOrderDeletion(order.id!)}>Delete</button>,
+			content: (order: Order) => <button onClick={() => handleOrderDeletion(order.id!)}>Delete</button>,
 		},
 	]
 

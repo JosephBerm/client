@@ -1,29 +1,32 @@
 'use client'
-import Order, { OrderItem } from '@/src/classes/Order'
-import { Product } from '@/src/classes/Product'
-import InputTextBox from '@/src/components/InputTextBox'
-import IsBusyLoading from '@/src/components/isBusyLoading'
-import API from '@/src/services/api'
+import Order, { OrderItem } from '@/classes/Order'
+import { Product } from '@/classes/Product'
+import InputTextBox from '@/components/InputTextBox'
+import IsBusyLoading from '@/components/isBusyLoading'
+import API from '@/services/api'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import InputNumber from '@/components/InputNumber'
+import Table from '@/common/table'
+import { SortColumn, TableColumn } from '@/interfaces/Table'
 
-interface props {
-    order: Order,
-    products: Product[]
+interface OrdersProps {
+	order: Order
+	products: Product[]
 }
 
-const OrdersPage = (props: props) => {
+const OrdersPage = ({ order, products }: OrdersProps) => {
 	const params = useParams()
 	const route = useRouter()
-	const [order, setOrder] = useState<Order>(props.order)
-	const [products, setProducts]  = useState<Product[]>(props.products)
+
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [product, setProduct] = useState<Product | null>(null)
+	const [currentOrder, setCurrentOrder] = useState<Order>(order)
 
 	const updateOrder = async () => {
 		try {
 			setIsLoading(true)
-			const { data } = await API.Orders.update(order)
+			const { data } = await API.Orders.update(currentOrder)
 
 			if (data.statusCode == 200) {
 				route.push('/dashboard/orders')
@@ -34,13 +37,13 @@ const OrdersPage = (props: props) => {
 			setIsLoading(false)
 		}
 	}
-	const handleQuantityChange = (orderItem: OrderItem, quantity: number) =>{
-		setOrder((prev) => {
-			const newOrder: Order = JSON.parse(JSON.stringify(prev));
-			
+	const handleQuantityChange = (orderItem: OrderItem, quantity: number) => {
+		setCurrentOrder((prev) => {
+			const newOrder: Order = JSON.parse(JSON.stringify(prev))
+
 			const index = newOrder.products.findIndex((p) => {
-				return p.product?.id === orderItem.product?.id;
-			});
+				return p.product?.id === orderItem.product?.id
+			})
 			if (index >= 0) {
 				newOrder.products[index].quantity = quantity
 			}
@@ -48,13 +51,13 @@ const OrdersPage = (props: props) => {
 			return newOrder
 		})
 	}
-	const handlePriceChange = (orderItem: OrderItem, price: number) =>{
-		setOrder((prev) => {
-			const newOrder: Order = JSON.parse(JSON.stringify(prev));
-			
+	const handlePriceChange = (orderItem: OrderItem, price: number) => {
+		setCurrentOrder((prev) => {
+			const newOrder: Order = JSON.parse(JSON.stringify(prev))
+
 			const index = newOrder.products.findIndex((p) => {
-				return p.product?.id === orderItem.product?.id;
-			});
+				return p.product?.id === orderItem.product?.id
+			})
 			if (index >= 0) {
 				newOrder.products[index].sellPrice = price
 			}
@@ -63,73 +66,72 @@ const OrdersPage = (props: props) => {
 		})
 	}
 	const handleSelectProduct = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		const productId = e.target.value;
-		const product = products.find((p) => p.id == productId);
+		const productId = e.target.value
+		const product = products.find((p) => p.id == productId)
 		setProduct(product || null)
 	}
-    
-    const renderProductRows = () => {
-        return (
-            <tbody className='table-dark'>
-                {order.products.map((orderItem, index) => {
-                    return (
-                        <tr key={orderItem.product?.id || index}>
-                            <td>{orderItem.product?.name} </td>
-                            <td>
-                                <InputTextBox 
-                                    label="" 
-                                    type="number" 
-                                    value={orderItem.quantity.toString()} 
-                                    handleChange={(e:string) => handleQuantityChange(orderItem, parseInt(e))} 
-                                />
-                            </td>
-    
-                            <td>
-                                <InputTextBox 
-                                    label="" 
-                                    type="number" 
-                                    value={orderItem.sellPrice.toString()} 
-                                    handleChange={(e:string) => handlePriceChange(orderItem, parseFloat(e))} 
-                                />
-                            </td>
-                        </tr>
-                    )
-                })}
-            </tbody>
-        )
-    }
 
-    return (
-        <div className='EditQuoteForm'>
-            <h4 style={{marginBottom: 25}}>Order Details</h4>
-            <div>
-                <select onChange={handleSelectProduct}>
-                    <option disabled value="">Select a product</option>
-                    {products.map((product, index) => (
-                        <option key ={index}  value={product.id}>{product.name}</option>
-                    ))}
-                </select>
-                <button>Add Product</button>
-            </div>
-         
-            <table>
-                <thead>
-                    <tr>
-                        <th>Product Name</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                    </tr>
-                </thead>
-                {renderProductRows()}
-            </table>
-        
-            <div style={{marginTop: 50, display:'flex', gap: 25}}>
-                <button onClick={() => route.back()}>Back</button>
-                <button  onClick={updateOrder}>Save</button>
-            </div>
-        </div>
-    )
-	
+	const columns: TableColumn<OrderItem>[] = [
+		{
+			key: 'product',
+			label: 'Product Name',
+			content: (orderItem) => <span>{orderItem.product?.name}</span>,
+		},
+		{
+			key: 'quantity',
+			label: 'Quantity',
+			content: (orderItem) => (
+				<InputNumber
+					label=''
+					value={orderItem.quantity.toString()}
+					handleChange={(e: string) => handleQuantityChange(orderItem, parseInt(e))}
+				/>
+			),
+		},
+		{
+			key: 'buyPrice',
+			label: 'Price',
+			content: (orderItem) => (
+				<InputNumber
+					label=''
+					value={orderItem.buyPrice.toString()}
+					handleChange={(e: string) => handlePriceChange(orderItem, parseInt(e))}
+				/>
+			),
+		},
+	]
+
+	return (
+		<div className='EditQuoteForm'>
+			<h4 style={{ marginBottom: 25 }}>Order Details</h4>
+			<div>
+				<select onChange={handleSelectProduct}>
+					<option disabled value=''>
+						Select a product
+					</option>
+					{products.map((product, index) => (
+						<option key={index} value={product.id}>
+							{product.name}
+						</option>
+					))}
+				</select>
+				<button>Add Product</button>
+			</div>
+
+			<Table<OrderItem>
+				columns={columns}
+				data={currentOrder.products}
+				isSortable={true}
+				isSearchable={true}
+				isPaged={true}
+			/>
+
+			<div style={{ marginTop: 50, display: 'flex', gap: 25 }}>
+				<button onClick={() => route.back()}>Back</button>
+				<button onClick={updateOrder}>Save</button>
+			</div>
+		</div>
+	)
 }
 
 export default OrdersPage
