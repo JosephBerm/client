@@ -3,11 +3,13 @@
 import React, { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
-import { Product } from '@/src/classes/Product'
+import '@/styles/App/orderPage.css'
+
 import API from '@/src/services/api'
-import OrdersPage from '@/src/components/Orders/OrdersPage'
+import { Product } from '@/src/classes/Product'
 import Order, { OrderItem } from '@/src/classes/Order'
 import IsBusyLoading from '@/src/components/isBusyLoading'
+import OrdersPage from '@/src/components/Orders/OrdersPage'
 
 const Page = (context: any) => {
 	const router = useRouter()
@@ -66,7 +68,7 @@ const Page = (context: any) => {
 	if (isLoading || !order) return <IsBusyLoading />
 
 	return (
-		<div className='EditQuoteForm'>
+		<div className='orders-page-container'>
 			<OrdersPage products={productsList} order={order} />
 		</div>
 	)

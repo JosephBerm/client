@@ -15,8 +15,9 @@
 	--header-color: #0e1326;
 	--text-color: #d3d8e8;
 	--section-bg-color: #181d2f;
-	--toastify-color-error: #b22222 !important;
+	--toastify-color-error: #d22b2b !important;
 	--error-color: var(--toastify-color-error);
+	--error-color-tint: #520606;
 	--slate: #8892b0;
 	--dark-slate: #495670;
 	--darker-slate: #0a0f1c;
@@ -167,14 +168,28 @@ button,
 	align-self: center;
 }
 
-button:not(:disabled):hover,
-.button:not(:disabled):hover {
+button:not(:disabled):hover {
 	background-color: var(--main-color-tint);
 }
 
 button:disabled {
 	opacity: 0.7;
 	cursor: no-drop;
+}
+
+button.responsive-icon span {
+	display: none;
+}
+
+button.delete,
+button.error {
+	color: var(--error-color);
+	border: 1px solid var(--error-color);
+}
+
+button.delete:not(:disabled):hover,
+button.error:not(:disabled):hover {
+	background-color: var(--error-color-tint);
 }
 
 p {
@@ -219,9 +234,10 @@ p:last-of-type {
 	font-size: 1.6rem;
 	font-family: var(--font-sans);
 	font-weight: normal;
-	width: 100%;
 }
-.InputTextBox label {
+
+.InputTextBox label,
+.InputDropdown label {
 	font-size: 1em;
 	font-weight: bold;
 	text-wrap: nowrap;
@@ -232,19 +248,30 @@ p:last-of-type {
 	margin: 2px 1px;
 }
 
+.InputTextBox,
+.InputDropdown,
+.InputNumber {
+	width: fit-content;
+}
+
 .InputTextBox textarea,
-.InputTextBox input {
-	border: 1px solid;
-	border-color: var(--accent-color);
+.InputTextBox input,
+.InputDropdown select {
+	border: 1px solid var(--accent-color);
 	border-radius: var(--border-radius);
 	background: transparent !important;
-	padding: 5px 7px;
+	padding: 5px 10px;
 	font-size: 0.95em;
 	font-weight: 100;
 	width: 100%;
 	min-height: 35px;
 	transition: var(--transition);
-	z-index: 2;
+}
+
+.InputTextBox.primary textarea,
+.InputTextBox.primary input,
+.InputDropdown.primary select {
+	border: 1px solid var(--main-color);
 }
 
 .InputTextBox input:-webkit-autofill,
@@ -256,7 +283,9 @@ p:last-of-type {
 .InputTextBox textarea:focus,
 .InputTextBox textarea:focus-visible,
 .InputTextBox input:focus,
-.InputTextBox input:focus-visible {
+.InputTextBox input:focus-visible,
+.InputDropdown select:focus,
+.InputDropdown select:focus-visible {
 	outline: none;
 	border-color: var(--main-color);
 }
@@ -283,6 +312,22 @@ p:last-of-type {
 	font-size: 0.75em;
 	font-weight: 700;
 	letter-spacing: 0.5px;
+}
+
+/*////////////////////////////////////
+				InputDropdown     
+//////////////////////////////////// */
+.InputDropdown select {
+	cursor: pointer;
+}
+.InputDropdown option {
+	background-color: var(--section-bg-color);
+	padding: 6px 12px;
+}
+
+.InputDropdown option:not(.default-option):checked {
+	color: var(--main-color);
+	background-color: var(--main-color-tint);
 }
 
 /*////////////////////////////////////
@@ -434,6 +479,12 @@ section.SectionPreviewer h4.title {
 @media screen and (min-width: 768px) {
 	main.page-container {
 		padding: 0 100px;
+	}
+	button.responsive-icon {
+		gap: 7px;
+	}
+	button.responsive-icon span {
+		display: unset;
 	}
 
 	/*////////////////////////////////////
