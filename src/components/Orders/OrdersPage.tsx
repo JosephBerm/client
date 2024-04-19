@@ -60,6 +60,8 @@ const OrdersPage = ({ order, products }: OrdersProps) => {
 				newOrder.products[index].quantity = quantity
 			}
 
+            console.log("first, ", currentOrder)
+
 			return newOrder
 		})
 	}
@@ -90,16 +92,22 @@ const OrdersPage = ({ order, products }: OrdersProps) => {
 		}
 
 		const productToAdd = new OrderItem()
+        productToAdd.id = 0;
 		productToAdd.product = product
 		productToAdd.productId = product.id
 		productToAdd.quantity = 1
 
-		setCurrentOrder((current) => {
-			const newOrder = new Order({ ...current })
-			newOrder.products.push(productToAdd)
-			newOrder.total += productToAdd.product?.price ?? 0
-			return newOrder
-		})
+	
+
+        setCurrentOrder((prevState) => ({
+            ...prevState,
+            products: [...prevState.products, productToAdd],
+            total: prevState.total + (productToAdd.product?.price ?? 0),
+            CreateFromQuote: prevState.CreateFromQuote// Calculate or set the value here
+          }));
+        console.log(currentOrder.products)
+
+        
 
 		setProduct(null)
 	}

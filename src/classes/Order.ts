@@ -34,6 +34,8 @@ export class OrderItem {
     buyPrice: number = 0;
     isSold: boolean = false;
     total: number = 0;
+    order: Order | null = null;
+    orderId = 0;
 
     constructor(init?: Partial<OrderItem>) {
         Object.assign(this, init);

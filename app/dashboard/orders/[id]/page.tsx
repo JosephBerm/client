@@ -58,8 +58,8 @@ const Page = (context: any) => {
 				return
 			}
 
-			setOrder(orderData)
-			setProducts(productsList)
+			setOrder(new Order(orderData))
+			setProducts(productsList.map(x => new Product(x)))
 		}
 
 		fetchData()
