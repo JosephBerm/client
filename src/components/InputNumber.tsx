@@ -31,7 +31,7 @@ const InputNumber: React.FC<InputNumberType> = ({
 			handleChange={handleInputChange}
 			inputmode='numeric'
 			pattern='[0-9]*'
-			className='inputNumber'
+			className='InputNumber'
 		/>
 	)
 }
