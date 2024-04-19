@@ -77,7 +77,11 @@ const Page = () => {
 		{
 			key: 'delete',
 			label: 'Delete',
-			content: (product) => <button onClick={() => handleQuoteDeletion(product.id!)}>Delete</button>,
+			content: (product) => (
+				<button className='delete' onClick={() => handleQuoteDeletion(product.id!)}>
+					Delete
+				</button>
+			),
 		},
 	]
 

@@ -76,13 +76,12 @@ const Page = () => {
 			content: (provider: Provider) => (
 				<div className='flex gap-5'>
 					<button
-						className='btn btn-danger btn-sm'
 						onClick={() => {
 							route.push(`/dashboard/providers/${provider.id}`)
 						}}>
 						Edit
 					</button>
-					<button className='btn btn-danger btn-sm' onClick={() => deleteProvider(provider.id!)}>Delete</button>
+					<button className='delete' onClick={() => deleteProvider(provider.id!)}>Delete</button>
 				</div>
 			),
 		},
