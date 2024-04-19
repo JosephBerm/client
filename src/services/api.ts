@@ -59,6 +59,14 @@ const API = {
 		update: async <T>(quote: T) => await HttpService.put<T>('/notifications', quote),
 		delete: async <T>(quoteId: string) => await HttpService.delete<T>(`/notifications/${quoteId}`),
 	},
+	Providers: {
+		get: async <Provider>(id: number) => await HttpService.get<Provider>(`/provider/${id}`),
+		getAll: async <Provider>() => await HttpService.get<Provider[]>('/providers'),
+		create: async <Provider>(provider: Provider) => await HttpService.post<Provider>('/provider', provider),
+		update: async <Provider>(quote: Provider) => await HttpService.put<Provider>('/provider', quote),
+		delete: async (providerId: number) => await HttpService.delete<number>(`/provider/${providerId}`),
+	
+	},
 	Public: {
 		sendQuote: async <T>(quote: T) => await HttpService.post<T>('/quote', quote),
 	},

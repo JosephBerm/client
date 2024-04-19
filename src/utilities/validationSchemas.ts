@@ -38,6 +38,12 @@ export default class Validations {
 		}),
 	}
 
+	public static providerSchema = yup.object().shape({
+		name: yup.string().required('Name is required'),
+		email: yup.string().required('Email is required'),
+		identifier: yup.string().required('Identifier is required'),
+	})
+
 	public static userSchema = yup.object().shape({
 		id: yup.number().required(),
 		username: yup.string().required(),
