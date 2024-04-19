@@ -21,9 +21,9 @@ const Page = () => {
 	const fetchCustomers = async () => {
 		try {
 			const { data } = await API.Customers.getAll()
-			if(data.payload){
+			if (data.payload) {
 				//TODO: FIX as cuustomerarray
-				setTables(data.payload as Customer[] || [])
+				setTables((data.payload as Customer[]) || [])
 			}
 		} finally {
 			setIsLoading(true)
@@ -52,11 +52,7 @@ const Page = () => {
 		{
 			name: 'name',
 			label: 'Name',
-			content: (user: Customer) => (
-				<>
-					{user.name}
-				</>
-			),
+			content: (user: Customer) => <>{user.name}</>,
 		},
 		{
 			name: 'email',
@@ -73,13 +69,14 @@ const Page = () => {
 			content: (customer: Customer) => (
 				<div className='flex gap-5'>
 					<button
-						className='btn btn-danger btn-sm'
 						onClick={() => {
 							route.push(`/dashboard/customers/${customer.id}`)
 						}}>
 						Edit
 					</button>
-					<button className='btn btn-danger btn-sm' onClick={() => deleteCompany(customer.id!)}>Delete</button>
+					<button className='delete' onClick={() => deleteCompany(customer.id!)}>
+						Delete
+					</button>
 				</div>
 			),
 		},

@@ -82,7 +82,11 @@ const Page = () => {
 		{
 			key: 'delete',
 			label: 'Delete',
-			content: (order: Order) => <button onClick={() => handleOrderDeletion(order.id!)}>Delete</button>,
+			content: (order: Order) => (
+				<button className='delete' onClick={() => handleOrderDeletion(order.id!)}>
+					Delete
+				</button>
+			),
 		},
 	]
 

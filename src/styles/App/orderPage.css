@@ -47,5 +47,16 @@
 	} */
 }
 
+@media screen and (min-width: 768px) {
+	.orders-page-container .orders-page {
+		height: 75vh;
+		justify-content: flex-start;
+	}
+	.orders-page-container .add-product-container,
+	.orders-page-container .buttons-container {
+		margin-top: 10%;
+	}
+}
+
 /* @media screen and (min-width: 1440px) and (min-height: 1618px) {
 } */
