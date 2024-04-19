@@ -32,7 +32,7 @@ const OrdersPage = ({ order, products }: OrdersProps) => {
 		if (!product) return
 
 		const productIdToAdd = product.id
-		return currentOrder.products.some((item) => item.productId === productIdToAdd)
+		return currentOrder.products.some((item) => item.product?.id === productIdToAdd)
 	}, [product, currentOrder.products])
 
 	const updateOrder = async () => {
@@ -64,6 +64,7 @@ const OrdersPage = ({ order, products }: OrdersProps) => {
 		})
 	}
 	const handlePriceChange = (orderItem: OrderItem, price: number) => {
+		//TODO: THIS CAUSES THE FOCUS TO BE LOST IN THE INPUT.
 		setCurrentOrder((prev) => {
 			const newOrder: Order = JSON.parse(JSON.stringify(prev))
 
@@ -90,8 +91,7 @@ const OrdersPage = ({ order, products }: OrdersProps) => {
 		}
 
 		const productToAdd = new OrderItem()
-		productToAdd.product = product
-		productToAdd.productId = product.id
+		productToAdd.setProduct(product)
 		productToAdd.quantity = 1
 
 		setCurrentOrder((current) => {
@@ -108,6 +108,19 @@ const OrdersPage = ({ order, products }: OrdersProps) => {
 		return currentOrder.products
 			.filter((product) => !!product.product)
 			.map((orderItem) => orderItem.product as Product)
+	}
+
+	const handleProductDeletion = (productId: string) => {
+		setCurrentOrder((current) => {
+			const newOrder: Order = JSON.parse(JSON.stringify(current))
+			const foundProductIndex = newOrder.products.findIndex((p) => p.product?.id === productId)
+			if (foundProductIndex >= 0) {
+				newOrder.total -= newOrder.products[foundProductIndex].product?.price ?? 0
+				newOrder.products.splice(foundProductIndex, 1)
+			}
+
+			return newOrder
+		})
 	}
 
 	const columns: TableColumn<OrderItem>[] = [
@@ -136,6 +149,15 @@ const OrdersPage = ({ order, products }: OrdersProps) => {
 					value={orderItem.buyPrice.toString()}
 					handleChange={(e: string) => handlePriceChange(orderItem, parseInt(e))}
 				/>
+			),
+		},
+		{
+			key: 'delete',
+			label: 'Delete',
+			content: (product: OrderItem) => (
+				<button className='delete' onClick={() => handleProductDeletion(product.product?.id!)}>
+					Delete
+				</button>
 			),
 		},
 	]
