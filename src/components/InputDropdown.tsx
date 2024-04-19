@@ -35,9 +35,9 @@ function InputDropdown<T extends { id: string; name: string }>({
 	return (
 		<div className={classNames('InputDropdown', customClass)}>
 			{label ? <label>{label}</label> : <></>}
-			<select value={value} onChange={handleChangeInternal}>
+			<select value={value} onChange={handleChangeInternal} disabled={!getOptions().length}>
 				<option disabled value='' className='default-option'>
-					{placeholder}
+					{getOptions().length ? placeholder : ''}
 				</option>
 				{getOptions().map((item, index) => (
 					<option key={index} value={item.id}>
