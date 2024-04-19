@@ -1,4 +1,5 @@
 import { ProductsCategory } from '@/classes/Enums'
+import Provider from '@/classes/Provider';
 
 export class Product {
 	id: string = "";
@@ -9,19 +10,23 @@ export class Product {
 	price: number = 0
 	image: string | null = null
 	category: ProductsCategory | null = null
+	providerId: number | null = null
+	provider: Provider | null = null
 
 	toString(): string {
 		return `Product: ${this.name} - ${this.description} - ${this.price} - ${this.image} - ${this.category}`
 	}
 
 	constructor(product: Partial<Product>) {
-		this.id = product.id || '';
-		this.sku = product.sku || '';
-		this.name = product.name || '';
-		this.description = product.description || '';
-		this.price = product.price || 0;
-		this.image = product.image || null;
-		this.category = product.category || null;
+		this.id = product?.id || '';
+		this.sku = product?.sku || '';
+		this.name = product?.name || '';
+		this.description = product?.description || '';
+		this.price = product?.price || 0;
+		this.image = product?.image || null;
+		this.category = product?.category || null;
+		this.providerId = product?.providerId || null;
+		this.provider = product?.provider || null;
 	}
 }
 

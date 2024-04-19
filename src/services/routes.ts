@@ -22,6 +22,11 @@ class Routes {
 			icon: 'fa-solid fa-list-check',
 		},
 		{
+			name: 'Providers',
+			location: '/dashboard/providers',
+			icon: 'fa-solid fa-users',
+		},
+		{
 			name: 'Orders',
 			location: '/dashboard/orders',
 			icon: 'fa-solid fa-dollar-sign',
@@ -48,6 +53,7 @@ class Routes {
 			location: '/dashboard/profile',
 			icon: 'fa-solid fa-user',
 		},
+		
 		
 	]
 
