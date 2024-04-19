@@ -5,13 +5,13 @@ type InputDropdownProps<T> = {
 	options: T[]
 	display: keyof T | ((item: T) => string)
 	value: string | number
-	handleChange: (value: string) => void
+	handleChange: (value: string | number) => void
 	label?: string
 	placeholder?: string
 	customClass?: string
 	filterIfSelected?: () => T[]
 }
-function InputDropdown<T extends { id: string; name: string }>({
+function InputDropdown<T extends { id: string | number; name: string }>({
 	value,
 	options,
 	placeholder,

@@ -10,6 +10,7 @@ import { Product } from '@/src/classes/Product'
 import Order, { OrderItem } from '@/src/classes/Order'
 import IsBusyLoading from '@/src/components/isBusyLoading'
 import OrdersPage from '@/src/components/Orders/OrdersPage'
+import Customer from '@/src/classes/Customer'
 
 const Page = (context: any) => {
 	const router = useRouter()
@@ -17,14 +18,30 @@ const Page = (context: any) => {
 	const [order, setOrder] = useState<Order | null>(null)
 	const [productsList, setProducts] = useState<Product[]>([])
 	const [isLoading, setIsLoading] = useState<boolean>(false)
+	const [customers, setCustomers] = useState<Customer[]>([])
 
 	const getOrder = async () => {
+		if (context.params.id == 'create') return;
 		try {
 			setIsLoading(true)
 			const { data } = await API.Orders.get<Order>(parseInt(context.params.id as string))
 			if (!data.payload) toast.error(`Order with id #${context.params.id} not found!`)
 
 			return data.payload
+		} catch (err) {
+			console.error(err)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+	const fetchCustomers = async () => {
+		try {
+			setIsLoading(true)
+			const { data } = await API.Customers.getAll<Customer>()
+			if (!data.payload) toast.error('Unable to retrieve the list of available customers...')
+
+			setCustomers(data.payload?.map(customer => new Customer(customer)) ?? [])
 		} catch (err) {
 			console.error(err)
 		} finally {
@@ -48,9 +65,9 @@ const Page = (context: any) => {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const [orderData, productsList] = await Promise.all([getOrder(), getProducts()])
+			const [orderData, productsList] = await Promise.all([getOrder(), getProducts(), fetchCustomers()])
 
-			if (!orderData || !productsList) {
+			if (!productsList) {
 				setTimeout(() => {
 					router.push('/dashboard/orders')
 				}, 3000)
@@ -58,7 +75,7 @@ const Page = (context: any) => {
 				return
 			}
 
-			setOrder(new Order(orderData))
+			setOrder(new Order(orderData ?? {}))
 			setProducts(productsList.map(x => new Product(x)))
 		}
 
@@ -69,7 +86,7 @@ const Page = (context: any) => {
 
 	return (
 		<div className='orders-page-container'>
-			<OrdersPage products={productsList} order={order} />
+			<OrdersPage products={productsList} order={order} customers={customers} />
 		</div>
 	)
 }

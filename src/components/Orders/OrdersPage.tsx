@@ -12,13 +12,15 @@ import InputTextBox from '@/components/InputTextBox'
 import IsBusyLoading from '@/components/isBusyLoading'
 import InputNumber from '@/components/InputNumber'
 import InputDropdown from '@/components/InputDropdown'
+import Customer from '@/src/classes/Customer'
 
 interface OrdersProps {
 	order: Order
 	products: Product[]
+    customers: Customer[]
 }
 
-const OrdersPage = ({ order, products }: OrdersProps) => {
+const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 	const params = useParams()
 	const route = useRouter()
 
@@ -32,7 +34,7 @@ const OrdersPage = ({ order, products }: OrdersProps) => {
 		if (!product) return
 
 		const productIdToAdd = product.id
-		return currentOrder.products.some((item) => item.productId === productIdToAdd)
+		return currentOrder.products.some((item) => item.product?.id === productIdToAdd)
 	}, [product, currentOrder.products])
 
 	const updateOrder = async () => {
@@ -66,6 +68,7 @@ const OrdersPage = ({ order, products }: OrdersProps) => {
 		})
 	}
 	const handlePriceChange = (orderItem: OrderItem, price: number) => {
+		//TODO: THIS CAUSES THE FOCUS TO BE LOST IN THE INPUT.
 		setCurrentOrder((prev) => {
 			const newOrder: Order = JSON.parse(JSON.stringify(prev))
 
@@ -79,8 +82,8 @@ const OrdersPage = ({ order, products }: OrdersProps) => {
 			return newOrder
 		})
 	}
-	const handleSelectProduct = (productId: string) => {
-		const product = products.find((p) => p.id == productId)
+	const handleSelectProduct = (productId: number | string) => {
+		const product = products.find((p) => p.id == productId as string)
 		if (product) setProduct(product)
 	}
 	const handleAddingProduct = () => {
@@ -92,9 +95,7 @@ const OrdersPage = ({ order, products }: OrdersProps) => {
 		}
 
 		const productToAdd = new OrderItem()
-        productToAdd.id = 0;
-		productToAdd.product = product
-		productToAdd.productId = product.id
+		productToAdd.setProduct(product)
 		productToAdd.quantity = 1
 
 	
@@ -117,6 +118,32 @@ const OrdersPage = ({ order, products }: OrdersProps) => {
 			.filter((product) => !!product.product)
 			.map((orderItem) => orderItem.product as Product)
 	}
+
+	const handleProductDeletion = (productId: string) => {
+		setCurrentOrder((current) => {
+			const newOrder: Order = JSON.parse(JSON.stringify(current))
+			const foundProductIndex = newOrder.products.findIndex((p) => p.product?.id === productId)
+			if (foundProductIndex >= 0) {
+				newOrder.total -= newOrder.products[foundProductIndex].product?.price ?? 0
+				newOrder.products.splice(foundProductIndex, 1)
+			}
+
+			return newOrder
+		})
+	}
+
+    const handleSelectCustomer = (customerId: number | string) => {
+        const customer = customers.find((c) => c.id == customerId as number)
+
+        if (customer) {
+            setCurrentOrder((prevState) => ({
+                ...prevState,
+                customer: customer,
+                customerId: customer.id,
+                CreateFromQuote: prevState.CreateFromQuote
+            }))
+        }
+    }
 
 	const columns: TableColumn<OrderItem>[] = [
 		{
@@ -146,11 +173,30 @@ const OrdersPage = ({ order, products }: OrdersProps) => {
 				/>
 			),
 		},
+		{
+			key: 'delete',
+			label: 'Delete',
+			content: (product: OrderItem) => (
+				<button className='delete' onClick={() => handleProductDeletion(product.product?.id!)}>
+					Delete
+				</button>
+			),
+		},
 	]
 
 	return (
 		<div className='orders-page'>
 			<h3 className='page-title'>Order Details</h3>
+
+            <InputDropdown<Customer>
+					options={customers}
+					display='name'
+					label='Customer'
+					value={currentOrder.customer?.id ?? ""}
+					handleChange={handleSelectCustomer}
+					placeholder='Select a Customer'
+					customClass='primary'
+				/>
 
 			<Table<OrderItem>
 				columns={columns}
