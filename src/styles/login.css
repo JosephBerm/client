@@ -25,6 +25,11 @@
 	padding: 10% 0;
 	min-width: 200px;
 	max-width: 300px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 4vh;
 }
 .Signup form {
 	min-width: 250px;
