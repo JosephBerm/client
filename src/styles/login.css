@@ -1,16 +1,9 @@
-.Login {
-	height: 55vh;
-	top: 45%;
-}
-.Login h1 {
+.Login h1,
+.Signup h1 {
 	color: var(--brand-color-1);
 	font-size: 1.25em;
 }
-.Signup {
-	height: 65vh;
-	top: 40%;
-	max-height: 550px;
-}
+
 .Login,
 .Signup {
 	width: 100%;
@@ -25,7 +18,8 @@
 	transform: translate(-50%, -50%);
 }
 
-.Login .container {
+.Login .container,
+.Signup .container {
 	width: 50%;
 	min-width: 295px;
 	max-width: 500px;
@@ -40,17 +34,24 @@
 	padding-top: 40px;
 }
 
-.Login .container .page-title {
+.Login .container .page-title,
+.Signup .container .page-title {
 	align-self: center;
 	font-weight: 500;
 }
-.Login .container .form-container {
+.Login .container .form-container,
+.Signup .container .form-container {
 	width: 100%;
 }
-.Login .container .form-container .form-footer {
+.Login .container .form-container .form-footer,
+.Signup .container .form-container .form-footer {
 	align-self: center;
 	width: 100%;
 	max-width: 300px;
+}
+.Signup .container .form-container .form-footer {
+	grid-column: span 2;
+	justify-self: center;
 }
 
 .Login .form-container form {
@@ -62,18 +63,24 @@
 	justify-content: center;
 	gap: 3.5vh;
 }
-.Login .form-container form .InputTextBox {
+
+.Signup .form-container form {
+	padding: 5% 0;
+	width: 100%;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	row-gap: 3.5vh;
+	column-gap: 10px;
+}
+
+.Login .form-container form .InputTextBox,
+.Signup .form-container form .InputTextBox {
 	width: 100%;
 }
 
-.Login .form-container h3 {
+.Login .form-container h3,
+.Signup .form-container h3 {
 	font-weight: bold;
-}
-
-.Signup form {
-	min-width: 250px;
-	max-width: 600px;
-	gap: 10px;
 }
 
 .Login .login-options-container {
@@ -88,7 +95,8 @@
 	font-size: 0.75em;
 }
 
-.Login button {
+.Login button,
+.Signup button {
 	width: 100%;
 }
 
@@ -100,36 +108,23 @@
 	color: var(--black-text-color);
 }
 
-.Signup form .two-sided {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-}
-
 @media screen and (min-width: 480px) {
-	.Login {
+	.Login,
+	.Signup {
 		min-width: 350px;
 	}
 }
 
 @media screen and (min-width: 600px) {
-	.Signup {
-		top: 45%;
-	}
-	.Signup form {
-		gap: 5%;
-		height: 80%;
-	}
-	.Signup form .two-sided {
-		flex-direction: row;
-		gap: 5%;
-	}
 }
 
 @media screen and (min-width: 768px) {
 }
 
 @media screen and (min-width: 1024px) {
+	.Signup .form-container form {
+		column-gap: 25px;
+	}
 }
 
 @media screen and (min-width: 1080px) {
