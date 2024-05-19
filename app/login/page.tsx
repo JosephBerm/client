@@ -14,9 +14,11 @@ import instance from '@/services/httpService'
 import API from '@/services/api'
 
 import FormInputTextBox from '@/components/FormInputTextbox'
+import InputCheckbox from '@/components/InputCheckbox'
 
 const Page = () => {
 	const [credentials, setCredentials] = useState(new LoginCredentials())
+	const [isUserRemembered, setIsUserRemembered] = useState(false)
 	const router = useRouter()
 	const user = useAccountStore((state) => state.User)
 	const [isLoading, setIsLoading] = useState(false)
@@ -59,41 +61,52 @@ const Page = () => {
 	}
 	return (
 		<div className='Login'>
-			<h2 className='page-title'>Login</h2>
-			<Formik
-				initialValues={credentials}
-				validationSchema={Validations.loginSchema}
-				onSubmit={(values, { setSubmitting }) => {
-					handleLogin(values)
-					setSubmitting(false)
-				}}>
-				{(form) => (
-					<Form className='min-h-96 flex flex-col gap-8 w-2/4 relative'>
-						<FormInputTextBox<LoginCredentials>
-							label='Username / Email'
-							autofocused={true}
-							name='username'
-						/>
+			<div className='container'>
+				<h1 className='page-title'>MEDSOURCE</h1>
 
-						<FormInputTextBox<LoginCredentials> type='password' label='Password' name='password' />
-						<div className='form-footer flex flex-col items-center justify-center gap-10'>
-							<a className='clickable forgot-password mb-7' onClick={handleForgotPasswordClick}>
-								Forgot Password?
-							</a>
-							<button type='submit' className='submit' disabled={isMissingFields(form) || isLoading}>
-								{isLoading ? <i className='fa-solid fa-spinner animate-spin' /> : 'Login'}
-							</button>
-
-							<span className='button-subtitle'>
-								Don&apos;t have a password?&nbsp;
-								<a className='clickable inline-link' onClick={routeToSignUp}>
-									Sign up!
-								</a>
-							</span>
-						</div>
-					</Form>
-				)}
-			</Formik>
+				<div className='form-container'>
+					<h3>Log in</h3>
+					<Formik
+						initialValues={credentials}
+						validationSchema={Validations.loginSchema}
+						onSubmit={(values, { setSubmitting }) => {
+							handleLogin(values)
+							setSubmitting(false)
+						}}>
+						{(form) => (
+							<Form className='min-h-96 flex flex-col gap-8 w-2/4 relative'>
+								<FormInputTextBox<LoginCredentials>
+									label='Email Address'
+									autofocused={true}
+									name='username'
+								/>
+								<FormInputTextBox<LoginCredentials> type='password' label='Password' name='password' />
+								<div className='form-footer flex flex-col items-center justify-center gap-10'>
+									<div className='login-options-container'>
+										<InputCheckbox
+											checked={isUserRemembered}
+											label='Remember Me'
+											onChange={() => setIsUserRemembered(!isUserRemembered)}
+										/>
+										<a className='clickable forgot-password' onClick={handleForgotPasswordClick}>
+											Forgot Password?
+										</a>
+									</div>
+									<button disabled={isMissingFields(form) || isLoading}>
+										{isLoading ? <i className='fa-solid fa-spinner animate-spin' /> : 'Login'}
+									</button>
+									<span className='button-subtitle'>
+										Don&apos;t have a password?&nbsp;
+										<a className='clickable inline-link' onClick={routeToSignUp}>
+											Sign up!
+										</a>
+									</span>
+								</div>
+							</Form>
+						)}
+					</Formik>
+				</div>
+			</div>
 		</div>
 	)
 }

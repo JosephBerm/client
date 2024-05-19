@@ -40,43 +40,35 @@ class Routes {
 			name: 'Accounts',
 			location: '/dashboard/accounts',
 			icon: 'fa-solid fa-users',
-
 		},
 		{
 			name: 'Customers',
 			location: '/dashboard/customers',
 			icon: 'fa-solid fa-users',
-
 		},
 		{
 			name: 'Profile',
 			location: '/dashboard/profile',
 			icon: 'fa-solid fa-user',
 		},
-		
-		
 	]
 
 	public static publicRoutes: Route[] = [
 		{
 			name: 'Home',
 			location: '/',
-			icon: 'fa-solid fa-house',
+		},
+		{
+			name: 'About Us',
+			location: '/about-us',
 		},
 		{
 			name: 'Products',
 			location: '/products',
-			icon: 'fa-solid fa-store',
 		},
 		{
-			name: 'Login',
-			location: '/login',
-			icon: 'fa-solid fa-door-closed',
-		},
-		{
-			name: 'Cart',
-			location: '/cart',
-			icon: 'fa-solid fa-cart-shopping',
+			name: 'Contact',
+			location: '/contact',
 		},
 	]
 

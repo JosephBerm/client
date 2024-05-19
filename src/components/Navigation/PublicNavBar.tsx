@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Routes from '@/services/routes'
+import Link from 'next/link'
 
 import { useRouter } from 'next/navigation'
 
@@ -20,6 +21,10 @@ function NavBar() {
 		document.body.classList.toggle('blur')
 	}
 
+	const enterLoginPage = () => {
+		router.push('/login')
+	}
+
 	return (
 		<header className='header'>
 			<nav className='navbar'>
@@ -35,17 +40,28 @@ function NavBar() {
 							<li key={index} style={{ animationDelay: `${index * 0.1}s` }}>
 								{route.component ? (
 									<route.component />
-								) : (
+								) : route.icon ? (
 									<button
 										className='clickable titled'
 										onClick={() => router.push(route.location)}
 										data-title={route.name}>
 										<i className={route.icon} />
 									</button>
+								) : (
+									<Link className='inline-link' href={route.location}>
+										{route.name}
+									</Link>
 								)}
 							</li>
 						))}
 					</ol>
+					<Link className='nav-link' href={'/cart'}>
+						<i className='fa-solid fa-cart-shopping'></i>
+					</Link>
+
+					<button onClick={enterLoginPage}>
+						<span className='route-link'>Login</span>
+					</button>
 				</div>
 			</nav>
 		</header>

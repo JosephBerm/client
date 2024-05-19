@@ -146,6 +146,10 @@ nav .burger-button:hover {
 	opacity: 1;
 }
 
+nav.navbar .nav_StyledLinks .nav-link {
+	
+}
+
 /*////////////////////////////////////
 				Breadcrumb     
 //////////////////////////////////// */
@@ -166,7 +170,7 @@ nav .burger-button:hover {
 }
 
 .Breadcrumb span.active {
-	color: var(--accent-color);
+	color: var(--brand-color-2);
 }
 
 /*////////////////////////////////////

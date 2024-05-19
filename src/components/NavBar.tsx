@@ -18,6 +18,8 @@ function NavBar() {
 		}
 	}, [path])
 
+	if (path === '/login') return
+	
 	return (
 		<>
 			{securedRoute && <SecuredNavBar />}

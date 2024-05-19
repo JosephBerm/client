@@ -8,19 +8,26 @@
 @import '@/styles/animations.css';
 
 :root {
-	--main-color: #a264ff;
-	--main-color-tint: #291147;
-	--accent-color: #fff;
-	--bg-color: #0d1224;
-	--header-color: #0e1326;
-	--text-color: #d3d8e8;
-	--section-bg-color: #181d2f;
+	--bg-color: #fcfff7;
+	--section-bg-color: #f8f8f8;
+	--footer-color: #fcfff7;
+	--brand-color-1: #416706;
+	--brand-color-2: #4d7a07;
+	--brand-color-3: #355405;
+	--brand-color-4: #2a4204;
+	--brand-color-5: #1e2f03;
+	--link-color: #00008b;
+	--soft-brand-color: #f2fcef;
+	--black-text-color: #393939;
+	--black: #000;
+	--white: #fff;
+	--gray: #a1a1a1;
+	--light-gray: #d8d8d8;
+
 	--toastify-color-error: #d22b2b !important;
 	--error-color: var(--toastify-color-error);
 	--error-color-tint: #520606;
-	--slate: #8892b0;
-	--dark-slate: #495670;
-	--darker-slate: #0a0f1c;
+
 	--tooltip-background: rgba(0, 0, 0, 0.35);
 	--fz-xxs: 1.2rem;
 	--fz-xs: 1.3rem;
@@ -103,7 +110,7 @@ h5,
 h6 {
 	margin: 0px;
 	font-weight: 600;
-	color: var(--accent-color);
+	color: var(--text-color);
 	line-height: 1.1;
 }
 
@@ -120,19 +127,19 @@ a {
 
 a:hover,
 a:focus {
-	color: var(--accent-color) !important;
+	color: var(--link-color) !important;
 }
 
 a.inline-link {
-	color: var(--main-color);
+	color: var(--brand-color-1);
 }
 a.inline-link:hover,
 a.inline-link:focus {
-	color: var(--main-color) !important;
+	color: var(--brand-color-1) !important;
 }
 
 a.inline-link:after {
-	background-color: var(--main-color);
+	background-color: var(--brand-color-1);
 	bottom: 0.1em;
 	content: '';
 	display: block;
@@ -154,9 +161,8 @@ svg {
 
 button,
 .button {
-	color: var(--main-color);
-	background-color: transparent;
-	border: 1px solid var(--main-color);
+	color: var(--bg-color);
+	background-color: var(--brand-color-1);
 	border-radius: var(--border-radius);
 	font-size: var(--fz-xs);
 	font-family: var(--font-sans);
@@ -169,7 +175,7 @@ button,
 }
 
 button:not(:disabled):hover {
-	background-color: var(--main-color-tint);
+	background-color: var(--brand-color-1-tint);
 }
 
 button:disabled {
@@ -215,7 +221,7 @@ p:last-of-type {
 }
 
 .header .navbar .clickable.titled.active i {
-	color: var(--main-color) !important;
+	color: var(--brand-color-1) !important;
 }
 
 .two-line-limit {
@@ -238,14 +244,11 @@ p:last-of-type {
 
 .InputTextBox label,
 .InputDropdown label {
-	font-size: 1em;
-	font-weight: bold;
+	font-size: 0.85em;
 	text-wrap: nowrap;
-	max-width: 85%;
-	overflow: hidden;
-	text-overflow: ellipsis;
 	align-self: flex-start;
-	margin: 2px 1px;
+	font-weight: bold;
+	color: var(--black-text-color);
 }
 
 .InputTextBox,
@@ -257,7 +260,7 @@ p:last-of-type {
 .InputTextBox textarea,
 .InputTextBox input,
 .InputDropdown select {
-	border: 1px solid var(--accent-color);
+	border: 1px solid var(--light-gray);
 	border-radius: var(--border-radius);
 	background: transparent !important;
 	padding: 5px 10px;
@@ -268,10 +271,16 @@ p:last-of-type {
 	transition: var(--transition);
 }
 
+.InputTextBox:has(.error-message-container:not(:empty)) textarea,
+.InputTextBox:has(.error-message-container:not(:empty)) input,
+.InputDropdown:has(.error-message-container:not(:empty)) select {
+	border-color: var(--error-color);
+}
+
 .InputTextBox.primary textarea,
 .InputTextBox.primary input,
 .InputDropdown.primary select {
-	border: 1px solid var(--main-color);
+	border: 1px solid var(--brand-color-1);
 }
 
 .InputTextBox input:-webkit-autofill,
@@ -287,18 +296,17 @@ p:last-of-type {
 .InputDropdown select:focus,
 .InputDropdown select:focus-visible {
 	outline: none;
-	border-color: var(--main-color);
+	border-color: var(--brand-color-1);
 }
 
 .InputTextBox .error-message-container {
 	position: absolute;
-	top: 99%;
+	top: 98%;
 	min-width: 99%;
+	max-width: 99%;
 	width: max-content;
-	max-width: 150%;
-	background-color: var(--error-color);
-	border: 1px solid var(--error-color);
-	padding: 5px 10px;
+	color: var(--error-color);
+	padding-top: 5px;
 	z-index: 1;
 	animation: flipDown 0.1s ease-out forwards;
 	transition: var(--transition);
@@ -309,9 +317,8 @@ p:last-of-type {
 }
 
 .InputTextBox .error-message-container span.error-message {
-	font-size: 0.75em;
-	font-weight: 700;
-	letter-spacing: 0.5px;
+	font-size: 0.85em;
+	font-weight: bold;
 }
 
 /*////////////////////////////////////
@@ -326,8 +333,30 @@ p:last-of-type {
 }
 
 .InputDropdown option:not(.default-option):checked {
-	color: var(--main-color);
-	background-color: var(--main-color-tint);
+	color: var(--brand-color-1);
+	background-color: var(--brand-color-1-tint);
+}
+
+/*////////////////////////////////////
+				InputCheckbox     
+//////////////////////////////////// */
+.InputCheckbox {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	justify-content: space-between;
+	width: max-content;
+	color: var(--black-text-color);
+	transition: var(--transition);
+}
+.InputCheckbox.checked,
+.InputCheckbox:hover {
+	color: var(--black);
+}
+.InputCheckbox input {
+	accent-color: var(--brand-color-3);
+	position: relative;
+	bottom: 1px;
 }
 
 /*////////////////////////////////////
@@ -412,7 +441,7 @@ section.SectionPreviewer h4.title {
 	transition: var(--transition);
 }
 .FloatingMenu.isOpen .selected-container {
-	color: var(--main-color);
+	color: var(--brand-color-1);
 }
 
 .FloatingMenuTimeSelect,
@@ -454,12 +483,12 @@ section.SectionPreviewer h4.title {
 }
 
 .FloatingMenu .option.selected {
-	color: var(--main-color);
-	background: var(--main-color-tint);
+	color: var(--brand-color-1);
+	background: var(--brand-color-1-tint);
 }
 
 .FloatingMenu .option:hover {
-	color: var(--main-color);
+	color: var(--brand-color-1);
 	background: var(--darker-slate);
 }
 
