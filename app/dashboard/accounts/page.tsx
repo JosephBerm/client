@@ -52,7 +52,7 @@ const Page = () => {
 				<div className='flex gap-5'>
 					<button
 						onClick={() => {
-							route.push(`/dashboard/accounts/${user.id}`)
+							route.push(`/employee-dashboard/accounts/${user.id}`)
 						}}>
 						Edit
 					</button>

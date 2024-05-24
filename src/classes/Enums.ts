@@ -22,3 +22,9 @@ export enum NotificationType {
 	Warning,
 	Error,
 }
+
+export enum UserType {
+	Visitor,
+	Customer,
+	Employee,
+}

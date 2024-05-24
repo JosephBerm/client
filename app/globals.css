@@ -444,7 +444,6 @@ section.SectionPreviewer h4.title {
 	color: var(--brand-color-1);
 }
 
-.FloatingMenuTimeSelect,
 .FloatingMenu,
 .FloatingMenu .selected-container {
 	width: 100%;

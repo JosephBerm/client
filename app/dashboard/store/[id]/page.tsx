@@ -8,7 +8,7 @@ const page = () => {
 	return (
 		<div className='creation-container'>
 			<div className='mb-6'>
-				<Link href='/dashboard/store'>Back to store</Link>
+				<Link href='/employee-dashboard/store'>Back to store</Link>
 			</div>
 			<h3>Create a product</h3>
 			<AddEditForm />

@@ -69,7 +69,7 @@ const Page = (context: any) => {
 
 			if (!productsList) {
 				setTimeout(() => {
-					router.push('/dashboard/orders')
+					router.push('/employee-dashboard/orders')
 				}, 3000)
 
 				return

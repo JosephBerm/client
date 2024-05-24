@@ -10,7 +10,7 @@ function NavBar() {
 	const router = useRouter()
 
 	const [navStyleClassName, setNavStyleClassName] = useState('nav_StyledLinks')
-	const SecuredPaths = ['dashboard']
+	const SecuredPaths = ['employee-dashboard']
 
 	const [pathSplit, setPathSplit] = React.useState<String[]>([])
 	const [currentPath, setCurrentPath] = React.useState<String[]>([])
@@ -20,7 +20,7 @@ function NavBar() {
 		const regex = /(\/)|([^/]+)/g
 		const pathsplit = path.match(regex)
 		const cleanSlashes = pathsplit?.filter((value) => value !== '/')
-		const cleanDashboard = cleanSlashes?.filter((value) => value !== 'dashboard')
+		const cleanDashboard = cleanSlashes?.filter((value) => value !== 'employee-dashboard')
 		setCurrentPath(cleanDashboard!)
 	}, [path])
 
@@ -34,7 +34,7 @@ function NavBar() {
 	}
 
 	const isCurrentPath = (path: string) => {
-		if (currentPath.length === 0 && path == '/dashboard') return true
+		if (currentPath.length === 0 && path == '/employee-dashboard') return true
 		return path.includes(currentPath[0] as string)
 	}
 
@@ -49,7 +49,7 @@ function NavBar() {
 				</div>
 				<div className={navStyleClassName}>
 					<ol>
-						{Routes.navRoutes.map((route, index) => (
+						{Routes.internalRoutes.map((route, index) => (
 							<li key={index} style={{ animationDelay: `${index * 0.1}s` }}>
 								{route.component ? (
 									<route.component />
@@ -70,7 +70,7 @@ function NavBar() {
 						<button
 							className='button p-2'
 							rel='noopener noreferrer'
-							onClick={() => router.push('/dashboard/notifications')}>
+							onClick={() => router.push('/employee-dashboard/notifications')}>
 							<i className='fa-regular fa-bell' />
 						</button>
 					</div> */}

@@ -43,7 +43,7 @@ const AddEditForm = () => {
 			if (!res.payload || res.statusCode !== 200) return toast.error(res.message)
 
 			toast.success(res.message)
-			router.push('/dashboard/store')
+			router.push('/employee-dashboard/store')
 		} catch (error: any) {
 			toast.error(error.message)
 		} finally {
@@ -58,7 +58,7 @@ const AddEditForm = () => {
 			if (!res.payload || res.statusCode !== 200) return toast.error(res.message)
 
 			toast.success(res.message)
-			router.push('/dashboard/store')
+			router.push('/employee-dashboard/store')
 		} catch (error: any) {
 			toast.error(error.message)
 		} finally {

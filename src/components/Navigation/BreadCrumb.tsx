@@ -19,7 +19,7 @@ export default function Breadcrumb() {
 		setPathSplit(pathsplit!)
 	}, [path])
 
-	if (!path.startsWith('/dashboard')) return <></>
+	if (!path.startsWith('/employee-dashboard')) return <></>
 
 	return (
 		<div className='Breadcrumb'>

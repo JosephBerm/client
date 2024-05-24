@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ChangeEvent } from 'react'
 import InputTextBox, { InputType } from './InputTextBox'
 import '@/styles/inputcomponents.css'
 
@@ -14,12 +14,10 @@ const InputNumber: React.FC<InputNumberType> = ({
 	handleChange,
 	...rest
 }) => {
-	const handleInputChange = (newValue: string) => {
-		const parsedValue = parseInt(newValue)
+	const handleInputChange = (newValue: ChangeEvent<HTMLInputElement>) => {
+		const parsedValue = parseInt(newValue.currentTarget.value)
 		if (!isNaN(parsedValue) && (parsedValue >= min || !min) && (parsedValue <= max || !max)) {
-			handleChange(parsedValue)
-		} else {
-			handleChange(null)
+			handleChange(newValue)
 		}
 	}
 

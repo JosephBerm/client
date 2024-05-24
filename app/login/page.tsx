@@ -40,7 +40,7 @@ const Page = () => {
 				instance.defaults.headers.common['Authorization'] = `Bearer ${JWTToken}`
 
 				//route to dashboard
-				router.push('/dashboard')
+				router.push('/employee-dashboard')
 			} else {
 				toast.error(authenticated.message)
 			}

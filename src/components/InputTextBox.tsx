@@ -1,14 +1,15 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React, { useRef, ChangeEvent } from 'react'
 
 type inputMode = 'search' | 'email' | 'tel' | 'text' | 'url' | 'none' | 'numeric' | 'decimal' | undefined
 
 export interface InputType {
 	type: string
 	value: string
-	label: string
+	label?: string
 	placeholder?: string
+	iconClass?: string
 	disabled?: boolean
 	readOnly?: boolean
 	autofocused?: boolean
@@ -18,8 +19,8 @@ export interface InputType {
 	// Icon: ?
 	// VALIDATION: ?
 	maxLength?: number
-	handleChange: (value: any) => void
-	handleBlur?: (value: any) => void
+	handleChange: (value: ChangeEvent<HTMLInputElement>) => void
+	handleBlur?: (value: ChangeEvent<HTMLInputElement>) => void
 	handleFocus?: () => void
 	className?: string
 }
@@ -29,6 +30,7 @@ const InputTextBox: React.FC<InputType> = ({
 	label,
 	value,
 	placeholder,
+	iconClass,
 	disabled,
 	readOnly,
 	autofocused,
@@ -48,6 +50,16 @@ const InputTextBox: React.FC<InputType> = ({
 		}
 	}
 
+	const getIcon = () => {
+		if (!iconClass) return <></>
+
+		return (
+			<div className='icon-container'>
+				<i className={iconClass}></i>
+			</div>
+		)
+	}
+
 	return (
 		<div className='InputTextBox flex flex-col'>
 			<label onClick={focusInput} className='m-2'>
@@ -64,11 +76,13 @@ const InputTextBox: React.FC<InputType> = ({
 				maxLength={maxLength}
 				inputMode={inputmode}
 				pattern={pattern}
-				onChange={(e) => handleChange(e.target.value)}
+				onChange={(e) => handleChange(e)}
 				onBlur={handleBlur}
 				onFocus={handleFocus}
 				className={`${className + ' ' ?? ''}border-b border-gray-300`}
 			/>
+
+			{getIcon()}
 		</div>
 	)
 }

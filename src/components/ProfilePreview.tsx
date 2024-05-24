@@ -1,11 +1,24 @@
 import React from 'react'
+import FloatingMenu, { FloatingMenuProps } from '@/common/FloatingMenu'
 
 function ProfilePreview() {
-	return (
-		<div className='ProfilePreview titled clickable flex justify-center items-center' data-title='Profile'>
-			<div className='picture-container'>pfp</div>
-		</div>
-	)
+	const floatingMenuChildren: FloatingMenuProps = {
+		children: {
+			buttonSlot: (
+				<div className='pfp-preview'>
+					<span>pfp</span>
+				</div>
+			),
+			bodySlot: (
+				<>
+					<div>Settings</div>
+					<div>App Preferences</div>
+					<div>Logout</div>
+				</>
+			),
+		},
+	}
+	return <FloatingMenu {...floatingMenuChildren} />
 }
 
 export default ProfilePreview

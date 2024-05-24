@@ -43,7 +43,7 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 			const { data } = await API.Orders.update(currentOrder)
 
 			if (data.statusCode == 200) {
-				route.push('/dashboard/orders')
+				route.push('/employee-dashboard/orders')
 			}
 		} catch (err) {
 			console.error(err)

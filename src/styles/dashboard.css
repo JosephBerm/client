@@ -1,7 +1,5 @@
-.sections-container {
-	display: grid;
-	grid-template-columns: 1fr;
-	gap: 10px;
+.Dashboard {
+	
 }
 
 /*////////////////////////////////////
@@ -9,25 +7,16 @@
 //////////////////////////////////// */
 
 @media screen and (min-width: 480px) {
-	.sections-container {
-		grid-template-columns: 1fr 1fr;
-	}
 }
 
 @media screen and (min-width: 600px) {
 }
 
 @media screen and (min-width: 768px) {
-	.sections-container {
-		grid-template-columns: 1fr 1fr 1fr;
-	}
 }
 
 @media screen and (min-width: 1024px) {
 }
 
 @media screen and (min-width: 1080px) {
-	.sections-container {
-		grid-template-columns: 1fr 1fr 1fr 1fr;
-	}
 }

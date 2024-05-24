@@ -72,7 +72,7 @@ const Page = () => {
 		{
 			key: 'edit',
 			label: 'Edit',
-			content: (quote) => <Link href={`/dashboard/quotes/${quote.id}`}>Edit</Link>,
+			content: (quote) => <Link href={`/employee-dashboard/quotes/${quote.id}`}>Edit</Link>,
 		},
 		{
 			key: 'delete',

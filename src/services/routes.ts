@@ -1,54 +1,54 @@
 import { NextRouter } from 'next/router'
 import ProfilePreview from '@/components/ProfilePreview'
 import Route from '@/interfaces/Route'
+import InputTextBox, { InputType } from '@/components/InputTextBox'
 
 class Routes {
 	private static router: NextRouter
-
-	public static navRoutes: Route[] = [
+	public static internalRoutes: Route[] = [
 		{
 			name: 'Dashboard',
-			location: '/dashboard',
+			location: '/employee-dashboard',
 			icon: 'fa-solid fa-house',
 		},
 		{
 			name: 'Store',
-			location: '/dashboard/store',
+			location: '/employee-dashboard/store',
 			icon: 'fa-solid fa-store',
 		},
 		{
 			name: 'Quotes',
-			location: '/dashboard/quotes',
+			location: '/employee-dashboard/quotes',
 			icon: 'fa-solid fa-list-check',
 		},
 		{
 			name: 'Providers',
-			location: '/dashboard/providers',
+			location: '/employee-dashboard/providers',
 			icon: 'fa-solid fa-users',
 		},
 		{
 			name: 'Orders',
-			location: '/dashboard/orders',
+			location: '/employee-dashboard/orders',
 			icon: 'fa-solid fa-dollar-sign',
 		},
 		{
 			name: 'Notifications',
-			location: '/dashboard/notifications',
+			location: '/employee-dashboard/notifications',
 			icon: 'fa-solid fa-bell',
 		},
 		{
 			name: 'Accounts',
-			location: '/dashboard/accounts',
+			location: '/employee-dashboard/accounts',
 			icon: 'fa-solid fa-users',
 		},
 		{
 			name: 'Customers',
-			location: '/dashboard/customers',
+			location: '/employee-dashboard/customers',
 			icon: 'fa-solid fa-users',
 		},
 		{
 			name: 'Profile',
-			location: '/dashboard/profile',
+			location: '/employee-dashboard/profile',
 			icon: 'fa-solid fa-user',
 		},
 	]

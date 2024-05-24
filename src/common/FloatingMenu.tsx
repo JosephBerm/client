@@ -1,21 +1,27 @@
 import React, { useState, useRef, useEffect } from 'react'
 import classNames from 'classnames'
 
-type FloatingMenuProps = {
-	options: string[]
-	onChange: Function
+export type FloatingMenuProps = {
+	children: {
+		buttonSlot?: React.ReactNode
+		bodySlot: React.ReactNode
+	}
+	iconClass?: string
 }
 
-function FloatingMenu({ options, onChange: emitChange }: FloatingMenuProps) {
-	const [selected, setSelected] = useState(options[0])
+function FloatingMenu({ children, iconClass }: FloatingMenuProps) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false)
 	const optionsContainerRef = useRef<HTMLDivElement>(null)
 
-	const handleClick = (option: string) => {
-		if (option === selected) return
+	const getIcon = () => {
+		if (iconClass) {
+			return <i className={iconClass}></i>
+		} else if (children.buttonSlot) {
+			return children.buttonSlot // Assuming the first child is the icon
+		}
 
-		setSelected(option)
-		emitChange(option)
+		// Slot for custom icon
+		return 'fa-solid fa-bars'
 	}
 
 	useEffect(() => {
@@ -26,25 +32,10 @@ function FloatingMenu({ options, onChange: emitChange }: FloatingMenuProps) {
 
 	return (
 		<div className={classNames({ FloatingMenu: true, isOpen: isMenuOpen })}>
-			<div className='selected-container clickable' onClick={() => setIsMenuOpen(!isMenuOpen)}>
-				<span className='selected'>{selected}</span>
+			<div className='icon-container clickable' onClick={() => setIsMenuOpen(!isMenuOpen)}>
+				{getIcon()}
 			</div>
-			{isMenuOpen && (
-				<div
-					className='options-container'
-					tabIndex={0}
-					onBlur={() => setIsMenuOpen(!isMenuOpen)}
-					ref={optionsContainerRef}>
-					{options.map((option, index) => (
-						<div
-							key={index}
-							className={classNames({ clickable: true, option: true, selected: selected === option })}
-							onClick={() => handleClick(option)}>
-							{option}
-						</div>
-					))}
-				</div>
-			)}
+			{isMenuOpen ? <div className='childrens-container'>{children.bodySlot}</div> : <></>}
 		</div>
 	)
 }

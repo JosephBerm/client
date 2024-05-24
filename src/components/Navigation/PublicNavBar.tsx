@@ -10,7 +10,7 @@ function NavBar() {
 	const router = useRouter()
 
 	const [navStyleClassName, setNavStyleClassName] = useState('nav_StyledLinks')
-	const SecuredPaths = ['dashboard']
+	const SecuredPaths = ['employee-dashboard']
 
 	const toggleNavbar = () => {
 		if (navStyleClassName.includes('opened')) {

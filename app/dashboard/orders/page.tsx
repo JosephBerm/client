@@ -74,7 +74,7 @@ const Page = () => {
 			key: 'edit',
 			label: 'Edit',
 			content: (order: Order) => (
-				<Link className='inline-link' href={`/dashboard/orders/${order.id}`}>
+				<Link className='inline-link' href={`/employee-dashboard/orders/${order.id}`}>
 					Edit
 				</Link>
 			),

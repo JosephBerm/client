@@ -15,7 +15,7 @@ const Page = () => {
 	const route = useRouter()
 
 	const createCustomer = async () => {
-		route.push('/dashboard/customers/create')
+		route.push('/employee-dashboard/customers/create')
 	}
 
 	const fetchCustomers = async () => {
@@ -70,7 +70,7 @@ const Page = () => {
 				<div className='flex gap-5'>
 					<button
 						onClick={() => {
-							route.push(`/dashboard/customers/${customer.id}`)
+							route.push(`/employee-dashboard/customers/${customer.id}`)
 						}}>
 						Edit
 					</button>
