@@ -8,6 +8,7 @@ import API from '@/services/api'
 import IsBusyLoading from '@/components/isBusyLoading'
 import Table from '@/common/table'
 import Link from 'next/link'
+import Routes from '@/services/routes'
 
 const Page = () => {
 	const [quotes, setQuotes] = useState<Quote[]>([])
@@ -72,7 +73,7 @@ const Page = () => {
 		{
 			key: 'edit',
 			label: 'Edit',
-			content: (quote) => <Link href={`/employee-dashboard/quotes/${quote.id}`}>Edit</Link>,
+			content: (quote) => <Link href={`${Routes.InternalAppRoute}/quotes/${quote.id}`}>Edit</Link>,
 		},
 		{
 			key: 'delete',

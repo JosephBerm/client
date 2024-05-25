@@ -10,6 +10,7 @@ import { Formik, Form } from 'formik'
 import FormInputTextBox from '@/components/FormInputTextbox'
 import Validations from '@/utilities/validationSchemas'
 import Provider from '@/src/classes/Provider'
+import Routes from '@/services/routes'
 
 const AddEditForm = () => {
 	const router = useRouter()
@@ -43,7 +44,7 @@ const AddEditForm = () => {
 			if (!res.payload || res.statusCode !== 200) return toast.error(res.message)
 
 			toast.success(res.message)
-			router.push('/employee-dashboard/store')
+			router.push(`${Routes.InternalAppRoute}/store`)
 		} catch (error: any) {
 			toast.error(error.message)
 		} finally {
@@ -58,7 +59,7 @@ const AddEditForm = () => {
 			if (!res.payload || res.statusCode !== 200) return toast.error(res.message)
 
 			toast.success(res.message)
-			router.push('/employee-dashboard/store')
+			router.push(`${Routes.InternalAppRoute}/store`)
 		} catch (error: any) {
 			toast.error(error.message)
 		} finally {
@@ -71,16 +72,14 @@ const AddEditForm = () => {
 			const { data } = await API.Providers.getAll()
 			console.log(data)
 			if (data.payload) {
+				setProviders((data.payload as Provider[]) || [])
 
-				setProviders(data.payload as Provider[] || [])
-
-				console.log("first", data.payload)
+				console.log('first', data.payload)
 			}
 		} finally {
 			setIsLoading(true)
 		}
 	}
-
 
 	useEffect(() => {
 		if (!params.id || isNewProduct) return
@@ -105,7 +104,10 @@ const AddEditForm = () => {
 					<FormInputTextBox<Product> label='SKU' name='sku' />
 					<FormInputTextBox<Product> label='Product Price' name='price' />
 					<FormInputTextBox<Product> label='Product Description' name='description' />
-					<select name='providerId' className='form-input' onChange={(e) => setProduct({ ...product, providerId: parseInt(e.target.value) })}>
+					<select
+						name='providerId'
+						className='form-input'
+						onChange={(e) => setProduct({ ...product, providerId: parseInt(e.target.value) })}>
 						<option value=''>Select Provider</option>
 						{providers.map((provider) => (
 							<option key={provider.id} value={provider.id}>

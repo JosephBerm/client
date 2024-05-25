@@ -13,14 +13,15 @@ function CustomerNavBar() {
 	const hideFloatingButton = () => {}
 
 	return (
-		<header className='header'>
+		<header className='header customer'>
 			<nav className='navbar'>
 				<div className='logo'>
+					(())
 					<a href='/'>MEDSOURCE</a>
 				</div>
 				<div className='navbar-container'>
-					<div className={classNames({ 'search-container': true, 'is-hidden': !hasFloatingButton })}>
-						<button className='floating-button' onClick={hideFloatingButton}>
+					<div className={classNames({ 'search-container': true, 'is-hidden': hasFloatingButton })}>
+						<button className='floating-button' onClick={() => setHasFloatingButton(!hasFloatingButton)}>
 							<i className='fa-solid fa-magnifying-glass' />
 						</button>
 
@@ -29,6 +30,7 @@ function CustomerNavBar() {
 							type='text'
 							handleChange={handleSearchTextChange}
 							iconClass='fa-solid fa-magnifying-glass'
+							autofocused={true}
 						/>
 					</div>
 					<NotificationBell />

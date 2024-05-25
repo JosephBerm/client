@@ -15,6 +15,7 @@ import API from '@/services/api'
 
 import FormInputTextBox from '@/components/FormInputTextbox'
 import InputCheckbox from '@/components/InputCheckbox'
+import Routes from '@/services/routes'
 
 const Page = () => {
 	const [credentials, setCredentials] = useState(new LoginCredentials())
@@ -40,7 +41,7 @@ const Page = () => {
 				instance.defaults.headers.common['Authorization'] = `Bearer ${JWTToken}`
 
 				//route to dashboard
-				router.push('/employee-dashboard')
+				router.push(Routes.CustomerAppRoute)
 			} else {
 				toast.error(authenticated.message)
 			}

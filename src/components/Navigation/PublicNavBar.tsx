@@ -10,7 +10,7 @@ function NavBar() {
 	const router = useRouter()
 
 	const [navStyleClassName, setNavStyleClassName] = useState('nav_StyledLinks')
-	const SecuredPaths = ['employee-dashboard']
+	const SecuredPaths = [Routes.InternalAppRoute]
 
 	const toggleNavbar = () => {
 		if (navStyleClassName.includes('opened')) {
@@ -22,11 +22,15 @@ function NavBar() {
 	}
 
 	const enterLoginPage = () => {
-		router.push('/login')
+		router.push('/customer-login')
+	}
+
+	const enterEmployeeLoginPage = () => {
+		router.push('/app-login')
 	}
 
 	return (
-		<header className='header'>
+		<header className='header public'>
 			<nav className='navbar'>
 				<div className='logo'>
 					<a href='/'>LOGO</a>
@@ -60,7 +64,10 @@ function NavBar() {
 					</Link>
 
 					<button onClick={enterLoginPage}>
-						<span className='route-link'>Login</span>
+						<span className='route-link'>Customer Login</span>
+					</button>
+					<button onClick={enterEmployeeLoginPage}>
+						<span className='route-link'>Employee Login</span>
 					</button>
 				</div>
 			</nav>

@@ -174,10 +174,6 @@ button,
 	align-self: center;
 }
 
-button:not(:disabled):hover {
-	background-color: var(--brand-color-1-tint);
-}
-
 button:disabled {
 	opacity: 0.7;
 	cursor: no-drop;
@@ -240,6 +236,7 @@ p:last-of-type {
 	font-size: 1.6rem;
 	font-family: var(--font-sans);
 	font-weight: normal;
+	--input-color: var(--light-gray);
 }
 
 .InputTextBox label,
@@ -260,7 +257,7 @@ p:last-of-type {
 .InputTextBox textarea,
 .InputTextBox input,
 .InputDropdown select {
-	border: 1px solid var(--light-gray);
+	border: 1px solid var(--input-color);
 	border-radius: var(--border-radius);
 	background: transparent !important;
 	padding: 5px 10px;
@@ -268,6 +265,7 @@ p:last-of-type {
 	font-weight: 100;
 	width: 100%;
 	min-height: 35px;
+	color: var(--black-text-color);
 	transition: var(--transition);
 }
 
@@ -277,10 +275,10 @@ p:last-of-type {
 	border-color: var(--error-color);
 }
 
-.InputTextBox.primary textarea,
-.InputTextBox.primary input,
-.InputDropdown.primary select {
-	border: 1px solid var(--brand-color-1);
+.InputTextBox.primary,
+.InputTextBox.primary,
+.InputDropdown.primary {
+	--input-color: var(--brand-color-1);
 }
 
 .InputTextBox input:-webkit-autofill,
@@ -296,7 +294,15 @@ p:last-of-type {
 .InputDropdown select:focus,
 .InputDropdown select:focus-visible {
 	outline: none;
-	border-color: var(--brand-color-1);
+}
+
+.InputTextBox:has(textarea:focus),
+.InputTextBox:has(textarea:focus-visible),
+.InputTextBox:has(input:focus),
+.InputTextBox:has(input:focus-visible),
+.InputDropdown:has(select:focus),
+.InputDropdown:has(select:focus-visible) {
+	--input-color: var(--brand-color-1);
 }
 
 .InputTextBox .error-message-container {
@@ -319,6 +325,32 @@ p:last-of-type {
 .InputTextBox .error-message-container span.error-message {
 	font-size: 0.85em;
 	font-weight: bold;
+}
+.InputTextBox:has(.icon-container) input {
+	padding-left: 35px;
+}
+.InputTextBox .icon-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 100%;
+	max-width: 30px;
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--input-color);
+}
+.InputTextBox textarea:focus .icon-container,
+.InputTextBox textarea:focus-visible .icon-container {
+}
+.InputTextBox .icon-container::after {
+	content: '';
+	position: absolute;
+	right: 0;
+	height: 60%;
+	width: 1px;
+	background-color: var(--input-color);
 }
 
 /*////////////////////////////////////
@@ -431,64 +463,12 @@ section.SectionPreviewer h4.title {
 	background: transparent;
 	transition: var(--transition);
 }
-.FloatingMenu.isOpen {
-	background-color: var(--darker-slate);
-}
 
-.FloatingMenu .selected-container {
-	text-wrap: nowrap;
-	text-align: center;
-	transition: var(--transition);
+.FloatingMenu .icon-container {
 }
-.FloatingMenu.isOpen .selected-container {
-	color: var(--brand-color-1);
-}
-
-.FloatingMenu,
-.FloatingMenu .selected-container {
-	width: 100%;
-	height: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
-
-.FloatingMenu .option {
-	height: 100%;
-	width: 100%;
-	text-align: center;
-}
-
-.FloatingMenu .options-container {
+.FloatingMenu .childrens-container {
 	position: absolute;
-	top: 100%;
-	left: 50%;
-	transform: translateX(-50%);
-	background-color: var(--section-bg-color);
-	display: flex;
-	flex-direction: column;
-	gap: 5px;
-	padding: 5px;
-	width: max-content;
-	z-index: 5;
-	opacity: 0;
-	outline: none;
-	animation: fadeIn 0.2s ease-out forwards;
-}
-
-.FloatingMenu .option {
-	transition: var(--transition);
-	padding: 5px 10px;
-}
-
-.FloatingMenu .option.selected {
-	color: var(--brand-color-1);
-	background: var(--brand-color-1-tint);
-}
-
-.FloatingMenu .option:hover {
-	color: var(--brand-color-1);
-	background: var(--darker-slate);
+	background-color: var(--black-text-color);
 }
 
 /*////////////////////////////////////

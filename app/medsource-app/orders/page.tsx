@@ -8,9 +8,10 @@ import API from '@/services/api'
 import IsBusyLoading from '@/components/isBusyLoading'
 import Table from '@/common/table'
 import Link from 'next/link'
-import Order from '@/src/classes/Order'
+import Order from '@/classes/Order'
 import { useRouter } from 'next/navigation'
-import { formatNumber } from '@/src/services/utils'
+import { formatNumber } from '@/services/utils'
+import Routes from '@/services/routes'
 
 const Page = () => {
 	const [orders, setOrders] = useState<Order[]>([])
@@ -74,7 +75,7 @@ const Page = () => {
 			key: 'edit',
 			label: 'Edit',
 			content: (order: Order) => (
-				<Link className='inline-link' href={`/employee-dashboard/orders/${order.id}`}>
+				<Link className='inline-link' href={`${Routes.InternalAppRoute}/orders/${order.id}`}>
 					Edit
 				</Link>
 			),

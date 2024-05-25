@@ -8,6 +8,7 @@ import API from '@/services/api'
 import '@/styles/accounts.css'
 import Customer from '@/src/classes/Customer'
 import { toast } from 'react-toastify'
+import Routes from '@/services/routes'
 
 const Page = () => {
 	const [tables, setTables] = useState<Customer[]>([])
@@ -15,7 +16,7 @@ const Page = () => {
 	const route = useRouter()
 
 	const createCustomer = async () => {
-		route.push('/employee-dashboard/customers/create')
+		route.push(`${Routes.InternalAppRoute}/customers/create`)
 	}
 
 	const fetchCustomers = async () => {
@@ -70,7 +71,7 @@ const Page = () => {
 				<div className='flex gap-5'>
 					<button
 						onClick={() => {
-							route.push(`/employee-dashboard/customers/${customer.id}`)
+							route.push(`${Routes.InternalAppRoute}/customers/${customer.id}`)
 						}}>
 						Edit
 					</button>

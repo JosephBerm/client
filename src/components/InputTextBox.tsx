@@ -62,9 +62,13 @@ const InputTextBox: React.FC<InputType> = ({
 
 	return (
 		<div className='InputTextBox flex flex-col'>
-			<label onClick={focusInput} className='m-2'>
-				{label}
-			</label>
+			{label ? (
+				<label onClick={focusInput} className='m-2'>
+					{label}
+				</label>
+			) : (
+				<></>
+			)}
 			<input
 				ref={inputRef}
 				autoFocus={autofocused}

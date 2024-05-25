@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Routes from '@/services/routes'
 
 function formatPath(string: String) {
 	return string.charAt(0).toUpperCase() + string.slice(1)
@@ -19,7 +20,7 @@ export default function Breadcrumb() {
 		setPathSplit(pathsplit!)
 	}, [path])
 
-	if (!path.startsWith('/employee-dashboard')) return <></>
+	if (!path.startsWith(Routes.InternalAppRoute)) return <></>
 
 	return (
 		<div className='Breadcrumb'>

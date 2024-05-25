@@ -10,7 +10,7 @@ function NavBar() {
 	const router = useRouter()
 
 	const [navStyleClassName, setNavStyleClassName] = useState('nav_StyledLinks')
-	const SecuredPaths = ['employee-dashboard']
+	const SecuredPaths = [Routes.InternalAppRoute]
 
 	const [pathSplit, setPathSplit] = React.useState<String[]>([])
 	const [currentPath, setCurrentPath] = React.useState<String[]>([])
@@ -20,7 +20,7 @@ function NavBar() {
 		const regex = /(\/)|([^/]+)/g
 		const pathsplit = path.match(regex)
 		const cleanSlashes = pathsplit?.filter((value) => value !== '/')
-		const cleanDashboard = cleanSlashes?.filter((value) => value !== 'employee-dashboard')
+		const cleanDashboard = cleanSlashes?.filter((value) => value !== Routes.InternalAppRoute)
 		setCurrentPath(cleanDashboard!)
 	}, [path])
 
@@ -34,12 +34,12 @@ function NavBar() {
 	}
 
 	const isCurrentPath = (path: string) => {
-		if (currentPath.length === 0 && path == '/employee-dashboard') return true
+		if (currentPath.length === 0 && path == Routes.InternalAppRoute) return true
 		return path.includes(currentPath[0] as string)
 	}
 
 	return (
-		<header className='header'>
+		<header className='header internal'>
 			<nav className='navbar'>
 				<div className='logo'>
 					<a href='/'>LOGO</a>
@@ -70,7 +70,7 @@ function NavBar() {
 						<button
 							className='button p-2'
 							rel='noopener noreferrer'
-							onClick={() => router.push('/employee-dashboard/notifications')}>
+							onClick={() => router.push(`${Routes.InternalAppRoute}/notifications`)}>
 							<i className='fa-regular fa-bell' />
 						</button>
 					</div> */}

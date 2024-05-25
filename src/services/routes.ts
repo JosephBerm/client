@@ -4,51 +4,53 @@ import Route from '@/interfaces/Route'
 import InputTextBox, { InputType } from '@/components/InputTextBox'
 
 class Routes {
+	public static InternalAppRoute: string = '/medsource-app'
+	public static CustomerAppRoute: string = '/customer'
 	private static router: NextRouter
 	public static internalRoutes: Route[] = [
 		{
 			name: 'Dashboard',
-			location: '/employee-dashboard',
+			location: this.InternalAppRoute,
 			icon: 'fa-solid fa-house',
 		},
 		{
 			name: 'Store',
-			location: '/employee-dashboard/store',
+			location: `${this.InternalAppRoute}/store`,
 			icon: 'fa-solid fa-store',
 		},
 		{
 			name: 'Quotes',
-			location: '/employee-dashboard/quotes',
+			location: `${this.InternalAppRoute}/quotes`,
 			icon: 'fa-solid fa-list-check',
 		},
 		{
 			name: 'Providers',
-			location: '/employee-dashboard/providers',
+			location: `${this.InternalAppRoute}/providers`,
 			icon: 'fa-solid fa-users',
 		},
 		{
 			name: 'Orders',
-			location: '/employee-dashboard/orders',
+			location: `${this.InternalAppRoute}/orders`,
 			icon: 'fa-solid fa-dollar-sign',
 		},
 		{
 			name: 'Notifications',
-			location: '/employee-dashboard/notifications',
+			location: `${this.InternalAppRoute}/notifications`,
 			icon: 'fa-solid fa-bell',
 		},
 		{
 			name: 'Accounts',
-			location: '/employee-dashboard/accounts',
+			location: `${this.InternalAppRoute}/accounts`,
 			icon: 'fa-solid fa-users',
 		},
 		{
 			name: 'Customers',
-			location: '/employee-dashboard/customers',
+			location: `${this.InternalAppRoute}/customers`,
 			icon: 'fa-solid fa-users',
 		},
 		{
 			name: 'Profile',
-			location: '/employee-dashboard/profile',
+			location: `${this.InternalAppRoute}/profile`,
 			icon: 'fa-solid fa-user',
 		},
 	]
@@ -69,6 +71,25 @@ class Routes {
 		{
 			name: 'Contact',
 			location: '/contact',
+		},
+	]
+
+	public static customerRoutes: Route[] = [
+		{
+			name: 'Dashboard',
+			location: this.CustomerAppRoute,
+		},
+		{
+			name: 'Cart',
+			location: `${this.CustomerAppRoute}/cart`,
+		},
+		{
+			name: 'Orders',
+			location: `${this.CustomerAppRoute}/orders`,
+		},
+		{
+			name: 'Profile',
+			location: `${this.CustomerAppRoute}/profile`,
 		},
 	]
 

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import Table from '@/common/table'
 import API from '@/services/api'
+import Routes from '@/services/routes'
 import '@/styles/accounts.css'
 
 const Page = () => {
@@ -52,7 +53,7 @@ const Page = () => {
 				<div className='flex gap-5'>
 					<button
 						onClick={() => {
-							route.push(`/employee-dashboard/accounts/${user.id}`)
+							route.push(`${Routes.InternalAppRoute}/accounts/${user.id}`)
 						}}>
 						Edit
 					</button>

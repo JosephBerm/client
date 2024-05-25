@@ -12,12 +12,13 @@ import InputTextBox from '@/components/InputTextBox'
 import IsBusyLoading from '@/components/isBusyLoading'
 import InputNumber from '@/components/InputNumber'
 import InputDropdown from '@/components/InputDropdown'
-import Customer from '@/src/classes/Customer'
+import Customer from '@/classes/Customer'
+import Routes from '@/services/routes'
 
 interface OrdersProps {
 	order: Order
 	products: Product[]
-    customers: Customer[]
+	customers: Customer[]
 }
 
 const OrdersPage = ({ order, products, customers }: OrdersProps) => {
@@ -43,7 +44,7 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 			const { data } = await API.Orders.update(currentOrder)
 
 			if (data.statusCode == 200) {
-				route.push('/employee-dashboard/orders')
+				route.push(`${Routes.InternalAppRoute}/orders`)
 			}
 		} catch (err) {
 			console.error(err)
@@ -62,7 +63,7 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 				newOrder.products[index].quantity = quantity
 			}
 
-            console.log("first, ", currentOrder)
+			console.log('first, ', currentOrder)
 
 			return newOrder
 		})
@@ -83,7 +84,7 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 		})
 	}
 	const handleSelectProduct = (productId: number | string) => {
-		const product = products.find((p) => p.id == productId as string)
+		const product = products.find((p) => p.id == (productId as string))
 		if (product) setProduct(product)
 	}
 	const handleAddingProduct = () => {
@@ -98,17 +99,13 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 		productToAdd.setProduct(product)
 		productToAdd.quantity = 1
 
-	
-
-        setCurrentOrder((prevState) => ({
-            ...prevState,
-            products: [...prevState.products, productToAdd],
-            total: prevState.total + (productToAdd.product?.price ?? 0),
-            CreateFromQuote: prevState.CreateFromQuote// Calculate or set the value here
-          }));
-        console.log(currentOrder.products)
-
-        
+		setCurrentOrder((prevState) => ({
+			...prevState,
+			products: [...prevState.products, productToAdd],
+			total: prevState.total + (productToAdd.product?.price ?? 0),
+			CreateFromQuote: prevState.CreateFromQuote, // Calculate or set the value here
+		}))
+		console.log(currentOrder.products)
 
 		setProduct(null)
 	}
@@ -132,18 +129,18 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 		})
 	}
 
-    const handleSelectCustomer = (customerId: number | string) => {
-        const customer = customers.find((c) => c.id == customerId as number)
+	const handleSelectCustomer = (customerId: number | string) => {
+		const customer = customers.find((c) => c.id == (customerId as number))
 
-        if (customer) {
-            setCurrentOrder((prevState) => ({
-                ...prevState,
-                customer: customer,
-                customerId: customer.id,
-                CreateFromQuote: prevState.CreateFromQuote
-            }))
-        }
-    }
+		if (customer) {
+			setCurrentOrder((prevState) => ({
+				...prevState,
+				customer: customer,
+				customerId: customer.id,
+				CreateFromQuote: prevState.CreateFromQuote,
+			}))
+		}
+	}
 
 	const columns: TableColumn<OrderItem>[] = [
 		{
@@ -188,15 +185,15 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 		<div className='orders-page'>
 			<h3 className='page-title'>Order Details</h3>
 
-            <InputDropdown<Customer>
-					options={customers}
-					display='name'
-					label='Customer'
-					value={currentOrder.customer?.id ?? ""}
-					handleChange={handleSelectCustomer}
-					placeholder='Select a Customer'
-					customClass='primary'
-				/>
+			<InputDropdown<Customer>
+				options={customers}
+				display='name'
+				label='Customer'
+				value={currentOrder.customer?.id ?? ''}
+				handleChange={handleSelectCustomer}
+				placeholder='Select a Customer'
+				customClass='primary'
+			/>
 
 			<Table<OrderItem>
 				columns={columns}

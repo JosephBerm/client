@@ -30,6 +30,64 @@ nav.navbar {
 	z-index: 12;
 }
 
+nav.navbar .logo,
+nav.navbar .navbar-container {
+	display: flex;
+	width: fit-content;
+	align-items: center;
+	justify-content: space-between;
+	gap: 5px;
+}
+
+nav.navbar .navbar-container > * {
+	width: fit-content;
+	color: var(--brand-color-1);
+}
+
+nav.navbar .navbar-container .FloatingMenu {
+	width: fit-content;
+	padding: 0 5px;
+}
+
+nav.navbar .navbar-container .search-container {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+nav.navbar .navbar-container .search-container.is-hidden .floating-button {
+	position: relative;
+	background-color: unset;
+	color: var(--brand-color-1);
+}
+
+nav.navbar .navbar-container .search-container .floating-button {
+	position: absolute;
+	right: 0;
+	width: fit-content;
+	padding: 5px;
+}
+
+nav.navbar .navbar-container .search-container.is-hidden .InputTextBox,
+nav.navbar .navbar-container .search-container:not(.is-hidden) .floating-button {
+	position: absolute;
+	visibility: hidden;
+	opacity: 0;
+	pointer-events: none;
+	user-select: none;
+}
+
+nav.navbar .navbar-container .search-container .InputTextBox {
+	max-width: 100%;
+	transition: var(--transition);
+	transition-delay: 0.05s;
+}
+
+nav.navbar .navbar-container .search-container.is-hidden .InputTextBox {
+	max-width: 0px;
+}
+
 nav .burger-button,
 nav.navbar {
 	align-items: center;
@@ -147,7 +205,6 @@ nav .burger-button:hover {
 }
 
 nav.navbar .nav_StyledLinks .nav-link {
-	
 }
 
 /*////////////////////////////////////

@@ -1,7 +1,8 @@
 'use client'
 import Quote from '@/classes/Quote'
-import IsBusyLoading from '@/src/components/isBusyLoading'
-import API from '@/src/services/api'
+import IsBusyLoading from '@/components/isBusyLoading'
+import API from '@/services/api'
+import Routes from '@/services/routes'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
@@ -29,12 +30,12 @@ const Page = () => {
 	const createOrderFromQuote = async () => {
 		setIsLoading(true)
 		try {
-			const {data } = await API.Orders.createFromQuote<Quote>(params.id as string)
+			const { data } = await API.Orders.createFromQuote<Quote>(params.id as string)
 
 			if (data.payload) {
-				route.push(`/employee-dashboard/orders/${data.payload.id}`)
+				route.push(`${Routes.InternalAppRoute}/orders/${data.payload.id}`)
 			}
-		} catch(err ){
+		} catch (err) {
 			console.error(err)
 		} finally {
 			setIsLoading(false)
