@@ -28,3 +28,8 @@ export enum UserType {
 	Customer,
 	Employee,
 }
+
+export enum AccountRole {
+	Customer,
+	Admin = 9999999,
+}

@@ -1,9 +1,10 @@
 import Notification from '@/src/classes/Notification'
+import Customer from '@/classes/Customer'
 /**
  * Implementation of the server user class.
  */
 export default class User {
-	public readonly id: string = '0'
+	public readonly id: string | null = null
 	public username: string = ''
 	public password: string = ''
 
@@ -24,6 +25,10 @@ export default class User {
 	public mobile?: string
 
 	public name: string = ''
+	public role: number | null = null
+	public customerId?: number | null
+	public customer?: Customer | null
+	
 
 	constructor(user: Partial<IUser>) {
 		Object.assign(this, user)

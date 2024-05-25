@@ -14,7 +14,7 @@ const UpdateProfileForm = () => {
 
 	return (
 		<div className='UpdateProfileForm'>
-			<h2 className='page-title'>Account</h2>
+			<h2 className='page-title mb-5'>Account</h2>
 			<UpdateAccountForm user={UserFromStore} onUserUpdate={onUserUpdate} />
 		</div>
 	)

@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios'
+import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios'
 import { getCookies, deleteCookie } from 'cookies-next'
 
 const baseInstance: AxiosInstance = axios.create({
@@ -49,8 +49,8 @@ interface Response<T> {
 export class HttpService {
 	private static readonly instance: AxiosInstance = baseInstance
 
-	public static get<T>(url: string): Promise<AxiosResponse<Response<T>>> {
-		return HttpService.instance.get<Response<T>>(url)
+	public static get<T>(url: string, config: AxiosRequestConfig = {}): Promise<AxiosResponse<Response<T>>> {
+		return HttpService.instance.get<Response<T>>(url, config)
 	}
 
 	public static post<T>(url: string, data: any): Promise<AxiosResponse<Response<T>>> {

@@ -37,7 +37,7 @@ const Page = () => {
 			<button className='mb-10' onClick={() => route.back()}>
 				Back
 			</button>
-			<h1>Account Page</h1>
+			<h1 className='mb-5'>Account Page</h1>
 			{isLoading && user && (
 				<div>
 					<UpdateAccountForm user={user} />

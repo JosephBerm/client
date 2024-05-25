@@ -4,7 +4,7 @@ import UpdateProfileForm from '@/components/Settings/UpdateProfileForm'
 
 const Page = () => {
 	return (
-		<div className='justify-center flex-column'>
+		<div >
 			<UpdateProfileForm />
 			<ChangePasswordForm />
 		</div>

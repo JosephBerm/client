@@ -44,7 +44,7 @@ const Page = () => {
 		{
 			name: 'createdAt',
 			label: 'Date Created',
-			content: (user: User) => <>{format(new Date(user.createdAt), 'mm/dd/yyyy')}</>,
+			content: (user: User) => <>{format(new Date(user.createdAt), 'MM/dd/yyyy')}</>,
 		},
 		{
 			name: 'id',

@@ -73,7 +73,7 @@ const UpdateCustomerForm = ({ customer: customer, onUserUpdate: onCustomerUpdate
 
 					
 					<div className='form-buttons-container'>
-						<button type='submit' className='btn btn-primary' disabled={!form.isValid || isLoading}>
+						<button type='submit' className='button' disabled={!form.isValid || isLoading}>
 							{isLoading ? <i className='fa-solid fa-spinner animate-spin'></i> : buttonText}
 						</button>
 					</div>

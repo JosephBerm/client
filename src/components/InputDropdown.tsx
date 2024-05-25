@@ -3,7 +3,7 @@ import classNames from 'classnames'
 
 type InputDropdownProps<T> = {
 	options: T[]
-	display: keyof T | ((item: T) => string)
+	display: ((item: T) => string)
 	value: string | number
 	handleChange: (value: string | number) => void
 	label?: string

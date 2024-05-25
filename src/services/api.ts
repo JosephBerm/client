@@ -1,7 +1,10 @@
-import { HttpService } from './httpService'
+import { HttpService } from '@/services/httpService'
 
 import LoginCredentials from '@/classes/LoginCredentials'
 import User, { SignupForm } from '@/classes/User'
+import { GenericSearchFilter } from '../classes/Base/GenericSearchFilter'
+import { PagedResult } from '@/classes/Base/PagedResult'
+import Customer from '@/classes/Customer'
 
 const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
@@ -12,6 +15,7 @@ const API = {
 		changePassword: async <T>(oldPassword: string, newPassword: string) =>
 			await HttpService.put<T>('/account/changepassword', { oldPassword, newPassword }),
 		getAll: () => HttpService.get<User[]>('/account/all'),
+		search: async (search: GenericSearchFilter) => await HttpService.post<PagedResult<User>>(`/account/search`, search)
 	},
 	Store: {
 		Products: {
@@ -76,6 +80,7 @@ const API = {
 		create: async <Customer>(customer: Customer) => await HttpService.post<Customer>('/customer', customer),
 		update: async <Customer>(quote: Customer) => await HttpService.put<Customer>('/customer', quote),
 		delete: async (customerId: number) => await HttpService.delete<number>(`/customer/${customerId}`),
+		search: async (search: GenericSearchFilter) => await HttpService.post<PagedResult<Customer>>(`/customers/search`, {data: {...search}}),
 	}
 }
 

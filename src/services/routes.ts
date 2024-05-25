@@ -2,6 +2,7 @@ import { NextRouter } from 'next/router'
 import ProfilePreview from '@/components/ProfilePreview'
 import Route from '@/interfaces/Route'
 import InputTextBox, { InputType } from '@/components/InputTextBox'
+import { AccountRole } from '../classes/Enums'
 
 class Routes {
 	public static InternalAppRoute: string = '/medsource-app'
@@ -12,46 +13,55 @@ class Routes {
 			name: 'Dashboard',
 			location: this.InternalAppRoute,
 			icon: 'fa-solid fa-house',
+			accessable: AccountRole.Customer,
 		},
 		{
 			name: 'Store',
 			location: `${this.InternalAppRoute}/store`,
 			icon: 'fa-solid fa-store',
+			accessable: AccountRole.Admin,
 		},
 		{
 			name: 'Quotes',
 			location: `${this.InternalAppRoute}/quotes`,
 			icon: 'fa-solid fa-list-check',
+			accessable: AccountRole.Admin,
 		},
 		{
 			name: 'Providers',
 			location: `${this.InternalAppRoute}/providers`,
 			icon: 'fa-solid fa-users',
+			accessable: AccountRole.Admin,
 		},
 		{
 			name: 'Orders',
 			location: `${this.InternalAppRoute}/orders`,
 			icon: 'fa-solid fa-dollar-sign',
+			accessable: AccountRole.Admin,
 		},
 		{
 			name: 'Notifications',
 			location: `${this.InternalAppRoute}/notifications`,
 			icon: 'fa-solid fa-bell',
+			accessable: AccountRole.Customer,
 		},
 		{
 			name: 'Accounts',
 			location: `${this.InternalAppRoute}/accounts`,
 			icon: 'fa-solid fa-users',
+			accessable: AccountRole.Admin,
 		},
 		{
 			name: 'Customers',
 			location: `${this.InternalAppRoute}/customers`,
 			icon: 'fa-solid fa-users',
+			accessable: AccountRole.Admin,
 		},
 		{
 			name: 'Profile',
 			location: `${this.InternalAppRoute}/profile`,
 			icon: 'fa-solid fa-user',
+			accessable: AccountRole.Customer,
 		},
 	]
 
