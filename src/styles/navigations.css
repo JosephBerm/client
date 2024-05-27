@@ -19,9 +19,7 @@ header.header {
 
 nav.navbar {
 	display: flex;
-	-webkit-box-pack: justify;
 	justify-content: space-between;
-	-webkit-box-align: center;
 	align-items: center;
 	position: relative;
 	width: 100%;
@@ -88,8 +86,7 @@ nav.navbar .navbar-container .search-container.is-hidden .InputTextBox {
 	max-width: 0px;
 }
 
-nav .burger-button,
-nav.navbar {
+nav .burger-button {
 	align-items: center;
 	display: flex;
 }
@@ -160,51 +157,50 @@ nav .burger-button:hover {
 	font-size: var(--fz-s);
 }
 
-.nav_StyledLinks ol li .titled {
-	color: var(--slate);
-	padding: 10px;
-	border: none;
-	position: relative;
-	font-family: var(--font-sans);
-	background-color: unset !important;
-}
-.nav_StyledLinks ol li .titled:hover,
-.nav_StyledLinks ol li .titled:focus {
-	color: var(--main-color);
-}
-.nav_StyledLinks ol li .titled,
-.nav_StyledLinks ol li .titled::after,
-.nav_StyledLinks ol li .titled::after {
-	transition: var(--transition);
-	transition-duration: 0.2s;
-}
+/*////////////////////////////////////
+				SideBar 
+//////////////////////////////////// */
 
-.nav_StyledLinks ol li .titled::after,
-.nav_StyledLinks ol li .titled::after {
-	content: attr(data-title);
-	color: var(--slate);
-	width: fit-content;
-	font-size: 1rem;
-	padding: 0.5em 0.75em;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	position: absolute;
-	top: 110%;
+nav.Sidebar {
+	position: fixed;
+	bottom: 2%;
+	width: 95%;
+	height: 50px;
 	left: 50%;
 	transform: translateX(-50%);
-	background-color: var(--tooltip-background);
-	pointer-events: none;
-	user-select: none;
-	opacity: 0;
-	border-radius: var(--border-radius);
+	box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.25);
+	background-color: var(--white);
+	padding: 2px 5px;
 }
-.nav_StyledLinks ol li .titled:hover::after,
-.nav_StyledLinks ol li .titled:focus::after {
-	opacity: 1;
+nav.Sidebar ul,
+nav.Sidebar ul li {
+	display: flex;
+	align-items: center;
 }
 
-nav.navbar .nav_StyledLinks .nav-link {
+nav.Sidebar ul {
+	height: 100%;
+	width: 100%;
+	justify-content: space-evenly;
+	gap: 5px;
+}
+
+nav.Sidebar ul li {
+	height: 90%;
+	width: 100%;
+	justify-content: center;
+	background-color: transparent;
+	transition: var(--transition);
+}
+nav.Sidebar ul li:hover {
+	background-color: var(--light-gray);
+}
+nav.Sidebar ul li.active {
+	color: var(--brand-color-2);
+}
+
+nav.Sidebar ul .path-label {
+	display: none;
 }
 
 /*////////////////////////////////////
@@ -240,8 +236,13 @@ nav.navbar .nav_StyledLinks .nav-link {
 
 /* TODO: 768px ~ NavBar */
 @media screen and (min-width: 768px) {
+	nav.navbar {
+		height: 100%;
+		box-shadow: 0px -1px 4px 1px rgba(0, 0, 0, 0.25);
+	}
+
 	header.header {
-		padding: 0px 40px;
+		padding: unset;
 	}
 	nav .burger-button {
 		display: none !important;
@@ -281,17 +282,75 @@ nav.navbar .nav_StyledLinks .nav-link {
 		min-width: 55px;
 	}
 
-	.nav_StyledLinks .button-container {
-	}
 	.nav_StyledLinks .button-container .button {
 		margin-left: 15px;
+	}
+
+	/*////////////////////////////////////
+						SideBar 
+		//////////////////////////////////// */
+
+	.app-title-container {
+		width: var(--nav-title-width);
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 2px -3px 4px 1px rgba(0, 0, 0, 0.25);
+	}
+
+	nav.Sidebar {
+		position: relative;
+		width: var(--nav-title-width);
+		min-width: var(--nav-title-width);
+		bottom: unset;
+		left: unset;
+		transform: unset;
+		height: 100%;
+		background-color: var(--white);
+		padding: unset;
+		box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.25);
+		display: flex;
+		justify-content: center;
+		align-items: flex-start;
+		padding-top: 4vh;
+	}
+
+	nav.Sidebar ul {
+		flex-direction: column;
+		height: fit-content;
+		width: 80%;
+		justify-content: flex-start;
+		gap: 10px;
+	}
+
+	nav.Sidebar ul li {
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		gap: 15px;
+		position: relative;
+		padding: unset;
+		height: 50px;
+		min-height: fit-content;
+		padding: 0 10px;
+		animation-delay: unset !important;
+		transition: unset !important;
+	}
+	nav.Sidebar ul li:hover {
+		background-color: var(--light-gray);
+	}
+	nav.Sidebar ul li.active {
+		color: var(--brand-color-2);
+	}
+	nav.Sidebar ul li .path-label {
+		position: absolute;
+		left: 25%;
+		display: flex;
 	}
 }
 
 /*////////////////////////////////////////////////////////// TODO: 1024px ~ NavBar.css
 ////////////////////////////////////////////////////////// */
 @media screen and (min-width: 1024px) {
-	header.header {
-		padding: 0px 50px;
-	}
 }

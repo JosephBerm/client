@@ -4,6 +4,6 @@ export default interface Route {
 	name: string
 	location: string
 	icon?: string
-	accessable?: AccountRole 
+	accessible?: AccountRole[]
 	component?: () => JSX.Element
 }

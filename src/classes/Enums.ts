@@ -23,11 +23,6 @@ export enum NotificationType {
 	Error,
 }
 
-export enum UserType {
-	Visitor,
-	Customer,
-	Employee,
-}
 
 export enum AccountRole {
 	Customer,

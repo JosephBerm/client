@@ -1,15 +1,18 @@
 'use client'
 
-import React, { useRef, ChangeEvent } from 'react'
+import React, { useRef, ChangeEvent, ReactNode } from 'react'
 
 type inputMode = 'search' | 'email' | 'tel' | 'text' | 'url' | 'none' | 'numeric' | 'decimal' | undefined
 
+type HTMLChildren = {
+	children: ReactNode
+}
 export interface InputType {
 	type: string
 	value: string
 	label?: string
 	placeholder?: string
-	iconClass?: string
+	icon?: string | HTMLChildren
 	disabled?: boolean
 	readOnly?: boolean
 	autofocused?: boolean
@@ -30,7 +33,7 @@ const InputTextBox: React.FC<InputType> = ({
 	label,
 	value,
 	placeholder,
-	iconClass,
+	icon,
 	disabled,
 	readOnly,
 	autofocused,
@@ -51,13 +54,16 @@ const InputTextBox: React.FC<InputType> = ({
 	}
 
 	const getIcon = () => {
-		if (!iconClass) return <></>
+		if (!icon) return <></>
+		else if (typeof icon === 'string') {
+			return (
+				<div className='icon-container'>
+					<i className={icon}></i>
+				</div>
+			)
+		}
 
-		return (
-			<div className='icon-container'>
-				<i className={iconClass}></i>
-			</div>
-		)
+		return icon.children
 	}
 
 	return (

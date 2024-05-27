@@ -21,12 +21,8 @@ function NavBar() {
 		document.body.classList.toggle('blur')
 	}
 
-	const enterLoginPage = () => {
-		router.push('/customer-login')
-	}
-
-	const enterEmployeeLoginPage = () => {
-		router.push('/app-login')
+	const enterLogin = () => {
+		router.push('/login')
 	}
 
 	return (
@@ -63,11 +59,8 @@ function NavBar() {
 						<i className='fa-solid fa-cart-shopping'></i>
 					</Link>
 
-					<button onClick={enterLoginPage}>
-						<span className='route-link'>Customer Login</span>
-					</button>
-					<button onClick={enterEmployeeLoginPage}>
-						<span className='route-link'>Employee Login</span>
+					<button onClick={enterLogin}>
+						<span className='route-link'>Login</span>
 					</button>
 				</div>
 			</nav>

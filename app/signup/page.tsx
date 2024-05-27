@@ -41,7 +41,7 @@ const Page = () => {
 
 	const routeToLogin = () => {
 		//route to sign up
-		router.push('/login')
+		router.push('/customer-login')
 	}
 
 	if (isLoading)

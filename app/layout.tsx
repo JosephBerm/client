@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import { ToastContainer } from 'react-toastify'
-import NavBar from '@/components/NavBar'
+import Header from '@/components/Header'
 import WrapperHandlerPublic from '@/components/WrapperHandlerPublic'
-import Breadcrumb from '@/src/components/Navigation/BreadCrumb'
 
 import 'react-toastify/dist/ReactToastify.css'
 import '@fortawesome/fontawesome-free/css/all.min.css'
@@ -20,10 +19,9 @@ export default function RootLayout(props: any) {
 		<html lang='en'>
 			<body>
 				<WrapperHandlerPublic />
-				<NavBar />
+				<Header />
 
 				<main className='page-container'>
-					<Breadcrumb />
 					{props.children}
 				</main>
 				<ToastContainer />

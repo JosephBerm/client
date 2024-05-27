@@ -5,63 +5,57 @@ import InputTextBox, { InputType } from '@/components/InputTextBox'
 import { AccountRole } from '../classes/Enums'
 
 class Routes {
-	public static InternalAppRoute: string = '/medsource-app'
-	public static CustomerAppRoute: string = '/customer'
 	private static router: NextRouter
+
+	public static InternalAppRoute: string = '/medsource-app'
 	public static internalRoutes: Route[] = [
 		{
 			name: 'Dashboard',
 			location: this.InternalAppRoute,
 			icon: 'fa-solid fa-house',
-			accessable: AccountRole.Customer,
+			accessible: [AccountRole.Customer],
+		},
+		{
+			name: 'Orders',
+			location: `${this.InternalAppRoute}/orders`,
+			icon: 'fa-solid fa-truck',
+			accessible: [AccountRole.Customer, AccountRole.Admin],
 		},
 		{
 			name: 'Store',
 			location: `${this.InternalAppRoute}/store`,
 			icon: 'fa-solid fa-store',
-			accessable: AccountRole.Admin,
+			accessible: [AccountRole.Admin],
 		},
 		{
 			name: 'Quotes',
 			location: `${this.InternalAppRoute}/quotes`,
 			icon: 'fa-solid fa-list-check',
-			accessable: AccountRole.Admin,
+			accessible: [AccountRole.Admin],
 		},
 		{
 			name: 'Providers',
 			location: `${this.InternalAppRoute}/providers`,
 			icon: 'fa-solid fa-users',
-			accessable: AccountRole.Admin,
-		},
-		{
-			name: 'Orders',
-			location: `${this.InternalAppRoute}/orders`,
-			icon: 'fa-solid fa-dollar-sign',
-			accessable: AccountRole.Admin,
-		},
-		{
-			name: 'Notifications',
-			location: `${this.InternalAppRoute}/notifications`,
-			icon: 'fa-solid fa-bell',
-			accessable: AccountRole.Customer,
+			accessible: [AccountRole.Admin],
 		},
 		{
 			name: 'Accounts',
 			location: `${this.InternalAppRoute}/accounts`,
 			icon: 'fa-solid fa-users',
-			accessable: AccountRole.Admin,
+			accessible: [AccountRole.Admin],
 		},
 		{
 			name: 'Customers',
 			location: `${this.InternalAppRoute}/customers`,
 			icon: 'fa-solid fa-users',
-			accessable: AccountRole.Admin,
+			accessible: [AccountRole.Admin],
 		},
 		{
 			name: 'Profile',
 			location: `${this.InternalAppRoute}/profile`,
 			icon: 'fa-solid fa-user',
-			accessable: AccountRole.Customer,
+			accessible: [AccountRole.Customer],
 		},
 	]
 
@@ -81,25 +75,6 @@ class Routes {
 		{
 			name: 'Contact',
 			location: '/contact',
-		},
-	]
-
-	public static customerRoutes: Route[] = [
-		{
-			name: 'Dashboard',
-			location: this.CustomerAppRoute,
-		},
-		{
-			name: 'Cart',
-			location: `${this.CustomerAppRoute}/cart`,
-		},
-		{
-			name: 'Orders',
-			location: `${this.CustomerAppRoute}/orders`,
-		},
-		{
-			name: 'Profile',
-			location: `${this.CustomerAppRoute}/profile`,
 		},
 	]
 

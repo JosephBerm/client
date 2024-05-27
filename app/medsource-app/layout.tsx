@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 import WrapperHandler from '@/components/WrapperHandler'
 import { IUser } from '@/classes/User'
 import '@/styles/store.css'
+import Sidebar from '@/components/Sidebar'
+import Breadcrumb from '@/src/components/Navigation/BreadCrumb'
 
 export const metadata: Metadata = {
 	title: 'The best app ever. Trust me. I know. I made it. I Aint No Lie',
@@ -44,6 +46,8 @@ export default async function RootLayout({
 
 	return (
 		<div className='App'>
+			<Sidebar />
+			<Breadcrumb />
 			<WrapperHandler User={response.payload as IUser} />
 			{children}
 		</div>
