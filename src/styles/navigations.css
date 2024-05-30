@@ -18,8 +18,8 @@ header.header {
 }
 
 nav.navbar {
-	display: flex;
-	justify-content: space-between;
+	display: grid;
+	grid-template-columns: auto 1fr;
 	align-items: center;
 	position: relative;
 	width: 100%;
@@ -28,16 +28,37 @@ nav.navbar {
 	z-index: 12;
 }
 
-nav.navbar .logo,
-nav.navbar .navbar-container {
-	display: flex;
-	width: fit-content;
-	align-items: center;
-	justify-content: space-between;
-	gap: 5px;
+nav.navbar .app-title-container {
+	font-size: clamp(var(--fz-md), 1vw, var(--fz-xxl));
 }
 
+nav.navbar .navbar-container {
+	width: 100%;
+	gap: 5px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 5%;
+}
 nav.navbar .navbar-container > * {
+	width: 100%;
+}
+
+nav.navbar .navbar-container .current-route-details {
+	display: none;
+	align-items: center;
+	justify-content: flex-start;
+	font-size: clamp(var(--fz-s), 1vw, var(--fz-xl));
+	color: var(--black-text-color);
+}
+
+nav.navbar .navbar-container .options {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+nav.navbar .navbar-container .options > * {
 	width: fit-content;
 	color: var(--brand-color-1);
 }
@@ -211,15 +232,16 @@ nav.Sidebar ul .path-label {
 	display: flex;
 	align-items: center;
 	gap: 3px;
-	margin: 1.5rem 0 2rem 0;
-	font-size: var(--fz-md);
-	color: var(--dark-slate);
+	color: inherit;
 }
 
 .Breadcrumb span.seperator {
 	scale: 1.25;
 	position: relative;
 	left: 1px;
+}
+.Breadcrumb a {
+	color: inherit;
 }
 
 .Breadcrumb span.active {
@@ -238,11 +260,15 @@ nav.Sidebar ul .path-label {
 @media screen and (min-width: 768px) {
 	nav.navbar {
 		height: 100%;
-		box-shadow: 0px -1px 4px 1px rgba(0, 0, 0, 0.25);
+		box-shadow: 0px -1px 4px 1px rgba(0, 0, 0, 0.1);
 	}
 
 	header.header {
 		padding: unset;
+	}
+
+	nav.navbar .navbar-container .current-route-details {
+		display: flex;
 	}
 	nav .burger-button {
 		display: none !important;
@@ -290,7 +316,7 @@ nav.Sidebar ul .path-label {
 						SideBar 
 		//////////////////////////////////// */
 
-	.app-title-container {
+	nav.navbar .app-title-container {
 		width: var(--nav-title-width);
 		height: 100%;
 		display: flex;

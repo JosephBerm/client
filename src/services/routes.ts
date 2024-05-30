@@ -5,6 +5,7 @@ import InputTextBox, { InputType } from '@/components/InputTextBox'
 import { AccountRole } from '../classes/Enums'
 
 class Routes {
+	constructor() {}
 	private static router: NextRouter
 
 	public static InternalAppRoute: string = '/medsource-app'
