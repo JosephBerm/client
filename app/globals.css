@@ -396,66 +396,6 @@ p:last-of-type {
 }
 
 /*////////////////////////////////////
-				SECTION PREVIEWER   
-//////////////////////////////////// */
-
-section.SectionPreviewer {
-	border: 1px solid var(--dark-slate);
-	border-radius: var(--border-radius);
-	height: min-content;
-	min-height: 100%;
-	display: grid;
-	grid-template-rows: auto 1fr auto;
-	justify-items: center;
-}
-
-section.SectionPreviewer .section-header {
-	border-bottom: 1px solid var(--dark-slate);
-}
-
-section.SectionPreviewer .section-header .action {
-	width: 100%;
-	height: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
-
-section.SectionPreviewer .section-header,
-section.SectionPreviewer .section-body,
-section.SectionPreviewer .section-footer {
-	padding: 10px;
-	width: 90%;
-}
-
-section.SectionPreviewer .section-header,
-section.SectionPreviewer .section-footer {
-	height: 100%;
-	gap: 10px;
-	align-items: center;
-}
-section.SectionPreviewer .section-footer {
-	display: flex;
-	justify-content: center;
-	border-top: 1px solid var(--dark-slate);
-}
-
-section.SectionPreviewer .section-header {
-	display: grid;
-	grid-template-columns: 65% 1fr;
-	justify-items: center;
-}
-
-section.SectionPreviewer .section-body {
-	height: 100%;
-}
-
-section.SectionPreviewer h4.title {
-	width: 100%;
-	justify-self: flex-start;
-}
-
-/*////////////////////////////////////
 				TOOL TIPS   
 //////////////////////////////////// */
 .titled {
@@ -552,10 +492,6 @@ section.SectionPreviewer h4.title {
 	/*////////////////////////////////////
 				SECTION PREVIEWER   
 //////////////////////////////////// */
-
-	section.SectionPreviewer.col-span {
-		grid-column-end: span var(--span);
-	}
 }
 
 @media screen and (min-width: 1024px) {
