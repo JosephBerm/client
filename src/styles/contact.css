@@ -1,0 +1,170 @@
+.contact-page-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Component 1 */
+
+.contact-page-container .component-one-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 20px;
+}
+
+.contact-page-container .component-one-container h4{
+    font-size: 20px;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 800;
+    font-family: 'montserrat', sans-serif;
+    color: var(--brand-color-1);
+}
+
+.contact-page-container .component-one-container p{
+    font-size: 14px;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-family: 'montserrat', sans-serif;
+    color: var(--gray);
+    /* Add letter spaciong */
+    letter-spacing: 0.5px;
+}
+
+/* Component 2 */
+.contact-page-container .component-three-container,
+.contact-page-container .component-two-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 40px;
+    width: 100%;
+}
+
+.contact-page-container .component-three-container,
+.contact-page-container  .component-two-container h3{
+    font-size: 25px;
+    text-align: center;
+    text-transform: uppercase;
+    font-family: 'montserrat', sans-serif;
+}
+
+.contact-page-container .component-two-container .component-contact-form-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+    background-color: var(--brand-color-1);
+    width: 100%;
+    padding: 20px;
+    border-radius: 3px;
+}
+
+.half-container {
+    width: 100%;
+}
+
+.half-container > * {
+    width: 50%;
+}
+.contact-input-container{
+    width: 100%;
+}
+
+.contact-page-container .component-contact-form-container label {
+    font-size: 13px;
+    font-family: 'inter', sans-serif;
+    color: var(--white);
+    font-weight: 600;
+
+}
+.contact-page-container .component-contact-form-container textarea,
+.contact-page-container .component-contact-form-container input {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: 'montserrat', sans-serif;
+    color: var(--gray);
+    background-color: rgba(252, 255, 247, 0.1);
+    padding: 15px;
+    margin-top: 10px;
+    border: 0.5px solid transparent;
+
+}
+.contact-page-container .component-contact-form-container textarea:focus,
+.contact-page-container .component-contact-form-container input:focus{
+    outline: none;
+    border: 0.5px solid rgba(255, 255, 255, 0.3);
+}
+
+.component-contact-form-container button {
+    width: 120px;
+    height: 60px;
+    font-size: 14px;
+    font-family: 'montserrat', sans-serif;
+    color: var(--white);
+    background-color: var(--brand-color-4) !important;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    transition-property: background-color;
+    align-self: flex-start;
+
+}
+
+.component-contact-form-container button:hover {
+    background-color: var(--brand-color-3) !important;
+}
+
+.direct-contact-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;    
+    margin-top: 50px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.component-three-container .contact-container{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    max-width: 70px;
+    width: 30%;
+    aspect-ratio: 1 / 1;
+    background-color: var(--brand-color-1);
+}
+
+.contact-page-break{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+}
+
+@media screen and (min-width: 1280px) {
+    .contact-page-break{
+        display: flex;
+        flex-direction: row;
+        gap: 50px;
+    }
+
+    /* Make childresns take 50% of space each */
+    .contact-page-break > *{
+        width: 50%;
+
+    }
+}
