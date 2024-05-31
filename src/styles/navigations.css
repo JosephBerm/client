@@ -319,6 +319,7 @@ nav.Sidebar ul .path-label {
 
 	nav.navbar .app-title-container {
 		width: var(--nav-title-width);
+		background-color: var(--white);
 		height: 100%;
 		display: flex;
 		align-items: center;
