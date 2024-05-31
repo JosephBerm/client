@@ -5,8 +5,10 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Routes from '@/services/routes'
 
-function formatPath(string: String) {
-	return string.charAt(0).toUpperCase() + string.slice(1)
+function formatPath(path: String) {
+	if (Routes.InternalAppRoute.toLowerCase() === `/${path.toLowerCase()}`) return 'Dashboard'
+
+	return path.charAt(0).toUpperCase() + path.slice(1)
 }
 
 export default function Breadcrumb() {
@@ -17,7 +19,7 @@ export default function Breadcrumb() {
 		//what is this regex for? what is it calculating?
 		const regex = /(\/)|([^/]+)/g
 		const pathsplit = path.match(regex)
-		setPathSplit(pathsplit!)
+		setPathSplit(pathsplit || [])
 	}, [path])
 
 	if (!path.startsWith(Routes.InternalAppRoute)) return <></>
@@ -32,8 +34,7 @@ export default function Breadcrumb() {
 							{value}
 						</span>
 					)
-
-				if (index < pathSplit.length - 1 && value !== '/') {
+				else if (index < pathSplit.length - 1) {
 					// Create a new array without modifying the original pathSplit
 					const mypath = pathSplit.slice(0, index + 1)
 
