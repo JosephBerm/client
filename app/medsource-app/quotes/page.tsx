@@ -17,7 +17,7 @@ const Page = () => {
 	const getQuotes = async () => {
 		try {
 			setIsLoading(true)
-			const { data } = await API.Quote.get<Quote[]>(null)
+			const { data } = await API.Quotes.get<Quote[]>(null)
 
 			if (data.statusCode == 200 && data.payload) {
 				setQuotes(data.payload)
@@ -41,7 +41,7 @@ const Page = () => {
 			const newList = originalList.toSpliced(toDelete, 1)
 			setQuotes(newList)
 
-			const { data } = await API.Quote.delete(id)
+			const { data } = await API.Quotes.delete(id)
 			if (data.statusCode != 200) {
 				throw Error(data.message ?? 'Item Not Found.')
 			}
