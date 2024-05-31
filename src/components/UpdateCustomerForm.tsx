@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Customer from '@/classes/Customer'
+import Company from '@/src/classes/Company'
 import { Form, Formik } from 'formik'
 import Validations from '@/utilities/validationSchemas'
 import API from '@/services/api'
@@ -9,13 +9,13 @@ import { toast } from 'react-toastify'
 import FormInputTextBox from '@/src/components/FormInputTextbox'
 import { useParams } from 'next/navigation'
 
-const UpdateCustomerForm = ({ customer: customer, onUserUpdate: onCustomerUpdate }: { customer: Customer; onUserUpdate?: (User: Customer) => void }) => {
+const UpdateCustomerForm = ({ customer: customer, onUserUpdate: onCustomerUpdate }: { customer: Company; onUserUpdate?: (User: Company) => void }) => {
 	const [isLoading, setIsLoading] = React.useState(false)
 	const params = useParams()
 
 	console.log("Actual customer...", customer)
 
-	const handleSubmit = async (customerData: Customer) => {
+	const handleSubmit = async (customerData: Company) => {
 		if(params.id == "create"){
 			await createCustomer(customerData)
 		}else {
@@ -23,7 +23,7 @@ const UpdateCustomerForm = ({ customer: customer, onUserUpdate: onCustomerUpdate
 		}
 	}
 
-	const updateCustomer = async (customerData: Customer) => {
+	const updateCustomer = async (customerData: Company) => {
 		try {
 			setIsLoading(true)
 			const { data } = await API.Customers.update(customerData)
@@ -39,7 +39,7 @@ const UpdateCustomerForm = ({ customer: customer, onUserUpdate: onCustomerUpdate
 		}
 	}
 
-	const createCustomer = async (customerData: Customer) => {
+	const createCustomer = async (customerData: Company) => {
 		try {
 			setIsLoading(true)
 			const { data } = await API.Customers.create(customerData)
@@ -67,9 +67,9 @@ const UpdateCustomerForm = ({ customer: customer, onUserUpdate: onCustomerUpdate
 			}}>
 			{(form) => (
 				<Form className='update-account-form-container'>
-					<FormInputTextBox<Customer> label='First Name' name='name' />
-					<FormInputTextBox<Customer> label='Email Address' name='email' />
-					<FormInputTextBox<Customer> label='Indentifier (ETIN/SSN)' name='identifier' />
+					<FormInputTextBox<Company> label='First Name' name='name' />
+					<FormInputTextBox<Company> label='Email Address' name='email' />
+					<FormInputTextBox<Company> label='Indentifier (ETIN/SSN)' name='identifier' />
 
 					
 					<div className='form-buttons-container'>

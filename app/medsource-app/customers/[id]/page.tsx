@@ -4,7 +4,7 @@ import API from '@/src/services/api'
 import UpdateAccountForm from '@/src/components/UpdateAccountForm'
 import { useRouter, useParams } from 'next/navigation'
 import '@/styles/accounts.css'
-import Customer from '@/src/classes/Customer'
+import Company from '@/src/classes/Company'
 import UpdateCustomerForm from '@/src/components/UpdateCustomerForm'
 import User from '@/src/classes/User'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
@@ -16,7 +16,7 @@ import Routes from '@/src/services/routes'
 const Page = () => {
 	const params = useParams()
 
-	const [customer, setCustomer] = useState<Customer>(new Customer({}))
+	const [customer, setCustomer] = useState<Company>(new Company({}))
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [accountsForCustomer, setAccountsForCustomer] = useState<User[]>([])	
 	const route = useRouter()
@@ -30,7 +30,7 @@ const Page = () => {
 		try {
 			const { data } = await API.Customers.get(actualUserId)
 			if (data.payload) {
-				setCustomer(data.payload as Customer)
+				setCustomer(data.payload as Company)
 			}
 		} finally {
 			setIsLoading(false)

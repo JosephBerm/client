@@ -6,12 +6,12 @@ import { format } from 'date-fns'
 import Table from '@/common/table'
 import API from '@/services/api'
 import '@/styles/accounts.css'
-import Customer from '@/src/classes/Customer'
+import Company from '@/src/classes/Company'
 import { toast } from 'react-toastify'
 import Routes from '@/services/routes'
 
 const Page = () => {
-	const [tables, setTables] = useState<Customer[]>([])
+	const [tables, setTables] = useState<Company[]>([])
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const route = useRouter()
 
@@ -24,7 +24,7 @@ const Page = () => {
 			const { data } = await API.Customers.getAll()
 			if (data.payload) {
 				//TODO: FIX as cuustomerarray
-				setTables((data.payload as Customer[]) || [])
+				setTables((data.payload as Company[]) || [])
 			}
 		} finally {
 			setIsLoading(true)
@@ -49,11 +49,11 @@ const Page = () => {
 		fetchCustomers()
 	}, [])
 
-	const columns: TableColumn<Customer>[] = [
+	const columns: TableColumn<Company>[] = [
 		{
 			name: 'name',
 			label: 'Name',
-			content: (user: Customer) => <>{user.name}</>,
+			content: (user: Company) => <>{user.name}</>,
 		},
 		{
 			name: 'email',
@@ -62,12 +62,12 @@ const Page = () => {
 		{
 			name: 'createdAt',
 			label: 'Date Created',
-			content: (customer: Customer) => <>{format(new Date(customer.createdAt), 'mm/dd/yyyy')}</>,
+			content: (customer: Company) => <>{format(new Date(customer.createdAt), 'mm/dd/yyyy')}</>,
 		},
 		{
 			name: 'id',
 			label: 'actions',
-			content: (customer: Customer) => (
+			content: (customer: Company) => (
 				<div className='flex gap-5'>
 					<button
 						onClick={() => {
@@ -88,7 +88,7 @@ const Page = () => {
 			<h1 style={{ alignSelf: 'flex-start', margin: 0 }}>Customers</h1>
 			<button onClick={createCustomer}>Create</button>
 
-			<Table<Customer> columns={columns} data={tables} />
+			<Table<Company> columns={columns} data={tables} />
 		</div>
 	)
 }

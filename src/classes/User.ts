@@ -1,5 +1,5 @@
 import Notification from '@/src/classes/Notification'
-import Customer from '@/classes/Customer'
+import Company from '@/classes/Customer'
 /**
  * Implementation of the server user class.
  */
@@ -27,7 +27,7 @@ export default class User {
 	public name: string = ''
 	public role: number | null = null
 	public customerId?: number | null
-	public customer?: Customer | null
+	public customer?: Company | null
 	
 
 	constructor(user: Partial<IUser>) {

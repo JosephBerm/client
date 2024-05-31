@@ -12,13 +12,13 @@ import InputTextBox from '@/components/InputTextBox'
 import IsBusyLoading from '@/components/isBusyLoading'
 import InputNumber from '@/components/InputNumber'
 import InputDropdown from '@/components/InputDropdown'
-import Customer from '@/classes/Customer'
+import Company from '@/src/classes/Company'
 import Routes from '@/services/routes'
 
 interface OrdersProps {
 	order: Order
 	products: Product[]
-	customers: Customer[]
+	customers: Company[]
 }
 
 const OrdersPage = ({ order, products, customers }: OrdersProps) => {
@@ -185,7 +185,7 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 		<div className='orders-page'>
 			<h3 className='page-title'>Order Details</h3>
 
-			<InputDropdown<Customer>
+			<InputDropdown<Company>
 				options={customers}
 				display='name'
 				label='Customer'

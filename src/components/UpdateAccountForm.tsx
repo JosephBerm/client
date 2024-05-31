@@ -12,7 +12,7 @@ import { AccountRole } from '../classes/Enums'
 import {EnumToDropdownValues} from '../services/utils'
 import FormDropdown from './FormDropdown'
 import FormFetchDropdown from './FormFetchDropDown'
-import Customer from '../classes/Customer'
+import Company from '../classes/Company'
 import { useAccountStore } from '../stores/user'
 
 const UpdateAccountForm = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User: User) => void }) => {
@@ -70,8 +70,8 @@ const UpdateAccountForm = ({ user, onUserUpdate }: { user: User; onUserUpdate?: 
 							label='Customer'
 							endpoint='/customer/search'
 							name='customerId'
-							display={(item: Customer) => item.name}
-							value={(item: Customer) => item.id}
+							display={(item: Company) => item.name}
+							value={(item: Company) => item.id}
 							searchBy='name'
 						/>
 					)}

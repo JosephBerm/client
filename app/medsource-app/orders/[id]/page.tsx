@@ -10,7 +10,7 @@ import { Product } from '@/classes/Product'
 import Order, { OrderItem } from '@/classes/Order'
 import IsBusyLoading from '@/components/isBusyLoading'
 import OrdersPage from '@/components/Orders/OrdersPage'
-import Customer from '@/classes/Customer'
+import Company from '@/src/classes/Company'
 import Routes from '@/services/routes'
 
 const Page = (context: any) => {
@@ -19,7 +19,7 @@ const Page = (context: any) => {
 	const [order, setOrder] = useState<Order | null>(null)
 	const [productsList, setProducts] = useState<Product[]>([])
 	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const [customers, setCustomers] = useState<Customer[]>([])
+	const [customers, setCustomers] = useState<Company[]>([])
 
 	const getOrder = async () => {
 		if (context.params.id == 'create') return
@@ -39,10 +39,10 @@ const Page = (context: any) => {
 	const fetchCustomers = async () => {
 		try {
 			setIsLoading(true)
-			const { data } = await API.Customers.getAll<Customer>()
+			const { data } = await API.Customers.getAll<Company>()
 			if (!data.payload) toast.error('Unable to retrieve the list of available customers...')
 
-			setCustomers(data.payload?.map((customer) => new Customer(customer)) ?? [])
+			setCustomers(data.payload?.map((customer) => new Company(customer)) ?? [])
 		} catch (err) {
 			console.error(err)
 		} finally {

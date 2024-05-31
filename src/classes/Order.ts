@@ -1,4 +1,4 @@
-import Customer from './Customer'
+import Company from './Company'
 import { Product } from './Product'
 import Quote from './Quote'
 
@@ -7,7 +7,7 @@ export default class Order {
 	products: OrderItem[] = []
 	total: number = 0
 	dateCreated: Date | null = null
-    customer: Customer | null = null
+    customer: Company | null = null
     customerId: number | null = null
 
 	CreateFromQuote(quote: Quote) {
