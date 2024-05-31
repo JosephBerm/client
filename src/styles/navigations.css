@@ -189,9 +189,10 @@ nav.Sidebar {
 	height: 50px;
 	left: 50%;
 	transform: translateX(-50%);
-	box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.25);
+	box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.15);
 	background-color: var(--white);
 	padding: 2px 5px;
+	border-radius: 3px;
 }
 nav.Sidebar ul,
 nav.Sidebar ul li {

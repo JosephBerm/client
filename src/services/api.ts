@@ -4,7 +4,8 @@ import LoginCredentials from '@/classes/LoginCredentials'
 import User, { SignupForm } from '@/classes/User'
 import { GenericSearchFilter } from '../classes/Base/GenericSearchFilter'
 import { PagedResult } from '@/classes/Base/PagedResult'
-import Customer from '@/classes/Customer'
+import Company from '@/classes/Company'
+import Quote from '@/classes/Quote'
 
 const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
@@ -15,7 +16,8 @@ const API = {
 		changePassword: async <T>(oldPassword: string, newPassword: string) =>
 			await HttpService.put<T>('/account/changepassword', { oldPassword, newPassword }),
 		getAll: () => HttpService.get<User[]>('/account/all'),
-		search: async (search: GenericSearchFilter) => await HttpService.post<PagedResult<User>>(`/account/search`, search)
+		search: async (search: GenericSearchFilter) =>
+			await HttpService.post<PagedResult<User>>(`/account/search`, search),
 	},
 	Store: {
 		Products: {
@@ -26,13 +28,12 @@ const API = {
 			delete: async <T>(productId: string) => await HttpService.delete<T>(`/products/${productId}`),
 		},
 	},
-	Quote: {
-		get: async <T>(id: string | null) => {
-			if (id !== null) {
-				return await HttpService.get<T>(`/quote/${id}`)
-			} else {
-				return await HttpService.get<T>('/quote')
-			}
+	Quotes: {
+		get: async <T>(id: string) => {
+			return await HttpService.get<T>(`/quote/${id}`)
+		},
+		getAll: async <T>() => {
+			return await HttpService.get<T>('/quote')
 		},
 		create: async <T>(quote: T) => await HttpService.post<T>('/quote', quote),
 		update: async <T>(quote: T) => await HttpService.put<T>('/quote', quote),
@@ -47,7 +48,8 @@ const API = {
 			}
 		},
 		create: async <Order>(quote: Order) => await HttpService.post<Order>('/orders', quote),
-		createFromQuote: async <Order>(quoteId: string) => await HttpService.post<Order>(`/orders/fromquote/${quoteId}`, null),
+		createFromQuote: async <Order>(quoteId: string) =>
+			await HttpService.post<Order>(`/orders/fromquote/${quoteId}`, null),
 		update: async <Order>(quote: Order) => await HttpService.put<Order>('/orders', quote),
 		delete: async <Boolean>(quoteId: number) => await HttpService.delete<Boolean>(`/orders/${quoteId}`),
 	},
@@ -69,7 +71,6 @@ const API = {
 		create: async <Provider>(provider: Provider) => await HttpService.post<Provider>('/provider', provider),
 		update: async <Provider>(quote: Provider) => await HttpService.put<Provider>('/provider', quote),
 		delete: async (providerId: number) => await HttpService.delete<number>(`/provider/${providerId}`),
-	
 	},
 	Public: {
 		sendQuote: async <T>(quote: T) => await HttpService.post<T>('/quote', quote),
@@ -80,8 +81,9 @@ const API = {
 		create: async <Customer>(customer: Customer) => await HttpService.post<Customer>('/customer', customer),
 		update: async <Customer>(quote: Customer) => await HttpService.put<Customer>('/customer', quote),
 		delete: async (customerId: number) => await HttpService.delete<number>(`/customer/${customerId}`),
-		search: async (search: GenericSearchFilter) => await HttpService.post<PagedResult<Customer>>(`/customers/search`, {data: {...search}}),
-	}
+		search: async (search: GenericSearchFilter) =>
+			await HttpService.post<PagedResult<Company>>(`/customers/search`, { data: { ...search } }),
+	},
 }
 
 export default API
