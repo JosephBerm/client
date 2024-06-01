@@ -47,6 +47,8 @@
     flex-direction: column;
     margin-top: 40px;
     width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 .contact-page-container .component-three-container,
@@ -162,11 +164,19 @@
         display: flex;
         flex-direction: row;
         gap: 50px;
+        padding: 50px;
+        box-sizing: border-box;
     }
 
     /* Make childresns take 50% of space each */
     .contact-page-break > *{
         width: 50%;
 
+    }
+}
+
+@media screen and (min-width: 1440px) {
+    .contact-page-break{
+        max-width: 1440px;
     }
 }
