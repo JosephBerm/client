@@ -115,15 +115,14 @@ const AddEditForm = () => {
 							</option>
 						))}
 					</select>
+					
 
-					<button type='submit' disabled={isSubmitting || !isValid || !values.name || isLoading == true}>
-						{isLoading ? (
-							<i className='fa-solid fa-spinner animate-spin' />
-						) : isNewProduct ? (
-							'Add Product'
-						) : (
-							'Update Product'
-						)}
+					<button type='submit' disabled={false}>
+						{isLoading 
+						? 
+						(<i className='fa-solid fa-spinner animate-spin' />) 
+						: isNewProduct ? ('Add Product') : ('Update Product')
+						}
 					</button>
 				</Form>
 			)}

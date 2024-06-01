@@ -35,4 +35,4 @@ export function EnumToDropdownValues<T extends {[index: string]: string | number
     return Object.keys(enumVariable)
       .filter(key => isNaN(Number(key))) // filter out the numeric keys
       .map(key => ({ id: enumVariable[key], name: key })); // map to an array of { value, label } objects
-  }
+}

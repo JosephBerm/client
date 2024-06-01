@@ -6,6 +6,7 @@ import { GenericSearchFilter } from '../classes/Base/GenericSearchFilter'
 import { PagedResult } from '@/classes/Base/PagedResult'
 import Company from '@/classes/Company'
 import Quote from '@/classes/Quote'
+import CustomerSummary from '@/classes/Base/CustomerSummary'
 
 const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
@@ -18,6 +19,7 @@ const API = {
 		getAll: () => HttpService.get<User[]>('/account/all'),
 		search: async (search: GenericSearchFilter) =>
 			await HttpService.post<PagedResult<User>>(`/account/search`, search),
+		getDashboardSummary: async () => await HttpService.get<CustomerSummary>('/account/analytics'),
 	},
 	Store: {
 		Products: {

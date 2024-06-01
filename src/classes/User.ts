@@ -1,5 +1,5 @@
 import Notification from '@/src/classes/Notification'
-import Company from '@/classes/Customer'
+import Company from '@/classes/Company'
 /**
  * Implementation of the server user class.
  */

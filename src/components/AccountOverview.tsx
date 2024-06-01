@@ -1,36 +1,36 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
+import CustomerSummary, {OverviewDetail} from '@/classes/Base/CustomerSummary'
+import API from '@/services/api'
+
+import { toast } from 'react-toastify'
 
 function AccountOverview() {
-	type OverviewDetail = {
-		title: string
-		value: number
-		selectedTime: number
-		icon: string
+
+	const [summary, setSummary] = useState<CustomerSummary>(new CustomerSummary({}))
+	const [loadingSummary, setLoadingSummary] = useState<boolean>(false)
+
+	const fetchSummary = async () => {
+		console.log("WHATT")
+		try {
+			setLoadingSummary(true)
+			const { data } = await API.Accounts.getDashboardSummary()
+			if (data?.payload) setSummary(new CustomerSummary(data.payload))
+
+		} catch (err: any) {
+			console.warn(err)
+			toast.error(err)
+		} finally {
+			setLoadingSummary(false)
+		}
 	}
 
-	const overviewDetails: OverviewDetail[] = [
-		{
-			title: 'Product Requests',
-			value: 10,
-			selectedTime: 7,
-			icon: 'fa-solid fa-bell-concierge',
-		},
-		{
-			title: 'Orders In Process',
-			value: 37,
-			selectedTime: 30,
-			icon: 'fa-solid fa-truck',
-		},
-		{
-			title: 'Total Orders Completed',
-			value: 50,
-			selectedTime: 90,
-			icon: 'fa-solid fa-box',
-		},
-	]
+	useEffect(() => {
+		fetchSummary()
+	}, [])
+
 	return (
 		<section className='account-overviews'>
-			{overviewDetails.map((overview, index) => (
+			{summary.GenerateOverviewDetails().map((overview, index) => (
 				<div className='overview-container clickable' key={index}>
 					<div className='details'>
 						<h4>{overview.title}</h4>
