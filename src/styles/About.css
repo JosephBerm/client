@@ -1,0 +1,19 @@
+.about-us-first-component{
+    width: calc(100vw + 25px);
+    position: relative;
+    left: -25px;
+    color: white !important;
+}
+
+.about-us-first-component h1 {
+    font-size: 38px !important;
+    font-family: 'Montserrat', sans-serif;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.wrapper-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
