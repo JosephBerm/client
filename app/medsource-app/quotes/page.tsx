@@ -17,7 +17,7 @@ const Page = () => {
 	const getQuotes = async () => {
 		try {
 			setIsLoading(true)
-			const { data } = await API.Quotes.get<Quote[]>(null)
+			const { data } = await API.Quotes.getAll<Quote[]>()
 
 			if (data.statusCode == 200 && data.payload) {
 				setQuotes(data.payload)

@@ -1,26 +1,23 @@
-import React, {useState, useEffect} from 'react'
-import CustomerSummary, {OverviewDetail} from '@/classes/Base/CustomerSummary'
-import API from '@/services/api'
-
+import React, { useState, useEffect } from 'react'
+import CustomerSummary, { OverviewDetail } from '@/classes/Base/CustomerSummary'
 import { toast } from 'react-toastify'
 
-function AccountOverview() {
+import API from '@/services/api'
 
+function AccountOverview() {
 	const [summary, setSummary] = useState<CustomerSummary>(new CustomerSummary({}))
-	const [loadingSummary, setLoadingSummary] = useState<boolean>(false)
+	const [isLoadingData, setIsLoadingData] = useState<boolean>(false)
 
 	const fetchSummary = async () => {
-		console.log("WHATT")
 		try {
-			setLoadingSummary(true)
+			setIsLoadingData(true)
 			const { data } = await API.Accounts.getDashboardSummary()
 			if (data?.payload) setSummary(new CustomerSummary(data.payload))
-
 		} catch (err: any) {
 			console.warn(err)
 			toast.error(err)
 		} finally {
-			setLoadingSummary(false)
+			setIsLoadingData(false)
 		}
 	}
 
