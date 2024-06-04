@@ -1,10 +1,21 @@
-.about-us-first-component{
-    width: calc(100vw + 25px);
-    position: relative;
-    left: -25px;
-    color: white !important;
+.about-us-page {
+    height: 100%;
+    overflow-y: auto;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
 }
+.about-us-first-component{
+    width: 100%;
+    position: relative;
+    color: white !important;
 
+    /*  Get form path */
+    background-image: url('/aboutus-main.png');
+    background-repeat: no-repeat;
+    max-width: 1670px;
+    margin-bottom: 100px;
+}
 .about-us-first-component h1 {
     font-size: 38px !important;
     font-family: 'Montserrat', sans-serif;
@@ -16,4 +27,138 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+
+.about-us-first-component .content-wrapper {
+    padding: 10px 25px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 562px;
+    justify-content: center;
+
+}
+
+.about-us-first-component .content-wrapper p {
+    width: 90%;
+    line-height: 2;
+
+    /* Center parragraph */
+}
+
+.about-us-page  .bullet-component {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 20px;
+    padding: 25px 20px;
+
+    max-width: 360px;
+}
+
+.about-us-page .bullet-component h3 {
+    font-size: 25px;
+    font-family: 'Montserrat', sans-serif;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--brand-color-1);
+}
+
+.about-us-page .bullet-component p {
+    line-height: 2.2;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+}
+.about-us-page .bullet-component img {
+    width: 340px;
+    height: 360px;
+    object-fit: cover;
+}
+
+
+
+.make-request-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    margin-bottom: 80px;
+
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.make-request-container p{
+    font-size: 10px;
+    color: var(--gray)
+}
+
+.make-request-container h4{
+    color: var(--brand-color-2);
+}
+
+.make-request-container button{
+    background-color: transparent;
+    font-family: 'Inter', sans-serif;
+    color: var(--gray);
+    font-size: 16px;
+    border: 1px solid var(--gray);
+    padding: 20px 40px;
+    font-weight: 400;
+}
+
+.make-request-container button:hover{
+    background-color: var(--brand-color-2);
+    color: white;
+}
+
+.about-us-page .content-wrapper img  {
+    width: 99px;
+}
+
+@media screen and (min-width: 900px) {
+    .bullets-wrapper{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 100px
+    }
+    
+    .about-us-page  .bullet-component{
+        justify-content: space-between;
+    }
+
+    .make-request-container{
+        margin-top: 100px;
+    }
+
+    .about-us-page .content-wrapper img {
+        max-width: unset !important;
+        height: unset !important;
+        width: 200px;
+    }
+
+    .about-us-first-component .content-wrapper {
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: center;
+    }
+
+    .about-us-page .content-wrapper p{
+        width: 50%;
+    }
+
+}
+
+@media screen and (min-width: 1280px) {
+    .bullets-wrapper{
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+    
+    
 }

@@ -70,7 +70,7 @@ main {
 }
 
 main.page-container {
-	padding: 0 25px;
+	/* padding: 0 25px; */
 	overflow: hidden;
 	padding-top: var(--nav-height) !important;
 }
@@ -463,7 +463,7 @@ p:last-of-type {
 
 @media screen and (min-width: 480px) {
 	main.page-container {
-		padding: 0 50px;
+		/* padding: 0 50px; */
 	}
 }
 
