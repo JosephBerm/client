@@ -23,8 +23,15 @@ export enum NotificationType {
 	Error,
 }
 
-
 export enum AccountRole {
 	Customer,
 	Admin = 9999999,
+}
+
+export enum OrderStatus {
+	Pending = 10,
+	Processing = 20,
+	Shipped = 30,
+	Delivered = 40,
+	Cancelled = 50,
 }

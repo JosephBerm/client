@@ -1,4 +1,5 @@
 import Company from './Company'
+import { OrderStatus } from '@/classes/Enums'
 import { Product } from './Product'
 import Quote from './Quote'
 
@@ -6,10 +7,10 @@ export default class Order {
 	id: number | null = null
 	products: OrderItem[] = []
 	total: number = 0
-	dateCreated: Date | null = null
+	createdAt: Date = new Date()
 	customer: Company | null = null
 	customerId: number | null = null
-	transitDetails: TransitDetails | null = null
+	status: OrderStatus = OrderStatus.Pending
 
 	CreateFromQuote(quote: Quote) {
 		this.products = quote.products.map((cartProduct) => {
@@ -38,6 +39,7 @@ export class OrderItem {
 	total: number = 0
 	order: Order | null = null
 	orderId = 0
+	transitDetails: TransitDetails = new TransitDetails()
 
 	constructor(init?: Partial<OrderItem>) {
 		Object.assign(this, init)
@@ -51,7 +53,7 @@ export class OrderItem {
 
 export class TransitDetails {
 	locationOrigin: string | null = null
-	locationDropOff: string | null = null
+	locationDropoff: string | null = null
 	weight: number | null = null
 	dimensions: Dimensions | null = null
 }

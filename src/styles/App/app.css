@@ -13,8 +13,10 @@
 .App .Breadcrumb {
 	font-size: clamp(var(--fz-xs), 4vw, var(--fz-md));
 }
+
 .App .page-container {
 	padding: 5vh 5vw;
+	width: 100%;
 }
 
 /*////////////////////////////////////////////////////////// TODO: 768px ~ App
