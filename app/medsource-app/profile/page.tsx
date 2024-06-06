@@ -4,7 +4,7 @@ import UpdateProfileForm from '@/components/Settings/UpdateProfileForm'
 
 const Page = () => {
 	return (
-		<div >
+		<div className='Profile page-container'>
 			<UpdateProfileForm />
 			<ChangePasswordForm />
 		</div>
