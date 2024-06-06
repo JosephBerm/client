@@ -155,7 +155,7 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 				<InputNumber
 					label=''
 					value={orderItem.quantity.toString()}
-					handleChange={(e: string) => handleQuantityChange(orderItem, parseInt(e))}
+					handleChange={(e) => handleQuantityChange(orderItem, parseInt(e.currentTarget.value))}
 				/>
 			),
 		},
@@ -166,7 +166,7 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 				<InputNumber
 					label=''
 					value={orderItem.buyPrice.toString()}
-					handleChange={(e: string) => handlePriceChange(orderItem, parseInt(e))}
+					handleChange={(e) => handlePriceChange(orderItem, parseInt(e.currentTarget.value))}
 				/>
 			),
 		},
