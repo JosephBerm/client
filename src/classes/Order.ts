@@ -52,7 +52,6 @@ export class OrderItem {
 }
 
 export class TransitDetails {
-	locationOrigin: string | null = null
 	locationDropoff: string | null = null
 	weight: number | null = null
 	dimensions: Dimensions | null = null
