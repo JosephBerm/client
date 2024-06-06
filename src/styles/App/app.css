@@ -13,72 +13,10 @@
 .App .Breadcrumb {
 	font-size: clamp(var(--fz-xs), 4vw, var(--fz-md));
 }
-.App .Dashboard {
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 25px;
-}
-.App .Dashboard .account-overviews {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-	font-size: clamp(var(--fz-md), 2vw, var(--fz-xl));
-	max-width: 500px;
-	width: 100%;
-}
-.App .Dashboard .account-overviews .overview-container {
-	padding: 25px 15px;
-	display: grid;
-	grid-template-columns: 7fr 3fr;
-	align-items: center;
-	background: var(--soft-brand-color);
-	transition: var(--transition);
-}
-.App .Dashboard .account-overviews .overview-container:hover {
-	background: var(----soft-brand-color-hovered);
+.App .page-container {
+	padding: 5vh 5vw;
 }
 
-.App .Dashboard .account-overviews .details {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-	width: 100%;
-}
-
-.App .Dashboard .account-overviews .details .value {
-	font-size: 1.75em;
-	font-weight: bold;
-}
-
-.App .Dashboard .account-overviews .details .time-select {
-	font-size: 0.75em;
-	color: var(--disabled-color);
-}
-.App .Dashboard .account-overviews .icon-container {
-	width: 90% !important;
-	max-width: 80px;
-	min-width: 50px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 50%;
-	background: var(--brand-color-2);
-	font-size: 1.75em;
-	color: var(--bg-color);
-	aspect-ratio: 1 / 1;
-	justify-self: center;
-}
-.App .Dashboard .account-overviews .icon-container i {
-	font-size: clamp(10px, 10vw, 3rem);
-}
-.recent-orders-table {
-	width: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
 /*////////////////////////////////////////////////////////// TODO: 768px ~ App
 ////////////////////////////////////////////////////////// */
 @media screen and (min-width: 768px) {

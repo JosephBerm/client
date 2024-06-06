@@ -219,6 +219,7 @@ nav.Sidebar ul li:hover {
 }
 nav.Sidebar ul li.active {
 	color: var(--brand-color-2);
+	background-color: var(--soft-brand-color);
 }
 
 nav.Sidebar ul .path-label {
@@ -368,9 +369,7 @@ nav.Sidebar ul .path-label {
 	nav.Sidebar ul li:hover {
 		background-color: var(--light-gray);
 	}
-	nav.Sidebar ul li.active {
-		color: var(--brand-color-2);
-	}
+
 	nav.Sidebar ul li .path-label {
 		position: absolute;
 		left: 25%;
