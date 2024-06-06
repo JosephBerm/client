@@ -7,8 +7,9 @@ export default class Order {
 	products: OrderItem[] = []
 	total: number = 0
 	dateCreated: Date | null = null
-    customer: Company | null = null
-    customerId: number | null = null
+	customer: Company | null = null
+	customerId: number | null = null
+	transitDetails: TransitDetails | null = null
 
 	CreateFromQuote(quote: Quote) {
 		this.products = quote.products.map((cartProduct) => {
@@ -35,8 +36,8 @@ export class OrderItem {
 	buyPrice: number = 0
 	isSold: boolean = false
 	total: number = 0
-    order: Order | null = null;
-    orderId = 0;
+	order: Order | null = null
+	orderId = 0
 
 	constructor(init?: Partial<OrderItem>) {
 		Object.assign(this, init)
@@ -45,5 +46,22 @@ export class OrderItem {
 	setProduct(product: Product) {
 		this.productId = product.id
 		this.product = product
+	}
+}
+
+export class TransitDetails {
+	locationOrigin: string | null = null
+	locationDropOff: string | null = null
+	weight: number | null = null
+	dimensions: Dimensions | null = null
+}
+
+export class Dimensions {
+	private width: number | null = null
+	private length: number | null = null
+	private height: number | null = null
+
+	toString = () => {
+		return `${this.width} x ${this.length} x ${this.height}cm`
 	}
 }
