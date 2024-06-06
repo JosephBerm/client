@@ -11,7 +11,7 @@ const Page = () => {
 	const User = useAccountStore((state) => state.User)
 
 	return (
-		<div className='Dashboard'>
+		<div className='Dashboard page-container'>
 			<AccountOverview />
 			<AccountProductsTable />
 		</div>
