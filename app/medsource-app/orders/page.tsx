@@ -1,17 +1,14 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Quote from '@/classes/Quote'
-import { TableColumn } from '@/interfaces/Table'
 import { toast } from 'react-toastify'
 import API from '@/services/api'
 import IsBusyLoading from '@/components/isBusyLoading'
-import Table from '@/common/table'
 import Link from 'next/link'
 import Order from '@/classes/Order'
 import { useRouter } from 'next/navigation'
-import { formatNumber } from '@/services/utils'
 import Routes from '@/services/routes'
+import OrderSummary from '@/src/components/OrderSummary'
 
 const Page = () => {
 	const [orders, setOrders] = useState<Order[]>([])
@@ -34,80 +31,25 @@ const Page = () => {
 		}
 	}
 
-	const handleOrderDeletion = async (id: number) => {
-		const originalList = [...orders]
-		try {
-			setIsLoading(true)
-
-			const toDelete = originalList.findIndex((order) => order.id === id)
-			if (toDelete < 0) return
-
-			const newList = originalList.toSpliced(toDelete, 1)
-			setOrders(newList)
-
-			const { data } = await API.Orders.delete(id)
-			if (data.statusCode != 200) {
-				throw Error(data.message ?? 'Item Not Found.')
-			}
-		} catch (err) {
-			toast.error('Unable to delete item.')
-			setOrders(originalList)
-		} finally {
-			setIsLoading(false)
-		}
-	}
-
 	useEffect(() => {
 		getOrders()
 	}, [])
 
-	const columns: TableColumn<Order>[] = [
-		{
-			name: 'id',
-			label: 'Order Number',
-		},
-		{
-			name: 'total',
-			label: 'Order Total',
-			content: (order: Order) => <span>US$ {formatNumber(order.total)}</span>,
-		},
-		{
-			key: 'edit',
-			label: 'Edit',
-			content: (order: Order) => (
-				<Link className='inline-link' href={`${Routes.InternalAppRoute}/orders/${order.id}`}>
-					Edit
-				</Link>
-			),
-		},
-		{
-			key: 'delete',
-			label: 'Delete',
-			content: (order: Order) => (
-				<button className='delete' onClick={() => handleOrderDeletion(order.id!)}>
-					Delete
-				</button>
-			),
-		},
-	]
-
-	if (isLoading) {
-		return (
-			<div className='Quotes'>
-				<h2 className='page-title'>Orders</h2>
+	return (
+		<div className='Quotes page-container'>
+			<h2 className='page-title'>Orders</h2>
+			{isLoading ? (
 				<IsBusyLoading />
-			</div>
-		)
-	} else {
-		return (
-			<div className='Quotes'>
-				<h2 className='page-title'>Orders</h2>
-				<button onClick={() => router.push('orders/create')}> Create</button>
-
-				<Table<Order> data={orders} columns={columns} isSortable={true} isPaged={true} isSearchable={true} />
-			</div>
-		)
-	}
+			) : (
+				<div className='orders-table'>
+					<button onClick={() => router.push('orders/create')}> Create</button>
+					{orders.map((order) => (
+						<OrderSummary order={order} key={order.id} />
+					))}
+				</div>
+			)}
+		</div>
+	)
 }
 
 export default Page
