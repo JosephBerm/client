@@ -9,8 +9,6 @@ function OrderSummary({ order }: OrderSummaryProps) {
 	const getTrackingDetails = (orderItem: OrderItem) => {
 		return (
 			<div className='transit-details' key={orderItem.id}>
-				<div className='origin'>{orderItem.transitDetails.locationOrigin}</div>
-				<div className='tracking-line' />
 				<div className='dropoff'>{orderItem.transitDetails.locationDropoff}</div>
 
 				<div className='product-info'>
