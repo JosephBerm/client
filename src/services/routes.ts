@@ -53,6 +53,12 @@ class Routes {
 			accessible: [AccountRole.Admin],
 		},
 		{
+			name: 'Products',
+			location: '/products',
+			icon: 'fa-solid fa-bag-shopping',
+			accessible: [AccountRole.Customer],
+		},
+		{
 			name: 'Profile',
 			location: `${this.InternalAppRoute}/profile`,
 			icon: 'fa-solid fa-user',
