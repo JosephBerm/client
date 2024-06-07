@@ -1,69 +1,56 @@
-.page-container{
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    width: 100%;
-    gap: 50px;
-    padding-top: 50px;
+.cart {
+	width: 50%;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
 }
 
-.page-container .cart{
-    width: 50%;
-    display: flex;  
-    flex-direction: column;
-    align-items: flex-start;
-    
+.cart .cart-item {
+	display: grid;
+	grid-template-columns: 5fr 1fr 1fr;
+	align-items: center;
+	width: 100%;
+	gap: 10px;
+	padding: 10px;
 }
 
-.page-container .cart .cart-item{
-    display: grid;
-    grid-template-columns: 5fr 1fr 1fr;
-    align-items: center;
-    width: 100%;
-    gap: 10px;
-    padding: 10px;    
+.cart .cart-item p {
+	font-size: 1.4rem;
 }
 
-.page-container .cart .cart-item p{
-    font-size: 1.4rem;   
+.cart .cart-item.header {
+	background-color: rgba(0, 0, 0, 0.3);
+	border-radius: 5px;
+	padding: 10px;
+	font-weight: bold;
 }
 
-.page-container .cart .cart-item.header {
-    background-color: rgba(0, 0, 0, .3);
-    border-radius: 5px;
-    padding: 10px;
-    font-weight: bold;
-
-    
+.cart .cart-item.header p {
+	font-size: 1.5rem;
 }
 
-.page-container .cart .cart-item.header p {
-    font-size: 1.5rem; 
+.cart .InputTextBox {
+	max-width: 60px !important;
 }
 
-
-.page-container .cart .InputTextBox{
-    max-width: 60px !important;
-} 
-
-.page-container .quote{
-    display: flex;
-    flex-direction: column;
-    width: 50%;
+.quote {
+	display: flex;
+	flex-direction: column;
+	width: 50%;
 }
 
-.page-container .quote .InputTextBox{
-    font-size: 1.4rem; 
+.quote .InputTextBox {
+	font-size: 1.4rem;
 }
 
-.page-container .quote form{
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px
+.quote form {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	gap: 10px;
 }
-.page-container .quote form > *:nth-child(1) {
-    grid-column: span 3; /* Make it span two columns */
+.quote form > *:nth-child(1) {
+	grid-column: span 3; /* Make it span two columns */
 }
-.page-container .quote form > *:nth-child(5) {
-    grid-column: span 3; /* Make it span two columns */
+.quote form > *:nth-child(5) {
+	grid-column: span 3; /* Make it span two columns */
 }

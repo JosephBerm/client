@@ -238,6 +238,7 @@ p:last-of-type {
 	font-family: var(--font-sans);
 	font-weight: normal;
 	--input-color: var(--light-gray);
+	position: relative;
 }
 
 .InputTextBox label,
@@ -268,6 +269,7 @@ p:last-of-type {
 	min-height: 35px;
 	color: var(--black-text-color);
 	transition: var(--transition);
+	height: 100%;
 }
 
 .InputTextBox:has(.error-message-container:not(:empty)) textarea,
