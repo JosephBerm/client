@@ -7,6 +7,7 @@ import { PagedResult } from '@/classes/Base/PagedResult'
 import Company from '@/classes/Company'
 import Quote from '@/classes/Quote'
 import CustomerSummary from '@/classes/Base/CustomerSummary'
+import Order from '@/classes/Order'
 
 const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
@@ -37,6 +38,9 @@ const API = {
 		getAll: async <T>() => {
 			return await HttpService.get<T>('/quote')
 		},
+		search: async (search: GenericSearchFilter) => {
+			return await HttpService.post<PagedResult<Quote>>('/quote/search', search)
+		},
 		create: async <T>(quote: T) => await HttpService.post<T>('/quote', quote),
 		update: async <T>(quote: T) => await HttpService.put<T>('/quote', quote),
 		delete: async <T>(quoteId: string) => await HttpService.delete<T>(`/quote/${quoteId}`),
@@ -48,6 +52,9 @@ const API = {
 			} else {
 				return await HttpService.get<Order>('/orders')
 			}
+		},
+		search: async (search: GenericSearchFilter) => {
+			return await HttpService.post<PagedResult<Order>>('/orders/search', search)
 		},
 		create: async <Order>(quote: Order) => await HttpService.post<Order>('/orders', quote),
 		createFromQuote: async <Order>(quoteId: string) =>

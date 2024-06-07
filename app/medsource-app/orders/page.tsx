@@ -9,6 +9,7 @@ import Order from '@/classes/Order'
 import { useRouter } from 'next/navigation'
 import Routes from '@/services/routes'
 import OrderSummary from '@/src/components/OrderSummary'
+import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 
 const Page = () => {
 	const [orders, setOrders] = useState<Order[]>([])
@@ -18,10 +19,14 @@ const Page = () => {
 	const getOrders = async () => {
 		try {
 			setIsLoading(true)
-			const { data } = await API.Orders.get<Order[]>(null)
+			const searchCriteria = new GenericSearchFilter()
+			searchCriteria.includes = ['Products']
+			
+			const {data} = await API.Orders.search(searchCriteria)
+			// const { data } = await API.Orders.get<Order[]>(null)
 
 			if (data.statusCode == 200 && data.payload) {
-				setOrders(data.payload)
+				setOrders(data?.payload?.data ?? [])
 			}
 		} catch (err) {
 			console.error(err)

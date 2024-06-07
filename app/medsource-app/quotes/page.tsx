@@ -9,6 +9,7 @@ import IsBusyLoading from '@/components/isBusyLoading'
 import Table from '@/common/table'
 import Link from 'next/link'
 import Routes from '@/services/routes'
+import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 
 const Page = () => {
 	const [quotes, setQuotes] = useState<Quote[]>([])
@@ -17,10 +18,13 @@ const Page = () => {
 	const getQuotes = async () => {
 		try {
 			setIsLoading(true)
-			const { data } = await API.Quotes.getAll<Quote[]>()
+			const searchCriteria = new GenericSearchFilter()
+			
+			const { data } = await API.Quotes.search(searchCriteria)
+			// const { data } = await API.Quotes.getAll<Quote[]>()
 
 			if (data.statusCode == 200 && data.payload) {
-				setQuotes(data.payload)
+				setQuotes(data.payload?.data ?? [])
 			}
 		} catch (err) {
 			console.error(err)
