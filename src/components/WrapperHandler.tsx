@@ -7,9 +7,13 @@ import React from 'react'
 
 const WrapperHandler = ({ User }: { User: IUser }) => {
 	const AccountInformation = useAccountStore((state) => state)
+	
 	useEffect(() => {
-		AccountInformation.setUser(User)
-	}, [User])
+		if(User.id != null) {
+			if	(!AccountInformation.LoggedIn) AccountInformation.login(User)
+			else AccountInformation.setUser(User)
+		}
+	}, [])
 
 	return <></>
 }

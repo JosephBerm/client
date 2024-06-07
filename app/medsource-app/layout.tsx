@@ -42,13 +42,13 @@ export default async function RootLayout({
 	// Load user data into state management library.
 	if (token == null) return redirect('/login')
 	const response = await getUserData(token.value)
-	if (response?.payload == null) return redirect('/login')
+	if (response?.payload == null) return redirect('/login') // Ensure the Authorization token is valiud.
 
 	return (
 		<div className='App'>
 			<Sidebar />
 			<Breadcrumb />
-			<WrapperHandler User={response.payload as IUser} />
+			{/* <WrapperHandler User={response.payload as IUser} /> */}
 			{children}
 		</div>
 	)

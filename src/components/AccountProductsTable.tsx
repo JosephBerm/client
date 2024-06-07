@@ -11,6 +11,7 @@ import Quote from '@/classes/Quote'
 import API from '@/services/api'
 import CustomerSummary from '@/classes/Base/CustomerSummary'
 import Table from '../common/table'
+import { GenericSearchFilter } from '../classes/Base/GenericSearchFilter'
 
 function AccountProductsTable() {
 	const User = useAccountStore((state) => state.User)
@@ -21,8 +22,10 @@ function AccountProductsTable() {
 	const getQuotes = async () => {
 		try {
 			setIsLoadingData(true)
-			const { data } = await API.Quotes.getAll<Quote[]>()
-			const allQuotes = data.payload
+			const searchCriteria = new GenericSearchFilter()
+
+			const { data } = await API.Quotes.search(searchCriteria)
+			const allQuotes = data.payload?.data
 			if (allQuotes) setQuotes(allQuotes)
 			else if (data.message) {
 				toast.error(data.message)

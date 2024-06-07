@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Routes from '@/services/routes'
 import Link from 'next/link'
+import { useAccountStore } from '@/src/stores/user'
 
 import { useRouter } from 'next/navigation'
 
@@ -11,6 +12,9 @@ function NavBar() {
 
 	const [navStyleClassName, setNavStyleClassName] = useState('nav_StyledLinks')
 	const SecuredPaths = [Routes.InternalAppRoute]
+
+	const loggedIn = useAccountStore((state) => state.LoggedIn)
+	const state = useAccountStore((state) => state)
 
 	const toggleNavbar = () => {
 		if (navStyleClassName.includes('opened')) {
@@ -22,7 +26,9 @@ function NavBar() {
 	}
 
 	const enterLogin = () => {
-		router.push('/login')
+		
+		if(loggedIn) router.push('/medsource-app')
+		else router.push('/login')
 	}
 
 	return (
@@ -60,7 +66,7 @@ function NavBar() {
 					</Link>
 
 					<button onClick={enterLogin}>
-						<span className='route-link'>Login</span>
+						<span className='route-link'>{loggedIn ? "Go to dashboard" : "Login" }</span>
 					</button>
 				</div>
 			</nav>
