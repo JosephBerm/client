@@ -48,7 +48,7 @@ export default async function RootLayout({
 		<div className='App'>
 			<Sidebar />
 			<Breadcrumb />
-			{/* <WrapperHandler User={response.payload as IUser} /> */}
+			<WrapperHandler User={response.payload as IUser} />
 			{children}
 		</div>
 	)

@@ -1,33 +1,34 @@
 import { ProductsCategory } from '@/classes/Enums'
-import Provider from '@/classes/Provider';
-import Guid from '@/classes/Base/Guid';
+import Provider from '@/classes/Provider'
+import Guid from '@/classes/Base/Guid'
+import HtmlImage from '@/classes/HtmlImage'
 
 export class Product {
-	id: string = "";
-	
+	id: string = ''
+
 	sku: string = ''
 	name: string = ''
 	description: string = ''
 	price: number = 0
-	image: string | null = null
+	image: HtmlImage = new HtmlImage()
 	category: ProductsCategory | null = null
 	providerId: number | null = null
 	provider: Provider | null = null
 
 	toString(): string {
-		return `Product: ${this.name} - ${this.description} - ${this.price} - ${this.image} - ${this.category}`
+		return `Product: ${this.name} - ${this.description} - ${this.price} - ${this.image?.alt} - ${this.category}`
 	}
 
 	constructor(product: Partial<Product>) {
-		this.id = product?.id || Guid.newGuid();
-		this.sku = product?.sku || '';
-		this.name = product?.name || '';
-		this.description = product?.description || '';
-		this.price = product?.price || 0;
-		this.image = product?.image || null;
-		this.category = product?.category || null;
-		this.providerId = product?.providerId || null;
-		this.provider = product?.provider || null;
+		this.id = product?.id || Guid.newGuid()
+		this.sku = product?.sku || ''
+		this.name = product?.name || ''
+		this.description = product?.description || ''
+		this.price = product?.price || 0
+		this.image = product.image || new HtmlImage()
+		this.category = product?.category || null
+		this.providerId = product?.providerId || null
+		this.provider = product?.provider || null
 	}
 }
 

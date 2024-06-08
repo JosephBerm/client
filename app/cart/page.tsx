@@ -2,7 +2,7 @@
 
 import '@/styles/cart.css'
 
-import React, { useEffect, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import { FormikProvider, useFormik, Form } from 'formik'
 import { CartProduct } from '@/classes/Product'
 import { useCartStore } from '@/src/stores/store'
@@ -13,6 +13,7 @@ import API from '@/services/api'
 import InputNumber from '@/components/InputNumber'
 import FormInputTextBox from '@/components/FormInputTextbox'
 import IsBusyLoading from '@/components/isBusyLoading'
+import Image from 'next/image'
 
 const Page = () => {
 	const formik = useFormik({
@@ -52,12 +53,12 @@ const Page = () => {
 		}
 	}
 
-	const handleSetProductToCart = (productId: string, value: number) => {
+	const handleSetProductToCart = (productId: string, e: ChangeEvent<HTMLInputElement>) => {
 		const existingProduct = cartStore.find((p: CartProduct) => p.product!.id === productId)
 
 		if (existingProduct) {
 			const productsToSet = cartStore.map((p: CartProduct) =>
-				p.product!.id === productId ? { ...p, quantity: value } : p
+				p.product!.id === productId ? { ...p, quantity: parseInt(e.currentTarget.value) } : p
 			)
 			setCart(productsToSet)
 		}
@@ -69,54 +70,53 @@ const Page = () => {
 		})
 	}
 
-	useEffect(() => {}, [cartStore, isLoading])
+	const getImage = (item: CartProduct) => {
+		if (item.product?.image?.src) return <Image src={item.product.image.src} alt={item.product.image.alt} />
 
-	if (isLoading)
-		return (
-			<div className='Cart'>
-				<h2 className='page-title'>Cart</h2>
-				<IsBusyLoading />
-			</div>
-		)
-	else
-		return (
-			<div className='Cart'>
-				<h2 className='page-title'>Cart</h2>
-				<div className='cart'>
-					<div style={{ position: 'relative', width: '100%' }}>
-						<div className='cart-item header'>
-							<p>Product</p>
-							<p>Quantity</p>
-							<p>Actions</p>
-						</div>
-						{cartStore.map((item, index) => (
-							<div key={index} className='cart-item'>
-								<p style={{ margin: 0 }}>{item.product!.name}</p>
+		return <i className='fa-regular fa-image' />
+	}
 
-								<div className='flex flex-row mb-2'>
-									<InputNumber
-										value={item.quantity?.toString() ?? ''}
-										label={''}
-										handleChange={(e: number) => handleSetProductToCart(item.product!.id!, e)}
-										handleBlur={handleBlur}
-									/>
+	useEffect(() => {
+		console.log('fdsfsdfsdfsd', cartStore)
+	}, [cartStore, isLoading])
+
+	return (
+		<div className='Cart'>
+			<h2 className='page-title'>CART & CHECKOUT</h2>
+			{isLoading && <IsBusyLoading />}
+			{!isLoading && (
+				<div className='page-body'>
+					<div className='cart-items'>
+						{cartStore.map((item) => (
+							// create component out of this called CartItemPreview, have it hold a state
+							<div className='details-container' key={item.product?.id}>
+								<div className='details'>
+									<div className='image-container'>{getImage(item)}</div>
+
+									<div className='description'>
+										<span className='name'>{item.product?.name}</span>
+										<span className='desc'>{item.product?.description}</span>
+										<span className='total'>${item.product?.price}</span>
+									</div>
 								</div>
-
-								<button
-									style={{ border: 'none', height: 30, width: 30, padding: 0 }}
-									onClick={() => deleteProdFromCart(item)}>
-									<i className='fas fa-trash'></i>
-								</button>
+								<div className='quantity'>
+									<button className='delete' onClick={() => deleteProdFromCart(item)}>
+										<i className='fas fa-trash'></i>
+									</button>
+									{/* create component out of this called QuantitySelector */}
+									{/* it would have a delete button on it. */}
+									{/* left button will start as a trash if 1 is selected */}
+									{/* middle would have the quantity in the input */}
+									{/* right would have the increase by 1 button */}
+									<input value={item.quantity.toString()} onChange={() => {}} />
+									<button onClick={() => deleteProdFromCart(item)}>
+										<i className='fa-solid fa-arrow-up'></i>
+									</button>
+								</div>
 							</div>
 						))}
 					</div>
-				</div>
-
-				<div className='quote'>
-					{submitted && (
-						<p>Thank you for contact us. One of our team members will be reaching out shortly.</p>
-					)}
-					{!submitted && (
+					<div className='quote'>
 						<FormikProvider value={formik}>
 							<Form onSubmit={formik.handleSubmit} className='FormContainer'>
 								<FormInputTextBox<Quote> label='Facility Name' name='name' value={formik.values.name} />
@@ -142,16 +142,18 @@ const Page = () => {
 									name='description'
 									value={formik.values.description}
 								/>
-
 								<button type='submit' style={{ marginTop: 40 }}>
 									Submit
 								</button>
 							</Form>
 						</FormikProvider>
-					)}
+					</div>
+
+					<p>Thank you for contact us. One of our team members will be reaching out shortly.</p>
 				</div>
-			</div>
-		)
+			)}
+		</div>
+	)
 }
 
 export default Page

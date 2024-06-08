@@ -10,10 +10,12 @@ import { useRouter } from 'next/navigation'
 import Routes from '@/services/routes'
 import OrderSummary from '@/src/components/OrderSummary'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
+import InputTextBox from '@/components/InputTextBox'
 
 const Page = () => {
 	const [orders, setOrders] = useState<Order[]>([])
 	const [isLoading, setIsLoading] = useState<boolean>(false)
+	const [trackingNumber, setTackingNumber] = useState('')
 	const router = useRouter()
 
 	const getOrders = async () => {
@@ -21,8 +23,8 @@ const Page = () => {
 			setIsLoading(true)
 			const searchCriteria = new GenericSearchFilter()
 			searchCriteria.includes = ['Products']
-			
-			const {data} = await API.Orders.search(searchCriteria)
+
+			const { data } = await API.Orders.search(searchCriteria)
 			// const { data } = await API.Orders.get<Order[]>(null)
 
 			if (data.statusCode == 200 && data.payload) {
@@ -40,17 +42,36 @@ const Page = () => {
 		getOrders()
 	}, [])
 
+	const redirectUser = () => {
+		// window.open('')
+		console.log('redirect user to tracking page of usps or whatever ?')
+	}
+
 	return (
 		<div className='Quotes page-container'>
-			<h2 className='page-title'>Orders</h2>
+			<h2 className='page-title'>
+				Track <br />
+				<strong>YOUR ORDERS</strong>
+			</h2>
 			{isLoading ? (
 				<IsBusyLoading />
 			) : (
 				<div className='orders-table'>
-					<button onClick={() => router.push('orders/create')}> Create</button>
-					{orders.map((order) => (
-						<OrderSummary order={order} key={order.id} />
-					))}
+					<div className='container-header'>
+						<InputTextBox
+							value={trackingNumber}
+							type='text'
+							icon='fa-solid fa-magnifying-glass'
+							handleChange={(e) => setTackingNumber(e.currentTarget.value)}
+							placeholder='# Order Number'
+						/>
+						<button onClick={() => redirectUser()}>Trace</button>
+					</div>
+					<div className='container-body'>
+						{orders.map((order) => (
+							<OrderSummary order={order} key={order.id} />
+						))}
+					</div>
 				</div>
 			)}
 		</div>
