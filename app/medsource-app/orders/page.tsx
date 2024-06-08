@@ -43,7 +43,8 @@ const Page = () => {
 	}, [])
 
 	const redirectUser = () => {
-		window.open('')
+		// window.open('')
+		console.log('redirect user to tracking page of usps or whatever ?')
 	}
 
 	return (

@@ -28,6 +28,7 @@
 	display: grid;
 	grid-template-rows: auto 1fr;
 	height: 100%;
+	gap: 10px;
 }
 .App .Quotes .page-title {
 	text-align: center;
