@@ -1,5 +1,7 @@
 .Cart {
 	padding: 1vh 5vw;
+	height: 100%;
+	overflow: auto;
 }
 .Cart .page-title {
 	text-align: center;

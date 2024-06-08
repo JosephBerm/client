@@ -79,10 +79,11 @@ main.page-container {
 	width: 12px;
 }
 ::-webkit-scrollbar-track {
-	background: #0a192f;
+	background: transparent;
 }
 ::-webkit-scrollbar-thumb {
 	border-radius: 10px;
+	background-color: var(--light-gray);
 }
 
 *,
