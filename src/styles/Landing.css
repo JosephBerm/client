@@ -60,7 +60,9 @@
     max-width: 700px;
 }
 
+.landing-page .faq-container h1,
 .landing-page .firstcomponent h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
     color: var(--brand-color-1);
     font-weight: 800;
 }
@@ -71,28 +73,45 @@
 }
 
 .landing-page .firstcomponent h1 {
-    font-size: clamp(3.5rem, 14.5vw, 8rem);
+    font-size: clamp(3.5rem, 13vw, 8rem);
     margin: 0;
 }
 
-.header-container {
+.landing-page .header-container {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
 }
 
-.header-container h2 {
+.landing-page .header-container h2 {
     margin: 0;
     padding-right: 5px; /* Adjust spacing as needed */
 }
 
-.header-container h1 {
+.landing-page .header-container h1 {
     margin: 0;
 }
 
-.landing-page .firstcomponent p {
+.landing-page .thirdcomponent .header-container {
+    margin-bottom: 10px;
+}
+.landing-page .thirdcomponent .header-container h2{
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.7rem, 3.5vw, 2.5rem);
+    font-weight: 600;
+    color: var(--brand-color-1);
+}
+
+.landing-page .thirdcomponent .header-container .responsive-header{
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.5rem, 10vw, 3rem);
+    font-weight: 800;
+    color: var(--brand-color-1);
+}
+
+.landing-page  p {
     font-weight: 400;
-    font-size: 1.4rem;
+    font-size: clamp(1.4rem, 3vw, 1.6rem);
     font-family: 'Inter', sans-serif;
     line-height: 28px;
 }
@@ -126,6 +145,7 @@
 .landing-page .buttons-container #first {
     background-color: var(--brand-color-4);
     color: white;
+    font-size: clamp(1rem, 2.8vw, 1.5rem);
 }
 
 .landing-page .buttons-container #second {
@@ -135,6 +155,7 @@
     background-color: #4167060d;
     color: var(--brand-color-1);
     border: 1px solid #4167060d;
+    font-size: clamp(1rem, 2.8vw, 1.5rem);
 }
 
 .landing-page .buttons-container #second img {
@@ -150,23 +171,23 @@
     width: 100vw;
     background-color: #f0f0f0;
     height: 100px;
-  }
-  .landing-page .secondcomponent .scroller {
+}
+.landing-page .secondcomponent .scroller {
     max-width: 100%;
     overflow: hidden;
     display: flex;
     height: 150px;
     align-items: center;
     width: 100vw;
-  }
-  
-  .landing-page .secondcomponent .scroller__inner {
+}
+
+.landing-page .secondcomponent .scroller__inner {
     display: flex;
     transition: transform 0.1s linear; /* Adjust timing and easing as needed */
     white-space: nowrap;
-  }
-  
-  .landing-page .secondcomponent h1 {
+}
+
+.landing-page .secondcomponent h1 {
     font-family: 'Montserrat', sans-serif;
     line-height: 49px;
     font-size: 40rem;
@@ -174,14 +195,150 @@
     margin: 0;
     padding: 0 10px;
     color: var(--gray);
-  }
+}
+
+.landing-page .thirdcomponent > * {
+    max-width: 1280px;
+}
+.landing-page .thirdcomponent {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+    padding: 100px 20px 100px 20px;
+    background-color: white;
+}
+
+.landing-page .box-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 3px;
+    background-color: rgba(65, 103, 6, 0.05);
+    padding: 30px;
+    width: 100%;
+    max-width: 390px;
+    height: 229px;
+}
+
+.landing-page .box-container h3 {
+    color: rgba(57, 57, 57, 1);
+    font-size: clamp(1.7rem, 3vw, 2.5rem);
+}
+
+.landing-page .box-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.faq-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    padding: 20px;
+}
+
+.faq-container p {
+    text-align: justify;
+    max-width: 580px;
+}
+
+.faq-container h1 {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    margin: 0;
+    color: var(--brand-color-3);
+    margin-bottom: 20px;
+
+}
+
+.faq-bullets-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+}
+
+.faq-container .faq-header {
+    background-color: var(--brand-color-1);
+    color: white;
+    width: 100%;;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 20px 20px;
+    border-radius: 5px;
+}
+
+.faq-container .faq-header:hover {
+    cursor: pointer;
+}
+
+.faq-container .faq-header h1 {
+    font-size: clamp(1.4rem, 3vw, 2.5rem);
+    padding: 10px;
+    margin: 0;
+}
+
+
+.bullet-container {
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.bullet-container .faq-header span {
+    font-size: clamp(1.4rem, 3vw, 1.6rem);
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    line-height: 28px;
+
+}
+
+.faq-bullet-content {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border-style: solid solid solid ;
+    border-color: #7C83B4   ;
+    border-width: 1px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    max-height: 500px;
+    background-color: rgba(252, 255, 247, 1);
+
+}
+
+.faq-bullet-content .hide {
+    display: none;
+}
+
+.faq-bullet-content.display {
+    margin-bottom: 10px;
+}
+
+.bullets-holder{
+     width: 100%;;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+}
+
+
 
 @media screen and (min-width: 760px) {
 
     .landing-page .firstcomponent {
         flex-direction: row-reverse;
-        min-height: 830px;
-        height: calc(100vh - 250px); /* Ensure it takes up full viewport height */
+        min-height: 600px;
+        height: 100%; /* Ensure it takes up full viewport height */
         overflow: hidden;
         box-sizing: border-box;
         padding: 0 25px;
@@ -232,23 +389,23 @@
         width: 100vw;
         background-color: #f0f0f0;
         height: 100px;
-      }
-      .landing-page .secondcomponent .scroller {
+    }
+    .landing-page .secondcomponent .scroller {
         max-width: 100%;
         overflow: hidden;
         display: flex;
         height: 150px;
         align-items: center;
         width: 100vw;
-      }
-      
-      .landing-page .secondcomponent .scroller__inner {
+    }
+    
+    .landing-page .secondcomponent .scroller__inner {
         display: flex;
         transition: transform 0.1s linear; /* Adjust timing and easing as needed */
         white-space: nowrap;
-      }
-      
-      .landing-page .secondcomponent h1 {
+    }
+    
+    .landing-page .secondcomponent h1 {
         font-family: 'Montserrat', sans-serif;
         line-height: 49px;
         font-size: 40rem;
@@ -256,7 +413,59 @@
         margin: 0;
         padding: 0 10px;
         color: var(--gray);
-      }
+    }
+
+    .landing-page .text-wrapper {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .landing-page .text-wrapper .description {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-end;
+        max-width: 590px;
+
+    }
+
+    .landing-page .text-wrapper .header-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        max-width: 590px;
+    }
+
+    .landing-page .box-wrapper {
+        display: flex;
+        flex-direction: row;
+        gap: 40px;
+        height: 100%;
+    }
+
+    .landing-page .box-wrapper .box-container {
+       min-height: 249px;
+       height: 100%;
+    }
+
+    .faq-container {
+        min-height: 700px;
+    }
+
+    .bullets-holder {
+        max-width: 1280px;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+        gap: 25px;
+        align-items: flex-start;
+    }
+    
 }
 
 

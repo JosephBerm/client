@@ -1,7 +1,7 @@
 import React from 'react'
 import FirstComponent from '@/src/components/About/FirstComponent'
 import BulletComponent from '@/src/components/About/BulletComponent'
-import LastComponent from '@/src/components/About/LastComponent'
+import LastComponent from '@/src/components/LastComponent'
 
 import '@/src/styles/About.css'
 
