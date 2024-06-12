@@ -9,7 +9,7 @@ const LastComponent = () => {
         <div id="lastcomponent">
             <p>Discover Quality Medical Supplies at Medsource.</p>
             <h2>Empowering Healthcare Excellence, One Supply at a Time</h2>
-            <button onClick={() => route.push("/contact")}>Make A Request</button>
+            <button className="transparent-button"  onClick={() => route.push("/contact")}>Make A Request</button>
         </div>
     )
 }

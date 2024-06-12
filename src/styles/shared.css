@@ -27,14 +27,20 @@
 
 #lastcomponent button {
     margin-top: 20px;
+    gap: 10px;
+    color: var(--gray);
+    font-weight: 700;
+    font-size: clamp(1rem, 2.8vw, 1.5rem);
+    padding: 20px 40px;
+
+}
+
+
+.transparent-button {
     display: flex;
     flex-direction: row;
-    gap: 10px;
-    background-color: transparent;
-    color: var(--gray);
-    border: 2px solid #4167060d;
-    padding: 20px 40px;
-    font-size: clamp(1rem, 2.8vw, 1.5rem);
-    font-weight: 700;
     font-family: 'Inter', sans-serif;
+    padding: 10px 20px;
+    border: 2px solid #4167060d;
+    background-color: transparent;
 }
