@@ -100,9 +100,14 @@ const Page = () => {
 	} else {
 		return (
 			<div className='Quotes'>
-				<h2 className='page-title'>Quotes</h2>
+				<div className='page-header'>
+					<h2 className='page-title'>Quotes</h2>
+				</div>
 
-				<Table<Quote> data={quotes} columns={columns} isSortable={true} isPaged={true} isSearchable={true} />
+				{isLoading ? <IsBusyLoading /> : 
+					<Table<Quote> data={quotes} columns={columns} isSortable={true} isPaged={true} isSearchable={true} />
+				}
+
 			</div>
 		)
 	}

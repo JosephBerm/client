@@ -9,16 +9,20 @@ nav ul.pagination li {
 nav ul.pagination li.page-item,
 nav ul.pagination li.page-active {
 	padding: 5px;
-	border: 1px solid;
 	border-color: var(--dark-slate);
 	border-radius: var(--border-radius);
+}
+
+nav ul.pagination li.active a{
+	background-color: var(--main-color);
+	color: var(--brand-color-1) !important;
+	font-weight: 600;
 }
 
 nav ul.pagination li.magnify:hover,
 nav ul.pagination li.magnify:hover,
 nav ul.pagination li.active {
 	transform: scale(1.1);
-	color: var(--main-color) !important;
 	background-color: var(--main-color-tint);
 	border-color: var(--main-slate) !important;
 }
