@@ -189,6 +189,7 @@ button.delete,
 button.error {
 	color: var(--error-color);
 	border: 1px solid var(--error-color);
+	background-color: transparent;
 }
 
 button.delete:not(:disabled):hover,

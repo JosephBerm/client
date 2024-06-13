@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react'
 import Routes from '@/services/routes'
 import Link from 'next/link'
 import { useAccountStore } from '@/src/stores/user'
+import Image from 'next/image'
+import Logo from '@/public/big-logo.png'
 
 import { useRouter } from 'next/navigation'
 
@@ -35,7 +37,7 @@ function NavBar() {
 		<header className='header public'>
 			<nav className='navbar'>
 				<div className='logo'>
-					<a href='/'>LOGO</a>
+					<Image priority src={Logo} alt="logo"  />
 				</div>
 				<div className='burger-button' onClick={toggleNavbar}>
 					<i className='fa-solid fa-bars' />
@@ -61,13 +63,15 @@ function NavBar() {
 							</li>
 						))}
 					</ol>
-					<Link className='nav-link' href={'/cart'}>
-						<i className='fa-solid fa-cart-shopping'></i>
-					</Link>
+					<div>
+						<Link className='nav-link' href={'/cart'}>
+							<i className='fa-solid fa-cart-shopping'></i>
+						</Link>
 
-					<button onClick={enterLogin}>
-						<span className='route-link'>{loggedIn ? "Go to dashboard" : "Login" }</span>
-					</button>
+						<button onClick={enterLogin}>
+							<span className='route-link'>{loggedIn ? "Go to dashboard" : "Login" }</span>
+						</button>
+					</div>
 				</div>
 			</nav>
 		</header>

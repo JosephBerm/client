@@ -15,11 +15,11 @@ type Actions = {
 const useCartStore = create<State & Actions>((set, get) => ({
     Cart: [],
     addProduct: (product: CartProduct) => {
-        const existingProduct = get().Cart.find((p) => p.product.id === product.product.id);
+        const existingProduct = get().Cart.find((p) => p.product?.id === product.product?.id);
         if (existingProduct) {
             set((state) => ({
                 Cart: state.Cart.map((p) =>
-                    p.product.id === product.product.id ? { ...p, quantity: p.quantity + product.quantity } : p
+                    p.product?.id === product.product?.id ? { ...p, quantity: p.quantity + product.quantity } : p
                 ),
             }));
         } else {
@@ -29,7 +29,7 @@ const useCartStore = create<State & Actions>((set, get) => ({
     },
     removeProduct: (cartItem: CartProduct) => {
         set((state) => ({
-            Cart: state.Cart.filter((c) => c.product.id !== cartItem.product.id),
+            Cart: state.Cart.filter((c) => c.product?.id !== cartItem.product?.id),
         }));
         localStorage.setItem('cart', JSON.stringify(get().Cart));
     },

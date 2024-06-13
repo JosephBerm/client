@@ -101,7 +101,12 @@ const Page = () => {
 	else
 		return (
 			<div className='store-page'>
-				<h2 className='page-title'>Products</h2>
+				<div className='page-header'>
+					<h2 className='page-title'>Products</h2>
+					<button className='mt-7' onClick={() => route.push('store/create')}>
+						Create Product
+					</button>
+				</div>
 				<div className='products-container'>
 					{!allProducts.length ? (
 						<h3>No Items found for this search...</h3>
@@ -115,9 +120,7 @@ const Page = () => {
 						/>
 					)}
 				</div>
-				<button className='mt-7' onClick={() => route.push('store/create')}>
-					Create Product
-				</button>
+
 			</div>
 		)
 }

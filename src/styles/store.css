@@ -3,6 +3,20 @@
 	flex-direction: column;
 	align-items: center;
 	min-height: 80vh;
+	padding: 20px;
+}
+
+.store-page .page-header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+}
+
+.store-page .page-header button {
+	font-family: 'Inter', sans-serif;
+	align-self: flex-start;
 }
 
 .creation-container {
@@ -26,8 +40,11 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	margin-top: 5%;
 	width: 100%;
+}
+.store-page .page-title {
+	font-family: 'Montserrat', sans-serif;
+	color: var(--brand-color-1)
 }
 
 .products-container .product {
