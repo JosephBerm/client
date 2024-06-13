@@ -149,6 +149,11 @@
     font-size: clamp(1rem, 2.8vw, 1.5rem);
 }
 
+.landing-page .firstcomponent .buttons-container #first:hover {
+    background-color: var(--brand-color-5);
+
+}
+
 .landing-page .firstcomponent .buttons-container #second {
     display: flex;
     flex-direction: row;
@@ -157,6 +162,11 @@
     color: var(--brand-color-1);
     border: 1px solid #4167060d;
     font-size: clamp(1rem, 2.8vw, 1.5rem);
+}
+
+.landing-page .firstcomponent .buttons-container #second:hover {
+    background-color: var(--brand-color-2);
+    color: white;
 }
 
 .landing-page .firstcomponent .buttons-container #second img {
@@ -363,8 +373,20 @@
     display: flex;
     justify-content: space-around;
     width: 100%;
+    gap: 10px;
 }
 
+.landing-page .product-container .buttons-container .img-wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: clamp(35px, 3vw, 50px);
+    height: clamp(35px, 3vw, 50px);
+    border-radius: 50%;
+    transition: background-color 0.2s ease-in-out;
+    aspect-ratio: 1/1;
+}
 
 .landing-page .product-container .buttons-container button {
     font-size: clamp(1rem, 2.5vw, 1.2rem);
@@ -377,11 +399,42 @@
     padding: 10px 20px;
 }
 
+.landing-page .product-container .buttons-container .img-wrapper:hover,
+.landing-page .product-container .buttons-container button:hover {
+    background-color: rgba(57, 57, 57, 1);
+    color: white;
+    cursor: pointer;
+}
+
 .landing-page .products-container .product-wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 5px;
     margin-top: 30px;;
+}
+
+#lastcomponent {
+    background-color: white;
+}
+
+#lastcomponent button:hover {
+    background-color: var(--brand-color-1);
+    color: white;
+}
+
+.view-all-products { 
+    margin-top: 100px;
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    padding: 15px 50px;
+}
+
+.view-all-products:hover {
+    background-color: var(--brand-color-2);
+    color: white;
+    cursor: pointer;
+
 }
 
 @media screen and (min-width: 760px) {
@@ -560,6 +613,7 @@
         border-radius: 5px;
         font-weight: 600;
         padding: 15px 55px;
+        text-wrap: nowrap;
     }
     
     

@@ -13,7 +13,7 @@ const ProductCard = ({product}: {product: IProduct}) => {
 
     const [QuantityToAdd, setQuantityToAdd] = React.useState<number>(0)
 
-    const productQuantity = useCartStore((state) => state.Cart.filter((c) => c.product.id === product.id).length)
+    const productQuantity = useCartStore((state) => state.Cart.filter((c) => c.product?.id === product.id).length)
 
     const handleAddProductToCart = () => {
         var Quantity = QuantityToAdd > 0 ? QuantityToAdd : 1
@@ -36,7 +36,7 @@ const ProductCard = ({product}: {product: IProduct}) => {
                 <button onClick={() => setQuantityToAdd(prev => prev > 0 ? prev - 1 : prev )} disabled={QuantityToAdd <= 0}>
                     <i className="fa-solid fa-minus"></i>
                 </button>
-                <InputNumber value={QuantityToAdd.toString()} label={""} handleChange={(e: number) => setQuantityToAdd(e)} />
+                <InputNumber value={QuantityToAdd.toString()} label={""} handleChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuantityToAdd(Number(e.target.value))} />
                 <button onClick={() => setQuantityToAdd(prev => prev + 1 )}>
                     <i className="fa-solid fa-plus"></i>
                 </button>

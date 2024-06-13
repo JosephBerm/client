@@ -8,6 +8,7 @@ import Company from '@/classes/Company'
 import Quote from '@/classes/Quote'
 import CustomerSummary from '@/classes/Base/CustomerSummary'
 import Order from '@/classes/Order'
+import { Product } from '@/classes/Product'
 
 const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
@@ -29,6 +30,7 @@ const API = {
 			create: async <T>(product: T) => await HttpService.post<T>(`/products`, product),
 			update: async <T>(product: T) => await HttpService.put<T>(`/products`, product),
 			delete: async <T>(productId: string) => await HttpService.delete<T>(`/products/${productId}`),
+			getLastest: async(quantity: number = 3) => await HttpService.get<Product[]>(`/products/lastest?quantity=${quantity}`)
 		},
 	},
 	Quotes: {

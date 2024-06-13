@@ -15,7 +15,6 @@ const FirstComponent = () => {
                     priority 
                     src={DoctorsImage} 
                     alt='Doctors Image' 
-                    layout="responsive"
                     width={855} 
                     height={950} 
                 />
