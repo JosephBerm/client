@@ -1,7 +1,4 @@
 /* Landing.css */
-.page-container {
-    overflow: unset !important;
-}
 .landing-page {
     display: flex;
     flex-direction: column;

@@ -40,6 +40,10 @@ function Sidebar() {
 
 	return (
 		<nav className='Sidebar'>
+			<div className='app-title-container'>
+				(())
+				<a href='/'>MEDSOURCE</a>
+			</div>
 			<ul>
 				{pathsToRender.map((route, index) => (
 					<li

@@ -13,19 +13,12 @@ function Header() {
 	const User = useAccountStore((state) => state.User)
 	const path = usePathname()
 
-	if (path.includes('login') || path.includes('signup')) return null // Early return for login/signup
+	const isOnCredentialsPage = path.includes('login') || path.includes('signup')
+	const isUserInInternalApp = path.includes(Routes.InternalAppRoute)
 
-	// Set the navbar based on the role.
-	// We might want to render different navbars based on the user's location, or other factors.
-	if (!path.includes(Routes.InternalAppRoute)) return <PublicNavBar />
+	if (isOnCredentialsPage || isUserInInternalApp) return null
 
-	switch (User.role) {
-		case AccountRole.Customer:
-		case AccountRole.Admin:
-			return <SecuredNavBar />
-		default:
-			return <PublicNavBar />
-	}
+	return <PublicNavBar />
 }
 
 export default Header

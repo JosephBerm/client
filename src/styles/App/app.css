@@ -8,6 +8,17 @@
 	padding-bottom: 75px;
 	padding-top: 10px;
 	gap: 15px;
+	position: relative;
+	overflow: auto;
+}
+.App .body {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	justify-content: flex-start;
+	align-items: flex-start;
+	width: 100%;
+	position: relative;
 }
 
 .App .Breadcrumb {
@@ -59,9 +70,5 @@
 
 	.App .page-container {
 		padding: 5vh 5vw;
-	}
-
-	.App .Breadcrumb {
-		display: none;
 	}
 }

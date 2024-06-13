@@ -2,19 +2,19 @@ header.header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	position: fixed;
-	top: 0px;
 	z-index: 11;
-	padding: 0px 25px;
 	width: 100%;
 	min-width: 200px;
-	height: var(--nav-height);
+	max-height: var(--nav-height);
+	min-height: var(--nav-height);
 	background-color: var(--header-color);
 	backdrop-filter: blur(10px);
 	transition: var(--transition);
 	filter: none !important;
 	pointer-events: auto !important;
 	user-select: auto !important;
+	position: sticky;
+	top: 0;
 }
 
 nav.navbar {
@@ -26,10 +26,15 @@ nav.navbar {
 	color: var(--slate);
 	font-family: var(--font-mono);
 	z-index: 12;
+	height: 100%;
 }
-
 nav.navbar .app-title-container {
-	font-size: clamp(var(--fz-md), 1vw, var(--fz-xxl));
+	min-width: 150px;
+	padding: 0 0.5em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
 }
 
 nav.navbar .navbar-container {
@@ -197,6 +202,15 @@ nav.Sidebar {
 	padding: 2px 5px;
 	border-radius: 3px;
 }
+nav.Sidebar .app-title-container {
+	display: none;
+	height: var(--nav-height);
+	justify-content: center;
+	align-items: center;
+	gap: 7px;
+	width: 100%;
+}
+
 nav.Sidebar ul,
 nav.Sidebar ul li {
 	display: flex;
@@ -270,6 +284,9 @@ nav.Sidebar ul .path-label {
 		flex-direction: row;
 		justify-content: space-between;
 	}
+	nav.navbar .app-title-container {
+		display: none;
+	}
 
 	header.header {
 		padding: unset;
@@ -294,7 +311,7 @@ nav.Sidebar ul .path-label {
 		transform: none;
 		visibility: visible;
 		gap: 20px;
-		width: 100%;;
+		width: 100%;
 	}
 	.nav_StyledLinks.closed,
 	.nav_StyledLinks.opened {
@@ -327,19 +344,10 @@ nav.Sidebar ul .path-label {
 						SideBar 
 		//////////////////////////////////// */
 
-	nav.navbar .app-title-container {
-		width: var(--nav-title-width);
-		background-color: var(--white);
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		box-shadow: 2px -3px 4px 1px rgba(0, 0, 0, 0.25);
-	}
-
 	nav.Sidebar {
-		position: relative;
-		width: var(--nav-title-width);
+		position: sticky;
+		top: 0;
+		max-width: var(--nav-title-width);
 		min-width: var(--nav-title-width);
 		bottom: unset;
 		left: unset;
@@ -349,9 +357,12 @@ nav.Sidebar ul .path-label {
 		padding: unset;
 		box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.25);
 		display: flex;
-		justify-content: center;
-		align-items: flex-start;
-		padding-top: 4vh;
+		flex-direction: column;
+		justify-content: flex-start;
+		align-items: center;
+	}
+	nav.Sidebar .app-title-container {
+		display: flex;
 	}
 
 	nav.Sidebar ul {
@@ -389,13 +400,12 @@ nav.Sidebar ul .path-label {
 /*////////////////////////////////////////////////////////// TODO: 1024px ~ NavBar.css
 ////////////////////////////////////////////////////////// */
 @media screen and (min-width: 1024px) {
-	.header.public{
+	.header.public {
 		width: 100%;
 		display: flex;
 		flex-direction: row;
 		justify-content: center;
 		align-items: center;
-
 	}
 	.header.public .navbar {
 		max-width: 1920px;

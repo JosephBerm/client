@@ -117,6 +117,7 @@ const Page = () => {
 						))}
 					</div>
 					<div className='quote'>
+						div.quote
 						<FormikProvider value={formik}>
 							<Form onSubmit={formik.handleSubmit} className='FormContainer'>
 								<FormInputTextBox<Quote> label='Facility Name' name='name' value={formik.values.name} />

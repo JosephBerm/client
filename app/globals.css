@@ -72,7 +72,6 @@ main {
 main.page-container {
 	/* padding: 0 25px; */
 	overflow: hidden;
-	padding-top: var(--nav-height) !important;
 }
 
 ::-webkit-scrollbar {
@@ -224,11 +223,10 @@ p:last-of-type {
 	align-self: flex-start;
 }
 
-
 .page-title {
 	font-size: 2.5rem;
 	font-family: 'Montserrat', sans-serif;
-	color: var(--brand-color-1)
+	color: var(--brand-color-1);
 }
 
 .clickable {
@@ -259,7 +257,6 @@ p:last-of-type {
 	--input-color: var(--light-gray);
 	position: relative;
 }
-
 
 .InputTextBox label,
 .InputDropdown label {
@@ -484,9 +481,7 @@ p:last-of-type {
 //////////////////////////////////// */
 
 @media screen and (min-width: 480px) {
-	main.page-container {
-		/* padding: 0 50px; */
-	}
+
 }
 
 @media screen and (min-width: 600px) {
@@ -494,8 +489,7 @@ p:last-of-type {
 
 @media screen and (min-width: 768px) {
 	main.page-container {
-		overflow: hidden;
-		padding: unset;
+		overflow: unset;
 	}
 	button.responsive-icon {
 		gap: 7px;

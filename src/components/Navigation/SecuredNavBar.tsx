@@ -1,9 +1,12 @@
+'use client'
+
 import React, { useState, useEffect, ChangeEvent } from 'react'
 import InputTextBox from '@/components/InputTextBox'
 import NotificationBell from '@/components/Navigation/NotificationBell'
-import classNames from 'classnames'
 import ProfilePreview from '../ProfilePreview'
 import Breadcrumb from '@/src/components/Navigation/BreadCrumb'
+import classNames from 'classnames'
+import Link from 'next/link'
 
 function CustomerNavBar() {
 	const [searchText, setSearchText] = useState('')
@@ -16,10 +19,10 @@ function CustomerNavBar() {
 	return (
 		<header className='header customer'>
 			<nav className='navbar'>
-				<div className='app-title-container'>
+				<Link className='app-title-container clickable' href='/'>
 					(())
-					<a href='/'>MEDSOURCE</a>
-				</div>
+					<span>MEDSOURCE</span>
+				</Link>
 				<div className='navbar-container'>
 					<div className='current-route-details'>
 						<Breadcrumb />
