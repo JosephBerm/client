@@ -235,6 +235,7 @@ p:last-of-type {
 /*////////////////////////////////////
 				InputTextBox     
 //////////////////////////////////// */
+.InputDropdown,
 .InputTextBox {
 	font-size: 1.6rem;
 	font-family: var(--font-sans);
@@ -242,6 +243,7 @@ p:last-of-type {
 	--input-color: var(--light-gray);
 	position: relative;
 }
+
 
 .InputTextBox label,
 .InputDropdown label {

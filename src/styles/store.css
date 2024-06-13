@@ -20,10 +20,11 @@
 }
 
 .creation-container {
+	width: 100%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
+	padding: 25px 0px;
 	max-width: 1440px;
 }
 
@@ -33,6 +34,17 @@
 	width: 80%;
 	max-width: 250px;
 	gap: 20px;
+}
+
+.crudForm .InputDropdown,
+.crudForm .InputTextBox {
+	width: 100%;
+}
+
+.crudForm button{
+	font-family: 'Inter', sans-serif;
+	background-color: var(--brand-color-1);
+	align-self: center;
 }
 
 .products-container {

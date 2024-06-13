@@ -11,6 +11,7 @@ import FormInputTextBox from '@/components/FormInputTextbox'
 import Validations from '@/utilities/validationSchemas'
 import Provider from '@/src/classes/Provider'
 import Routes from '@/services/routes'
+import FormDropdown from '../../FormDropdown'
 
 const AddEditForm = () => {
 	const router = useRouter()
@@ -104,18 +105,13 @@ const AddEditForm = () => {
 					<FormInputTextBox<Product> label='SKU' name='sku' />
 					<FormInputTextBox<Product> label='Product Price' name='price' />
 					<FormInputTextBox<Product> label='Product Description' name='description' />
-					<select
+					<FormDropdown<any>
+						label='Provider'
 						name='providerId'
-						className='form-input'
-						onChange={(e) => setProduct({ ...product, providerId: parseInt(e.target.value) })}>
-						<option value=''>Select Provider</option>
-						{providers.map((provider) => (
-							<option key={provider.id} value={provider.id}>
-								{provider.name}
-							</option>
-						))}
-					</select>
-					
+						display={(item: Provider) => item.name}
+						value={(item: Provider) => item.id}
+						options = {providers}
+					/>				
 
 					<button type='submit' disabled={false}>
 						{isLoading 

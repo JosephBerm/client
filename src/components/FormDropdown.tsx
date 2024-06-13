@@ -44,7 +44,7 @@ const FormDropdown: <T>(props: InputType<T>) => JSX.Element = ({
     options
 }) => {
     const getComponentClass = () => {
-        let className = 'InputTextBox'
+        let className = 'InputDropdown'
 
         if (cssClass) className += ` ${cssClass}`
 
@@ -68,7 +68,7 @@ const FormDropdown: <T>(props: InputType<T>) => JSX.Element = ({
                 maxLength={maxLength}
                 inputMode={inputmode}
                 pattern={pattern}
-                className='border-b border-gray-300'
+                className='border-b border-gray-300 w-full p-2 mt-2 focus:outline-none focus:border-blue-500 rounded-md'
                 rows={type === "textarea" && rows ? rows : 4} // Add this line to set the number of rows for textarea
             >
                 <option value={undefined}>Select an option</option> {/* Add this line to display a blank option */}

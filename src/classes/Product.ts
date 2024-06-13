@@ -10,7 +10,7 @@ export class Product {
 	name: string = ''
 	description: string = ''
 	price: number = 0
-	image: HtmlImage = new HtmlImage()
+	image: HtmlImage | null = null
 	category: ProductsCategory | null = null
 	providerId: number | null = null
 	provider: Provider | null = null
@@ -25,7 +25,7 @@ export class Product {
 		this.name = product?.name || ''
 		this.description = product?.description || ''
 		this.price = product?.price || 0
-		this.image = product.image || new HtmlImage()
+		this.image = product.image || null
 		this.category = product?.category || null
 		this.providerId = product?.providerId || null
 		this.provider = product?.provider || null
