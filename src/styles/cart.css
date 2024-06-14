@@ -1,7 +1,9 @@
 .Cart {
-	padding: 1vh 5vw;
-	height: 100%;
-	overflow: auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	padding: 3vh 3vw;
 }
 .Cart .page-title {
 	text-align: center;

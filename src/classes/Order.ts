@@ -2,6 +2,7 @@ import Company from './Company'
 import { OrderStatus } from '@/classes/Enums'
 import { Product } from './Product'
 import Quote from './Quote'
+import Address from './Address'
 
 export default class Order {
 	id: number | null = null
@@ -52,7 +53,7 @@ export class OrderItem {
 }
 
 export class TransitDetails {
-	locationDropoff: string | null = null
+	locationDropoff: Address | null = null
 	weight: number | null = null
 	dimensions: Dimensions | null = null
 }

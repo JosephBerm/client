@@ -14,6 +14,9 @@ import InputNumber from '@/components/InputNumber'
 import FormInputTextBox from '@/components/FormInputTextbox'
 import IsBusyLoading from '@/components/isBusyLoading'
 import Image from 'next/image'
+import InputTextBox from '@/components/InputTextBox'
+import Name from '@/classes/Name'
+import Address from '@/classes/Address'
 
 const Page = () => {
 	const formik = useFormik({
@@ -36,7 +39,6 @@ const Page = () => {
 			product.productId = cartProduct.product!.id
 			return product
 		})
-		values.typeOfBusiness = values.typeOfBusiness ?? TypeOfBusiness.Other
 		values.id = crypto.randomUUID()
 
 		try {
@@ -75,6 +77,12 @@ const Page = () => {
 
 		return <i className='fa-regular fa-image' />
 	}
+
+	const updateName = (key: keyof Name, newValue: string) => {
+		formik.setFieldValue(`name.${key}`, newValue)
+	}
+
+	const updateAddress = (key: keyof Address, newValue: string) => {}
 
 	useEffect(() => {
 		console.log('fdsfsdfsdfsd', cartStore)
@@ -117,20 +125,54 @@ const Page = () => {
 						))}
 					</div>
 					<div className='quote'>
-						div.quote
+						<h3>Your Quote Request</h3>
 						<FormikProvider value={formik}>
 							<Form onSubmit={formik.handleSubmit} className='FormContainer'>
-								<FormInputTextBox<Quote> label='Facility Name' name='name' value={formik.values.name} />
-								<FormInputTextBox<Quote>
-									label='Contact Name'
-									name='contactName'
-									value={formik.values.contactName}
-								/>
+								<div className='name-container'>
+									<InputTextBox
+										label='First Name'
+										type='text'
+										handleChange={(e) => updateName('first', e.currentTarget.value)}
+										value={formik.values.name.first}
+									/>
+									<InputTextBox
+										label='Last Name'
+										type='text'
+										handleChange={(e) => updateName('last', e.currentTarget.value)}
+										value={formik.values.name.last}
+									/>
+								</div>
 								<FormInputTextBox<Quote>
 									label='Email Address'
 									name='emailAddress'
 									value={formik.values.emailAddress}
 								/>
+								<div className='address-container'>
+									<InputTextBox
+										label='Country'
+										type='text'
+										handleChange={(e) => updateAddress('country', e.currentTarget.value)}
+										value={formik.values.name.first}
+									/>
+									<InputTextBox
+										label='City'
+										type='text'
+										handleChange={(e) => updateAddress('city', e.currentTarget.value)}
+										value={formik.values.name.last}
+									/>
+									<InputTextBox
+										label='State'
+										type='text'
+										handleChange={(e) => updateAddress('state', e.currentTarget.value)}
+										value={formik.values.name.last}
+									/>
+									<InputTextBox
+										label='Zip Code'
+										type='text'
+										handleChange={(e) => updateAddress('zipCode', e.currentTarget.value)}
+										value={formik.values.name.last}
+									/>
+								</div>
 								<FormInputTextBox<Quote>
 									label='Phone Number'
 									name='phoneNumber'

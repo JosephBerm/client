@@ -1,15 +1,16 @@
 import { TypeOfBusiness, QuoteStatus } from '@/classes/Enums'
 import { CartProduct } from '@/classes/Product'
+import Address from './Address'
+import Name from './Name'
 
 export default class Quote {
 	id: string = ''
-	name: string = ''
+	name: Name = new Name()
+	transitDetails: Address = new Address()
 	emailAddress: string = ''
-	contactName: string = ''
 	phoneNumber: string = ''
-	typeOfBusiness: TypeOfBusiness | null = null
-	description: string = ''
 	products: CartProduct[] = []
+	description: string = ''
+	dateCreated: Date = new Date()
 	status: QuoteStatus = QuoteStatus.Unread
-	dateCreated: Date | null = null
 }
