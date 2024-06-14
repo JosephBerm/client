@@ -126,7 +126,7 @@ const Page = () => {
 					</div>
 					<div className='quote'>
 						<h3>Your Quote Request</h3>
-						{submitted && (
+						{!submitted && (
 							<FormikProvider value={formik}>
 								<Form onSubmit={formik.handleSubmit} className='FormContainer'>
 									<div className='gapped-fields'>
@@ -211,7 +211,7 @@ const Page = () => {
 								</Form>
 							</FormikProvider>
 						)}
-						{!submitted && (
+						{submitted && (
 							<div className='fade-in'>
 								<p>Thank you for contact us. One of our team members will be reaching out shortly.</p>
 							</div>

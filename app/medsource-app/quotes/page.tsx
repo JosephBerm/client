@@ -65,6 +65,7 @@ const Page = () => {
 		{
 			name: 'name',
 			label: 'Name',
+			content: (quote) => <Link href={`${Routes.InternalAppRoute}/quotes/${quote.id}`}>{quote.name?.first} {quote.name?.last}</Link>
 		},
 		{
 			name: 'contactName',

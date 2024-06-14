@@ -63,11 +63,9 @@ const Page = () => {
 				<button onClick={createOrderFromQuote}> Create Order</button>
 				{quote && (
 					<div>
-						<h4>{quote.name}</h4>
-						<p>{quote.contactName}</p>
+						<h4>{quote.name.first}</h4>
 						<p>{quote.emailAddress}</p>
 						<p>{quote.phoneNumber}</p>
-						<p>{quote.typeOfBusiness}</p>
 
 						<p>{quote.description}</p>
 					</div>
