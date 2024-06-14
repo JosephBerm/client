@@ -99,6 +99,8 @@
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: center;
+	max-height: 2000px;
+	transition: var(--transition);
 }
 .Cart .quote .FormContainer > * {
 	width: 100%;
@@ -139,4 +141,15 @@
 	padding: 2vh 3vw;
 	background-color: var(--brand-color-4);
 	color: var(--bg-color);
+}
+.Cart .quote .FormContainer.isSubmitted {
+	max-height: 200px;
+}
+
+.Cart .quote .FormContainer.isSubmitted .fade-out {
+	animation: fadeOut 1s ease-out forwards;
+}
+
+.Cart .quote .FormContainer.isSubmitted .fade-in {
+	animation: fadeIn 1s ease-out forwards;
 }

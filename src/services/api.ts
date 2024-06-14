@@ -30,7 +30,8 @@ const API = {
 			create: async <T>(product: T) => await HttpService.post<T>(`/products`, product),
 			update: async <T>(product: T) => await HttpService.put<T>(`/products`, product),
 			delete: async <T>(productId: string) => await HttpService.delete<T>(`/products/${productId}`),
-			getLastest: async(quantity: number = 3) => await HttpService.get<Product[]>(`/products/lastest?quantity=${quantity}`)
+			getLastest: async (quantity: number = 3) =>
+				await HttpService.get<Product[]>(`/products/lastest?quantity=${quantity}`),
 		},
 	},
 	Quotes: {
@@ -84,7 +85,7 @@ const API = {
 		delete: async (providerId: number) => await HttpService.delete<number>(`/provider/${providerId}`),
 	},
 	Public: {
-		sendQuote: async <T>(quote: T) => await HttpService.post<T>('/quote', quote),
+		sendQuote: async(quote: Quote) => await HttpService.post<Quote>('/quote', quote),
 	},
 	Customers: {
 		get: async <Customer>(id: number) => await HttpService.get<Customer>(`/customer/${id}`),
