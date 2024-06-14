@@ -43,7 +43,7 @@ const InputTextBox: React.FC<InputType> = ({
 	handleChange,
 	handleBlur,
 	handleFocus,
-	className,
+	className: cssClass,
 }) => {
 	const inputRef = useRef<HTMLInputElement>(null)
 
@@ -66,8 +66,16 @@ const InputTextBox: React.FC<InputType> = ({
 		return icon.children
 	}
 
+	const getComponentClass = () => {
+		let className = 'InputTextBox flex flex-col'
+
+		if (cssClass) className += ` ${cssClass}`
+
+		return className
+	}
+
 	return (
-		<div className='InputTextBox flex flex-col'>
+		<div className={getComponentClass()}>
 			{label ? (
 				<label onClick={focusInput} className='m-2'>
 					{label}
@@ -89,7 +97,7 @@ const InputTextBox: React.FC<InputType> = ({
 				onChange={(e) => handleChange(e)}
 				onBlur={handleBlur}
 				onFocus={handleFocus}
-				className={`${className + ' ' ?? ''}border-b border-gray-300`}
+				className={`border-b border-gray-300`}
 			/>
 
 			{getIcon()}

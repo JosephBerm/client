@@ -82,15 +82,16 @@ const Page = () => {
 		formik.setFieldValue(`name.${key}`, newValue)
 	}
 
-	const updateAddress = (key: keyof Address, newValue: string) => {}
-
+	const updateAddress = (key: keyof Address, newValue: string) => {
+		formik.setFieldValue(`transitDetails.${key}`, newValue)
+	}
 	useEffect(() => {
 		console.log('fdsfsdfsdfsd', cartStore)
 	}, [cartStore, isLoading])
 
 	return (
 		<div className='Cart'>
-			<h2 className='page-title'>CART & CHECKOUT</h2>
+			<h2 className='page-title'>Quote Request</h2>
 			{isLoading && <IsBusyLoading />}
 			{!isLoading && (
 				<div className='page-body'>
@@ -128,65 +129,76 @@ const Page = () => {
 						<h3>Your Quote Request</h3>
 						<FormikProvider value={formik}>
 							<Form onSubmit={formik.handleSubmit} className='FormContainer'>
-								<div className='name-container'>
+								<div className='gapped-fields'>
 									<InputTextBox
 										label='First Name'
 										type='text'
 										handleChange={(e) => updateName('first', e.currentTarget.value)}
 										value={formik.values.name.first}
+										className='faded-bg'
 									/>
 									<InputTextBox
 										label='Last Name'
 										type='text'
 										handleChange={(e) => updateName('last', e.currentTarget.value)}
 										value={formik.values.name.last}
+										className='faded-bg'
 									/>
 								</div>
 								<FormInputTextBox<Quote>
 									label='Email Address'
 									name='emailAddress'
 									value={formik.values.emailAddress}
+									className='faded-bg'
 								/>
 								<div className='address-container'>
 									<InputTextBox
 										label='Country'
 										type='text'
 										handleChange={(e) => updateAddress('country', e.currentTarget.value)}
-										value={formik.values.name.first}
+										value={formik.values.transitDetails.country}
+										className='faded-bg'
 									/>
-									<InputTextBox
-										label='City'
-										type='text'
-										handleChange={(e) => updateAddress('city', e.currentTarget.value)}
-										value={formik.values.name.last}
-									/>
-									<InputTextBox
-										label='State'
-										type='text'
-										handleChange={(e) => updateAddress('state', e.currentTarget.value)}
-										value={formik.values.name.last}
-									/>
+									<div className='gapped-fields'>
+										<InputTextBox
+											label='City'
+											type='text'
+											handleChange={(e) => updateAddress('city', e.currentTarget.value)}
+											value={formik.values.transitDetails.city}
+											className='faded-bg'
+										/>
+										<InputTextBox
+											label='State'
+											type='text'
+											handleChange={(e) => updateAddress('state', e.currentTarget.value)}
+											value={formik.values.transitDetails.state}
+											className='faded-bg'
+										/>
+									</div>
 									<InputTextBox
 										label='Zip Code'
 										type='text'
 										handleChange={(e) => updateAddress('zipCode', e.currentTarget.value)}
-										value={formik.values.name.last}
+										value={formik.values.transitDetails.zipCode}
+										className='faded-bg'
 									/>
 								</div>
 								<FormInputTextBox<Quote>
 									label='Phone Number'
 									name='phoneNumber'
 									value={formik.values.phoneNumber}
+									className='faded-bg'
 								/>
 								<FormInputTextBox<Quote>
 									type='textarea'
 									rows={6}
-									label='Comments'
+									label='Personal Note'
 									name='description'
 									value={formik.values.description}
+									className='faded-bg'
 								/>
-								<button type='submit' style={{ marginTop: 40 }}>
-									Submit
+								<button className='submit-btn' onClick={() => formik.submitForm()}>
+									Place Request
 								</button>
 							</Form>
 						</FormikProvider>

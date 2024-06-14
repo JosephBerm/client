@@ -288,6 +288,9 @@ p:last-of-type {
 	transition: var(--transition);
 	height: 100%;
 }
+.InputTextBox.faded-bg input {
+	background: rgba(200, 200, 200, 0.1) !important;
+}
 
 .InputTextBox:has(.error-message-container:not(:empty)) textarea,
 .InputTextBox:has(.error-message-container:not(:empty)) input,

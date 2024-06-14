@@ -10,6 +10,9 @@
 }
 .Cart .page-body {
 	margin-top: 15px;
+	display: flex;
+	flex-direction: column;
+	gap: 5vh;
 }
 .Cart .cart-items {
 	display: flex;
@@ -75,4 +78,65 @@
 	border-radius: 4px;
 	padding: 5px 10px;
 	text-align: center;
+}
+
+.Cart .quote {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	background: var(--brand-color-1);
+	padding: 5vh 3vw;
+	border-radius: 4px;
+}
+.Cart .quote h3,
+.Cart .quote label {
+	color: var(--bg-color);
+}
+
+.Cart .quote .FormContainer {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+}
+.Cart .quote .FormContainer > * {
+	width: 100%;
+}
+
+.Cart .quote .FormContainer .gapped-fields {
+	display: flex;
+	gap: 1.25em;
+}
+.Cart .quote .FormContainer .InputTextBox {
+	width: 100%;
+}
+
+.Cart .quote label {
+	font-weight: unset;
+	font-size: 0.75em;
+}
+
+.Cart .quote input {
+	border: 1px solid;
+	border-color: transparent;
+	color: var(--light-gray);
+}
+
+.Cart .quote input:focus {
+	border-color: var(--bg-color);
+}
+
+.Cart .quote .FormContainer .InputTextBox,
+.Cart .quote .FormContainer .gapped-fields:not(:has(.InputTextBox)),
+.Cart .quote button.submit-btn {
+	margin-top: 25px;
+}
+
+.Cart .quote button.submit-btn {
+	border-radius: 4px;
+	width: 75%;
+	padding: 2vh 3vw;
+	background-color: var(--brand-color-4);
+	color: var(--bg-color);
 }

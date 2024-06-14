@@ -21,7 +21,7 @@ export interface InputType<T> {
 	// VALIDATION: ?
 	// why do we need validation here? we can handle that in the validate() function inside the Formik element wrapping this component. Inside the validate method, when whatever condition is false, you would do something like form.error.username = "Invalid username because..."
 	maxLength?: number
-	cssClass?: string
+	className?: string
 	rows?: number
 }
 
@@ -37,8 +37,8 @@ const FormInputTextBox: <T>(props: InputType<T>) => JSX.Element = ({
 	maxLength,
 	inputmode,
 	pattern,
-	cssClass,
-	rows
+	className: cssClass,
+	rows,
 }) => {
 	const getComponentClass = () => {
 		let className = 'InputTextBox'
@@ -53,7 +53,7 @@ const FormInputTextBox: <T>(props: InputType<T>) => JSX.Element = ({
 		<div className={`${getComponentClass()} flex flex-col items-center relative`}>
 			<label>{label}</label>
 			<Field
-				as={type === "textarea" ? "textarea" : "input"}
+				as={type === 'textarea' ? 'textarea' : 'input'}
 				name={name}
 				autoFocus={autofocused}
 				placeholder={placeholder}
@@ -65,7 +65,7 @@ const FormInputTextBox: <T>(props: InputType<T>) => JSX.Element = ({
 				inputMode={inputmode}
 				pattern={pattern}
 				className='border-b border-gray-300'
-				rows={type === "textarea" && rows ? rows : 4} // Add this line to set the number of rows for textarea
+				rows={type === 'textarea' && rows ? rows : 4} // Add this line to set the number of rows for textarea
 			/>
 
 			<div className='error-message-container'>
