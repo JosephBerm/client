@@ -1,19 +1,14 @@
 'use client'
 
-import { useAccountStore } from '@/src/stores/user'
-import Table from '@/common/table'
-import Quote from '@/classes/Quote'
 import '@/styles/dashboard.css'
 import AccountOverview from '@/src/components/AccountOverview'
-import AccountProductsTable from '@/src/components/AccountProductsTable'
+import AccountOrdersTable from '@/src/components/AccountOrdersTable'
 
 const Page = () => {
-	const User = useAccountStore((state) => state.User)
-
 	return (
 		<div className='Dashboard page-container'>
 			<AccountOverview />
-			<AccountProductsTable />
+			<AccountOrdersTable />
 		</div>
 	)
 }
