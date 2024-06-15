@@ -201,6 +201,7 @@ nav.Sidebar {
 	background-color: var(--white);
 	padding: 2px 5px;
 	border-radius: 3px;
+	z-index: calc(infinity);
 }
 nav.Sidebar .app-title-container {
 	display: none;
