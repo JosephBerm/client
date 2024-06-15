@@ -1,6 +1,11 @@
 import React from 'react'
 
-function IsBusyLoading() {
+type isBusyLoadingProps = {
+	isBusy: boolean
+}
+function IsBusyLoading({ isBusy }: isBusyLoadingProps) {
+	if (!isBusy) return
+
 	return (
 		<div className='isBusyLoading'>
 			<h3>Loading...</h3>
