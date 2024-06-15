@@ -1,5 +1,9 @@
 import Notification from '@/src/classes/Notification'
 import Company from '@/classes/Company'
+import Order from './Order'
+import Address from './Address'
+import Name from './Name'
+
 /**
  * Implementation of the server user class.
  */
@@ -10,28 +14,31 @@ export default class User {
 
 	public notifications: Notification[] = []
 	public email: string = ''
-	public firstName: string = ''
-	public lastName: string = ''
+	public name: Name = new Name()
 	public dateOfBirth: Date | null = null
 	public createdAt: Date = new Date()
 
-	public address?: string
-	public city?: string
-	public state?: string
-	public zipCode?: string
-	public country?: string
+	public shippingDetails: Address = new Address()
 
 	public phone?: string
 	public mobile?: string
 
-	public name: string = ''
 	public role: number | null = null
-	public customerId?: number | null
+	public customerId: number = -99
 	public customer?: Company | null
-	
+	public orders?: Order[] = []
 
 	constructor(user: Partial<IUser>) {
 		Object.assign(this, user)
+	}
+	// Method to update user details
+	public updateDetails(details: Partial<IUser>): void {
+		Object.assign(this, details)
+	}
+
+	// Method to add a notification
+	public addNotification(notification: Notification): void {
+		this.notifications.push(notification)
 	}
 }
 

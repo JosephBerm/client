@@ -8,7 +8,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-	font-size: clamp(var(--fz-xxs), 3vw, var(--fz-md));
+	font-size: clamp(var(--fz-s), 3vw, var(--fz-lg));
 	max-width: 500px;
 	width: 100%;
 }

@@ -49,12 +49,11 @@ const API = {
 		delete: async <T>(quoteId: string) => await HttpService.delete<T>(`/quote/${quoteId}`),
 	},
 	Orders: {
-		get: async <Order>(id: number | null) => {
-			if (id !== null) {
-				return await HttpService.get<Order>(`/orders/${id}`)
-			} else {
-				return await HttpService.get<Order>('/orders')
-			}
+		get: async <Order>(customerId?: number | null) => {
+			return await HttpService.get<Order>(`/orders${customerId ? `/${customerId}` : ''}`)
+		},
+		getByCustomerId: async (id: number) => {
+			return await HttpService.get<Order[]>(`/orders/customer/${id}`)
 		},
 		search: async (search: GenericSearchFilter) => {
 			return await HttpService.post<PagedResult<Order>>('/orders/search', search)
@@ -85,7 +84,7 @@ const API = {
 		delete: async (providerId: number) => await HttpService.delete<number>(`/provider/${providerId}`),
 	},
 	Public: {
-		sendQuote: async(quote: Quote) => await HttpService.post<Quote>('/quote', quote),
+		sendQuote: async (quote: Quote) => await HttpService.post<Quote>('/quote', quote),
 	},
 	Customers: {
 		get: async <Customer>(id: number) => await HttpService.get<Customer>(`/customer/${id}`),

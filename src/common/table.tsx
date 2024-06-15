@@ -57,7 +57,14 @@ const Table = <T extends {}>(props: TableProps<T>) => {
 
 	const tableSearch = (): JSX.Element => {
 		if (props.isSearchable) {
-			return <InputTextBox type='text' value={searchQuery} label='Search' handleChange={handleSearchQuery} />
+			return (
+				<InputTextBox
+					type='text'
+					value={searchQuery}
+					label='Search'
+					handleChange={(e) => handleSearchQuery(e.currentTarget.value)}
+				/>
+			)
 		}
 		return <></>
 	}

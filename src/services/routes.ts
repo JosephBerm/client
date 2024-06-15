@@ -7,8 +7,15 @@ import { AccountRole } from '../classes/Enums'
 class Routes {
 	constructor() {}
 	private static router: NextRouter
-
 	public static InternalAppRoute: string = '/medsource-app'
+
+	public static Orders: Route = {
+			name: 'Orders',
+			location: `${this.InternalAppRoute}/orders`,
+			icon: 'fa-solid fa-truck',
+			accessible: [AccountRole.Customer, AccountRole.Admin],
+	}
+
 	public static internalRoutes: Route[] = [
 		{
 			name: 'Dashboard',
@@ -16,12 +23,7 @@ class Routes {
 			icon: 'fa-solid fa-house',
 			accessible: [AccountRole.Customer],
 		},
-		{
-			name: 'Orders',
-			location: `${this.InternalAppRoute}/orders`,
-			icon: 'fa-solid fa-truck',
-			accessible: [AccountRole.Customer, AccountRole.Admin],
-		},
+		Routes.Orders,
 		{
 			name: 'Store',
 			location: `${this.InternalAppRoute}/store`,
