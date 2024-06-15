@@ -10,10 +10,17 @@ class Routes {
 	public static InternalAppRoute: string = '/medsource-app'
 
 	public static Orders: Route = {
-			name: 'Orders',
-			location: `${this.InternalAppRoute}/orders`,
-			icon: 'fa-solid fa-truck',
-			accessible: [AccountRole.Customer, AccountRole.Admin],
+		name: 'Orders',
+		location: `${this.InternalAppRoute}/orders`,
+		icon: 'fa-solid fa-truck',
+		accessible: [AccountRole.Customer, AccountRole.Admin],
+	}
+
+	public static Products: Route = {
+		name: 'Products',
+		location: '/products',
+		icon: 'fa-solid fa-bag-shopping',
+		accessible: [AccountRole.Customer],
 	}
 
 	public static internalRoutes: Route[] = [
@@ -54,12 +61,7 @@ class Routes {
 			icon: 'fa-solid fa-users',
 			accessible: [AccountRole.Admin],
 		},
-		{
-			name: 'Products',
-			location: '/products',
-			icon: 'fa-solid fa-bag-shopping',
-			accessible: [AccountRole.Customer],
-		},
+		Routes.Products,
 		{
 			name: 'Profile',
 			location: `${this.InternalAppRoute}/profile`,
@@ -77,10 +79,7 @@ class Routes {
 			name: 'About Us',
 			location: '/about-us',
 		},
-		{
-			name: 'Products',
-			location: '/products',
-		},
+		Routes.Products,
 		{
 			name: 'Contact',
 			location: '/contact',

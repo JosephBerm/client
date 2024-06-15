@@ -28,8 +28,7 @@ function NavBar() {
 	}
 
 	const enterLogin = () => {
-		
-		if(loggedIn) router.push('/medsource-app')
+		if (loggedIn) router.push('/medsource-app')
 		else router.push('/login')
 	}
 
@@ -37,7 +36,7 @@ function NavBar() {
 		<header className='header public'>
 			<nav className='navbar'>
 				<div className='logo'>
-					<Image priority src={Logo} alt="logo"  />
+					<Image priority src={Logo} alt='logo' />
 				</div>
 				<div className='burger-button' onClick={toggleNavbar}>
 					<i className='fa-solid fa-bars' />
@@ -48,13 +47,6 @@ function NavBar() {
 							<li key={index} style={{ animationDelay: `${index * 0.1}s` }}>
 								{route.component ? (
 									<route.component />
-								) : route.icon ? (
-									<button
-										className='clickable titled'
-										onClick={() => router.push(route.location)}
-										data-title={route.name}>
-										<i className={route.icon} />
-									</button>
 								) : (
 									<Link className='inline-link' href={route.location}>
 										{route.name}
@@ -63,13 +55,12 @@ function NavBar() {
 							</li>
 						))}
 					</ol>
-					<div>
-						<Link className='nav-link' href={'/cart'}>
+					<div className='gapped-fields'>
+						<Link className='nav-link flex justify-center items-center' href={'/cart'}>
 							<i className='fa-solid fa-cart-shopping'></i>
 						</Link>
-
 						<button onClick={enterLogin}>
-							<span className='route-link'>{loggedIn ? "Go to dashboard" : "Login" }</span>
+							<span className='route-link'>{loggedIn ? 'Dashboard' : 'Login'}</span>
 						</button>
 					</div>
 				</div>
