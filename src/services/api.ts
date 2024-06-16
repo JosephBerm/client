@@ -52,8 +52,8 @@ const API = {
 		get: async <Order>(customerId?: number | null) => {
 			return await HttpService.get<Order>(`/orders${customerId ? `/${customerId}` : ''}`)
 		},
-		getByCustomerId: async (id: number) => {
-			return await HttpService.get<Order[]>(`/orders/customer/${id}`)
+		getByCustomerId: async (customerId: number) => {
+			return await HttpService.get<Order[]>(`/orders/customer/${customerId}`)
 		},
 		search: async (search: GenericSearchFilter) => {
 			return await HttpService.post<PagedResult<Order>>('/orders/search', search)

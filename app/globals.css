@@ -246,6 +246,11 @@ p:last-of-type {
 	max-height: 3.6rem; /* (font-size + line-height) * number of lines */
 }
 
+.gapped-fields {
+	display: flex;
+	gap: 1.25em;
+}
+
 /*////////////////////////////////////
 				InputTextBox     
 //////////////////////////////////// */

@@ -77,7 +77,16 @@ function AccountOrdersTable() {
 
 	return (
 		<div className='recent-orders-table'>
-			{lastFiveOrders.length !== 0 && <Table data={lastFiveOrders} columns={columns} />}
+			{lastFiveOrders.length !== 0 ? (
+				<Table data={lastFiveOrders} columns={columns} />
+			) : (
+				<div className='no-order-container flex flex-col items-center'>
+					You currently have no orders placed.
+					<Link className='inline-link' href={Routes.Products.location}>
+						Place Your First Order Now!
+					</Link>
+				</div>
+			)}
 		</div>
 	)
 }
