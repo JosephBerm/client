@@ -174,6 +174,16 @@
 	align-items: center;
 	color: var(--bg-color);
 }
+.Cart .quote .message-container .message-icon {
+	width: fit-content;
+	aspect-ratio: 1 / 1;
+	background: var(--bg-color);
+	border-radius: 50%;
+	padding: 5%;
+	margin-bottom: 5%;
+	color: var(--brand-color-1);
+	font-size: 2.5em;
+}
 .Cart .quote .message-container p {
 	margin: 2vh 0;
 }

@@ -229,6 +229,9 @@ const Page = () => {
 						)}
 						{submitted && (
 							<div className='message-container'>
+								<div className='message-icon'>
+									<i className='fa-solid fa-check-to-slot' />
+								</div>
 								<h3>Request Sent!</h3>
 								<p className='message'>
 									We have successfully received your order and our staff will contact you shortly.
