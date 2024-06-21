@@ -140,15 +140,16 @@ a:focus {
 }
 
 a.inline-link {
-	color: var(--brand-color-1);
+	--inline-link-color: var(var(--brand-color-1));
+	color: var(--inline-link-color);
 }
 a.inline-link:hover,
 a.inline-link:focus {
-	color: var(--brand-color-1) !important;
+	color: var(--inline-link-color) !important;
 }
 
 a.inline-link:after {
-	background-color: var(--brand-color-1);
+	background-color: var(--inline-link-color);
 	bottom: 0.1em;
 	content: '';
 	display: block;
@@ -212,11 +213,6 @@ button.remove {
 p {
 	font-size: var(--fz-md);
 	line-height: 1.4;
-}
-
-p:last-child,
-p:last-of-type {
-	margin: 0px;
 }
 
 /*////////////////////////////////////

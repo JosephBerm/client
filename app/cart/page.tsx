@@ -102,40 +102,47 @@ const Page = () => {
 			<IsBusyLoading isBusy={isLoading} />
 			{!isLoading && (
 				<div className='page-body'>
-					<div className='cart-items'>
-						{cartStore.length === 0 && (
-							<div className='no-order-container flex flex-col items-center'>
-								There&apos;s nothing in your cart.
-								<Link className='inline-link' href={Routes.Products.location}>
-									Start Adding Products Now!
-								</Link>
-							</div>
-						)}
-						{cartStore.length > 0 &&
-							cartStore.map((item) => (
-								// create component out of this called CartItemPreview, have it hold a state
-								<div className='details-container' key={item.product?.id}>
-									<div className='details'>
-										<div className='image-container'>{getImage(item)}</div>
-
-										<div className='description'>
-											<span className='name'>{item.product?.name}</span>
-											<span className='desc'>{item.product?.description}</span>
-											<span className='total'>${item.product?.price}</span>
-										</div>
-									</div>
-									<QuantitySelector
-										handleDelete={() => deleteProdFromCart(item)}
-										quantity={item.quantity}
-										handleChange={(quantity: number) => handleQuantityChange(item, quantity)}
-									/>
+					{!submitted && (
+						<div className='cart-items'>
+							{cartStore.length === 0 && (
+								<div className='no-order-container flex flex-col items-center'>
+									There&apos;s nothing in your cart.
 								</div>
-							))}
-					</div>
+							)}
+							{cartStore.length > 0 &&
+								cartStore.map((item) => (
+									// create component out of this called CartItemPreview, have it hold a state
+									<div className='details-container' key={item.product?.id}>
+										<div className='details'>
+											<div className='image-container'>{getImage(item)}</div>
+
+											<div className='description'>
+												<span className='name'>{item.product?.name}</span>
+												<span className='desc'>{item.product?.description}</span>
+												<span className='total'>${item.product?.price}</span>
+											</div>
+										</div>
+										<QuantitySelector
+											handleDelete={() => deleteProdFromCart(item)}
+											quantity={item.quantity}
+											handleChange={(quantity: number) => handleQuantityChange(item, quantity)}
+										/>
+									</div>
+								))}
+							<Link className='inline-link' href={Routes.Products.location}>
+								Add Products
+								<i className='fa-solid fa-plus ml-2' />
+							</Link>
+						</div>
+					)}
 					<div className='quote'>
 						<h3>Your Quote Request</h3>
 						{!submitted && (
 							<FormikProvider value={formik}>
+								<p className='subtitle my-2 text-center'>
+									Complete the form below to submit your quote request and a staff member will contact
+									you within 24 hours.
+								</p>
 								<Form onSubmit={formik.handleSubmit} className='FormContainer'>
 									<div className='gapped-fields'>
 										<InputTextBox
@@ -220,8 +227,25 @@ const Page = () => {
 							</FormikProvider>
 						)}
 						{submitted && (
-							<div className='fade-in'>
-								<p>Thank you for contact us. One of our team members will be reaching out shortly.</p>
+							<div className='message-container'>
+								<p className='message'>
+									Thank you for submitting your quote request. A team member will be in contact with
+									you shortly.
+								</p>
+
+								<p className='sign-up'>
+									Keep track of your Quotes by{' '}
+									<Link className='inline-link' href={Routes.SignUp.location}>
+										signing up!
+									</Link>
+								</p>
+
+								<p className='login'>
+									Already Have an account?{' '}
+									<Link className='inline-link' href={Routes.LogIn.location}>
+										Log In
+									</Link>
+								</p>
 							</div>
 						)}
 					</div>

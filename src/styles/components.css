@@ -1,9 +1,19 @@
 .QuantitySelector {
 	display: grid;
-	grid-template-columns: 1fr 2fr 1fr;
+	grid-template-columns: 25% 1fr 25%;
 	gap: 5%;
 	width: 200px;
 	max-height: 45px;
+	position: relative;
+}
+.QuantitySelector::before {
+	content: 'Quantity';
+	font-size: 0.65em;
+	font-weight: 600;
+	position: absolute;
+	bottom: 105%;
+	left: 50%;
+	transform: translateX(-50%);
 }
 
 .QuantitySelector input {

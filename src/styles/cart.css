@@ -4,6 +4,7 @@
 	align-items: center;
 	justify-content: flex-start;
 	padding: 3vh 3vw;
+	min-height: 75vh;
 }
 .Cart .page-title {
 	text-align: center;
@@ -12,7 +13,10 @@
 	margin-top: 15px;
 	display: flex;
 	flex-direction: column;
+	align-items: center;
 	gap: 5vh;
+	width: 100%;
+	max-width: 1200px;
 }
 .Cart .cart-items {
 	display: flex;
@@ -20,17 +24,23 @@
 	align-items: center;
 	justify-content: center;
 	gap: 20px;
+	width: 100%;
+	max-width: 500px;
 }
 .Cart .cart-items .details-container {
 	width: 100%;
 	border: 1px solid var(--light-gray);
 	padding: 10px;
-	height: 150px;
+	height: 25vh;
+	min-height: 150px;
+	max-height: 250px;
 	display: grid;
-	grid-template-columns: 1fr auto;
+	grid-template-rows: 1fr auto;
+	row-gap: 1vh;
 	align-items: center;
 	justify-items: center;
 	font-size: 2rem;
+	background: var(--section-bg-color);
 }
 .Cart .cart-items .details {
 	display: grid;
@@ -89,8 +99,11 @@
 	justify-content: flex-start;
 	align-items: center;
 	background: var(--brand-color-1);
-	padding: 5vh 3vw;
+	padding: 4vh 5vw;
 	border-radius: 4px;
+	max-width: 500px;
+	width: 100%;
+	font-size: clamp(var(--fz-xxs), 5vw, var(--fz-lg));
 }
 .Cart .quote h3,
 .Cart .quote label {
@@ -102,7 +115,6 @@
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: center;
-	max-height: 1500px;
 	transition: var(--transition);
 	transition-duration: 2s;
 }
@@ -132,7 +144,7 @@
 .Cart .quote .FormContainer .InputTextBox,
 .Cart .quote .FormContainer .gapped-fields:not(:has(.InputTextBox)),
 .Cart .quote button.submit-btn {
-	margin-top: 25px;
+	margin-top: 1.5%;
 }
 
 .Cart .quote button.submit-btn {
@@ -146,12 +158,74 @@
 	max-height: 200px;
 }
 
-.Cart .quote .FormContainer.isSubmitted .fade-in {
-	animation: fadeIn 1s ease-out forwards;
+.Cart .quote .subtitle {
+	font-size: 0.75em;
+	color: var(--bg-color);
+}
+.Cart .quote .message-container {
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+	justify-content: center;
+	align-items: center;
+	color: var(--bg-color);
+}
+.Cart .quote .message-container p {
+	margin: 2vh 0;
+}
+.Cart .quote .message-container p.login {
+	font-size: 0.65em;
+	font-weight: 600;
+	color: var(--light-gray);
+}
+.Cart .quote .message-container p.sign-up {
+	margin-bottom: 1vh;
+}
+.Cart .quote .message-container p.login {
+	margin: 0;
+}
+.Cart .quote .message-container p.login a.inline-link {
+	--inline-link-color: var(--disabled-color);
+}
+
+.Cart .quote .message-container a.inline-link {
+	--inline-link-color: var(--link-color);
+	font-weight: 500;
+}
+
+.Cart .quote .message-container a.inline-link:hover,
+.Cart .quote .message-container a.inline-link:focus {
+	--inline-link-color: var(--link-color) !important;
 }
 
 @media screen and (min-width: 768px) {
+	.Cart .page-body {
+		flex-direction: row;
+		justify-content: center;
+		align-items: flex-start;
+		gap: 3vw;
+		margin-top: 25px;
+	}
+	.Cart .cart-items {
+		gap: 0px;
+		border: 1px solid var(--light-gray);
+		max-width: 750px;
+	}
 	.Cart .cart-items .details-container {
-		grid-template-rows: 1fr auto;
+		border: unset;
+		border-bottom: 1px solid var(--light-gray);
+		padding: 4% 5%;
+	}
+	.Cart .cart-items .inline-link {
+		margin: 2vh 0;
+	}
+	.Cart .quote {
+		padding: 3% 2%;
+	}
+}
+
+@media screen and (min-width: 1280px) {
+	.Cart .cart-items .details-container {
+		grid-template-columns: 1fr auto;
 	}
 }

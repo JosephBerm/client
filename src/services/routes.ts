@@ -16,6 +16,20 @@ class Routes {
 		accessible: [AccountRole.Customer, AccountRole.Admin],
 	}
 
+	public static SignUp: Route = {
+		name: 'Sign Up',
+		location: '/signup',
+		icon: 'fa-solid fa-user-plus',
+		accessible: [AccountRole.Customer, AccountRole.Admin],
+	}
+
+	public static LogIn: Route = {
+		name: 'LogIn',
+		location: '/login',
+		icon: 'fa-solid fa-user-plus',
+		accessible: [AccountRole.Customer, AccountRole.Admin],
+	}
+
 	public static Products: Route = {
 		name: 'Products',
 		location: '/products',
