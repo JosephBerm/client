@@ -6,11 +6,9 @@ import React, { ChangeEvent, useEffect, useState } from 'react'
 import { FormikProvider, useFormik, Form } from 'formik'
 import { CartProduct } from '@/classes/Product'
 import { useCartStore } from '@/src/stores/store'
-import { TypeOfBusiness } from '@/classes/Enums'
 import Quote from '@/classes/Quote'
 import API from '@/services/api'
 
-import InputNumber from '@/components/InputNumber'
 import FormInputTextBox from '@/components/FormInputTextbox'
 import IsBusyLoading from '@/components/isBusyLoading'
 import Image from 'next/image'
@@ -20,8 +18,10 @@ import Address from '@/classes/Address'
 import Link from 'next/link'
 import Routes from '@/services/routes'
 import QuantitySelector from '@/components/QuantitySelector'
+import { useRouter } from 'next/navigation'
 
 const Page = () => {
+	const router = useRouter()
 	const formik = useFormik({
 		initialValues: new Quote(),
 		onSubmit: (values) => {
@@ -94,6 +94,7 @@ const Page = () => {
 		)
 		setCart(productsToSet)
 	}
+
 	useEffect(() => {}, [cartStore, isLoading])
 
 	return (
@@ -136,9 +137,9 @@ const Page = () => {
 						</div>
 					)}
 					<div className='quote'>
-						<h3>Your Quote Request</h3>
 						{!submitted && (
 							<FormikProvider value={formik}>
+								<h3>Your Quote Request</h3>
 								<p className='subtitle my-2 text-center'>
 									Complete the form below to submit your quote request and a staff member will contact
 									you within 24 hours.
@@ -228,24 +229,21 @@ const Page = () => {
 						)}
 						{submitted && (
 							<div className='message-container'>
+								<h3>Request Sent!</h3>
 								<p className='message'>
-									Thank you for submitting your quote request. A team member will be in contact with
-									you shortly.
+									We have successfully received your order and our staff will contact you shortly.
 								</p>
 
 								<p className='sign-up'>
-									Keep track of your Quotes by{' '}
-									<Link className='inline-link' href={Routes.SignUp.location}>
-										signing up!
-									</Link>
+									In the meantime you can login to your customer account and track the status of your
+									quotes, as well as place orders directly.
 								</p>
 
-								<p className='login'>
-									Already Have an account?{' '}
-									<Link className='inline-link' href={Routes.LogIn.location}>
-										Log In
-									</Link>
-								</p>
+								<div className='button-container'>
+									<button onClick={() => router.push(Routes.InternalAppRoute)}>
+										Go To My Dashboard
+									</button>
+								</div>
 							</div>
 						)}
 					</div>
