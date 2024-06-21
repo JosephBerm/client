@@ -140,7 +140,7 @@ a:focus {
 }
 
 a.inline-link {
-	--inline-link-color: var(var(--brand-color-1));
+	--inline-link-color: var(--brand-color-1);
 	color: var(--inline-link-color);
 }
 a.inline-link:hover,

@@ -105,7 +105,7 @@ const Page = () => {
 					{!submitted && (
 						<div className='cart-items'>
 							{cartStore.length === 0 && (
-								<div className='no-order-container flex flex-col items-center'>
+								<div className='no-order-container flex flex-col items-center mt-7'>
 									There&apos;s nothing in your cart.
 								</div>
 							)}
