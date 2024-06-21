@@ -27,7 +27,9 @@
 	padding: 10px;
 	height: 150px;
 	display: grid;
-	grid-template-rows: 1fr auto;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	justify-items: center;
 	font-size: 2rem;
 }
 .Cart .cart-items .details {
@@ -35,6 +37,7 @@
 	grid-template-columns: 0.5fr 1fr;
 	column-gap: 5px;
 	height: 100%;
+	width: 100%;
 }
 .Cart .cart-items .details .image-container {
 	display: flex;
@@ -145,4 +148,10 @@
 
 .Cart .quote .FormContainer.isSubmitted .fade-in {
 	animation: fadeIn 1s ease-out forwards;
+}
+
+@media screen and (min-width: 768px) {
+	.Cart .cart-items .details-container {
+		grid-template-rows: 1fr auto;
+	}
 }

@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+@import '@/styles/components.css';
 @import '@/styles/normalize.css';
 @import '@/styles/fonts.css';
 @import '@/styles/common.css';
@@ -22,9 +23,11 @@
 	--black-text-color: #393939;
 	--disabled-color: #949494;
 	--black: #000;
+	--highlight: #ffcc00;
 	--white: #fff;
 	--gray: #a1a1a1;
 	--light-gray: #d8d8d8;
+	--blue: rgb(15, 82, 186);
 
 	--toastify-color-error: #d22b2b !important;
 	--error-color: var(--toastify-color-error);
@@ -89,6 +92,11 @@ main.page-container {
 :after,
 :before {
 	box-sizing: inherit;
+}
+
+::selection {
+	background: var(--highlight); /* Highlight background color */
+	color: var(--black); /* Highlight text color */
 }
 
 body {
@@ -186,13 +194,18 @@ button.responsive-icon span {
 
 button.delete,
 button.error {
-	color: var(--error-color);
-	border: 1px solid var(--error-color);
-	background-color: transparent;
+	background-color: var(--error-color-tint);
 }
 
-button.delete:not(:disabled):hover,
-button.error:not(:disabled):hover {
+button.primary {
+	background-color: var(--blue);
+}
+
+button.disabled {
+	background-color: var(--disabled-color);
+}
+
+button.remove {
 	background-color: var(--error-color-tint);
 }
 

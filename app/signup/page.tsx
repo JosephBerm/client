@@ -44,56 +44,57 @@ const Page = () => {
 		router.push('/customer-login')
 	}
 
-	if (isLoading)
 		return (
 			<div className='Signup'>
 				<div className='container'>
 					<h1 className='page-title'>MEDSOURCE</h1>
-					<IsBusyLoading />
-				</div>
-			</div>
-		)
-	else
-		return (
-			<div className='Signup'>
-				<div className='container'>
-					<h1 className='page-title'>MEDSOURCE</h1>
-					<div className='form-container'>
-						<h3>Sign up</h3>
-						<Formik
-							initialValues={form}
-							validationSchema={Validations.signupSchema}
-							onSubmit={(values, { setSubmitting }) => {
-								handleLogin(values)
-								setSubmitting(false)
-							}}>
-							{({ isSubmitting }) => (
-								<Form className='min-h-96 flex flex-col w-full relative'>
-									<FormInputTextBox<SignupForm> label='Username' name='username' />
+					<IsBusyLoading isBusy={isLoading} />
+					{!isLoading && (
+						<div className='form-container'>
+							<h3>Sign up</h3>
+							<Formik
+								initialValues={form}
+								validationSchema={Validations.signupSchema}
+								onSubmit={(values, { setSubmitting }) => {
+									handleLogin(values)
+									setSubmitting(false)
+								}}>
+								{({ isSubmitting }) => (
+									<Form className='min-h-96 flex flex-col w-full relative'>
+										<FormInputTextBox<SignupForm> label='Username' name='username' />
 
-									<FormInputTextBox<SignupForm> label='Email' name='email' />
+										<FormInputTextBox<SignupForm> label='Email' name='email' />
 
-									<FormInputTextBox<SignupForm> label='Password' name='password' type='password' />
+										<FormInputTextBox<SignupForm>
+											label='Password'
+											name='password'
+											type='password'
+										/>
 
-									<FormInputTextBox label='Confirm Password' name='confirmPassword' type='password' />
+										<FormInputTextBox
+											label='Confirm Password'
+											name='confirmPassword'
+											type='password'
+										/>
 
-									<FormInputTextBox<SignupForm> label='First Name' name='firstName' />
+										<FormInputTextBox<SignupForm> label='First Name' name='firstName' />
 
-									<FormInputTextBox<SignupForm> label='Last Name' name='lastName' />
+										<FormInputTextBox<SignupForm> label='Last Name' name='lastName' />
 
-									<div className='form-footer flex flex-col items-center justify-center gap-10'>
-										<button>Create Account</button>
-										<span className='button-subtitle'>
-											Already have an account?&nbsp;
-											<a className='inline-link clickable' onClick={routeToLogin}>
-												Login!
-											</a>
-										</span>
-									</div>
-								</Form>
-							)}
-						</Formik>
-					</div>
+										<div className='form-footer flex flex-col items-center justify-center gap-10'>
+											<button>Create Account</button>
+											<span className='button-subtitle'>
+												Already have an account?&nbsp;
+												<a className='inline-link clickable' onClick={routeToLogin}>
+													Login!
+												</a>
+											</span>
+										</div>
+									</Form>
+								)}
+							</Formik>
+						</div>
+					)}
 				</div>
 			</div>
 		)

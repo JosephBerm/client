@@ -53,9 +53,8 @@ const Page = () => {
 				Track <br />
 				<strong>YOUR ORDERS</strong>
 			</h2>
-			{isLoading ? (
-				<IsBusyLoading />
-			) : (
+			<IsBusyLoading isBusy={isLoading} />
+			{!isLoading && (
 				<div className='orders-table'>
 					<div className='container-header'>
 						<InputTextBox

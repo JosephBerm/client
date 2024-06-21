@@ -31,24 +31,19 @@ const Page = () => {
 		retrieveProducts()
 	}, [])
 
-	if (isLoading)
-		return (
-			<div className='products-page'>
-				<h2 className='page-title'>Products</h2>
-				<IsBusyLoading />
-			</div>
-		)
-	else
-		return (
-			<div className='products-page'>
-				<h2>Products</h2>
-				<div>
+	return (
+		<div className='products-page'>
+			<h2>Products</h2>
+			<IsBusyLoading isBusy={isLoading} />
+			{!isLoading && (
+				<div className='products-container'>
 					{products.map((product, index) => (
 						<ProductCard key={index} product={product} />
 					))}
 				</div>
-			</div>
-		)
+			)}
+		</div>
+	)
 }
 
 export default Page

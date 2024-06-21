@@ -68,4 +68,23 @@ export default class Address {
 			zipCode: this.zipCode,
 		}
 	}
+
+	// Getter for the full address
+	get fullAddress(): string {
+		return `${this.shippingAddress}, ${this.city}, ${this.state} ${this.zipCode}, ${this.country}`
+	}
+
+	// Getter for city and state
+	get cityState(): string {
+		return `${this.city}, ${this.state}`
+	}
+
+	// Getter for a country-specific formatted address
+	get formattedAddress(): string {
+		if (this.country.toLowerCase() === 'usa' || this.country.toLowerCase() === 'united states') {
+			return `${this.shippingAddress}, ${this.city}, ${this.state} ${this.zipCode}`
+		} else {
+			return `${this.shippingAddress}, ${this.city}, ${this.zipCode}, ${this.state}, ${this.country}`
+		}
+	}
 }

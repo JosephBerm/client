@@ -19,7 +19,7 @@ const Page = () => {
 		try {
 			setIsLoading(true)
 			const searchCriteria = new GenericSearchFilter()
-			
+
 			const { data } = await API.Quotes.search(searchCriteria)
 			// const { data } = await API.Quotes.getAll<Quote[]>()
 
@@ -65,11 +65,11 @@ const Page = () => {
 		{
 			name: 'name',
 			label: 'Name',
-			content: (quote) => <Link href={`${Routes.InternalAppRoute}/quotes/${quote.id}`}>{quote.name?.first} {quote.name?.last}</Link>
-		},
-		{
-			name: 'contactName',
-			label: 'Contact Name',
+			content: (quote) => (
+				<Link href={`${Routes.InternalAppRoute}/quotes/${quote.id}`}>
+					{quote.name?.first} {quote.name?.last}
+				</Link>
+			),
 		},
 		{
 			name: 'phoneNumber',
@@ -91,27 +91,17 @@ const Page = () => {
 		},
 	]
 
-	if (isLoading) {
-		return (
-			<div className='Quotes'>
+	return (
+		<div className='Quotes'>
+			<div className='page-header'>
 				<h2 className='page-title'>Quotes</h2>
-				<IsBusyLoading />
 			</div>
-		)
-	} else {
-		return (
-			<div className='Quotes'>
-				<div className='page-header'>
-					<h2 className='page-title'>Quotes</h2>
-				</div>
-
-				{isLoading ? <IsBusyLoading /> : 
-					<Table<Quote> data={quotes} columns={columns} isSortable={true} isPaged={true} isSearchable={true} />
-				}
-
-			</div>
-		)
-	}
+			<IsBusyLoading isBusy={isLoading} />
+			{!isLoading && (
+				<Table<Quote> data={quotes} columns={columns} isSortable={true} isPaged={true} isSearchable={true} />
+			)}
+		</div>
+	)
 }
 
 export default Page

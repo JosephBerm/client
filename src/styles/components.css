@@ -1,0 +1,14 @@
+.QuantitySelector {
+	display: grid;
+	grid-template-columns: 1fr 2fr 1fr;
+	gap: 5%;
+	width: 200px;
+	max-height: 45px;
+}
+
+.QuantitySelector input {
+	width: 100%;
+	text-align: center;
+	border: 1px solid var(--brand-color-1);
+	border-radius: 4px;
+}

@@ -48,31 +48,26 @@ const Page = () => {
 		}
 	}, [])
 
-	if (isLoading)
-		return (
-			<div className='EditQuoteForm'>
-				<h2 className='page-title'>Quote</h2>
-				<IsBusyLoading />
-			</div>
-		)
-	else {
-		return (
-			<div className='EditQuoteForm'>
-				<h2 className='page-title'>Quote</h2>
-				<button onClick={() => route.back()}>Go back</button>
-				<button onClick={createOrderFromQuote}> Create Order</button>
-				{quote && (
-					<div>
-						<h4>{quote.name.first}</h4>
-						<p>{quote.emailAddress}</p>
-						<p>{quote.phoneNumber}</p>
-
-						<p>{quote.description}</p>
-					</div>
-				)}
-			</div>
-		)
-	}
+	return (
+		<div className='EditQuoteForm'>
+			<h2 className='page-title'>Quote</h2>
+			<IsBusyLoading isBusy={isLoading} />
+			{!isLoading && (
+				<div className='buttons-container'>
+					<button onClick={() => route.back()}>Go back</button>
+					<button onClick={createOrderFromQuote}> Create Order</button>
+					{quote && (
+						<div>
+							<h4>{quote.name.first}</h4>
+							<p>{quote.emailAddress}</p>
+							<p>{quote.phoneNumber}</p>
+							<p>{quote.description}</p>
+						</div>
+					)}
+				</div>
+			)}
+		</div>
+	)
 }
 
 export default Page

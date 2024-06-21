@@ -9,7 +9,9 @@ function OrderSummary({ order }: OrderSummaryProps) {
 	const getTrackingDetails = (orderItem: OrderItem) => {
 		return (
 			<div className='transit-details' key={orderItem.id}>
-				<div className='dropoff'>{orderItem?.transitDetails?.locationDropoff ?? "Drop off location"}</div>
+				<div className='dropoff'>
+					{orderItem.transitDetails?.locationDropoff?.cityState ?? 'Drop off location'}
+				</div>
 
 				<div className='product-info'>
 					<div className='product-name'>
@@ -25,11 +27,11 @@ function OrderSummary({ order }: OrderSummaryProps) {
 				<div className='product-dimensions'>
 					<div className='detail'>
 						<span className='title'>Weight</span>
-						<span>{orderItem.transitDetails?.weight ?? "Test Weight"}</span>
+						<span>{orderItem.transitDetails?.weight ?? 'Test Weight'}</span>
 					</div>
 					<div className='detail'>
 						<span className='title'>Dimensions</span>
-						<span>{orderItem.transitDetails?.dimensions?.toString() ?? "Test Dimensions"}</span>
+						<span>{orderItem.transitDetails?.dimensions?.toString() ?? 'Test Dimensions'}</span>
 					</div>
 					<div className='detail'>
 						<span className='title'>Quantity</span>

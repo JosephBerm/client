@@ -17,6 +17,9 @@ import Image from 'next/image'
 import InputTextBox from '@/components/InputTextBox'
 import Name from '@/classes/Name'
 import Address from '@/classes/Address'
+import Link from 'next/link'
+import Routes from '@/services/routes'
+import QuantitySelector from '@/components/QuantitySelector'
 
 const Page = () => {
 	const formik = useFormik({
@@ -85,44 +88,49 @@ const Page = () => {
 	const updateAddress = (key: keyof Address, newValue: string) => {
 		formik.setFieldValue(`transitDetails.${key}`, newValue)
 	}
-	useEffect(() => {
-	}, [cartStore, isLoading])
+	const handleQuantityChange = (item: CartProduct, quantity: number) => {
+		const productsToSet = cartStore.map((p: CartProduct) =>
+			p.product!.id === item.product!.id ? { ...p, quantity } : p
+		)
+		setCart(productsToSet)
+	}
+	useEffect(() => {}, [cartStore, isLoading])
 
 	return (
 		<div className='Cart'>
 			<h2 className='page-title'>Quote Request</h2>
-			{isLoading && <IsBusyLoading />}
+			<IsBusyLoading isBusy={isLoading} />
 			{!isLoading && (
 				<div className='page-body'>
 					<div className='cart-items'>
-						{cartStore.map((item) => (
-							// create component out of this called CartItemPreview, have it hold a state
-							<div className='details-container' key={item.product?.id}>
-								<div className='details'>
-									<div className='image-container'>{getImage(item)}</div>
-
-									<div className='description'>
-										<span className='name'>{item.product?.name}</span>
-										<span className='desc'>{item.product?.description}</span>
-										<span className='total'>${item.product?.price}</span>
-									</div>
-								</div>
-								<div className='quantity'>
-									<button className='delete' onClick={() => deleteProdFromCart(item)}>
-										<i className='fas fa-trash'></i>
-									</button>
-									{/* create component out of this called QuantitySelector */}
-									{/* it would have a delete button on it. */}
-									{/* left button will start as a trash if 1 is selected */}
-									{/* middle would have the quantity in the input */}
-									{/* right would have the increase by 1 button */}
-									<input value={item.quantity.toString()} onChange={() => {}} />
-									<button onClick={() => deleteProdFromCart(item)}>
-										<i className='fa-solid fa-arrow-up'></i>
-									</button>
-								</div>
+						{cartStore.length === 0 && (
+							<div className='no-order-container flex flex-col items-center'>
+								There&apos;s nothing in your cart.
+								<Link className='inline-link' href={Routes.Products.location}>
+									Start Adding Products Now!
+								</Link>
 							</div>
-						))}
+						)}
+						{cartStore.length > 0 &&
+							cartStore.map((item) => (
+								// create component out of this called CartItemPreview, have it hold a state
+								<div className='details-container' key={item.product?.id}>
+									<div className='details'>
+										<div className='image-container'>{getImage(item)}</div>
+
+										<div className='description'>
+											<span className='name'>{item.product?.name}</span>
+											<span className='desc'>{item.product?.description}</span>
+											<span className='total'>${item.product?.price}</span>
+										</div>
+									</div>
+									<QuantitySelector
+										handleDelete={() => deleteProdFromCart(item)}
+										quantity={item.quantity}
+										handleChange={(quantity: number) => handleQuantityChange(item, quantity)}
+									/>
+								</div>
+							))}
 					</div>
 					<div className='quote'>
 						<h3>Your Quote Request</h3>
