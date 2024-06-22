@@ -30,7 +30,6 @@ const ChangePasswordForm = () => {
 
 	return (
 		<div className='ChangePasswordForm'>
-			<h2 className='page-title'>Account</h2>
 
 			<Formik
 				enableReinitialize={true}

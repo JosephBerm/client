@@ -6,7 +6,7 @@ import { useAccountStore } from '@/src/stores/user'
 import { Formik, Form, FormikProps } from 'formik'
 import { useRouter } from 'next/navigation'
 import { getCookies, setCookie } from 'cookies-next'
-import '@/styles/login.css'
+import '@/styles/pages/login.css'
 
 import LoginCredentials from '@/classes/LoginCredentials'
 import Validations from '@/utilities/validationSchemas'

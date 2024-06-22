@@ -51,10 +51,7 @@ const Page = () => {
 
 	return (
 		<div className='Quotes page-container'>
-			<h2 className='page-title'>
-				Track <br />
-				<strong>YOUR ORDERS</strong>
-			</h2>
+			<h2 className='page-title'>Track Your Orders</h2>
 			<IsBusyLoading isBusy={isLoading} />
 			{!isLoading && (
 				<div className='orders-table'>

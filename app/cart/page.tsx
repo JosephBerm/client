@@ -1,6 +1,6 @@
 'use client'
 
-import '@/styles/cart.css'
+import '@/styles/pages/cart.css'
 
 import React, { useEffect, useState } from 'react'
 import { FormikProvider, useFormik, Form } from 'formik'

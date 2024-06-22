@@ -1,6 +1,6 @@
 'use client'
 
-import '@/styles/dashboard.css'
+import '@/styles/pages/dashboard.css'
 import AccountOverview from '@/src/components/AccountOverview'
 import AccountOrdersTable from '@/src/components/AccountOrdersTable'
 

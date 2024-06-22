@@ -3,7 +3,7 @@ import FirstComponent from '@/src/components/About/FirstComponent'
 import BulletComponent from '@/src/components/About/BulletComponent'
 import LastComponent from '@/src/components/LastComponent'
 
-import '@/src/styles/About.css'
+import '@/styles/pages/about.css'
 
 import Aboutus11 from '@/public/aboutus11.png'
 import Aboutus22 from '@/public/aboutus22.png'

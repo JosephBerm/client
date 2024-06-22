@@ -1,6 +1,4 @@
-/* customTable.css */
-
-.custom-table {
+.WealthyTable {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
@@ -8,11 +6,11 @@
 	margin: 20px 0;
 }
 
-.custom-table-header {
+.WealthyTable-header {
 	display: none;
 }
 
-.custom-table-cell {
+.WealthyTable-cell {
 	padding: 10px;
 	border: 1px solid #ddd;
 	text-align: left;
@@ -24,12 +22,12 @@
 	font-weight: bold;
 }
 
-.custom-table-body {
+.WealthyTable-body {
 	display: flex;
 	flex-direction: column;
 }
 
-.custom-table-row {
+.WealthyTable-row {
 	display: flex;
 	flex-direction: column;
 	margin-bottom: 10px;
@@ -44,11 +42,11 @@
 
 /* Media Queries for Larger Screens */
 @media (min-width: 768px) {
-	.custom-table-header {
+	.WealthyTable-header {
 		display: flex;
 	}
 
-	.custom-table-cell {
+	.WealthyTable-cell {
 		display: table-cell;
 	}
 
@@ -58,7 +56,7 @@
 		font-weight: bold;
 	}
 
-	.custom-table-row {
+	.WealthyTable-row {
 		display: table-row;
 	}
 
@@ -66,12 +64,12 @@
 		display: none;
 	}
 
-	.custom-table {
+	.WealthyTable {
 		display: table;
 	}
 
-	.custom-table-header,
-	.custom-table-body {
+	.WealthyTable-header,
+	.WealthyTable-body {
 		display: table-header-group;
 		display: table-row-group;
 	}

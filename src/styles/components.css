@@ -1,3 +1,5 @@
+@import '@/styles/components/WealthyTable.css';
+
 .QuantitySelector {
 	display: grid;
 	grid-template-columns: 25% 1fr 25%;

@@ -1,12 +1,12 @@
 /* Landing.css */
-.landing-page {
+.home-page {
     display: flex;
     flex-direction: column;
     margin: auto;
     overflow: hidden;
 }
 
-.landing-page .firstcomponent {
+.home-page .firstcomponent {
     display: flex;
     flex-direction: column;
     height: calc(100vh - 100px); /* Ensure it takes up full viewport height */
@@ -16,7 +16,7 @@
     margin: auto;
 }
 
-.landing-page .secondcomponent {
+.home-page .secondcomponent {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -25,7 +25,7 @@
     flex: 1; /* Allow the second component to take up remaining space */
 }
 
-.landing-page .secondcomponent h1 {
+.home-page .secondcomponent h1 {
 
 }
 
@@ -33,7 +33,7 @@
     flex: 1; /* Make each child take up an equal amount of space */
 }
 
-.landing-page .firstcomponent .text-container {
+.home-page .firstcomponent .text-container {
     padding: 50px;
     display: flex;
     flex-direction: column;
@@ -41,7 +41,7 @@
     height: 50%;
 }
 
-.landing-page .firstcomponent .image-container {
+.home-page .firstcomponent .image-container {
     height: 50%;
     display: flex;
     justify-content: center; /* Center the image horizontally */
@@ -50,71 +50,71 @@
     overflow: hidden;
 }
 
-.landing-page .firstcomponent .image-container img {
+.home-page .firstcomponent .image-container img {
     width: 100%;
     height: auto;
     display: block;
     max-width: 700px;
 }
 
-.landing-page .faq-container h1,
-.landing-page .firstcomponent h1, h2, h3, h4, h5, h6 {
+.home-page .faq-container h1,
+.home-page .firstcomponent h1, h2, h3, h4, h5, h6 {
     font-family: 'Montserrat', sans-serif;
     color: var(--brand-color-1);
     font-weight: 800;
 }
 
-.landing-page .firstcomponent h2 {
+.home-page .firstcomponent h2 {
     font-size: clamp(1.75rem, 6vw, 4rem);
     margin: 0;
 }
 
-.landing-page .firstcomponent h1 {
+.home-page .firstcomponent h1 {
     font-size: clamp(3.5rem, 13vw, 8rem);
     margin: 0;
 }
 
-.landing-page .header-container {
+.home-page .header-container {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
     flex-direction: column;
 }
 
-.landing-page .header-container h2 {
+.home-page .header-container h2 {
     margin: 0;
     padding-right: 5px; /* Adjust spacing as needed */
 }
 
-.landing-page .header-container h1 {
+.home-page .header-container h1 {
     margin: 0;
 }
 
-.landing-page .header-container {
+.home-page .header-container {
     margin-bottom: 10px;
 }
-.landing-page .header-container h2{
+.home-page .header-container h2{
     font-family: 'Montserrat', sans-serif;
     font-size: clamp(1.7rem, 3.5vw, 2.5rem);
     font-weight: 600;
     color: var(--brand-color-1);
 }
 
-.landing-page .header-container .responsive-header{
+.home-page .header-container .responsive-header{
     font-family: 'Montserrat', sans-serif;
     font-size: clamp(1.5rem, 10vw, 3rem);
     font-weight: 800;
     color: var(--brand-color-1);
 }
 
-.landing-page  p {
+.home-page  p {
     font-weight: 400;
     font-size: clamp(1.4rem, 3vw, 1.6rem);
     font-family: 'Inter', sans-serif;
     line-height: 28px;
 }
 
-.landing-page .firstcomponent #UnderTitle {
+.home-page .firstcomponent #UnderTitle {
     font-family: 'Montserrat', sans-serif;
     font-weight: 600;
     line-height: 36px;
@@ -122,7 +122,7 @@
     margin-bottom: 25px;
 }
 
-.landing-page .firstcomponent .buttons-container {
+.home-page .firstcomponent .buttons-container {
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -130,7 +130,7 @@
     gap: 20px;
 }
 
-.landing-page .firstcomponent .buttons-container button {
+.home-page .firstcomponent .buttons-container button {
     font-family: 'Inter', sans-serif;
     padding: clamp(16.5px, 4%, 20.5px) 20px;
     border: none;
@@ -140,18 +140,18 @@
     cursor: pointer;
 }
 
-.landing-page .firstcomponent .buttons-container #first {
+.home-page .firstcomponent .buttons-container #first {
     background-color: var(--brand-color-4);
     color: white;
     font-size: clamp(1rem, 2.8vw, 1.5rem);
 }
 
-.landing-page .firstcomponent .buttons-container #first:hover {
+.home-page .firstcomponent .buttons-container #first:hover {
     background-color: var(--brand-color-5);
 
 }
 
-.landing-page .firstcomponent .buttons-container #second {
+.home-page .firstcomponent .buttons-container #second {
     display: flex;
     flex-direction: row;
     gap: 10px;
@@ -161,17 +161,17 @@
     font-size: clamp(1rem, 2.8vw, 1.5rem);
 }
 
-.landing-page .firstcomponent .buttons-container #second:hover {
+.home-page .firstcomponent .buttons-container #second:hover {
     background-color: var(--brand-color-2);
     color: white;
 }
 
-.landing-page .firstcomponent .buttons-container #second img {
+.home-page .firstcomponent .buttons-container #second img {
     height: 15px;
     width: 15px;
 }
 
-.landing-page .secondcomponent {
+.home-page .secondcomponent {
     display: flex;
     justify-content: center;
     overflow: hidden;
@@ -180,7 +180,7 @@
     background-color: #f0f0f0;
     height: 100px;
 }
-.landing-page .secondcomponent .scroller {
+.home-page .secondcomponent .scroller {
     max-width: 100%;
     overflow: hidden;
     display: flex;
@@ -189,13 +189,13 @@
     width: 100vw;
 }
 
-.landing-page .secondcomponent .scroller__inner {
+.home-page .secondcomponent .scroller__inner {
     display: flex;
     transition: transform 0.1s linear; /* Adjust timing and easing as needed */
     white-space: nowrap;
 }
 
-.landing-page .secondcomponent h1 {
+.home-page .secondcomponent h1 {
     font-family: 'Montserrat', sans-serif;
     line-height: 49px;
     font-size: 40rem;
@@ -205,10 +205,10 @@
     color: var(--gray);
 }
 
-.landing-page .thirdcomponent > * {
+.home-page .thirdcomponent > * {
     max-width: 1280px;
 }
-.landing-page .thirdcomponent {
+.home-page .thirdcomponent {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -218,7 +218,7 @@
     background-color: white;
 }
 
-.landing-page .box-container {
+.home-page .box-container {
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -231,12 +231,12 @@
     height: 229px;
 }
 
-.landing-page .box-container h3 {
+.home-page .box-container h3 {
     color: rgba(57, 57, 57, 1);
     font-size: clamp(1.7rem, 3vw, 2.5rem);
 }
 
-.landing-page .box-wrapper {
+.home-page .box-wrapper {
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -344,7 +344,7 @@
     padding: 100px 20px 100px 20px;
 }
 
-.landing-page .product-container {
+.home-page .product-container {
     display: flex;
     flex-direction: column;
     background-color: rgba(248, 248, 248, 1);
@@ -355,7 +355,7 @@
     box-sizing: border-box;
 }
 
-.landing-page .product-container  p {
+.home-page .product-container  p {
     color: var(--gray);
     font-weight: 800;
     font-family: 'Montserrat', sans-serif;
@@ -366,14 +366,14 @@
     text-align: center;
 }
 
-.landing-page .product-container .buttons-container  {
+.home-page .product-container .buttons-container  {
     display: flex;
     justify-content: space-around;
     width: 100%;
     gap: 10px;
 }
 
-.landing-page .product-container .buttons-container .img-wrapper{
+.home-page .product-container .buttons-container .img-wrapper{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -385,7 +385,7 @@
     aspect-ratio: 1/1;
 }
 
-.landing-page .product-container .buttons-container button {
+.home-page .product-container .buttons-container button {
     font-size: clamp(1rem, 2.5vw, 1.2rem);
     color: var(--gray);
     justify-content: center;
@@ -396,14 +396,14 @@
     padding: 10px 20px;
 }
 
-.landing-page .product-container .buttons-container .img-wrapper:hover,
-.landing-page .product-container .buttons-container button:hover {
+.home-page .product-container .buttons-container .img-wrapper:hover,
+.home-page .product-container .buttons-container button:hover {
     background-color: rgba(57, 57, 57, 1);
     color: white;
     cursor: pointer;
 }
 
-.landing-page .products-container .product-wrapper {
+.home-page .products-container .product-wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 5px;
@@ -436,7 +436,7 @@
 
 @media screen and (min-width: 760px) {
 
-    .landing-page .firstcomponent {
+    .home-page .firstcomponent {
         flex-direction: row-reverse;
         min-height: 600px;
         height: 100%; /* Ensure it takes up full viewport height */
@@ -447,18 +447,18 @@
         max-width: 1920px;
     }
 
-    .landing-page .firstcomponent h1, h2 {
+    .home-page .firstcomponent h1, h2 {
         font-size: 4rem;
     }
 
-    .landing-page .firstcomponent #UnderTitle {
+    .home-page .firstcomponent #UnderTitle {
         margin-top: 5px;
         font-size: 3.5rem;
         max-width: 700px;
         font-weight: 600;
     }
 
-    .landing-page .firstcomponent .text-container {
+    .home-page .firstcomponent .text-container {
         background-color: unset;
         height: 100%;
         flex: 1;
@@ -466,7 +466,7 @@
         margin-top: 100px;
     }
 
-    .landing-page .firstcomponent .image-container {
+    .home-page .firstcomponent .image-container {
         display: flex;
         align-items: flex-start;
         flex: 1;
@@ -482,7 +482,7 @@
         min-width: 210px;
     }
 
-    .landing-page .secondcomponent {
+    .home-page .secondcomponent {
         display: flex;
         justify-content: center;
         overflow: hidden;
@@ -491,7 +491,7 @@
         background-color: #f0f0f0;
         height: 100px;
     }
-    .landing-page .secondcomponent .scroller {
+    .home-page .secondcomponent .scroller {
         max-width: 100%;
         overflow: hidden;
         display: flex;
@@ -500,13 +500,13 @@
         width: 100vw;
     }
     
-    .landing-page .secondcomponent .scroller__inner {
+    .home-page .secondcomponent .scroller__inner {
         display: flex;
         transition: transform 0.1s linear; /* Adjust timing and easing as needed */
         white-space: nowrap;
     }
     
-    .landing-page .secondcomponent h1 {
+    .home-page .secondcomponent h1 {
         font-family: 'Montserrat', sans-serif;
         line-height: 49px;
         font-size: 40rem;
@@ -516,14 +516,14 @@
         color: var(--gray);
     }
 
-    .landing-page .text-wrapper {
+    .home-page .text-wrapper {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
         width: 100%;
     }
 
-    .landing-page .text-wrapper .description {
+    .home-page .text-wrapper .description {
         flex: 1;
         display: flex;
         flex-direction: column;
@@ -533,7 +533,7 @@
 
     }
 
-    .landing-page .text-wrapper .header-container {
+    .home-page .text-wrapper .header-container {
         flex: 1;
         display: flex;
         flex-direction: column;
@@ -542,14 +542,14 @@
         max-width: 590px;
     }
 
-    .landing-page .box-wrapper {
+    .home-page .box-wrapper {
         display: flex;
         flex-direction: row;
         gap: 40px;
         height: 100%;
     }
 
-    .landing-page .box-wrapper .box-container {
+    .home-page .box-wrapper .box-container {
        min-height: 249px;
        height: 100%;
     }
@@ -577,23 +577,23 @@
     .products-container > * {
         max-width: 1280px;
     }
-    .landing-page .product-container {
+    .home-page .product-container {
         padding: 40px;
         max-width: 355px;
     }
 
-    .landing-page .products-container .product-wrapper {
+    .home-page .products-container .product-wrapper {
         display: flex;
         flex-direction: row;
         gap: 20px;
     }
 
-    .landing-page .product-container p {
+    .home-page .product-container p {
         margin-top: 50px;;
         max-width: 285px;
     }
 
-    .landing-page .product-container .buttons-container  {
+    .home-page .product-container .buttons-container  {
         display: flex;
         justify-content: space-between;
         width: 100%;
@@ -601,7 +601,7 @@
     }
     
     
-    .landing-page .product-container .buttons-container button {
+    .home-page .product-container .buttons-container button {
         font-size: clamp(1rem, 3vw, 1.2rem);
         color: var(--gray);
         justify-content: center;

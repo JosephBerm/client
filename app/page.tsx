@@ -11,7 +11,7 @@ import FAQ from '@/src/components/Landing/FAQ'
 
 export default function Home() {
 	return (
-		<div className='landing-page'>
+		<div className='home-page'>
 			<FirstComponent	/>
 			<SecondComponent/>
 			<ThirdComponent	/>
