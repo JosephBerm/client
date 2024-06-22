@@ -2,23 +2,26 @@
 
 import '@/styles/cart.css'
 
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FormikProvider, useFormik, Form } from 'formik'
-import { CartProduct } from '@/classes/Product'
+import { useAccountStore } from '@/src/stores/user'
 import { useCartStore } from '@/src/stores/store'
+import { useRouter } from 'next/navigation'
+
+import { CartProduct } from '@/classes/Product'
+import Address from '@/classes/Address'
 import Quote from '@/classes/Quote'
+import Name from '@/classes/Name'
+
+import Routes from '@/services/routes'
 import API from '@/services/api'
+import Image from 'next/image'
+import Link from 'next/link'
 
 import FormInputTextBox from '@/components/FormInputTextbox'
-import IsBusyLoading from '@/components/isBusyLoading'
-import Image from 'next/image'
-import InputTextBox from '@/components/InputTextBox'
-import Name from '@/classes/Name'
-import Address from '@/classes/Address'
-import Link from 'next/link'
-import Routes from '@/services/routes'
 import QuantitySelector from '@/components/QuantitySelector'
-import { useRouter } from 'next/navigation'
+import IsBusyLoading from '@/components/isBusyLoading'
+import InputTextBox from '@/components/InputTextBox'
 
 const Page = () => {
 	const router = useRouter()
@@ -29,6 +32,7 @@ const Page = () => {
 		},
 	})
 
+	const loggedIn = useAccountStore((state) => state.LoggedIn)
 	const cartStore = useCartStore((state) => state.Cart)
 	const setCart = useCartStore((state) => state.setCart)
 	const deleteProdFromCart = useCartStore((state) => state.removeProduct)
@@ -58,23 +62,6 @@ const Page = () => {
 		}
 	}
 
-	const handleSetProductToCart = (productId: string, e: ChangeEvent<HTMLInputElement>) => {
-		const existingProduct = cartStore.find((p: CartProduct) => p.product!.id === productId)
-
-		if (existingProduct) {
-			const productsToSet = cartStore.map((p: CartProduct) =>
-				p.product!.id === productId ? { ...p, quantity: parseInt(e.currentTarget.value) } : p
-			)
-			setCart(productsToSet)
-		}
-	}
-
-	const handleBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
-		cartStore.forEach((carProduct) => {
-			if (!carProduct.quantity) deleteProdFromCart(carProduct)
-		})
-	}
-
 	const getImage = (item: CartProduct) => {
 		if (item.product?.image?.src) return <Image src={item.product.image.src} alt={item.product.image.alt} />
 
@@ -93,6 +80,10 @@ const Page = () => {
 			p.product!.id === item.product!.id ? { ...p, quantity } : p
 		)
 		setCart(productsToSet)
+	}
+	const goToDashBoard = () => {
+		if (loggedIn) router.push(Routes.InternalAppRoute)
+		else router.push(Routes.Login.location)
 	}
 
 	useEffect(() => {}, [cartStore, isLoading])
@@ -243,9 +234,7 @@ const Page = () => {
 								</p>
 
 								<div className='button-container'>
-									<button onClick={() => router.push(Routes.InternalAppRoute)}>
-										Go To My Dashboard
-									</button>
+									<button onClick={() => goToDashBoard()}>Go To My Dashboard</button>
 								</div>
 							</div>
 						)}

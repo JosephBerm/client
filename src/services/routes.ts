@@ -21,7 +21,7 @@ class Routes {
 		accessible: [AccountRole.Customer, AccountRole.Admin],
 	}
 
-	public static LogIn: Route = {
+	public static Login: Route = {
 		name: 'LogIn',
 		location: '/login',
 		icon: 'fa-solid fa-user-plus',
