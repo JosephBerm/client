@@ -136,26 +136,46 @@ nav .burger-button:hover {
 }
 
 .nav_StyledLinks {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
 	position: fixed;
 	right: 0;
 	top: 0;
 	height: 100vh;
-	width: 75%;
-	min-width: 200px;
+	width: 0px;
+	overflow: hidden;
+	display: flex;
 	background: var(--section-bg-color);
-	transform: translateX(100%);
 	visibility: hidden;
+	transform: rotateY(15deg);
 	box-shadow: 1px 0px 7px 2px rgba(0, 0, 0, 0.2);
 	transition: var(--transition);
 }
+.nav_StyledLinks.opened .sliding-nav-container {
+	pointer-events: all;
+	opacity: 1;
+}
+.nav_StyledLinks .sliding-nav-container {
+	pointer-events: none;
+	width: 75vw;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	opacity: 0;
+	transition: opacity 0.3s var(--easing);
+}
+.nav_StyledLinks .sliding-nav-container .gapped-fields {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: clamp(25px, 5vh, 35px);
+	margin-top: 10vh;
+}
 
 .nav_StyledLinks.opened {
-	transform: translateX(0);
 	visibility: visible;
+	width: 75vw;
+	transform: rotateY(0deg);
 }
 
 .nav_StyledLinks ol {
@@ -165,11 +185,11 @@ nav .burger-button:hover {
 	align-items: center;
 	font-weight: 400;
 	padding: 0;
+	gap: clamp(10px, 5vh, 35px);
 }
 
 .nav_StyledLinks ol li {
 	position: relative;
-	margin: 20px 0;
 	font-size: var(--fz-lg);
 	counter-increment: item 1;
 }
@@ -318,15 +338,11 @@ nav.Sidebar ul .path-label {
 		inset: unset;
 		height: auto;
 		background: none;
-		transform: none;
+		transform: none !important;
 		visibility: visible;
 		gap: 20px;
 		width: 100%;
 		box-shadow: unset;
-	}
-	.nav_StyledLinks.closed,
-	.nav_StyledLinks.opened {
-		animation: none;
 	}
 
 	.nav_StyledLinks ol {
@@ -352,6 +368,12 @@ nav.Sidebar ul .path-label {
 
 	.nav_StyledLinks .button-container .button {
 		margin-left: 15px;
+	}
+
+	.nav_StyledLinks .sliding-nav-container {
+		pointer-events: all;
+	}
+	.nav_StyledLinks.opened {
 	}
 
 	/*////////////////////////////////////
@@ -408,6 +430,17 @@ nav.Sidebar ul .path-label {
 		position: absolute;
 		left: 25%;
 		display: flex;
+	}
+	.nav_StyledLinks .sliding-nav-container {
+		flex-direction: row;
+		justify-content: flex-end;
+		opacity: 1;
+	}
+
+	.nav_StyledLinks .sliding-nav-container .gapped-fields {
+		flex-direction: row;
+		gap: 1.23em;
+		margin-top: unset;
 	}
 }
 
