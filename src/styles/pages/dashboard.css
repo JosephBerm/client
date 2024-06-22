@@ -3,7 +3,6 @@
 	flex-direction: column;
 	align-items: center;
 	gap: 25px;
-	height: 100%;
 }
 .Dashboard .account-overviews {
 	display: flex;
