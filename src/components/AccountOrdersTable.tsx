@@ -52,7 +52,6 @@ function AccountOrdersTable() {
 				const { data } = await API.Orders.getByCustomerId(User.customer?.id)
 				if (!data.payload) throw data.message
 
-				console.log('data.payload', data.payload)
 				setOrders(data.payload)
 			}
 		} catch (error: unknown) {

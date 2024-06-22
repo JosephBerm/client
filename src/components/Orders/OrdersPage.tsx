@@ -63,7 +63,6 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 				newOrder.products[index].quantity = quantity
 			}
 
-			console.log('first, ', currentOrder)
 
 			return newOrder
 		})
@@ -105,7 +104,6 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 			total: prevState.total + (productToAdd.product?.price ?? 0),
 			CreateFromQuote: prevState.CreateFromQuote, // Calculate or set the value here
 		}))
-		console.log(currentOrder.products)
 
 		setProduct(null)
 	}

@@ -71,11 +71,9 @@ const AddEditForm = () => {
 	const fetchProviders = async () => {
 		try {
 			const { data } = await API.Providers.getAll()
-			console.log(data)
 			if (data.payload) {
 				setProviders((data.payload as Provider[]) || [])
 
-				console.log('first', data.payload)
 			}
 		} finally {
 			setIsLoading(true)

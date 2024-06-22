@@ -28,7 +28,6 @@ function Page() {
 	const router = useRouter()
 	const pathName = usePathname()
 	const user = useAccountStore((state) => state.User)
-	console.log(user)
 
 	const showUnread = (item: Notification): string => {
 		return !item.read ? 'unread' : ''

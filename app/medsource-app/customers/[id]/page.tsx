@@ -38,18 +38,15 @@ const Page = () => {
 	}
 
 	const fetchAccounts = async () => {
-		console.log("AA")
 		if (userId == "create") return;
 		const params = new GenericSearchFilter()
 		
-		console.log("aa", typeof userId)
 		if(typeof userId != "string") return;
 		params.add("CustomerId", userId)
 
 		setIsLoading(true)
 		try {
 			const { data } = await API.Accounts.search(params)
-			console.log("XXX", data)
 			if (data.payload) {
 				setAccountsForCustomer(data.payload.data)
 			}

@@ -22,12 +22,10 @@ const Page = () => {
 	const fetchProviders = async () => {
 		try {
 			const { data } = await API.Providers.getAll()
-			console.log(data)
 			if (data.payload) {
 				//TODO: FIX as providerarray
 				setTables((data.payload as Provider[]) || [])
 
-				console.log('first', data.payload)
 			}
 		} finally {
 			setIsLoading(true)
