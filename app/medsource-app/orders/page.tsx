@@ -1,15 +1,18 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { toast } from 'react-toastify'
-import API from '@/services/api'
-import IsBusyLoading from '@/components/isBusyLoading'
-import Link from 'next/link'
-import Order from '@/classes/Order'
-import { useRouter } from 'next/navigation'
-import Routes from '@/services/routes'
-import OrderSummary from '@/src/components/OrderSummary'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
+import { toast } from 'react-toastify'
+import { useRouter } from 'next/navigation'
+
+import Routes from '@/services/routes'
+import Order from '@/classes/Order'
+import API from '@/services/api'
+import Link from 'next/link'
+
+import AccountOrdersTable from '@/src/components/AccountOrdersTable'
+import OrderSummary from '@/src/components/OrderSummary'
+import IsBusyLoading from '@/components/isBusyLoading'
 import InputTextBox from '@/components/InputTextBox'
 
 const Page = () => {
@@ -55,7 +58,7 @@ const Page = () => {
 			<IsBusyLoading isBusy={isLoading} />
 			{!isLoading && (
 				<div className='orders-table'>
-					<div className='container-header'>
+					{/* <div className='container-header'>
 						<InputTextBox
 							value={trackingNumber}
 							type='text'
@@ -64,11 +67,12 @@ const Page = () => {
 							placeholder='# Order Number'
 						/>
 						<button onClick={() => redirectUser()}>Trace</button>
-					</div>
-					<div className='container-body'>
-						{orders.map((order) => (
+					</div> */}
+					<div className='container-body mt-10'>
+						{/* {orders.map((order) => (
 							<OrderSummary order={order} key={order.id} />
-						))}
+						)) } */}
+						<AccountOrdersTable />
 					</div>
 				</div>
 			)}
