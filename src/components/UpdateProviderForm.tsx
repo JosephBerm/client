@@ -13,7 +13,6 @@ const UpdateProviderForm = ({ provider: provider, onUserUpdate: onProviderUpdate
 	const [isLoading, setIsLoading] = React.useState(false)
 	const params = useParams()
 
-	console.log("Actual provider...", provider)
 
 	const handleSubmit = async (providerData: Provider) => {
 		if(params.id == "create"){

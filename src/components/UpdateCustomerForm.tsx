@@ -13,7 +13,6 @@ const UpdateCustomerForm = ({ customer: customer, onUserUpdate: onCustomerUpdate
 	const [isLoading, setIsLoading] = React.useState(false)
 	const params = useParams()
 
-	console.log("Actual customer...", customer)
 
 	const handleSubmit = async (customerData: Company) => {
 		if(params.id == "create"){
