@@ -10,7 +10,8 @@ import Routes from '@/services/routes'
 
 import API from '@/services/api'
 import Order from '@/classes/Order'
-import Table from '../common/table'
+import Table from '@/common/table'
+import WealthyTable from '@/components/WealthyTable'
 
 function AccountOrdersTable() {
 	const User = useAccountStore((state) => state.User)
@@ -49,9 +50,11 @@ function AccountOrdersTable() {
 		try {
 			setIsLoadingData(true)
 			if (User.customer) {
-				const { data } = await API.Orders.getByCustomerId(User.customer?.id)
+				const { data } = await API.Orders.getFromCustomer(User.customer?.id)
 				if (!data.payload) throw data.message
 
+				console.log('REEEEEEEEEE')
+				console.log(data.payload)
 				setOrders(data.payload)
 			}
 		} catch (error: unknown) {
@@ -67,17 +70,20 @@ function AccountOrdersTable() {
 		getOrders()
 	}, [])
 
-	const lastFiveOrders = useMemo(() => {
-		return orders
-			.slice()
-			.sort((a, b) => compareDesc(a.createdAt, b.createdAt))
-			.slice(0, 5)
-	}, [orders])
+	// const lastFiveOrders = useMemo(() => {
+	// 	return orders
+	// 		.slice()
+	// 		.sort((a, b) => compareDesc(a.createdAt, b.createdAt))
+	// 		.slice(0, 5)
+	// }, [orders])
 
 	return (
-		<div className='recent-orders-table'>
-			{lastFiveOrders.length !== 0 ? (
-				<Table data={lastFiveOrders} columns={columns} />
+		<div className='AccountOrdersTable'>
+			{orders.length !== 0 ? (
+				<div className='table-container'>
+					{/* <WealthyTable headers={['Order ID', 'Date', 'Total']} data={orders} /> */}
+					<Table<Order> columns={columns} data={orders} />
+				</div>
 			) : (
 				<div className='no-order-container flex flex-col items-center'>
 					You currently have no orders placed.
