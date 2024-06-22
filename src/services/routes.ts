@@ -75,11 +75,17 @@ class Routes {
 		},
 		Routes.Products,
 		{
+			name: 'Manage Orders',
+			location: `${this.InternalAppRoute}/adminorders`,
+			icon: 'fa-solid fa-user',
+			accessible: [AccountRole.Customer, AccountRole.Admin],
+		},
+		{
 			name: 'Profile',
 			location: `${this.InternalAppRoute}/profile`,
 			icon: 'fa-solid fa-user',
-			accessible: [AccountRole.Customer],
-		},
+			accessible: [AccountRole.Customer, AccountRole.Admin],
+		}
 	]
 
 	public static publicRoutes: Route[] = [
