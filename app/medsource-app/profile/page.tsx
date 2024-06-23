@@ -36,11 +36,14 @@ const Page = () => {
 			<h2 className='page-title'>Profile Settings</h2>
 			<BasicUserInformation />
 
-			<h3>Security & Privacy</h3>
-			<ChangePasswordForm />
-
 			<h3>Shipping Information</h3>
+			<section className='ShippingInfo'></section>
 			<h3>Billing Information</h3>
+			<section className='BillingInfo'></section>
+
+			<h3>Security & Privacy</h3>
+			{/* <section className='Security'></section> */}
+			<ChangePasswordForm />
 		</div>
 	)
 }

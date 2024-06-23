@@ -14,12 +14,12 @@ const BasicUserInformation = () => {
 	}
 
 	return (
-		<div className='BasicUserInformation'>
+		<section className='BasicUserInformation'>
 			<ProfilePicture />
 
-			<h3>Basic Information</h3>
+			<h3 className='header'>Basic Information</h3>
 			<UpdateAccountForm user={UserFromStore} onUserUpdate={onUserUpdate} />
-		</div>
+		</section>
 	)
 }
 
