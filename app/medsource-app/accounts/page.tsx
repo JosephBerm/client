@@ -7,7 +7,6 @@ import { format } from 'date-fns'
 import Table from '@/common/table'
 import API from '@/services/api'
 import Routes from '@/services/routes'
-import '@/styles/accounts.css'
 
 const Page = () => {
 	const [tables, setTables] = useState<User[]>([])
@@ -64,7 +63,7 @@ const Page = () => {
 	]
 
 	return (
-		<div className='accounts-page-container'>
+		<div className='page-container'>
 			<h1 style={{ alignSelf: 'flex-start', margin: 0 }}>Accounts</h1>
 
 			<Table<User> columns={columns} data={tables} />

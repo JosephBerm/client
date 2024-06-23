@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react'
 import API from '@/src/services/api'
 import { useRouter, useParams } from 'next/navigation'
-import '@/styles/accounts.css'
 import Provider from '@/src/classes/Provider'
 import UpdateProviderForm from '@/src/components/UpdateProviderForm'
 
@@ -16,7 +15,7 @@ const Page = () => {
 	const userId = params.id
 
 	const fetchProviders = async () => {
-		if (userId == "create") return;
+		if (userId == 'create') return
 		const actualProviderId = parseInt(userId as string)
 		setIsLoading(true)
 		try {

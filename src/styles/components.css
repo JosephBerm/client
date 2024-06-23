@@ -24,3 +24,33 @@
 	border: 1px solid var(--brand-color-1);
 	border-radius: 4px;
 }
+
+.FormContainer {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	transition: var(--transition);
+	transition-duration: 2s;
+}
+.FormContainer > * {
+	width: 100%;
+}
+
+.FormContainer .InputTextBox,
+.FormContainer .InputDropdown,
+.FormContainer .gapped-fields:not(:has(.InputTextBox)) {
+	margin-top: 5%;
+}
+
+.FormContainer .InputTextBox,
+.FormContainer .InputDropdown {
+	width: 100%;
+}
+@media screen and (min-width: 768px) {
+	.FormContainer .InputTextBox,
+	.FormContainer .InputDropdown,
+	.FormContainer .gapped-fields:not(:has(.InputTextBox)) {
+		margin-top: 1.5%;
+	}
+}

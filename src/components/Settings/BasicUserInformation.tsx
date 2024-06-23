@@ -4,8 +4,9 @@ import User from '@/classes/User'
 import { useAccountStore } from '@/src/stores/user'
 
 import UpdateAccountForm from '@/components/UpdateAccountForm'
+import ProfilePicture from '@/components/ProfilePicture'
 
-const UpdateProfileForm = () => {
+const BasicUserInformation = () => {
 	const { User: UserFromStore } = useAccountStore((state) => state)
 
 	const onUserUpdate = (user: User) => {
@@ -13,10 +14,13 @@ const UpdateProfileForm = () => {
 	}
 
 	return (
-		<div className='UpdateProfileForm'>
+		<div className='BasicUserInformation'>
+			<ProfilePicture />
+
+			<h3>Basic Information</h3>
 			<UpdateAccountForm user={UserFromStore} onUserUpdate={onUserUpdate} />
 		</div>
 	)
 }
 
-export default UpdateProfileForm
+export default BasicUserInformation

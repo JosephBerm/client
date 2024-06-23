@@ -8,7 +8,6 @@ import Table from '@/common/table'
 import API from '@/services/api'
 import Provider from '@/classes/Provider'
 import Routes from '@/services/routes'
-import '@/styles/accounts.css'
 
 const Page = () => {
 	const [tables, setTables] = useState<Provider[]>([])
@@ -25,7 +24,6 @@ const Page = () => {
 			if (data.payload) {
 				//TODO: FIX as providerarray
 				setTables((data.payload as Provider[]) || [])
-
 			}
 		} finally {
 			setIsLoading(true)
@@ -85,7 +83,7 @@ const Page = () => {
 	]
 
 	return (
-		<div className='accounts-page-container'>
+		<div className='page-container'>
 			<h1 style={{ alignSelf: 'flex-start', margin: 0 }}>providers</h1>
 			<button onClick={createCustomer}>Create</button>
 

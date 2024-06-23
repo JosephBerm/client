@@ -110,22 +110,6 @@
 	color: var(--bg-color);
 }
 
-.Cart .quote .FormContainer {
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-start;
-	align-items: center;
-	transition: var(--transition);
-	transition-duration: 2s;
-}
-.Cart .quote .FormContainer > * {
-	width: 100%;
-}
-
-.Cart .quote .FormContainer .InputTextBox {
-	width: 100%;
-}
-
 .Cart .quote label {
 	font-weight: unset;
 	font-size: 0.75em;
@@ -139,12 +123,6 @@
 
 .Cart .quote input:focus {
 	border-color: var(--bg-color);
-}
-
-.Cart .quote .FormContainer .InputTextBox,
-.Cart .quote .FormContainer .gapped-fields:not(:has(.InputTextBox)),
-.Cart .quote button.submit-btn {
-	margin-top: 5%;
 }
 
 .Cart .quote button.submit-btn {
@@ -231,11 +209,6 @@
 	}
 	.Cart .quote {
 		padding: 3% 2%;
-	}
-	.Cart .quote .FormContainer .InputTextBox,
-	.Cart .quote .FormContainer .gapped-fields:not(:has(.InputTextBox)),
-	.Cart .quote button.submit-btn {
-		margin-top: 1.5%;
 	}
 }
 

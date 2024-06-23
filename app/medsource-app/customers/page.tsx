@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import Table from '@/common/table'
 import API from '@/services/api'
-import '@/styles/accounts.css'
 import Company from '@/src/classes/Company'
 import { toast } from 'react-toastify'
 import Routes from '@/services/routes'
@@ -84,7 +83,7 @@ const Page = () => {
 	]
 
 	return (
-		<div className='accounts-page-container'>
+		<div className='page-container'>
 			<h1 style={{ alignSelf: 'flex-start', margin: 0 }}>Customers</h1>
 			<button onClick={createCustomer}>Create</button>
 

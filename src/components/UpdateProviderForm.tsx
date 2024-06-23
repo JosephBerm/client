@@ -65,21 +65,16 @@ const UpdateProviderForm = ({ provider: provider, onUserUpdate: onProviderUpdate
 				setSubmitting(false)
 			}}>
 			{(form) => (
-				<Form className='update-account-form-container'>
+				<Form className='FormContainer'>
 					<FormInputTextBox<Provider> label='Name' name='name' />
 					<FormInputTextBox<Provider> label='Email Address' name='email' />
 					<FormInputTextBox<Provider> label='Indentifier (ETIN/SSN)' name='identifier' />
 
-					
 					<div className='form-buttons-container'>
 						<button type='submit' className='btn btn-primary' disabled={!form.isValid || isLoading}>
 							{isLoading ? <i className='fa-solid fa-spinner animate-spin'></i> : buttonText}
 						</button>
 					</div>
-						
-					
-					
-
 				</Form>
 			)}
 		</Formik>

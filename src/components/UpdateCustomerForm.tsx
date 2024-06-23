@@ -9,15 +9,20 @@ import { toast } from 'react-toastify'
 import FormInputTextBox from '@/src/components/FormInputTextbox'
 import { useParams } from 'next/navigation'
 
-const UpdateCustomerForm = ({ customer: customer, onUserUpdate: onCustomerUpdate }: { customer: Company; onUserUpdate?: (User: Company) => void }) => {
+const UpdateCustomerForm = ({
+	customer: customer,
+	onUserUpdate: onCustomerUpdate,
+}: {
+	customer: Company
+	onUserUpdate?: (User: Company) => void
+}) => {
 	const [isLoading, setIsLoading] = React.useState(false)
 	const params = useParams()
 
-
 	const handleSubmit = async (customerData: Company) => {
-		if(params.id == "create"){
+		if (params.id == 'create') {
 			await createCustomer(customerData)
-		}else {
+		} else {
 			await updateCustomer(customerData)
 		}
 	}
@@ -53,7 +58,7 @@ const UpdateCustomerForm = ({ customer: customer, onUserUpdate: onCustomerUpdate
 		}
 	}
 
-	const buttonText = params.id == "create" ? "Create Customer" : "Update Customer"
+	const buttonText = params.id == 'create' ? 'Create Customer' : 'Update Customer'
 
 	return (
 		<Formik
@@ -65,21 +70,16 @@ const UpdateCustomerForm = ({ customer: customer, onUserUpdate: onCustomerUpdate
 				setSubmitting(false)
 			}}>
 			{(form) => (
-				<Form className='update-account-form-container'>
+				<Form className='FormContainer'>
 					<FormInputTextBox<Company> label='First Name' name='name' />
 					<FormInputTextBox<Company> label='Email Address' name='email' />
 					<FormInputTextBox<Company> label='Indentifier (ETIN/SSN)' name='identifier' />
 
-					
 					<div className='form-buttons-container'>
 						<button type='submit' className='button' disabled={!form.isValid || isLoading}>
 							{isLoading ? <i className='fa-solid fa-spinner animate-spin'></i> : buttonText}
 						</button>
 					</div>
-						
-					
-					
-
 				</Form>
 			)}
 		</Formik>

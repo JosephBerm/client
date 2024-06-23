@@ -1,10 +1,9 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import User from '@/src/classes/User'
-import API from '@/src/services/api'
-import UpdateAccountForm from '@/src/components/UpdateAccountForm'
+import User from '@/classes/User'
+import API from '@/services/api'
+import UpdateAccountForm from '@/components/UpdateAccountForm'
 import { useRouter, useParams } from 'next/navigation'
-import '@/styles/accounts.css'
 
 const Page = () => {
 	const params = useParams()
