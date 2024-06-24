@@ -16,6 +16,7 @@ import Validations from '@/utilities/validationSchemas'
 import Company from '@/classes/Company'
 import User from '@/classes/User'
 import API from '@/services/api'
+import InputTextBox from '@/components/InputTextBox'
 
 const UpdateAccountForm = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User: User) => void }) => {
 	const [isLoading, setIsLoading] = React.useState(false)
@@ -26,15 +27,16 @@ const UpdateAccountForm = ({ user, onUserUpdate }: { user: User; onUserUpdate?: 
 		<Formik
 			enableReinitialize={true}
 			initialValues={user}
-			validationSchema={Validations.profileSchema}>
+			validationSchema={ Validations.profileSchema }
+			onSubmit={() => {}}>
 			{(form) => (
 				<Form className='FormContainer'>
 					<div className="gapped-fields">
-						<FormInputTextBox<User> label='First Name' name='firstName' />
-						<FormInputTextBox<User> label='Last Name' name='lastName' />
+						<FormInputTextBox label='First Name' name='name.first' />
+						<FormInputTextBox label='Last Name' name='name.last' />
 					</div>
-					<FormInputTextBox<User> label='Email Address' name='email' />
-					<FormInputTextBox<User> label='Phone Number' name='phoneNumber' />
+					<FormInputTextBox label='Email Address' name='email' />
+					<FormInputTextBox label='Phone Number' name='phoneNumber' />
 
 					{User.role == AccountRole.Admin && (
 						<FormFetchDropdown<any>

@@ -27,7 +27,7 @@ export default class User {
 	public customerId: number = -99
 	public customer?: Company | null
 	public orders?: Order[] = []
-	public profilePictureUrl?: string
+	public profilePicturePath?: string
 
 	constructor(user: Partial<IUser>) {
 		Object.assign(this, user)

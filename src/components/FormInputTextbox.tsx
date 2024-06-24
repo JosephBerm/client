@@ -5,11 +5,11 @@ import { Field, ErrorMessage, useFormikContext } from 'formik'
 
 type inputMode = 'search' | 'email' | 'tel' | 'text' | 'url' | 'none' | 'numeric' | 'decimal' | undefined
 
-export interface InputType<T> {
+export interface InputType {
 	type?: string
 	value?: string
 	label: string
-	name: keyof T
+	name: string
 	placeholder?: string
 	disabled?: boolean
 	readOnly?: boolean
@@ -25,7 +25,7 @@ export interface InputType<T> {
 	rows?: number
 }
 
-const FormInputTextBox: <T>(props: InputType<T>) => JSX.Element = ({
+const FormInputTextBox: (props: InputType) => JSX.Element = ({
 	type = 'text',
 	label,
 	value,

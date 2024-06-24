@@ -5,7 +5,7 @@ import Image from 'next/image'
 function ProfilePicture() {
 	const { User: UserFromStore } = useAccountStore((state) => state)
 
-	const { profilePictureUrl } = UserFromStore
+	const { profilePicturePath: profilePictureUrl } = UserFromStore
 	return (
 		<div className='ProfilePicture'>
 			<Image

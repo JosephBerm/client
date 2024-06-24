@@ -6,7 +6,7 @@ import { useAccountStore } from '@/src/stores/user'
 import UpdateAccountForm from '@/components/UpdateAccountForm'
 import ProfilePicture from '@/components/ProfilePicture'
 
-const BasicUserInformation = () => {
+const UserInfoBasic = () => {
 	const { User: UserFromStore } = useAccountStore((state) => state)
 
 	const onUserUpdate = (user: User) => {
@@ -23,4 +23,4 @@ const BasicUserInformation = () => {
 	)
 }
 
-export default BasicUserInformation
+export default UserInfoBasic

@@ -1,16 +1,20 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import ChangePasswordForm from '@/components/Settings/ChangePasswordForm'
-import BasicUserInformation from '@/components/Settings/BasicUserInformation'
-import '@/styles/pages/profile.css'
 import { toast } from 'react-toastify'
+
+import '@/styles/pages/profile.css'
 import API from '@/services/api'
+import User from '@/classes/User'
+
+import UserInfoBasic from '@/components/Settings/UserInfoBasic'
+import UserInfoShipping from '@/components/Settings/UserInfoShipping'
+import UserInfoBilling from '@/components/Settings/UserInfoBilling'
+import UserInfoPrivacy from '@/components/Settings/UserInfoPrivacy'
 
 const Page = () => {
+	const [isLoading, setIsLoading] = useState(false)
 	const handleSubmit = async (UserData: User) => {
-		const [isLoading, setIsLoading] = useState(false)
-
 		try {
 			//why were these here ?
 			// UserData.notifications = []
@@ -34,16 +38,10 @@ const Page = () => {
 	return (
 		<div className='Profile page-container'>
 			<h2 className='page-title'>Profile Settings</h2>
-			<BasicUserInformation />
-
-			<h3>Shipping Information</h3>
-			<section className='ShippingInfo'></section>
-			<h3>Billing Information</h3>
-			<section className='BillingInfo'></section>
-
-			<h3>Security & Privacy</h3>
-			{/* <section className='Security'></section> */}
-			<ChangePasswordForm />
+			<UserInfoBasic />
+			<UserInfoShipping />
+			<UserInfoBilling />
+			<UserInfoPrivacy />
 		</div>
 	)
 }

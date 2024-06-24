@@ -6,7 +6,7 @@
 }
 
 .Profile .ProfilePicture {
-	width: 50vw;
+	width: 100%;
 	max-width: 250px;
 	aspect-ratio: 1/1;
 	border-radius: 50%;
@@ -42,4 +42,13 @@
 	margin-top: 5%;
 	width: 75%;
 	min-width: 125px;
+}
+
+.Profile > section {
+	margin-top: 5%;
+	gap: 1vh;
+}
+
+.Profile .BasicUserInformation h3 {
+	margin-top: 5%;
 }
