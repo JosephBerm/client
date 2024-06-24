@@ -10,13 +10,13 @@ export class Product {
 	name: string = ''
 	description: string = ''
 	price: number = 0
-	image: HtmlImage | null = null
+	image: Uint8Array | HtmlImage | null = null
 	category: ProductsCategory | null = null
 	providerId: number | null = null
 	provider: Provider | null = null
 
 	toString(): string {
-		return `Product: ${this.name} - ${this.description} - ${this.price} - ${this.image?.alt} - ${this.category}`
+		return `Product: ${this.name} - ${this.description} - ${this.price} - ${this.category}`
 	}
 
 	constructor(product: Partial<Product>) {

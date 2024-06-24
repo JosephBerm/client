@@ -12,6 +12,7 @@ import Validations from '@/utilities/validationSchemas'
 import Provider from '@/src/classes/Provider'
 import Routes from '@/services/routes'
 import FormDropdown from '../../FormDropdown'
+import FormInputFile from '../../FormInputFile'
 
 const AddEditForm = () => {
 	const router = useRouter()
@@ -99,6 +100,7 @@ const AddEditForm = () => {
 			}}>
 			{({ isSubmitting, isValid, values }) => (
 				<Form className='crudForm'>
+					<FormInputFile<Product> label='image' name='image' />
 					<FormInputTextBox<Product> label='Product Name' autofocused={true} name='name' />
 					<FormInputTextBox<Product> label='SKU' name='sku' />
 					<FormInputTextBox<Product> label='Product Price' name='price' />
