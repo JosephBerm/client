@@ -23,7 +23,7 @@ export interface InputType<T> {
 	rows?: number
 }
 
-const FormInputFile: <T>(props: InputType<T>) => JSX.Element = ({
+const FormInputFile: <T>(props: any) => JSX.Element = ({
 	type = 'text',
 	label,
 	value,
@@ -50,19 +50,14 @@ const FormInputFile: <T>(props: InputType<T>) => JSX.Element = ({
 	const inputRef = useRef<HTMLInputElement>(null) // Add a ref for the input element
 
 	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const file = event.target.files?.[0]
+		
 		const reader = new FileReader()
 	
 		reader.onload = () => {
-			const byteArray = reader.result as string
-	
+			const file = event.target.files?.[0]
 			if (file) {
-				formikContext.setFieldValue(name as string, byteArray) // Set the field value to the selected file
+				formikContext.setFieldValue(name, file) // Set the field value to the selected file
 			}
-		}
-	
-		if (file) {
-			reader.readAsDataURL(file)
 		}
 	}
 

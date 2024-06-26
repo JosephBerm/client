@@ -3,11 +3,11 @@ import { Field, ErrorMessage, useFormikContext } from 'formik'
 
 type inputMode = 'search' | 'email' | 'tel' | 'text' | 'url' | 'none' | 'numeric' | 'decimal' | undefined
 
-export interface InputType<T> {
-    name: keyof T
-    display: ((item: T) => string)
-    value: ((item: T) => any),
-    options: T[]
+export interface InputType {
+    name: any
+    display: ((item: any) => string)
+    value: ((item: any) => any),
+    options: any[]
     type?: string
     label: string
     placeholder?: string
@@ -26,7 +26,7 @@ export interface InputType<T> {
     rows?: number
 }
 
-const FormDropdown: <T>(props: InputType<T>) => JSX.Element = ({
+const FormDropdown: <T>(props: InputType) => JSX.Element = ({
     type = 'text',
     label,
     value,
@@ -72,7 +72,7 @@ const FormDropdown: <T>(props: InputType<T>) => JSX.Element = ({
                 rows={type === "textarea" && rows ? rows : 4} // Add this line to set the number of rows for textarea
             >
                 <option value={undefined}>Select an option</option> {/* Add this line to display a blank option */}
-                {options.map(option => (
+                {options.map((option: any ) => (
                     <option key={value(option)} value={value(option)}>{display(option)}</option>
                 ))}
             </Field>

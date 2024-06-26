@@ -9,6 +9,7 @@ import Quote from '@/classes/Quote'
 import CustomerSummary from '@/classes/Base/CustomerSummary'
 import Order from '@/classes/Order'
 import { Product } from '@/classes/Product'
+import { AxiosRequestConfig } from 'axios'
 
 const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
@@ -27,10 +28,11 @@ const API = {
 		Products: {
 			getList: async <T>() => await HttpService.get<T>('/products'),
 			get: async <T>(productId: string) => await HttpService.get<T>(`/products/${productId}`),
-			create: async <T>(product: T) => await HttpService.post<T>(`/products`, product),
+			create: async (product: FormData, config: AxiosRequestConfig = {}) => await HttpService.post<Product>(`/products`, product, config),
 			update: async <T>(product: T) => await HttpService.put<T>(`/products`, product),
 			delete: async <T>(productId: string) => await HttpService.delete<T>(`/products/${productId}`),
-			getLastest: async (quantity: number = 3) => await HttpService.get<Product[]>(`/products/lastest?quantity=${quantity}`)
+			getLastest: async (quantity: number = 3) => await HttpService.get<Product[]>(`/products/lastest?quantity=${quantity}`),
+			image: async (id: string, name: string) => await HttpService.get(`/products/image?productId=${id}&image=${name}`)
 		},
 	},
 	Quotes: {

@@ -19,7 +19,7 @@ const Page = () => {
 			if (!res.payload || res.statusCode !== 200) {
 				return toast.error(res.message)
 			}
-			setProducts(res.payload)
+			setProducts(res.payload.map((p) => new Product(p)))
 		} catch (err: any) {
 			toast.error(err.message)
 		} finally {

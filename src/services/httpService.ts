@@ -53,8 +53,8 @@ export class HttpService {
 		return HttpService.instance.get<Response<T>>(url, config)
 	}
 
-	public static post<T>(url: string, data: any): Promise<AxiosResponse<Response<T>>> {
-		return HttpService.instance.post<Response<T>>(url, data)
+	public static post<T>(url: string, data: any, config: AxiosRequestConfig = {} ): Promise<AxiosResponse<Response<T>>> {
+		return HttpService.instance.post<Response<T>>(url, data, config)
 	}
 
 	public static put<T>(url: string, data: any): Promise<AxiosResponse<Response<T>>> {

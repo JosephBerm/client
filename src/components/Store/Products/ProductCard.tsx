@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { IProduct } from '@/src/classes/Product';
 import { CartProduct } from '@/src/classes/Product';
 import { useCartStore } from '@/src/stores/store';
 import InputNumber from '@/components/InputNumber';
+import API from '@/src/services/api';
+import Image from 'next/image';
 
 
 
@@ -28,6 +30,18 @@ const ProductCard = ({product}: {product: IProduct}) => {
 
     return (
         <div className='product-card-container'>
+
+            {product.hasImage() &&
+                <Image 
+                    src={`${process.env.API_URL}/products/image?productId=${product.id}&image=${product.files[0]?.name ?? ""}`}
+                    width={200}
+                    height={200}
+                    alt='Product Image'
+                />
+            
+            }
+
+
             <h2>{product.name}</h2>
             <p>{product.description}</p>
             {/* <p>{product.price}</p> */}

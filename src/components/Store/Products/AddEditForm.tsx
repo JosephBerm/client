@@ -13,6 +13,7 @@ import Provider from '@/src/classes/Provider'
 import Routes from '@/services/routes'
 import FormDropdown from '../../FormDropdown'
 import FormInputFile from '../../FormInputFile'
+import InputFile from '@/components/InputFile'
 
 const AddEditForm = () => {
 	const router = useRouter()
@@ -22,6 +23,7 @@ const AddEditForm = () => {
 	const [providers, setProviders] = useState<Provider[]>([])
 	const [isNewProduct, setIsNewProduct] = useState<Boolean>(params?.id == 'create')
 	const [isLoading, setIsLoading] = useState<Boolean>(false)
+	const [files, setFiles] = useState<File[]>([])
 
 	const getProduct = async () => {
 		try {
@@ -39,20 +41,35 @@ const AddEditForm = () => {
 		}
 	}
 
-	const createProduct = async (prdct: Product) => {
+	
+	const createProduct = async (prdct: any) => {
 		try {
-			setIsLoading(true)
-			const { data: res } = await API.Store.Products.create<Product>(prdct)
-			if (!res.payload || res.statusCode !== 200) return toast.error(res.message)
+			const formData = new FormData();
+			formData.append('product.name', prdct.name);
+			formData.append('product.description', prdct.description);
+			formData.append('product.price', prdct.price.toString());
+			formData.append('product.sku', prdct.sku);
+		
+			files.forEach((file: File) => {
+				formData.append('files', file);
+			});
+		
+			const { data: res } = await API.Store.Products.create(formData, {
+				headers: {
+				'Content-Type': 'multipart/form-data',
+				},
+			});
 
-			toast.success(res.message)
-			router.push(`${Routes.InternalAppRoute}/store`)
+			if (res.statusCode !== 200) return toast.error(res.message);
+			toast.success(res.message);
+
+			router.push(`${Routes.InternalAppRoute}/store`);
+	
+		 
 		} catch (error: any) {
-			toast.error(error.message)
-		} finally {
-			setIsLoading(false)
+		  	toast.error(error?.message?? "Unexpected server error");
 		}
-	}
+	  };
 
 	const updateProduct = async (prdct: Product) => {
 		try {
@@ -100,12 +117,12 @@ const AddEditForm = () => {
 			}}>
 			{({ isSubmitting, isValid, values }) => (
 				<Form className='crudForm'>
-					<FormInputFile<Product> label='image' name='image' />
-					<FormInputTextBox<Product> label='Product Name' autofocused={true} name='name' />
-					<FormInputTextBox<Product> label='SKU' name='sku' />
-					<FormInputTextBox<Product> label='Product Price' name='price' />
-					<FormInputTextBox<Product> label='Product Description' name='description' />
-					<FormDropdown<any>
+					<InputFile label='image' onChange={setFiles} multiple={true} />
+					<FormInputTextBox label='Product Name' autofocused={true} name='name' />
+					<FormInputTextBox label='SKU' name='sku' />
+					<FormInputTextBox label='Product Price' name='price' />
+					<FormInputTextBox label='Product Description' name='description' />
+					<FormDropdown
 						label='Provider'
 						name='providerId'
 						display={(item: Provider) => item.name}

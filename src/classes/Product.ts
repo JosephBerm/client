@@ -2,18 +2,21 @@ import { ProductsCategory } from '@/classes/Enums'
 import Provider from '@/classes/Provider'
 import Guid from '@/classes/Base/Guid'
 import HtmlImage from '@/classes/HtmlImage'
+import UploadedFile from '@/classes/UploadedFile'
 
 export class Product {
 	id: string = ''
 
 	sku: string = ''
 	name: string = ''
+	files: UploadedFile[] = []
 	description: string = ''
 	price: number = 0
-	image: Uint8Array | HtmlImage | null = null
+	image: File | null = null
 	category: ProductsCategory | null = null
 	providerId: number | null = null
 	provider: Provider | null = null
+	createdAt: Date = new Date()
 
 	toString(): string {
 		return `Product: ${this.name} - ${this.description} - ${this.price} - ${this.category}`
@@ -21,6 +24,7 @@ export class Product {
 
 	constructor(product: Partial<Product>) {
 		this.id = product?.id || Guid.newGuid()
+		this.files = product?.files || []
 		this.sku = product?.sku || ''
 		this.name = product?.name || ''
 		this.description = product?.description || ''
@@ -29,6 +33,15 @@ export class Product {
 		this.category = product?.category || null
 		this.providerId = product?.providerId || null
 		this.provider = product?.provider || null
+		this.createdAt = product?.createdAt || new Date()
+	}
+
+	getFileName(): string {
+		return this.files[0]?.name ?? ''
+	}
+
+	hasImage(): boolean {
+		return this.files.length > 0 && this.files[0].name !== null
 	}
 }
 
