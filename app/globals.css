@@ -366,6 +366,7 @@ input:disabled {
 	color: var(--error-color);
 	padding-top: 5px;
 	z-index: 1;
+	backdrop-filter: blur(1px);
 	animation: flipDown 0.1s ease-out forwards;
 	transition: var(--transition);
 }

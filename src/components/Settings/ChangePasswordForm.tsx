@@ -17,7 +17,6 @@ const ChangePasswordForm = () => {
 	const [isEditEnabled, setIsEditEnabled] = useState(false)
 
 	const handleSubmit = async (e: PasswordForm) => {
-		console.log('Submitting form data', e)
 		try {
 			setIsLoading(true)
 			const response = await API.Accounts.changePassword<Boolean>(e.oldPassword, e.newPassword)
@@ -40,12 +39,24 @@ const ChangePasswordForm = () => {
 		enableReinitialize: true,
 		initialValues: new PasswordForm(),
 		validationSchema: Validations.changePasswordSchema,
-		onSubmit: (values) => {
-			console.log('reeeeeeeeee')
+		onSubmit: async (values) => {
 			//Is edit enabled ?
 			if (!isEditEnabled) {
 				setIsEditEnabled(true)
 				return
+			}
+			try {
+				await handleSubmit(values)
+			} catch (error: unknown) {
+				if (error instanceof Error) {
+					toast.error(error.message)
+					console.error(error.message)
+				} else if (error instanceof String) {
+					toast.error(error)
+					console.error(error)
+				} else toast.error('An error occurred')
+			} finally {
+				setIsEditEnabled(false)
 			}
 		},
 	})
@@ -61,20 +72,22 @@ const ChangePasswordForm = () => {
 					type='password'
 					disabled={!isEditEnabled}
 				/>
-				<button
-					className={classNames({ 'form-button': true, 'edit-button': isEditEnabled })}
-					onClick={() => formik.submitForm()}>
-					{isEditEnabled ? 'Save' : 'Change Password'}
-				</button>
-				<button
-					type='button'
-					className={classNames({ 'delete form-button': true, hidden: !isEditEnabled })}
-					onClick={() => {
-						setIsEditEnabled(false)
-						formik.resetForm()
-					}}>
-					Cancel
-				</button>
+				<div className='button-container'>
+					<button
+						className={classNames({ 'form-button': true, 'edit-button': isEditEnabled })}
+						onClick={() => formik.submitForm()}>
+						{isEditEnabled ? 'Save' : 'Change Password'}
+					</button>
+					<button
+						type='button'
+						className={classNames({ 'delete form-button': true, hidden: !isEditEnabled })}
+						onClick={() => {
+							setIsEditEnabled(false)
+							formik.resetForm()
+						}}>
+						Cancel
+					</button>
+				</div>
 			</Form>
 		</FormikProvider>
 	)
