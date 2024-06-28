@@ -152,7 +152,7 @@ const Page = () => {
 											className='faded-bg'
 										/>
 									</div>
-									<FormInputTextBox<Quote>
+									<FormInputTextBox
 										label='Email Address'
 										name='emailAddress'
 										value={formik.values.emailAddress}
@@ -191,20 +191,20 @@ const Page = () => {
 										/>
 									</div>
 									<div className='gapped-fields'>
-										<FormInputTextBox<Quote>
+										<FormInputTextBox
 											label='Phone Number'
 											name='phoneNumber'
 											value={formik.values.phoneNumber}
 											className='faded-bg'
 										/>
-										<FormInputTextBox<Quote>
+										<FormInputTextBox
 											label='Company Name'
 											name='companyName'
 											value={formik.values.companyName}
 											className='faded-bg'
 										/>
 									</div>
-									<FormInputTextBox<Quote>
+									<FormInputTextBox
 										type='textarea'
 										rows={6}
 										label='Personal Note'

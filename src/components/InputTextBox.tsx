@@ -70,6 +70,7 @@ const InputTextBox: React.FC<InputType> = ({
 		let className = 'InputTextBox flex flex-col'
 
 		if (cssClass) className += ` ${cssClass}`
+		if (disabled) className += ` disabled`
 
 		return className
 	}

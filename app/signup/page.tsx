@@ -61,17 +61,17 @@ const Page = () => {
 							}}>
 							{({ isSubmitting }) => (
 								<Form className='min-h-96 flex flex-col w-full relative'>
-									<FormInputTextBox<SignupForm> label='Username' name='username' />
+									<FormInputTextBox label='Username' name='username' />
 
-									<FormInputTextBox<SignupForm> label='Email' name='email' />
+									<FormInputTextBox label='Email' name='email' />
 
-									<FormInputTextBox<SignupForm> label='Password' name='password' type='password' />
+									<FormInputTextBox label='Password' name='password' type='password' />
 
 									<FormInputTextBox label='Confirm Password' name='confirmPassword' type='password' />
 
-									<FormInputTextBox<SignupForm> label='First Name' name='firstName' />
+									<FormInputTextBox label='First Name' name='firstName' />
 
-									<FormInputTextBox<SignupForm> label='Last Name' name='lastName' />
+									<FormInputTextBox label='Last Name' name='lastName' />
 
 									<div className='form-footer flex flex-col items-center justify-center gap-10'>
 										<button>Create Account</button>

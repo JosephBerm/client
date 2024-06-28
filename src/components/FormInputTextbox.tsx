@@ -44,6 +44,7 @@ const FormInputTextBox: (props: InputType) => JSX.Element = ({
 		let className = 'InputTextBox'
 
 		if (cssClass) className += ` ${cssClass}`
+		if (disabled) className += ` disabled`
 
 		return className
 	}

@@ -263,6 +263,10 @@ p {
 /*////////////////////////////////////
 				InputTextBox     
 //////////////////////////////////// */
+input:disabled {
+	background-color: var(--light-gray);
+	cursor: not-allowed;
+}
 .InputDropdown,
 .InputTextBox {
 	font-size: 1.6rem;
@@ -292,7 +296,6 @@ p {
 .InputDropdown select {
 	border: 1px solid var(--input-color);
 	border-radius: var(--border-radius);
-	background: transparent !important;
 	padding: 5px 10px;
 	font-size: 0.95em;
 	font-weight: 100;
@@ -302,6 +305,18 @@ p {
 	transition: var(--transition);
 	height: 100%;
 }
+
+.InputTextBox:not(.disabled) textarea,
+.InputTextBox:not(.disabled) input,
+.InputDropdown select:not(:disabled) {
+	background: transparent !important;
+}
+
+.InputTextBox.disabled label,
+.InputDropdown.disabled label {
+	color: var(--disabled-color);
+}
+
 .InputTextBox.faded-bg input {
 	background: rgba(200, 200, 200, 0.1) !important;
 }

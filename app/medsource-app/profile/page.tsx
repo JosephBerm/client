@@ -9,7 +9,6 @@ import User from '@/classes/User'
 
 import UserInfoBasic from '@/components/Settings/UserInfoBasic'
 import UserInfoShipping from '@/components/Settings/UserInfoShipping'
-import UserInfoBilling from '@/components/Settings/UserInfoBilling'
 import UserInfoPrivacy from '@/components/Settings/UserInfoPrivacy'
 
 const Page = () => {
@@ -40,7 +39,6 @@ const Page = () => {
 			<h2 className='page-title'>Profile Settings</h2>
 			<UserInfoBasic />
 			<UserInfoShipping />
-			<UserInfoBilling />
 			<UserInfoPrivacy />
 		</div>
 	)

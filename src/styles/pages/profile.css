@@ -20,35 +20,40 @@
 	object-fit: cover;
 }
 
-.Profile .BasicUserInformation {
+.Profile > section {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	width: 60%;
-	min-width: 150px;
+	min-width: 250px;
+	margin-top: 20%;
+	gap: 1vh;
+}
+.Profile > section:first-of-type {
+	margin-top: 5%;
 }
 
-.Profile .BasicUserInformation form {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-	max-width: 500px;
+.Profile .BasicUserInformation h3 {
+	margin-top: 5%;
 }
-
 .Profile .BasicUserInformation form button {
 	margin-top: 5%;
 	width: 75%;
 	min-width: 125px;
 }
 
-.Profile > section {
-	margin-top: 5%;
-	gap: 1vh;
+.Profile .FormContainer {
+	justify-content: center;
+	width: 100%;
+	max-width: 500px;
+}
+.Profile .FormContainer .gapped-fields {
+	gap: 5%;
 }
 
-.Profile .BasicUserInformation h3 {
-	margin-top: 5%;
+@media screen and (min-width: 768px) {
+	.Profile > section {
+		margin-top: 10%;
+	}
 }

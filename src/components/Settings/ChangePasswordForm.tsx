@@ -5,16 +5,19 @@ import InputTextBox from '../InputTextBox'
 import API from '@/services/api'
 import { toast } from 'react-toastify'
 
-import { Formik, Form } from 'formik'
+import { FormikProvider, useFormik, Form } from 'formik'
 import FormInputTextBox from '@/components/FormInputTextbox'
 import Validations from '@/utilities/validationSchemas'
+import classNames from 'classnames'
 
 import { PasswordForm } from '@/classes/User'
 
 const ChangePasswordForm = () => {
 	const [isLoading, setIsLoading] = useState(false)
+	const [isEditEnabled, setIsEditEnabled] = useState(false)
 
 	const handleSubmit = async (e: PasswordForm) => {
+		console.log('Submitting form data', e)
 		try {
 			setIsLoading(true)
 			const response = await API.Accounts.changePassword<Boolean>(e.oldPassword, e.newPassword)
@@ -28,34 +31,52 @@ const ChangePasswordForm = () => {
 		}
 	}
 
+	// const handleButtonClick = () => {
+	// 	if (!isEditEnabled) setIsEditEnabled(true)
+	// 	setIsEditEnabled(false)
+	// }
+
+	const formik = useFormik({
+		enableReinitialize: true,
+		initialValues: new PasswordForm(),
+		validationSchema: Validations.changePasswordSchema,
+		onSubmit: (values) => {
+			console.log('reeeeeeeeee')
+			//Is edit enabled ?
+			if (!isEditEnabled) {
+				setIsEditEnabled(true)
+				return
+			}
+		},
+	})
+
 	return (
-		<div className='ChangePasswordForm'>
-
-			<Formik
-				enableReinitialize={true}
-				initialValues={new PasswordForm()}
-				validationSchema={Validations.changePasswordSchema}
-				onSubmit={(values, { setSubmitting }) => {
-					handleSubmit(values)
-					setSubmitting(false)
-				}}>
-				{(form) => (
-					<Form className='min-h-96 flex flex-col gap-8 w-2/4 relative'>
-						<FormInputTextBox<PasswordForm> label='Old Password' name='oldPassword' type='password' />
-						<FormInputTextBox<PasswordForm> label='New Password' name='newPassword' type='password' />
-						<FormInputTextBox<PasswordForm>
-							label='Confirm New Password'
-							name='confirmNewPassword'
-							type='password'
-						/>
-
-						<button type='submit' disabled={!form.isValid || isLoading}>
-							{isLoading ? <i className='fa-solid fa-spinner animate-spin'></i> : 'Change Password'}
-						</button>
-					</Form>
-				)}
-			</Formik>
-		</div>
+		<FormikProvider value={formik}>
+			<Form className='FormContainer change-password' onSubmit={formik.handleSubmit}>
+				<FormInputTextBox label='Old Password' name='oldPassword' type='password' disabled={!isEditEnabled} />
+				<FormInputTextBox label='New Password' name='newPassword' type='password' disabled={!isEditEnabled} />
+				<FormInputTextBox
+					label='Confirm New Password'
+					name='confirmNewPassword'
+					type='password'
+					disabled={!isEditEnabled}
+				/>
+				<button
+					className={classNames({ 'form-button': true, 'edit-button': isEditEnabled })}
+					onClick={() => formik.submitForm()}>
+					{isEditEnabled ? 'Save' : 'Change Password'}
+				</button>
+				<button
+					type='button'
+					className={classNames({ 'delete form-button': true, hidden: !isEditEnabled })}
+					onClick={() => {
+						setIsEditEnabled(false)
+						formik.resetForm()
+					}}>
+					Cancel
+				</button>
+			</Form>
+		</FormikProvider>
 	)
 }
 

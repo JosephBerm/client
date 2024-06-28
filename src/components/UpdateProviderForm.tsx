@@ -66,9 +66,9 @@ const UpdateProviderForm = ({ provider: provider, onUserUpdate: onProviderUpdate
 			}}>
 			{(form) => (
 				<Form className='FormContainer'>
-					<FormInputTextBox<Provider> label='Name' name='name' />
-					<FormInputTextBox<Provider> label='Email Address' name='email' />
-					<FormInputTextBox<Provider> label='Indentifier (ETIN/SSN)' name='identifier' />
+					<FormInputTextBox label='Name' name='name' />
+					<FormInputTextBox label='Email Address' name='email' />
+					<FormInputTextBox label='Indentifier (ETIN/SSN)' name='identifier' />
 
 					<div className='form-buttons-container'>
 						<button type='submit' className='btn btn-primary' disabled={!form.isValid || isLoading}>

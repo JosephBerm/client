@@ -76,12 +76,12 @@ const Page = () => {
 						}}>
 						{(form) => (
 							<Form className='min-h-96 flex flex-col gap-8 w-2/4 relative'>
-								<FormInputTextBox<LoginCredentials>
+								<FormInputTextBox
 									label='Email Address'
 									autofocused={true}
 									name='username'
 								/>
-								<FormInputTextBox<LoginCredentials> type='password' label='Password' name='password' />
+								<FormInputTextBox type='password' label='Password' name='password' />
 								<div className='form-footer flex flex-col items-center justify-center gap-10'>
 									<div className='login-options-container'>
 										<InputCheckbox

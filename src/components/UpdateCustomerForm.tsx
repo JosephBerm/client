@@ -71,9 +71,9 @@ const UpdateCustomerForm = ({
 			}}>
 			{(form) => (
 				<Form className='FormContainer'>
-					<FormInputTextBox<Company> label='First Name' name='name' />
-					<FormInputTextBox<Company> label='Email Address' name='email' />
-					<FormInputTextBox<Company> label='Indentifier (ETIN/SSN)' name='identifier' />
+					<FormInputTextBox label='First Name' name='name' />
+					<FormInputTextBox label='Email Address' name='email' />
+					<FormInputTextBox label='Indentifier (ETIN/SSN)' name='identifier' />
 
 					<div className='form-buttons-container'>
 						<button type='submit' className='button' disabled={!form.isValid || isLoading}>

@@ -47,6 +47,22 @@
 .FormContainer .InputDropdown {
 	width: 100%;
 }
+
+.FormContainer .form-button {
+	margin-top: 5%;
+}
+.FormContainer .form-button {
+	opacity: 1;
+	visibility: visible;
+	transition: var(--transition);
+}
+.FormContainer .hidden {
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	user-select: none;
+}
+
 @media screen and (min-width: 768px) {
 	.FormContainer .InputTextBox,
 	.FormContainer .InputDropdown,
