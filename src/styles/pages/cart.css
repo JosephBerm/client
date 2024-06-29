@@ -131,6 +131,7 @@
 	padding: 2vh 3vw;
 	background-color: var(--brand-color-4);
 	color: var(--bg-color);
+	margin-top: 3%;
 }
 .Cart .quote .FormContainer.isSubmitted {
 	max-height: 200px;
