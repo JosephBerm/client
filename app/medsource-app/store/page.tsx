@@ -35,17 +35,17 @@ const Page = () => {
 			label: 'Price',
 		},
 		{
-			key: 'edit',
-			label: 'Edit',
-			content: (product) => <Link href={`store/${product.id}`}>Edit</Link>,
-		},
-		{
 			key: 'delete',
-			label: 'Delete',
+			label: 'Archive',
 			content: (product) => (
-				<button className='delete' onClick={() => deleteProduct(product.id!)}>
-					Delete
-				</button>
+				<div className="flex gap-5">
+					<button>
+						<Link href={`store/${product.id}`}>Edit</Link>
+					</button>
+					<button className='delete' onClick={() => deleteProduct(product.id!)}>
+						Archive
+					</button>	
+				</div>
 			),
 		},
 	]

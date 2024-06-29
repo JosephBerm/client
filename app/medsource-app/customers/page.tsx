@@ -84,7 +84,9 @@ const Page = () => {
 
 	return (
 		<div className='page-container'>
-			<h1 style={{ alignSelf: 'flex-start', margin: 0 }}>Customers</h1>
+			<div className='page-header'>
+				<h2 className='page-title'>Customers</h2>
+			</div>
 			<button onClick={createCustomer}>Create</button>
 
 			<Table<Company> columns={columns} data={tables} />

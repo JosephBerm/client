@@ -536,6 +536,12 @@ input:disabled {
     min-width: 200px; /* Adjust as needed */
 }
 
+.image-delete-button:hover{
+/* scale */
+	transform: scale(1.1);
+
+}
+
 /*////////////////////////////////////
 				MEDIA QUERIES     
 //////////////////////////////////// */

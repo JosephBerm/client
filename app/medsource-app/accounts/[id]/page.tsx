@@ -4,6 +4,7 @@ import User from '@/classes/User'
 import API from '@/services/api'
 import UpdateAccountForm from '@/components/UpdateAccountForm'
 import { useRouter, useParams } from 'next/navigation'
+import AccountCRUD from '@/components/AccountCRUD'
 
 const Page = () => {
 	const params = useParams()
@@ -39,7 +40,7 @@ const Page = () => {
 			<h1 className='mb-5'>Account Page</h1>
 			{isLoading && user && (
 				<div>
-					<UpdateAccountForm user={user} />
+					<AccountCRUD user={user} />
 				</div>
 			)}
 		</div>

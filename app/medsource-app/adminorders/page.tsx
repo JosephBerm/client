@@ -99,7 +99,7 @@ const Page = () => {
 	]
 
 	return (
-		<div className='Orders'>
+		<div className='page-container Orders'>
 			<div className='page-header'>
 				<h2 className='page-title'>Manage Orders</h2>
 				<button className='mt-7' onClick={() => route.push('adminorders/create')}>

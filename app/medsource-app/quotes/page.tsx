@@ -10,10 +10,12 @@ import Table from '@/common/table'
 import Link from 'next/link'
 import Routes from '@/services/routes'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
+import { useRouter } from 'next/navigation'
 
 const Page = () => {
 	const [quotes, setQuotes] = useState<Quote[]>([])
 	const [isLoading, setIsLoading] = useState<boolean>(false)
+	const route = useRouter()
 
 	const getQuotes = async () => {
 		try {
@@ -76,23 +78,27 @@ const Page = () => {
 			label: 'Phone Number',
 		},
 		{
-			key: 'edit',
-			label: 'Edit',
-			content: (quote) => <Link href={`${Routes.InternalAppRoute}/quotes/${quote.id}`}>Edit</Link>,
-		},
-		{
 			key: 'delete',
-			label: 'Delete',
-			content: (product) => (
-				<button className='delete' onClick={() => handleQuoteDeletion(product.id!)}>
-					Delete
-				</button>
+			label: 'Actions',
+			content: (quote) => (
+				<div className='flex gap-5'>
+					<button
+						onClick={() => {
+							route.push(`${Routes.InternalAppRoute}/quotes/${quote.id}`)
+						}}>
+
+							Edit
+						</button>
+					<button className='delete' onClick={() => handleQuoteDeletion(quote.id!)}>
+						Delete
+					</button>
+				</div>
 			),
 		},
 	]
 
 	return (
-		<div className='Quotes'>
+		<div className='page-container Quotes'>
 			<div className='page-header'>
 				<h2 className='page-title'>Quotes</h2>
 			</div>

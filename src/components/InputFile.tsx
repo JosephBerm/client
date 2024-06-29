@@ -68,8 +68,8 @@ const InputFile: React.FC<InputType> = ({
 
 			<div style={{display:'flex', flexDirection:'row', gap: 10, width:'100%'}} className='scroll-horizontal-container scroller mt-10'>
 				{value.map((file, index) => (
-					<div key={index} className='image-container'>
-						<button className="transparent-button" onClick={() => onFileDelete && onFileDelete(file)} style={{position:'absolute', border: 'none'}}>
+					<div key={index} style={{width:200, height: 200}}>
+						<button className="transparent-button image-delete-button" onClick={() => onFileDelete && onFileDelete(file)} style={{position:'absolute', border: 'none'}}>
 							<i className='fa-solid fa-trash' style={{color: 'var(--brand-color-1)'}} />
 						</button>
 						{isUploadedFile(file) ? 

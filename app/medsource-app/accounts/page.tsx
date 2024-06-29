@@ -28,11 +28,11 @@ const Page = () => {
 
 	const columns: TableColumn<User>[] = [
 		{
-			name: 'firstName',
-			label: 'Name',
+			name: 'username',
+			label: 'Username',
 			content: (user: User) => (
 				<>
-					{user.firstName} {user.lastName}
+					{user.username}
 				</>
 			),
 		},
@@ -64,7 +64,12 @@ const Page = () => {
 
 	return (
 		<div className='page-container'>
-			<h1 style={{ alignSelf: 'flex-start', margin: 0 }}>Accounts</h1>
+			<div className='page-header'>
+				<h2 className='page-title'>Accounts</h2>
+			</div>
+			<button onClick ={() => route.push("accounts/create")}>
+				Create
+			</button>
 
 			<Table<User> columns={columns} data={tables} />
 		</div>

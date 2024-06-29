@@ -65,7 +65,7 @@ const Page = () => {
 		},
 		{
 			name: 'id',
-			label: 'actions',
+			label: 'Actions',
 			content: (provider: Provider) => (
 				<div className='flex gap-5'>
 					<button
@@ -84,7 +84,9 @@ const Page = () => {
 
 	return (
 		<div className='page-container'>
-			<h1 style={{ alignSelf: 'flex-start', margin: 0 }}>providers</h1>
+			<div className='page-header'>
+				<h2 className='page-title'>Providers</h2>
+			</div>
 			<button onClick={createCustomer}>Create</button>
 
 			<Table<Provider> columns={columns} data={tables} />
