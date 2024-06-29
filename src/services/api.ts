@@ -10,6 +10,7 @@ import CustomerSummary from '@/classes/Base/CustomerSummary'
 import Order from '@/classes/Order'
 import { Product } from '@/classes/Product'
 import { AxiosRequestConfig } from 'axios'
+import UploadedFile from '../classes/UploadedFile'
 
 const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
@@ -27,12 +28,23 @@ const API = {
 	Store: {
 		Products: {
 			getList: async <T>() => await HttpService.get<T>('/products'),
-			get: async <T>(productId: string) => await HttpService.get<T>(`/products/${productId}`),
-			create: async (product: FormData, config: AxiosRequestConfig = {}) => await HttpService.post<Product>(`/products`, product, config),
+			get: async (productId: string) => await HttpService.get<Product>(`/products/${productId}`),
+			create: async (product: FormData) => await HttpService.post<Product>(`/products`, product, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
+			}),
 			update: async <T>(product: T) => await HttpService.put<T>(`/products`, product),
 			delete: async <T>(productId: string) => await HttpService.delete<T>(`/products/${productId}`),
 			getLastest: async (quantity: number = 3) => await HttpService.get<Product[]>(`/products/lastest?quantity=${quantity}`),
-			image: async (id: string, name: string) => await HttpService.get(`/products/image?productId=${id}&image=${name}`)
+			image: async (id: string, name: string) => await HttpService.get(`/products/image?productId=${id}&image=${name}`),
+			uploadImage: async (productId: string, formData: FormData) => await HttpService.post<UploadedFile[]>(`/products/${productId}/images`, formData, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+					},
+			}),
+			deleteImage: async (id: string, name: string) => await HttpService.delete<boolean>(`/products/${id}/image/${name}`),
+			images: async(id: string) => await HttpService.get<File[]>(`/products/images?productId=${id}`),
 		},
 	},
 	Quotes: {

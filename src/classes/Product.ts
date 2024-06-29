@@ -24,7 +24,7 @@ export class Product {
 
 	constructor(product: Partial<Product>) {
 		this.id = product?.id || Guid.newGuid()
-		this.files = product?.files || []
+		this.files = product?.files?.length ? product.files.map(x => new UploadedFile(x)) : []
 		this.sku = product?.sku || ''
 		this.name = product?.name || ''
 		this.description = product?.description || ''
