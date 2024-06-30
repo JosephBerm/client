@@ -147,13 +147,13 @@
 	width: 100%;
 }
 
-.Home .SalesPitch .box-wrapper {
+.Home .box-wrapper {
 	display: flex;
 	flex-direction: column;
 	gap: 2vh;
 }
 
-.Home .SalesPitch .box-wrapper .box-container {
+.Home .box-wrapper .box-container {
 	display: grid;
 	grid-template-rows: auto 1fr;
 	gap: 5%;
@@ -164,7 +164,7 @@
 	max-width: 450px;
 }
 
-.Home .SalesPitch .box-wrapper .box-container h3 {
+.Home .box-wrapper .box-container h3 {
 	color: var(--black-text-color);
 	font-size: clamp(1.4rem, 2vw, 1.9rem);
 }
