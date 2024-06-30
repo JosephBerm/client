@@ -36,7 +36,7 @@ const Page = () => {
 		},
 		{
 			key: 'delete',
-			label: 'Archive',
+			label: 'Actions',
 			content: (product) => (
 				<div className="flex gap-5">
 					<button>
