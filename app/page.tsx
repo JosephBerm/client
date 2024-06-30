@@ -6,7 +6,7 @@ import '@/styles/Landing.css'
 
 import Intro from '@/src/components/Landing/Intro'
 import ProductsCarousel from '@/src/components/Landing/ProductsCarousel'
-import ThirdComponent from '@/src/components/Landing/ThirdComponent'
+import SalesPitch from '@/src/components/Landing/SalesPitch'
 import Products from '@/src/components/Landing/Products'
 import LastComponent from '@/src/components/LastComponent'
 
@@ -30,7 +30,7 @@ export default function Home() {
 
 			<div className='page-body'>
 				<ProductsCarousel />
-				<ThirdComponent />
+				<SalesPitch />
 				<Products />
 				<FAQ />
 				<LastComponent />

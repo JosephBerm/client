@@ -183,6 +183,10 @@ button,
 	padding: 1.25rem 1.75rem;
 	align-self: center;
 }
+button.transparent {
+	background-color: transparent;
+	color: var(--brand-color-1);
+}
 
 button:disabled {
 	opacity: 0.7;
@@ -210,8 +214,19 @@ button.remove {
 	background-color: var(--error-color-tint);
 }
 
+button.action {
+	color: var(--gray);
+	border: 1px solid var(--gray);
+}
+
+button.action:hover {
+	color: var(--gray);
+	background-color: var(--light-gray);
+	border: 1px solid var(--gray);
+}
+
 p {
-	font-size: var(--fz-md);
+	font-size: clamp(1.4rem, 2vw, 1.6rem);
 	line-height: 1.4;
 }
 

@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useRef } from 'react'
 import '@/styles/InfiniteScroll.css'
+import Home from '@/classes/Home'
 
 const ProductsCarousel = () => {
 	const scrollerRef = useRef(null)
@@ -31,21 +32,11 @@ const ProductsCarousel = () => {
 		<section className='ProductsCarousel'>
 			<div className='scroller' ref={scrollerRef} data-speed='slow' data-direction='left'>
 				<div className='scroller__inner'>
-					<div>
-						<h1>Medical Tent</h1>
-					</div>
-					<div>
-						<h1>Regulators</h1>
-					</div>
-					<div>
-						<h1>KN45 Mask</h1>
-					</div>
-					<div>
-						<h1>Flowmeters</h1>
-					</div>
-					<div>
-						<h1>Tri-Gas Adaptor</h1>
-					</div>
+					{Home.CarouselProducts.map((product, index) => (
+						<h1 className='scroller__item' key={index}>
+							{product}
+						</h1>
+					))}
 				</div>
 			</div>
 		</section>

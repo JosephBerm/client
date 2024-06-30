@@ -73,10 +73,19 @@
 	user-select: none;
 }
 
+.view-all-products-button {
+	width: 100%;
+	max-width: 200px;
+}
+
 @media screen and (min-width: 768px) {
 	.FormContainer .InputTextBox,
 	.FormContainer .InputDropdown,
 	.FormContainer .gapped-fields:not(:has(.InputTextBox)) {
 		margin-top: 1.5%;
+	}
+
+	.view-all-products-button {
+		max-width: 250px;
 	}
 }

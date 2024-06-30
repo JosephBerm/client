@@ -10,22 +10,22 @@ import ProductSample from '@/public/product-sample.png'
 import { useCartStore } from '@/src/stores/store'
 import { useRouter } from 'next/navigation'
 
-const Product = ({product}: {product: ProductClass}) => {
-	const Store = useCartStore();
-	const Route = useRouter();
+const Product = ({ product }: { product: ProductClass }) => {
+	const Store = useCartStore()
+	const Route = useRouter()
 
 	return (
-		<div className='product-container'>
-			<div>
-				<Image src={ProductSample} alt="" />
-			</div>
+		<div className='Product'>
+			<Image src={ProductSample} alt='' className='preview' />
 
-			<p>{product.name.toUpperCase()}</p>
+			<p className='name'>{product.name.toUpperCase()}</p>
 
 			<div className='buttons-container'>
-				<button className='transparent-button' onClick={() => Route.push('/products')}>VIEW PRODUCT</button>
-				<div className="img-wrapper" onClick={() => Store.addProduct(new CartProduct(product, 1))}>
-					<Image src={AddCart} alt="cart" color='red'/>
+				<button className='transparent action' onClick={() => Route.push('/products')}>
+					VIEW PRODUCT
+				</button>
+				<div className='icon-wrapper' onClick={() => Store.addProduct(new CartProduct(product, 1))}>
+					<Image src={AddCart} alt='cart' color='red' />
 				</div>
 			</div>
 		</div>
