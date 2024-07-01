@@ -127,7 +127,7 @@ h6 {
 }
 .gradiant-text-brand {
 	background-image: linear-gradient(
-		150deg,
+		90deg,
 		var(--darker-teal),
 		var(--teal),
 		var(--teal),
