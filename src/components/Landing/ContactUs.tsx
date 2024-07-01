@@ -7,7 +7,7 @@ const ContactUs = () => {
 	return (
 		<section className='ContactUs '>
 			<p>Discover Quality Medical Supplies at Medsource.</p>
-			<h2 className='page-title'>
+			<h2 className='page-title gradiant-text-brand'>
 				<span>Empowering Healthcare Excellence,</span>
 				<br /> One Supply at a Time
 			</h2>
