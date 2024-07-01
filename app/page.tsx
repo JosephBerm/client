@@ -8,7 +8,7 @@ import Intro from '@/src/components/Landing/Intro'
 import ProductsCarousel from '@/src/components/Landing/ProductsCarousel'
 import SalesPitch from '@/src/components/Landing/SalesPitch'
 import Products from '@/src/components/Landing/Products'
-import LastComponent from '@/src/components/LastComponent'
+import ContactUs from '@/src/components/Landing/ContactUs'
 
 import FAQ from '@/src/components/Landing/FAQ'
 
@@ -33,7 +33,7 @@ export default function Home() {
 				<SalesPitch />
 				<Products />
 				<FAQ />
-				<LastComponent />
+				<ContactUs />
 			</div>
 		</div>
 	)

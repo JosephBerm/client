@@ -13,8 +13,8 @@ const FAQ = () => {
 				<h2 className='section-title'>
 					<strong>FAQs</strong>
 				</h2>
-				<p>
-					<strong className='description'>{Home.FAQs.description}</strong>
+				<p className='description'>
+					<strong>{Home.FAQs.description}</strong>
 				</p>
 				<div className='bullets-holder'>
 					{questions.map((question, index) => (

@@ -75,6 +75,7 @@ main:has(> .App) {
 main.page-container {
 	/* padding: 0 25px; */
 	overflow: hidden;
+	width: 100%;
 }
 
 ::-webkit-scrollbar {
@@ -121,6 +122,9 @@ h6 {
 	font-weight: 600;
 	color: var(--text-color);
 	line-height: 1.1;
+}
+.gradiant-text-brand {
+	background-image: linear-gradient(45deg, #06674f, var(--brand-color-1), var(--brand-color-4));
 }
 
 a {
@@ -527,34 +531,33 @@ input:disabled {
 
 .nude,
 .transparent-button {
-    display: flex;
-    flex-direction: row;
-    font-family: 'Inter', sans-serif;
-    padding: 10px 20px;
-    border: 2px solid #4167060d;
-    background-color: transparent;
+	display: flex;
+	flex-direction: row;
+	font-family: 'Inter', sans-serif;
+	padding: 10px 20px;
+	border: 2px solid #4167060d;
+	background-color: transparent;
 }
 
 .scroll-horizontal-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start; /* Adjust as needed */
-    gap: 20px;
-    margin-top: 50px;
-    overflow-x: auto;
-    white-space: nowrap; /* Ensures items stay in a single row */
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start; /* Adjust as needed */
+	gap: 20px;
+	margin-top: 50px;
+	overflow-x: auto;
+	white-space: nowrap; /* Ensures items stay in a single row */
 }
 
 .scroll-horizontal-container > * {
-    /* Optionally set a minimum width for each image container */
-    min-width: 200px; /* Adjust as needed */
+	/* Optionally set a minimum width for each image container */
+	min-width: 200px; /* Adjust as needed */
 }
 
-.image-delete-button:hover{
-/* scale */
+.image-delete-button:hover {
+	/* scale */
 	transform: scale(1.1);
-
 }
 
 /*////////////////////////////////////

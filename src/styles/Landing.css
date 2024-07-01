@@ -6,10 +6,17 @@
 	justify-content: flex-start;
 	align-items: center;
 	padding: 3vh 3vw;
+	width: 100%;
 }
 .Home .landing {
 	padding: 0;
-	height: calc(100vh - var(--nav-height));
+	height: fit-content;
+	min-height: calc(100vh - var(--nav-height));
+}
+
+.Home .landing section.hero-section {
+	margin-top: 2%;
+	width: 100%;
 }
 
 .Home .page-title {
@@ -78,7 +85,7 @@
 .Home .Intro strong.description {
 	letter-spacing: 0.5px;
 	text-transform: uppercase;
-	line-height: 3vh;
+	line-height: 125%;
 }
 
 .Home .Intro h2 {
@@ -100,9 +107,8 @@
 }
 
 .Home .Intro .buttons-container button {
-	padding: 2vh 3vw;
+	padding: 8%;
 	height: 100%;
-	text-wrap: nowrap;
 }
 
 .Home .Intro .buttons-container #first {
@@ -257,7 +263,16 @@
 	padding: 20px;
 }
 
-.Home .FAQ .faq-header {
+.Home .FAQ .bullet-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	height: 100%;
+	width: 100%;
+}
+
+.Home .FAQ .bullet-container .faq-header {
 	background-color: var(--brand-color-1);
 	color: var(--bg-color);
 	width: 100%;
@@ -267,6 +282,11 @@
 	border-radius: 4px;
 	padding: 5%;
 	cursor: pointer;
+	box-shadow: none;
+	transition: box-shadow 0.2s ease-out;
+}
+.Home .FAQ .bullet-container.open .faq-header {
+	box-shadow: 0px 5px 6px -4px black;
 }
 
 .Home .FAQ .bullets-holder {
@@ -274,15 +294,7 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 1vh;
-}
-
-.Home .FAQ .bullet-container {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	width: 100%;
+	gap: 2vh;
 }
 
 .Home .FAQ .bullet-container .faq-header span {
@@ -299,17 +311,32 @@
 	transform: rotateX(180deg);
 }
 
-.Home .FAQ .faq-bullet-content {
+.Home .FAQ .bullet-container .faq-bullet-content {
 	width: 100%;
-	padding: 10px;
-	box-sizing: border-box;
-	border-style: solid solid solid;
-	border-color: #7c83b4;
-	border-width: 1px;
-	border-bottom-left-radius: 5px;
-	border-bottom-right-radius: 5px;
-	max-height: 500px;
-	background-color: rgba(252, 255, 247, 1);
+	border: 1px solid var(--light-gray);
+	border-top: none;
+	overflow: hidden;
+	opacity: 0;
+	visibility: hidden;
+	height: 0%;
+	padding: 5%;
+	transition: var(--transition);
+}
+
+.Home .FAQ .bullet-container.open .faq-bullet-content {
+	animation: openAccordion 0.5s ease-out forwards;
+}
+@keyframes openAccordion {
+	from {
+		height: 0%;
+		opacity: 0;
+		visibility: hidden;
+	}
+	to {
+		height: 100%;
+		opacity: 1;
+		visibility: visible;
+	}
 }
 
 .Home .FAQ .faq-bullet-content:not(.open) .hide {
@@ -318,17 +345,39 @@
 
 /*/////////////////////////////////
 
-	 LAST SECTION
+	 ContactUs
 
 /////////////////////////////////*/
 
-#lastcomponent {
-	background-color: white;
+.Home .ContactUs {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 2vh;
+	width: 100%;
+	font-size: clamp(10px, 4vw, var(--fz-xxl));
+}
+.Home .ContactUs p {
+	color: var(--gray);
+	font-size: 0.8em;
 }
 
-#lastcomponent button:hover {
-	background-color: var(--brand-color-1);
-	color: white;
+.Home .ContactUs .page-title {
+	width: 100%;
+	margin-top: unset;
+	font-size: 1.1em;
+	text-align: center;
+}
+
+.Home .ContactUs .page-title span {
+	text-wrap: nowrap;
+}
+
+.Home .ContactUs button {
+	padding: 1em;
+	font-size: clamp(var(--fz-xxs), 2vw, var(--fz-lg));
+	margin-top: 2vh;
 }
 
 /*/////////////////////////////////
@@ -382,6 +431,16 @@
 	.Home .products-container .product-wrapper {
 		grid-template-columns: 1fr 1fr;
 	}
+	.Home .Intro .buttons-container button {
+		text-wrap: nowrap;
+	}
+
+	.Home .FAQ .section-container h2.section-title {
+		text-align: center;
+	}
+	.Home .FAQ .section-container p.description {
+		text-align: center;
+	}
 }
 
 /*/////////////////////////////////
@@ -390,6 +449,10 @@
 
 /////////////////////////////////*/
 @media screen and (min-width: 768px) {
+	.Home .page-body section {
+		margin: 10vh 0;
+	}
+
 	.Home .landing {
 		flex-direction: row-reverse;
 		align-items: flex-start;
@@ -455,7 +518,7 @@
 		gap: 10%;
 	}
 
-	.Home .SalesPitch .section-container {
+	.Home .section-container {
 		margin-top: 2vh;
 		display: grid;
 		row-gap: 10vh;
@@ -465,14 +528,33 @@
 			'extra extra' auto / 1fr 1fr;
 		place-items: center;
 	}
-	.Home .SalesPitch h2.section-title {
+	.Home h2.section-title {
 		grid-area: title;
 	}
-	.Home .SalesPitch .description {
+	.Home .description {
 		grid-area: description;
 	}
-	.Home .SalesPitch .box-wrapper {
+	.Home .SalesPitch .box-wrapper,
+	.Home .products-container .product-wrapper {
 		grid-area: extra;
+	}
+
+	.Home .FAQ .section-container {
+		display: flex;
+		flex-direction: column;
+		row-gap: unset;
+		column-gap: unset;
+		grid-template: unset;
+		place-items: unset;
+		gap: 3vh;
+	}
+	.Home .FAQ .bullets-holder {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: auto;
+		row-gap: 5%;
+		column-gap: 5%;
+		align-items: flex-start;
 	}
 }
 

@@ -12,20 +12,18 @@ const Products = async () => {
 	return (
 		<section className='products-container'>
 			<div className='section-container'>
-				<div className='text-wrapper'>
-					<h2 className='section-title'>
-						OUR <br />
-						<strong>PRODUCTS</strong>
-					</h2>
-					<p className='description'>{Home.Products.description}</p>
-				</div>
+				<h2 className='section-title'>
+					OUR <br />
+					<strong>PRODUCTS</strong>
+				</h2>
+				<p className='description'>{Home.Products.description}</p>
 				<div className='product-wrapper'>
 					{products.map((product: ProductClass) => (
 						<Product product={product} key={product.id} />
 					))}
 				</div>
-				<ViewProductClientButton />
 			</div>
+			<ViewProductClientButton />
 		</section>
 	)
 }
