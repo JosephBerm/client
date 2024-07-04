@@ -1,38 +1,21 @@
-'use client';
-
-import React, { useEffect } from 'react'
-import Link from 'next/link'
 import Image from 'next/image'
 import DoctorsImage from '@/public/LandingImage1.png'
 
 import '@/styles/Landing.css'
 
-import Intro from '@/src/components/Landing/Intro'
-import ProductsCarousel from '@/src/components/Landing/ProductsCarousel'
-import SalesPitch from '@/src/components/Landing/SalesPitch'
-import Products from '@/src/components/Landing/Products'
-import ContactUs from '@/src/components/Landing/ContactUs'
+import Intro from '@/components/Landing/Intro'
+import ProductsCarousel from '@/components/Landing/ProductsCarousel'
+import SalesPitch from '@/components/Landing/SalesPitch'
+import Products from '@/components/Landing/Products'
+import ContactUs from '@/components/Landing/ContactUs'
+import ScrollIntoViewComponent from '@/components/Landing/ScrollIntoViewComponent'
 
 import FAQ from '@/src/components/Landing/FAQ'
 
 export default function Home() {
-	const scrollToSection = (sectionId: string) => {
-		const section = document.getElementById(sectionId)
-		if (section) {
-			section.scrollIntoView({ behavior: 'smooth', block: 'center' })
-		}
-	}
-
-	useEffect(() => {
-		const hash = window.location.hash
-		if (hash) {
-			const sectionId = hash.substring(1) // Remove the '#' character
-			scrollToSection(sectionId)
-		}
-	}, [])
-
 	return (
 		<div className='Home'>
+			<ScrollIntoViewComponent />
 			<div className='landing'>
 				<div className='page-header image-container'>
 					<Image priority src={DoctorsImage} alt='Doctors Image' width={1920} height={1080} />
