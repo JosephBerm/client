@@ -31,7 +31,7 @@ export default class Order {
 		this.products = init?.products?.map((p) => new OrderItem(p)) ?? []
 		this.total = init?.total ?? 0
 
-		this.createdAt = typeof init?.createdAt === 'string' ? new Date(init.createdAt) : init?.createdAt ?? new Date()
+		this.createdAt =  new Date(init?.createdAt as Date);
 		this.customer = init?.customer ?? null
 		this.customerId = init?.customerId ?? null
 		this.status = init?.status ?? OrderStatus.Pending
