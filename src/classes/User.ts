@@ -2,7 +2,7 @@ import Notification from '@/src/classes/Notification'
 import Company from '@/classes/Company'
 import Order from './Order'
 import Address from './Address'
-import Name from './Name'
+import Name from '@/classes/common/Name'
 
 /**
  * Implementation of the server user class.

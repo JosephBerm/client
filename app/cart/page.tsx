@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation'
 import { CartProduct } from '@/classes/Product'
 import Address from '@/classes/Address'
 import Quote from '@/classes/Quote'
-import Name from '@/classes/Name'
+import Name from '@/classes/common/Name'
 
 import Routes from '@/services/routes'
 import API from '@/services/api'

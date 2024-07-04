@@ -8,7 +8,7 @@ const FAQ = () => {
 	const [questions, setQuestions] = useState(Home.FAQs.questions)
 
 	return (
-		<section className='FAQ'>
+		<section className='FAQ' id='faq'>
 			<div className='section-container'>
 				<h2 className='section-title'>
 					<strong>FAQs</strong>

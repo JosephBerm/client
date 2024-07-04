@@ -1,8 +1,8 @@
 import { TypeOfBusiness, QuoteStatus } from '@/classes/Enums'
 import { CartProduct } from '@/classes/Product'
 import Address from './Address'
-import Name from './Name'
-import Company from './Company'
+import Name from '@/classes/common/Name'
+import Company from '@/classes/Company'
 
 export default class Quote {
 	id: string = ''

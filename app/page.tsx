@@ -1,3 +1,6 @@
+'use client';
+
+import React, { useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import DoctorsImage from '@/public/LandingImage1.png'
@@ -13,6 +16,21 @@ import ContactUs from '@/src/components/Landing/ContactUs'
 import FAQ from '@/src/components/Landing/FAQ'
 
 export default function Home() {
+	const scrollToSection = (sectionId: string) => {
+		const section = document.getElementById(sectionId)
+		if (section) {
+			section.scrollIntoView({ behavior: 'smooth', block: 'center' })
+		}
+	}
+
+	useEffect(() => {
+		const hash = window.location.hash
+		if (hash) {
+			const sectionId = hash.substring(1) // Remove the '#' character
+			scrollToSection(sectionId)
+		}
+	}, [])
+
 	return (
 		<div className='Home'>
 			<div className='landing'>

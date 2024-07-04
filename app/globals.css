@@ -355,7 +355,8 @@ input:disabled {
 	color: var(--disabled-color);
 }
 
-.InputTextBox.faded-bg input {
+.InputTextBox.faded-bg input,
+.InputTextBox.faded-bg textarea {
 	background: rgba(200, 200, 200, 0.1) !important;
 }
 

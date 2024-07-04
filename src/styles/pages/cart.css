@@ -115,13 +115,15 @@
 	font-size: 0.75em;
 }
 
-.Cart .quote input {
+.Cart .quote input,
+.Cart .quote textarea {
 	border: 1px solid;
 	border-color: transparent;
 	color: var(--light-gray);
 }
 
-.Cart .quote input:focus {
+.Cart .quote input:focus,
+.Cart .quote textarea:focus  {
 	border-color: var(--bg-color);
 }
 
@@ -132,9 +134,6 @@
 	background-color: var(--brand-color-4);
 	color: var(--bg-color);
 	margin-top: 3%;
-}
-.Cart .quote .FormContainer.isSubmitted {
-	max-height: 200px;
 }
 
 .Cart .quote .subtitle {
