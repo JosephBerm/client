@@ -77,6 +77,10 @@ function AccountOrdersTable() {
 
 	return (
 		<div className='AccountOrdersTable'>
+			<button className='mb-5'>
+				<i className='fa-solid fa-plus mr-3' />
+				New Request
+			</button>
 			{orders.length !== 0 ? (
 				<div className='table-container'>
 					{/* <WealthyTable headers={['Order ID', 'Date', 'Total']} data={orders} /> */}

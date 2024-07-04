@@ -14,10 +14,6 @@ const Page = () => {
 			<IsBusyLoading isBusy={isLoading} />
 			{!isLoading && (
 				<div className='orders-table'>
-					<button>
-						<i className='fa-solid fa-plus mr-3' />
-						New Request
-					</button>
 					<AccountOrdersTable />
 				</div>
 			)}
