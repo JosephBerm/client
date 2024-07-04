@@ -16,6 +16,7 @@
 .orders-page-container .add-product-container {
 	display: flex;
 	gap: 5px;
+	align-items: center;
 }
 
 .orders-page-container .add-product-container button {

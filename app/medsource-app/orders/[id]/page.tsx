@@ -83,7 +83,7 @@ const Page = (context: any) => {
 		fetchData()
 	}, [])
 
-	if (isLoading || !order) return <IsBusyLoading />
+	if (isLoading || !order) return <IsBusyLoading isBusy={true} />
 
 	return (
 		<div className='orders-page-container'>

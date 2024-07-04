@@ -78,7 +78,7 @@ class Routes {
 			name: 'Manage Orders',
 			location: `${this.InternalAppRoute}/adminorders`,
 			icon: 'fa-solid fa-user',
-			accessible: [AccountRole.Customer, AccountRole.Admin],
+			accessible: [AccountRole.Admin],
 		},
 		{
 			name: 'Profile',
