@@ -28,9 +28,9 @@ class Routes {
 		accessible: [AccountRole.Customer, AccountRole.Admin],
 	}
 
-	public static Products: Route = {
-		name: 'Products',
-		location: '/products',
+	public static Store: Route = {
+		name: 'Store',
+		location: '/store',
 		icon: 'fa-solid fa-bag-shopping',
 		accessible: [AccountRole.Customer],
 	}
@@ -73,7 +73,7 @@ class Routes {
 			icon: 'fa-solid fa-users',
 			accessible: [AccountRole.Admin],
 		},
-		Routes.Products,
+		Routes.Store,
 		{
 			name: 'Manage Orders',
 			location: `${this.InternalAppRoute}/adminorders`,
@@ -85,7 +85,7 @@ class Routes {
 			location: `${this.InternalAppRoute}/profile`,
 			icon: 'fa-solid fa-user',
 			accessible: [AccountRole.Customer, AccountRole.Admin],
-		}
+		},
 	]
 
 	public static publicRoutes: Route[] = [
@@ -97,7 +97,7 @@ class Routes {
 			name: 'About Us',
 			location: '/about-us',
 		},
-		Routes.Products,
+		Routes.Store,
 		{
 			name: 'Contact',
 			location: '/contact',

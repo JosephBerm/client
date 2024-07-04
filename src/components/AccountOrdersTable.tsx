@@ -87,7 +87,7 @@ function AccountOrdersTable() {
 			) : (
 				<div className='no-order-container flex flex-col items-center'>
 					You currently have no orders placed.
-					<Link className='inline-link' href={Routes.Products.location}>
+					<Link className='inline-link' href={Routes.Store.location}>
 						Place Your First Order Now!
 					</Link>
 				</div>

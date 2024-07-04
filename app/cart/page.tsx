@@ -121,7 +121,7 @@ const Page = () => {
 										/>
 									</div>
 								))}
-							<Link className='inline-link' href={Routes.Products.location}>
+							<Link className='inline-link' href={Routes.Store.location}>
 								Add Products
 								<i className='fa-solid fa-plus ml-2' />
 							</Link>

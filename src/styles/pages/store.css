@@ -1,0 +1,92 @@
+.Store {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	padding: 3vh 3vw;
+	min-height: 75vh;
+	gap: 2vh;
+}
+.Store .page-title {
+	text-align: center;
+	max-width: 400px;
+}
+.Store .page-body {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1vh;
+	width: 100%;
+	max-width: 1200px;
+	margin-top: 7%;
+}
+.Store p.description {
+	letter-spacing: 1px;
+	color: var(--gray);
+	font-weight: 600;
+	text-align: center;
+	width: 90%;
+	font-size: 1.25em;
+	margin-top: 10%;
+	user-select: none;
+	pointer-events: none;
+}
+
+/* 
+.product-card-container {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-around;
+	flex-direction: column;
+	margin: 0 auto;
+	padding: 0;
+	width: 100%;
+
+	max-width: 400px;
+
+	background-color: rgba(255, 255, 255, 0.1);
+	border-radius: 10px;
+
+	padding: 20px;
+	box-sizing: border-box;
+}
+
+.product-card-container .product-card-button-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 25px;
+	margin: 0;
+	padding: 0;
+}
+
+.product-card-container .product-card-button-container button {
+	border: none;
+	font-size: 15px;
+	height: 50px;
+	width: 50px;
+}
+
+.product-card-container .product-card-button-container .InputTextBox {
+	max-width: 100px !important;
+	margin: 0;
+	padding: 0;
+}
+
+.product-card-container .product-card-button-container .InputTextBox input {
+	text-align: center;
+}
+
+.addButtonSyle {
+	background-color: #4caf50;
+	color: white;
+	padding: 10px 20px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	border-radius: 10px;
+	border: none;
+	cursor: pointer;
+} */
