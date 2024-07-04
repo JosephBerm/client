@@ -32,7 +32,7 @@ function AccountOrdersTable() {
 			label: 'Date',
 			content: (order: Order) => (
 				<div className='createdAt'>
-					{/* <span className='date'>{order.createdAt.toLocaleDateString()}</span> */}
+					<span className='date'>{order.createdAt.toLocaleDateString()}</span>
 				</div>
 			),
 		},
@@ -53,9 +53,7 @@ function AccountOrdersTable() {
 				const { data } = await API.Orders.getFromCustomer(User.customer?.id)
 				if (!data.payload) throw data.message
 
-				console.log('REEEEEEEEEE')
-				console.log(data.payload)
-				setOrders(data.payload)
+				setOrders(data.payload.map((x) => new Order(x)))
 			}
 		} catch (error: unknown) {
 			if (typeof error === 'string') {
@@ -68,7 +66,7 @@ function AccountOrdersTable() {
 	}
 	useEffect(() => {
 		getOrders()
-	}, [])
+	}, [User.customer?.id])
 
 	// const lastFiveOrders = useMemo(() => {
 	// 	return orders

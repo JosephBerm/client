@@ -33,7 +33,7 @@ export class Product {
 		this.category = product?.category || null
 		this.providerId = product?.providerId || null
 		this.provider = product?.provider || null
-		this.createdAt = product?.createdAt || new Date()
+		this.createdAt = product?.createdAt ? new Date(product?.createdAt) : new Date()
 	}
 
 	getFileName(): string {

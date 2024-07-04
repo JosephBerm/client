@@ -1,11 +1,17 @@
 export default class Address {
-	constructor(
-		public country: string = '',
-		public shippingAddress: string = '',
-		public city: string = '',
-		public state: string = '',
-		public zipCode: string = ''
-	) {}
+	public country: string = '';
+	public shippingAddress: string = '';
+	public city: string = '';
+	public state: string = '';
+	public zipCode: string = '';
+
+    constructor(address: Partial<Address>) {
+        this.country = address?.country ?? '';
+        this.shippingAddress = address?.shippingAddress ?? '';
+        this.city = address?.city ?? '';
+        this.state = address?.state ?? '';
+        this.zipCode = address?.zipCode ?? '';
+    }
 
 	// Method to check if the address is fully populated
 	isComplete(): boolean {

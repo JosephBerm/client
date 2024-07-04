@@ -1,25 +1,57 @@
-.orders-page-container {
+.App .Orders {
+	display: flex;
+	flex-direction: column;
+	gap: 25px;
+}
+.App .Orders .orders-table {
+	display: grid;
+	grid-template-rows: auto 1fr;
+	height: 100%;
+	gap: 10px;
+	justify-content: center;
+}
+.App .Orders .orders-table > button {
+	max-width: 175px;
+	width: 100%;
+	min-width: 100px;
+}
+.App .Orders .page-title {
+	text-align: center;
+}
+
+.App .Orders .orders-table .container-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 5px;
+}
+.App .Orders .orders-table .container-header .InputTextBox {
+	width: 100%;
+	height: 100%;
+}
+
+.Orders .orders-page-container {
 	width: fit-content;
 	height: fit-content;
 }
 
-.orders-page-container .orders-page {
+.Orders .orders-page-container .orders-page {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 }
-.orders-page-container .orders-page h3 {
+.Orders .orders-page-container .orders-page h3 {
 	margin-bottom: 25px;
 }
 
-.orders-page-container .add-product-container {
+.Orders .orders-page-container .add-product-container {
 	display: flex;
 	gap: 5px;
 	align-items: center;
 }
 
-.orders-page-container .add-product-container button {
+.Orders .orders-page-container .add-product-container button {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -27,12 +59,12 @@
 	align-self: flex-end;
 }
 
-.orders-page-container .add-product-container,
-.orders-page-container .buttons-container {
+.Orders .orders-page-container .add-product-container,
+.Orders .orders-page-container .buttons-container {
 	margin-top: 3vh;
 }
 
-.orders-page-container .buttons-container {
+.Orders .orders-page-container .buttons-container {
 	display: flex;
 	justify-content: space-evenly;
 	width: 100%;
@@ -40,7 +72,7 @@
 }
 
 @media screen and (min-width: 480px) {
-	.orders-page-container .add-product-container {
+	.Orders .orders-page-container .add-product-container {
 		gap: 10px;
 		max-width: 500px;
 	}
@@ -49,12 +81,12 @@
 }
 
 @media screen and (min-width: 768px) {
-	.orders-page-container .orders-page {
+	.Orders .orders-page-container .orders-page {
 		height: 75vh;
 		justify-content: flex-start;
 	}
-	.orders-page-container .add-product-container,
-	.orders-page-container .buttons-container {
+	.Orders .orders-page-container .add-product-container,
+	.Orders .orders-page-container .buttons-container {
 		margin-top: 10%;
 	}
 }

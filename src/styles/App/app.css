@@ -27,34 +27,29 @@
 	width: 100%;
 }
 
-.App .AdminOrders,
-.App .Quotes {
+.App .AdminOrders {
 	display: flex;
 	flex-direction: column;
 	gap: 25px;
 }
-.App .AdminOrders .orders-table,
-.App .Quotes .orders-table {
+.App .AdminOrders .orders-table {
 	display: grid;
 	grid-template-rows: auto 1fr;
 	height: 100%;
 	gap: 10px;
 }
 
-.App .AdminOrders .page-title,
-.App .Quotes .page-title {
+.App .AdminOrders .page-title {
 	text-align: center;
 }
 
-.App .AdminOrders .orders-table .container-header,
-.App .Quotes .orders-table .container-header {
+.App .AdminOrders .orders-table .container-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	gap: 5px;
 }
-.App .AdminOrders .orders-table .container-header .InputTextBox,
-.App .Quotes .orders-table .container-header .InputTextBox {
+.App .AdminOrders .orders-table .container-header .InputTextBox.InputTextBox {
 	width: 100%;
 	height: 100%;
 }
