@@ -13,7 +13,7 @@ const Intro = () => {
 			<strong className='description'>{Home.HeroSection.description}</strong>
 			<p>{Home.HeroSection.paragraph}</p>
 			<div className='buttons-container'>
-				<button id='first' onClick={() => route.push('/products')}>
+				<button id='first' onClick={() => route.push('/store')}>
 					View Catalog
 				</button>
 				<button id='second' onClick={() => route.push('/about-us')}>

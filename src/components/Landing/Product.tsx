@@ -21,7 +21,7 @@ const Product = ({ product }: { product: ProductClass }) => {
 			<p className='name'>{product.name.toUpperCase()}</p>
 
 			<div className='buttons-container'>
-				<button className='transparent action' onClick={() => Route.push('/products')}>
+				<button className='transparent action' onClick={() => Route.push('/store')}>
 					VIEW PRODUCT
 				</button>
 				<div className='icon-wrapper' onClick={() => Store.addProduct(new CartProduct(product, 1))}>

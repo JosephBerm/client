@@ -78,6 +78,38 @@
 	max-width: 200px;
 }
 
+.AccountOrdersTable {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+.AccountOrdersTable .table-container {
+	width: 100%;
+	max-width: 700px;
+	/* in higher media query set this higher */
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+.AccountOrdersTable .no-order-container {
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1%;
+	color: var(--gray);
+}
+.AccountOrdersTable > button {
+	max-width: 175px;
+	width: 100%;
+	min-width: 100px;
+	align-self: flex-start;
+}
+
 @media screen and (min-width: 768px) {
 	.FormContainer .InputTextBox,
 	.FormContainer .InputDropdown,

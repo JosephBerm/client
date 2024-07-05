@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 const ViewProductClientButton = () => {
 	const route = useRouter()
 	return (
-		<button className='view-all-products-button' onClick={() => route.push('/products')}>
+		<button className='view-all-products-button' onClick={() => route.push('/store')}>
 			View All Products
 		</button>
 	)
