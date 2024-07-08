@@ -3,24 +3,32 @@ import InputNumber from '@/components/InputNumber'
 
 interface QuantitySelectorProps {
 	quantity: number
-	handleDelete: () => void
+	handleDelete?: () => void
 	handleChange: (quantity: number) => void
 }
 
 function QuantitySelector({ quantity, handleDelete, handleChange }: QuantitySelectorProps) {
 	return (
 		<div className='QuantitySelector'>
-			{!quantity && (
+			{!quantity && handleDelete ? (
 				<button className='delete' onClick={() => handleDelete()}>
 					<i className='fas fa-trash' />
 				</button>
-			)}
-
-			{quantity > 0 && (
-				<button className='remove' onClick={() => handleChange(quantity - 1)}>
+			) : (
+				<button className='remove' disabled={true} onClick={() => {}}>
 					<i className='fa-solid fa-arrow-down' />
 				</button>
 			)}
+
+			{quantity > 0 && !handleDelete && (
+				<button
+					className='remove'
+					disabled={!handleDelete && quantity > 0}
+					onClick={() => handleChange(quantity - 1)}>
+					<i className='fa-solid fa-arrow-down' />
+				</button>
+			)}
+
 			{/* create component out of this called QuantitySelector */}
 			{/* it would have a delete button on it. */}
 			{/* left button will start as a trash if 1 is selected */}
