@@ -12,18 +12,18 @@ export class PagedResult<T> {
     public pageCount: number = 0;
     public data: T[] = [];
 
-    constructor(data: T[], page: number, pageSize: number, total: number) {
-        this.page = page;
-        this.pageSize = pageSize;
-        this.total = total;
-        this.totalPages = Math.ceil(total / pageSize);
-        this.hasNext = page < this.totalPages;
-        this.hasPrevious = page > 1;
-        this.nextPage = this.hasNext ? `?page=${page + 1}&pageSize=${pageSize}` : null;
-        this.previousPage = this.hasPrevious ? `?page=${page - 1}&pageSize=${pageSize}` : null;
-        this.firstPage = `?page=1&pageSize=${pageSize}`;
-        this.lastPage = `?page=${this.totalPages}&pageSize=${pageSize}`;
-        this.pageCount = Math.ceil(total / pageSize);
-        this.data = [...data];
+    constructor(init: Partial<PagedResult<T>> = {}) {
+        this.page = init.page ?? 1;
+        this.pageSize = init.pageSize ?? 10;
+        this.total = init.total ?? 0;
+        this.totalPages = Math.ceil(this.total / this.pageSize);
+        this.hasNext = this.page < this.totalPages;
+        this.hasPrevious = this.page > 1;
+        this.nextPage = this.hasNext ? `?page=${this.page + 1}&pageSize=${this.pageSize}` : null;
+        this.previousPage = this.hasPrevious ? `?page=${this.page - 1}&pageSize=${this.pageSize}` : null;
+        this.firstPage = `?page=1&pageSize=${this.pageSize}`;
+        this.lastPage = `?page=${this.totalPages}&pageSize=${this.pageSize}`;
+        this.pageCount = Math.ceil(this.total / this.pageSize);
+        this.data = init.data ?? [];
     }
 }

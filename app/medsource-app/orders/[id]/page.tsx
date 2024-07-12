@@ -9,7 +9,7 @@ import API from '@/services/api'
 import { Product } from '@/classes/Product'
 import Order, { OrderItem } from '@/classes/Order'
 import IsBusyLoading from '@/components/isBusyLoading'
-import OrdersPage from '@/components/Orders/OrdersPage'
+import UserOrdersPage from '@/components/Orders/UserOrdersPage'
 import Company from '@/src/classes/Company'
 import Routes from '@/services/routes'
 
@@ -86,8 +86,8 @@ const Page = (context: any) => {
 	if (isLoading || !order) return <IsBusyLoading isBusy={true} />
 
 	return (
-		<div className='orders-page-container'>
-			<OrdersPage products={productsList} order={order} customers={customers} />
+		<div style={{height:'100%', width:'100%'}} className='flex items-center justify-center text-center h-1 w-1'>
+			<UserOrdersPage products={productsList} order={order} customers={customers} />
 		</div>
 	)
 }

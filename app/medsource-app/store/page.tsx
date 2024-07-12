@@ -9,13 +9,15 @@ import _ from 'lodash'
 
 import Link from 'next/link'
 import API from '@/services/api'
-import Table from '@/common/table'
+import ServerTable from '@/src/common/ServerTable'
 import IsBusyLoading from '@/components/isBusyLoading'
+import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
+import { PagedResult } from '@/src/classes/Base/PagedResult'
 
 const Page = () => {
 	const route = useRouter()
 	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const [allProducts, setAllProducts] = useState<Product[]>([])
+	const [PagedResultData, setPagedResultData] = useState<PagedResult<Product>>(new PagedResult<Product>())
 
 	const columns: TableColumn<Product>[] = [
 		{
@@ -53,14 +55,15 @@ const Page = () => {
 	const retrieveProducts = async () => {
 		try {
 			setIsLoading(true)
-			const { data: res } = await API.Store.Products.getList<Product[]>()
+			//const { data: res } = await API.Store.Products.getList<Product[]>()
+			const searchCriteria = new GenericSearchFilter()
+			const {data: res } = await API.Store.Products.search(searchCriteria)
 
 			if (!res.payload || res.statusCode !== 200) {
 				toast.error(res.message)
 				return
 			}
-			const productsList = res.payload
-			setAllProducts(productsList)
+			setPagedResultData(res.payload)
 		} catch (err: any) {
 			toast.error(err.message)
 		} finally {
@@ -77,8 +80,6 @@ const Page = () => {
 				return
 			} else {
 				toast.success(res.message)
-				const productsList = allProducts.filter((product) => product.id !== productId)
-				setAllProducts(productsList)
 			}
 		} catch (err: any) {
 			toast.error(err.message)
@@ -92,7 +93,7 @@ const Page = () => {
 	}, [])
 
 	return (
-		<div className='store-page'>
+		<div className='page-container store-page'>
 			<div className='page-header'>
 				<h2 className='page-title'>Products</h2>
 				<button className='mt-7' onClick={() => route.push('store/create')}>
@@ -101,15 +102,12 @@ const Page = () => {
 			</div>
 			<div className='products-container'>
 				<IsBusyLoading isBusy={isLoading} />
-				{!isLoading && !allProducts.length ? (
+				{!isLoading && !PagedResultData.data.length ? (
 					<h3>No Items found for this search...</h3>
 				) : (
-					<Table<Product>
+					<ServerTable<Product>
 						columns={columns}
-						data={allProducts}
-						isSortable={true}
-						isSearchable={true}
-						isPaged={true}
+						methodToQuery = {API.Store.Products.search}
 					/>
 				)}
 			</div>

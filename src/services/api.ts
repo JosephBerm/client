@@ -52,6 +52,7 @@ const API = {
 			deleteImage: async (id: string, name: string) =>
 				await HttpService.delete<boolean>(`/products/${id}/image/${name}`),
 			images: async (id: string) => await HttpService.get<File[]>(`/products/images?productId=${id}`),
+			search: async (search: GenericSearchFilter) => await HttpService.post<PagedResult<Product>>(`/api/Products/search`, search),
 		},
 	},
 	Quotes: {
@@ -82,7 +83,7 @@ const API = {
 		createFromQuote: async <Order>(quoteId: string) =>
 			await HttpService.post<Order>(`/orders/fromquote/${quoteId}`, null),
 		update: async <Order>(quote: Order) => await HttpService.put<Order>('/orders', quote),
-		delete: async <Boolean>(quoteId: number) => await HttpService.delete<Boolean>(`/orders/${quoteId}`),
+		delete: async <Boolean>(quoteId: number) => await HttpService.delete<Boolean>(`/orders/${quoteId}`)
 	},
 	Notifications: {
 		get: async <T>(id: string) => {
@@ -101,7 +102,7 @@ const API = {
 		getAll: async <Provider>() => await HttpService.get<Provider[]>('/providers'),
 		create: async <Provider>(provider: Provider) => await HttpService.post<Provider>('/provider', provider),
 		update: async <Provider>(quote: Provider) => await HttpService.put<Provider>('/provider', quote),
-		delete: async (providerId: number) => await HttpService.delete<number>(`/provider/${providerId}`),
+		delete: async (providerId: number) => await HttpService.delete<number>(`/provider/${providerId}`)
 	},
 	Public: {
 		sendQuote: async (quote: Quote) => await HttpService.post<Quote>('/quote', quote),

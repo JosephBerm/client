@@ -33,7 +33,7 @@ function FormFetchDropdown<T = any>(p: InputFetchDropdownProps<T>) {
 
             const response = await HttpService.post<PagedResult<T>>(p.endpoint, searchResults)
 
-            if(!response.data.payload?.data) return 
+            if (!response.data.payload?.data) return 
             const listOfCustomers = response.data.payload?.data;
 
             setOptions(listOfCustomers) 

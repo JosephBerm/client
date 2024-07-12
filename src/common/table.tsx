@@ -15,7 +15,7 @@ const Table = <T extends {}>(props: TableProps<T>) => {
 	const [pagedData, setPagedData] = useState<any[]>([])
 	const [searchQuery, setSearchQuery] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
-	const [pageSize, setPageSize] = useState(4)
+	const [pageSize, setPageSize] = useState(10)
 	const [filteredItems, setFilteredItems] = useState<any[]>([])
 	const [sortColumn, setSortColumn] = useState<SortColumn<any>>({
 		path: 'name',
