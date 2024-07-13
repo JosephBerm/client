@@ -1,6 +1,7 @@
 import { NextRouter } from 'next/router'
 import Route from '@/interfaces/Route'
 import { AccountRole } from '../classes/Enums'
+import Products from '../components/Landing/Products'
 
 class Routes {
 	constructor() {}
@@ -18,21 +19,24 @@ class Routes {
 		name: 'Sign Up',
 		location: '/signup',
 		icon: 'fa-solid fa-user-plus',
-		accessible: [AccountRole.Customer, AccountRole.Admin],
 	}
 
 	public static Login: Route = {
 		name: 'LogIn',
 		location: '/login',
 		icon: 'fa-solid fa-user-plus',
-		accessible: [AccountRole.Customer, AccountRole.Admin],
 	}
 
 	public static Store: Route = {
 		name: 'Store',
 		location: '/store',
 		icon: 'fa-solid fa-bag-shopping',
-		accessible: [AccountRole.Customer],
+	}
+
+	public static Product: Route = {
+		name: 'Products',
+		location: `${Routes.Store.location}/product`,
+		icon: 'fa-solid fa-box',
 	}
 
 	public static internalRoutes: Route[] = [

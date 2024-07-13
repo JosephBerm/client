@@ -6,18 +6,16 @@ import InputNumber from '@/components/InputNumber'
 import API from '@/services/api'
 import Image from 'next/image'
 import QuantitySelector from '@/components/QuantitySelector'
+import Link from 'next/link'
+import Routes from '@/services/routes'
 
 const ProductCard = ({ product }: { product: IProduct }) => {
 	const addProductToCart = useCartStore((state) => state.addProduct)
-	const removeProductFromCart = useCartStore((state) => state.removeProduct)
-
-	const [QuantityToAdd, setQuantityToAdd] = React.useState<number>(0)
-
-	const productQuantity = useCartStore((state) => state.Cart.filter((c) => c.product?.id === product.id).length)
-
-	const handleProductQuantity = (quantity: number) => {
-		setQuantityToAdd(quantity)
+	const handleProductQuantity = () => {
+		addProductToCart(new CartProduct(product, 1))
 	}
+	const isProductInCart = useCartStore((state) => state.Cart.some((cartItem) => cartItem.product?.id === product.id))
+
 	return (
 		<div className='ProductCard'>
 			<div className='image-container'>
@@ -41,8 +39,23 @@ const ProductCard = ({ product }: { product: IProduct }) => {
 					<span className='subheader'>Sold By: {product.provider?.name}</span>
 				</h3>
 				<p className='description'>{product.description}</p>
-{/* 
-				<QuantitySelector quantity={QuantityToAdd} handleChange={handleProductQuantity} /> */}
+				<div className='button-container'>
+					<Link href={`${Routes.Product.location}/${product.id}`}>View Product</Link>
+					<button
+						className='add-to-cart transparent'
+						onClick={() => handleProductQuantity()}
+						disabled={isProductInCart}
+						title={isProductInCart ? 'Product added to cart' : ''}>
+						{!isProductInCart ? (
+							<i className='fa-solid fa-cart-plus' />
+						) : (
+							<div className='InShoppingCart'>
+								<i className='fa-solid fa-cart-shopping' />
+								<i className='fa-solid fa-check-double floating' />
+							</div>
+						)}
+					</button>
+				</div>
 			</div>
 		</div>
 	)
