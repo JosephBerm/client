@@ -13,7 +13,7 @@ import CustomerSummary from '@/classes/Base/CustomerSummary'
 import { Product } from '@/classes/Product'
 import { PagedResult } from '@/classes/Base/PagedResult'
 import { GenericSearchFilter } from '@/classes/Base/GenericSearchFilter'
-import { PagedData } from '../types/PagedData'
+import { PagedData } from '@/classes/PagedData'
 
 const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),

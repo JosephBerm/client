@@ -52,6 +52,7 @@
 	align-items: center;
 	overflow: hidden; /* Will this be trouble in the future? */
 	height: 100%;
+	user-select: none;
 }
 .Store .products-container .ProductCard .image-container i {
 	font-size: 5em;
