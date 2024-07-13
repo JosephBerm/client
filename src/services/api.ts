@@ -13,6 +13,7 @@ import CustomerSummary from '@/classes/Base/CustomerSummary'
 import { Product } from '@/classes/Product'
 import { PagedResult } from '@/classes/Base/PagedResult'
 import { GenericSearchFilter } from '@/classes/Base/GenericSearchFilter'
+import { PagedData } from '../types/PagedData'
 
 const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
@@ -29,7 +30,8 @@ const API = {
 	},
 	Store: {
 		Products: {
-			getList: async <T>() => await HttpService.get<T>('/products'),
+			getAllProducts: async <T>() => await HttpService.get<T>('/products'),
+			getList: async <T>(pagedData: PagedData) => await HttpService.post<T>('/products/paged', pagedData),
 			get: async (productId: string) => await HttpService.get<Product>(`/products/${productId}`),
 			create: async (product: FormData) =>
 				await HttpService.post<Product>(`/products`, product, {
@@ -39,7 +41,7 @@ const API = {
 				}),
 			update: async <T>(product: T) => await HttpService.put<T>(`/products`, product),
 			delete: async <T>(productId: string) => await HttpService.delete<T>(`/products/${productId}`),
-			getLastest: async (quantity: number = 3) =>
+			getLastest: async (quantity: number = 4) =>
 				await HttpService.get<Product[]>(`/products/lastest?quantity=${quantity}`),
 			image: async (id: string, name: string) =>
 				await HttpService.get(`/products/image?productId=${id}&image=${name}`),
@@ -52,7 +54,8 @@ const API = {
 			deleteImage: async (id: string, name: string) =>
 				await HttpService.delete<boolean>(`/products/${id}/image/${name}`),
 			images: async (id: string) => await HttpService.get<File[]>(`/products/images?productId=${id}`),
-			search: async (search: GenericSearchFilter) => await HttpService.post<PagedResult<Product>>(`/api/Products/search`, search),
+			search: async (search: GenericSearchFilter) =>
+				await HttpService.post<PagedResult<Product>>(`/api/Products/search`, search),
 		},
 	},
 	Quotes: {
@@ -83,7 +86,7 @@ const API = {
 		createFromQuote: async <Order>(quoteId: string) =>
 			await HttpService.post<Order>(`/orders/fromquote/${quoteId}`, null),
 		update: async <Order>(quote: Order) => await HttpService.put<Order>('/orders', quote),
-		delete: async <Boolean>(quoteId: number) => await HttpService.delete<Boolean>(`/orders/${quoteId}`)
+		delete: async <Boolean>(quoteId: number) => await HttpService.delete<Boolean>(`/orders/${quoteId}`),
 	},
 	Notifications: {
 		get: async <T>(id: string) => {
@@ -102,7 +105,7 @@ const API = {
 		getAll: async <Provider>() => await HttpService.get<Provider[]>('/providers'),
 		create: async <Provider>(provider: Provider) => await HttpService.post<Provider>('/provider', provider),
 		update: async <Provider>(quote: Provider) => await HttpService.put<Provider>('/provider', quote),
-		delete: async (providerId: number) => await HttpService.delete<number>(`/provider/${providerId}`)
+		delete: async (providerId: number) => await HttpService.delete<number>(`/provider/${providerId}`),
 	},
 	Public: {
 		sendQuote: async (quote: Quote) => await HttpService.post<Quote>('/quote', quote),
