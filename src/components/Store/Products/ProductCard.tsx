@@ -40,7 +40,9 @@ const ProductCard = ({ product }: { product: IProduct }) => {
 				</h3>
 				<p className='description'>{product.description}</p>
 				<div className='button-container'>
-					<Link href={`${Routes.Product.location}/${product.id}`}>View Product</Link>
+					<Link href={`${Routes.Product.location}/${product.id}`} className='button'>
+						View Product
+					</Link>
 					<button
 						className='add-to-cart transparent'
 						onClick={() => handleProductQuantity()}

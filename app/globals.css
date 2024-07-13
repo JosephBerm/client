@@ -188,12 +188,29 @@ a.inline-link:hover:after {
 	width: 100%;
 }
 
+a.button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	padding: 1em;
+	border: 1px solid;
+	border-radius: 4px;
+	text-align: center;
+	border-color: var(--gray);
+	color: var(--gray);
+	transition: var(--transition);
+}
+a.button:hover {
+	border-color: var(--brand-color-1) !important;
+	color: var(--brand-color-1) !important;
+}
+
 svg {
 	user-select: none;
 }
 
-button,
-.button {
+button {
 	color: var(--bg-color);
 	background-color: var(--brand-color-1);
 	border-radius: var(--border-radius);

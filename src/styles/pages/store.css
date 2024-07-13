@@ -21,39 +21,66 @@
 	margin-top: 7%;
 }
 .Store .products-container {
-	display: grid;
-	grid-template-columns: 1fr;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	place-items: center;
+	grid-auto-rows: 500px;
 	gap: 1vh;
 	width: 100%;
 	padding: 5%;
 }
 
 .Store .products-container .ProductCard {
-	display: flex;
-	flex-direction: column;
+	display: grid;
+	grid-template-rows: 1fr 1fr;
+	justify-content: center;
 	width: 100%;
-	border: 1px solid var(--light-gray);
-	gap: 2%;
+	gap: 15px;
 	border-radius: 5px;
 	font-size: clamp(var(--fz-s), 2vw, var(--fz-md));
+	background: var(--section-bg-color);
 	padding: 10% 7%;
+	min-height: 500px;
+	height: 100%;
+	max-height: 500px;
+}
+.Store .products-container .ProductCard .image-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden; /* Will this be trouble in the future? */
+	height: 100%;
+}
+.Store .products-container .ProductCard .image-container i {
+	font-size: 5em;
+	color: var(--light-gray);
 }
 .Store .products-container .ProductCard .image-container img {
 	object-fit: cover;
-}
-.Store .products-container .ProductCard .image-container,
-.Store .products-container .ProductCard .image-container img {
-	width: 100%;
 	height: 100%;
 }
 
 .Store .products-container .ProductCard .product-details {
 	display: flex;
 	flex-direction: column;
-	align-items: flex-start;
+	align-items: center;
+	justify-content: space-between;
 	gap: 1em;
 	padding: 2%;
+	height: 100%;
 }
+
+.Store .products-container .ProductCard .product-details .button-container {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 0.85em;
+	gap: 5%;
+}
+
 .Store .products-container .ProductCard .product-details .QuantitySelector {
 	align-self: flex-end;
 }
@@ -64,13 +91,16 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
-	align-items: flex-start;
+	align-items: center;
+	text-align: center;
 	gap: 1vh;
+	width: 100%;
 }
 
 .Store .products-container .ProductCard .product-details .name > * {
 	font-size: 0.75em;
 	opacity: 0.75;
+	align-self: flex-start;
 }
 
 .Store .products-container .ProductCard .product-details .description {
@@ -99,15 +129,23 @@
 ////////////////////////////////////////////////////////// */
 @media screen and (min-width: 480px) {
 	.Store .products-container {
+		display: grid;
 		grid-template-columns: 1fr 1fr;
+		flex-direction: unset;
 	}
 }
 /*////////////////////////////////////////////////////////// TODO: 768px ~ App
 ////////////////////////////////////////////////////////// */
 @media screen and (min-width: 768px) {
+	.Store .products-container {
+		grid-template-columns: 1fr 1fr 1fr;
+	}
 }
 
 /*////////////////////////////////////////////////////////// TODO: 768px ~ App
 ////////////////////////////////////////////////////////// */
 @media screen and (min-width: 1280px) {
+	.Store .products-container {
+		grid-template-columns: 1fr 1fr 1fr 1fr;
+	}
 }
