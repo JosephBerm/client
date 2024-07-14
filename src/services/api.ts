@@ -7,6 +7,7 @@ import Quote from '@/classes/Quote'
 import Company from '@/classes/Company'
 import UploadedFile from '@/classes/UploadedFile'
 import ContactRequest from '@/classes/ContactRequest'
+import ProductsCategory from '@/classes/ProductsCategory'
 import LoginCredentials from '@/classes/LoginCredentials'
 import CustomerSummary from '@/classes/Base/CustomerSummary'
 
@@ -56,6 +57,7 @@ const API = {
 			images: async (id: string) => await HttpService.get<File[]>(`/products/images?productId=${id}`),
 			search: async (search: GenericSearchFilter) =>
 				await HttpService.post<PagedResult<Product>>(`/api/Products/search`, search),
+			getAllCategories: async () => await HttpService.get<ProductsCategory[]>('/categories'),
 		},
 	},
 	Quotes: {

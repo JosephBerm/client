@@ -118,8 +118,8 @@ function ProductsList() {
 						return <ProductCard key={index} product={product} />
 					}
 				})}
-				<IsBusyLoading isBusy={isLoading} />
 			</div>
+			<IsBusyLoading isBusy={isLoading} />
 		</div>
 	)
 }

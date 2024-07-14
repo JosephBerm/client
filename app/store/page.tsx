@@ -2,7 +2,8 @@
 
 import '@/styles/pages/store.css'
 import React from 'react'
-import ProductsList from '@/src/components/Store/ProductsList'
+import ProductsList from '@/components/Store/ProductsList'
+import CategoriesMenu from '@/components/Store/CategoriesMenu'
 
 const Page = () => {
 	return (
@@ -10,6 +11,7 @@ const Page = () => {
 			<h2 className='page-title'>
 				<strong>Store</strong>
 			</h2>
+			{/* <CategoriesMenu /> */}
 			<ProductsList />
 		</div>
 	)

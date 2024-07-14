@@ -1,5 +1,4 @@
 import * as yup from 'yup'
-import { ProductsCategory } from '@/classes/Enums'
 
 export default class Validations {
 	public static signupSchema = yup.object().shape({
@@ -34,7 +33,6 @@ export default class Validations {
 			name: yup.string().required('Name is required'),
 			description: yup.string().required('Description is required'),
 			price: yup.number().positive('Price must be a positive number').required('Price is required'),
-			//category: yup.mixed<ProductsCategory>().required('Category is required'),
 		}),
 	}
 

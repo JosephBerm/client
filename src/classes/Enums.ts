@@ -1,7 +1,3 @@
-export enum ProductsCategory {
-	ProductOne,
-}
-
 export enum TypeOfBusiness {
 	Dentist,
 	SurgeryCenter,

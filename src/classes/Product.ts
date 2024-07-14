@@ -1,4 +1,4 @@
-import { ProductsCategory } from '@/classes/Enums'
+import ProductsCategory from '@/classes/ProductsCategory'
 import Provider from '@/classes/Provider'
 import Guid from '@/classes/Base/Guid'
 import HtmlImage from '@/classes/HtmlImage'
@@ -13,7 +13,7 @@ export class Product {
 	description: string = ''
 	price: number = 0
 	image: File | null = null
-	category: ProductsCategory | null = null
+	category: ProductsCategory[] = []
 	providerId: number | null = null
 	provider: Provider | null = null
 	createdAt: Date = new Date()
@@ -24,13 +24,13 @@ export class Product {
 
 	constructor(product: Partial<Product>) {
 		this.id = product?.id || Guid.newGuid()
-		this.files = product?.files?.length ? product.files.map(x => new UploadedFile(x)) : []
+		this.files = product?.files?.length ? product.files.map((x) => new UploadedFile(x)) : []
 		this.sku = product?.sku || ''
 		this.name = product?.name || ''
 		this.description = product?.description || ''
 		this.price = product?.price || 0
 		this.image = product.image || null
-		this.category = product?.category || null
+		this.category = product?.category?.length ? product.category.map((x) => new ProductsCategory(x)) : []
 		this.providerId = product?.providerId || null
 		this.provider = product?.provider || null
 		this.createdAt = product?.createdAt ? new Date(product?.createdAt) : new Date()
