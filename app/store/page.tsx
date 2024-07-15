@@ -11,7 +11,7 @@ const Page = () => {
 			<h2 className='page-title'>
 				<strong>Store</strong>
 			</h2>
-			{/* <CategoriesMenu /> */}
+			<CategoriesMenu />
 			<ProductsList />
 		</div>
 	)

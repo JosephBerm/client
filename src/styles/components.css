@@ -110,6 +110,103 @@
 	align-self: flex-start;
 }
 
+/*////////////////////////////////////
+				TreeSelect
+//////////////////////////////////// */
+.TreeSelect {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	gap: 0.25em;
+	border: 1px solid var(--light-gray);
+	border-radius: 4px;
+	padding: 5%;
+	user-select: none;
+}
+.TreeSelect .branch {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: center;
+	width: 100%;
+}
+.TreeSelect .branch .item {
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 5%;
+	width: 100%;
+	background-color: transparent;
+	transition: var(--transition);
+	height: 100%;
+	padding: 3% 5%;
+	border-left: 3px solid var(--light-gray);
+}
+/* main layer non-parent branches don't get border */
+.TreeSelect .branch:not(:has(.parent-branch)) .item {
+	border-left: unset;
+}
+/* inner layer non-parent branches get dashed border */
+.TreeSelect .TreeSelect .branch:not(:has(.parent-branch)) .item {
+	border-left: 2px dashed var(--light-gray);
+}
+
+/* change border color to selected */
+.TreeSelect .branch.selected .item {
+	border-color: var(--brand-color-1) !important;
+}
+
+.TreeSelect .branch .item li {
+	width: 100%;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+}
+
+.TreeSelect .branch .item:hover {
+	background-color: var(--soft-brand-color);
+}
+
+.TreeSelect .TreeSelect {
+	padding-left: 10%;
+	padding-top: 2%;
+	border: unset !important;
+}
+
+/*////////////////////////////////////
+				Input Radio
+//////////////////////////////////// */
+.InputRadio {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 1em;
+	aspect-ratio: 1/1;
+	border: 2px solid var(--gray);
+	border-radius: 50%;
+	position: relative;
+}
+.InputRadio:has(.selected) {
+	border-color: var(--brand-color-1);
+}
+.InputRadio .selected {
+	width: 65%;
+	border-radius: 50%;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	aspect-ratio: 1/1;
+	background-color: var(--brand-color-1);
+	opacity: 1;
+	transition: opacity 0.2s ease-out;
+}
+.InputRadio .selected.hidden {
+	opacity: 0;
+}
+
 @media screen and (min-width: 768px) {
 	.FormContainer .InputTextBox,
 	.FormContainer .InputDropdown,

@@ -1,25 +1,33 @@
 .Store {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
+	display: grid;
+	grid-template-areas:
+		'header header'
+		'menu body';
+	grid-template-columns: minmax(0, 300px) 1fr;
+	grid-template-rows: auto 1fr;
+	row-gap: 1vh;
+	column-gap: 5vw;
 	padding: 3vh 3vw;
 	min-height: 75vh;
 	gap: 2vh;
+	position: relative;
 }
 .Store .page-title {
+	grid-area: header;
+	justify-self: center;
 	text-align: center;
 	max-width: 400px;
 }
-.Store .page-body {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 1vh;
-	width: 100%;
-	max-width: 1200px;
-	margin-top: 7%;
+
+.Store .CategoriesMenu {
+	grid-area: menu;
+	position: sticky;
+	top: 0;
 }
+.Store.ProductsList {
+	grid-area: body;
+}
+
 .Store .ProductsList {
 	width: 100%;
 	display: flex;
@@ -27,7 +35,6 @@
 	align-items: flex-end;
 	justify-content: flex-start;
 	gap: 2vh;
-	padding: 5%;
 }
 .Store .ProductsList .InputTextBox {
 	width: 50%;
