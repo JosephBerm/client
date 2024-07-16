@@ -56,8 +56,10 @@ const API = {
 				await HttpService.delete<boolean>(`/products/${id}/image/${name}`),
 			images: async (id: string) => await HttpService.get<File[]>(`/products/images?productId=${id}`),
 			search: async (search: GenericSearchFilter) =>
-				await HttpService.post<PagedResult<Product>>(`/api/Products/search`, search),
-			getAllCategories: async () => await HttpService.get<ProductsCategory[]>('/categories'),
+				await HttpService.post<PagedResult<Product>>(`/Products/search`, search),
+			searchPublic: async (search: GenericSearchFilter) =>
+				await HttpService.post<PagedResult<Product>>(`/Products/search/public`, search),
+			getAllCategories: async () => await HttpService.get<ProductsCategory[]>('/Products/categories/clean'),
 		},
 	},
 	Quotes: {

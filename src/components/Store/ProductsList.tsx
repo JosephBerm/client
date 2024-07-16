@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react'
+import { PagedResult } from '@/src/classes/Base/PagedResult'
 import { Product } from '@/classes/Product'
 import { toast } from 'react-toastify'
 import API from '@/services/api'
@@ -7,41 +8,56 @@ import ProductCard from '@/components/Store/Products/ProductCard'
 import IsBusyLoading from '@/components/isBusyLoading'
 import debounce from 'lodash/debounce'
 import InputTextBox from '@/components/InputTextBox'
-import { PagedData } from '@/classes/PagedData'
+import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
+import { isEmpty } from 'lodash'
 
 function ProductsList() {
 	const [products, setProducts] = useState<Product[]>([])
-	const [pagedData, setPagedData] = useState<PagedData>(new PagedData())
+	const [pagedData, setPagedData] = useState<PagedResult<Product>>(new PagedResult<Product>({
+		pageSize: 10
+	}))
 	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const [isSearching, setIsSearching] = useState<boolean>(false)
 	const [hasMore, setHasMore] = useState<boolean>(true)
 	const [searchText, setSearchText] = useState<string>('')
 	const observer = useRef<IntersectionObserver | null>(null)
 
-	const retrieveProducts = async (pagedData: PagedData, replace: boolean = false) => {
+	const retrieveProducts = async ( replace: boolean = false) => {
 		try {
 			setIsLoading(true)
-			const { data: res } = await API.Store.Products.getList<Product[]>(pagedData)
+			const searchCriteria = new GenericSearchFilter()
+
+			if (!isEmpty(searchText)) {
+				searchCriteria.add("Name", searchText)
+			}
+			//searchCriteria.add("CategorieIds", "11")
+			const { data: res } = await API.Store.Products.searchPublic(searchCriteria)
 
 			if (!res.payload || res.statusCode !== 200) {
 				setHasMore(false)
 				return toast.error(res.message)
 			}
-			const newListOfProducts = res.payload.map((p) => new Product(p))
-			setProducts((prev) => (replace ? newListOfProducts : [...prev, ...newListOfProducts]))
+			const newListOfProducts = res.payload.data.map((p) => new Product(p))
+			setProducts(newListOfProducts)
 
-			setHasMore(res.payload.length > 0)
+			setHasMore(res.payload.data.length > 0)
 		} catch (err: any) {
 			toast.error(err.message)
 		} finally {
 			setIsLoading(false)
-			setIsSearching(false)
 		}
 	}
 
 	useEffect(() => {
-		retrieveProducts(pagedData, isSearching)
-	}, [pagedData])
+		// Set a timeout to retrieve products after a delay
+		const timeout = setTimeout(() => {
+		  retrieveProducts();
+		}, 1000);
+	  
+		// Cleanup function to clear the timeout on unmount or before the next effect runs
+		return () => {
+		  clearTimeout(timeout);
+		};
+	  }, [searchText]); // Only run this effect when isSearching changes
 
 	const lastProductElementRef = useCallback(
 		(node: HTMLDivElement) => {
@@ -71,21 +87,6 @@ function ProductsList() {
 	const debouncedRetrieveProducts = useMemo(() => debounce(retrieveProducts, 300), [])
 
 	const handleSearch = (searchQuery: string) => {
-		setIsSearching(true)
-
-		if (searchQuery.length > 3) {
-			setPagedData((prevPagedData) => ({
-				...prevPagedData,
-				page: 1,
-				searchQuery: searchQuery,
-			}))
-		} else {
-			setPagedData((prevPagedData) => ({
-				...prevPagedData,
-				page: 1,
-				searchQuery: '',
-			}))
-		}
 		setSearchText(searchQuery)
 	}
 
