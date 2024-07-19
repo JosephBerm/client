@@ -14,7 +14,7 @@ import { PagedResult } from '../classes/Base/PagedResult'
 const ServerTable = <T extends {}>(props: SearchTableProps<T>) => {
 
 	const [pagedResult, setPagedResult] = useState<PagedResult<T>>(new PagedResult<T>())
-	const [searchCriteria, setSearchCriteria] = useState<GenericSearchFilter>(new GenericSearchFilter())
+	const [searchCriteria, setSearchCriteria] = useState<GenericSearchFilter>(props.searchCriteria ?? new GenericSearchFilter())
 	const [searchQuery, setSearchQuery] = useState('')
 	const [sortColumn, setSortColumn] = useState<SortColumn<any>>({
 		path: 'name',

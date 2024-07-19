@@ -8,11 +8,11 @@ export default class Quote {
 	id: string = ''
 	name: Name = new Name()
 	companyName: string = ''
-	transitDetails: Address = new Address()
+	transitDetails: Address = new Address({})
 	emailAddress: string = ''
 	phoneNumber: string = ''
 	products: CartProduct[] = []
 	description: string = ''
-	dateCreated: Date = new Date()
+	createdAt: Date = new Date()
 	status: QuoteStatus = QuoteStatus.Unread
 }

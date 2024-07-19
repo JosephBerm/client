@@ -77,8 +77,8 @@ const API = {
 		delete: async <T>(quoteId: string) => await HttpService.delete<T>(`/quote/${quoteId}`),
 	},
 	Orders: {
-		get: async <Order>(customerId?: number | null) => {
-			return await HttpService.get<Order>(`/orders${customerId ? `/${customerId}` : ''}`)
+		get: async <Order>(orderId?: number | null) => { // This gets order by ID.
+			return await HttpService.get<Order>(`/orders${orderId ? `/${orderId}` : ''}`)
 		},
 		getFromCustomer: async (customerId: number) => {
 			return await HttpService.get<Order[]>(`/orders/fromcustomer/${customerId}`)

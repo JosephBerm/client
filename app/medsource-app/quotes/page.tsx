@@ -11,30 +11,20 @@ import Link from 'next/link'
 import Routes from '@/services/routes'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 import { useRouter } from 'next/navigation'
+import ServerTable from '@/src/common/ServerTable'
+import {format} from 'date-fns'
 
 const Page = () => {
 	const [quotes, setQuotes] = useState<Quote[]>([])
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const route = useRouter()
+	const searchCriteria = new GenericSearchFilter({
+		sortBy: 'CreatedAt',
+		sortOrder: 'desc',
+	
+	})
 
-	const getQuotes = async () => {
-		try {
-			setIsLoading(true)
-			const searchCriteria = new GenericSearchFilter()
-
-			const { data } = await API.Quotes.search(searchCriteria)
-			// const { data } = await API.Quotes.getAll<Quote[]>()
-
-			if (data.statusCode == 200 && data.payload) {
-				setQuotes(data.payload?.data ?? [])
-			}
-		} catch (err) {
-			console.error(err)
-			toast.error('Unable to retrieve the list of quotes at the moment.')
-		} finally {
-			setIsLoading(false)
-		}
-	}
+	
 
 	const handleQuoteDeletion = async (id: string) => {
 		const originalList = [...quotes]
@@ -59,23 +49,20 @@ const Page = () => {
 		}
 	}
 
-	useEffect(() => {
-		getQuotes()
-	}, [])
-
 	const columns: TableColumn<Quote>[] = [
 		{
 			name: 'name',
 			label: 'Name',
 			content: (quote) => (
 				<Link href={`${Routes.InternalAppRoute}/quotes/${quote.id}`}>
-					{quote.name?.first} {quote.name?.last}
+					{quote.companyName}
 				</Link>
 			),
 		},
 		{
 			name: 'phoneNumber',
 			label: 'Phone Number',
+			content: (quote) => <p>{quote.phoneNumber}</p>,
 		},
 		{
 			key: 'delete',
@@ -95,6 +82,13 @@ const Page = () => {
 				</div>
 			),
 		},
+		{
+			key: 'createdAt',
+			label: 'Date Created',
+			content: (quote) => <p>
+				{format(quote.createdAt, 'PPP') ?? ""}
+			</p>
+		},
 	]
 
 	return (
@@ -104,7 +98,11 @@ const Page = () => {
 			</div>
 			<IsBusyLoading isBusy={isLoading} />
 			{!isLoading && (
-				<Table<Quote> data={quotes} columns={columns} isSortable={true} isPaged={true} isSearchable={true} />
+				<ServerTable<Quote> 						
+				columns={columns}
+				methodToQuery = {API.Quotes.search}
+				searchCriteria = {searchCriteria}
+				/>
 			)}
 		</div>
 	)

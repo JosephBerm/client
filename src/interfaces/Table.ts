@@ -1,3 +1,4 @@
+import { GenericSearchFilter } from "../classes/Base/GenericSearchFilter"
 import { PagedResult } from "../classes/Base/PagedResult"
 
 export interface TableColumn<T> {
@@ -29,6 +30,7 @@ export interface SearchTableProps<T> {
 	cssRowClass?: (item: T) => string
 	onRowClick?: (item: T) => void
 	methodToQuery: Function
+	searchCriteria?: GenericSearchFilter
 }
 
 

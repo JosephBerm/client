@@ -9,9 +9,10 @@ import API from '@/services/api'
 import { Product } from '@/classes/Product'
 import Order, { OrderItem } from '@/classes/Order'
 import IsBusyLoading from '@/components/isBusyLoading'
-import OrdersPage from '@/components/Orders/OrdersPage'
+import AdminOrdersPage from '@/components/Orders/AdminOrdersPage'
 import Company from '@/src/classes/Company'
 import Routes from '@/services/routes'
+import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 
 const Page = (context: any) => {
 	const router = useRouter()
@@ -25,7 +26,7 @@ const Page = (context: any) => {
 		if (context.params.id == 'create') return
 		try {
 			setIsLoading(true)
-			const { data } = await API.Orders.get<Order>(parseInt(context.params.id as string))
+			const { data } = await API.Orders.get(parseInt(context.params.id as string))
 			if (!data.payload) toast.error(`Order with id #${context.params.id} not found!`)
 
 			return data.payload
@@ -53,7 +54,10 @@ const Page = (context: any) => {
 	const getProducts = async () => {
 		try {
 			setIsLoading(true)
-			const { data } = await API.Store.Products.getList<Product[]>()
+			const searchCriteria = new GenericSearchFilter()
+			searchCriteria.pageSize = 1000
+			const { data } = await API.Store.Products.search(searchCriteria)
+
 			if (!data.payload) toast.error('Unable to retrieve the list of available products...')
 
 			return data.payload
@@ -66,18 +70,10 @@ const Page = (context: any) => {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const [orderData, productsList] = await Promise.all([getOrder(), getProducts(), fetchCustomers()])
-
-			if (!productsList) {
-				setTimeout(() => {
-					router.push(`${Routes.InternalAppRoute}/orders`)
-				}, 3000)
-
-				return
-			}
+			const [orderData, productsListResponse] = await Promise.all([getOrder(), getProducts(), fetchCustomers()])
 
 			setOrder(new Order(orderData ?? {}))
-			setProducts(productsList.map((x) => new Product(x)))
+			setProducts(productsListResponse?.data?.map((x) => new Product(x)) ?? [])
 		}
 
 		fetchData()
@@ -87,7 +83,7 @@ const Page = (context: any) => {
 
 	return (
 		<div className='orders-page-container'>
-			<OrdersPage products={productsList} order={order} customers={customers} />
+			<AdminOrdersPage products={productsList} order={order} customers={customers} />
 		</div>
 	)
 }

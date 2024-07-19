@@ -11,31 +11,18 @@ import Link from 'next/link'
 import Routes from '@/services/routes'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 import { useRouter } from 'next/navigation'
+import ServerTable from '@/src/common/ServerTable'
 
 const Page = () => {
 	const [orders, setOrders] = useState<Order[]>([])
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const route = useRouter()
-
-	const getOrders = async () => {
-		try {
-			setIsLoading(true)
-			const searchCriteria = new GenericSearchFilter()
-			searchCriteria.includes = ['Customer']
-
-			const { data } = await API.Orders.search(searchCriteria)
-			// const { data } = await API.Orders.getAll<Order[]>()
-
-			if (data.statusCode == 200 && data.payload) {
-				setOrders(data.payload?.data ?? [])
-			}
-		} catch (err) {
-			console.error(err)
-			toast.error('Unable to retrieve the list of orders at the moment.')
-		} finally {
-			setIsLoading(false)
-		}
-	}
+	const searchCriteria = new GenericSearchFilter({
+		sortBy: 'CreatedAt',
+		sortOrder: 'desc',
+		includes: ['Customer'],
+	
+	})
 
 	const handleOrderDeletion = async (id: number) => {
 		const originalList = [...orders]
@@ -60,16 +47,12 @@ const Page = () => {
 		}
 	}
 
-	useEffect(() => {
-		getOrders()
-	}, [])
-
 	const columns: TableColumn<Order>[] = [
 		{
 			name:"id",
 			label: 'Order #',
 			content: (order) => (
-				<Link href={`${Routes.InternalAppRoute}/orders/${order.id}`}>
+				<Link href={`${Routes.InternalAppRoute}/adminorders/${order.id}`}>
 					{order.id}
 				</Link>
 			),
@@ -78,7 +61,7 @@ const Page = () => {
 			name: 'customer',
 			label: 'Customer',
 			content: (order) => (
-				<Link href={`${Routes.InternalAppRoute}/orders/${order.id}`}>
+				<Link href={`${Routes.InternalAppRoute}/adminorders/${order.id}`}>
 					{order.customer?.name}
 				</Link>
 			),
@@ -108,7 +91,11 @@ const Page = () => {
 			</div>
 			<IsBusyLoading isBusy={isLoading} />
 			{!isLoading && (
-				<Table<Order> data={orders} columns={columns} isSortable={true} isPaged={true} isSearchable={true} />
+				<ServerTable
+					columns={columns}
+					methodToQuery = {API.Orders.search}
+					searchCriteria = {searchCriteria}
+				/>
 			)}
 		</div>
 	)

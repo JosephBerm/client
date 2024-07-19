@@ -22,6 +22,7 @@ interface OrdersProps {
 }
 
 const OrdersPage = ({ order, products, customers }: OrdersProps) => {
+	console.log("RE RENDERED")
 	const params = useParams()
 	const route = useRouter()
 
@@ -54,32 +55,30 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 	}
 	const handleQuantityChange = (orderItem: OrderItem, quantity: number) => {
 		setCurrentOrder((prev) => {
-			const newOrder: Order = JSON.parse(JSON.stringify(prev))
-
-			const index = newOrder.products.findIndex((p) => {
+			const index = prev.products.findIndex((p) => {
 				return p.product?.id === orderItem.product?.id
 			})
 			if (index >= 0) {
-				newOrder.products[index].quantity = quantity
+				prev.products[index].quantity = quantity
 			}
 
 
-			return newOrder
+			return prev
 		})
 	}
 	const handlePriceChange = (orderItem: OrderItem, price: number) => {
+		console.log("22", price)
 		//TODO: THIS CAUSES THE FOCUS TO BE LOST IN THE INPUT.
 		setCurrentOrder((prev) => {
-			const newOrder: Order = JSON.parse(JSON.stringify(prev))
-
-			const index = newOrder.products.findIndex((p) => {
+			const index = prev.products.findIndex((p) => {
 				return p.product?.id === orderItem.product?.id
 			})
 			if (index >= 0) {
-				newOrder.products[index].sellPrice = price
+				console.log("FOUND", index)
+				prev.products[index].sellPrice = price
 			}
-
-			return newOrder
+			console.log(prev)
+			return prev
 		})
 	}
 	const handleSelectProduct = (productId: number | string) => {
