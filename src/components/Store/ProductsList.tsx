@@ -25,7 +25,8 @@ function ProductsList() {
 		try {
 			setIsLoading(true)
 			const searchCriteria = new GenericSearchFilter()
-
+			searchCriteria.pageSize = 10
+			searchCriteria.includes = ['Files']
 			if (!isEmpty(searchText)) {
 				searchCriteria.add("Name", searchText)
 			}
