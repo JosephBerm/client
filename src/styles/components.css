@@ -142,15 +142,12 @@
 	transition: var(--transition);
 	height: 100%;
 	padding: 3% 5%;
-	border-left: 3px solid var(--light-gray);
 }
-/* main layer non-parent branches don't get border */
-.TreeSelect .branch:not(:has(.parent-branch)) .item {
-	border-left: unset;
-}
+
 /* inner layer non-parent branches get dashed border */
 .TreeSelect .TreeSelect .branch:not(:has(.parent-branch)) .item {
 	border-left: 2px dashed var(--light-gray);
+	padding-right: unset;
 }
 
 /* change border color to selected */
@@ -175,35 +172,58 @@
 	border: unset !important;
 }
 
+.TreeSelect .expand-btn {
+	width: fit-content;
+	padding: 0.35em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: var(--gray);
+	transition: background-color 0.2s ease-out;
+}
+.TreeSelect .expand-btn:has(.expanded) {
+	background-color: var(--brand-color-5);
+}
+
+.TreeSelect .branch .item.disabled {
+	pointer-events: none;
+	opacity: 0.8;
+	background-color: var(--light-gray);
+}
+.TreeSelect .branch .item.selected {
+	background-color: var(--soft-brand-color);
+}
+
 /*////////////////////////////////////
 				Input Radio
 //////////////////////////////////// */
 .InputRadio {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 1em;
+	height: 12px;
 	aspect-ratio: 1/1;
 	border: 2px solid var(--gray);
 	border-radius: 50%;
 	position: relative;
+	display: flex;
+	align-items: center;
+	box-sizing: content-box;
 }
 .InputRadio:has(.selected) {
 	border-color: var(--brand-color-1);
 }
-.InputRadio .selected {
-	width: 65%;
+
+.InputRadio .dot {
+	width: 75%;
 	border-radius: 50%;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
 	aspect-ratio: 1/1;
 	background-color: var(--brand-color-1);
 	opacity: 1;
 	transition: opacity 0.2s ease-out;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
 }
-.InputRadio .selected.hidden {
+.InputRadio .dot:not(.selected) {
 	opacity: 0;
 }
 

@@ -1,12 +1,8 @@
 .Store {
-	display: grid;
-	grid-template-areas:
-		'header header'
-		'menu body';
-	grid-template-columns: minmax(0, 300px) 1fr;
-	grid-template-rows: auto 1fr;
-	row-gap: 1vh;
-	column-gap: 5vw;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
 	padding: 3vh 3vw;
 	min-height: 75vh;
 	gap: 2vh;
@@ -166,6 +162,19 @@
 
 /*////////////////////////////////////////////////////////// TODO: 768px ~ App
 ////////////////////////////////////////////////////////// */
+@media screen and (min-width: 1080px) {
+	.Store {
+		display: grid;
+		grid-template-areas:
+			'header header'
+			'menu body';
+		grid-template-columns: minmax(0, 300px) 1fr;
+		grid-template-rows: auto 1fr;
+		row-gap: 1vh;
+		column-gap: 5vw;
+	}
+}
+
 @media screen and (min-width: 1280px) {
 	.Store .products-container {
 		grid-template-columns: 1fr 1fr 1fr 1fr;

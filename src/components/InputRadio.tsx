@@ -11,7 +11,7 @@ function InputRadio({ value, handleToggleSelection }: InputRadioProps) {
 	}
 	return (
 		<div className='InputRadio clickable' onClick={handleClick}>
-			<div className={classNames({ selected: true, hidden: !value })} />
+			<div className={classNames({ dot: true, selected: value })} />
 		</div>
 	)
 }

@@ -5,29 +5,40 @@ import InputRadio from '@/components/InputRadio'
 class TreeBranch<T> {
 	isExpanded: boolean = false
 	isSelected: boolean = false
+	isDisabled: boolean = false
+	branches?: TreeBranch<T>[]
 	constructor(public item: T, public childKey: keyof T) {
-		this.item = item
 		this.childKey = childKey
+		this.item = item
+		if (Array.isArray(item[childKey]) && item[childKey].length) {
+			this.branches = item[childKey].map((child) => new TreeBranch(child, childKey))
+		}
 	}
 
-	get children(): T[] {
-		return this.item[this.childKey] as T[]
+	get children(): TreeBranch<T>[] {
+		return this.branches || []
 	}
 }
 
 type TreeSelectProps<T> = {
-	list: T[]
+	list?: T[]
 	label: keyof T | ((item: T) => string)
 	childKey: keyof T
 	onItemSelected: (selectedItem: T) => void
+	branches?: TreeBranch<T>[]
 }
 
-function TreeSelect<T>({ list, label, childKey, onItemSelected }: TreeSelectProps<T>) {
+function TreeSelect<T>({ list, label, childKey, branches, onItemSelected }: TreeSelectProps<T>) {
 	const [treeItems, setTreeItems] = useState<TreeBranch<T>[]>([])
 
 	useEffect(() => {
-		setTreeItems(list.map((item) => new TreeBranch(item, childKey)))
-	}, [list])
+		if (list) setTreeItems(list.map((item) => new TreeBranch<T>(item, childKey)))
+		else if (branches) {
+			setTreeItems(branches)
+		} else {
+			setTreeItems([])
+		}
+	}, [list, childKey, branches])
 
 	const getLabel = (item: T) => {
 		if (label instanceof Function) {
@@ -44,9 +55,17 @@ function TreeSelect<T>({ list, label, childKey, onItemSelected }: TreeSelectProp
 			handleTreeItemSelection(branch)
 		}
 	}
-	const handleTreeItemSelection = (branch: TreeBranch<T>) => {
-		onItemSelected(branch.item)
-		branch.isSelected = !branch.isSelected
+	const handleTreeItemSelection = (root: TreeBranch<T>) => {
+		if (root.isDisabled) return
+
+		onItemSelected(root.item)
+		root.isSelected = !root.isSelected
+		if (root.branches) {
+			root.branches.forEach((branch) => {
+				branch.isSelected = root.isSelected
+				branch.isDisabled = root.isSelected
+			})
+		}
 		setTreeItems([...treeItems])
 	}
 
@@ -71,20 +90,40 @@ function TreeSelect<T>({ list, label, childKey, onItemSelected }: TreeSelectProp
 		<ul className='TreeSelect'>
 			{treeItems.map((branch, index) => (
 				<div className={classNames({ branch: true, selected: isSelectedOrHasSelected(branch) })} key={index}>
-					<div className={classNames({ item: true, 'parent-branch': isParentBranch(branch) })}>
-						<InputRadio
-							value={branch.isSelected}
-							handleToggleSelection={() => handleTreeItemSelection(branch)}
-						/>
-						<li className='clickable' onClick={() => expandIfHasChild(branch)}>
+					<div
+						className={classNames({
+							item: true,
+							'parent-branch': isParentBranch(branch),
+							disabled: branch.isDisabled,
+							selected: branch.isSelected,
+						})}
+						onClick={() => handleTreeItemSelection(branch)}>
+						<InputRadio value={branch.isSelected} />
+						<li className='clickable'>
 							{getLabel(branch.item)}
 							<br />
 						</li>
+						{branch.children.length > 0 && (
+							<button
+								className='expand-btn'
+								onClick={(e) => {
+									e.stopPropagation()
+									expandIfHasChild(branch)
+								}}>
+								<i
+									className={classNames({
+										'fa-solid': true,
+										'fa-plus': !branch.isExpanded,
+										'fa-minus expanded': branch.isExpanded,
+									})}
+								/>
+							</button>
+						)}
 					</div>
 
 					{branch.isExpanded && (
 						<TreeSelect<T>
-							list={branch.children}
+							branches={branch.children}
 							label={label}
 							childKey={childKey}
 							onItemSelected={onItemSelected}
