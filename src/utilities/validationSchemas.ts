@@ -24,11 +24,14 @@ export default class Validations {
 	public static changePasswordSchema = yup.object().shape({
 		oldPassword: yup.string().required('Username is required'),
 		newPassword: yup.string().required('New Password is required').min(6, 'Password must be at least 6 characters'),
-		confirmNewPassword: yup.string().required('Confirm new Password is required').oneOf([yup.ref('newPassword')], 'Passwords must match')
+		confirmNewPassword: yup
+			.string()
+			.required('Confirm new Password is required')
+			.oneOf([yup.ref('newPassword')], 'Passwords must match'),
 	})
 
 	public static store = {
-		productSchema:  yup.object().shape({
+		productSchema: yup.object().shape({
 			sku: yup.string().required('SKU is required'),
 			name: yup.string().required('Name is required'),
 			description: yup.string().required('Description is required'),
@@ -61,9 +64,10 @@ export default class Validations {
 	})
 
 	public static profileSchema = yup.object().shape({
-
 		email: yup.string().email().required(),
 		firstName: yup.string().required(),
-		lastName: yup.string().required()
+		lastName: yup.string().required(),
 	})
 }
+
+// DO NOT ALLOW ANY ITEM TO BE SAVED IN THE DB TO HAVE ANY SPECIAL CHARACTERS EXCEPT '&' and '@'

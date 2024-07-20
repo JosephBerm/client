@@ -26,6 +26,7 @@ const ProductCard = ({ product }: { product: IProduct }) => {
 						}`}
 						width={200}
 						height={200}
+						style={{ width: 'auto' }}
 						alt='Product Image'
 					/>
 				) : (
