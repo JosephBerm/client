@@ -20,7 +20,7 @@ const Page = () => {
 
 	const [products, setProducts] = useState<Product[]>([])
 	const [searchCriteria, setSearchCriteria] = useState<GenericSearchFilter>(
-		new GenericSearchFilter({ pageSize: 50, includes: ['Files'] })
+		new GenericSearchFilter({ pageSize: 50, includes: ['Files', 'Provider'] })
 	)
 	const [selectedCategories, setSelectedCategories] = useState<ProductsCategory[]>([])
 	const [categories, setCategories] = useState<ProductsCategory[]>([])
@@ -60,6 +60,8 @@ const Page = () => {
 			if (selectedCategories.length > 0) {
 				const categoryIds = selectedCategories.map((cat) => cat.id).join('|')
 				criteria.add('CategorieIds', categoryIds)
+			} else {
+				criteria.clear('CategorieIds')
 			}
 
 			//criteria.add("CategorieIds", "11")

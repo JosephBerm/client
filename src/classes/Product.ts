@@ -12,7 +12,6 @@ export class Product {
 	files: UploadedFile[] = []
 	description: string = ''
 	price: number = 0
-	image: File | null = null
 	category: ProductsCategory[] = []
 	providerId: number | null = null
 	provider: Provider | null = null
@@ -29,7 +28,6 @@ export class Product {
 		this.name = product?.name || ''
 		this.description = product?.description || ''
 		this.price = product?.price || 0
-		this.image = product.image || null
 		this.category = product?.category?.length ? product.category.map((x) => new ProductsCategory(x)) : []
 		this.providerId = product?.providerId || null
 		this.provider = product?.provider || null

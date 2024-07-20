@@ -63,8 +63,6 @@ const Page = () => {
 	}
 
 	const getImage = (item: CartProduct) => {
-		if (item.product?.image?.src) return <Image src={item.product.image.src} alt={item.product.image.alt} />
-
 		return <i className='fa-regular fa-image' />
 	}
 
@@ -111,7 +109,6 @@ const Page = () => {
 											<div className='description'>
 												<span className='name'>{item.product?.name}</span>
 												<span className='desc'>{item.product?.description}</span>
-												<span className='total'>${item.product?.price}</span>
 											</div>
 										</div>
 										<QuantitySelector
