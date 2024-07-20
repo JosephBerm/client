@@ -79,8 +79,8 @@ function AccountOrdersTable() {
 		<div className='AccountOrdersTable'>
 			{!isLoadingData && (
 				<button className='mb-5'>
-					<i className='fa-solid fa-plus mr-3' />
-					New Request
+					<i className='fa-solid fa-plus' />
+					<span className="ml-2">New Request</span>
 				</button>
 			)}
 			{orders.length !== 0 ? (
