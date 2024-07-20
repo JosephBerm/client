@@ -12,8 +12,10 @@ import API from '@/services/api'
 import Order from '@/classes/Order'
 import Table from '@/common/table'
 import WealthyTable from '@/components/WealthyTable'
+import { useRouter } from 'next/navigation'
 
 function AccountOrdersTable() {
+	const router = useRouter()
 	const User = useAccountStore((state) => state.User)
 	const [isLoadingData, setIsLoadingData] = useState<boolean>(false)
 	const [orders, setOrders] = useState<Order[]>([])
@@ -78,9 +80,9 @@ function AccountOrdersTable() {
 	return (
 		<div className='AccountOrdersTable'>
 			{!isLoadingData && (
-				<button className='mb-5'>
+				<button className='mb-5' onClick={() => router.push(Routes.Store.location)}>
 					<i className='fa-solid fa-plus' />
-					<span className="ml-2">New Request</span>
+					<span className='ml-2'>New Request</span>
 				</button>
 			)}
 			{orders.length !== 0 ? (
