@@ -85,12 +85,20 @@ const Page = () => {
 	const handleCategorySelection = (toggledCategory: ProductsCategory) => {
 		setSelectedCategories((prevSelectedItems) => {
 			const alreadySelected = prevSelectedItems.some((item) => item.id === toggledCategory.id)
-			if (alreadySelected) {
-				return prevSelectedItems.filter((item) => item.id !== toggledCategory.id)
-			}
 
-			//add it to the end of the selected array
-			return [...prevSelectedItems, toggledCategory]
+			if (alreadySelected) {
+				// If unselecting, remove the parent and all its children
+				const filteredItems = prevSelectedItems.filter((item) => {
+					const isChild = item.parentCategoryId === toggledCategory.id
+					const isParent = item.id === toggledCategory.id
+					return !isChild && !isParent
+				})
+				return filteredItems
+			} else {
+				// If selecting, remove the parent's children and add the parent
+				const filteredItems = prevSelectedItems.filter((item) => item.parentCategoryId !== toggledCategory.id)
+				return [...filteredItems, toggledCategory]
+			}
 		})
 	}
 
