@@ -24,7 +24,6 @@ const Table = <T extends {}>(props: TableProps<T>) => {
 
 	useEffect(() => {
 		let filtered = props.data
-
 		// if (props.isSearchable && searchQuery) {
 		// 	filtered = props.data.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
 		// }

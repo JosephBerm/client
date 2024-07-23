@@ -1,15 +1,12 @@
-'use client'
-
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { Product } from '@/classes/Product'
-import { useParams, useRouter } from 'next/navigation'
-import { SortColumn, TableColumn } from '@/interfaces/Table'
+import { useRouter } from 'next/navigation'
+import { TableColumn } from '@/interfaces/Table'
 import Order, { OrderItem } from '@/classes/Order'
 
 import API from '@/services/api'
 import Table from '@/common/table'
 import InputTextBox from '@/components/InputTextBox'
-import IsBusyLoading from '@/components/isBusyLoading'
 import InputNumber from '@/components/InputNumber'
 import InputDropdown from '@/components/InputDropdown'
 import Company from '@/src/classes/Company'
@@ -22,21 +19,16 @@ interface OrdersProps {
 }
 
 const OrdersPage = ({ order, products, customers }: OrdersProps) => {
-	console.log("RE RENDERED")
-	const params = useParams()
 	const route = useRouter()
 
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [product, setProduct] = useState<Product | null>(null)
 	const [currentOrder, setCurrentOrder] = useState<Order>(order)
-
-	useEffect(() => {}, [product, currentOrder.products])
+	const [salesTaxRate, setSalesTaxRate] = useState<number>(6)
 
 	const hasProductInList = useMemo(() => {
-		if (!product) return
-
-		const productIdToAdd = product.id
-		return currentOrder.products.some((item) => item.product?.id === productIdToAdd)
+		if (!product) return false
+		return currentOrder.products.some((item) => item.product?.id === product.id)
 	}, [product, currentOrder.products])
 
 	const updateOrder = async () => {
@@ -44,7 +36,7 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 			setIsLoading(true)
 			const { data } = await API.Orders.update(currentOrder)
 
-			if (data.statusCode == 200) {
+			if (data.statusCode === 200) {
 				route.push(`${Routes.InternalAppRoute}/orders`)
 			}
 		} catch (err) {
@@ -53,43 +45,52 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 			setIsLoading(false)
 		}
 	}
+
 	const handleQuantityChange = (orderItem: OrderItem, quantity: number) => {
 		setCurrentOrder((prev) => {
-			const index = prev.products.findIndex((p) => {
-				return p.product?.id === orderItem.product?.id
+			const updatedProducts = prev.products.map((p) => {
+				if (p.product?.id === orderItem.product?.id) {
+					return { ...p, quantity }
+				}
+				return p
 			})
-			if (index >= 0) {
-				prev.products[index].quantity = quantity
-			}
-
-
-			return prev
+			return { ...prev, products: updatedProducts }
 		})
 	}
+
 	const handlePriceChange = (orderItem: OrderItem, price: number) => {
-		console.log("22", price)
-		//TODO: THIS CAUSES THE FOCUS TO BE LOST IN THE INPUT.
 		setCurrentOrder((prev) => {
-			const index = prev.products.findIndex((p) => {
-				return p.product?.id === orderItem.product?.id
+			const updatedProducts = prev.products.map((p) => {
+				if (p.product?.id === orderItem.product?.id) {
+					return { ...p, sellPrice: price }
+				}
+				return p
 			})
-			if (index >= 0) {
-				console.log("FOUND", index)
-				prev.products[index].sellPrice = price
-			}
-			console.log(prev)
-			return prev
+			return { ...prev, products: updatedProducts }
 		})
 	}
+
+	const handleBuyPriceChange = (orderItem: OrderItem, price: number) => {
+		setCurrentOrder((prev) => {
+			const updatedProducts = prev.products.map((p) => {
+				if (p.product?.id === orderItem.product?.id) {
+					return { ...p, buyPrice: price }
+				}
+				return p
+			})
+			return { ...prev, products: updatedProducts }
+		})
+	}
+
 	const handleSelectProduct = (productId: number | string) => {
 		const product = products.find((p) => p.id == (productId as string))
 		if (product) setProduct(product)
 	}
+
 	const handleAddingProduct = () => {
 		if (!product) return
 
 		if (hasProductInList) {
-			// Product is already in the order, do not add again
 			return
 		}
 
@@ -100,11 +101,7 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 		setCurrentOrder((prevState) => ({
 			...prevState,
 			products: [...prevState.products, productToAdd],
-			total: prevState.total + (productToAdd.product?.price ?? 0),
-			CreateFromQuote: prevState.CreateFromQuote, // Calculate or set the value here
 		}))
-
-		setProduct(null)
 	}
 
 	const getSelectedProducts = (): Product[] => {
@@ -115,14 +112,26 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 
 	const handleProductDeletion = (productId: string) => {
 		setCurrentOrder((current) => {
-			const newOrder: Order = JSON.parse(JSON.stringify(current))
-			const foundProductIndex = newOrder.products.findIndex((p) => p.product?.id === productId)
-			if (foundProductIndex >= 0) {
-				newOrder.total -= newOrder.products[foundProductIndex].product?.price ?? 0
-				newOrder.products.splice(foundProductIndex, 1)
-			}
+			const updatedProducts = current.products.filter((p) => p.product?.id !== productId)
+			const total = updatedProducts.reduce((acc, item) => acc + item.sellPrice * item.quantity, 0)
+			const salesTax = updatedProducts.reduce((acc, item) => acc + ((item.sellPrice * item.quantity) * (salesTaxRate / 100)), 0)
 
-			return newOrder
+			return {
+				...current,
+				products: updatedProducts,
+				total: total + salesTax - current.discount + current.shipping,
+				salesTax,
+			}
+		})
+	}
+
+	const handleTaxesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setCurrentOrder((prev) => {
+			const salesTax = (parseInt(e.target.value) / 100) * prev.products.reduce((acc, item) => acc + (item.sellPrice * item.quantity), 0)
+			return {
+				...prev,
+				salesTax,
+			}
 		})
 	}
 
@@ -134,10 +143,26 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 				...prevState,
 				customer: customer,
 				customerId: customer.id,
-				CreateFromQuote: prevState.CreateFromQuote,
 			}))
 		}
 	}
+
+	const handleChangeSalesTaxPercentage = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const rate = parseInt(e.target.value)
+		setSalesTaxRate(rate)
+	}
+
+	useEffect(() => {
+		const total = currentOrder.products.reduce((acc, item) => acc + item.sellPrice * item.quantity, 0)
+		const salesTax = parseFloat((total * (salesTaxRate / 100)).toFixed(2))
+		const finalTotal = parseFloat((total + salesTax - currentOrder.discount + currentOrder.shipping).toFixed(2))
+
+		setCurrentOrder(prev => ({
+			...prev,
+			total: finalTotal,
+			salesTax,
+		}))
+	}, [currentOrder.products, salesTaxRate, currentOrder.discount, currentOrder.shipping])
 
 	const columns: TableColumn<OrderItem>[] = [
 		{
@@ -158,11 +183,22 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 		},
 		{
 			key: 'buyPrice',
-			label: 'Price',
+			label: 'Buy Price',
 			content: (orderItem) => (
 				<InputNumber
 					label=''
 					value={orderItem.buyPrice.toString()}
+					handleChange={(e) => handleBuyPriceChange(orderItem, parseInt(e.currentTarget.value))}
+				/>
+			),
+		},
+		{
+			key: 'sellPrice',
+			label: 'Sell Price',
+			content: (orderItem) => (
+				<InputNumber
+					label=''
+					value={orderItem.sellPrice.toString()}
 					handleChange={(e) => handlePriceChange(orderItem, parseInt(e.currentTarget.value))}
 				/>
 			),
@@ -170,10 +206,8 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 		{
 			key: 'delete',
 			label: 'Delete',
-			content: (product: OrderItem) => (
-				<button className='delete' onClick={() => handleProductDeletion(product.product?.id!)}>
-					Delete
-				</button>
+			content: (orderItem) => (
+				<button className='delete' onClick={() => handleProductDeletion(orderItem.product?.id!)}>Delete</button>
 			),
 		},
 	]
@@ -195,10 +229,39 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 			<Table<OrderItem>
 				columns={columns}
 				data={currentOrder.products}
-				isSortable={true}
-				isSearchable={true}
-				isPaged={true}
+				isSortable={false}
+				isSearchable={false}
+				isPaged={false}
 			/>
+
+			<div>
+				<InputNumber 
+					label='Sales Tax %' 
+					value={salesTaxRate.toString()} 
+					handleChange={handleChangeSalesTaxPercentage} 
+				/>
+
+				<InputNumber 
+					label="Sales Tax" 
+					value={currentOrder.salesTax.toString()} 
+					handleChange={handleTaxesChange} 
+				/>
+			</div>
+
+			<InputNumber 
+				label='Shipping' 
+				value={currentOrder.shipping.toString()} 
+				handleChange={(e) => setCurrentOrder((prev) => ({ ...prev, shipping: parseInt(e.target.value) }))} 
+			/>
+
+			<InputNumber 
+				label='Discount' 
+				value={currentOrder.discount.toString()} 
+				handleChange={(e) => setCurrentOrder((prev) => ({ ...prev, discount: parseInt(e.target.value) }))} 
+			/>
+
+			<InputNumber label='Total' value={currentOrder.total.toString()} disabled={true} />
+
 
 			<div className='add-product-container'>
 				<InputDropdown<Product>

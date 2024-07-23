@@ -56,7 +56,6 @@ function TreeSelect<T>({ list, label, childKey, branches, onItemSelected }: Tree
 		}
 	}
 	const handleTreeItemSelection = (root: TreeBranch<T>) => {
-		console.log("EXECUTING UNSELECTED")
 		if (root.isDisabled) return
 
 		onItemSelected(root.item)

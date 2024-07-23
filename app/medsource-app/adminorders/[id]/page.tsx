@@ -82,7 +82,7 @@ const Page = (context: any) => {
 	if (isLoading || !order) return <IsBusyLoading isBusy={true} />
 
 	return (
-		<div className='orders-page-container'>
+		<div className='orders-page-container page-container'>
 			<AdminOrdersPage products={productsList} order={order} customers={customers} />
 		</div>
 	)

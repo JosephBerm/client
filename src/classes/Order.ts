@@ -12,6 +12,9 @@ export default class Order {
 	customer: Company | null = null
 	customerId: number | null = null
 	status: OrderStatus = OrderStatus.Pending
+	salesTax = 0
+	shipping = 0
+	discount = 0
 
 	CreateFromQuote(quote: Quote) {
 		this.products = quote.products.map((cartProduct) => {
@@ -112,3 +115,4 @@ export class Dimensions {
 		return `${this.width} x ${this.length} x ${this.height}cm`
 	}
 }
+
