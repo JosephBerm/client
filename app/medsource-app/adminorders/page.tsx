@@ -12,6 +12,8 @@ import Routes from '@/services/routes'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 import { useRouter } from 'next/navigation'
 import ServerTable from '@/src/common/ServerTable'
+import {OrderStatusName, OrderStatusVariants} from '@/classes/EnumsTranslations'
+import Pill from '@/src/components/Pill'
 
 const Page = () => {
 	const [orders, setOrders] = useState<Order[]>([])
@@ -46,6 +48,7 @@ const Page = () => {
 			setIsLoading(false)
 		}
 	}
+	type Variant = 'info' | 'success' | 'error' | 'warning';
 
 	const columns: TableColumn<Order>[] = [
 		{
@@ -61,7 +64,7 @@ const Page = () => {
 			name: 'customer',
 			label: 'Customer',
 			content: (order) => (
-				<Link href={`${Routes.InternalAppRoute}/adminorders/${order.id}`}>
+				<Link href={`${Routes.InternalAppRoute}/adminorders/${order.id}`} style={{fontWeight: 800}}>
 					{order.customer?.name}
 				</Link>
 			),
@@ -69,6 +72,13 @@ const Page = () => {
 		{
 			name: 'status',
 			label: 'Order Status',
+			content: (order) => (
+				<div className='flex flex-row '>
+					<span>
+						<Pill text={OrderStatusName[order.status]} variant={OrderStatusVariants[order.status] as Variant}/>
+					</span>
+				</div>
+			)
 		},
 		{
 			key: 'delete',

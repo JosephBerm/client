@@ -16,6 +16,8 @@ import {SubmitOrderRequest} from '@/classes/RequestClasses'
 import { toast } from 'react-toastify';
 import { OrderStatus } from '@/src/classes/Enums';
 import {OrderStatusName} from '@/classes/EnumsTranslations'
+import Pill from '@/components/Pill';
+import {OrderStatusVariants} from '@/classes/EnumsTranslations'
 
 interface OrdersProps {
 	order: Order;
@@ -275,11 +277,16 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 		return updatedOrder;
 	}
 
+	type Variant = 'info' | 'success' | 'error' | 'warning';
 
 	return (
 		<div className='orders-page'>
 			<div className='admin-order-page-header'>
-				<h3 className='page-title'>Order Details</h3>
+				<div className='flex flex-row gap-5'>
+					<h3 className='page-title'>Order #{currentOrder.id}</h3>
+					<Pill text={OrderStatusName[currentOrder.status]} variant={OrderStatusVariants[currentOrder.status] as Variant}/>
+				
+				</div>
 				<div className='flex flex-col'>
 					{currentOrder.status <= OrderStatus.WaitingCustomerApproval && (
 						<button onClick={handleSubmitQuote} disabled={!currentOrder.customerId}>Submit Quote to customer</button>
@@ -307,11 +314,7 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 
 					{currentOrder.status != OrderStatus.Cancelled && (
 						<button  onClick={() => setOrderStatus(OrderStatus.Cancelled, true)} disabled={!currentOrder.customerId}>Cancel Order</button>
-					)}
-
-					
-					{/* Order status */}
-					<span className='order-status'>{OrderStatusName[currentOrder.status]}</span>
+					)}					
 				</div>
 			</div>
 

@@ -227,6 +227,40 @@
 	opacity: 0;
 }
 
+.pill {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-size: 1.3rem;
+    border: 1px solid;
+	text-align: center;
+	width: fit-content;
+}
+
+.pill.info {
+    color: #0958d9;
+    background: #e6f4ff;
+    border-color: #91caff;
+}
+
+.pill.success {
+    color: #0f5132;
+    background: #d1e7dd;
+    border-color: #badbcc;
+}
+
+.pill.error {
+    color: #842029;
+    background: #f8d7da;
+    border-color: #f5c2c7;
+}
+
+.pill.warning {
+    color: #664d03;
+    background: #fff3cd;
+    border-color: #ffecb5;
+}
+
 @media screen and (min-width: 768px) {
 	.FormContainer .InputTextBox,
 	.FormContainer .InputDropdown,
