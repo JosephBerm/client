@@ -34,7 +34,7 @@ const Page = () => {
 			const { data } = await API.Orders.createFromQuote<Quote>(params.id as string)
 
 			if (data.payload) {
-				route.push(`${Routes.InternalAppRoute}/orders/${data.payload.id}`)
+				route.push(`${Routes.InternalAppRoute}/adminorders/${data.payload.id}`)
 			}
 		} catch (err) {
 			console.error(err)
