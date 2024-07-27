@@ -18,8 +18,6 @@ export default class User {
 	public dateOfBirth: Date | null = null
 	public createdAt: Date = new Date()
 
-	public shippingDetails: Address = new Address()
-
 	public phone?: string
 	public mobile?: string
 

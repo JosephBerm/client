@@ -4,7 +4,7 @@ import InputTextBox from '@/components/InputTextBox'
 import { useAccountStore } from '@/src/stores/user'
 import Address from '@/classes/Address'
 
-function UserInfoShipping() {
+function UserInfoBilling() {
     const { User: UserFromStore, setUser } = useAccountStore((state) => ({
         User: state.User,
         setUser: state.setUser
@@ -14,17 +14,17 @@ function UserInfoShipping() {
         setUser(user)
     }, [setUser])
 
-    const updateShippingDetails = useCallback((key: keyof Address, value: string) => {
+    const updateBillingDetails = useCallback((key: keyof Address, value: string) => {
         if (UserFromStore.customer) {
-            // Update shipping address in the customer object
-            const updatedShippingDetails = new Address({ ...UserFromStore.customer.shippingAddress, [key]: value })
-
-            // Create a new user object with the updated customer and shipping address
+            // Create a new Address instance with updated billing details
+            const updatedBillingAddress = new Address({ ...UserFromStore.customer.billingAddress, [key]: value })
+            
+            // Update the User object with the new billing address inside customer
             const updatedUser = new User({
                 ...UserFromStore,
                 customer: {
                     ...UserFromStore.customer,
-                    shippingAddress: updatedShippingDetails
+                    billingAddress: updatedBillingAddress
                 }
             })
 
@@ -33,41 +33,41 @@ function UserInfoShipping() {
     }, [UserFromStore, onUserUpdate])
 
     return (
-        <section className='ShippingInfo'>
-            <h3 className='header'>Shipping Information</h3>
+        <section className='BillingInfo'>
+            <h3 className='header'>Billing Information</h3>
             <div className='FormContainer'>
                 <InputTextBox
                     label='Address'
                     type='text'
-                    handleChange={(e) => updateShippingDetails('addressOne', e.currentTarget.value)}
-                    value={UserFromStore.customer?.shippingAddress?.addressOne ?? ""}
+                    handleChange={(e) => updateBillingDetails('addressOne', e.currentTarget.value)}
+                    value={UserFromStore.customer?.billingAddress?.addressOne || ''}
                 />
                 <div className='gapped-fields'>
                     <InputTextBox
                         label='City'
                         type='text'
-                        handleChange={(e) => updateShippingDetails('city', e.currentTarget.value)}
-                        value={UserFromStore.customer?.shippingAddress?.city ?? "" }
+                        handleChange={(e) => updateBillingDetails('city', e.currentTarget.value)}
+                        value={UserFromStore.customer?.billingAddress?.city || ''}
                     />
                     <InputTextBox
                         label='State'
                         type='text'
-                        handleChange={(e) => updateShippingDetails('state', e.currentTarget.value)}
-                        value={UserFromStore.customer?.shippingAddress?.state?? ""}
+                        handleChange={(e) => updateBillingDetails('state', e.currentTarget.value)}
+                        value={UserFromStore.customer?.billingAddress?.state || ''}
                     />
                 </div>
                 <div className='gapped-fields'>
                     <InputTextBox
                         label='Country'
                         type='text'
-                        handleChange={(e) => updateShippingDetails('country', e.currentTarget.value)}
-                        value={UserFromStore.customer?.shippingAddress?.country ?? ""}
+                        handleChange={(e) => updateBillingDetails('country', e.currentTarget.value)}
+                        value={UserFromStore.customer?.billingAddress?.country || ''}
                     />
                     <InputTextBox
                         label='Zip Code'
                         type='text'
-                        handleChange={(e) => updateShippingDetails('zipCode', e.currentTarget.value)}
-                        value={UserFromStore.customer?.shippingAddress?.zipCode ?? ""}
+                        handleChange={(e) => updateBillingDetails('zipCode', e.currentTarget.value)}
+                        value={UserFromStore.customer?.billingAddress?.zipCode || ''}
                     />
                 </div>
             </div>
@@ -75,4 +75,4 @@ function UserInfoShipping() {
     )
 }
 
-export default UserInfoShipping
+export default UserInfoBilling

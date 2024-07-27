@@ -1,13 +1,13 @@
 export default class Address {
 	public country: string = '';
-	public shippingAddress: string = '';
+	public addressOne: string = '';
 	public city: string = '';
 	public state: string = '';
 	public zipCode: string = '';
 
     constructor(address: Partial<Address>) {
         this.country = address?.country ?? '';
-        this.shippingAddress = address?.shippingAddress ?? '';
+        this.addressOne = address?.addressOne ?? '';
         this.city = address?.city ?? '';
         this.state = address?.state ?? '';
         this.zipCode = address?.zipCode ?? '';
@@ -17,7 +17,7 @@ export default class Address {
 	isComplete(): boolean {
 		return (
 			this.country !== '' &&
-			this.shippingAddress !== '' &&
+			this.addressOne !== '' &&
 			this.city !== '' &&
 			this.state !== '' &&
 			this.zipCode !== ''
@@ -26,13 +26,13 @@ export default class Address {
 
 	// Method to format the address as a single string
 	formatAddress(): string {
-		return `${this.shippingAddress}, ${this.city}, ${this.state}, ${this.zipCode}, ${this.country}`
+		return `${this.addressOne}, ${this.city}, ${this.state}, ${this.zipCode}, ${this.country}`
 	}
 
 	// Method to update the address properties
 	updateAddress(newAddress: Partial<Address>): void {
 		this.country = newAddress.country ?? this.country
-		this.shippingAddress = newAddress.shippingAddress ?? this.shippingAddress
+		this.addressOne = newAddress.addressOne ?? this.addressOne
 		this.city = newAddress.city ?? this.city
 		this.state = newAddress.state ?? this.state
 		this.zipCode = newAddress.zipCode ?? this.zipCode
@@ -41,13 +41,13 @@ export default class Address {
 	// Method to validate the address format (basic example)
 	validate(): boolean {
 		// Example: check if country and shippingAddress are not empty
-		return this.country !== '' && this.shippingAddress !== ''
+		return this.country !== '' && this.addressOne !== ''
 	}
 
 	// Method to clear the address properties
 	clear(): void {
 		this.country = ''
-		this.shippingAddress = ''
+		this.addressOne = ''
 		this.city = ''
 		this.state = ''
 		this.zipCode = ''
@@ -57,7 +57,7 @@ export default class Address {
 	isEqual(other: Address): boolean {
 		return (
 			this.country === other.country &&
-			this.shippingAddress === other.shippingAddress &&
+			this.addressOne === other.addressOne &&
 			this.city === other.city &&
 			this.state === other.state &&
 			this.zipCode === other.zipCode
@@ -68,7 +68,7 @@ export default class Address {
 	toObject(): Record<string, string | null> {
 		return {
 			country: this.country,
-			shippingAddress: this.shippingAddress,
+			shippingAddress: this.addressOne,
 			city: this.city,
 			state: this.state,
 			zipCode: this.zipCode,
@@ -77,7 +77,7 @@ export default class Address {
 
 	// Getter for the full address
 	get fullAddress(): string {
-		return `${this.shippingAddress}, ${this.city}, ${this.state} ${this.zipCode}, ${this.country}`
+		return `${this.addressOne}, ${this.city}, ${this.state} ${this.zipCode}, ${this.country}`
 	}
 
 	// Getter for city and state
@@ -88,9 +88,9 @@ export default class Address {
 	// Getter for a country-specific formatted address
 	get formattedAddress(): string {
 		if (this.country.toLowerCase() === 'usa' || this.country.toLowerCase() === 'united states') {
-			return `${this.shippingAddress}, ${this.city}, ${this.state} ${this.zipCode}`
+			return `${this.addressOne}, ${this.city}, ${this.state} ${this.zipCode}`
 		} else {
-			return `${this.shippingAddress}, ${this.city}, ${this.zipCode}, ${this.state}, ${this.country}`
+			return `${this.addressOne}, ${this.city}, ${this.zipCode}, ${this.state}, ${this.country}`
 		}
 	}
 }
