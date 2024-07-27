@@ -1,18 +1,18 @@
+import { RichConstructor } from '@/decorators/RichConstructor'
 
-export default  class UploadedFile {
-    public name: string | null;
-    public contentType: string | null;
-    public data: Uint8Array | null;
-    public filePath: string | null;
+export default class UploadedFile {
+	public name: string | null = null
+	public contentType: string | null = null
+	public data: Uint8Array | null = null
+	public filePath: string | null = null
 
-    constructor(file: Partial<UploadedFile>) {
-        this.name = file.name ?? null;
-        this.contentType = file.contentType ?? null;
-        this.data = file.data ?? null;
-        this.filePath = file.filePath ?? null;
-    }
+	constructor(partial: Partial<UploadedFile>) {
+		if (partial) {
+			Object.assign(this, partial)
+		}
+	}
 
-    public GetFileType(): string | null {
-        return this.name?.split(".")[1] ?? null;
-    }
+	public GetFileType(): string | null {
+		return this.name?.split('.')[1] ?? null
+	}
 }

@@ -1,8 +1,9 @@
 import Notification from '@/src/classes/Notification'
 import Company from '@/classes/Company'
 import Order from './Order'
-import Address from './Address'
+import Address from '@/classes/common/Address'
 import Name from '@/classes/common/Name'
+import { RichConstructor } from '@/decorators/RichConstructor'
 
 /**
  * Implementation of the server user class.
@@ -27,8 +28,26 @@ export default class User {
 	public orders?: Order[] = []
 	public profilePicturePath?: string
 
-	constructor(user: Partial<IUser>) {
-		Object.assign(this, user)
+	constructor(partial?: Partial<IUser>) {
+		if (partial) {
+			Object.assign(this, partial)
+			// Handle deep copying for nested objects
+			if (partial.notifications) {
+				this.notifications = partial.notifications.map((n) => new Notification(n))
+			}
+			if (partial.name) {
+				this.name = new Name(partial.name)
+			}
+			if (partial.dateOfBirth) {
+				this.dateOfBirth = new Date(partial.dateOfBirth)
+			}
+			if (partial.customer) {
+				this.customer = new Company(partial.customer)
+			}
+			if (partial.orders) {
+				this.orders = partial.orders.map((o) => new Order(o))
+			}
+		}
 	}
 	// Method to update user details
 	public updateDetails(details: Partial<IUser>): void {
@@ -45,17 +64,30 @@ export class PasswordForm {
 	oldPassword: string = ''
 	newPassword: string = ''
 	confirmNewPassword: string = ''
+
+	constructor(param?: Partial<PasswordForm>) {
+		if (param) {
+			Object.assign(this, param)
+		}
+	}
 }
 
 export class SignupForm {
-	constructor(
-		public username: string = '',
-		public email: string = '',
-		public password: string = '',
-		public firstName: string = '',
-		public lastName: string = '',
-		public dateOfBirth?: Date
-	) {}
+	public username: string = ''
+	public email: string = ''
+	public password: string = ''
+	public firstName: string = ''
+	public lastName: string = ''
+	public dateOfBirth?: Date
+
+	constructor(param?: Partial<SignupForm>) {
+		if (param) {
+			Object.assign(this, param)
+			if (param.dateOfBirth) {
+				this.dateOfBirth = new Date(param.dateOfBirth)
+			}
+		}
+	}
 }
 
 export interface IUser extends User {}

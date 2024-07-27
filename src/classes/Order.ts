@@ -2,7 +2,7 @@ import Company from './Company'
 import { OrderStatus } from '@/classes/Enums'
 import { Product } from './Product'
 import Quote from './Quote'
-import Address from './Address'
+import Address from './common/Address'
 
 export default class Order {
 	id: number | null = null
@@ -29,15 +29,20 @@ export default class Order {
 		this.total = this.products.reduce((acc, item) => acc + item.total, 0)
 	}
 
-	constructor(init?: Partial<Order>) {
-		this.id = init?.id ?? null
-		this.products = init?.products?.map((p) => new OrderItem(p)) ?? []
-		this.total = init?.total ?? 0
-
-		this.createdAt =  new Date(init?.createdAt as Date);
-		this.customer = init?.customer ?? null
-		this.customerId = init?.customerId ?? null
-		this.status = init?.status ?? OrderStatus.Pending
+	constructor(param?: Partial<Order>) {
+		if (param) {
+			Object.assign(this, param)
+			// Handle deep copying for nested objects and arrays
+			if (param.products) {
+				this.products = param.products.map((p) => new OrderItem(p))
+			}
+			if (param.createdAt) {
+				this.createdAt = new Date(param.createdAt)
+			}
+			if (param.customer) {
+				this.customer = new Company(param.customer)
+			}
+		}
 	}
 }
 
@@ -51,33 +56,20 @@ export class OrderItem {
 	isSold: boolean = false
 	total: number = 0
 	order: Order | null = null
-	orderId = 0
+	orderId: number = 0
 	transitDetails: TransitDetails = new TransitDetails()
 
-	constructor(init?: Partial<OrderItem>) {
-		this.id = null
-		this.productId = null
-		this.product = null
-		this.quantity = 0
-		this.sellPrice = 0
-		this.buyPrice = 0
-		this.isSold = false
-		this.total = 0
-		this.order = null
-		this.orderId = 0
-		this.transitDetails = new TransitDetails()
-
-		this.id = init?.id ?? null
-		this.productId = init?.productId ?? null
-		this.product = init?.product ? new Product(init.product) : null
-		this.quantity = init?.quantity ?? 0
-		this.sellPrice = init?.sellPrice ?? 0
-		this.buyPrice = init?.buyPrice ?? 0
-		this.isSold = init?.isSold ?? false
-		this.total = init?.total ?? 0
-		this.order = init?.order ?? null
-		this.orderId = init?.orderId ?? 0
-		this.transitDetails = init?.transitDetails ? new TransitDetails(init.transitDetails) : new TransitDetails()
+	constructor(param?: Partial<OrderItem>) {
+		if (param) {
+			Object.assign(this, param)
+			// Handle deep copying for nested objects
+			if (param.product) {
+				this.product = new Product(param.product)
+			}
+			if (param.transitDetails) {
+				this.transitDetails = new TransitDetails(param.transitDetails)
+			}
+		}
 	}
 
 	setProduct(product: Product) {
@@ -91,13 +83,16 @@ export class TransitDetails {
 	weight: number | null = null
 	dimensions: Dimensions | null = null
 
-	constructor(init?: Partial<TransitDetails>) {
-		Object.assign(this, init)
-		if (init?.locationDropoff) {
-			this.locationDropoff = new Address(init.locationDropoff)
-		}
-		if (init?.dimensions) {
-			this.dimensions = new Dimensions(init.dimensions)
+	constructor(param?: Partial<TransitDetails>) {
+		if (param) {
+			Object.assign(this, param)
+			// Handle deep copying for nested objects
+			if (param.locationDropoff) {
+				this.locationDropoff = new Address(param.locationDropoff)
+			}
+			if (param.dimensions) {
+				this.dimensions = new Dimensions(param.dimensions)
+			}
 		}
 	}
 }
@@ -107,12 +102,13 @@ export class Dimensions {
 	private length: number | null = null
 	private height: number | null = null
 
-	constructor(init?: Partial<Dimensions>) {
-		Object.assign(this, init)
+	constructor(param?: Partial<Dimensions>) {
+		if (param) {
+			Object.assign(this, param)
+		}
 	}
 
 	toString = () => {
 		return `${this.width} x ${this.length} x ${this.height}cm`
 	}
 }
-

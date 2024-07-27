@@ -8,6 +8,7 @@
 	max-height: 45px;
 	position: relative;
 }
+
 .QuantitySelector::before {
 	content: 'Quantity';
 	font-size: 0.65em;

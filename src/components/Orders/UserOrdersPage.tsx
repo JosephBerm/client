@@ -20,11 +20,7 @@ interface OrdersProps {
 }
 
 const UserOrdersPage = ({ order, products, customers }: OrdersProps) => {
-
-
-	return (
-        <h1>Coming soon!</h1>
-	)
+	return <h1>Coming soon!</h1>
 }
 
 export default UserOrdersPage

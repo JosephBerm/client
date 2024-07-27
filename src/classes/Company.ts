@@ -1,32 +1,54 @@
-import Quote from "@/classes/Quote";
-import User from "@/classes/User";
-import Order from "@/classes/Order";
-import Address from "@/classes/Address";
+import Quote from '@/classes/Quote'
+import User from '@/classes/User'
+import Order from '@/classes/Order'
+import Address from '@/classes/common/Address'
 
 export default class Company {
-    id: number = 0;
-    name: string = '';
-    email: string = '';
-    phone: string = '';
-    address: string = '';
-    city: string = '';
-    state: string = '';
-    zip: string = '';
-    country: string = '';
-    identifier: string | null = "";
-    createdAt: Date | string = "";
-    updatedAt: Date | null = null;
-    shippingAddress: Address = new Address({});
-    billingAddress: Address = new Address({});
+	id: number = 0
+	name: string = ''
+	email: string = ''
+	phone: string = ''
+	city: string = ''
+	state: string = ''
+	zip: string = ''
+	country: string = ''
+	identifier: string = ''
+	createdAt: Date = new Date()
+	updatedAt: Date | null = null
+	shippingAddress: Address = new Address()
+	billingAddress: Address = new Address()
 
-    quotes: Quote[] = [];
-    orders: Order[] = [];
-    users: User[] = [];
+	quotes: Quote[] = []
+	orders: Order[] = []
+	users: User[] = []
 
-    constructor(customer: Partial<Company>) {
-        customer.identifier = customer.identifier || ""; // We cannot let it have null because of formik.
+	constructor(partial?: Partial<Company>) {
+		if (partial) {
+			Object.assign(this, partial) // Assign provided properties
 
-        Object.assign(this, customer);
-    }
+			// Handle deep copying for nested objects
+			if (partial.shippingAddress) {
+				console.log('partial.shippingAddress', partial.shippingAddress)
+				this.shippingAddress = new Address(partial.shippingAddress)
+			}
+			if (partial.billingAddress) {
+				this.billingAddress = new Address(partial.billingAddress)
+			}
+			if (partial.quotes) {
+				this.quotes = partial.quotes.map((q) => new Quote(q))
+			}
+			if (partial.orders) {
+				this.orders = partial.orders.map((o) => new Order(o))
+			}
+			if (partial.users) {
+				this.users = partial.users.map((u) => new User(u))
+			}
 
+			// Ensure identifier is never null
+			this.identifier = partial.identifier || ''
+			// Ensure createdAt is always a Date object
+			this.createdAt =
+				partial.createdAt instanceof Date ? partial.createdAt : new Date(partial.createdAt ?? Date.now())
+		}
+	}
 }

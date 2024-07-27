@@ -1,9 +1,12 @@
-export class SubmitOrderRequest{
-    quoteId: number | null
-    emails: string[]
+import { RichConstructor } from '@/decorators/RichConstructor'
 
-    constructor(req: Partial<SubmitOrderRequest>) {
-        this.emails = req.emails ?? []
-        this.quoteId = req.quoteId ?? null
-    }
+export class SubmitOrderRequest {
+	quoteId: number | null = null
+	emails: string[] = []
+
+	constructor(partial?: Partial<SubmitOrderRequest>) {
+		if (partial) {
+			Object.assign(this, partial)
+		}
+	}
 }

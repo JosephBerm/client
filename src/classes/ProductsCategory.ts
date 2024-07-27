@@ -1,3 +1,5 @@
+import { RichConstructor } from '@/decorators/RichConstructor'
+
 export default class ProductsCategory {
 	id: number = -99
 	name?: string

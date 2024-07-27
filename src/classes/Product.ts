@@ -3,6 +3,7 @@ import Provider from '@/classes/Provider'
 import Guid from '@/classes/Base/Guid'
 import HtmlImage from '@/classes/HtmlImage'
 import UploadedFile from '@/classes/UploadedFile'
+import { RichConstructor } from '@/decorators/RichConstructor'
 
 export class Product {
 	id: string = ''
@@ -44,13 +45,20 @@ export class Product {
 }
 
 export class CartProduct {
-	product: IProduct | null
-	quantity: number
+	product: IProduct | null = null
+	quantity: number = 0
 	productId: string | null = null
 
-	constructor(product: Product | null, quantity: number) {
-		this.product = product
-		this.quantity = quantity
+	constructor(param?: Partial<CartProduct>) {
+		if (param) {
+			Object.assign(this, param)
+			// // Handle deep copying for nested objects if necessary
+			// if (param.product) {
+			// 	this.product = { ...param.product, getFileName: () => '', hasImage: () => false }
+			// }
+
+			// the problme with the code above is that getFileName and hasImage are overriden by meaningless functions
+		}
 	}
 }
 

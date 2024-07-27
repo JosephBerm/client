@@ -1,3 +1,11 @@
+import { RichConstructor } from '@/decorators/RichConstructor'
 export default class HtmlImage {
-	constructor(public src: string = '', public alt: string = '') {}
+	public src: string = ''
+	public alt: string = ''
+
+	constructor(partial?: Partial<HtmlImage>) {
+		if (partial) {
+			Object.assign(this, partial) // Assign provided properties
+		}
+	}
 }

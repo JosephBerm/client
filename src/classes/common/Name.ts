@@ -5,6 +5,12 @@ export default class Name {
 	public title?: string = ''
 	public suffix?: string = ''
 
+	constructor(param?: Partial<Name>) {
+		if (param) {
+			Object.assign(this, param)
+		}
+	}
+
 	public toString = () => {
 		return this.getFormattedName('lastFirst')
 	}

@@ -1,3 +1,5 @@
+import { RichConstructor } from '@/decorators/RichConstructor'
+
 export class PagedData {
 	page: number = 1
 	pageSize: number = 50
