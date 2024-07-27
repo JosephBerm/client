@@ -23,6 +23,7 @@
 			"@/*": ["./*"],
 			"@/components/*": ["src/components/*"],
 			"@/interfaces/*": ["src/interfaces/*"],
+			"@/decorators/*": ["src/decorators/*"],
 			"@/utilities/*": ["src/utilities/*"],
 			"@/services/*": ["src/services/*"],
 			"@/classes/*": ["src/classes/*"],

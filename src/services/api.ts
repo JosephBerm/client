@@ -15,7 +15,7 @@ import { Product } from '@/classes/Product'
 import { PagedResult } from '@/classes/Base/PagedResult'
 import { GenericSearchFilter } from '@/classes/Base/GenericSearchFilter'
 import { PagedData } from '@/classes/PagedData'
-import {SubmitOrderRequest} from '@/classes/RequestClasses'
+import { SubmitOrderRequest } from '@/classes/RequestClasses'
 
 const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
@@ -32,8 +32,8 @@ const API = {
 	},
 	Store: {
 		Products: {
-			getAllProducts: async <T>() => await HttpService.get<T>('/products'),
-			getList: async <T>(pagedData: PagedData) => await HttpService.post<T>('/products/paged', pagedData),
+			getAllProducts: async () => await HttpService.get<Product[]>('/products'),
+			getList: async (pagedData: PagedData) => await HttpService.post<Product[]>('/products/paged', pagedData),
 			get: async (productId: string) => await HttpService.get<Product>(`/products/${productId}`),
 			create: async (product: FormData) =>
 				await HttpService.post<Product>(`/products`, product, {
@@ -78,7 +78,8 @@ const API = {
 		delete: async <T>(quoteId: string) => await HttpService.delete<T>(`/quote/${quoteId}`),
 	},
 	Orders: {
-		get: async <Order>(orderId?: number | null) => { // This gets order by ID.
+		get: async <Order>(orderId?: number | null) => {
+			// This gets order by ID.
 			return await HttpService.get<Order>(`/orders${orderId ? `/${orderId}` : ''}`)
 		},
 		getFromCustomer: async (customerId: number) => {
@@ -92,8 +93,10 @@ const API = {
 			await HttpService.post<Order>(`/orders/fromquote/${quoteId}`, null),
 		update: async <Order>(quote: Order) => await HttpService.put<Order>('/orders', quote),
 		delete: async <Boolean>(quoteId: number) => await HttpService.delete<Boolean>(`/orders/${quoteId}`),
-		submitQuote: async <Boolean>(req: SubmitOrderRequest) => await HttpService.post<Boolean>(`/orders/submit/quote`, req),
-		submitInvoice: async <Boolean>(req: SubmitOrderRequest) => await HttpService.post<Boolean>(`/orders/submit/invoice`, req)
+		submitQuote: async <Boolean>(req: SubmitOrderRequest) =>
+			await HttpService.post<Boolean>(`/orders/submit/quote`, req),
+		submitInvoice: async <Boolean>(req: SubmitOrderRequest) =>
+			await HttpService.post<Boolean>(`/orders/submit/invoice`, req),
 	},
 	Notifications: {
 		get: async <T>(id: string) => {

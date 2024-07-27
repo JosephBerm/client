@@ -9,7 +9,7 @@ import { useCartStore } from '@/src/stores/store'
 import { useRouter } from 'next/navigation'
 
 import { CartProduct } from '@/classes/Product'
-import Address from '@/classes/Address'
+import Address from '@/classes/common/Address'
 import Quote from '@/classes/Quote'
 import Name from '@/classes/common/Name'
 
@@ -41,7 +41,7 @@ const Page = () => {
 
 	const submitQuote = async (values: Quote) => {
 		values.products = cartStore.map((cartProduct) => {
-			const product = new CartProduct(null, cartProduct.quantity)
+			const product = new CartProduct({ quantity: cartProduct.quantity })
 			product.product = null
 			product.productId = cartProduct.product!.id
 			return product

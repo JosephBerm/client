@@ -1,17 +1,15 @@
 export default class Address {
-	public country: string = '';
-	public addressOne: string = '';
-	public city: string = '';
-	public state: string = '';
-	public zipCode: string = '';
+	public country: string = ''
+	public addressOne: string = ''
+	public city: string = ''
+	public state: string = ''
+	public zipCode: string = ''
 
-    constructor(address: Partial<Address>) {
-        this.country = address?.country ?? '';
-        this.addressOne = address?.addressOne ?? '';
-        this.city = address?.city ?? '';
-        this.state = address?.state ?? '';
-        this.zipCode = address?.zipCode ?? '';
-    }
+	constructor(param?: Partial<Address>) {
+		if (param) {
+			Object.assign(this, param)
+		}
+	}
 
 	// Method to check if the address is fully populated
 	isComplete(): boolean {

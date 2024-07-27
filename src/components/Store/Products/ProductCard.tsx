@@ -12,7 +12,7 @@ import Routes from '@/services/routes'
 const ProductCard = ({ product }: { product: IProduct }) => {
 	const addProductToCart = useCartStore((state) => state.addProduct)
 	const handleProductQuantity = () => {
-		addProductToCart(new CartProduct(product, 1))
+		addProductToCart(new CartProduct({ product, quantity: 1 }))
 	}
 	const isProductInCart = useCartStore((state) => state.Cart.some((cartItem) => cartItem.product?.id === product.id))
 

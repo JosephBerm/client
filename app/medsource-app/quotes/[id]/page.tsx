@@ -5,7 +5,7 @@ import API from '@/services/api'
 import Routes from '@/services/routes'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
-import  { format } from 'date-fns'
+import { format } from 'date-fns'
 
 const Page = () => {
 	const params = useParams()
@@ -34,7 +34,7 @@ const Page = () => {
 			const { data } = await API.Orders.createFromQuote<Quote>(params.id as string)
 
 			if (data.payload) {
-				route.push(`${Routes.InternalAppRoute}/adminorders/${data.payload.id}`)
+				route.push(`${Routes.Orders.location}/${data.payload.id}`)
 			}
 		} catch (err) {
 			console.error(err)
@@ -49,38 +49,48 @@ const Page = () => {
 		}
 	}, [])
 
-
 	return (
 		<div className='page-container EditQuoteForm'>
 			<h2 className='page-title'>Quote</h2>
 			<IsBusyLoading isBusy={isLoading} />
 			{!isLoading && (
 				<div className='buttons-container'>
-					<div className="w-full flex justify-between mb-10 mt-10">
+					<div className='w-full flex justify-between mb-10 mt-10'>
 						<button onClick={() => route.back()}>Go back</button>
 						<button onClick={createOrderFromQuote}>Create Order</button>
 					</div>
 					{quote && (
 						<div>
-							<h4>{(quote.name.first?.toUpperCase() ?? "" )+ " "+ (quote.name.last?.toUpperCase() ?? "")}</h4>
-							<p className="font-bold">{quote.emailAddress}</p>
+							<h4>
+								{(quote.name.first?.toUpperCase() ?? '') + ' ' + (quote.name.last?.toUpperCase() ?? '')}
+							</h4>
+							<p className='font-bold'>{quote.emailAddress}</p>
 							<p>{quote.phoneNumber}</p>
-							<p >{quote.description}</p>
-							<p className="text-sm">{format(quote.createdAt, 'PPP')}</p>
+							<p>{quote.description}</p>
+							<p className='text-sm'>{format(quote.createdAt, 'PPP')}</p>
 						</div>
 					)}
 
 					{quote && quote.products && (
-						<div className="mt-10">
-							<h4 className="text-lg font-semibold mb-4">Products</h4>
-							<div className="space-y-2">
+						<div className='mt-10'>
+							<h4 className='text-lg font-semibold mb-4'>Products</h4>
+							<div className='space-y-2'>
 								{quote.products.map((productEntry) => (
-									<div key={productEntry.product?.id ?? ""} className="flex items-center gap-4 bg-gray-100 p-2 rounded-lg justify-between">
-										<p className="font-medium">SKU: <span className="font-normal">{productEntry.product?.sku}</span></p>
+									<div
+										key={productEntry.product?.id ?? ''}
+										className='flex items-center gap-4 bg-gray-100 p-2 rounded-lg justify-between'>
+										<p className='font-medium'>
+											SKU: <span className='font-normal'>{productEntry.product?.sku}</span>
+										</p>
 										<span>-</span>
-										<p className="font-medium"><span className="font-normal">{productEntry.product?.name ?? "N/A"}</span></p>
+										<p className='font-medium'>
+											<span className='font-normal'>{productEntry.product?.name ?? 'N/A'}</span>
+										</p>
 										<span>-</span>
-										<p className="font-medium">Quantity: <span className="font-normal">{productEntry.quantity ?? "N/A"}</span></p>
+										<p className='font-medium'>
+											Quantity:{' '}
+											<span className='font-normal'>{productEntry.quantity ?? 'N/A'}</span>
+										</p>
 									</div>
 								))}
 							</div>

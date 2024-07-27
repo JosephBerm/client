@@ -455,7 +455,6 @@ nav.Sidebar ul .path-label {
 		align-items: center;
 	}
 	.header.public .navbar {
-		max-width: 1920px;
 		padding: 0px 50px;
 	}
 }

@@ -79,12 +79,6 @@ class Routes {
 		},
 		Routes.Store,
 		{
-			name: 'Manage Orders',
-			location: `${this.InternalAppRoute}/adminorders`,
-			icon: 'fa-solid fa-user',
-			accessible: [AccountRole.Admin],
-		},
-		{
 			name: 'Profile',
 			location: `${this.InternalAppRoute}/profile`,
 			icon: 'fa-solid fa-user',

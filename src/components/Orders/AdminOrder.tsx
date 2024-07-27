@@ -14,7 +14,7 @@ import Company from '@/src/classes/Company'
 import Routes from '@/services/routes'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 
-const Page = (context: any) => {
+function AdminOrder(context: any) {
 	const router = useRouter()
 
 	const [order, setOrder] = useState<Order | null>(null)
@@ -88,4 +88,4 @@ const Page = (context: any) => {
 	)
 }
 
-export default Page
+export default AdminOrder

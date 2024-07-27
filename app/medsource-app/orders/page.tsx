@@ -1,24 +1,24 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import AccountOrdersTable from '@/src/components/AccountOrdersTable'
-import IsBusyLoading from '@/components/isBusyLoading'
+import { useAccountStore } from '@/src/stores/user'
 import '@/styles/App/orderPage.css'
 
-const Page = () => {
-	const [isLoading, setIsLoading] = useState<boolean>(false)
+import { AccountRole } from '@/classes/Enums'
 
-	return (
-		<div className='Orders page-container'>
-			<h2 className='page-title'>Track Your Orders</h2>
-			<IsBusyLoading isBusy={isLoading} />
-			{!isLoading && (
-				<div className='orders-table'>
-					<AccountOrdersTable />
-				</div>
-			)}
-		</div>
-	)
+import AdminOrdersPage from '@/components/Orders/AdminOrdersPage'
+import CustomerOrdersPage from '@/components/Orders/CustomerOrdersPage'
+import AdminView from '@/components/Orders/AdminView'
+
+const Page = () => {
+	const User = useAccountStore((state) => state.User)
+	const isAdmin = User.role == AccountRole.Admin
+
+	function getPageComponent() {
+		if (isAdmin) return <AdminView />
+		return <CustomerOrdersPage />
+	}
+	return <div className='Orders page-container'>{getPageComponent()}</div>
 }
 
 export default Page

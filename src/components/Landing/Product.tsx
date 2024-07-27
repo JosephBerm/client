@@ -24,7 +24,9 @@ const Product = ({ product }: { product: ProductClass }) => {
 				<button className='transparent action' onClick={() => Route.push('/store')}>
 					VIEW PRODUCT
 				</button>
-				<div className='icon-wrapper' onClick={() => Store.addProduct(new CartProduct(product, 1))}>
+				<div
+					className='icon-wrapper'
+					onClick={() => Store.addProduct(new CartProduct({ product, quantity: 1 }))}>
 					<Image src={AddCart} alt='cart' color='red' />
 				</div>
 			</div>

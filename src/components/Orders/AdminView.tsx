@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useState, useEffect } from 'react'
 import Order from '@/classes/Order'
 import { TableColumn } from '@/interfaces/Table'
@@ -12,10 +10,10 @@ import Routes from '@/services/routes'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 import { useRouter } from 'next/navigation'
 import ServerTable from '@/src/common/ServerTable'
-import {OrderStatusName, OrderStatusVariants} from '@/classes/EnumsTranslations'
+import { OrderStatusName, OrderStatusVariants } from '@/classes/EnumsTranslations'
 import Pill from '@/src/components/Pill'
 
-const Page = () => {
+function AdminView() {
 	const [orders, setOrders] = useState<Order[]>([])
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const route = useRouter()
@@ -23,7 +21,6 @@ const Page = () => {
 		sortBy: 'CreatedAt',
 		sortOrder: 'desc',
 		includes: ['Customer'],
-	
 	})
 
 	const handleOrderDeletion = async (id: number) => {
@@ -48,23 +45,19 @@ const Page = () => {
 			setIsLoading(false)
 		}
 	}
-	type Variant = 'info' | 'success' | 'error' | 'warning';
+	type Variant = 'info' | 'success' | 'error' | 'warning'
 
 	const columns: TableColumn<Order>[] = [
 		{
-			name:"id",
+			name: 'id',
 			label: 'Order #',
-			content: (order) => (
-				<Link href={`${Routes.InternalAppRoute}/adminorders/${order.id}`}>
-					{order.id}
-				</Link>
-			),
+			content: (order) => <Link href={`${Routes.Orders.location}/${order.id}`}>{order.id}</Link>,
 		},
 		{
 			name: 'customer',
 			label: 'Customer',
 			content: (order) => (
-				<Link href={`${Routes.InternalAppRoute}/adminorders/${order.id}`} style={{fontWeight: 800}}>
+				<Link href={`${Routes.Orders.location}/${order.id}`} style={{ fontWeight: 800 }}>
 					{order.customer?.name}
 				</Link>
 			),
@@ -75,10 +68,13 @@ const Page = () => {
 			content: (order) => (
 				<div className='flex flex-row '>
 					<span>
-						<Pill text={OrderStatusName[order.status]} variant={OrderStatusVariants[order.status] as Variant}/>
+						<Pill
+							text={OrderStatusName[order.status]}
+							variant={OrderStatusVariants[order.status] as Variant}
+						/>
 					</span>
 				</div>
-			)
+			),
 		},
 		{
 			key: 'delete',
@@ -95,20 +91,16 @@ const Page = () => {
 		<div className='page-container Orders'>
 			<div className='page-header'>
 				<h2 className='page-title'>Manage Orders</h2>
-				<button className='mt-7' onClick={() => route.push('adminorders/create')}>
+				<button className='mt-7' onClick={() => route.push(`${Routes.Orders.location}/create`)}>
 					Create Order
 				</button>
 			</div>
 			<IsBusyLoading isBusy={isLoading} />
 			{!isLoading && (
-				<ServerTable
-					columns={columns}
-					methodToQuery = {API.Orders.search}
-					searchCriteria = {searchCriteria}
-				/>
+				<ServerTable columns={columns} methodToQuery={API.Orders.search} searchCriteria={searchCriteria} />
 			)}
 		</div>
 	)
 }
 
-export default Page
+export default AdminView
