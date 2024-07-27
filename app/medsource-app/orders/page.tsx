@@ -6,7 +6,6 @@ import '@/styles/App/orderPage.css'
 
 import { AccountRole } from '@/classes/Enums'
 
-import AdminOrdersPage from '@/components/Orders/AdminOrdersPage'
 import CustomerOrdersPage from '@/components/Orders/CustomerOrdersPage'
 import AdminView from '@/components/Orders/AdminView'
 
