@@ -15,6 +15,7 @@ import { Product } from '@/classes/Product'
 import { PagedResult } from '@/classes/Base/PagedResult'
 import { GenericSearchFilter } from '@/classes/Base/GenericSearchFilter'
 import { PagedData } from '@/classes/PagedData'
+import {SubmitOrderRequest} from '@/classes/RequestClasses'
 
 const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
@@ -91,6 +92,8 @@ const API = {
 			await HttpService.post<Order>(`/orders/fromquote/${quoteId}`, null),
 		update: async <Order>(quote: Order) => await HttpService.put<Order>('/orders', quote),
 		delete: async <Boolean>(quoteId: number) => await HttpService.delete<Boolean>(`/orders/${quoteId}`),
+		submitQuote: async <Boolean>(req: SubmitOrderRequest) => await HttpService.post<Boolean>(`/orders/submit/quote`, req),
+		submitInvoice: async <Boolean>(req: SubmitOrderRequest) => await HttpService.post<Boolean>(`/orders/submit/invoice`, req)
 	},
 	Notifications: {
 		get: async <T>(id: string) => {

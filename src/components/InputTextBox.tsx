@@ -22,7 +22,7 @@ export interface InputType {
 	// Icon: ?
 	// VALIDATION: ?
 	maxLength?: number
-	handleChange: (value: ChangeEvent<HTMLInputElement>) => void
+	handleChange?: (value: ChangeEvent<HTMLInputElement>) => void
 	handleBlur?: (value: ChangeEvent<HTMLInputElement>) => void
 	handleFocus?: () => void
 	className?: string
@@ -40,7 +40,7 @@ const InputTextBox: React.FC<InputType> = ({
 	maxLength,
 	inputmode,
 	pattern,
-	handleChange,
+	handleChange = () => {},
 	handleBlur,
 	handleFocus,
 	className: cssClass,

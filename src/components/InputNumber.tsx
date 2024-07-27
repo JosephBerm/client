@@ -2,22 +2,23 @@ import React, { ChangeEvent } from 'react'
 import InputTextBox, { InputType } from './InputTextBox'
 import '@/styles/inputcomponents.css'
 
-interface InputNumberType extends Omit<InputType, 'type'> {
+interface InputNumberType extends Omit<InputType, 'type' | 'handleChange'> {
 	min?: number
 	max?: number
+	handleChange?: (event: ChangeEvent<HTMLInputElement>) => void
 }
 
 const InputNumber: React.FC<InputNumberType> = ({
 	value,
 	min = Number.MIN_VALUE,
 	max = Number.MAX_VALUE,
-	handleChange,
+	handleChange = () => {},
 	...rest
 }) => {
-	const handleInputChange = (newValue: ChangeEvent<HTMLInputElement>) => {
-		const parsedValue = parseInt(newValue.currentTarget.value)
+	const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const parsedValue = parseInt(event.currentTarget.value, 10)
 		if (!isNaN(parsedValue) && (parsedValue >= min || !min) && (parsedValue <= max || !max)) {
-			handleChange(newValue)
+			handleChange(event) // Pass event to handleChange
 		}
 	}
 
@@ -26,7 +27,7 @@ const InputNumber: React.FC<InputNumberType> = ({
 			{...rest}
 			type='number'
 			value={value}
-			handleChange={handleInputChange}
+			handleChange={handleInputChange} // Correctly use handleChange here
 			inputmode='numeric'
 			pattern='[0-9]*'
 			className='InputNumber'

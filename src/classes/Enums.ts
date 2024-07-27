@@ -26,8 +26,10 @@ export enum AccountRole {
 
 export enum OrderStatus {
 	Pending = 10,
+	WaitingCustomerApproval = 12,
+	Placed = 13,
 	Processing = 20,
 	Shipped = 30,
 	Delivered = 40,
-	Cancelled = 50,
+	Cancelled = 9999
 }
