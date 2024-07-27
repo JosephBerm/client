@@ -74,17 +74,17 @@ export default class Address {
 	}
 
 	// Getter for the full address
-	get fullAddress(): string {
+	getFullAddress(): string {
 		return `${this.addressOne}, ${this.city}, ${this.state} ${this.zipCode}, ${this.country}`
 	}
 
 	// Getter for city and state
-	get cityState(): string {
+	getCityState(): string {
 		return `${this.city}, ${this.state}`
 	}
 
 	// Getter for a country-specific formatted address
-	get formattedAddress(): string {
+	getFormattedAddress(): string {
 		if (this.country.toLowerCase() === 'usa' || this.country.toLowerCase() === 'united states') {
 			return `${this.addressOne}, ${this.city}, ${this.state} ${this.zipCode}`
 		} else {
