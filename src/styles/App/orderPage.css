@@ -31,23 +31,6 @@
 	height: fit-content;
 }
 
-.Orders .orders-page-container .orders-page {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-}
-
-.orders-page .admin-order-page-header {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: space-between;
-}
-.Orders .orders-page-container .orders-page h3 {
-	margin-bottom: 25px;
-}
-
 .Orders .orders-page-container .add-product-container {
 	display: flex;
 	gap: 5px;
@@ -74,26 +57,156 @@
 	max-width: 250px;
 }
 
+.App .Orders .order-id {
+	width: 100%;
+	height: 100%;
+}
+.App .Orders .order-id:hover {
+	color: var(--brand-color-1);
+}
+
+/*////////////////////////////////////
+			ADMIN ORDERS PAGE
+//////////////////////////////////// */
+
+.OrderDetails {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-width: 250px;
+}
+.OrderDetails section:not(:first-of-type) {
+	margin-top: 10vh;
+}
+.OrderDetails section {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1em;
+	width: 100%;
+}
+
+.OrderDetails section.general {
+	gap: 1.5em;
+	max-width: 500px;
+}
+.OrderDetails section.general > * {
+	width: 100%;
+}
+
+.OrderDetails section.general .order-title {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1vh;
+}
+
+.OrderDetails section.general .header-options {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 0.5em;
+}
+.OrderDetails section.general .header-options > *,
+.OrderDetails section.general .header-options .button-container > * {
+	width: 100%;
+}
+.OrderDetails section.general .header-options .button-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 1em;
+}
+.OrderDetails section.product-details {
+}
+.OrderDetails section.product-details .add-product-container {
+	display: flex;
+	gap: 5%;
+	align-items: flex-end;
+}
+
+.OrderDetails section.product-details td:has(button.aligned-to-center) {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.OrderDetails section.product-details button.aligned-to-center {
+	padding-left: 2em;
+	padding-right: 2em;
+}
+.OrderDetails section.product-details table .product-name {
+	max-width: 50%;
+	-webkit-line-break: strict;
+}
+.OrderDetails .section-title {
+	align-self: flex-start;
+	font-size: 1.1em;
+	font-weight: 600;
+	color: var(--brand-color-4);
+}
 
 @media screen and (min-width: 480px) {
 	.Orders .orders-page-container .add-product-container {
 		gap: 10px;
 		max-width: 500px;
 	}
+	.OrderDetails section.general .header-options .button-container {
+		flex-direction: row;
+	}
 	/* .add-product-container {
 	} */
 }
 
 @media screen and (min-width: 768px) {
-	.Orders .orders-page-container .orders-page {
-		height: 75vh;
-		justify-content: flex-start;
-	}
 	.Orders .orders-page-container .add-product-container,
 	.Orders .orders-page-container .buttons-container {
 		margin-top: 10%;
+	}
+
+	/*////////////////////////////////////
+			Order Details PAGE
+//////////////////////////////////// */
+
+	.OrderDetails {
+		height: 75vh;
+		justify-content: flex-start;
+	}
+
+	.OrderDetails section.general {
+		display: grid;
+		grid-template-columns: auto 1fr 2fr;
+		max-width: unset;
+		align-items: end;
+	}
+
+	.OrderDetails section.general .order-title {
+		align-items: flex-start;
+		gap: 2vh;
+		width: 100%;
+		grid-column: 1 / -1;
+	}
+	.OrderDetails section.general .order-title .page-title {
+		text-wrap: nowrap;
+	}
+	.OrderDetails section.general .customer-selector {
+		grid-column: 1 / 3; /* Second item spans the first two columns */
 	}
 }
 
 /* @media screen and (min-width: 1440px) and (min-height: 1618px) {
 } */
+@media screen and (min-width: 1280px) {
+	.OrderDetails section.general .header-options {
+		flex-direction: row;
+		align-items: flex-end;
+		justify-content: flex-end;
+	}
+	.OrderDetails section.general .header-options .button-container {
+		width: 100%;
+		text-wrap: nowrap;
+		max-width: fit-content;
+	}
+}

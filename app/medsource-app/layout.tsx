@@ -1,12 +1,15 @@
 import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import WrapperHandler from '@/components/WrapperHandler'
 import { IUser } from '@/classes/User'
-import '@/styles/store.css'
+
 import Sidebar from '@/components/Sidebar'
+import WrapperHandler from '@/components/WrapperHandler'
 import Breadcrumb from '@/components/Navigation/BreadCrumb'
 import SecuredNavBar from '@/components/Navigation/SecuredNavBar'
+
+import '@/styles/store.css'
+import '@/styles/App/orderPage.css'
 
 export const metadata: Metadata = {
 	title: 'The best app ever. Trust me. I know. I made it. I Aint No Lie',

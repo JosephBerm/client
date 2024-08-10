@@ -51,7 +51,11 @@ function AdminView() {
 		{
 			name: 'id',
 			label: 'Order #',
-			content: (order) => <Link href={`${Routes.Orders.location}/${order.id}`}>{order.id}</Link>,
+			content: (order) => (
+				<div className='order-id clickable' onClick={() => route.push(`${Routes.Orders.location}/${order.id}`)}>
+					{order.id}
+				</div>
+			),
 		},
 		{
 			name: 'customer',
@@ -88,7 +92,7 @@ function AdminView() {
 	]
 
 	return (
-		<div className='page-container Orders'>
+		<div className='Orders'>
 			<div className='page-header'>
 				<h2 className='page-title'>Manage Orders</h2>
 				<button className='mt-7' onClick={() => route.push(`${Routes.Orders.location}/create`)}>

@@ -10,11 +10,11 @@ export const OrderStatusName = {
 };
 
 export const OrderStatusVariants = {
-    [OrderStatus.Pending]: 'info',
-    [OrderStatus.WaitingCustomerApproval]: 'warning',
-    [OrderStatus.Placed]: 'info',
-    [OrderStatus.Processing]: 'info', // Changed from 'primary' to 'info' to match the defined variants
-    [OrderStatus.Shipped]: 'success',
-    [OrderStatus.Delivered]: 'success',
-    [OrderStatus.Cancelled]: 'error', // Changed from 'danger' to 'error' to match the defined variants
-};
+	[OrderStatus.Pending]: 'warning',
+	[OrderStatus.WaitingCustomerApproval]: 'warning',
+	[OrderStatus.Placed]: 'info',
+	[OrderStatus.Processing]: 'warning', // Changed from 'primary' to 'info' to match the defined variants
+	[OrderStatus.Shipped]: 'info',
+	[OrderStatus.Delivered]: 'success',
+	[OrderStatus.Cancelled]: 'error', // Changed from 'danger' to 'error' to match the defined variants
+}

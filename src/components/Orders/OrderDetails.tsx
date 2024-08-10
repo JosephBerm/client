@@ -3,6 +3,8 @@ import { Product } from '@/classes/Product'
 import { useRouter } from 'next/navigation'
 import { TableColumn } from '@/interfaces/Table'
 import Order, { OrderItem } from '@/classes/Order'
+import { useAccountStore } from '@/src/stores/user'
+import { AccountRole } from '@/classes/Enums'
 
 import API from '@/services/api'
 import Table from '@/common/table'
@@ -18,20 +20,23 @@ import { OrderStatus } from '@/src/classes/Enums'
 import { OrderStatusName } from '@/classes/EnumsTranslations'
 import Pill from '@/components/Pill'
 import { OrderStatusVariants } from '@/classes/EnumsTranslations'
+import { EnumToDropdownValues } from '@/services/utils'
+import classNames from 'classnames'
+import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
+import { useParams } from 'next/navigation'
 
-interface OrdersProps {
-	order: Order
-	products: Product[]
-	customers: Company[]
-}
-
-const OrdersPage = ({ order, products, customers }: OrdersProps) => {
+const OrderDetails = () => {
 	const route = useRouter()
+	const { id: orderId } = useParams()
 
+	const User = useAccountStore((state) => state.User)
+	const isAdmin = User.role == AccountRole.Admin
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [product, setProduct] = useState<Product | null>(null)
-	const [currentOrder, setCurrentOrder] = useState<Order>(order)
+	const [currentOrder, setCurrentOrder] = useState<Order>(new Order())
 	const [salesTaxRate, setSalesTaxRate] = useState<number>(6)
+	const [productsList, setProducts] = useState<Product[]>([])
+	const [customers, setCustomers] = useState<Company[]>([])
 
 	const hasProductInList = useMemo(() => {
 		if (!product) return false
@@ -70,7 +75,7 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 	}
 
 	const handleSelectProduct = (productId: number | string) => {
-		const product = products.find((p) => p.id == (productId as string))
+		const product = productsList.find((p) => p.id == (productId as string))
 		if (product) setProduct(product)
 	}
 
@@ -125,7 +130,7 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 			return
 		}
 
-		const customer = customers.find((c) => c.id === id)
+		const customer = isAdmin ? customers?.find((c) => c.id === id) : User
 
 		if (customer) {
 			setCurrentOrder((prevState) => {
@@ -149,6 +154,67 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 		setSalesTaxRate(rate)
 	}
 
+	const getOrder = async () => {
+		if (orderId == 'create') return
+		try {
+			setIsLoading(true)
+			const { data } = await API.Orders.get(parseInt(orderId as string))
+			if (!data.payload) toast.error(`Order with id #${orderId} not found!`)
+			console.log('data', data)
+			return data.payload
+		} catch (err) {
+			console.error(err)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+	const fetchCustomers = async () => {
+		try {
+			setIsLoading(true)
+			const { data } = await API.Customers.getAll<Company>()
+			if (!data.payload) toast.error('Unable to retrieve the list of available customers...')
+
+			setCustomers(data.payload?.map((customer) => new Company(customer)) ?? [])
+		} catch (err) {
+			console.error(err)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+	const getProducts = async () => {
+		try {
+			setIsLoading(true)
+			const searchCriteria = new GenericSearchFilter()
+			searchCriteria.pageSize = 1000
+			const { data } = await API.Store.Products.search(searchCriteria)
+
+			if (!data.payload) toast.error('Unable to retrieve the list of available products...')
+
+			return data.payload
+		} catch (err) {
+			console.error(err)
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+	useEffect(() => {
+		const fetchData = async () => {
+			const [orderData, productsListResponse] = await Promise.all([
+				getOrder(),
+				getProducts(),
+				isAdmin ? fetchCustomers() : Promise.resolve(),
+			])
+
+			setCurrentOrder(new Order(orderData ?? {}))
+			setProducts(productsListResponse?.data?.map((x) => new Product(x)) ?? [])
+		}
+
+		fetchData()
+	}, [isAdmin])
+
 	useEffect(() => {
 		const total = currentOrder.products.reduce((acc, item) => acc + item.sellPrice * item.quantity, 0)
 		const salesTax = parseFloat((total * (salesTaxRate / 100)).toFixed(2))
@@ -164,9 +230,9 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 
 	const columns: TableColumn<OrderItem>[] = [
 		{
-			key: 'product',
+			name: 'product',
 			label: 'Product Name',
-			content: (orderItem) => <span>{orderItem.product?.name}</span>,
+			content: (orderItem) => <div className='product-name'>{orderItem.product?.name}</div>,
 		},
 		{
 			key: 'quantity',
@@ -205,15 +271,6 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 						handleProductPropertyChange(orderItem, 'sellPrice', parseInt(e.currentTarget.value))
 					}
 				/>
-			),
-		},
-		{
-			key: 'delete',
-			label: 'Delete',
-			content: (orderItem) => (
-				<button className='delete' onClick={() => handleProductDeletion(orderItem.product?.id!)}>
-					Delete
-				</button>
 			),
 		},
 	]
@@ -292,138 +349,160 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 		return updatedOrder
 	}
 
-	type Variant = 'info' | 'success' | 'error' | 'warning'
+	// Usage Example
+	const filteredOrderStatusList = [
+		OrderStatus.WaitingCustomerApproval,
+		OrderStatus.Placed,
+		OrderStatus.Processing,
+		OrderStatus.Shipped,
+		OrderStatus.Delivered,
+	].map((status) => ({
+		id: status,
+		name: OrderStatus[status],
+	}))
 
+	const handleStatusChange = (value: string | number) => {
+		const filtered = filteredOrderStatusList.find((status) => status.id == value)
+		if (!filtered) return
+		setOrderStatus(filtered.id, true)
+	}
+	type Variant = 'info' | 'success' | 'error' | 'warning'
+	const isOrderPlaced = currentOrder.status >= OrderStatus.Placed
+	const deleteColumn: TableColumn<OrderItem> = {
+		key: 'delete',
+		label: '',
+		content: (orderItem) => (
+			<button className='delete aligned-to-center' onClick={() => handleProductDeletion(orderItem.product?.id!)}>
+				Remove Product
+			</button>
+		),
+	}
+
+	if (!isOrderPlaced) columns.push(deleteColumn)
+	else columns.filter((column) => column.key !== deleteColumn.key)
+
+	console.log('currentOrder', currentOrder)
 	return (
-		<div className='orders-page'>
-			<div className='admin-order-page-header'>
-				<div className='flex flex-row gap-5'>
+		<div className='OrderDetails'>
+			<section className='general'>
+				<div className='order-title'>
 					<h3 className='page-title'>Order #{currentOrder.id}</h3>
 					<Pill
 						text={OrderStatusName[currentOrder.status]}
 						variant={OrderStatusVariants[currentOrder.status] as Variant}
 					/>
 				</div>
-				<div className='flex flex-col'>
-					{currentOrder.status <= OrderStatus.WaitingCustomerApproval && (
-						<button onClick={handleSubmitQuote} disabled={!currentOrder.customerId}>
-							Submit Quote to customer
-						</button>
-					)}
+				{isAdmin && (
+					<InputDropdown<Company>
+						options={customers}
+						display='name'
+						label='Customer'
+						value={currentOrder.customerId ?? ''}
+						handleChange={handleSelectCustomer}
+						placeholder='Select a Customer'
+						customClass='customer-selector'
+					/>
+				)}
 
-					{currentOrder.status == OrderStatus.WaitingCustomerApproval && (
-						<button
-							onClick={() => setOrderStatus(OrderStatus.Placed, true)}
-							disabled={!currentOrder.customerId}>
-							Place order
-						</button>
-					)}
-
-					{currentOrder.status == OrderStatus.Placed && (
-						<button
-							onClick={() => setOrderStatus(OrderStatus.Processing, true)}
-							disabled={!currentOrder.customerId}>
-							Start Processing Order
-						</button>
-					)}
-
+				<fieldset className='header-options' disabled={!currentOrder.customerId}>
 					{currentOrder.status >= OrderStatus.Placed && (
-						<button onClick={handleSubmitInvoice} disabled={!currentOrder.customerId}>
-							Submit Invoice to customer
-						</button>
+						<InputDropdown
+							options={filteredOrderStatusList}
+							display='name'
+							label='Order Status'
+							value={currentOrder.status}
+							handleChange={handleStatusChange}
+							placeholder='Change Order Status'
+						/>
 					)}
+					<div className='button-container'>
+						{currentOrder.status <= OrderStatus.WaitingCustomerApproval && (
+							<button onClick={handleSubmitQuote}>
+								{currentOrder.status === OrderStatus.WaitingCustomerApproval
+									? 'Re-Submit Quote to Customer'
+									: 'Submit Quote to Customer'}
+							</button>
+						)}
 
-					{currentOrder.status == OrderStatus.Processing && (
-						<button
-							onClick={() => setOrderStatus(OrderStatus.Shipped, true)}
-							disabled={!currentOrder.customerId}>
-							Order has been shipped
-						</button>
-					)}
+						{currentOrder.status == OrderStatus.Placed && (
+							<button onClick={handleSubmitInvoice}>Submit Invoice to customer</button>
+							// <button onClick={handleSubmitInvoice}>Generate Invoice</button>
+						)}
+						{currentOrder.status >= OrderStatus.Placed && (
+							<button onClick={handleSubmitInvoice}>Submit Invoice to customer</button>
+							// <button onClick={handleSubmitInvoice}>Generate Invoice</button>
+						)}
+						{currentOrder.status != OrderStatus.Cancelled && (
+							<button className='delete' onClick={() => setOrderStatus(OrderStatus.Cancelled, true)}>
+								Cancel Order
+							</button>
+						)}
+					</div>
+				</fieldset>
+			</section>
+			<section className='product-details'>
+				<span className='section-title'>Product Details</span>
+				<fieldset disabled={isOrderPlaced}>
+					<Table<OrderItem>
+						columns={columns}
+						data={currentOrder.products}
+						isSortable={false}
+						isSearchable={false}
+						isPaged={false}
+					/>
+				</fieldset>
 
-					{currentOrder.status == OrderStatus.Shipped && (
-						<button
-							onClick={() => setOrderStatus(OrderStatus.Delivered, true)}
-							disabled={!currentOrder.customerId}>
-							Order has been delivered
-						</button>
-					)}
-
-					{currentOrder.status != OrderStatus.Cancelled && (
-						<button
-							onClick={() => setOrderStatus(OrderStatus.Cancelled, true)}
-							disabled={!currentOrder.customerId}>
-							Cancel Order
-						</button>
-					)}
+				<div className='add-product-container'>
+					<InputDropdown<Product>
+						options={productsList}
+						display='name'
+						label='Add Product To Order'
+						value={product?.id ?? ''}
+						handleChange={handleSelectProduct}
+						placeholder='Select a Product'
+						customClass='primary'
+						filterIfSelected={getSelectedProducts}
+					/>
+					<button
+						disabled={!product || hasProductInList}
+						onClick={handleAddingProduct}
+						className='responsive-icon'>
+						<span>Add Product</span>
+						<i className='fa-solid fa-plus' />
+					</button>
 				</div>
-			</div>
-
-			<InputDropdown<Company>
-				options={customers}
-				display='name'
-				label='Customer'
-				value={currentOrder.customerId ?? ''}
-				handleChange={handleSelectCustomer}
-				placeholder='Select a Customer'
-				customClass='primary'
-			/>
-
-			<Table<OrderItem>
-				columns={columns}
-				data={currentOrder.products}
-				isSortable={false}
-				isSearchable={false}
-				isPaged={false}
-			/>
-
-			<div>
+			</section>
+			<section className='purchase-figures'>
 				<InputNumber
+					disabled={!isAdmin}
 					label='Sales Tax %'
 					value={salesTaxRate.toString()}
 					handleChange={handleChangeSalesTaxPercentage}
 				/>
 
 				<InputNumber
+					disabled={!isAdmin}
 					label='Sales Tax'
 					value={currentOrder.salesTax.toString()}
 					handleChange={handleTaxesChange}
 				/>
-			</div>
 
-			<InputNumber
-				label='Shipping'
-				value={currentOrder.shipping.toString()}
-				handleChange={handleOrderChange('shipping')}
-			/>
-
-			<InputNumber
-				label='Discount'
-				value={currentOrder.discount.toString()}
-				handleChange={handleOrderChange('discount')}
-			/>
-
-			<InputNumber label='Total' value={currentOrder.total.toString()} disabled={true} />
-
-			<div className='add-product-container'>
-				<InputDropdown<Product>
-					options={products}
-					display='name'
-					label='Add Product To Order'
-					value={product?.id ?? ''}
-					handleChange={handleSelectProduct}
-					placeholder='Select a Product'
-					customClass='primary'
-					filterIfSelected={getSelectedProducts}
+				<InputNumber
+					disabled={!isAdmin}
+					label='Shipping'
+					value={currentOrder.shipping.toString()}
+					handleChange={handleOrderChange('shipping')}
 				/>
-				<button
-					disabled={!product || hasProductInList}
-					onClick={handleAddingProduct}
-					className='responsive-icon'>
-					<span>Add Product</span>
-					<i className='fa-solid fa-plus' />
-				</button>
-			</div>
+
+				<InputNumber
+					disabled={!isAdmin}
+					label='Discount'
+					value={currentOrder.discount.toString()}
+					handleChange={handleOrderChange('discount')}
+				/>
+
+				<InputNumber readOnly={!isAdmin} label='Total' value={currentOrder.total.toString()} />
+			</section>
 
 			<div className='buttons-container'>
 				<button className='error' onClick={() => route.back()}>
@@ -435,4 +514,4 @@ const OrdersPage = ({ order, products, customers }: OrdersProps) => {
 	)
 }
 
-export default OrdersPage
+export default OrderDetails

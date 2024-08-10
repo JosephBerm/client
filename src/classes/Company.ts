@@ -28,7 +28,6 @@ export default class Company {
 
 			// Handle deep copying for nested objects
 			if (partial.shippingAddress) {
-				console.log('partial.shippingAddress', partial.shippingAddress)
 				this.shippingAddress = new Address(partial.shippingAddress)
 			}
 			if (partial.billingAddress) {

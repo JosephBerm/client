@@ -5,7 +5,6 @@ import { Form, Formik } from 'formik'
 import { toast } from 'react-toastify'
 import { AccountRole } from '@/classes/Enums'
 import { useAccountStore } from '../stores/user'
-import { EnumToDropdownValues } from '@/services/utils'
 
 import FormFetchDropdown from '@/components/FormFetchDropDown'
 import FormInputTextBox from '@/components/FormInputTextbox'
@@ -20,7 +19,6 @@ import InputTextBox from '@/components/InputTextBox'
 
 const UpdateAccountForm = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User: User) => void }) => {
 	const [isLoading, setIsLoading] = React.useState(false)
-	const roleOptions = EnumToDropdownValues(AccountRole)
 	const User = useAccountStore((state) => state.User)
 
 	return (

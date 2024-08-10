@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react'
 import { useAccountStore } from '@/src/stores/user'
-import '@/styles/App/orderPage.css'
 
 import { AccountRole } from '@/classes/Enums'
 

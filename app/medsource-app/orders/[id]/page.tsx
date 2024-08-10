@@ -1,17 +1,14 @@
 'use client'
 
-import CustomerOrder from '@/src/components/Orders/CustomerOrder'
-import AdminOrder from '@/src/components/Orders/AdminOrder'
 import React, { useState, useEffect } from 'react'
-import { useAccountStore } from '@/src/stores/user'
-import { AccountRole } from '@/classes/Enums'
+import OrderDetails from '@/components/Orders/OrderDetails'
 
-const Page = (context: any) => {
-	const User = useAccountStore((state) => state.User)
-	const isAdmin = User.role == AccountRole.Admin
-
-	if (isAdmin) return <AdminOrder {...context} />
-	else return <CustomerOrder {...context} />
+const Page = () => {
+	return (
+		<div className='OrderDetails-Page page-container'>
+			<OrderDetails />
+		</div>
+	)
 }
 
 export default Page
