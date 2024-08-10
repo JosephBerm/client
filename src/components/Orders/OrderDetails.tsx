@@ -473,43 +473,46 @@ const OrderDetails = () => {
 				</div>
 			</section>
 			<section className='purchase-figures'>
-				<InputNumber
-					disabled={!isAdmin}
-					label='Sales Tax %'
-					value={salesTaxRate.toString()}
-					handleChange={handleChangeSalesTaxPercentage}
-				/>
-
-				<InputNumber
-					disabled={!isAdmin}
-					label='Sales Tax'
-					value={currentOrder.salesTax.toString()}
-					handleChange={handleTaxesChange}
-				/>
-
-				<InputNumber
-					disabled={!isAdmin}
-					label='Shipping'
-					value={currentOrder.shipping.toString()}
-					handleChange={handleOrderChange('shipping')}
-				/>
-
-				<InputNumber
-					disabled={!isAdmin}
-					label='Discount'
-					value={currentOrder.discount.toString()}
-					handleChange={handleOrderChange('discount')}
-				/>
-
-				<InputNumber readOnly={!isAdmin} label='Total' value={currentOrder.total.toString()} />
+				<span className='section-title'>Purchase Figures</span>
+				<form className='FormContainer'>
+					<div className='gapped-fields'>
+						<InputNumber
+							disabled={!isAdmin}
+							label='Sales Tax %'
+							value={salesTaxRate.toString()}
+							handleChange={handleChangeSalesTaxPercentage}
+						/>
+						<InputNumber
+							disabled={!isAdmin}
+							label='Sales Tax'
+							value={currentOrder.salesTax.toString()}
+							handleChange={handleTaxesChange}
+						/>
+					</div>
+					<div className='gapped-fields'>
+						<InputNumber
+							disabled={!isAdmin}
+							label='Shipping'
+							value={currentOrder.shipping.toString()}
+							handleChange={handleOrderChange('shipping')}
+						/>
+						<InputNumber
+							disabled={!isAdmin}
+							label='Discount'
+							value={currentOrder.discount.toString()}
+							handleChange={handleOrderChange('discount')}
+						/>
+					</div>
+					<InputNumber readOnly={!isAdmin} label='Total' value={currentOrder.total.toString()} />
+				</form>
 			</section>
 
-			<div className='buttons-container'>
+			<section className='footer'>
 				<button className='error' onClick={() => route.back()}>
 					Back
 				</button>
 				<button onClick={() => updateOrder()}>Save</button>
-			</div>
+			</section>
 		</div>
 	)
 }
