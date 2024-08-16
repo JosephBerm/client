@@ -122,6 +122,35 @@
 }
 .OrderDetails section.product-details {
 }
+
+.OrderDetails section.product-details .orders-table .estimate {
+	position: absolute;
+	top: 50%;
+	right: 5%;
+	transform: translateY(-50%);
+	color: var(--disabled-color);
+	font-size: 0.75em;
+}
+
+.OrderDetails section.product-details .orders-table .price-container {
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+.OrderDetails section.product-details .orders-table .price-container {
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+.OrderDetails section.product-details .add-product-container button {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	text-wrap: nowrap;
+}
+
 .OrderDetails section.product-details .add-product-container {
 	display: flex;
 	gap: 5%;
@@ -129,14 +158,9 @@
 }
 
 .OrderDetails section.product-details td:has(button.aligned-to-center) {
-	display: flex;
-	justify-content: center;
-	align-items: center;
+	text-align: center;
 }
-.OrderDetails section.product-details button.aligned-to-center {
-	padding-left: 2em;
-	padding-right: 2em;
-}
+
 .OrderDetails section.product-details table .product-name {
 	max-width: 50%;
 	-webkit-line-break: strict;

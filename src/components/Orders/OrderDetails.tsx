@@ -116,13 +116,6 @@ const OrderDetails = () => {
 		})
 	}
 
-	const handleTaxesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const salesTax =
-			(parseInt(e.target.value) / 100) *
-			currentOrder.products.reduce((acc, item) => acc + item.sellPrice * item.quantity, 0)
-		setCurrentOrder((prevState) => Object.assign({}, prevState, { salesTax }))
-	}
-
 	const handleSelectCustomer = (customerId: number | string) => {
 		const id = Number(customerId)
 		if (isNaN(id)) {
@@ -251,26 +244,36 @@ const OrderDetails = () => {
 			key: 'buyPrice',
 			label: 'Buy Price',
 			content: (orderItem) => (
-				<InputNumber
-					label=''
-					value={orderItem.buyPrice.toString()}
-					handleChange={(e) =>
-						handleProductPropertyChange(orderItem, 'buyPrice', parseInt(e.currentTarget.value))
-					}
-				/>
+				<div className='price-container'>
+					<InputNumber
+						label=''
+						value={`${orderItem.buyPrice.toString()}`}
+						handleChange={(e) =>
+							handleProductPropertyChange(orderItem, 'buyPrice', parseInt(e.currentTarget.value))
+						}
+					/>
+					{orderItem.quantity > 1 && (
+						<span className='estimate'> &#40;est. ${orderItem.buyPrice * orderItem.quantity}&#41;</span>
+					)}
+				</div>
 			),
 		},
 		{
 			key: 'sellPrice',
 			label: 'Sell Price',
 			content: (orderItem) => (
-				<InputNumber
-					label=''
-					value={orderItem.sellPrice.toString()}
-					handleChange={(e) =>
-						handleProductPropertyChange(orderItem, 'sellPrice', parseInt(e.currentTarget.value))
-					}
-				/>
+				<div className='price-container'>
+					<InputNumber
+						label=''
+						value={orderItem.sellPrice.toString()}
+						handleChange={(e) =>
+							handleProductPropertyChange(orderItem, 'sellPrice', parseInt(e.currentTarget.value))
+						}
+					/>
+					{orderItem.quantity > 1 && (
+						<span className='estimate'> &#40;est. ${orderItem.sellPrice * orderItem.quantity}&#41;</span>
+					)}
+				</div>
 			),
 		},
 	]
@@ -373,7 +376,7 @@ const OrderDetails = () => {
 		label: '',
 		content: (orderItem) => (
 			<button className='delete aligned-to-center' onClick={() => handleProductDeletion(orderItem.product?.id!)}>
-				Remove Product
+				<i className='fa-solid fa-trash-can' />
 			</button>
 		),
 	}
@@ -442,7 +445,7 @@ const OrderDetails = () => {
 			</section>
 			<section className='product-details'>
 				<span className='section-title'>Product Details</span>
-				<fieldset disabled={isOrderPlaced}>
+				<fieldset disabled={isOrderPlaced} className='orders-table'>
 					<Table<OrderItem>
 						columns={columns}
 						data={currentOrder.products}
@@ -478,20 +481,6 @@ const OrderDetails = () => {
 					<div className='gapped-fields'>
 						<InputNumber
 							disabled={!isAdmin}
-							label='Sales Tax %'
-							value={salesTaxRate.toString()}
-							handleChange={handleChangeSalesTaxPercentage}
-						/>
-						<InputNumber
-							disabled={!isAdmin}
-							label='Sales Tax'
-							value={currentOrder.salesTax.toString()}
-							handleChange={handleTaxesChange}
-						/>
-					</div>
-					<div className='gapped-fields'>
-						<InputNumber
-							disabled={!isAdmin}
 							label='Shipping'
 							value={currentOrder.shipping.toString()}
 							handleChange={handleOrderChange('shipping')}
@@ -502,6 +491,15 @@ const OrderDetails = () => {
 							value={currentOrder.discount.toString()}
 							handleChange={handleOrderChange('discount')}
 						/>
+					</div>
+					<div className='gapped-fields'>
+						<InputNumber
+							disabled={!isAdmin}
+							label='Sales Tax %'
+							value={salesTaxRate.toString()}
+							handleChange={handleChangeSalesTaxPercentage}
+						/>
+						<InputNumber disabled={true} label='Sales Tax' value={currentOrder.salesTax.toString()} />
 					</div>
 					<InputNumber readOnly={!isAdmin} label='Total' value={currentOrder.total.toString()} />
 				</form>
