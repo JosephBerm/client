@@ -22,6 +22,7 @@ const ServerTable = <T extends {}>(props: SearchTableProps<T>) => {
 	})
 
 	useEffect(() => {
+		console.log("WHJAT")
 		handleRequestData()
 	}, [])
 
@@ -54,7 +55,9 @@ const ServerTable = <T extends {}>(props: SearchTableProps<T>) => {
 	}
 
 	const handleRequestData = async () => {
+		console.log("a")
 		const res = await props.methodToQuery(searchCriteria)
+		console.log("b", res)
 		setPagedResult(res.data.payload)
 	}
 

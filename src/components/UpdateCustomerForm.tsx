@@ -75,7 +75,7 @@ const UpdateCustomerForm = ({
 					<FormInputTextBox label='Email Address' name='email' />
 					<FormInputTextBox label='Indentifier (ETIN/SSN)' name='identifier' />
 
-					<div className='form-buttons-container'>
+					<div className='form-buttons-container mt-10'>
 						<button type='submit' className='button' disabled={!form.isValid || isLoading}>
 							{isLoading ? <i className='fa-solid fa-spinner animate-spin'></i> : buttonText}
 						</button>

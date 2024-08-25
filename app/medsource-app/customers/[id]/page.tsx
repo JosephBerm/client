@@ -1,7 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import API from '@/src/services/api'
-import UpdateAccountForm from '@/src/components/UpdateAccountForm'
 import { useRouter, useParams } from 'next/navigation'
 import Company from '@/src/classes/Company'
 import UpdateCustomerForm from '@/src/components/UpdateCustomerForm'
@@ -42,6 +41,7 @@ const Page = () => {
 		
 		if(typeof userId != "string") return;
 		params.add("CustomerId", userId)
+		params.includes.push("Customer")
 
 		setIsLoading(true)
 		try {
@@ -63,11 +63,11 @@ const Page = () => {
 
 	const columns: TableColumn<User>[] = [
 		{
-			name: 'firstName',
+			name: 'name',
 			label: 'Name',
 			content: (user: User) => (
 				<>
-					{user.firstName} {user.lastName}
+					{user.customer?.name}
 				</>
 			),
 		},
@@ -98,7 +98,7 @@ const Page = () => {
 	]
 
 	return (
-		<div>
+		<div className='page-container'>
 			<button className='mb-10' onClick={() => route.back()}>
 				Back
 			</button>

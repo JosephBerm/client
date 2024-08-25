@@ -36,16 +36,6 @@ const UpdateAccountForm = ({ user, onUserUpdate }: { user: User; onUserUpdate?: 
 					<FormInputTextBox label='Email Address' name='email' />
 					<FormInputTextBox label='Phone Number' name='phoneNumber' />
 
-					{User.role == AccountRole.Admin && (
-						<FormFetchDropdown<any>
-							label='Customer'
-							endpoint='/customer/search'
-							name='customerId'
-							display={(item: Company) => item.name}
-							value={(item: Company) => item.id}
-							searchBy='name'
-						/>
-					)}
 					
 				</Form>
 			)}

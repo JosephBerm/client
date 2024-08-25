@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from 'react'
 import User from '@/classes/User'
 import API from '@/services/api'
-import UpdateAccountForm from '@/components/UpdateAccountForm'
 import { useRouter, useParams } from 'next/navigation'
 import AccountCRUD from '@/components/AccountCRUD'
+import "@/styles/pages/accounts.css"
+import "@/styles/forms.css"
 
 const Page = () => {
 	const params = useParams()
@@ -17,12 +18,13 @@ const Page = () => {
 
 	const fetchUser = async () => {
 		try {
+			setIsLoading(true)
 			const { data } = await API.Accounts.get(userId as string)
 			if (data.payload) {
 				setUser(data.payload)
 			}
 		} finally {
-			setIsLoading(true)
+			setIsLoading(false)
 		}
 	}
 
@@ -33,15 +35,14 @@ const Page = () => {
 	if (!userId) return route.back()
 
 	return (
-		<div>
+		<div className='page-container'>
 			<button className='mb-10' onClick={() => route.back()}>
 				Back
 			</button>
 			<h1 className='mb-5'>Account Page</h1>
-			{isLoading && user && (
-				<div>
-					<AccountCRUD user={user} />
-				</div>
+			{isLoading && <i className='fa-solid fa-spinner animate-spin' />}
+			{!isLoading && user && (
+				<AccountCRUD user={user} />
 			)}
 		</div>
 	)

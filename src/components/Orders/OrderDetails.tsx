@@ -52,6 +52,12 @@ const OrderDetails = () => {
 			if (data.statusCode === 200 && exitPage) {
 				route.push(`${Routes.InternalAppRoute}/orders`)
 			}
+
+			if(!exitPage && data.statusCode === 200) {
+				toast.success('Order saved successfully')
+			} else if(data.statusCode !== 200) {
+				toast.error(data.message ?? 'Failed to save order')
+			}
 		} catch (err) {
 			console.error(err)
 		} finally {
@@ -425,7 +431,7 @@ const OrderDetails = () => {
 					)}
 					<div className='button-container'>
 						{currentOrder.status <= OrderStatus.WaitingCustomerApproval && (
-							<button onClick={handleSubmitQuote}>
+							<button disabled={isLoading} onClick={handleSubmitQuote}>
 								{currentOrder.status === OrderStatus.WaitingCustomerApproval
 									? 'Re-Submit Quote to Customer'
 									: 'Submit Quote to Customer'}
@@ -433,18 +439,22 @@ const OrderDetails = () => {
 						)}
 
 						{currentOrder.status == OrderStatus.Placed && (
-							<button onClick={handleSubmitInvoice}>Submit Invoice to customer</button>
+							<button disabled={isLoading} onClick={handleSubmitInvoice}>Submit Invoice to customer</button>
 							// <button onClick={handleSubmitInvoice}>Generate Invoice</button>
 						)}
 						{currentOrder.status >= OrderStatus.Placed && (
-							<button onClick={handleSubmitInvoice}>Submit Invoice to customer</button>
+							<button disabled={isLoading} onClick={handleSubmitInvoice}>Submit Invoice to customer</button>
 							// <button onClick={handleSubmitInvoice}>Generate Invoice</button>
 						)}
 						{currentOrder.status != OrderStatus.Cancelled && (
-							<button className='delete' onClick={() => setOrderStatus(OrderStatus.Cancelled, true)}>
+							<button disabled={isLoading} className='delete' onClick={() => setOrderStatus(OrderStatus.Cancelled, true)}>
 								Cancel Order
 							</button>
 						)}
+
+						<button  onClick={() => updateOrder(null, false)} disabled={isLoading}>
+							{isLoading ? <i className='fa-solid fa-spinner animate-spin'/> : 'Save'}
+						</button>
 					</div>
 				</fieldset>
 			</section>

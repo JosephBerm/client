@@ -4,6 +4,8 @@ import API from '@/src/services/api'
 import { useRouter, useParams } from 'next/navigation'
 import Provider from '@/src/classes/Provider'
 import UpdateProviderForm from '@/src/components/UpdateProviderForm'
+import "@/styles/forms.css"
+import "@/styles/pages/providers.css"
 
 const Page = () => {
 	const params = useParams()
@@ -35,13 +37,13 @@ const Page = () => {
 	if (!userId) return route.back()
 
 	return (
-		<div>
+		<div className='page-container'>
 			<button className='mb-10' onClick={() => route.back()}>
 				Back
 			</button>
 			<h1>Providers</h1>
 			{!isLoading && (
-				<div>
+				<div className='mt-10'>
 					<UpdateProviderForm provider={provider} />
 					{/* <UpdateCustomerForm customer={customer} /> */}
 					{/* <UpdateAccountForm user={user} /> */}

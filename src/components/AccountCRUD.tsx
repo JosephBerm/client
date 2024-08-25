@@ -57,12 +57,12 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 				setSubmitting(false)
 			}}>
 			{(form) => (
-				<Form className='update-account-form-container'>
+				<Form className='update-form-container'>
 					<FormInputTextBox label='Username' name='username' />
 					<FormInputTextBox label='Email Address' name='email' />
                     {params.id == "create"
 					&&
-					<FormInputTextBox label='Password' name='password' />
+					<FormInputTextBox label='Password' name='password'  type="password" />
 					}
 
 					<FormDropdown<any>
@@ -84,11 +84,9 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 						/>
 					)}
 
-					<div className='form-buttons-container'>
-						<button type='submit' className='button'  disabled={!form.isValid || isLoading}>
+						<button type='submit' className='mt-10' disabled={!form.isValid || isLoading}>
 							{isLoading ? <i className='fa-solid fa-spinner animate-spin'></i> : params.id == "create" ? 'Create Account' : 'Update Account'}
 						</button>
-					</div>
 				</Form>
 			)}
 		</Formik>

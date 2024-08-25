@@ -15,6 +15,12 @@ import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 import { PagedResult } from '@/src/classes/Base/PagedResult'
 import Routes from '@/src/services/routes'
 
+const searchCriteria = new GenericSearchFilter({
+	sortBy: 'CreatedAt',
+	sortOrder: 'desc',
+	includes: ['Categories'],
+})
+
 const Page = () => {
 	const route = useRouter()
 	const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -65,24 +71,25 @@ const Page = () => {
 		},
 	]
 
-	const retrieveProducts = async () => {
-		try {
-			setIsLoading(true)
-			//const { data: res } = await API.Store.Products.getList<Product[]>()
-			const searchCriteria = new GenericSearchFilter()
-			const { data: res } = await API.Store.Products.search(searchCriteria)
+	// const retrieveProducts = async () => {
+	// 	try {
+	// 		setIsLoading(true)
+	// 		//const { data: res } = await API.Store.Products.getList<Product[]>()
+	// 		const searchCriteria = new GenericSearchFilter()
+	// 		searchCriteria.includes.push("Categories")
+	// 		const { data: res } = await API.Store.Products.search(searchCriteria)
 
-			if (!res.payload || res.statusCode !== 200) {
-				toast.error(res.message)
-				return
-			}
-			setPagedResultData(res.payload)
-		} catch (err: any) {
-			toast.error(err.message)
-		} finally {
-			setIsLoading(false)
-		}
-	}
+	// 		if (!res.payload || res.statusCode !== 200) {
+	// 			toast.error(res.message)
+	// 			return
+	// 		}
+	// 		setPagedResultData(res.payload)
+	// 	} catch (err: any) {
+	// 		toast.error(err.message)
+	// 	} finally {
+	// 		setIsLoading(false)
+	// 	}
+	// }
 
 	const deleteProduct = async (productId: string) => {
 		try {
@@ -101,10 +108,6 @@ const Page = () => {
 		}
 	}
 
-	useEffect(() => {
-		retrieveProducts()
-	}, [])
-
 	return (
 		<div className='page-container store-page'>
 			<div className='page-header'>
@@ -115,11 +118,8 @@ const Page = () => {
 			</div>
 			<div className='products-container'>
 				<IsBusyLoading isBusy={isLoading} />
-				{!isLoading && !PagedResultData.data.length ? (
-					<h3>No Items found for this search...</h3>
-				) : (
-					<ServerTable<Product> columns={columns} methodToQuery={API.Store.Products.search} />
-				)}
+				<ServerTable<Product> columns={columns} methodToQuery={API.Store.Products.search} searchCriteria={searchCriteria} />
+				
 			</div>
 		</div>
 	)

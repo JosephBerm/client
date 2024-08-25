@@ -13,6 +13,7 @@ import ServerTable from '@/src/common/ServerTable'
 import { OrderStatusName, OrderStatusVariants } from '@/classes/EnumsTranslations'
 import Pill from '@/src/components/Pill'
 
+
 function AdminView() {
 	const [orders, setOrders] = useState<Order[]>([])
 	const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -86,10 +87,15 @@ function AdminView() {
 		{
 			key: 'delete',
 			label: 'Delete',
-			content: (product) => (
-				<button className='delete' onClick={() => handleOrderDeletion(product.id!)}>
-					Delete
-				</button>
+			content: (order) => (
+				<div className='flex gap-5'>
+					<button  onClick={() => route.push(`${Routes.Orders.location}/${order.id}`)}>
+						View
+					</button>
+					<button className='delete' onClick={() => handleOrderDeletion(order.id!)}>
+						Delete
+					</button>
+				</div>
 			),
 		},
 	]
