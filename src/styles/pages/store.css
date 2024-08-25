@@ -23,6 +23,7 @@
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: center;
+	min-width: 50vw;
 }
 .Store.ProductsList {
 	grid-area: body;
@@ -177,6 +178,10 @@
 		row-gap: 1vh;
 		column-gap: 5vw;
 		align-items: unset;
+	}
+
+	.Store .CategoriesMenu {
+		min-width: unset;
 	}
 }
 

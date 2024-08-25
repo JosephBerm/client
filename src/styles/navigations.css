@@ -29,6 +29,11 @@ nav.navbar {
 	z-index: 12;
 	height: 100%;
 }
+
+nav.navbar .Breadcrumb {
+	display: none;
+}
+
 nav.navbar .app-title-container {
 	min-width: 150px;
 	padding: 0 0.5em;
@@ -41,9 +46,8 @@ nav.navbar .app-title-container {
 nav.navbar .navbar-container {
 	width: 100%;
 	gap: 5px;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
+	display: grid;
+	grid-template-columns: auto 1fr;
 	padding: 0 5%;
 }
 nav.navbar .navbar-container > * {
@@ -62,6 +66,7 @@ nav.navbar .navbar-container .options {
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
+	grid-column: 2;
 }
 
 nav.navbar .navbar-container .options > * {
@@ -283,6 +288,7 @@ nav.Sidebar ul .path-label {
 	align-items: center;
 	gap: 3px;
 	color: inherit;
+	font-size: clamp(1rem, 2vw, 1.5rem);
 }
 
 .Breadcrumb span.seperator {
@@ -317,6 +323,10 @@ nav.Sidebar ul .path-label {
 	}
 	nav.navbar .app-title-container {
 		display: none;
+	}
+
+	nav.navbar .Breadcrumb {
+		display: flex;
 	}
 
 	header.header {

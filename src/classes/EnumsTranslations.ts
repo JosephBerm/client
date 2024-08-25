@@ -1,13 +1,13 @@
-import {OrderStatus} from '@/classes/Enums';
+import { OrderStatus } from '@/classes/Enums'
 export const OrderStatusName = {
-    [OrderStatus.Pending]: 'Pending',
-    [OrderStatus.WaitingCustomerApproval]: 'Waiting Customer Approval',
-    [OrderStatus.Placed]: 'Placed',
-    [OrderStatus.Processing]: 'Processing',
-    [OrderStatus.Shipped]: 'Shipped',
-    [OrderStatus.Delivered]: 'Delivered',
-    [OrderStatus.Cancelled]: 'Cancelled',
-};
+	[OrderStatus.Pending]: 'Pending',
+	[OrderStatus.WaitingCustomerApproval]: 'Awaiting Customer Approval',
+	[OrderStatus.Placed]: 'Placed',
+	[OrderStatus.Processing]: 'Processing',
+	[OrderStatus.Shipped]: 'Shipped',
+	[OrderStatus.Delivered]: 'Delivered',
+	[OrderStatus.Cancelled]: 'Cancelled',
+}
 
 export const OrderStatusVariants = {
 	[OrderStatus.Pending]: 'warning',

@@ -62,13 +62,13 @@ class Routes {
 		{
 			name: 'Providers',
 			location: `${this.InternalAppRoute}/providers`,
-			icon: 'fa-solid fa-users',
+			icon: 'fa-solid fa-hand-holding-dollar',
 			accessible: [AccountRole.Admin],
 		},
 		{
 			name: 'Accounts',
 			location: `${this.InternalAppRoute}/accounts`,
-			icon: 'fa-solid fa-users',
+			icon: 'fa-solid fa-id-badge',
 			accessible: [AccountRole.Admin],
 		},
 		{
@@ -77,7 +77,6 @@ class Routes {
 			icon: 'fa-solid fa-users',
 			accessible: [AccountRole.Admin],
 		},
-		Routes.Store,
 		{
 			name: 'Profile',
 			location: `${this.InternalAppRoute}/profile`,

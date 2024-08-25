@@ -2,7 +2,7 @@ import React, { useCallback } from 'react'
 import User from '@/classes/User'
 import InputTextBox from '@/components/InputTextBox'
 import { useAccountStore } from '@/src/stores/user'
-import Address from '@/classes/Address'
+import Address from '@/classes/common/Address'
 
 function UserInfoShipping() {
     const { User: UserFromStore, setUser } = useAccountStore((state) => ({

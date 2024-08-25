@@ -153,6 +153,20 @@ const AddEditForm = () => {
 			{params.id == 'create' && (
 				<InputFile label='Upload Images' value={files} onChange={setFiles} multiple={true} onFileDelete={deleteImage} />
 			)}
+
+			{params.id != "create" && 
+				<div className='flex flex-col items-center justify-center text-center gap-5'>
+					<h3 className='mb-5'>Images</h3>
+					<InputFile
+						label='Upload'
+						onChange={uploadImage}
+						multiple={true}
+						value={product.files}
+						onFileDelete={deleteImage}
+					/>
+				</div>
+			}
+			
 			<Formik
 				
 				enableReinitialize={true}
@@ -191,18 +205,6 @@ const AddEditForm = () => {
 				)}
 			</Formik>
 
-			{params.id != "create" && 
-				<div className='flex flex-col items-center justify-center text-center gap-5'>
-					<h3 className='mb-5'>Images</h3>
-					<InputFile
-						label='Upload'
-						onChange={uploadImage}
-						multiple={true}
-						value={product.files}
-						onFileDelete={deleteImage}
-					/>
-				</div>
-			}
 		</div>
 	)
 }

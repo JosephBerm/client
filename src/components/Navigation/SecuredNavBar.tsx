@@ -24,9 +24,7 @@ function CustomerNavBar() {
 					<span>MEDSOURCE</span>
 				</Link>
 				<div className='navbar-container'>
-					<div className='current-route-details'>
-						<Breadcrumb />
-					</div>
+					<Breadcrumb />
 					<div className='options'>
 						<div className={classNames({ 'search-container': true, 'is-hidden': hasFloatingButton })}>
 							<button

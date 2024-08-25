@@ -12,7 +12,7 @@ import Routes from '@/services/routes'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 import { useRouter } from 'next/navigation'
 import ServerTable from '@/src/common/ServerTable'
-import {format} from 'date-fns'
+import { format } from 'date-fns'
 
 const Page = () => {
 	const [quotes, setQuotes] = useState<Quote[]>([])
@@ -21,10 +21,7 @@ const Page = () => {
 	const searchCriteria = new GenericSearchFilter({
 		sortBy: 'CreatedAt',
 		sortOrder: 'desc',
-	
 	})
-
-	
 
 	const handleQuoteDeletion = async (id: string) => {
 		const originalList = [...quotes]
@@ -53,16 +50,17 @@ const Page = () => {
 		{
 			name: 'name',
 			label: 'Name',
-			content: (quote) => (
-				<Link href={`${Routes.InternalAppRoute}/quotes/${quote.id}`}>
-					{quote.companyName}
-				</Link>
-			),
+			content: (quote) => <Link href={`${Routes.InternalAppRoute}/quotes/${quote.id}`}>{quote.companyName}</Link>,
 		},
 		{
 			name: 'phoneNumber',
 			label: 'Phone Number',
 			content: (quote) => <p>{quote.phoneNumber}</p>,
+		},
+		{
+			key: 'createdAt',
+			label: 'Date Created',
+			content: (quote) => <p>{format(quote.createdAt, 'PPP') ?? ''}</p>,
 		},
 		{
 			key: 'delete',
@@ -73,21 +71,13 @@ const Page = () => {
 						onClick={() => {
 							route.push(`${Routes.InternalAppRoute}/quotes/${quote.id}`)
 						}}>
-
-							Edit
-						</button>
+						Edit
+					</button>
 					<button className='delete' onClick={() => handleQuoteDeletion(quote.id!)}>
 						Delete
 					</button>
 				</div>
 			),
-		},
-		{
-			key: 'createdAt',
-			label: 'Date Created',
-			content: (quote) => <p>
-				{format(quote.createdAt, 'PPP') ?? ""}
-			</p>
 		},
 	]
 
@@ -98,10 +88,10 @@ const Page = () => {
 			</div>
 			<IsBusyLoading isBusy={isLoading} />
 			{!isLoading && (
-				<ServerTable<Quote> 						
-				columns={columns}
-				methodToQuery = {API.Quotes.search}
-				searchCriteria = {searchCriteria}
+				<ServerTable<Quote>
+					columns={columns}
+					methodToQuery={API.Quotes.search}
+					searchCriteria={searchCriteria}
 				/>
 			)}
 		</div>

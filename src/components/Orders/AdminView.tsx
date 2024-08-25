@@ -69,16 +69,19 @@ function AdminView() {
 		{
 			name: 'status',
 			label: 'Order Status',
-			content: (order) => (
-				<div className='flex flex-row '>
-					<span>
-						<Pill
-							text={OrderStatusName[order.status]}
-							variant={OrderStatusVariants[order.status] as Variant}
-						/>
-					</span>
-				</div>
-			),
+			content: (order) => {
+				console.log('Order Status: ', order.status)
+				return (
+					<div className='flex flex-row '>
+						<span>
+							<Pill
+								text={OrderStatusName[order.status]}
+								variant={OrderStatusVariants[order.status] as Variant}
+							/>
+						</span>
+					</div>
+				)
+			},
 		},
 		{
 			key: 'delete',

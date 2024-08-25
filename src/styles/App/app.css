@@ -19,9 +19,6 @@
 	position: relative;
 }
 
-.App .Breadcrumb {
-	font-size: clamp(var(--fz-xs), 4vw, var(--fz-md));
-}
 .App .page-container {
 	padding: 1vh 5vw calc(2vh + 55px) 5vw;
 	width: 100%;

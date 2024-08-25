@@ -306,7 +306,18 @@ p {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	-webkit-line-clamp: 2; /* Number of lines to show */
-	max-height: 3.6rem; /* (font-size + line-height) * number of lines */
+}
+
+.three-line-limit {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-webkit-line-clamp: 3; /* Number of lines to show */
+}
+
+.nowrap {
+	text-wrap: nowrap;
 }
 
 .gapped-fields {

@@ -49,7 +49,7 @@ export default function Breadcrumb() {
 				}
 
 				return (
-					<span key={index} className='active'>
+					<span key={index} className='active two-line-limit'>
 						{formatPath(value)}
 					</span>
 				)

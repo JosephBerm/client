@@ -6,17 +6,16 @@ import Link from 'next/link'
 import Routes from '@/services/routes'
 
 const page = () => {
-
-
 	return (
 		<div className='store-page'>
 			<div className='header mb-6'>
-				<Link href={`${Routes.InternalAppRoute}/store`}>
-				<i className="fa-solid fa-chevron-left"/>
-				Back to store</Link>
+				<Link className='flex items-center' href={`${Routes.InternalAppRoute}/${Routes.Store.location}`}>
+					<i className='fa-solid fa-chevron-left mx-4' />
+					Back to store
+				</Link>
 			</div>
 			<div className='creation-container'>
-				<h2 id="page-header-text">Create a product</h2>
+				<h2 id='page-header-text'>Create a product</h2>
 				<AddEditForm />
 			</div>
 		</div>

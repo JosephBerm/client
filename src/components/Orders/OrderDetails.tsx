@@ -24,6 +24,7 @@ import { EnumToDropdownValues } from '@/services/utils'
 import classNames from 'classnames'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 import { useParams } from 'next/navigation'
+import Link from 'next/link'
 
 const OrderDetails = () => {
 	const route = useRouter()
@@ -225,7 +226,11 @@ const OrderDetails = () => {
 		{
 			name: 'product',
 			label: 'Product Name',
-			content: (orderItem) => <div className='product-name'>{orderItem.product?.name}</div>,
+			content: (orderItem) => (
+				<Link className='product-name' href={`${Routes.Product.location}/${orderItem.productId}`}>
+					{orderItem.product?.name}
+				</Link>
+			),
 		},
 		{
 			key: 'quantity',

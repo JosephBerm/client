@@ -13,6 +13,7 @@ import ServerTable from '@/src/common/ServerTable'
 import IsBusyLoading from '@/components/isBusyLoading'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 import { PagedResult } from '@/src/classes/Base/PagedResult'
+import Routes from '@/src/services/routes'
 
 const Page = () => {
 	const route = useRouter()
@@ -21,32 +22,44 @@ const Page = () => {
 
 	const columns: TableColumn<Product>[] = [
 		{
-			name: 'name',
-			label: 'Name',
+			key: 'product',
+			label: 'Product Name',
+			content: (product) => (
+				<Link className='product-name' href={`${Routes.Product.location}/${product.id}`}>
+					{product.name}
+				</Link>
+			),
 		},
 		{
-			name: 'description',
+			key: 'description',
 			label: 'Description',
+			content: (product) => <div className='three-line-limit'>{product.description}</div>,
 		},
 		{
-			name: 'category',
+			key: 'category',
 			label: 'Category',
-		},
-		{
-			name: 'price',
-			label: 'Price',
+			content: (product) => {
+				console.log('product', product)
+
+				return (
+					<div className='category-cell'>
+						WHAT THE HELL IS THIS? WHY IS THIS OBJECT DIFFERENT TO THE PRODUCT CLASS OBJECT?
+					</div>
+				)
+			},
 		},
 		{
 			key: 'delete',
 			label: 'Actions',
 			content: (product) => (
-				<div className="flex gap-5">
-					<button>
-						<Link href={`store/${product.id}`}>Edit</Link>
+				<div className='flex gap-5'>
+					<button
+						onClick={() => route.push(`${Routes.InternalAppRoute}/${Routes.Store.location}/${product.id}`)}>
+						Edit
 					</button>
 					<button className='delete' onClick={() => deleteProduct(product.id!)}>
 						Archive
-					</button>	
+					</button>
 				</div>
 			),
 		},
@@ -57,7 +70,7 @@ const Page = () => {
 			setIsLoading(true)
 			//const { data: res } = await API.Store.Products.getList<Product[]>()
 			const searchCriteria = new GenericSearchFilter()
-			const {data: res } = await API.Store.Products.search(searchCriteria)
+			const { data: res } = await API.Store.Products.search(searchCriteria)
 
 			if (!res.payload || res.statusCode !== 200) {
 				toast.error(res.message)
@@ -105,10 +118,7 @@ const Page = () => {
 				{!isLoading && !PagedResultData.data.length ? (
 					<h3>No Items found for this search...</h3>
 				) : (
-					<ServerTable<Product>
-						columns={columns}
-						methodToQuery = {API.Store.Products.search}
-					/>
+					<ServerTable<Product> columns={columns} methodToQuery={API.Store.Products.search} />
 				)}
 			</div>
 		</div>
