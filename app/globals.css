@@ -212,7 +212,7 @@ svg {
 
 button {
 	color: var(--bg-color);
-	background-color: var(--brand-color-1) !important;
+	background-color: var(--brand-color-1);
 	border-radius: var(--border-radius);
 	font-size: var(--fz-xs);
 	font-family: var(--font-sans);

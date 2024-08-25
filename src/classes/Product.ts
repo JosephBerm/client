@@ -13,13 +13,15 @@ export class Product {
 	files: UploadedFile[] = []
 	description: string = ''
 	price: number = 0
-	category: ProductsCategory[] = []
+	categoryIds: number[] = []
+	categories: ProductsCategory[] = []
 	providerId: number | null = null
 	provider: Provider | null = null
 	createdAt: Date = new Date()
+	updatedAt: Date = new Date()
 
 	toString(): string {
-		return `Product: ${this.name} - ${this.description} - ${this.price} - ${this.category}`
+		return `Product: ${this.name} - ${this.description} - ${this.price} - ${this.categories}`
 	}
 
 	constructor(product: Partial<Product>) {
@@ -29,7 +31,7 @@ export class Product {
 		this.name = product?.name || ''
 		this.description = product?.description || ''
 		this.price = product?.price || 0
-		this.category = product?.category?.length ? product.category.map((x) => new ProductsCategory(x)) : []
+		this.categories = product?.categories?.length ? product.categories.map((x) => new ProductsCategory(x)) : []
 		this.providerId = product?.providerId || null
 		this.provider = product?.provider || null
 		this.createdAt = product?.createdAt ? new Date(product?.createdAt) : new Date()

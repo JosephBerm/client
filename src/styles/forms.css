@@ -6,3 +6,7 @@
     width: 100%;
     gap: 10px;
 }
+
+.update-form-container > button {
+    background-color: var(--brand-color-1) !important;
+}

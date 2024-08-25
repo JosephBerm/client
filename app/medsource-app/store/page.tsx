@@ -14,6 +14,8 @@ import IsBusyLoading from '@/components/isBusyLoading'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 import { PagedResult } from '@/src/classes/Base/PagedResult'
 import Routes from '@/src/services/routes'
+import Pill from '@/src/components/Pill'
+import ProductsCategory from '@/src/classes/ProductsCategory'
 
 const searchCriteria = new GenericSearchFilter({
 	sortBy: 'CreatedAt',
@@ -48,8 +50,10 @@ const Page = () => {
 				console.log('product', product)
 
 				return (
-					<div className='category-cell'>
-						WHAT THE HELL IS THIS? WHY IS THIS OBJECT DIFFERENT TO THE PRODUCT CLASS OBJECT?
+					<div className='flex gap-2'>
+						{product.categories?.map((category: ProductsCategory) => (
+							<Pill key={category.id} text={category.name?? ""} variant='info' />
+						))}
 					</div>
 				)
 			},
