@@ -15,16 +15,18 @@ const RelatedProducts = async () => {
     }
     const prods = await products()
     return (
-        <div className='section-container'>
-            <h2 className='section-title'>
-                Related Products
-            </h2>
-            <div className='product-wrapper'>
-                {prods.map((product: ProductClass) => (
-                    <Product product={product} key={product.id} />
-                ))}
+        <section className='products-container component'>
+            <div className='section-container'>
+                <h2 className='section-title'>
+                    Related Products
+                </h2>
+                <div className='product-wrapper'>
+                    {prods.map((product: ProductClass) => (
+                        <Product product={product} key={product.id} />
+                    ))}
+                </div>
             </div>
-        </div>
+        </section>
     )
 }
 

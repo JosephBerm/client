@@ -1,12 +1,14 @@
 "use client"
-import { Product } from '@/src/classes/Product'
+import { CartProduct, Product } from '@/src/classes/Product'
 import React from 'react'
 import Pill from '@/components/Pill'
 import InputTextBox from '@/components/InputTextBox'
+import { useCartStore } from '@/src/stores/store'
 
 const ProductDetails = ({product}:{product:Product}) => {
     const [actualProduct, setActualProduct] = React.useState(new Product(product))
     const [email, setEmail]  = React.useState('')
+    const Cart = useCartStore()
     return (
         <div className='product-details-container'>
             <Pill text="Limited Stock" variant='info' />
@@ -22,7 +24,10 @@ const ProductDetails = ({product}:{product:Product}) => {
                 <p>* Leave your email here, we will be contacting you to help you find what you are looking for. </p>
             </div>
 
-            <button id="add-to-cart">Add to cart</button>
+            <button id="add-to-cart" onClick={() => Cart.addProduct(new CartProduct({ product, quantity: 1 }))} disabled={Cart.isInCart(product.id)}>
+                {Cart.isInCart(product.id) ? 'Added to Cart' : 'Add to Cart'}
+
+            </button>
         </div>
     )
 }

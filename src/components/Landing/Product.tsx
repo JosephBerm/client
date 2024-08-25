@@ -26,8 +26,13 @@ const Product = ({ product }: { product: ProductClass }) => {
 				</button>
 				<div
 					className='icon-wrapper'
-					onClick={() => Store.addProduct(new CartProduct({ product, quantity: 1 }))}>
-					<Image src={AddCart} alt='cart' color='red' />
+					onClick={() => Store.addProduct(new CartProduct({ product, quantity: 1 }))}
+					// disabled={Store.isInCart(product.id)}
+					>
+						<Image src={AddCart} alt='cart' color='red' />
+						{/* {Store.isInCart(product.id) && <i className='fas fa-check-circle' />} */}
+						{/* {!Store.isInCart(product.id) && <Image src={AddCart} alt='cart' color='red' />} */}
+					
 				</div>
 			</div>
 		</div>

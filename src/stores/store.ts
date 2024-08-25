@@ -9,7 +9,8 @@ type State = {
 type Actions = {
     addProduct: (product: CartProduct) => void,
     removeProduct: (product: CartProduct) => void,
-    setCart: (cart: CartProduct[]) => void
+    setCart: (cart: CartProduct[]) => void,
+    isInCart: (id: string) => boolean
 }
 
 const useCartStore = create<State & Actions>((set, get) => ({
@@ -37,6 +38,9 @@ const useCartStore = create<State & Actions>((set, get) => ({
         set((state) => ({ Cart: cart }));
         localStorage.setItem('cart', JSON.stringify(get().Cart));
     },
+    isInCart: (id: string) => {
+        return get().Cart.some((c) => c.product?.id === id);
+    }
 }));
 
 export { useCartStore }
