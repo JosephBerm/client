@@ -6,6 +6,7 @@ import Image from "next/image"
 import { Product } from "@/src/classes/Product"
 import ProductDetails from "@/src/components/ProductDetails/ProductDetails"
 import ProductDescription from "@/src/components/ProductDetails/ProductDescription"
+import RelatedProducts from "@/src/components/ProductDetails/RelatedProducts"
 
 const page = async ({params, searchParams}: {params: Record<string, string>, searchParams: Record<string, string>}) => {
 
@@ -47,6 +48,7 @@ const page = async ({params, searchParams}: {params: Record<string, string>, sea
 			</div>
 
 			<ProductDescription product={productResult}/>
+			<RelatedProducts />
 
 
 		</div>
