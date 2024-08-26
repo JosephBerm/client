@@ -6,6 +6,7 @@ import Order from '@/classes/Order'
 import Quote from '@/classes/Quote'
 import Company from '@/classes/Company'
 import UploadedFile from '@/classes/UploadedFile'
+import FinanceNumbers from '@/classes/FinanceNumbers'
 import ContactRequest from '@/classes/ContactRequest'
 import ProductsCategory from '@/classes/ProductsCategory'
 import LoginCredentials from '@/classes/LoginCredentials'
@@ -130,6 +131,9 @@ const API = {
 		delete: async (customerId: number) => await HttpService.delete<number>(`/customer/${customerId}`),
 		search: async (search: GenericSearchFilter) =>
 			await HttpService.post<PagedResult<Company>>(`/customers/search`, { data: { ...search } }),
+	},
+	Finance: {
+		getFinanceNumbers: async () => await HttpService.get<FinanceNumbers>('/finance/analytics'),
 	},
 }
 
