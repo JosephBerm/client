@@ -74,7 +74,10 @@ table td button {
 }
 
 table.table-dark tbody tr {
-	background-color: var(--section-bg-color);
+	background-color: var(--row-color);
+}
+table.table-dark tbody tr:nth-child(even) {
+	background-color: var(--alternating-row-color);
 }
 
 .table-container {
@@ -127,7 +130,9 @@ table.table-dark tbody tr {
 		background-color: var(--section-bg-color);
 	}
 	table.table-dark thead {
-		background-color: var(--darker-slate);
+		background-color: var(--alternating-row-color);
+		border-bottom: 1px solid var(--gray);
+		height: 50px;
 	}
 	table thead {
 		clip: unset;
@@ -174,10 +179,6 @@ table.table-dark tbody tr {
 	table th,
 	table td {
 		text-align: left;
-	}
-
-	table.table-dark tbody tr {
-		background-color: unset;
 	}
 
 	.table-container table .InputTextBox {

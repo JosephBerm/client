@@ -34,6 +34,8 @@
 	--toastify-color-error: #d22b2b !important;
 	--error-color: var(--toastify-color-error);
 	--error-color-tint: #520606;
+	--row-color: #fff;
+	--alternating-row-color: #f8f8f8;
 
 	--tooltip-background: rgba(0, 0, 0, 0.35);
 	--fz-xxs: 1.2rem;

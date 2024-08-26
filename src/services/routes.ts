@@ -78,6 +78,12 @@ class Routes {
 			accessible: [AccountRole.Admin],
 		},
 		{
+			name: 'Analytics',
+			location: `${this.InternalAppRoute}/analytics`,
+			icon: 'fa-solid fa-chart-line',
+			accessible: [AccountRole.Admin],
+		},
+		{
 			name: 'Profile',
 			location: `${this.InternalAppRoute}/profile`,
 			icon: 'fa-solid fa-user',
