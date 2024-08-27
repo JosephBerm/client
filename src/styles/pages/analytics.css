@@ -40,7 +40,7 @@
 .Analytics section .overview-container .details.col-2 {
 	grid-column: span 2;
 }
-.Analytics section .overview-container .details .value::before {
+.Analytics section .overview-container .details .value.cash::before {
 	content: '$';
    font-weight: bold;
    color: var(--brand-color-1);

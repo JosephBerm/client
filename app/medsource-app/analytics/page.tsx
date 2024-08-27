@@ -49,31 +49,31 @@ function Page() {
 				<div className='overview-container'>
 					<div className='details'>
 						<h4>Total Cost</h4>
-						<span className='value'>{financeNumbers.sales.totalCost}</span>
+						<span className='value cash'>{financeNumbers.sales.totalCost}</span>
 					</div>
 					<div className='details'>
 						<h4>Total Revenue</h4>
-						<span className='value'>{financeNumbers.sales.totalRevenue}</span>
+						<span className='value cash'>{financeNumbers.sales.totalRevenue}</span>
 					</div>
 					<div className='details'>
 						<h4>Total Discounted</h4>
-						<span className='value'>{financeNumbers.sales.totalDiscount}</span>
+						<span className='value cash'>{financeNumbers.sales.totalDiscount}</span>
 					</div>
 					<div className='details'>
 						<h4>Total Shipping</h4>
-						<span className='value'>{financeNumbers.sales.totalShipping}</span>
+						<span className='value cash'>{financeNumbers.sales.totalShipping}</span>
 					</div>
 					<div className='details'>
 						<h4>Total Sales</h4>
-						<span className='value'>{financeNumbers.sales.totalSales}</span>
+						<span className='value cash'>{financeNumbers.sales.totalSales}</span>
 					</div>
 					<div className='details'>
 						<h4>Total Tax</h4>
-						<span className='value'>{financeNumbers.sales.totalTax}</span>
+						<span className='value cash'>{financeNumbers.sales.totalTax}</span>
 					</div>
 					<div className='details col-2'>
 						<h4>Total Profit</h4>
-						<span className='value'>{financeNumbers.sales.totalProfit}</span>
+						<span className='value cash'>{financeNumbers.sales.totalProfit}</span>
 					</div>
 				</div>
 			</section>
