@@ -28,7 +28,7 @@ function AccountOverview() {
 	return (
 		<section className='account-overviews'>
 			{summary.GenerateOverviewDetails().map((overview, index) => (
-				<div className='overview-container clickable' key={index}>
+				<div className='overview-container' key={index}>
 					<div className='details'>
 						<h4>{overview.title}</h4>
 						<span className='value'>{overview.value}</span>
