@@ -63,7 +63,18 @@ const Page = () => {
 	}
 
 	const getImage = (item: CartProduct) => {
-		return <i className='fa-regular fa-image' />
+		if(item.product == null || item.product?.files.length <= 0) return <i className='fa-regular fa-image' />
+		
+		return <Image
+			src={`${process.env.API_URL}/products/image?productId=${item.product?.id}&image=${
+				item.product?.files[0]?.name ?? ''
+			}`}
+			width={125}
+			height={125}
+			style={{ width: 'auto' }}
+			alt='Product Image'
+		/>
+		
 	}
 
 	const updateName = (key: keyof Name, newValue: string) => {
