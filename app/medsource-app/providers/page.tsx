@@ -61,7 +61,7 @@ const Page = () => {
 		{
 			name: 'createdAt',
 			label: 'Date Created',
-			content: (provider: Provider) => <>{format(provider.createdAt, 'mm/dd/yyyy')}</>,
+			content: (provider: Provider) => <>{format(provider.createdAt, 'MM/dd/yyyy')}</>,
 		},
 		{
 			name: 'id',

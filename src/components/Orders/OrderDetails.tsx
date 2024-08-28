@@ -29,8 +29,8 @@ import Link from 'next/link'
 const OrderDetails = () => {
 	const route = useRouter()
 	const { id: orderId } = useParams()
-
 	const User = useAccountStore((state) => state.User)
+	console.log("XX", User.role == AccountRole.Admin)
 	const isAdmin = User.role == AccountRole.Admin
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [product, setProduct] = useState<Product | null>(null)
@@ -216,6 +216,31 @@ const OrderDetails = () => {
 	}, [isAdmin])
 
 	useEffect(() => {
+
+		if(isAdmin){
+			columns.push({
+				key: 'buyPrice',
+				label: 'Buy Price',
+				content: (orderItem) => (
+					<div className='price-container'>
+						<InputNumber
+							label=''
+							disabled={!isAdmin}
+							value={`${orderItem.buyPrice.toString()}`}
+							handleChange={(e) =>
+								handleProductPropertyChange(orderItem, 'buyPrice', parseInt(e.currentTarget.value))
+							}
+						/>
+						{orderItem.quantity > 1 && (
+							<span className='estimate'> &#40;est. ${orderItem.buyPrice * orderItem.quantity}&#41;</span>
+						)}
+					</div>
+				),
+			})
+		}
+	}, [])
+
+	useEffect(() => {
 		const total = currentOrder.products.reduce((acc, item) => acc + item.sellPrice * item.quantity, 0)
 		const salesTax = parseFloat((total * (salesTaxRate / 100)).toFixed(2))
 		const finalTotal = parseFloat((total + salesTax - currentOrder.discount + currentOrder.shipping).toFixed(2))
@@ -244,29 +269,12 @@ const OrderDetails = () => {
 			content: (orderItem) => (
 				<InputNumber
 					label=''
+					disabled={!isAdmin}
 					value={orderItem.quantity.toString()}
 					handleChange={(e) =>
 						handleProductPropertyChange(orderItem, 'quantity', parseInt(e.currentTarget.value))
 					}
 				/>
-			),
-		},
-		{
-			key: 'buyPrice',
-			label: 'Buy Price',
-			content: (orderItem) => (
-				<div className='price-container'>
-					<InputNumber
-						label=''
-						value={`${orderItem.buyPrice.toString()}`}
-						handleChange={(e) =>
-							handleProductPropertyChange(orderItem, 'buyPrice', parseInt(e.currentTarget.value))
-						}
-					/>
-					{orderItem.quantity > 1 && (
-						<span className='estimate'> &#40;est. ${orderItem.buyPrice * orderItem.quantity}&#41;</span>
-					)}
-				</div>
 			),
 		},
 		{
@@ -276,6 +284,7 @@ const OrderDetails = () => {
 				<div className='price-container'>
 					<InputNumber
 						label=''
+						disabled={!isAdmin}
 						value={orderItem.sellPrice.toString()}
 						handleChange={(e) =>
 							handleProductPropertyChange(orderItem, 'sellPrice', parseInt(e.currentTarget.value))
@@ -288,6 +297,24 @@ const OrderDetails = () => {
 			),
 		},
 	]
+
+	const handleApproveOrder = async () => {
+		if(currentOrder.id == null) return
+		setIsLoading(true)
+		try {
+			const updatedOrder = await API.Orders.approveOrder(currentOrder.id?.toString()) // Wait for the state update
+			if(updatedOrder.data.statusCode == 200){
+				setOrderStatus(OrderStatus.Placed, true)
+				toast.success('Order Approved Successfully')
+			} else {
+				toast.error('Failed to approve order')
+			}
+		} catch(err){
+			console.error(err)
+		} finally{
+			setIsLoading(false)
+		}
+	}
 
 	const handleSubmitQuote = async () => {
 		setIsLoading(true)
@@ -418,45 +445,55 @@ const OrderDetails = () => {
 					/>
 				)}
 
-				<fieldset className='header-options' disabled={!currentOrder.customerId}>
-					{currentOrder.status >= OrderStatus.Placed && (
-						<InputDropdown
-							options={filteredOrderStatusList}
-							display='name'
-							label='Order Status'
-							value={currentOrder.status}
-							handleChange={handleStatusChange}
-							placeholder='Change Order Status'
-						/>
-					)}
-					<div className='button-container'>
-						{currentOrder.status <= OrderStatus.WaitingCustomerApproval && (
-							<button disabled={isLoading} onClick={handleSubmitQuote}>
-								{currentOrder.status === OrderStatus.WaitingCustomerApproval
-									? 'Re-Submit Quote to Customer'
-									: 'Submit Quote to Customer'}
-							</button>
-						)}
+				
 
-						{currentOrder.status == OrderStatus.Placed && (
-							<button disabled={isLoading} onClick={handleSubmitInvoice}>Submit Invoice to customer</button>
-							// <button onClick={handleSubmitInvoice}>Generate Invoice</button>
+			
+					<fieldset className='header-options' disabled={!currentOrder.customerId}>
+						{isAdmin &&(
+							<InputDropdown
+								options={filteredOrderStatusList}
+								display='name'
+								label='Order Status'
+								value={currentOrder.status}
+								handleChange={handleStatusChange}
+								placeholder='Change Order Status'
+							/>
 						)}
-						{currentOrder.status >= OrderStatus.Placed && (
-							<button disabled={isLoading} onClick={handleSubmitInvoice}>Submit Invoice to customer</button>
-							// <button onClick={handleSubmitInvoice}>Generate Invoice</button>
-						)}
-						{currentOrder.status != OrderStatus.Cancelled && (
-							<button disabled={isLoading} className='delete' onClick={() => setOrderStatus(OrderStatus.Cancelled, true)}>
-								Cancel Order
-							</button>
-						)}
+						<div className='button-container'>
+							{isAdmin && currentOrder.status <= OrderStatus.WaitingCustomerApproval && (
+								<button disabled={isLoading} onClick={handleSubmitQuote}>
+									{currentOrder.status === OrderStatus.WaitingCustomerApproval
+										? 'Re-Submit Quote to Customer'
+										: 'Submit Quote to Customer'}
+								</button>
+							)}
+							
+							{!isAdmin && currentOrder.status == OrderStatus.WaitingCustomerApproval && (
+								<button disabled={isLoading} onClick={handleApproveOrder}>Approve Order</button>
+							)}
 
-						<button  onClick={() => updateOrder(null, false)} disabled={isLoading}>
-							{isLoading ? <i className='fa-solid fa-spinner animate-spin'/> : 'Save'}
-						</button>
-					</div>
-				</fieldset>
+
+							{isAdmin && currentOrder.status == OrderStatus.Placed && (
+								<button disabled={isLoading} onClick={handleSubmitInvoice}>Submit Invoice to customer</button>
+								// <button onClick={handleSubmitInvoice}>Generate Invoice</button>
+							)}
+							{isAdmin && currentOrder.status >= OrderStatus.Placed && (
+								<button disabled={isLoading} onClick={handleSubmitInvoice}>Submit Invoice to customer</button>
+								// <button onClick={handleSubmitInvoice}>Generate Invoice</button>
+							)}
+							{isAdmin && currentOrder.status != OrderStatus.Cancelled && (
+								<button disabled={isLoading} className='delete' onClick={() => setOrderStatus(OrderStatus.Cancelled, true)}>
+									Cancel Order
+								</button>
+							)}
+
+							{isAdmin &&
+								<button  onClick={() => updateOrder(null, false)} disabled={isLoading}>
+									{isLoading ? <i className='fa-solid fa-spinner animate-spin'/> : 'Save'}
+								</button>
+							}
+						</div>
+					</fieldset>
 			</section>
 			<section className='product-details'>
 				<span className='section-title'>Product Details</span>
@@ -470,25 +507,28 @@ const OrderDetails = () => {
 					/>
 				</fieldset>
 
-				<div className='add-product-container'>
-					<InputDropdown<Product>
-						options={productsList}
-						display='name'
-						label='Add Product To Order'
-						value={product?.id ?? ''}
-						handleChange={handleSelectProduct}
-						placeholder='Select a Product'
-						customClass='primary'
-						filterIfSelected={getSelectedProducts}
-					/>
-					<button
-						disabled={!product || hasProductInList}
-						onClick={handleAddingProduct}
-						className='responsive-icon'>
-						<span>Add Product</span>
-						<i className='fa-solid fa-plus' />
-					</button>
-				</div>
+				{isAdmin && (
+					<div className='add-product-container'>
+						<InputDropdown<Product>
+							options={productsList}
+							display='name'
+							label='Add Product To Order'
+							value={product?.id ?? ''}
+							handleChange={handleSelectProduct}
+							placeholder='Select a Product'
+							customClass='primary'
+							filterIfSelected={getSelectedProducts}
+						/>
+						<button
+							disabled={!product || hasProductInList}
+							onClick={handleAddingProduct}
+							className='responsive-icon'>
+							<span>Add Product</span>
+							<i className='fa-solid fa-plus' />
+						</button>
+					</div>
+				)}
+
 			</section>
 			<section className='purchase-figures'>
 				<span className='section-title'>Purchase Figures</span>
@@ -516,16 +556,18 @@ const OrderDetails = () => {
 						/>
 						<InputNumber disabled={true} label='Sales Tax' value={currentOrder.salesTax.toString()} />
 					</div>
-					<InputNumber readOnly={!isAdmin} label='Total' value={currentOrder.total.toString()} />
+					<InputNumber disabled={!isAdmin} label='Total' value={currentOrder.total.toString()} />
 				</form>
 			</section>
 
-			<section className='footer'>
-				<button className='error' onClick={() => route.back()}>
-					Back
-				</button>
-				<button onClick={() => updateOrder()}>Save</button>
-			</section>
+			{isAdmin && (
+				<section className='footer'>
+					<button className='error' onClick={() => route.back()}>
+						Back
+					</button>
+					<button onClick={() => updateOrder()}>Save</button>
+				</section>
+			)}
 		</div>
 	)
 }

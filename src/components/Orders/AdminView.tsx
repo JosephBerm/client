@@ -25,15 +25,13 @@ function AdminView() {
 	})
 
 	const handleOrderDeletion = async (id: number) => {
+		console.log("AAA", id)
 		const originalList = [...orders]
+		console.log(orders)
+
+		console.log(originalList)
 		try {
 			setIsLoading(true)
-
-			const toDelete = originalList.findIndex((order) => order.id === id)
-			if (toDelete < 0) return
-
-			const newList = originalList.toSpliced(toDelete, 1)
-			setOrders(newList)
 
 			const { data } = await API.Orders.delete(id)
 			if (data.statusCode != 200) {

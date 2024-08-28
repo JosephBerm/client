@@ -61,7 +61,7 @@ const API = {
 				await HttpService.post<PagedResult<Product>>(`/Products/search`, search),
 			searchPublic: async (search: GenericSearchFilter) =>
 				await HttpService.post<PagedResult<Product>>(`/Products/search/public`, search),
-			getAllCategories: async () => await HttpService.get<ProductsCategory[]>('/Products/categories/clean'),
+			getAllCategories: async () => await HttpService.get<ProductsCategory[]>('/Products/categories/clean')
 		},
 	},
 	Quotes: {
@@ -98,6 +98,7 @@ const API = {
 			await HttpService.post<Boolean>(`/orders/submit/quote`, req),
 		submitInvoice: async <Boolean>(req: SubmitOrderRequest) =>
 			await HttpService.post<Boolean>(`/orders/submit/invoice`, req),
+		approveOrder: async (orderId: string) => await HttpService.put<boolean>(`/orders/approve/${orderId}`, null),
 	},
 	Notifications: {
 		get: async <T>(id: string) => {

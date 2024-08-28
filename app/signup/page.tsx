@@ -12,6 +12,7 @@ import '@/styles/pages/login.css'
 
 import FormInputTextBox from '@/components/FormInputTextbox'
 import IsBusyLoading from '@/components/isBusyLoading'
+import { toast } from 'react-toastify'
 
 const Page = () => {
 	const [form, setForm] = useState(new SignupForm())
@@ -27,8 +28,15 @@ const Page = () => {
 				setCookie('at', JWTToken)
 				instance.defaults.headers.common['Authorization'] = `Bearer ${JWTToken}`
 
+				if(authenticated.statusCode == 200) {
+					toast.success(authenticated.message ?? 'Account created successfully')
+					//route to dashboard
+					router.push('/dashboard')
+				} else {
+					console.error(authenticated.message)
+					toast.error(authenticated.message ?? 'Account creation failed')
+				}
 				//route to dashboard
-				router.push('/dashboard')
 			} else {
 				console.error(authenticated.message)
 			}
@@ -41,7 +49,7 @@ const Page = () => {
 
 	const routeToLogin = () => {
 		//route to sign up
-		router.push('/customer-login')
+		//router.push('/customer-login')
 	}
 
 	return (
@@ -55,8 +63,8 @@ const Page = () => {
 						<Formik
 							initialValues={form}
 							validationSchema={Validations.signupSchema}
-							onSubmit={(values, { setSubmitting }) => {
-								handleLogin(values)
+							onSubmit={async (values, { setSubmitting }) => {
+								await handleLogin(values)
 								setSubmitting(false)
 							}}>
 							{({ isSubmitting }) => (
