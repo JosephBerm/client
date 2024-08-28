@@ -15,19 +15,11 @@ function QuantitySelector({ quantity, handleDelete, handleChange }: QuantitySele
 					<i className='fas fa-trash' />
 				</button>
 			) : (
-				<button className='remove' disabled={true} onClick={() => {}}>
+				<button className='remove' disabled={!handleDelete} onClick={() => handleChange(quantity - 1)}>
 					<i className='fa-solid fa-arrow-down' />
 				</button>
 			)}
 
-			{quantity > 0 && !handleDelete && (
-				<button
-					className='remove'
-					disabled={!handleDelete && quantity > 0}
-					onClick={() => handleChange(quantity - 1)}>
-					<i className='fa-solid fa-arrow-down' />
-				</button>
-			)}
 
 			{/* create component out of this called QuantitySelector */}
 			{/* it would have a delete button on it. */}
