@@ -98,7 +98,7 @@ const API = {
 			await HttpService.post<Boolean>(`/orders/submit/quote`, req),
 		submitInvoice: async <Boolean>(req: SubmitOrderRequest) =>
 			await HttpService.post<Boolean>(`/orders/submit/invoice`, req),
-		approveOrder: async (orderId: string) => await HttpService.put<boolean>(`/orders/approve/${orderId}`, null),
+		approveOrder: async (orderId: string) => await HttpService.post<boolean>(`/orders/approve/${orderId}`, null),
 	},
 	Notifications: {
 		get: async <T>(id: string) => {

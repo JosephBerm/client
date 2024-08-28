@@ -215,31 +215,7 @@ const OrderDetails = () => {
 		fetchData()
 	}, [isAdmin])
 
-	useEffect(() => {
-
-		if(isAdmin){
-			columns.push({
-				key: 'buyPrice',
-				label: 'Buy Price',
-				content: (orderItem) => (
-					<div className='price-container'>
-						<InputNumber
-							label=''
-							disabled={!isAdmin}
-							value={`${orderItem.buyPrice.toString()}`}
-							handleChange={(e) =>
-								handleProductPropertyChange(orderItem, 'buyPrice', parseInt(e.currentTarget.value))
-							}
-						/>
-						{orderItem.quantity > 1 && (
-							<span className='estimate'> &#40;est. ${orderItem.buyPrice * orderItem.quantity}&#41;</span>
-						)}
-					</div>
-				),
-			})
-		}
-	}, [])
-
+	
 	useEffect(() => {
 		const total = currentOrder.products.reduce((acc, item) => acc + item.sellPrice * item.quantity, 0)
 		const salesTax = parseFloat((total * (salesTaxRate / 100)).toFixed(2))
@@ -298,13 +274,37 @@ const OrderDetails = () => {
 		},
 	]
 
+
+	if(isAdmin){
+		columns.push({
+			key: 'buyPrice',
+			label: 'Buy Price',
+			content: (orderItem) => (
+				<div className='price-container'>
+					<InputNumber
+						label=''
+						disabled={!isAdmin}
+						value={`${orderItem.buyPrice.toString()}`}
+						handleChange={(e) =>
+							handleProductPropertyChange(orderItem, 'buyPrice', parseInt(e.currentTarget.value))
+						}
+					/>
+					{orderItem.quantity > 1 && (
+						<span className='estimate'> &#40;est. ${orderItem.buyPrice * orderItem.quantity}&#41;</span>
+					)}
+				</div>
+			),
+		})
+	}
+
+
 	const handleApproveOrder = async () => {
 		if(currentOrder.id == null) return
 		setIsLoading(true)
 		try {
 			const updatedOrder = await API.Orders.approveOrder(currentOrder.id?.toString()) // Wait for the state update
 			if(updatedOrder.data.statusCode == 200){
-				setOrderStatus(OrderStatus.Placed, true)
+				setOrderStatus(OrderStatus.Placed, false)
 				toast.success('Order Approved Successfully')
 			} else {
 				toast.error('Failed to approve order')
