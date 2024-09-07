@@ -58,6 +58,8 @@ export class OrderItem {
 	order: Order | null = null
 	orderId: number = 0
 	transitDetails: TransitDetails = new TransitDetails()
+	trackingNumber: string | null = null
+	tax: number = 0
 
 	constructor(param?: Partial<OrderItem>) {
 		if (param) {

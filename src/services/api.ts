@@ -17,6 +17,7 @@ import { PagedResult } from '@/classes/Base/PagedResult'
 import { GenericSearchFilter } from '@/classes/Base/GenericSearchFilter'
 import { PagedData } from '@/classes/PagedData'
 import { SubmitOrderRequest } from '@/classes/RequestClasses'
+import FinanceSearchFilter from '../classes/FinanceSearchFilter'
 
 const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
@@ -135,7 +136,9 @@ const API = {
 	},
 	Finance: {
 		getFinanceNumbers: async () => await HttpService.get<FinanceNumbers>('/finance/analytics'),
-	},
+		searchFinnanceNumbers: async (search: FinanceSearchFilter) => await HttpService.post<FinanceNumbers>('/finance/analytics/search', search),
+		downloadFinanceNumbers: async (search: FinanceSearchFilter) => await HttpService.download<Blob>('/finance/orders/download', search, { responseType: 'blob' }),
+	}
 }
 
 export default API

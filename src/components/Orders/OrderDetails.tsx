@@ -67,13 +67,19 @@ const OrderDetails = () => {
 
 	const handleProductPropertyChange = (
 		orderItem: OrderItem,
-		key: 'quantity' | 'sellPrice' | 'buyPrice',
-		value: number
+		key: 'quantity' | 'sellPrice' | 'buyPrice' | 'trackingNumber' | 'tax',
+		value: number | string
 	) => {
 		setCurrentOrder((prev) => {
 			const updatedProducts = prev.products.map((p) => {
 				if (p.product?.id === orderItem.product?.id) {
-					return Object.assign({}, p, { [key]: value })
+					if(key != "tax") {
+						if(typeof value === 'string') value = parseInt(value)
+						const newTax = value * (salesTaxRate / 100)
+						return Object.assign({}, p, { [key]: value, tax: newTax })
+					} else {
+						return Object.assign({}, p, { [key]: value })
+					}
 				}
 				return p
 			})
@@ -272,6 +278,38 @@ const OrderDetails = () => {
 				</div>
 			),
 		},
+		{
+			key: 'tax',
+			label: 'Tax',
+			content: (orderItem) => (
+				<div className='price-container'>
+					<InputNumber
+						label=''
+						disabled={!isAdmin}
+						value={orderItem.tax.toString()}
+						handleChange={(e) =>
+							handleProductPropertyChange(orderItem, 'tax', parseInt(e.currentTarget.value))
+						}
+					/>
+					{orderItem.quantity > 1 && (
+						<span className='estimate'> &#40;est. %{salesTaxRate}&#41;</span>
+					)}
+				</div>
+			),
+		},
+		{
+			key: 'trackingNumber',
+			label: 'Tracking #',
+			content: (orderItem) => (
+				<div className='price-container'>
+					<InputTextBox 
+						type={'text'} 
+						value={orderItem.trackingNumber ?? ''}
+						handleChange={(e) => handleProductPropertyChange(orderItem, 'trackingNumber', e.currentTarget.value)}					
+					/>
+				</div>
+			),
+		},
 	]
 
 
@@ -295,6 +333,9 @@ const OrderDetails = () => {
 				</div>
 			),
 		})
+
+		// set tracking to last in array
+		columns.push(columns.splice(columns.findIndex((column) => column.key === 'trackingNumber'), 1)[0])
 	}
 
 
@@ -548,12 +589,12 @@ const OrderDetails = () => {
 						/>
 					</div>
 					<div className='gapped-fields'>
-						<InputNumber
+						{/* <InputNumber
 							disabled={!isAdmin}
 							label='Sales Tax %'
 							value={salesTaxRate.toString()}
 							handleChange={handleChangeSalesTaxPercentage}
-						/>
+						/> */}
 						<InputNumber disabled={true} label='Sales Tax' value={currentOrder.salesTax.toString()} />
 					</div>
 					<InputNumber disabled={!isAdmin} label='Total' value={currentOrder.total.toString()} />

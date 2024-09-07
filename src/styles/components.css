@@ -262,6 +262,14 @@
     border-color: #ffecb5;
 }
 
+.date-picker-wrapper {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+}
+
 @media screen and (min-width: 768px) {
 	.FormContainer .InputTextBox,
 	.FormContainer .InputDropdown,
@@ -272,4 +280,13 @@
 	.view-all-products-button {
 		max-width: 250px;
 	}
+
+	.date-picker-wrapper {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+	}
+	
 }

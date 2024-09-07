@@ -65,5 +65,9 @@ export class HttpService {
 		return HttpService.instance.delete<Response<T>>(url, data)
 	}
 
+	public static download<T>(url: string, data: any = null, config: AxiosRequestConfig = {}): Promise<AxiosResponse<T>> {
+		return HttpService.instance.post<T>(url, data, config)
+	}
+
 	// Add other HTTP methods as needed
 }

@@ -63,7 +63,7 @@ const Page = () => {
 	}
 
 	const getImage = (item: CartProduct) => {
-		if(item.product == null || item.product?.files.length <= 0) return <i className='fa-regular fa-image' />
+		if (item.product == null || item.product?.files.length <= 0) return <i className='fa-regular fa-image' />
 		
 		return <Image
 			src={`${process.env.API_URL}/products/image?productId=${item.product?.id}&image=${
