@@ -68,6 +68,10 @@ export default class Validations {
 		firstName: yup.string().required(),
 		lastName: yup.string().required(),
 	})
+
+	public static modifyAccountSchema = yup.object().shape({
+		email: yup.string().email().required()
+	})
 }
 
 // DO NOT ALLOW ANY ITEM TO BE SAVED IN THE DB TO HAVE ANY SPECIAL CHARACTERS EXCEPT '&' and '@'

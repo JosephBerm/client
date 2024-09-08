@@ -25,6 +25,7 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 	const User = useAccountStore((state) => state.User)
     const params  = useParams()
 
+	
 	const handleSubmit = async (UserData: User) => {
 		try {
 			UserData.notifications = []
@@ -35,24 +36,25 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 			if(isNaN(UserData.customerId)) UserData.customerId = -99
 			setIsLoading(true)
 			const { data } = await API.Accounts.update<Boolean>(UserData)
-
+			
 			if (data?.statusCode != 200) return toast.error(data.message)
-			toast.success(data.message)
-
+				toast.success(data.message)
+			
 			if (onUserUpdate) onUserUpdate(UserData)
-		} catch (err: any) {
-			toast.error(err.message)
-		} finally {
-			setIsLoading(false)
-		}
+			} catch (err: any) {
+		toast.error(err.message)
+	} finally {
+		setIsLoading(false)
 	}
+}
 
 	return (
 		<Formik
 			enableReinitialize={true}
 			initialValues={user}
-			validationSchema={Validations.profileSchema}
+			validationSchema={Validations.modifyAccountSchema}
 			onSubmit={(values, { setSubmitting }) => {
+				console.log("WHASDASD")
 				handleSubmit(values)
 				setSubmitting(false)
 			}}>
