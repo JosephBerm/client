@@ -73,7 +73,7 @@ const OrderDetails = () => {
 		setCurrentOrder((prev) => {
 			const updatedProducts = prev.products.map((p) => {
 				if (p.product?.id === orderItem.product?.id) {
-					if(key != "tax") {
+					if(key == "sellPrice") {
 						if(typeof value === 'string') value = parseInt(value)
 						const newTax = value * (salesTaxRate / 100)
 						return Object.assign({}, p, { [key]: value, tax: newTax })
@@ -303,6 +303,7 @@ const OrderDetails = () => {
 			content: (orderItem) => (
 				<div className='price-container'>
 					<InputTextBox 
+						disabled={!isAdmin}
 						type={'text'} 
 						value={orderItem.trackingNumber ?? ''}
 						handleChange={(e) => handleProductPropertyChange(orderItem, 'trackingNumber', e.currentTarget.value)}					
@@ -363,7 +364,7 @@ const OrderDetails = () => {
 		try {
 			const updatedOrder = await setOrderStatus(OrderStatus.WaitingCustomerApproval) // Wait for the state update
 
-			await updateOrder(null, false) // Call updateOrder with the updated state
+			await updateOrder(updatedOrder, false) // Call updateOrder with the updated state
 			const request = new SubmitOrderRequest({
 				quoteId: currentOrder.id,
 				emails: [currentOrder.customer?.email ?? ''],
