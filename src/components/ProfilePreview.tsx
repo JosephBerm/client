@@ -1,7 +1,12 @@
 import React from 'react'
+import { deleteCookie } from 'cookies-next'
 import FloatingMenu, { FloatingMenuProps } from '@/common/FloatingMenu'
 
 function ProfilePreview() {
+	const handleLogout = () => {
+		deleteCookie('at')
+		window.location.reload()
+	}
 	const floatingMenuChildren: FloatingMenuProps = {
 		children: {
 			buttonSlot: (
@@ -13,7 +18,9 @@ function ProfilePreview() {
 				<>
 					<div>Settings</div>
 					<div>App Preferences</div>
-					<div>Logout</div>
+					<div className='clickable' onClick={handleLogout}>
+						Logout
+					</div>
 				</>
 			),
 		},

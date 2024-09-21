@@ -218,7 +218,7 @@
 	}
 
 	.OrderDetails section.general .order-title {
-		align-items: flex-start;
+		align-items: center;
 		gap: 2vh;
 		width: 100%;
 		grid-column: 1 / -1;
@@ -234,6 +234,9 @@
 /* @media screen and (min-width: 1440px) and (min-height: 1618px) {
 } */
 @media screen and (min-width: 1280px) {
+	.OrderDetails section.general .order-title {
+		align-items: flex-start;
+	}
 	.OrderDetails section.general .header-options {
 		flex-direction: row;
 		align-items: flex-end;

@@ -33,6 +33,7 @@ const Page = () => {
 	})
 
 	const loggedIn = useAccountStore((state) => state.LoggedIn)
+	const user = useAccountStore((state) => state.User)
 	const cartStore = useCartStore((state) => state.Cart)
 	const setCart = useCartStore((state) => state.setCart)
 	const deleteProdFromCart = useCartStore((state) => state.removeProduct)
@@ -64,17 +65,18 @@ const Page = () => {
 
 	const getImage = (item: CartProduct) => {
 		if (item.product == null || item.product?.files.length <= 0) return <i className='fa-regular fa-image' />
-		
-		return <Image
-			src={`${process.env.API_URL}/products/image?productId=${item.product?.id}&image=${
-				item.product?.files[0]?.name ?? ''
-			}`}
-			width={125}
-			height={125}
-			style={{ width: 'auto' }}
-			alt='Product Image'
-		/>
-		
+
+		return (
+			<Image
+				src={`${process.env.API_URL}/products/image?productId=${item.product?.id}&image=${
+					item.product?.files[0]?.name ?? ''
+				}`}
+				width={125}
+				height={125}
+				style={{ width: 'auto' }}
+				alt='Product Image'
+			/>
+		)
 	}
 
 	const updateName = (key: keyof Name, newValue: string) => {
@@ -96,6 +98,26 @@ const Page = () => {
 	}
 
 	useEffect(() => {}, [cartStore, isLoading])
+	useEffect(() => {
+		// Check if the user has the necessary details
+		if (user) {
+			// Create a new object to hold the updated form values
+			const updatedValues = { ...formik.values }
+
+			// Update transitDetails with the user's shipping address if available
+			if (user.customer?.shippingAddress) {
+				updatedValues.transitDetails = user.customer.shippingAddress
+			}
+
+			// Update the name field with the user's name if available
+			if (user.name) {
+				updatedValues.name = user.name
+			}
+
+			// Set the updated form values using formik's setValues
+			formik.setValues(updatedValues)
+		}
+	}, [user])
 
 	return (
 		<div className='Cart'>

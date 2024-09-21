@@ -72,17 +72,19 @@ export class PasswordForm {
 	}
 }
 
-export class SignupForm {
+export class RegisterModel {
 	public username: string = ''
 	public email: string = ''
 	public password: string = ''
-	public firstName: string = ''
-	public lastName: string = ''
+	public name: Name = new Name()
 	public dateOfBirth?: Date
 
-	constructor(param?: Partial<SignupForm>) {
+	constructor(param?: Partial<RegisterModel>) {
 		if (param) {
 			Object.assign(this, param)
+			if (param.name) {
+				this.name = new Name(param.name)
+			}
 			if (param.dateOfBirth) {
 				this.dateOfBirth = new Date(param.dateOfBirth)
 			}

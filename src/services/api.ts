@@ -1,7 +1,7 @@
 import { HttpService } from '@/services/httpService'
 import { AxiosRequestConfig } from 'axios'
 
-import User, { SignupForm } from '@/classes/User'
+import User, { RegisterModel } from '@/classes/User'
 import Order from '@/classes/Order'
 import Quote from '@/classes/Quote'
 import Company from '@/classes/Company'
@@ -21,7 +21,7 @@ import FinanceSearchFilter from '../classes/FinanceSearchFilter'
 
 const API = {
 	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
-	signup: async (form: SignupForm) => await HttpService.post<any>('/account/signup', form),
+	signup: async (form: RegisterModel) => await HttpService.post<any>('/account/signup', form),
 	Accounts: {
 		get: async <T>(id: string | null | undefined) => await HttpService.get<User>(`/account${id ? '/' + id : ''}`),
 		update: async <T>(account: User) => await HttpService.put<T>('/account', account),
@@ -62,7 +62,7 @@ const API = {
 				await HttpService.post<PagedResult<Product>>(`/Products/search`, search),
 			searchPublic: async (search: GenericSearchFilter) =>
 				await HttpService.post<PagedResult<Product>>(`/Products/search/public`, search),
-			getAllCategories: async () => await HttpService.get<ProductsCategory[]>('/Products/categories/clean')
+			getAllCategories: async () => await HttpService.get<ProductsCategory[]>('/Products/categories/clean'),
 		},
 	},
 	Quotes: {
@@ -136,9 +136,11 @@ const API = {
 	},
 	Finance: {
 		getFinanceNumbers: async () => await HttpService.get<FinanceNumbers>('/finance/analytics'),
-		searchFinnanceNumbers: async (search: FinanceSearchFilter) => await HttpService.post<FinanceNumbers>('/finance/analytics/search', search),
-		downloadFinanceNumbers: async (search: FinanceSearchFilter) => await HttpService.download<Blob>('/finance/orders/download', search, { responseType: 'blob' }),
-	}
+		searchFinnanceNumbers: async (search: FinanceSearchFilter) =>
+			await HttpService.post<FinanceNumbers>('/finance/analytics/search', search),
+		downloadFinanceNumbers: async (search: FinanceSearchFilter) =>
+			await HttpService.download<Blob>('/finance/orders/download', search, { responseType: 'blob' }),
+	},
 }
 
 export default API

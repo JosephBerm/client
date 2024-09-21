@@ -51,8 +51,8 @@ function AccountOrdersTable() {
 	const getOrders = async (isInitialLoad: boolean = true) => {
 		try {
 			setIsLoadingData(true)
-			if (User.customer) {
-				const { data } = await API.Orders.getFromCustomer(User.customer?.id)
+			if (User.customer?.id) {
+				const { data } = await API.Orders.getFromCustomer(User.customer.id)
 				if (!data.payload) throw data.message
 
 				setOrders(data.payload.map((x) => new Order(x)))
