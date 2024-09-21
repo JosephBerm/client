@@ -13,14 +13,13 @@ import UserInfoBasic from '@/components/Settings/UserInfoBasic'
 import UserInfoShipping from '@/components/Settings/UserInfoShipping'
 import UserInfoPrivacy from '@/components/Settings/UserInfoPrivacy'
 import UserInfoBilling from '@/components/Settings/UserInfoBilling'
-import { FormikProvider, useFormik, Form } from 'formik'
+import { FormikProvider, useFormik, Form, Formik } from 'formik'
 import InputTextBox from '@/components/InputTextBox'
 import FormInputTextBox from '@/components/FormInputTextbox'
 import ProfilePicture from '@/components/ProfilePicture'
 
 const Page = () => {
 	const { User: UserFromStore } = useAccountStore((state) => state)
-	console.log('UserFromStore', UserFromStore)
 
 	const [isLoading, setIsLoading] = useState(false)
 	const formik = useFormik({
@@ -30,19 +29,24 @@ const Page = () => {
 		},
 	})
 
+	// This will ensure that if userfromStore is loaded after the component is mounted, the formik values will be updated.
+	useEffect(() => {
+		formik.setValues(UserFromStore)
+	}, [UserFromStore])
+
 	const handleSubmit = async (UserData: User) => {
 		try {
-			//why were these here ?
-			// UserData.notifications = []
-			// UserData.customer = null
+			
+			UserData.notifications = [] 	// Prevents BE validation error. IF lets will fail to save because notifications expects a customer.
+			//UserData.customer = null
 
 			UserFromStore.role = parseInt(UserFromStore.role as any)
 			UserFromStore.customerId = parseInt(UserFromStore.customerId as any)
-			UserFromStore.notifications = []
+
 			if (isNaN(UserFromStore.customerId)) UserFromStore.customerId = -99
 			setIsLoading(true)
-			console.log('UserFromStore', UserFromStore)
-			const { data } = await API.Accounts.update<Boolean>(UserFromStore)
+			formik.values.notifications = [] // clear notifications to pass BE validation.
+			const { data } = await API.Accounts.update<Boolean>(formik.values)
 
 			if (data?.statusCode != 200) return toast.error(data.message)
 			toast.success(data.message)
@@ -59,6 +63,10 @@ const Page = () => {
 
 	const updateAddress = (key: keyof Address, newValue: string) => {
 		formik.setFieldValue(`transitDetails.${key}`, newValue)
+	}
+
+	const updateEmailAddress = (newValue: string) => {
+		formik.setFieldValue('email', newValue)
 	}
 
 	return (
@@ -87,15 +95,16 @@ const Page = () => {
 								className='faded-bg'
 							/>
 						</div>
-						<FormInputTextBox
-							label='Email Address'
-							name='emailAddress'
-							value={formik.values.email}
+						<InputTextBox
+						label='Email Address'
+						type='text'
+						value={formik.values.email}
+						handleChange={(e) => updateEmailAddress( e.currentTarget.value)}
 							className='faded-bg'
 						/>
 
 						{formik.values.customer && (
-							<div className='customer-container'>
+							<div className='customer-container mt-10'>
 								<h2>Shipping Information</h2>
 								<div className='address-container'>
 									<InputTextBox
@@ -129,38 +138,40 @@ const Page = () => {
 										className='faded-bg'
 									/>
 								</div>
-								<h2>Billing Information</h2>
-								<div className='address-container'>
-									<InputTextBox
-										label='Country'
-										type='text'
-										handleChange={(e) => updateAddress('country', e.currentTarget.value)}
-										value={formik.values.customer.billingAddress.country}
-										className='faded-bg'
-									/>
-									<div className='gapped-fields'>
+								<div className='mt-10'>
+									<h2>Billing Information</h2>
+									<div className='address-container'>
 										<InputTextBox
-											label='City'
+											label='Country'
 											type='text'
-											handleChange={(e) => updateAddress('city', e.currentTarget.value)}
-											value={formik.values.customer.billingAddress.city}
+											handleChange={(e) => updateAddress('country', e.currentTarget.value)}
+											value={formik.values.customer.billingAddress.country}
 											className='faded-bg'
 										/>
+										<div className='gapped-fields'>
+											<InputTextBox
+												label='City'
+												type='text'
+												handleChange={(e) => updateAddress('city', e.currentTarget.value)}
+												value={formik.values.customer.billingAddress.city}
+												className='faded-bg'
+											/>
+											<InputTextBox
+												label='State'
+												type='text'
+												handleChange={(e) => updateAddress('state', e.currentTarget.value)}
+												value={formik.values.customer.billingAddress.state}
+												className='faded-bg'
+											/>
+										</div>
 										<InputTextBox
-											label='State'
+											label='Zip Code'
 											type='text'
-											handleChange={(e) => updateAddress('state', e.currentTarget.value)}
-											value={formik.values.customer.billingAddress.state}
+											handleChange={(e) => updateAddress('zipCode', e.currentTarget.value)}
+											value={formik.values.customer.billingAddress.zipCode}
 											className='faded-bg'
 										/>
 									</div>
-									<InputTextBox
-										label='Zip Code'
-										type='text'
-										handleChange={(e) => updateAddress('zipCode', e.currentTarget.value)}
-										value={formik.values.customer.billingAddress.zipCode}
-										className='faded-bg'
-									/>
 								</div>
 							</div>
 						)}

@@ -17,6 +17,7 @@ const WrapperHandlerPublic = ({ User }: { User?: IUser }) => {
 	}, [])
 
 	useEffect(() => {
+		console.log("AAM i here")
 
 		if(User?.id != null) {
 			if	(!AccountInformation.LoggedIn) AccountInformation.login(User)
