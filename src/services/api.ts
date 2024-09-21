@@ -100,6 +100,7 @@ const API = {
 		submitInvoice: async <Boolean>(req: SubmitOrderRequest) =>
 			await HttpService.post<Boolean>(`/orders/submit/invoice`, req),
 		approveOrder: async (orderId: string) => await HttpService.post<boolean>(`/orders/approve/${orderId}`, null),
+		deleteProduct: async (orderId: string, productId: number) => await HttpService.delete<boolean>(`/orders/${orderId}/product/${productId}`),
 	},
 	Notifications: {
 		get: async <T>(id: string) => {

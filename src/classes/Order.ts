@@ -15,6 +15,7 @@ export default class Order {
 	salesTax = 0
 	shipping = 0
 	discount = 0
+	notes: string = ""
 
 	CreateFromQuote(quote: Quote) {
 		this.products = quote.products.map((cartProduct) => {

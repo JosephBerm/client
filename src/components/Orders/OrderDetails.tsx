@@ -25,6 +25,7 @@ import classNames from 'classnames'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import InputTextArea from '../InputTextArea'
 
 const OrderDetails = () => {
 	const route = useRouter()
@@ -111,22 +112,49 @@ const OrderDetails = () => {
 			.map((orderItem) => orderItem.product as Product)
 	}
 
-	const handleProductDeletion = (productId: string) => {
-		setCurrentOrder((current) => {
-			const updatedProducts = current.products.filter((p) => p.product?.id !== productId)
-			const total = updatedProducts.reduce((acc, item) => acc + item.sellPrice * item.quantity, 0)
-			const salesTax = updatedProducts.reduce(
-				(acc, item) => acc + item.sellPrice * item.quantity * (salesTaxRate / 100),
-				0
-			)
-			const finalTotal = total + salesTax - current.discount + current.shipping
+	const handleProductDeletion = async (productId: number) => {
+		// setCurrentOrder((current) => {
+		// 	const updatedProducts = current.products.filter((p) => p.product?.id !== productId)
+		// 	const total = updatedProducts.reduce((acc, item) => acc + item.sellPrice * item.quantity, 0)
+		// 	const salesTax = updatedProducts.reduce(
+		// 		(acc, item) => acc + item.sellPrice * item.quantity * (salesTaxRate / 100),
+		// 		0
+		// 	)
+		// 	const finalTotal = total + salesTax - current.discount + current.shipping
 
-			return Object.assign({}, current, {
-				products: updatedProducts,
-				total: finalTotal,
-				salesTax: salesTax,
-			})
-		})
+		// 	return Object.assign({}, current, {
+		// 		products: updatedProducts,
+		// 		total: finalTotal,
+		// 		salesTax: salesTax,
+		// 	})
+		// })
+		try {
+			if (currentOrder.id == null) return
+			const response = await API.Orders.deleteProduct(currentOrder.id?.toString(), productId)
+
+			if (response.data.statusCode === 200) {
+				toast.success('Product removed successfully')
+				const updatedProducts = currentOrder.products.filter((p) => p.id !== productId)
+				setCurrentOrder((current) => {
+					const total = updatedProducts.reduce((acc, item) => acc + item.sellPrice * item.quantity, 0)
+					const salesTax = updatedProducts.reduce(
+						(acc, item) => acc + item.sellPrice * item.quantity * (salesTaxRate / 100),
+						0
+					)
+					const finalTotal = total + salesTax - current.discount + current.shipping
+
+					return Object.assign({}, current, {
+						products: updatedProducts,
+						total: finalTotal,
+						salesTax: salesTax,
+					})
+				})
+			} else {
+				toast.error('Failed to remove product')
+			}
+		} catch(err : any) {
+			toast.error(err?.message ?? 'Failed to remove product')
+		} 
 	}
 
 	const handleSelectCustomer = (customerId: number | string) => {
@@ -455,7 +483,7 @@ const OrderDetails = () => {
 		key: 'delete',
 		label: '',
 		content: (orderItem) => (
-			<button className='delete aligned-to-center' onClick={() => handleProductDeletion(orderItem.product?.id!)}>
+			<button className='delete aligned-to-center' onClick={() => handleProductDeletion(orderItem.id as number)}>
 				<i className='fa-solid fa-trash-can' />
 			</button>
 		),
@@ -601,6 +629,22 @@ const OrderDetails = () => {
 					<InputNumber disabled={!isAdmin} label='Total' value={currentOrder.total.toString()} />
 				</form>
 			</section>
+
+			{isAdmin && 
+				<section className='notes'>
+					<form className='FormContainer'>
+						<div className='gapped-fields'>
+							<InputTextArea
+								rows={5}
+								label="Notes"
+								disabled={!isAdmin}
+								value={currentOrder.notes}
+								handleChange={(e) => setCurrentOrder((prev) => Object.assign({}, prev, { notes: e.target.value }))}		
+							/>
+						</div>
+					</form>
+				</section>
+			}
 
 			{isAdmin && (
 				<section className='footer'>

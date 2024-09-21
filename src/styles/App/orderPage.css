@@ -172,6 +172,7 @@
 	color: var(--brand-color-4);
 }
 
+.OrderDetails section.notes .FormContainer,
 .OrderDetails section.purchase-figures .FormContainer {
 	width: 100%;
 	max-width: 750px;
