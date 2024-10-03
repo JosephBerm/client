@@ -31,7 +31,6 @@ const OrderDetails = () => {
 	const route = useRouter()
 	const { id: orderId } = useParams()
 	const User = useAccountStore((state) => state.User)
-	console.log("XX", User.role == AccountRole.Admin)
 	const isAdmin = User.role == AccountRole.Admin
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [product, setProduct] = useState<Product | null>(null)
@@ -54,9 +53,9 @@ const OrderDetails = () => {
 				route.push(`${Routes.InternalAppRoute}/orders`)
 			}
 
-			if(!exitPage && data.statusCode === 200) {
+			if (!exitPage && data.statusCode === 200) {
 				toast.success('Order saved successfully')
-			} else if(data.statusCode !== 200) {
+			} else if (data.statusCode !== 200) {
 				toast.error(data.message ?? 'Failed to save order')
 			}
 		} catch (err) {
@@ -74,8 +73,8 @@ const OrderDetails = () => {
 		setCurrentOrder((prev) => {
 			const updatedProducts = prev.products.map((p) => {
 				if (p.product?.id === orderItem.product?.id) {
-					if(key == "sellPrice") {
-						if(typeof value === 'string') value = parseInt(value)
+					if (key == 'sellPrice') {
+						if (typeof value === 'string') value = parseInt(value)
 						const newTax = value * (salesTaxRate / 100)
 						return Object.assign({}, p, { [key]: value, tax: newTax })
 					} else {
@@ -112,24 +111,13 @@ const OrderDetails = () => {
 			.map((orderItem) => orderItem.product as Product)
 	}
 
-	const handleProductDeletion = async (productId: number) => {
-		// setCurrentOrder((current) => {
-		// 	const updatedProducts = current.products.filter((p) => p.product?.id !== productId)
-		// 	const total = updatedProducts.reduce((acc, item) => acc + item.sellPrice * item.quantity, 0)
-		// 	const salesTax = updatedProducts.reduce(
-		// 		(acc, item) => acc + item.sellPrice * item.quantity * (salesTaxRate / 100),
-		// 		0
-		// 	)
-		// 	const finalTotal = total + salesTax - current.discount + current.shipping
-
-		// 	return Object.assign({}, current, {
-		// 		products: updatedProducts,
-		// 		total: finalTotal,
-		// 		salesTax: salesTax,
-		// 	})
-		// })
+	const handleProductDeletion = async (productId: number | null) => {
 		try {
-			if (currentOrder.id == null) return
+			if (currentOrder.id == null || productId == null) {
+				toast.error('Invalid order or product ID')
+				return
+			}
+
 			const response = await API.Orders.deleteProduct(currentOrder.id?.toString(), productId)
 
 			if (response.data.statusCode === 200) {
@@ -152,9 +140,9 @@ const OrderDetails = () => {
 			} else {
 				toast.error('Failed to remove product')
 			}
-		} catch(err : any) {
+		} catch (err: any) {
 			toast.error(err?.message ?? 'Failed to remove product')
-		} 
+		}
 	}
 
 	const handleSelectCustomer = (customerId: number | string) => {
@@ -249,7 +237,6 @@ const OrderDetails = () => {
 		fetchData()
 	}, [isAdmin])
 
-	
 	useEffect(() => {
 		const total = currentOrder.products.reduce((acc, item) => acc + item.sellPrice * item.quantity, 0)
 		const salesTax = parseFloat((total * (salesTaxRate / 100)).toFixed(2))
@@ -319,9 +306,7 @@ const OrderDetails = () => {
 							handleProductPropertyChange(orderItem, 'tax', parseInt(e.currentTarget.value))
 						}
 					/>
-					{orderItem.quantity > 1 && (
-						<span className='estimate'> &#40;est. %{salesTaxRate}&#41;</span>
-					)}
+					{orderItem.quantity > 1 && <span className='estimate'> &#40;est. %{salesTaxRate}&#41;</span>}
 				</div>
 			),
 		},
@@ -330,19 +315,20 @@ const OrderDetails = () => {
 			label: 'Tracking #',
 			content: (orderItem) => (
 				<div className='price-container'>
-					<InputTextBox 
+					<InputTextBox
 						disabled={!isAdmin}
-						type={'text'} 
+						type={'text'}
 						value={orderItem.trackingNumber ?? ''}
-						handleChange={(e) => handleProductPropertyChange(orderItem, 'trackingNumber', e.currentTarget.value)}					
+						handleChange={(e) =>
+							handleProductPropertyChange(orderItem, 'trackingNumber', e.currentTarget.value)
+						}
 					/>
 				</div>
 			),
 		},
 	]
 
-
-	if(isAdmin){
+	if (isAdmin) {
 		columns.push({
 			key: 'buyPrice',
 			label: 'Buy Price',
@@ -364,24 +350,28 @@ const OrderDetails = () => {
 		})
 
 		// set tracking to last in array
-		columns.push(columns.splice(columns.findIndex((column) => column.key === 'trackingNumber'), 1)[0])
+		columns.push(
+			columns.splice(
+				columns.findIndex((column) => column.key === 'trackingNumber'),
+				1
+			)[0]
+		)
 	}
 
-
 	const handleApproveOrder = async () => {
-		if(currentOrder.id == null) return
+		if (currentOrder.id == null) return
 		setIsLoading(true)
 		try {
 			const updatedOrder = await API.Orders.approveOrder(currentOrder.id?.toString()) // Wait for the state update
-			if(updatedOrder.data.statusCode == 200){
+			if (updatedOrder.data.statusCode == 200) {
 				setOrderStatus(OrderStatus.Placed, false)
 				toast.success('Order Approved Successfully')
 			} else {
 				toast.error('Failed to approve order')
 			}
-		} catch(err){
+		} catch (err) {
 			console.error(err)
-		} finally{
+		} finally {
 			setIsLoading(false)
 		}
 	}
@@ -483,7 +473,7 @@ const OrderDetails = () => {
 		key: 'delete',
 		label: '',
 		content: (orderItem) => (
-			<button className='delete aligned-to-center' onClick={() => handleProductDeletion(orderItem.id as number)}>
+			<button className='delete aligned-to-center' onClick={() => handleProductDeletion(orderItem.id)}>
 				<i className='fa-solid fa-trash-can' />
 			</button>
 		),
@@ -515,55 +505,54 @@ const OrderDetails = () => {
 					/>
 				)}
 
-				
-
-			
-					<fieldset className='header-options' disabled={!currentOrder.customerId}>
-						{isAdmin &&(
-							<InputDropdown
-								options={filteredOrderStatusList}
-								display='name'
-								label='Order Status'
-								value={currentOrder.status}
-								handleChange={handleStatusChange}
-								placeholder='Change Order Status'
-							/>
+				<fieldset className='header-options' disabled={!currentOrder.customerId}>
+					{isAdmin && (
+						<InputDropdown
+							options={filteredOrderStatusList}
+							display='name'
+							label='Order Status'
+							value={currentOrder.status}
+							handleChange={handleStatusChange}
+							placeholder='Change Order Status'
+						/>
+					)}
+					<div className='button-container'>
+						{isAdmin && currentOrder.status <= OrderStatus.WaitingCustomerApproval && (
+							<button disabled={isLoading} onClick={handleSubmitQuote}>
+								{currentOrder.status === OrderStatus.WaitingCustomerApproval
+									? 'Re-Submit Quote to Customer'
+									: 'Submit Quote to Customer'}
+							</button>
 						)}
-						<div className='button-container'>
-							{isAdmin && currentOrder.status <= OrderStatus.WaitingCustomerApproval && (
-								<button disabled={isLoading} onClick={handleSubmitQuote}>
-									{currentOrder.status === OrderStatus.WaitingCustomerApproval
-										? 'Re-Submit Quote to Customer'
-										: 'Submit Quote to Customer'}
-								</button>
-							)}
-							
-							{!isAdmin && currentOrder.status == OrderStatus.WaitingCustomerApproval && (
-								<button disabled={isLoading} onClick={handleApproveOrder}>Approve Order</button>
-							)}
 
+						{!isAdmin && currentOrder.status == OrderStatus.WaitingCustomerApproval && (
+							<button disabled={isLoading} onClick={handleApproveOrder}>
+								Approve Order
+							</button>
+						)}
 
-							{isAdmin && currentOrder.status == OrderStatus.Placed && (
-								<button disabled={isLoading} onClick={handleSubmitInvoice}>Submit Invoice to customer</button>
-								// <button onClick={handleSubmitInvoice}>Generate Invoice</button>
-							)}
-							{isAdmin && currentOrder.status >= OrderStatus.Placed && (
-								<button disabled={isLoading} onClick={handleSubmitInvoice}>Submit Invoice to customer</button>
-								// <button onClick={handleSubmitInvoice}>Generate Invoice</button>
-							)}
-							{isAdmin && currentOrder.status != OrderStatus.Cancelled && (
-								<button disabled={isLoading} className='delete' onClick={() => setOrderStatus(OrderStatus.Cancelled, true)}>
-									Cancel Order
-								</button>
-							)}
+						{isAdmin && currentOrder.status >= OrderStatus.Placed && (
+							<button disabled={isLoading} onClick={handleSubmitInvoice}>
+								Submit Invoice to customer
+							</button>
+							// <button onClick={handleSubmitInvoice}>Generate Invoice</button>
+						)}
+						{isAdmin && currentOrder.status != OrderStatus.Cancelled && (
+							<button
+								disabled={isLoading}
+								className='delete'
+								onClick={() => setOrderStatus(OrderStatus.Cancelled, true)}>
+								Cancel Order
+							</button>
+						)}
 
-							{isAdmin &&
-								<button  onClick={() => updateOrder(null, false)} disabled={isLoading}>
-									{isLoading ? <i className='fa-solid fa-spinner animate-spin'/> : 'Save'}
-								</button>
-							}
-						</div>
-					</fieldset>
+						{isAdmin && (
+							<button onClick={() => updateOrder(null, false)} disabled={isLoading}>
+								{isLoading ? <i className='fa-solid fa-spinner animate-spin' /> : 'Save'}
+							</button>
+						)}
+					</div>
+				</fieldset>
 			</section>
 			<section className='product-details'>
 				<span className='section-title'>Product Details</span>
@@ -598,7 +587,6 @@ const OrderDetails = () => {
 						</button>
 					</div>
 				)}
-
 			</section>
 			<section className='purchase-figures'>
 				<span className='section-title'>Purchase Figures</span>
@@ -630,21 +618,23 @@ const OrderDetails = () => {
 				</form>
 			</section>
 
-			{isAdmin && 
+			{isAdmin && (
 				<section className='notes'>
 					<form className='FormContainer'>
 						<div className='gapped-fields'>
 							<InputTextArea
 								rows={5}
-								label="Notes"
+								label='Notes'
 								disabled={!isAdmin}
 								value={currentOrder.notes}
-								handleChange={(e) => setCurrentOrder((prev) => Object.assign({}, prev, { notes: e.target.value }))}		
+								handleChange={(e) =>
+									setCurrentOrder((prev) => Object.assign({}, prev, { notes: e.target.value }))
+								}
 							/>
 						</div>
 					</form>
 				</section>
-			}
+			)}
 
 			{isAdmin && (
 				<section className='footer'>
