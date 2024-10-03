@@ -431,8 +431,8 @@ input:disabled {
 	min-width: 99%;
 	max-width: 99%;
 	width: max-content;
-	color: var(--error-color);
-	padding-top: 5px;
+	background: var(--error-color);
+	padding: 5px 10px;
 	z-index: 1;
 	backdrop-filter: blur(1px);
 	animation: flipDown 0.1s ease-out forwards;

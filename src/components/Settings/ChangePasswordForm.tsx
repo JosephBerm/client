@@ -40,11 +40,6 @@ const ChangePasswordForm = () => {
 		initialValues: new PasswordForm(),
 		validationSchema: Validations.changePasswordSchema,
 		onSubmit: async (values) => {
-			//Is edit enabled ?
-			if (!isEditEnabled) {
-				setIsEditEnabled(true)
-				return
-			}
 			try {
 				await handleSubmit(values)
 			} catch (error: unknown) {
@@ -75,7 +70,10 @@ const ChangePasswordForm = () => {
 				<div className='button-container'>
 					<button
 						className={classNames({ 'form-button': true, 'edit-button': isEditEnabled })}
-						onClick={() => formik.submitForm()}>
+						onClick={() => {
+							if (isEditEnabled) formik.submitForm()
+							else setIsEditEnabled(true)
+						}}>
 						{isEditEnabled ? 'Save' : 'Change Password'}
 					</button>
 					<button

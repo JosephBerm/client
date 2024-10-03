@@ -9,14 +9,11 @@ import User from '@/classes/User'
 import Name from '@/classes/common/Name'
 import Address from '@/classes/common/Address'
 import { useAccountStore } from '@/src/stores/user'
-import UserInfoBasic from '@/components/Settings/UserInfoBasic'
-import UserInfoShipping from '@/components/Settings/UserInfoShipping'
-import UserInfoPrivacy from '@/components/Settings/UserInfoPrivacy'
-import UserInfoBilling from '@/components/Settings/UserInfoBilling'
 import { FormikProvider, useFormik, Form, Formik } from 'formik'
 import InputTextBox from '@/components/InputTextBox'
 import FormInputTextBox from '@/components/FormInputTextbox'
 import ProfilePicture from '@/components/ProfilePicture'
+import ChangePasswordForm from '@/components/Settings/ChangePasswordForm'
 
 const Page = () => {
 	const { User: UserFromStore } = useAccountStore((state) => state)
@@ -36,8 +33,7 @@ const Page = () => {
 
 	const handleSubmit = async (UserData: User) => {
 		try {
-			
-			UserData.notifications = [] 	// Prevents BE validation error. IF lets will fail to save because notifications expects a customer.
+			UserData.notifications = [] // Prevents BE validation error. IF lets will fail to save because notifications expects a customer.
 			//UserData.customer = null
 
 			UserFromStore.role = parseInt(UserFromStore.role as any)
@@ -61,8 +57,11 @@ const Page = () => {
 		formik.setFieldValue(`name.${key}`, newValue)
 	}
 
-	const updateAddress = (key: keyof Address, newValue: string) => {
-		formik.setFieldValue(`transitDetails.${key}`, newValue)
+	const updateShippingAddress = (key: keyof Address, newValue: string) => {
+		formik.setFieldValue(`customer.shippingAddress.${key}`, newValue)
+	}
+	const updateBillingAddress = (key: keyof Address, newValue: string) => {
+		formik.setFieldValue(`customer.billingAddress.${key}`, newValue)
 	}
 
 	const updateEmailAddress = (newValue: string) => {
@@ -74,119 +73,117 @@ const Page = () => {
 			<h2 className='page-title'>Profile Settings</h2>
 
 			<ProfilePicture />
-			{!isLoading && (
-				<FormikProvider value={formik}>
-					<h3>Basic Information</h3>
+			<FormikProvider value={formik}>
+				<h3>Basic Information</h3>
 
-					<Form onSubmit={formik.handleSubmit} className='FormContainer'>
-						<div className='gapped-fields'>
-							<InputTextBox
-								label='First Name'
-								type='text'
-								handleChange={(e) => updateName('first', e.currentTarget.value)}
-								value={formik.values.name.first}
-								className='faded-bg'
-							/>
-							<InputTextBox
-								label='Last Name'
-								type='text'
-								handleChange={(e) => updateName('last', e.currentTarget.value)}
-								value={formik.values.name.last}
-								className='faded-bg'
-							/>
-						</div>
+				<Form onSubmit={formik.handleSubmit} className='FormContainer'>
+					<div className='gapped-fields'>
 						<InputTextBox
+							label='First Name'
+							type='text'
+							handleChange={(e) => updateName('first', e.currentTarget.value)}
+							value={formik.values.name.first}
+							className='faded-bg'
+						/>
+						<InputTextBox
+							label='Last Name'
+							type='text'
+							handleChange={(e) => updateName('last', e.currentTarget.value)}
+							value={formik.values.name.last}
+							className='faded-bg'
+						/>
+					</div>
+					<InputTextBox
 						label='Email Address'
 						type='text'
 						value={formik.values.email}
-						handleChange={(e) => updateEmailAddress( e.currentTarget.value)}
-							className='faded-bg'
-						/>
+						handleChange={(e) => updateEmailAddress(e.currentTarget.value)}
+						className='faded-bg'
+					/>
 
-						{formik.values.customer && (
-							<div className='customer-container mt-10'>
-								<h2>Shipping Information</h2>
+					{formik.values.customer && (
+						<div className='customer-container mt-10'>
+							<h2>Shipping Information</h2>
+							<div className='address-container'>
+								<InputTextBox
+									label='Country'
+									type='text'
+									handleChange={(e) => updateShippingAddress('country', e.currentTarget.value)}
+									value={formik.values.customer.shippingAddress.country}
+									className='faded-bg'
+								/>
+								<div className='gapped-fields'>
+									<InputTextBox
+										label='City'
+										type='text'
+										handleChange={(e) => updateShippingAddress('city', e.currentTarget.value)}
+										value={formik.values.customer.shippingAddress.city}
+										className='faded-bg'
+									/>
+									<InputTextBox
+										label='State'
+										type='text'
+										handleChange={(e) => updateShippingAddress('state', e.currentTarget.value)}
+										value={formik.values.customer.shippingAddress.state}
+										className='faded-bg'
+									/>
+								</div>
+								<InputTextBox
+									label='Zip Code'
+									type='text'
+									handleChange={(e) => updateShippingAddress('zipCode', e.currentTarget.value)}
+									value={formik.values.customer.shippingAddress.zipCode}
+									className='faded-bg'
+								/>
+							</div>
+							<div className='mt-10'>
+								<h2>Billing Information</h2>
 								<div className='address-container'>
 									<InputTextBox
 										label='Country'
 										type='text'
-										handleChange={(e) => updateAddress('country', e.currentTarget.value)}
-										value={formik.values.customer.shippingAddress.country}
+										handleChange={(e) => updateBillingAddress('country', e.currentTarget.value)}
+										value={formik.values.customer.billingAddress.country}
 										className='faded-bg'
 									/>
 									<div className='gapped-fields'>
 										<InputTextBox
 											label='City'
 											type='text'
-											handleChange={(e) => updateAddress('city', e.currentTarget.value)}
-											value={formik.values.customer.shippingAddress.city}
+											handleChange={(e) => updateBillingAddress('city', e.currentTarget.value)}
+											value={formik.values.customer.billingAddress.city}
 											className='faded-bg'
 										/>
 										<InputTextBox
 											label='State'
 											type='text'
-											handleChange={(e) => updateAddress('state', e.currentTarget.value)}
-											value={formik.values.customer.shippingAddress.state}
+											handleChange={(e) => updateBillingAddress('state', e.currentTarget.value)}
+											value={formik.values.customer.billingAddress.state}
 											className='faded-bg'
 										/>
 									</div>
 									<InputTextBox
 										label='Zip Code'
 										type='text'
-										handleChange={(e) => updateAddress('zipCode', e.currentTarget.value)}
-										value={formik.values.customer.shippingAddress.zipCode}
+										handleChange={(e) => updateBillingAddress('zipCode', e.currentTarget.value)}
+										value={formik.values.customer.billingAddress.zipCode}
 										className='faded-bg'
 									/>
 								</div>
-								<div className='mt-10'>
-									<h2>Billing Information</h2>
-									<div className='address-container'>
-										<InputTextBox
-											label='Country'
-											type='text'
-											handleChange={(e) => updateAddress('country', e.currentTarget.value)}
-											value={formik.values.customer.billingAddress.country}
-											className='faded-bg'
-										/>
-										<div className='gapped-fields'>
-											<InputTextBox
-												label='City'
-												type='text'
-												handleChange={(e) => updateAddress('city', e.currentTarget.value)}
-												value={formik.values.customer.billingAddress.city}
-												className='faded-bg'
-											/>
-											<InputTextBox
-												label='State'
-												type='text'
-												handleChange={(e) => updateAddress('state', e.currentTarget.value)}
-												value={formik.values.customer.billingAddress.state}
-												className='faded-bg'
-											/>
-										</div>
-										<InputTextBox
-											label='Zip Code'
-											type='text'
-											handleChange={(e) => updateAddress('zipCode', e.currentTarget.value)}
-											value={formik.values.customer.billingAddress.zipCode}
-											className='faded-bg'
-										/>
-									</div>
-								</div>
 							</div>
-						)}
-					</Form>
-				</FormikProvider>
-			)}
-
-			{/* <UserInfoBasic />
-			<UserInfoShipping />
-			<UserInfoBilling /> */}
+						</div>
+					)}
+				</Form>
+			</FormikProvider>
 
 			<button className='btn btn-primary mt-10' onClick={() => handleSubmit(UserFromStore)} disabled={isLoading}>
 				{isLoading ? 'Loading...' : 'Save Changes'}
 			</button>
-			<UserInfoPrivacy />
+
+			<section className='Security'>
+				<h3>Security & Privacy</h3>
+				<ChangePasswordForm />
+			</section>
 		</div>
 	)
 }
