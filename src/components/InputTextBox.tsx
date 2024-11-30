@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, ChangeEvent, ReactNode } from 'react'
+import React, { useRef, ChangeEvent, ReactNode, KeyboardEvent } from 'react'
 
 type inputMode = 'search' | 'email' | 'tel' | 'text' | 'url' | 'none' | 'numeric' | 'decimal' | undefined
 
@@ -24,6 +24,7 @@ export interface InputType {
 	maxLength?: number
 	handleChange?: (value: ChangeEvent<HTMLInputElement>) => void
 	handleBlur?: (value: ChangeEvent<HTMLInputElement>) => void
+	handleKeyDown?: (e: KeyboardEvent) => void
 	handleFocus?: () => void
 	className?: string
 }
@@ -43,6 +44,7 @@ const InputTextBox: React.FC<InputType> = ({
 	handleChange = () => {},
 	handleBlur,
 	handleFocus,
+	handleKeyDown,
 	className: cssClass,
 }) => {
 	const inputRef = useRef<HTMLInputElement>(null)
@@ -98,6 +100,7 @@ const InputTextBox: React.FC<InputType> = ({
 				onChange={(e) => handleChange(e)}
 				onBlur={handleBlur}
 				onFocus={handleFocus}
+				onKeyDown={handleKeyDown}
 				className={`border-b border-gray-300`}
 			/>
 

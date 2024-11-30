@@ -13,6 +13,7 @@ import Order from '@/classes/Order'
 import Table from '@/common/table'
 import WealthyTable from '@/components/WealthyTable'
 import { useRouter } from 'next/navigation'
+import classNames from 'classnames'
 
 function AccountOrdersTable() {
 	const router = useRouter()
@@ -78,7 +79,7 @@ function AccountOrdersTable() {
 	// }, [orders])
 
 	return (
-		<div className='AccountOrdersTable'>
+		<div className={classNames({ AccountOrdersTable: true, empty: orders.length === 0 })}>
 			{!isLoadingData && (
 				<button className='mb-5' onClick={() => router.push(Routes.Store.location)}>
 					<i className='fa-solid fa-plus' />

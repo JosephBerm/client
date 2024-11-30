@@ -13,6 +13,7 @@ import API from '@/services/api'
 import { toast } from 'react-toastify'
 import debounce from 'lodash/debounce'
 import { PagedResult } from '@/classes/Base/PagedResult'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 const Page = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -25,7 +26,9 @@ const Page = () => {
 	const [selectedCategories, setSelectedCategories] = useState<ProductsCategory[]>([])
 	const [categories, setCategories] = useState<ProductsCategory[]>([])
 	const [searchText, setSearchText] = useState<string>('')
-	const [productsResult, setProductsResult] = useState<PagedResult<Product>>(new PagedResult<Product>())
+	const [ productsResult, setProductsResult ] = useState<PagedResult<Product>>(new PagedResult<Product>())
+	const router = useRouter()
+	const searchParams = useSearchParams()
 
 	const hasMoreProducts = useMemo(() => productsResult.pageSize < productsResult.total, [productsResult])
 
@@ -107,6 +110,21 @@ const Page = () => {
 	useEffect(() => {
 		fetchCategories()
 	}, [])
+
+	useEffect(() => {
+		const querySearchText = searchParams.get('search') // Retrieve 'search' query parameter
+		if (querySearchText) {
+			setSearchText(querySearchText)
+
+			// Remove 'search' query parameter from the URL
+			const params = new URLSearchParams(searchParams.toString())
+			params.delete('search')
+			const newQueryString = params.toString()
+			const newUrl = newQueryString ? `?${newQueryString}` : ''
+
+			router.replace(`/store${newUrl}`)
+		}
+	}, [searchParams])
 
 	useEffect(() => {
 		const debouncedTime = setTimeout(async () => {

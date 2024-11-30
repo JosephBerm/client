@@ -14,17 +14,18 @@ import InputTextBox from '@/components/InputTextBox'
 import FormInputTextBox from '@/components/FormInputTextbox'
 import ProfilePicture from '@/components/ProfilePicture'
 import ChangePasswordForm from '@/components/Settings/ChangePasswordForm'
+import InputCheckbox from '@/src/components/InputCheckbox'
 
 const Page = () => {
 	const { User: UserFromStore } = useAccountStore((state) => state)
-
-	const [isLoading, setIsLoading] = useState(false)
 	const formik = useFormik({
 		initialValues: UserFromStore,
 		onSubmit: (values) => {
 			handleSubmit(values)
 		},
 	})
+	const [isLoading, setIsLoading] = useState(false)
+	const [isBillingTheSameAsShipping, setIsBillingTheSameAsShipping] = useState(isShippingTheSameAsBilling())
 
 	// This will ensure that if userfromStore is loaded after the component is mounted, the formik values will be updated.
 	useEffect(() => {
@@ -51,6 +52,32 @@ const Page = () => {
 		} finally {
 			setIsLoading(false)
 		}
+	}
+	function isShippingTheSameAsBilling(): boolean {
+		return (
+			formik.values.customer?.shippingAddress?.addressOne ===
+				formik.values.customer?.billingAddress?.addressOne &&
+			formik.values.customer?.shippingAddress?.city === formik.values.customer?.billingAddress?.city &&
+			formik.values.customer?.shippingAddress?.state === formik.values.customer?.billingAddress?.state &&
+			formik.values.customer?.shippingAddress?.zipCode === formik.values.customer?.billingAddress?.zipCode &&
+			formik.values.customer?.shippingAddress?.country === formik.values.customer?.billingAddress?.country
+		)
+	}
+
+	const setBillingInformationSameAsShipping = () => {
+		if (!formik.values.customer?.shippingAddress) return
+
+		if (!isBillingTheSameAsShipping) {
+			Address.getKeys().forEach((key) => {
+				formik.setFieldValue(`customer.billingAddress.${key}`, formik.values.customer?.shippingAddress[key])
+			})
+		} else {
+			Address.getKeys().forEach((key) => {
+				formik.setFieldValue(`customer.billingAddress.${key}`, '')
+			})
+		}
+
+		setIsBillingTheSameAsShipping(!isBillingTheSameAsShipping)
 	}
 
 	const updateName = (key: keyof Name, newValue: string) => {
@@ -102,9 +129,16 @@ const Page = () => {
 					/>
 
 					{formik.values.customer && (
-						<div className='customer-container mt-10'>
+						<div className='customer-container'>
 							<h2>Shipping Information</h2>
 							<div className='address-container'>
+								<InputTextBox
+									label='Address'
+									type='text'
+									handleChange={(e) => updateShippingAddress('addressOne', e.currentTarget.value)}
+									value={formik.values.customer.shippingAddress.addressOne}
+									className='faded-bg'
+								/>
 								<InputTextBox
 									label='Country'
 									type='text'
@@ -136,39 +170,59 @@ const Page = () => {
 									className='faded-bg'
 								/>
 							</div>
-							<div className='mt-10'>
+							<div className='customer-container'>
 								<h2>Billing Information</h2>
-								<div className='address-container'>
-									<InputTextBox
-										label='Country'
-										type='text'
-										handleChange={(e) => updateBillingAddress('country', e.currentTarget.value)}
-										value={formik.values.customer.billingAddress.country}
-										className='faded-bg'
+								<div className='address-container billing'>
+									<InputCheckbox
+										checked={isBillingTheSameAsShipping}
+										label='Is the billing information the same as the shipping information?'
+										onChange={() => setBillingInformationSameAsShipping()}
 									/>
-									<div className='gapped-fields'>
+									<fieldset disabled={isBillingTheSameAsShipping}>
 										<InputTextBox
-											label='City'
+											label='Address'
 											type='text'
-											handleChange={(e) => updateBillingAddress('city', e.currentTarget.value)}
-											value={formik.values.customer.billingAddress.city}
+											handleChange={(e) =>
+												updateBillingAddress('addressOne', e.currentTarget.value)
+											}
+											value={formik.values.customer.billingAddress.addressOne}
 											className='faded-bg'
 										/>
 										<InputTextBox
-											label='State'
+											label='Country'
 											type='text'
-											handleChange={(e) => updateBillingAddress('state', e.currentTarget.value)}
-											value={formik.values.customer.billingAddress.state}
+											handleChange={(e) => updateBillingAddress('country', e.currentTarget.value)}
+											value={formik.values.customer.billingAddress.country}
 											className='faded-bg'
 										/>
-									</div>
-									<InputTextBox
-										label='Zip Code'
-										type='text'
-										handleChange={(e) => updateBillingAddress('zipCode', e.currentTarget.value)}
-										value={formik.values.customer.billingAddress.zipCode}
-										className='faded-bg'
-									/>
+										<div className='gapped-fields'>
+											<InputTextBox
+												label='City'
+												type='text'
+												handleChange={(e) =>
+													updateBillingAddress('city', e.currentTarget.value)
+												}
+												value={formik.values.customer.billingAddress.city}
+												className='faded-bg'
+											/>
+											<InputTextBox
+												label='State'
+												type='text'
+												handleChange={(e) =>
+													updateBillingAddress('state', e.currentTarget.value)
+												}
+												value={formik.values.customer.billingAddress.state}
+												className='faded-bg'
+											/>
+										</div>
+										<InputTextBox
+											label='Zip Code'
+											type='text'
+											handleChange={(e) => updateBillingAddress('zipCode', e.currentTarget.value)}
+											value={formik.values.customer.billingAddress.zipCode}
+											className='faded-bg'
+										/>
+									</fieldset>
 								</div>
 							</div>
 						</div>

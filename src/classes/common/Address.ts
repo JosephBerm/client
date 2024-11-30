@@ -91,4 +91,8 @@ export default class Address {
 			return `${this.addressOne}, ${this.city}, ${this.zipCode}, ${this.state}, ${this.country}`
 		}
 	}
+
+	public static getKeys(): (keyof Address)[] {
+        return Object.keys(new Address()) as (keyof Address)[];
+    }
 }

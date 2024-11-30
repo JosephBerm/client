@@ -72,11 +72,9 @@ nav.navbar .navbar-container .options {
 nav.navbar .navbar-container .options > * {
 	width: fit-content;
 	color: var(--brand-color-1);
-}
-
-nav.navbar .navbar-container .FloatingMenu {
-	width: fit-content;
-	padding: 0 5px;
+	height: 100%;
+	align-content: center;
+	padding: 5px;
 }
 
 nav.navbar .navbar-container .search-container {
@@ -84,28 +82,41 @@ nav.navbar .navbar-container .search-container {
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
+	gap: 5px;
 }
 
-nav.navbar .navbar-container .search-container.is-hidden .floating-button {
+nav.navbar .navbar-container .search-container .search-input {
 	position: relative;
-	background-color: unset;
-	color: var(--brand-color-1);
 }
 
-nav.navbar .navbar-container .search-container .floating-button {
+nav.navbar .navbar-container .search-container .search-input .floating-button {
 	position: absolute;
-	right: 0;
+	left: -9px;
+	top: -5px;
 	width: fit-content;
-	padding: 5px;
+	height: fit-content;
+	padding: 5px 6px;
+	border-radius: 50%;
+	font-size: 0.5em;
+	background: var(--black-text-color);
+	transition: var(--transition);
+}
+nav.navbar .navbar-container .search-container .search-input .floating-button:hover {
+	background: var(--error-color);
 }
 
-nav.navbar .navbar-container .search-container.is-hidden .InputTextBox,
-nav.navbar .navbar-container .search-container:not(.is-hidden) .floating-button {
-	position: absolute;
-	visibility: hidden;
-	opacity: 0;
-	pointer-events: none;
-	user-select: none;
+nav.navbar .navbar-container .search-container .search-input .floating-button:hover,
+nav.navbar .navbar-container .search-container.searchable .toggle-search-button:hover {
+	scale: 1.25;
+}
+
+nav.navbar .navbar-container .search-container .toggle-search-button {
+	width: fit-content;
+	z-index: 100;
+	background-color: transparent;
+	color: var(--brand-color-1);
+	padding: 5px;
+	height: 100%;
 }
 
 nav.navbar .navbar-container .search-container .InputTextBox {
@@ -113,11 +124,6 @@ nav.navbar .navbar-container .search-container .InputTextBox {
 	transition: var(--transition);
 	transition-delay: 0.05s;
 }
-
-nav.navbar .navbar-container .search-container.is-hidden .InputTextBox {
-	max-width: 0px;
-}
-
 nav .burger-button {
 	align-items: center;
 	display: flex;

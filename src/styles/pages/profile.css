@@ -12,6 +12,7 @@
 	border-radius: 50%;
 	overflow: hidden;
 	position: relative;
+	margin: 2vh 0;
 }
 
 .Profile .ProfilePicture img {
@@ -50,6 +51,18 @@
 }
 .Profile .FormContainer .gapped-fields {
 	gap: 5%;
+}
+.Profile .customer-container {
+	display: flex;
+	flex-direction: column;
+	gap: 1vh;
+	margin-top: 4vh;
+}
+
+.Profile .address-container.billing {
+	display: flex;
+	flex-direction: column;
+	gap: 1vh;
 }
 
 @media screen and (min-width: 768px) {

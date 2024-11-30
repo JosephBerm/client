@@ -110,6 +110,10 @@
 	min-width: 100px;
 	align-self: flex-start;
 }
+.AccountOrdersTable.empty > button {
+	align-self: center;
+	margin: 4vh 0;
+}
 
 /*////////////////////////////////////
 				TreeSelect
@@ -229,45 +233,37 @@
 }
 
 .pill {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    font-size: 1.3rem;
-    border: 1px solid;
+	display: inline-block;
+	padding: 0.5rem 1rem;
+	border-radius: 5px;
+	font-size: 1.3rem;
+	border: 1px solid;
 	text-align: center;
 	width: fit-content;
 }
 
 .pill.info {
-    color: #0958d9;
-    background: #e6f4ff;
-    border-color: #91caff;
+	color: #0958d9;
+	background: #e6f4ff;
+	border-color: #91caff;
 }
 
 .pill.success {
-    color: #0f5132;
-    background: #d1e7dd;
-    border-color: #badbcc;
+	color: #0f5132;
+	background: #d1e7dd;
+	border-color: #badbcc;
 }
 
 .pill.error {
-    color: #842029;
-    background: #f8d7da;
-    border-color: #f5c2c7;
+	color: #842029;
+	background: #f8d7da;
+	border-color: #f5c2c7;
 }
 
 .pill.warning {
-    color: #664d03;
-    background: #fff3cd;
-    border-color: #ffecb5;
-}
-
-.date-picker-wrapper {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	width: 100%;
+	color: #664d03;
+	background: #fff3cd;
+	border-color: #ffecb5;
 }
 
 @media screen and (min-width: 768px) {
@@ -280,13 +276,4 @@
 	.view-all-products-button {
 		max-width: 250px;
 	}
-
-	.date-picker-wrapper {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		width: 100%;
-	}
-	
 }
