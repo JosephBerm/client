@@ -7,8 +7,8 @@ const Environments = {
 		DEBUG: 'true',
 	},
 	production: {
-		API_URL: 'https://ourfuturewebsite.azurewebsites.net/api',
-		CLIENT_DOMAIN: 'https://ourfuturewebsite.com',
+		API_URL: 'https://prod-server20241205193558.azurewebsites.net/api',
+		CLIENT_DOMAIN: 'https://www.medsourcepro.com',
 		DEBUG: 'false',
 	},
 }
