@@ -3,6 +3,7 @@ import classNames from 'classnames'
 import InputRadio from '@/components/InputRadio'
 
 class TreeBranch<T> {
+	id: string = crypto.randomUUID()
 	isExpanded: boolean = false
 	isSelected: boolean = false
 	isDisabled: boolean = false
@@ -10,8 +11,9 @@ class TreeBranch<T> {
 	constructor(public item: T, public childKey: keyof T) {
 		this.childKey = childKey
 		this.item = item
-		if (Array.isArray(item[childKey]) && item[childKey].length) {
-			this.branches = item[childKey].map((child) => new TreeBranch(child, childKey))
+		const children = item[childKey]
+		if (Array.isArray(children)) {
+			this.branches = children.map((child) => new TreeBranch(child, childKey))
 		}
 	}
 
@@ -48,9 +50,14 @@ function TreeSelect<T>({ list, label, childKey, branches, onItemSelected }: Tree
 	}
 
 	const expandIfHasChild = (branch: TreeBranch<T>) => {
-		if (Array.isArray(branch.item[childKey]) && branch.item[childKey].length) {
-			branch.isExpanded = !branch.isExpanded
-			setTreeItems([...treeItems])
+		// Type guard to check if branch.item[childKey] is an array
+		const children = branch.item[childKey]
+		if (Array.isArray(children) && children.length > 0) {
+			const updatedBranch = new TreeBranch(branch.item, childKey)
+			updatedBranch.isExpanded = !branch.isExpanded
+
+			const updatedTreeItems = treeItems.map((item) => (item === branch ? updatedBranch : item))
+			setTreeItems(updatedTreeItems)
 		} else {
 			handleTreeItemSelection(branch)
 		}
@@ -74,22 +81,14 @@ function TreeSelect<T>({ list, label, childKey, branches, onItemSelected }: Tree
 	}
 	const isSelectedOrHasSelected = (branch: TreeBranch<T>) => {
 		if (branch.isSelected) return true
-		if (isParentBranch(branch)) {
-			for (const child of branch.children) {
-				// THIS WON'T WORK BECAUSE THE CHILD IS NOT A TREEITEMS OBJ
-				// const childBranch = treeItems.find((item) => item.item === child)
-				// if (childBranch && isSelectedOrHasSelected(childBranch)) {
-				// 	return true
-				// }
-			}
-		}
-
-		return false
+		return branch.children.some(isSelectedOrHasSelected)
 	}
 	return (
 		<ul className='TreeSelect'>
-			{treeItems.map((branch, index) => (
-				<div className={classNames({ branch: true, selected: isSelectedOrHasSelected(branch) })} key={index}>
+			{treeItems.map((branch) => (
+				<div
+					className={classNames({ branch: true, selected: isSelectedOrHasSelected(branch) })}
+					key={branch.id}>
 					<div
 						className={classNames({
 							item: true,

@@ -10,7 +10,7 @@ function OrderSummary({ order }: OrderSummaryProps) {
 		return (
 			<div className='transit-details' key={orderItem.id}>
 				<div className='dropoff'>
-					{orderItem.transitDetails?.locationDropoff?.cityState ?? 'Drop off location'}
+					{orderItem.transitDetails?.locationDropoff?.getCityState() ?? 'Drop off location'}
 				</div>
 
 				<div className='product-info'>

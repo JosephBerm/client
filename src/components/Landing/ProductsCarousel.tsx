@@ -13,7 +13,7 @@ const ProductsCarousel = () => {
 		}
 	}, [])
 
-	const addAnimation = (scroller) => {
+	const addAnimation = (scroller: any) => {
 		// Add data-animated attribute
 		scroller.setAttribute('data-animated', true)
 
@@ -21,7 +21,7 @@ const ProductsCarousel = () => {
 		const scrollerContent = Array.from(scrollerInner.children)
 
 		// Duplicate each item
-		scrollerContent.forEach((item) => {
+		scrollerContent.forEach((item: any) => {
 			const duplicatedItem = item.cloneNode(true)
 			duplicatedItem.setAttribute('aria-hidden', true)
 			scrollerInner.appendChild(duplicatedItem)
