@@ -1,13 +1,24 @@
-import React from 'react'
+'use client'
+
+import React, { useEffect } from 'react'
 import Product from './Product'
 import { Product as ProductClass } from '@/classes/Product'
 import Home from '@/classes/Home'
 import API from '@/src/services/api'
 import ViewProductClientButton from '@/components/Landing/ViewProductClientButton'
 
-const Products = async () => {
-	const res = await API.Store.Products.getLastest()
-	const products = res.data?.payload ?? []
+const Products = () => {
+	const [products, setProducts] = React.useState<ProductClass[]>([])
+	useEffect(() => {
+		const getProducts = async () => {
+			const res = await API.Store.Products.getLastest()
+			if (res.status !== 200 && Array.isArray(res.data?.payload)) {
+				const products = res.data.payload.map((product) => new ProductClass(product)) ?? []
+				setProducts(products)
+			}
+		}
+		getProducts()
+	}, [])
 
 	return (
 		<section className='products-container'>
