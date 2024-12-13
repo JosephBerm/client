@@ -12,7 +12,8 @@ import ScrollIntoViewComponent from '@/components/Landing/ScrollIntoViewComponen
 
 import FAQ from '@/src/components/Landing/FAQ'
 
-export default function Home() {
+export default function Home()
+{
 	return (
 		<div className='Home'>
 			<ScrollIntoViewComponent />

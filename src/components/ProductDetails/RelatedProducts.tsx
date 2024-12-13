@@ -6,7 +6,7 @@ import React from 'react'
 const RelatedProducts = async () => {
     const products = async () => {
         try {
-            const res = await API.Store.Products.getLastest(3)
+            const res = await API.Store.Products.getLatest(3)
             return res.data?.payload ?? []
         } catch(err) {
             console.error(err)

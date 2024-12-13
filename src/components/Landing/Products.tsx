@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useEffect } from 'react'
 import Product from './Product'
@@ -11,9 +11,9 @@ const Products = () => {
 	const [products, setProducts] = React.useState<ProductClass[]>([])
 	useEffect(() => {
 		const getProducts = async () => {
-			const res = await API.Store.Products.getLastest()
-			if (res.status !== 200 && Array.isArray(res.data?.payload)) {
-				const products = res.data.payload.map((product) => new ProductClass(product)) ?? []
+			const response = await API.Store.Products.getLatest()
+			if (response.status === 200 && Array.isArray(response.data?.payload)) {
+				const products = response.data.payload.map((product) => new ProductClass(product)) ?? []
 				setProducts(products)
 			}
 		}
