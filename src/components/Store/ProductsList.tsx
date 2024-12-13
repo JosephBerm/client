@@ -4,8 +4,6 @@ import API from '@/services/api'
 
 import ProductCard from '@/components/Store/Products/ProductCard'
 import InputTextBox from '@/components/InputTextBox'
-import { GenericSearchFilter } from '@/classes/Base/GenericSearchFilter'
-import { get } from 'lodash'
 
 type ProductsListProps = {
 	list: Product[]

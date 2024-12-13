@@ -14,7 +14,7 @@ const Environments = {
 const nextConfig = {
 	env: { ...Environments['production'] },
 	images: {
-		domains: ['img.freepik.com', 'localhost'],
+		domains: ['img.freepik.com', 'localhost', 'prod-server20241205193558.azurewebsites.net'],
 	},
 }
 
