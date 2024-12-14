@@ -144,11 +144,18 @@ const Page = () => {
 												<span className='desc'>{item.product?.description}</span>
 											</div>
 										</div>
-										<QuantitySelector
-											handleDelete={() => deleteProdFromCart(item)}
-											quantity={item.quantity}
-											handleChange={(quantity: number) => handleQuantityChange(item, quantity)}
-										/>
+										<div className='item-quantity-toggler'>
+											<QuantitySelector
+												handleDelete={() => deleteProdFromCart(item)}
+												quantity={item.quantity}
+												handleChange={(quantity: number) =>
+													handleQuantityChange(item, quantity)
+												}
+											/>
+											<button className='delete w-full' onClick={() => deleteProdFromCart(item)}>
+												Delete
+											</button>
+										</div>
 									</div>
 								))}
 							<Link className='inline-link' href={Routes.Store.location}>
