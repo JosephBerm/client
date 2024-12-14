@@ -1,6 +1,6 @@
 import { NextRouter } from 'next/router'
 import IRoute from '@/interfaces/Route'
-import { AccountRole, PublicRouteType } from '../classes/Enums'
+import { AccountRole, InternalRouteType, PublicRouteType } from '@/classes/Enums'
 import Products from '../components/Landing/Products'
 
 class Routes {
@@ -8,11 +8,12 @@ class Routes {
 	private static router: NextRouter
 	public static InternalAppRoute: string = '/medsource-app'
 
-	public static Orders: IRoute = {
+	public static Orders: IRoute<InternalRouteType> = {
 		name: 'Orders',
 		location: `${this.InternalAppRoute}/orders`,
 		icon: 'fa-solid fa-truck',
-		accessible: [AccountRole.Customer, AccountRole.Admin],
+		accessible: [ AccountRole.Customer, AccountRole.Admin ],
+		value: InternalRouteType.Orders,
 	}
 
 	public static Signup: IRoute = {
@@ -40,55 +41,63 @@ class Routes {
 		icon: 'fa-solid fa-box',
 	}
 
-	public static internalRoutes: IRoute[] = [
+	public static internalRoutes: IRoute<InternalRouteType>[] = [
 		{
 			name: 'Dashboard',
 			location: this.InternalAppRoute,
 			icon: 'fa-solid fa-house',
-			accessible: [AccountRole.Customer],
+			accessible: [ AccountRole.Customer ],
+			value: InternalRouteType.Dashboard,
 		},
 		Routes.Orders,
 		{
 			name: 'Store',
 			location: `${this.InternalAppRoute}/store`,
 			icon: 'fa-solid fa-store',
-			accessible: [AccountRole.Admin],
+			accessible: [ AccountRole.Admin ],
+			value: InternalRouteType.Store,
 		},
 		{
 			name: 'Quotes',
 			location: `${this.InternalAppRoute}/quotes`,
 			icon: 'fa-solid fa-list-check',
-			accessible: [AccountRole.Admin],
+			accessible: [ AccountRole.Admin ],
+			value: InternalRouteType.Quotes,
 		},
 		{
 			name: 'Providers',
 			location: `${this.InternalAppRoute}/providers`,
 			icon: 'fa-solid fa-hand-holding-dollar',
-			accessible: [AccountRole.Admin],
+			accessible: [ AccountRole.Admin ],
+			value: InternalRouteType.Providers,
 		},
 		{
 			name: 'Accounts',
 			location: `${this.InternalAppRoute}/accounts`,
 			icon: 'fa-solid fa-id-badge',
-			accessible: [AccountRole.Admin],
+			accessible: [ AccountRole.Admin ],
+			value: InternalRouteType.Accounts,
 		},
 		{
 			name: 'Customers',
 			location: `${this.InternalAppRoute}/customers`,
 			icon: 'fa-solid fa-users',
-			accessible: [AccountRole.Admin],
+			accessible: [ AccountRole.Admin ],
+			value: InternalRouteType.Customers,
 		},
 		{
 			name: 'Analytics',
 			location: `${this.InternalAppRoute}/analytics`,
 			icon: 'fa-solid fa-chart-line',
-			accessible: [AccountRole.Admin],
+			accessible: [ AccountRole.Admin ],
+			value: InternalRouteType.Analytics,
 		},
 		{
 			name: 'Profile',
 			location: `${this.InternalAppRoute}/profile`,
 			icon: 'fa-solid fa-user',
-			accessible: [AccountRole.Customer, AccountRole.Admin],
+			accessible: [ AccountRole.Customer, AccountRole.Admin ],
+			value: InternalRouteType.Profile,
 		},
 	]
 
@@ -121,6 +130,10 @@ class Routes {
 	// Add more route-related methods as needed
 	static getPublicRouteByValue(value: PublicRouteType): IRoute<PublicRouteType> {
 		return Routes.publicRoutes.find((route) => route.value === value) as IRoute<PublicRouteType>
+	}
+
+	static getInternalRouteByValue(value: InternalRouteType): IRoute<InternalRouteType> {
+		return Routes.internalRoutes.find((route) => route.value === value) as IRoute<InternalRouteType>
 	}
 }
 

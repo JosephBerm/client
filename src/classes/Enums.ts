@@ -51,3 +51,15 @@ export enum PublicRouteType
 	Store,
 	Contact,
 }
+export enum InternalRouteType
+{
+	Dashboard,
+	Orders,
+	Store,
+	Quotes,
+	Providers,
+	Accounts,
+	Customers,
+	Analytics,
+	Profile,
+}

@@ -16,6 +16,7 @@ import FormDropdown from '../../FormDropdown'
 import FormInputFile from '../../FormInputFile'
 import InputFile from '@/components/InputFile'
 import UploadedFile from '@/src/classes/UploadedFile'
+import { InternalRouteType } from '@/src/classes/Enums'
 
 const AddEditForm = () => {
 	const router = useRouter()
@@ -43,23 +44,21 @@ const AddEditForm = () => {
 		}
 	}
 	const handleOnChange = (onChangeFiles: File[]) => {
-		if(params.id == "create") {
+		if (params.id == 'create') {
 			setFiles(onChangeFiles)
 		} else {
 			uploadImage(onChangeFiles)
 		}
 	}
 
-
 	const uploadImage = async (passFiles: File[]) => {
-
-		console.log("AA", passFiles)
+		console.log('AA', passFiles)
 		const formData = new FormData()
 		formData.append('productId', product.id)
 		passFiles.forEach((file: File) => {
 			console.log(file)
-			formData.append('files', file);
-		});
+			formData.append('files', file)
+		})
 
 		console.log(formData)
 		const { data: res } = await API.Store.Products.uploadImage(product.id, formData)
@@ -69,48 +68,49 @@ const AddEditForm = () => {
 		const uploadedFiles = res.payload?.map((file) => new UploadedFile(file)) ?? []
 
 		if (uploadedFiles.length > 0) {
-			setProduct((prev) => (new Product({ ...prev, files:[...prev.files, ...uploadedFiles]})))
+			setProduct((prev) => new Product({ ...prev, files: [...prev.files, ...uploadedFiles] }))
 		}
 	}
-	
+
 	const deleteImage = async (image: File) => {
-		if(params.id == 'create') { // If product is being created
-			console.log("HERE", files, image)
+		if (params.id == 'create') {
+			// If product is being created
+			console.log('HERE', files, image)
 			setFiles((prev) => {
 				return prev.filter((file) => file.name !== image.name)
 			})
-		} else { // If product is already creded.
-			console.log("AA", image.name)
+		} else {
+			// If product is already creded.
+			console.log('AA', image.name)
 			const res = await API.Store.Products.deleteImage(params.id as string, image.name)
 			if (res.data.payload == true) {
-				setProduct((prev) => (new Product({ ...prev, files: product.files.filter((file) => file.name !== image.name) })))
+				setProduct(
+					(prev) => new Product({ ...prev, files: product.files.filter((file) => file.name !== image.name) })
+				)
 			}
-
 		}
 	}
-	
+
 	const createProduct = async (prdct: any) => {
 		try {
-			const formData = new FormData();
-			formData.append('product.name', prdct.name);
-			formData.append('product.description', prdct.description);
-			formData.append('product.price', prdct.price.toString());
-			formData.append('product.sku', prdct.sku);
+			const formData = new FormData()
+			formData.append('product.name', prdct.name)
+			formData.append('product.description', prdct.description)
+			formData.append('product.price', prdct.price.toString())
+			formData.append('product.sku', prdct.sku)
 			files.forEach((file: File) => {
-				formData.append('files', file);
-			});
-			const { data: res } = await API.Store.Products.create(formData);
+				formData.append('files', file)
+			})
+			const { data: res } = await API.Store.Products.create(formData)
 
-			if (res.statusCode !== 200) return toast.error(res.message);
-			toast.success(res.message);
+			if (res.statusCode !== 200) return toast.error(res.message)
+			toast.success(res.message)
 
-			router.push(`${Routes.InternalAppRoute}/store`);
-	
-		 
+			router.push(Routes.getInternalRouteByValue(InternalRouteType.Store).location)
 		} catch (error: any) {
-		  	toast.error(error?.message?? "Unexpected server error");
+			toast.error(error?.message ?? 'Unexpected server error')
 		}
-	  };
+	}
 
 	const updateProduct = async (prdct: Product) => {
 		try {
@@ -133,7 +133,6 @@ const AddEditForm = () => {
 			const { data } = await API.Providers.getAll()
 			if (data.payload) {
 				setProviders((data.payload as Provider[]) || [])
-
 			}
 		} finally {
 			setIsLoading(false)
@@ -149,12 +148,18 @@ const AddEditForm = () => {
 		fetchProviders()
 	}, [])
 	return (
-		<div style={{display:'flex', flexDirection:'column', width: '100%', alignItems:'center'}}>
+		<div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
 			{params.id == 'create' && (
-				<InputFile label='Upload Images' value={files} onChange={setFiles} multiple={true} onFileDelete={deleteImage} />
+				<InputFile
+					label='Upload Images'
+					value={files}
+					onChange={setFiles}
+					multiple={true}
+					onFileDelete={deleteImage}
+				/>
 			)}
 
-			{params.id != "create" && 
+			{params.id != 'create' && (
 				<div className='flex flex-col items-center justify-center text-center gap-5'>
 					<h3 className='mb-5'>Images</h3>
 					<InputFile
@@ -165,10 +170,9 @@ const AddEditForm = () => {
 						onFileDelete={deleteImage}
 					/>
 				</div>
-			}
-			
+			)}
+
 			<Formik
-				
 				enableReinitialize={true}
 				initialValues={product}
 				validationSchema={Validations.store.productSchema}
@@ -177,11 +181,9 @@ const AddEditForm = () => {
 					else await updateProduct(values)
 				}}>
 				{({ isSubmitting, isValid, values }) => (
-					<Form className='crudForm mb-10'
-					style={{display:'flex', flexDirection:'column', width: '100%', alignItems:'center'}}
-						>
-						
-						
+					<Form
+						className='crudForm mb-10'
+						style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
 						<FormInputTextBox label='Product Name' autofocused={true} name='name' />
 						<FormInputTextBox label='SKU' name='sku' />
 						<FormInputTextBox label='Product Price' name='price' />
@@ -191,20 +193,21 @@ const AddEditForm = () => {
 							name='providerId'
 							display={(item: Provider) => item.name}
 							value={(item: Provider) => item.id}
-							options = {providers}
-						/>				
+							options={providers}
+						/>
 
 						<button type='submit' disabled={false}>
-							{isLoading 
-							? 
-							(<i className='fa-solid fa-spinner animate-spin' />) 
-							: isNewProduct ? ('Add Product') : ('Update Product')
-							}
+							{isLoading ? (
+								<i className='fa-solid fa-spinner animate-spin' />
+							) : isNewProduct ? (
+								'Add Product'
+							) : (
+								'Update Product'
+							)}
 						</button>
 					</Form>
 				)}
 			</Formik>
-
 		</div>
 	)
 }

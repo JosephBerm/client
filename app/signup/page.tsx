@@ -60,11 +60,6 @@ const Page = () => {
 		formik.setFieldValue(`name.${key}`, newValue)
 	}
 
-	const routeToLogin = () => {
-		//route to sign up
-		//router.push('/customer-login')
-	}
-
 	return (
 		<div className='Signup'>
 			<div className='container'>
@@ -102,7 +97,9 @@ const Page = () => {
 									<button>Create Account</button>
 									<span className='button-subtitle'>
 										Already have an account?&nbsp;
-										<a className='inline-link clickable' onClick={routeToLogin}>
+										<a
+											className='inline-link clickable'
+											onClick={() => router.push(Routes.Login.location)}>
 											Login!
 										</a>
 									</span>

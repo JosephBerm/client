@@ -56,7 +56,7 @@ const Page = () => {
 
 	const routeToSignUp = () => {
 		//route to sign up
-		router.push('/signup')
+		router.push(Routes.Signup.location)
 	}
 
 	const isMissingFields = (form: FormikProps<LoginCredentials>) => {
