@@ -21,7 +21,6 @@ import Routes from '@/services/routes'
 
 const Page = () => {
 	const [credentials, setCredentials] = useState(new LoginCredentials())
-	const [isUserRemembered, setIsUserRemembered] = useState(false)
 	const router = useRouter()
 	const user = useAccountStore((state) => state.User)
 	const [isLoading, setIsLoading] = useState(false)
@@ -41,6 +40,9 @@ const Page = () => {
 				const JWTToken = authenticated.payload
 				setCookie('at', JWTToken)
 				instance.defaults.headers.common['Authorization'] = `Bearer ${JWTToken}`
+
+				//save if remember me is checked
+
 
 				//route to dashboard
 				router.push(Routes.InternalAppRoute)
@@ -62,6 +64,12 @@ const Page = () => {
 	const isMissingFields = (form: FormikProps<LoginCredentials>) => {
 		return !form.isValid || form.isSubmitting || !form.values.username.length
 	}
+
+	const handleRememberMeChange = () =>
+	{
+		setCredentials((prev) => ({ ...prev, rememberUser: !prev.rememberUser }))
+	}
+
 	return (
 		<div className='Login'>
 			<div className='container'>
@@ -84,9 +92,9 @@ const Page = () => {
 								<div className='form-footer flex flex-col items-center justify-center gap-10'>
 									<div className='login-options-container'>
 										<InputCheckbox
-											checked={isUserRemembered}
+											checked={credentials.rememberUser}
 											label='Remember Me'
-											onChange={() => setIsUserRemembered(!isUserRemembered)}
+											onChange={() => handleRememberMeChange()}
 										/>
 										<a className='clickable forgot-password' onClick={handleForgotPasswordClick}>
 											Forgot Password?
@@ -96,7 +104,7 @@ const Page = () => {
 										{isLoading ? <i className='fa-solid fa-spinner animate-spin' /> : 'Login'}
 									</button>
 									<span className='button-subtitle'>
-										Don&apos;t have a password?&nbsp;
+										Don&apos;t have an account?&nbsp;
 										<a className='clickable inline-link' onClick={routeToSignUp}>
 											Sign up!
 										</a>
