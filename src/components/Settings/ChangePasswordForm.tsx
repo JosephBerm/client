@@ -58,7 +58,7 @@ const ChangePasswordForm = () => {
 
 	return (
 		<FormikProvider value={formik}>
-			<Form className='FormContainer change-password' onSubmit={formik.handleSubmit}>
+			<Form className='FormContainer security change-password' onSubmit={formik.handleSubmit}>
 				<FormInputTextBox label='Old Password' name='oldPassword' type='password' disabled={!isEditEnabled} />
 				<FormInputTextBox label='New Password' name='newPassword' type='password' disabled={!isEditEnabled} />
 				<FormInputTextBox
@@ -67,25 +67,25 @@ const ChangePasswordForm = () => {
 					type='password'
 					disabled={!isEditEnabled}
 				/>
-				<div className='button-container'>
-					<button
-						className={classNames({ 'form-button': true, 'edit-button': isEditEnabled })}
-						onClick={() => {
-							if (isEditEnabled) formik.submitForm()
-							else setIsEditEnabled(true)
-						}}>
-						{isEditEnabled ? 'Save' : 'Change Password'}
-					</button>
+				<button
+					className={classNames({ 'form-button': true, 'edit-button': isEditEnabled })}
+					onClick={() => {
+						if (isEditEnabled) formik.submitForm()
+						else setIsEditEnabled(true)
+					}}>
+					{isEditEnabled ? 'Save' : 'Change Password'}
+				</button>
+				{isEditEnabled && (
 					<button
 						type='button'
-						className={classNames({ 'delete form-button': true, hidden: !isEditEnabled })}
+						className={classNames({ 'delete': true })}
 						onClick={() => {
 							setIsEditEnabled(false)
 							formik.resetForm()
 						}}>
 						Cancel
 					</button>
-				</div>
+				)}
 			</Form>
 		</FormikProvider>
 	)

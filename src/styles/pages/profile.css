@@ -3,6 +3,7 @@
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: center;
+	gap: 3vh;
 }
 
 .Profile .ProfilePicture {
@@ -12,7 +13,6 @@
 	border-radius: 50%;
 	overflow: hidden;
 	position: relative;
-	margin: 2vh 0;
 }
 
 .Profile .ProfilePicture img {
@@ -35,19 +35,22 @@
 	margin-top: 5%;
 }
 
-.Profile .BasicUserInformation h3 {
-	margin-top: 5%;
+.Profile .FormContainer h3 {
+	text-align: center;
 }
-.Profile .BasicUserInformation form button {
-	margin-top: 5%;
+.Profile button {
 	width: 75%;
 	min-width: 125px;
+	max-width: 175px;
 }
 
 .Profile .FormContainer {
 	justify-content: center;
 	width: 100%;
 	max-width: 500px;
+}
+.Profile .FormContainer.security {
+	gap: 3vh;
 }
 .Profile .FormContainer .gapped-fields {
 	gap: 5%;

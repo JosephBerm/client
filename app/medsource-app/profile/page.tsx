@@ -95,15 +95,16 @@ const Page = () => {
 		formik.setFieldValue('email', newValue)
 	}
 
+	const hasChanges = JSON.stringify(formik.values) !== JSON.stringify(UserFromStore)
+
 	return (
 		<div className='Profile page-container'>
 			<h2 className='page-title'>Profile Settings</h2>
 
-			<ProfilePicture />
+			{/* <ProfilePicture /> */}
 			<FormikProvider value={formik}>
-				<h3>Basic Information</h3>
-
 				<Form onSubmit={formik.handleSubmit} className='FormContainer'>
+					<h3>Basic Information</h3>
 					<div className='gapped-fields'>
 						<InputTextBox
 							label='First Name'
@@ -230,7 +231,7 @@ const Page = () => {
 				</Form>
 			</FormikProvider>
 
-			<button className='btn btn-primary mt-10' onClick={() => handleSubmit(UserFromStore)} disabled={isLoading}>
+			<button className='btn btn-primary mt-10' onClick={() => handleSubmit(UserFromStore)} disabled={isLoading || !hasChanges}>
 				{isLoading ? 'Loading...' : 'Save Changes'}
 			</button>
 
