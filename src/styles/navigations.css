@@ -132,25 +132,6 @@ nav.navbar .navbar-container .search-container .InputTextBox {
 	transition-delay: 0.05s;
 }
 
-nav.navbar .navbar-container .pfp-preview {
-	border: 2px solid;
-	border-color: transparent;
-	border-radius: 50%;
-	aspect-ratio: 1/1;
-	width: 30px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	transition: var(--transition);
-}
-
-nav.navbar .navbar-container .pfp-preview:hover {
-	border-color: var(--brand-color-2);
-}
-nav.navbar .navbar-container .FloatingMenu.isOpen .pfp-preview {
-	border-radius: unset;
-	border-color: var(--brand-color-2);
-}
 nav .burger-button {
 	align-items: center;
 	display: flex;

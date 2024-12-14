@@ -462,9 +462,6 @@ input:disabled {
 	transform: translateY(-50%);
 	color: var(--input-color);
 }
-.InputTextBox textarea:focus .icon-container,
-.InputTextBox textarea:focus-visible .icon-container {
-}
 .InputTextBox .icon-container::after {
 	content: '';
 	position: absolute;
@@ -573,23 +570,60 @@ input:disabled {
 
 .FloatingMenu .icon-container {
 }
-.FloatingMenu .childrens-container {
-	position: absolute;
-	background: var(--soft-brand-color);
-	padding: 10px;
-	position: absolute;
-	right: 5px;
-	z-index: 1111111;
-	box-sizing: border-box;
-}
-.FloatingMenu .childrens-container > div {
-	text-wrap: nowrap;
-	padding: 5px;
-	margin: 5px 0;
+
+
+.FloatingMenu .icon-container {
+	border: 2px solid;
+	border-color: transparent;
+	border-radius: 50%;
+	aspect-ratio: 1/1;
+	width: 30px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 	transition: var(--transition);
 }
-.FloatingMenu .childrens-container > div:hover {
-	background-color: var(--brand-color-5);
+
+.FloatingMenu .icon-container:hover {
+	border-color: var(--brand-color-2);
+}
+.FloatingMenu.isOpen .icon-container {
+	border-radius: unset;
+	border-color: var(--brand-color-2);
+}
+
+.FloatingMenu .childrens-container {
+	border: 1px solid var(--brand-color-1);
+	background: var(--soft-brand-color);
+	box-sizing: border-box;
+	z-index: 1111111;
+	position: absolute;
+	right: 5px;
+	padding: 5px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 5px;
+}
+.FloatingMenu .childrens-container .option {
+	text-wrap: nowrap;
+	padding: 10px;
+	transition: var(--transition);
+	width: 100%;
+	text-align: left;
+	position: relative;
+}
+.FloatingMenu .childrens-container .option:not(:first-of-type)::before {
+	content: '';
+	position: absolute;
+	top: -3px;
+	width: 90%;
+	height: 1px;
+	background-color: var(--brand-color-1);
+}
+
+.FloatingMenu .childrens-container .option:hover {
+	background-color: var(--brand-color-3);
 	color: var(--bg-color);
 }
 
