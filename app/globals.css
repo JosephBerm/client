@@ -575,7 +575,22 @@ input:disabled {
 }
 .FloatingMenu .childrens-container {
 	position: absolute;
-	background-color: var(--black-text-color);
+	background: var(--soft-brand-color);
+	padding: 10px;
+	position: absolute;
+	right: 5px;
+	z-index: 1111111;
+	box-sizing: border-box;
+}
+.FloatingMenu .childrens-container > div {
+	text-wrap: nowrap;
+	padding: 5px;
+	margin: 5px 0;
+	transition: var(--transition);
+}
+.FloatingMenu .childrens-container > div:hover {
+	background-color: var(--brand-color-5);
+	color: var(--bg-color);
 }
 
 .nude,

@@ -11,13 +11,13 @@ function ProfilePreview() {
 		children: {
 			buttonSlot: (
 				<div className='pfp-preview'>
-					<span>pfp</span>
+					<i className='fa-regular fa-user' />
 				</div>
 			),
 			bodySlot: (
 				<>
-					<div>Settings</div>
-					<div>App Preferences</div>
+					<div className='clickable'>Settings</div>
+					<div className='clickable'>App Preferences</div>
 					<div className='clickable' onClick={handleLogout}>
 						Logout
 					</div>
