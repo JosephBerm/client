@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Routes from '@/services/routes'
 import Link from 'next/link'
 import { useAccountStore } from '@/src/stores/user'
+import { useCartStore } from '@/src/stores/store'
 import Image from 'next/image'
 import Logo from '@/public/big-logo.png'
 
@@ -21,6 +22,7 @@ function NavBar() {
 
 	const loggedIn = useAccountStore((state) => state.LoggedIn)
 	const state = useAccountStore((state) => state)
+	const cartStore = useCartStore((state) => state.Cart)
 
 	const toggleNavbar = (forceClose = false) => {
 		if (forceClose || navStyleClassName.includes('opened')) {
@@ -41,6 +43,9 @@ function NavBar() {
 		}
 	}, [pathName])
 
+	const cartItemsQuantity = cartStore.reduce((total, item) => total + item.quantity, 0)
+	console.log('totalQuantity', cartItemsQuantity)
+
 	return (
 		<header className='header public'>
 			<nav className='navbar'>
@@ -50,7 +55,7 @@ function NavBar() {
 						src={Logo}
 						alt='logo'
 						onClick={() => router.push(Routes.getPublicRouteByValue(PublicRouteType.Home).location)}
-						className="clickable"
+						className='clickable'
 					/>
 				</div>
 				<div className='burger-button' onClick={() => toggleNavbar()}>
@@ -73,7 +78,10 @@ function NavBar() {
 						</ol>
 						<div className='gapped-fields'>
 							<Link className='nav-link flex justify-center items-center' href={'/cart'}>
-								<i className='fa-solid fa-cart-shopping'></i>
+								<i className='fa-solid fa-cart-shopping' />
+								{cartItemsQuantity !== 0 && (
+									<div className='cart-items-amount'>{cartItemsQuantity}</div>
+								)}
 							</Link>
 							<button onClick={enterLogin}>
 								<span className='route-link'>{loggedIn ? 'Dashboard' : 'Login'}</span>

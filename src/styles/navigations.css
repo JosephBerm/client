@@ -168,6 +168,35 @@ nav .burger-button:hover {
 	box-shadow: 1px 0px 7px 2px rgba(0, 0, 0, 0.2);
 	transition: var(--transition);
 }
+.nav_StyledLinks .nav-link {
+	position: relative;
+}
+
+.nav_StyledLinks .nav-link i {
+	z-index: 11;
+}
+.nav_StyledLinks .nav-link .cart-items-amount {
+	position: absolute;
+	bottom: 100%;
+	left: 50%;
+	transform: translate(-50%, 25%);
+	background-color: var(--brand-color-4);
+	color: var(--white);
+	border-radius: 50%;
+	font-size: 0.5em;
+	aspect-ratio: 1 / 1;
+	z-index: 1;
+	opacity: 0.75;
+	padding: 4px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-width: 25px;
+}
+.nav_StyledLinks .nav-link:hover .cart-items-amount {
+	opacity: 1;
+}
+
 .nav_StyledLinks.opened .sliding-nav-container {
 	pointer-events: all;
 	opacity: 1;
@@ -371,6 +400,7 @@ nav.Sidebar ul .path-label {
 		gap: 20px;
 		width: 100%;
 		box-shadow: unset;
+		overflow: unset;
 	}
 
 	.nav_StyledLinks ol {

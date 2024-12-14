@@ -41,6 +41,13 @@
 	font-size: 2rem;
 	background: var(--section-bg-color);
 }
+.Cart .cart-items .details-container .item-quantity-toggler {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+}
 .Cart .cart-items .details {
 	display: grid;
 	grid-template-columns: 0.5fr 1fr;
@@ -222,5 +229,10 @@
 @media screen and (min-width: 1280px) {
 	.Cart .cart-items .details-container {
 		grid-template-columns: 1fr auto;
+		row-gap: unset;
+		column-gap: 1.25em;
+	}
+	.Cart .cart-items .details-container .item-quantity-toggler {
+		gap: 25px;
 	}
 }
