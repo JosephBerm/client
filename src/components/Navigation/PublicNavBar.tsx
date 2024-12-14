@@ -9,6 +9,7 @@ import Logo from '@/public/big-logo.png'
 
 import { useRouter, usePathname } from 'next/navigation'
 import path from 'path'
+import { PublicRouteType } from '@/src/classes/Enums'
 
 function NavBar() {
 	const router = useRouter()
@@ -31,8 +32,8 @@ function NavBar() {
 	}
 
 	const enterLogin = () => {
-		if (loggedIn) router.push('/medsource-app')
-		else router.push('/login')
+		if (loggedIn) router.push(Routes.InternalAppRoute)
+		else router.push(Routes.Login.location)
 	}
 	useEffect(() => {
 		if (currentPath !== pathName || pathName === '/') {
@@ -44,7 +45,13 @@ function NavBar() {
 		<header className='header public'>
 			<nav className='navbar'>
 				<div className='logo'>
-					<Image priority src={Logo} alt='logo' />
+					<Image
+						priority
+						src={Logo}
+						alt='logo'
+						onClick={() => router.push(Routes.getPublicRouteByValue(PublicRouteType.Home).location)}
+						className="clickable"
+					/>
 				</div>
 				<div className='burger-button' onClick={() => toggleNavbar()}>
 					<i className='fa-solid fa-bars' />

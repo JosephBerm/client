@@ -43,3 +43,11 @@ export enum OrderStatus {
 	Delivered = 600,
 	Cancelled = 9999,
 }
+
+export enum PublicRouteType
+{
+	Home,
+	AboutUs,
+	Store,
+	Contact,
+}

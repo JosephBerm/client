@@ -12,6 +12,8 @@ import LoginCredentials from '@/classes/LoginCredentials'
 import Validations from '@/utilities/validationSchemas'
 import instance from '@/services/httpService'
 import API from '@/services/api'
+import Image from 'next/image'
+import Logo from '@/public/big-logo.png'
 
 import FormInputTextBox from '@/components/FormInputTextbox'
 import InputCheckbox from '@/components/InputCheckbox'
@@ -63,7 +65,8 @@ const Page = () => {
 	return (
 		<div className='Login'>
 			<div className='container'>
-				<h1 className='page-title'>MEDSOURCE</h1>
+				{/* <h1 className='page-title'>MEDSOURCE</h1> */}
+				<Image priority src={Logo} alt='logo' />
 
 				<div className='form-container'>
 					<h3>Log in</h3>
@@ -76,11 +79,7 @@ const Page = () => {
 						}}>
 						{(form) => (
 							<Form className='min-h-96 flex flex-col gap-8 w-2/4 relative'>
-								<FormInputTextBox
-									label='Email Address'
-									autofocused={true}
-									name='username'
-								/>
+								<FormInputTextBox label='Email Address' autofocused={true} name='username' />
 								<FormInputTextBox type='password' label='Password' name='password' />
 								<div className='form-footer flex flex-col items-center justify-center gap-10'>
 									<div className='login-options-container'>

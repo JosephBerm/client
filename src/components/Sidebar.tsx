@@ -3,8 +3,12 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAccountStore } from '@/src/stores/user'
+
+import Image from 'next/image'
+import Logo from '@/public/big-logo.png'
+import IRoute from '@/interfaces/Route'
 import Routes from '@/services/routes'
-import Route from '@/interfaces/Route'
+import { PublicRouteType } from '../classes/Enums'
 
 function Sidebar() {
 	const router = useRouter()
@@ -33,7 +37,7 @@ function Sidebar() {
 		[User?.role]
 	)
 
-	const handleRouteClick = (route: Route) => {
+	const handleRouteClick = (route: IRoute) => {
 		router.push(route.location)
 		setCurrentPath(route.location)
 	}
@@ -41,8 +45,13 @@ function Sidebar() {
 	return (
 		<nav className='Sidebar'>
 			<div className='app-title-container'>
-				(())
-				<a href='/'>MEDSOURCE</a>
+				<Image
+					priority
+					src={Logo}
+					alt='logo'
+					onClick={() => handleRouteClick(Routes.getPublicRouteByValue(PublicRouteType.Home))}
+					className='clickable nav-logo'
+				/>
 			</div>
 			<ul>
 				{pathsToRender.map((route, index) => (

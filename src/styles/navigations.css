@@ -20,7 +20,7 @@ header.header {
 
 nav.navbar {
 	display: grid;
-	grid-template-columns: auto 1fr;
+	grid-template-columns: minmax(60px, 50%) 1fr;
 	align-items: center;
 	position: relative;
 	width: 100%;
@@ -28,6 +28,13 @@ nav.navbar {
 	font-family: var(--font-mono);
 	z-index: 12;
 	height: 100%;
+}
+.nav-logo {
+	width: 100%;
+	padding: 5%;
+}
+.navbar .nav-logo {
+	max-width: 200px;
 }
 
 nav.navbar .Breadcrumb {
@@ -253,6 +260,10 @@ nav.Sidebar .app-title-container {
 	width: 100%;
 }
 
+nav.Sidebar .app-title-container .nav-logo {
+	width: 75%;
+}
+
 nav.Sidebar ul,
 nav.Sidebar ul li {
 	display: flex;
@@ -327,7 +338,7 @@ nav.Sidebar ul .path-label {
 		flex-direction: row;
 		justify-content: space-between;
 	}
-	nav.navbar .app-title-container {
+	nav.navbar .nav-logo {
 		display: none;
 	}
 

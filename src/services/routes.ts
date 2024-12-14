@@ -1,6 +1,6 @@
 import { NextRouter } from 'next/router'
-import Route from '@/interfaces/Route'
-import { AccountRole } from '../classes/Enums'
+import IRoute from '@/interfaces/Route'
+import { AccountRole, PublicRouteType } from '../classes/Enums'
 import Products from '../components/Landing/Products'
 
 class Routes {
@@ -8,38 +8,39 @@ class Routes {
 	private static router: NextRouter
 	public static InternalAppRoute: string = '/medsource-app'
 
-	public static Orders: Route = {
+	public static Orders: IRoute = {
 		name: 'Orders',
 		location: `${this.InternalAppRoute}/orders`,
 		icon: 'fa-solid fa-truck',
 		accessible: [AccountRole.Customer, AccountRole.Admin],
 	}
 
-	public static Signup: Route = {
+	public static Signup: IRoute = {
 		name: 'Sign Up',
 		location: '/signup',
 		icon: 'fa-solid fa-user-plus',
 	}
 
-	public static Login: Route = {
+	public static Login: IRoute = {
 		name: 'LogIn',
 		location: '/login',
 		icon: 'fa-solid fa-user-plus',
 	}
 
-	public static Store: Route = {
+	public static Store: IRoute<PublicRouteType> = {
 		name: 'Store',
 		location: '/store',
 		icon: 'fa-solid fa-bag-shopping',
+		value: PublicRouteType.Store,
 	}
 
-	public static Product: Route = {
+	public static Product: IRoute = {
 		name: 'Products',
 		location: `${Routes.Store.location}/product`,
 		icon: 'fa-solid fa-box',
 	}
 
-	public static internalRoutes: Route[] = [
+	public static internalRoutes: IRoute[] = [
 		{
 			name: 'Dashboard',
 			location: this.InternalAppRoute,
@@ -91,19 +92,22 @@ class Routes {
 		},
 	]
 
-	public static publicRoutes: Route[] = [
+	public static publicRoutes: IRoute<PublicRouteType>[] = [
 		{
 			name: 'Home',
 			location: '/',
+			value: PublicRouteType.Home,
 		},
 		{
 			name: 'About Us',
 			location: '/about-us',
+			value: PublicRouteType.AboutUs,
 		},
 		Routes.Store,
 		{
 			name: 'Contact',
 			location: '/contact',
+			value: PublicRouteType.Contact,
 		},
 	]
 
@@ -115,6 +119,9 @@ class Routes {
 	}
 
 	// Add more route-related methods as needed
+	static getPublicRouteByValue(value: PublicRouteType): IRoute<PublicRouteType> {
+		return Routes.publicRoutes.find((route) => route.value === value) as IRoute<PublicRouteType>
+	}
 }
 
 export default Routes

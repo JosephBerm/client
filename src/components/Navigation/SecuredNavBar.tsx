@@ -1,16 +1,18 @@
 'use client'
 
-import React, { useState, useEffect, ChangeEvent, KeyboardEvent } from 'react'
+import React, { useState, ChangeEvent, KeyboardEvent } from 'react'
 import classNames from 'classnames'
 
 import NotificationBell from '@/components/Navigation/NotificationBell'
 import Breadcrumb from '@/src/components/Navigation/BreadCrumb'
 import { useRouter } from 'next/navigation'
 import Routes from '@/src/services/routes'
-import Link from 'next/link'
 
 import InputTextBox from '@/components/InputTextBox'
 import ProfilePreview from '../ProfilePreview'
+import Image from 'next/image'
+import Logo from '@/public/big-logo.png'
+import { PublicRouteType } from '@/src/classes/Enums'
 
 function CustomerNavBar() {
 	const router = useRouter()
@@ -37,10 +39,14 @@ function CustomerNavBar() {
 	return (
 		<header className='header customer'>
 			<nav className='navbar'>
-				<Link className='app-title-container clickable' href='/'>
-					(())
-					<span>MEDSOURCE</span>
-				</Link>
+				<Image
+					priority
+					src={Logo}
+					alt='logo'
+					onClick={() => router.push(Routes.getPublicRouteByValue(PublicRouteType.Home).location)}
+					className='clickable nav-logo'
+				/>
+
 				<div className='navbar-container'>
 					<Breadcrumb />
 					<div className='options'>
