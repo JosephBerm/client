@@ -16,7 +16,16 @@ const Product = ({ product }: { product: ProductClass }) => {
 
 	return (
 		<div className='Product'>
-			<Image src={ProductSample} alt='' className='preview' />
+			{/* <Image src={ProductSample} alt='' className='preview' /> */}
+			<Image 
+				width={209}
+				height={170}
+				className='preview'
+				alt='cart'
+				src={product.files?.[0] 
+					? `${process.env.API_URL}/products/image?productId=${product.id}&image=${product.files[0].name}`
+					: ProductSample}
+			/>
 
 			<p className='name'>{product.name.toUpperCase()}</p>
 
