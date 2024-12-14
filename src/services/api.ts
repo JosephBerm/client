@@ -46,7 +46,7 @@ const API = {
 			update: async <T>(product: T) => await HttpService.put<T>(`/products`, product),
 			delete: async <T>(productId: string) => await HttpService.delete<T>(`/products/${productId}`),
 			getLatest: async (quantity: number = 6) =>
-				await HttpService.get<Product[]>(`/products/lastest?quantity=${quantity}`),
+				await HttpService.get<Product[]>(`/products/latest?quantity=${quantity}`),
 			image: async (id: string, name: string) =>
 				await HttpService.get(`/products/image?productId=${id}&image=${name}`),
 			uploadImage: async (productId: string, formData: FormData) =>
