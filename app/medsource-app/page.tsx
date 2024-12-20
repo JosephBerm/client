@@ -10,7 +10,7 @@ const Page = () => {
 		<div className='Dashboard page-container'>
 			<AccountOverview />
 			<AccountQuotesTable />
-			{/* <AccountOrdersTable /> */}
+			<AccountOrdersTable />
 		</div>
 	)
 }

@@ -14,6 +14,7 @@ import Table from '@/common/table'
 import WealthyTable from '@/components/WealthyTable'
 import { useRouter } from 'next/navigation'
 import classNames from 'classnames'
+import { InternalRouteType } from '../classes/Enums'
 
 function AccountOrdersTable() {
 	const router = useRouter()
@@ -24,15 +25,11 @@ function AccountOrdersTable() {
 		{
 			name: 'id',
 			label: 'Order ID',
-			content: (order: Order) => (
-				<Link href={`${Routes.Orders.location}/${order.id}`}>
-					<span className='order-id'>Order #{order.id}</span>
-				</Link>
-			),
+			content: (order: Order) => <span className='order-id'>#{order.id}</span>,
 		},
 		{
 			name: 'createdAt',
-			label: 'Date',
+			label: 'Date Created',
 			content: (order: Order) => (
 				<div className='createdAt'>
 					<span className='date'>{order.createdAt.toLocaleDateString()}</span>
@@ -48,7 +45,16 @@ function AccountOrdersTable() {
 				</div>
 			),
 		},
+		{
+			label: 'Edit',
+			content: (order: Order) => <button onClick={handleRouteToOrder(order)}>Edit</button>,
+		},
 	]
+
+	const handleRouteToOrder = (order: Order) => () => {
+		router.push(Routes.getInternalRouteByValue(InternalRouteType.Orders).location + '/' + order.id)
+	}
+
 	const getOrders = async (isInitialLoad: boolean = true) => {
 		try {
 			setIsLoadingData(true)
@@ -80,12 +86,7 @@ function AccountOrdersTable() {
 
 	return (
 		<div className={classNames({ AccountOrdersTable: true, empty: orders.length === 0 })}>
-			{!isLoadingData && (
-				<button className='mb-5' onClick={() => router.push(Routes.Store.location)}>
-					<i className='fa-solid fa-plus' />
-					<span className='ml-2'>New Request</span>
-				</button>
-			)}
+			<h2 className='page-title'>Orders</h2>
 			{orders.length !== 0 ? (
 				<div className='table-container'>
 					{/* <WealthyTable headers={['Order ID', 'Date', 'Total']} data={orders} /> */}
@@ -94,11 +95,13 @@ function AccountOrdersTable() {
 			) : (
 				<div className='no-order-container flex flex-col items-center'>
 					You currently have no orders placed.
-					<Link className='inline-link' href={Routes.Store.location}>
-						Place Your First Order Now!
-					</Link>
 				</div>
 			)}
+
+			<button className='mb-5' onClick={() => router.push(Routes.Store.location)}>
+				<i className='fa-solid fa-plus' />
+				<span className='ml-2'>New Request</span>
+			</button>
 		</div>
 	)
 }

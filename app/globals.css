@@ -164,16 +164,17 @@ a:focus {
 	color: var(--link-color) !important;
 }
 
-a.inline-link {
+.inline-link {
 	--inline-link-color: var(--brand-color-1);
 	color: var(--inline-link-color);
+	cursor: pointer;
 }
-a.inline-link:hover,
-a.inline-link:focus {
+.inline-link:hover,
+.inline-link:focus {
 	color: var(--inline-link-color) !important;
 }
 
-a.inline-link:after {
+.inline-link:after {
 	background-color: var(--inline-link-color);
 	bottom: 0.1em;
 	content: '';
@@ -185,8 +186,8 @@ a.inline-link:after {
 	transition: var(--transition);
 }
 
-a.inline-link:focus-visible:after,
-a.inline-link:hover:after {
+.inline-link:focus-visible:after,
+.inline-link:hover:after {
 	width: 100%;
 }
 
@@ -570,7 +571,6 @@ input:disabled {
 
 .FloatingMenu .icon-container {
 }
-
 
 .FloatingMenu .icon-container {
 	border: 2px solid;
