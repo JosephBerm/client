@@ -66,6 +66,7 @@ table td::before {
 	text-transform: uppercase;
 	line-break: strict;
 	font-size: clamp(8px, 4vw, 14px);
+	text-align: start;
 }
 table td button {
 	line-break: strict;
