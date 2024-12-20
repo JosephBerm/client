@@ -57,6 +57,11 @@
 	font-size: clamp(1.75em, 1.5vw, 2.75rem);
 }
 
+.Dashboard .no-option {
+	color: var(--gray);
+	text-transform: capitalize;
+}
+
 /*////////////////////////////////////
 				MEDIA QUERIES     
 //////////////////////////////////// */

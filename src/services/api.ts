@@ -72,6 +72,10 @@ const API = {
 		getAll: async <T>() => {
 			return await HttpService.get<T>('/quote')
 		},
+		getLatest: async (quantity: number = 6) =>
+		{
+			return await HttpService.get<Quote[]>(`/quote/latest?quantity=${quantity}`)
+		},
 		search: async (search: GenericSearchFilter) => {
 			return await HttpService.post<PagedResult<Quote>>('/quote/search', search)
 		},
