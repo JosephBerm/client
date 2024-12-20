@@ -1,7 +1,6 @@
 import { NextRouter } from 'next/router'
 import IRoute from '@/interfaces/Route'
 import { AccountRole, InternalRouteType, PublicRouteType } from '@/classes/Enums'
-import Products from '../components/Landing/Products'
 
 class Routes {
 	constructor() {}
@@ -46,7 +45,7 @@ class Routes {
 			name: 'Dashboard',
 			location: this.InternalAppRoute,
 			icon: 'fa-solid fa-house',
-			accessible: [ AccountRole.Customer ],
+			accessible: [ AccountRole.Admin, AccountRole.Customer ],
 			value: InternalRouteType.Dashboard,
 		},
 		Routes.Orders,
@@ -96,7 +95,7 @@ class Routes {
 			name: 'Profile',
 			location: `${this.InternalAppRoute}/profile`,
 			icon: 'fa-solid fa-user',
-			accessible: [ AccountRole.Customer, AccountRole.Admin ],
+			accessible: [  AccountRole.Admin, AccountRole.Customer ],
 			value: InternalRouteType.Profile,
 		},
 	]

@@ -272,14 +272,15 @@ nav.Sidebar {
 	position: fixed;
 	bottom: 2%;
 	width: 95%;
-	height: 50px;
+	min-height: 50px;
 	left: 50%;
 	transform: translateX(-50%);
 	box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.15);
-	background-color: var(--white);
+	background-color: var(--soft-brand-color);
 	padding: 2px 5px;
 	border-radius: 3px;
 	z-index: calc(infinity);
+	align-content: center;
 }
 nav.Sidebar .app-title-container {
 	display: none;
@@ -294,7 +295,6 @@ nav.Sidebar .app-title-container .nav-logo {
 	width: 75%;
 }
 
-nav.Sidebar ul,
 nav.Sidebar ul li {
 	display: flex;
 	align-items: center;
@@ -305,13 +305,14 @@ nav.Sidebar ul {
 	width: 100%;
 	justify-content: space-evenly;
 	gap: 5px;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
 }
 
 nav.Sidebar ul li {
-	height: 90%;
 	width: 100%;
 	justify-content: center;
-	background-color: transparent;
+	background-color: var(--white);
 	transition: var(--transition);
 }
 nav.Sidebar ul li:hover {
@@ -446,6 +447,7 @@ nav.Sidebar ul .path-label {
 		bottom: unset;
 		left: unset;
 		transform: unset;
+		min-height: unset;
 		height: 100%;
 		background-color: var(--white);
 		padding: unset;
@@ -454,17 +456,21 @@ nav.Sidebar ul .path-label {
 		flex-direction: column;
 		justify-content: flex-start;
 		align-items: center;
+		align-content: unset;
 	}
 	nav.Sidebar .app-title-container {
 		display: flex;
 	}
 
 	nav.Sidebar ul {
+		display: flex;
 		flex-direction: column;
 		height: fit-content;
 		width: 80%;
 		justify-content: flex-start;
 		gap: 10px;
+		grid-template-columns: unset;
+		margin-top: 10%;
 	}
 
 	nav.Sidebar ul li {
@@ -479,6 +485,7 @@ nav.Sidebar ul .path-label {
 		padding: 0 10px;
 		animation-delay: unset !important;
 		transition: unset !important;
+		background-color: transparent;
 	}
 	nav.Sidebar ul li:hover {
 		background-color: var(--light-gray);
