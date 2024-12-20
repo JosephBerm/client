@@ -50,6 +50,11 @@ const Page = () => {
 
 	const columns: TableColumn<Company>[] = [
 		{
+			name: 'id',
+			label: 'Customer ID',
+			content: (user: Company) => <>{user.id}</>,
+		},
+		{
 			name: 'name',
 			label: 'Name',
 			content: (user: Company) => <>{user.name}</>,
