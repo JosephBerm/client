@@ -231,7 +231,10 @@ const Page = () => {
 				</Form>
 			</FormikProvider>
 
-			<button className='btn btn-primary mt-10' onClick={() => handleSubmit(UserFromStore)} disabled={isLoading || !hasChanges}>
+			<button
+				className='btn btn-primary mt-10'
+				onClick={() => handleSubmit(UserFromStore)}
+				disabled={isLoading || !hasChanges}>
 				{isLoading ? 'Loading...' : 'Save Changes'}
 			</button>
 

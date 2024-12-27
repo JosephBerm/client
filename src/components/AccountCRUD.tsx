@@ -1,96 +1,143 @@
 'use client'
 
-import React from 'react'
-import User from '@/classes/User'
-import { Form, Formik } from 'formik'
-import Validations from '@/utilities/validationSchemas'
-import API from '@/services/api'
-import { toast } from 'react-toastify'
-import FormInputTextBox from '@/src/components/FormInputTextbox'
 import { AccountRole } from '../classes/Enums'
-import {EnumToDropdownValues} from '../services/utils'
-import FormDropdown from './FormDropdown'
-import FormFetchDropdown from './FormFetchDropDown'
-import Company from '../classes/Company'
+import { EnumToDropdownValues } from '../services/utils'
+import { Form, Formik, useFormik, FormikProvider } from 'formik'
+import { toast } from 'react-toastify'
 import { useAccountStore } from '../stores/user'
 import { useParams } from 'next/navigation'
 
+import API from '@/services/api'
+import Company from '@/classes/Company'
+import FormDropdown from './FormDropdown'
+import FormInputTextBox from '@/src/components/FormInputTextbox'
+import InputSearchDropdown from './InputSearchDropdown'
+import InputTextBox from './InputTextBox'
+import React, { ChangeEvent, useEffect } from 'react'
+import User from '@/classes/User'
+import { IUser } from '@/classes/User'
+import Validations from '@/utilities/validationSchemas'
+import Name from '@/classes/common/Name'
+import InputDropdown from './InputDropdown'
 
 // This CRUD is for editing/creating accounts
 
 const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User: User) => void }) => {
 	const [isLoading, setIsLoading] = React.useState(false)
-	const roleOptions = EnumToDropdownValues(AccountRole);
+	const [usersList, setUsersList] = React.useState<User[]>([])
+	const roleOptions = EnumToDropdownValues(AccountRole)
 	const User = useAccountStore((state) => state.User)
-    const params  = useParams()
+	const params = useParams()
+	const formik = useFormik({
+		initialValues: user,
+		onSubmit: (values) => {
+			handleSubmit(values)
+		},
+	})
 
-	
-	const handleSubmit = async (UserData: User) => {
+	useEffect(() => {
+		const fetchCustomers = async () => {
+			try {
+				setIsLoading(true)
+				const { data } = await API.Accounts.getAll()
+				if (data?.statusCode == 200) {
+					const listOfUsers = data.payload ?? []
+					listOfUsers.forEach((user: User) => (user.name = new Name(user.name)))
+					setUsersList(listOfUsers)
+				} else {
+					throw new Error(data.message ?? 'An error occurred while fetching customers')
+				}
+			} catch (error: any) {
+				return toast.error(error)
+				console.error(error)
+			} finally {
+				setIsLoading(false)
+			}
+		}
+		fetchCustomers()
+	}, [])
+
+	const handleSubmit = async (userData: User) => {
 		try {
-			UserData.notifications = []
-			UserData.customer = null
-			
-			UserData.role = parseInt(UserData.role as any)
-			UserData.customerId = parseInt(UserData.customerId as any)
-			if(isNaN(UserData.customerId)) UserData.customerId = -99
 			setIsLoading(true)
-			const { data } = await API.Accounts.update<Boolean>(UserData)
-			
+			userData.notifications = []
+			userData.customer = null
+
+			userData.role = parseInt(userData.role as any)
+			userData.customerId = parseInt(userData.customerId as any)
+			if (isNaN(userData.customerId)) userData.customerId = -99
+			const { data } = await API.Accounts.update<Boolean>(userData)
+
 			if (data?.statusCode != 200) return toast.error(data.message)
-				toast.success(data.message)
-			
-			if (onUserUpdate) onUserUpdate(UserData)
-			} catch (err: any) {
-		toast.error(err.message)
-	} finally {
-		setIsLoading(false)
+			toast.success(data.message)
+
+			if (onUserUpdate) onUserUpdate(userData)
+		} catch (err: any) {
+			toast.error(err.message)
+		} finally {
+			setIsLoading(false)
+		}
 	}
-}
+
+	const updateUser = (key: keyof User, newValue: string | number) => {
+		if (key == 'role' || key == 'customerId') newValue = parseInt(newValue as any)
+		
+		formik.setFieldValue(key, newValue)
+	}
 
 	return (
-		<Formik
-			enableReinitialize={true}
-			initialValues={user}
-			validationSchema={Validations.modifyAccountSchema}
-			onSubmit={(values, { setSubmitting }) => {
-				console.log("WHASDASD")
-				handleSubmit(values)
-				setSubmitting(false)
-			}}>
-			{(form) => (
-				<Form className='update-form-container'>
-					<FormInputTextBox label='Username' name='username' />
-					<FormInputTextBox label='Email Address' name='email' />
-                    {params.id == "create"
-					&&
-					<FormInputTextBox label='Password' name='password'  type="password" />
-					}
+		<FormikProvider value={formik}>
+			<Form className='update-form-container' onSubmit={formik.handleSubmit}>
+				<InputTextBox
+					label='Username'
+					type='text'
+					handleChange={(e: ChangeEvent<HTMLInputElement>) => updateUser('username', e.currentTarget.value)}
+					value={formik.values.username}
+				/>
 
-					<FormDropdown<any>
-						label='Role'
-						options={roleOptions}
-						name='role'
-						display={(item) => item.name}
-						value={(item) => item.id}
+				<InputTextBox
+					label='Email Address'
+					type='text'
+					handleChange={(e: ChangeEvent<HTMLInputElement>) => updateUser('email', e.currentTarget.value)}
+					value={formik.values.email}
+				/>
+
+				<InputTextBox
+					label='Password'
+					type='password'
+					handleChange={(e: ChangeEvent<HTMLInputElement>) => updateUser('password', e.currentTarget.value)}
+					value={formik.values.password}
+				/>
+
+				<InputDropdown
+					label='User Role'
+					options={roleOptions}
+					display={(item) => item.name}
+					value={formik.values.role ?? ''}
+					handleChange={(value: string | number) => updateUser('role', value)}
+				/>
+
+				{User.role == AccountRole.Admin && (
+					<InputSearchDropdown<User>
+						label='Customer'
+						name='name'
+						display={(user: User) => user.name.getFullName()}
+						value={(user: User) => user.id}
+						options={usersList}
 					/>
+				)}
 
-					{User.role == AccountRole.Admin && (
-						<FormFetchDropdown<any>
-							label='Customer'
-							endpoint='/customer/search'
-							name='customerId'
-							display={(item: Company) => item.name}
-							value={(item: Company) => item.id}
-							searchBy='name'
-						/>
+				<button className='mt-10' onClick={() => handleSubmit(formik.values)}>
+					{isLoading ? (
+						<i className='fa-solid fa-spinner animate-spin'></i>
+					) : params.id == 'create' ? (
+						'Create Account'
+					) : (
+						'Update Account'
 					)}
-
-						<button type='submit' className='mt-10' disabled={!form.isValid || isLoading}>
-							{isLoading ? <i className='fa-solid fa-spinner animate-spin'></i> : params.id == "create" ? 'Create Account' : 'Update Account'}
-						</button>
-				</Form>
-			)}
-		</Formik>
+				</button>
+			</Form>
+		</FormikProvider>
 	)
 }
 
