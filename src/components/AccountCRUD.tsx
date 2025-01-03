@@ -13,7 +13,7 @@ import FormDropdown from './FormDropdown'
 import FormInputTextBox from '@/src/components/FormInputTextbox'
 import InputSearchDropdown from './InputSearchDropdown'
 import InputTextBox from './InputTextBox'
-import React, { ChangeEvent, useEffect } from 'react'
+import React, { ChangeEvent, useCallback, useEffect } from 'react'
 import User from '@/classes/User'
 import { IUser } from '@/classes/User'
 import Validations from '@/utilities/validationSchemas'
@@ -23,10 +23,11 @@ import InputDropdown from './InputDropdown'
 // This CRUD is for editing/creating accounts
 
 const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User: User) => void }) => {
+	const [isSavingForm, setIsSavingForm] = React.useState(false)
 	const [isFetchingUsers, setIsFetchingUsers] = React.useState(false)
 	const [usersList, setUsersList] = React.useState<User[]>([])
 	const roleOptions = EnumToDropdownValues(AccountRole)
-	const User = useAccountStore((state) => state.User)
+	const currentUserRole = useAccountStore((state) => state.User.role)
 	const params = useParams()
 	const formik = useFormik({
 		initialValues: user,
@@ -59,7 +60,7 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 
 	const handleSubmit = async (userData: User) => {
 		try {
-			setIsFetchingUsers(true)
+			setIsSavingForm(true)
 			userData.notifications = []
 			userData.customer = null
 
@@ -75,37 +76,47 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 		} catch (err: any) {
 			toast.error(err.message)
 		} finally {
-			setIsFetchingUsers(false)
+			setIsSavingForm(false)
 		}
 	}
 
-	const updateUser = (key: keyof User, newValue: string | number) => {
-		if (key == 'role' || key == 'customerId') newValue = parseInt(newValue as any)
+	const updateUserInfo = useCallback(
+		(key: keyof IUser, newValue: string | number | null) => {
+			console.log('updateUserInfo', key, newValue)
+			if (newValue === null) return
+			if (key == 'role' || key == 'customerId') newValue = parseInt(newValue as any)
 
-		formik.setFieldValue(key, newValue)
-	}
+			formik.setFieldValue(key, newValue)
+		},
+		[formik]
+	)
 
+	console.log('Rendering AccountCRUD')
 	return (
 		<FormikProvider value={formik}>
 			<Form className='update-form-container' onSubmit={formik.handleSubmit}>
 				<InputTextBox
 					label='Username'
 					type='text'
-					handleChange={(e: ChangeEvent<HTMLInputElement>) => updateUser('username', e.currentTarget.value)}
+					handleChange={(e: ChangeEvent<HTMLInputElement>) =>
+						updateUserInfo('username', e.currentTarget.value)
+					}
 					value={formik.values.username}
 				/>
 
 				<InputTextBox
 					label='Email Address'
 					type='text'
-					handleChange={(e: ChangeEvent<HTMLInputElement>) => updateUser('email', e.currentTarget.value)}
+					handleChange={(e: ChangeEvent<HTMLInputElement>) => updateUserInfo('email', e.currentTarget.value)}
 					value={formik.values.email}
 				/>
 
 				<InputTextBox
 					label='Password'
 					type='password'
-					handleChange={(e: ChangeEvent<HTMLInputElement>) => updateUser('password', e.currentTarget.value)}
+					handleChange={(e: ChangeEvent<HTMLInputElement>) =>
+						updateUserInfo('password', e.currentTarget.value)
+					}
 					value={formik.values.password}
 				/>
 
@@ -114,10 +125,10 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 					options={roleOptions}
 					display={(item) => item.name}
 					value={formik.values.role ?? ''}
-					handleChange={(value: string | number) => updateUser('role', value)}
+					handleChange={(value: string | number) => updateUserInfo('role', value)}
 				/>
 
-				{User.role == AccountRole.Admin && (
+				{currentUserRole == AccountRole.Admin && (
 					<InputSearchDropdown<User>
 						label='Customer'
 						name='name'

@@ -104,6 +104,8 @@ function InputSearchDropdown<T = any>({
 	}
 
 	const isOpen = idRef.current !== null && isDropdownOpen(idRef.current)
+
+	console.log('Rendering Input Search Dropdown')
 	return (
 		<div className='InputSearchDropdown' ref={dropdownRef}>
 			<InputTextBox

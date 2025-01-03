@@ -4,14 +4,14 @@ import User from '@/classes/User'
 import API from '@/services/api'
 import { useRouter, useParams } from 'next/navigation'
 import AccountCRUD from '@/components/AccountCRUD'
-import "@/styles/pages/accounts.css"
-import "@/styles/forms.css"
+import '@/styles/pages/accounts.css'
+import '@/styles/forms.css'
 
 const Page = () => {
 	const params = useParams()
 
 	const [user, setUser] = useState<User>(new User({}))
-	const [isLoading, setIsLoading] = useState<boolean>(false)
+	const [isLoading, setIsLoading] = useState<boolean>(true)
 	const route = useRouter()
 
 	const userId = params.id
@@ -40,10 +40,8 @@ const Page = () => {
 				Back
 			</button>
 			<h1 className='mb-5'>Account Page</h1>
-			{isLoading && <i className='fa-solid fa-spinner animate-spin' />}
-			{!isLoading && user && (
-				<AccountCRUD user={user} />
-			)}
+			{!user && <i className='fa-solid fa-spinner animate-spin' />}
+			{user && <AccountCRUD user={user} />}
 		</div>
 	)
 }
