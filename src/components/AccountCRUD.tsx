@@ -23,7 +23,7 @@ import InputDropdown from './InputDropdown'
 // This CRUD is for editing/creating accounts
 
 const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User: User) => void }) => {
-	const [isLoading, setIsLoading] = React.useState(false)
+	const [isFetchingUsers, setIsFetchingUsers] = React.useState(false)
 	const [usersList, setUsersList] = React.useState<User[]>([])
 	const roleOptions = EnumToDropdownValues(AccountRole)
 	const User = useAccountStore((state) => state.User)
@@ -38,7 +38,7 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 	useEffect(() => {
 		const fetchCustomers = async () => {
 			try {
-				setIsLoading(true)
+				setIsFetchingUsers(true)
 				const { data } = await API.Accounts.getAll()
 				if (data?.statusCode == 200) {
 					const listOfUsers = data.payload ?? []
@@ -51,7 +51,7 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 				return toast.error(error)
 				console.error(error)
 			} finally {
-				setIsLoading(false)
+				setIsFetchingUsers(false)
 			}
 		}
 		fetchCustomers()
@@ -59,7 +59,7 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 
 	const handleSubmit = async (userData: User) => {
 		try {
-			setIsLoading(true)
+			setIsFetchingUsers(true)
 			userData.notifications = []
 			userData.customer = null
 
@@ -75,13 +75,13 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 		} catch (err: any) {
 			toast.error(err.message)
 		} finally {
-			setIsLoading(false)
+			setIsFetchingUsers(false)
 		}
 	}
 
 	const updateUser = (key: keyof User, newValue: string | number) => {
 		if (key == 'role' || key == 'customerId') newValue = parseInt(newValue as any)
-		
+
 		formik.setFieldValue(key, newValue)
 	}
 
@@ -124,12 +124,12 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 						display={(user: User) => user.name.getFullName()}
 						value={(user: User) => user.id}
 						options={usersList}
-						isLoading={isLoading}
+						isLoading={isFetchingUsers}
 					/>
 				)}
 
 				<button className='mt-10' onClick={() => handleSubmit(formik.values)}>
-					{isLoading ? (
+					{isFetchingUsers ? (
 						<i className='fa-solid fa-spinner animate-spin'></i>
 					) : params.id == 'create' ? (
 						'Create Account'

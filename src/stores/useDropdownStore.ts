@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import React from 'react'
+import React, { Ref, RefObject } from 'react'
 
 interface Dropdown {
 	id: number
@@ -8,9 +8,9 @@ interface Dropdown {
 }
 
 interface DropdownState {
-	dropdowns: Dropdown[]
+	dropdowns: Map<number, Dropdown>
 
-	addDropdown: () => number
+	addDropdown: (dropdownRef: RefObject<HTMLDivElement>) => number
 	removeDropdown: (id: number) => void
 	toggleDropdown: (id: number, isOpen: boolean) => void
 	closeAll: () => void
@@ -29,68 +29,82 @@ const useDropdownStore = create<DropdownState>((set, get) => ({
 	// TODO: Feature could use a Map until the number of dropdowns is large enough to warrant a performance improvement.
 	// Create a function to convert the Map to an array when the number of dropdowns is large enough to warrant a performance improvement.
 
-	dropdowns: [],
-	addDropdown: () => {
+	dropdowns: new Map<number, Dropdown>(),
+	addDropdown: (dropdownRef: RefObject<HTMLDivElement>) => {
 		let newId: number = 1
 		set((state) => {
-			const isFirstDropdown = state.dropdowns.length <= 0
-			if (!isFirstDropdown) {
-				newId = Math.max(...state.dropdowns.map((d) => d.id)) + 1
+			// Calculate new ID
+			const keys = Array.from(state.dropdowns.keys())
+			if (keys.length > 0) {
+				newId = Math.max(...keys) + 1
+			}
+			// Add new dropdown to Map
+			const newDropdown = {
+				id: newId,
+				isOpen: false,
+				ref: dropdownRef,
 			}
 
-			const newDropdownsState = {
-				dropdowns: [
-					...state.dropdowns,
-					{
-						id: newId,
-						isOpen: false,
-						ref: React.createRef<HTMLDivElement>(),
-					},
-				],
-			}
+			state.dropdowns.set(newId, newDropdown)
 
-			return newDropdownsState
+			return { dropdowns: new Map(state.dropdowns) }
 		})
 		return newId
 	},
+
 	removeDropdown: (id) =>
-		set((state) => ({
-			dropdowns: state.dropdowns.filter((dropdown) => dropdown.id !== id),
-		})),
+		set((state) => {
+			state.dropdowns.delete(id)
+
+			// Recreate Map to trigger re-render
+			return { dropdowns: new Map(state.dropdowns) }
+		}),
+
 	toggleDropdown: (id, isOpen) =>
-		set((state) => ({
-			dropdowns: state.dropdowns.map((dropdown) => (dropdown.id === id ? { ...dropdown, isOpen } : dropdown)),
-		})),
+		set((state) => {
+			const dropdown = state.dropdowns.get(id)
+			if (dropdown) {
+				dropdown.isOpen = isOpen
+				state.dropdowns.set(id, dropdown) // Update dropdown in Map
+			}
+
+			// Recreate Map to trigger re-render
+			return { dropdowns: new Map(state.dropdowns) }
+		}),
+
 	closeAll: () =>
-		set((state) => ({
-			dropdowns: state.dropdowns.map((dropdown) => ({
-				...dropdown,
-				isOpen: false,
-			})),
-		})),
+		set((state) => {
+			state.dropdowns.forEach((dropdown) => {
+				dropdown.isOpen = false
+			})
+
+			// Recreate Map to trigger re-render
+			return { dropdowns: new Map(state.dropdowns) }
+		}),
+
 	isDropdownOpen: (id: number) => {
-		return get().dropdowns.some((d) => d.id === id && d.isOpen)
+		const dropdown = get().dropdowns.get(id)
+		return !!dropdown?.isOpen
 	},
 
 	getOpenedDropdown: () => {
-		return get().dropdowns.find((d) => d.isOpen)
+		for (const dropdown of get().dropdowns.values()) {
+			if (dropdown.isOpen) {
+				return dropdown
+			}
+		}
+		return undefined
 	},
 
 	initializeListener: (): VoidAnonymousFunction => {
 		const handleClickOutside = (event: MouseEvent) => {
-			console.log('event triggered')
+			const openedDropdown = get().getOpenedDropdown()
+			if (!openedDropdown) return
 
-			const hasOpenedDropdown = get().getOpenedDropdown()
-			if (!hasOpenedDropdown) return
-
-			const dropdowns = get().dropdowns
-			const isClickInsideDropdown = dropdowns.some((dropdown) =>
-				dropdown.ref.current?.contains(event.target as Node)
-			)
-
-			if (!isClickInsideDropdown) {
+			const isClickInsideDropdown = openedDropdown.ref.current?.contains(event.target as Node)
+			if (isClickInsideDropdown === false) {
 				// If the click is outside the dropdown, close all open dropdowns
-				get().closeAll()
+				get().toggleDropdown(openedDropdown.id, false)
 			}
 		}
 

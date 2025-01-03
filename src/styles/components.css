@@ -247,6 +247,30 @@
 	font-size: 0.85em;
 	border: 1px solid var(--brand-color-1);
 	border-radius: 3px;
+	background: var(--bg-color);
+}
+
+.InputSearchDropdown .dropdown .loading-text {
+	color: var(--brand-color-5);
+	font-size: 0.95rem;
+	font-weight: 700;
+	text-align: center;
+}
+
+.InputSearchDropdown .dropdown .loading-text i {
+	margin-right: 3%;
+}
+
+.InputSearchDropdown .dropdown .option {
+	padding: 3% 5%;
+	border-radius: 3px;
+	transition: var(--transition);
+}
+
+.InputSearchDropdown .dropdown .option.active,
+.InputSearchDropdown .dropdown .option:hover {
+	background-color: var(--light-gray);
+	color: var(--brand-color-3);
 }
 
 .pill {
