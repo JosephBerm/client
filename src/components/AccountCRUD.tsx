@@ -124,6 +124,7 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 						display={(user: User) => user.name.getFullName()}
 						value={(user: User) => user.id}
 						options={usersList}
+						isLoading={isLoading}
 					/>
 				)}
 

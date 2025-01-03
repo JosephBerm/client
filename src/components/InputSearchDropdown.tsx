@@ -1,10 +1,13 @@
 import React, { useRef, useEffect, useState, ChangeEvent } from 'react'
 import classNames from 'classnames'
+import InputTextBox from '@/components/InputTextBox'
+import useDropdownStore from '../stores/useDropdownStore'
 
 interface IInputSearchDropdownProps<T> {
 	name: keyof T
 	options: T[]
 	label?: string
+	isLoading?: boolean
 	placeholder?: string
 	onSearch?: (query: string) => T[]
 	value: (item: T) => any
@@ -16,6 +19,7 @@ function InputSearchDropdown<T = any>({
 	name,
 	options,
 	label,
+	isLoading,
 	placeholder,
 	onSearch,
 	value,
@@ -25,7 +29,24 @@ function InputSearchDropdown<T = any>({
 	const [filteredOptions, setFilteredOptions] = useState<T[]>(options)
 	const [searchQuery, setSearchQuery] = useState('') // Change the type to string
 	const [activeIndex, setActiveIndex] = useState(-1)
-	const [isOpen, setIsOpen] = useState(false)
+
+	const { addDropdown, removeDropdown, toggleDropdown, closeAll, isDropdownOpen } = useDropdownStore()
+	const idRef = useRef<number | null>(null)
+	const dropdownRef = useRef<HTMLDivElement | null>(null)
+
+	useEffect(() => {
+		handleSearchChange({ target: { value: searchQuery } } as ChangeEvent<HTMLInputElement>)
+		console.log('options changed')
+	}, [options])
+
+	useEffect(() => {
+		const id = addDropdown() // Add dropdown to the store and get a unique ID
+		idRef.current = id
+
+		return () => {
+			if (idRef.current !== null) removeDropdown(idRef.current) // Cleanup on unmount
+		}
+	}, [addDropdown, removeDropdown])
 
 	const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
 		if (typeof onSearch == 'function') {
@@ -50,28 +71,35 @@ function InputSearchDropdown<T = any>({
 		} else if (e.key === 'Enter' && activeIndex >= 0) {
 			handleSelect(filteredOptions[activeIndex])
 		} else if (e.key === 'Escape') {
-			setIsOpen(false)
+			if (idRef.current !== null) toggleDropdown(idRef.current, false)
 		}
 	}
 	const handleSelect = (option: T) => {
-		// onSelect(option)
-		setIsOpen(false)
+		if (onSelect) onSelect(option)
+		if (idRef.current !== null) toggleDropdown(idRef.current, false)
 	}
 
-	console.log('options', options)
+	const handleFocus = () => {
+		if (idRef.current !== null) {
+			closeAll() // Close all other dropdowns
+			toggleDropdown(idRef.current, true) // Open the current dropdown
+		}
+	}
 
+	const isOpen = idRef.current !== null && isDropdownOpen(idRef.current)
+	console.log('component rendered')
 	return (
-		<div className='InputSearchDropdown'>
-			<input
-				type='text'
+		<div className='InputSearchDropdown' ref={dropdownRef}>
+			<InputTextBox
+				type={'text'}
 				value={searchQuery}
-				onChange={handleSearchChange}
+				handleChange={handleSearchChange}
 				placeholder='Search'
-				onKeyDown={handleKeyDown}
-				onFocus={() => setIsOpen(true)}
+				handleKeyDown={handleKeyDown}
+				handleFocus={handleFocus}
 			/>
-			{isOpen && (
-				<div className={classNames({ dropdown: true })}>
+			{isOpen && !isLoading && (
+				<div className='dropdown' ref={dropdownRef}>
 					{filteredOptions.map((option, index) => (
 						<div
 							key={value(option)}
@@ -82,6 +110,7 @@ function InputSearchDropdown<T = any>({
 					))}
 				</div>
 			)}
+			{isLoading && <div>show that isLoading is true</div>}
 		</div>
 	)
 }

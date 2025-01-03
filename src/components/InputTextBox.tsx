@@ -24,7 +24,7 @@ export interface InputType {
 	maxLength?: number
 	handleChange?: (value: ChangeEvent<HTMLInputElement>) => void
 	handleBlur?: (value: ChangeEvent<HTMLInputElement>) => void
-	handleKeyDown?: (e: KeyboardEvent) => void
+	handleKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 	handleFocus?: () => void
 	className?: string
 }

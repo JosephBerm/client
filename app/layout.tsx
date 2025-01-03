@@ -3,7 +3,7 @@ import { ToastContainer } from 'react-toastify'
 import Header from '@/components/Header'
 import WrapperHandlerPublic from '@/components/WrapperHandlerPublic'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+import DropdownProvider from '@/src/context/DropdownProvider'
 
 import 'react-toastify/dist/ReactToastify.css'
 import '@fortawesome/fontawesome-free/css/all.min.css'
@@ -12,7 +12,7 @@ import '@/styles/App/app.css'
 import './globals.css'
 
 export const metadata: Metadata = {
-	title: 'Next App',
+	title: 'MedSource',
 	description: 'Created by Code Prodigies',
 }
 
@@ -48,13 +48,13 @@ export default async function RootLayout(props: any) {
 	return (
 		<html lang='en'>
 			<body>
-				<WrapperHandlerPublic  User={response?.payload}/>
+				<WrapperHandlerPublic User={response?.payload} />
 				<Header />
 
-				<main className='page-container'>
-					{props.children}
-				</main>
-				<ToastContainer />
+				<DropdownProvider>
+					<main className='page-container'>{props.children}</main>
+					<ToastContainer />
+				</DropdownProvider>
 			</body>
 		</html>
 	)
