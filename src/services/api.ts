@@ -27,10 +27,13 @@ const API = {
 		update: async <T>(account: User) => await HttpService.put<T>('/account', account),
 		changePassword: async <T>(oldPassword: string, newPassword: string) =>
 			await HttpService.put<T>('/account/changepassword', { oldPassword, newPassword }),
+		changePasswordById: async <T>(id: string, oldPassword: string, newPassword: string) =>
+			await HttpService.put<T>(`/account/changepasswordById`, { id, oldPassword, newPassword }),
 		getAll: () => HttpService.get<User[]>('/account/all'),
 		search: async (search: GenericSearchFilter) =>
 			await HttpService.post<PagedResult<User>>(`/account/search`, search),
 		getDashboardSummary: async () => await HttpService.get<CustomerSummary>('/account/analytics'),
+		delete: async (id: string) => await HttpService.delete<boolean>(`/account/${id}`),
 	},
 	Store: {
 		Products: {
@@ -72,8 +75,7 @@ const API = {
 		getAll: async <T>() => {
 			return await HttpService.get<T>('/quote')
 		},
-		getLatest: async (quantity: number = 6) =>
-		{
+		getLatest: async (quantity: number = 6) => {
 			return await HttpService.get<Quote[]>(`/quote/latest?quantity=${quantity}`)
 		},
 		search: async (search: GenericSearchFilter) => {
@@ -104,7 +106,8 @@ const API = {
 		submitInvoice: async <Boolean>(req: SubmitOrderRequest) =>
 			await HttpService.post<Boolean>(`/orders/submit/invoice`, req),
 		approveOrder: async (orderId: string) => await HttpService.post<boolean>(`/orders/approve/${orderId}`, null),
-		deleteProduct: async (orderId: string, productId: number) => await HttpService.delete<boolean>(`/orders/${orderId}/product/${productId}`),
+		deleteProduct: async (orderId: string, productId: number) =>
+			await HttpService.delete<boolean>(`/orders/${orderId}/product/${productId}`),
 	},
 	Notifications: {
 		get: async <T>(id: string) => {

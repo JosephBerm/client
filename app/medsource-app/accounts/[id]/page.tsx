@@ -39,7 +39,9 @@ const Page = () => {
 			<button className='mb-10' onClick={() => route.back()}>
 				Back
 			</button>
-			<h1 className='mb-5'>Account Page</h1>
+			<div className='page-header'>
+				<h2 className='page-title'>User Settings</h2>
+			</div>
 			{!user && <i className='fa-solid fa-spinner animate-spin' />}
 			{user && <AccountCRUD user={user} />}
 		</div>
