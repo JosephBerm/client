@@ -273,6 +273,70 @@
 	color: var(--brand-color-3);
 }
 
+/*////////////////////////////////////
+				Add Edit User
+//////////////////////////////////// */
+.AddEditUser {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 3vh;
+}
+.AddEditUser section {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	justify-self: center;
+	width: 60%;
+	min-width: 250px;
+	margin-top: 20%;
+	gap: 1vh;
+}
+.AddEditUser section:first-of-type {
+	margin-top: 5%;
+}
+
+.AddEditUser .FormContainer h3 {
+	text-align: center;
+}
+
+.AddEditUser button {
+	width: 75%;
+	min-width: 125px;
+	max-width: 175px;
+}
+
+.AddEditUser .FormContainer {
+	justify-content: center;
+	width: 100%;
+	max-width: 500px;
+}
+.AddEditUser .FormContainer.security {
+	gap: 3vh;
+}
+.AddEditUser .FormContainer .gapped-fields {
+	gap: 5%;
+}
+
+.AddEditUser .customer-container {
+	display: flex;
+	flex-direction: column;
+	gap: 1vh;
+	margin-top: 4vh;
+}
+
+.AddEditUser .address-container.billing {
+	display: flex;
+	flex-direction: column;
+	gap: 1vh;
+}
+
+/*////////////////////////////////////
+				General
+//////////////////////////////////// */
+
 .pill {
 	display: inline-block;
 	padding: 0.5rem 1rem;
@@ -316,6 +380,10 @@
 
 	.view-all-products-button {
 		max-width: 250px;
+	}
+
+	.AddEditUser section {
+		margin-top: 10%;
 	}
 }
 

@@ -19,6 +19,7 @@ import { IUser } from '@/classes/User'
 import Validations from '@/utilities/validationSchemas'
 import Name from '@/classes/common/Name'
 import InputDropdown from './InputDropdown'
+import AddEditUser from './AddEditUser'
 
 // This CRUD is for editing/creating accounts
 
@@ -82,7 +83,6 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 
 	const updateUserInfo = useCallback(
 		(key: keyof IUser, newValue: string | number | null) => {
-			console.log('updateUserInfo', key, newValue)
 			if (newValue === null) return
 			if (key == 'role' || key == 'customerId') newValue = parseInt(newValue as any)
 
@@ -91,65 +91,28 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 		[formik]
 	)
 
+	useEffect(() => {
+		// Check if the user has the necessary details
+		if (user) {
+			formik.setValues(user)
+		}
+	}, [user])
+
 	console.log('Rendering AccountCRUD')
 	return (
-		<FormikProvider value={formik}>
-			<Form className='update-form-container' onSubmit={formik.handleSubmit}>
-				<InputTextBox
-					label='Username'
-					type='text'
-					handleChange={(e: ChangeEvent<HTMLInputElement>) =>
-						updateUserInfo('username', e.currentTarget.value)
-					}
-					value={formik.values.username}
+		<div className='AccountCRUD'>
+			{currentUserRole == AccountRole.Admin && (
+				<InputSearchDropdown<User>
+					label='Customer'
+					name='name'
+					display={(user: User) => user.name.getFullName()}
+					value={(user: User) => user.id}
+					options={usersList}
+					isLoading={isFetchingUsers}
 				/>
-
-				<InputTextBox
-					label='Email Address'
-					type='text'
-					handleChange={(e: ChangeEvent<HTMLInputElement>) => updateUserInfo('email', e.currentTarget.value)}
-					value={formik.values.email}
-				/>
-
-				<InputTextBox
-					label='Password'
-					type='password'
-					handleChange={(e: ChangeEvent<HTMLInputElement>) =>
-						updateUserInfo('password', e.currentTarget.value)
-					}
-					value={formik.values.password}
-				/>
-
-				<InputDropdown
-					label='User Role'
-					options={roleOptions}
-					display={(item) => item.name}
-					value={formik.values.role ?? ''}
-					handleChange={(value: string | number) => updateUserInfo('role', value)}
-				/>
-
-				{currentUserRole == AccountRole.Admin && (
-					<InputSearchDropdown<User>
-						label='Customer'
-						name='name'
-						display={(user: User) => user.name.getFullName()}
-						value={(user: User) => user.id}
-						options={usersList}
-						isLoading={isFetchingUsers}
-					/>
-				)}
-
-				<button className='mt-10' onClick={() => handleSubmit(formik.values)}>
-					{isFetchingUsers ? (
-						<i className='fa-solid fa-spinner animate-spin'></i>
-					) : params.id == 'create' ? (
-						'Create Account'
-					) : (
-						'Update Account'
-					)}
-				</button>
-			</Form>
-		</FormikProvider>
+			)}
+			<AddEditUser user={user} />
+		</div>
 	)
 }
 

@@ -7,6 +7,7 @@ import { format } from 'date-fns'
 import Table from '@/common/table'
 import API from '@/services/api'
 import Routes from '@/services/routes'
+import { toast } from 'react-toastify'
 
 const Page = () => {
 	const [tables, setTables] = useState<User[]>([])
@@ -22,6 +23,25 @@ const Page = () => {
 		}
 	}
 
+	//handle optimistic update for user deletion
+	const handleUserDeletion = async (id: string | null) => {
+		if (!id) return
+		if (window.confirm(`Are you sure you want to delete user #${id}?`)) {
+			const updatedUsers = tables.filter((user) => user.id !== id)
+			const originalUsers = [...tables]
+			setTables(updatedUsers)
+			try {
+				const { data } = await API.Accounts.delete(id)
+				if (data.statusCode !== 200 && data.message) throw new Error(data.message)
+
+				toast.success(data.message)
+			} catch (error: any) {
+				console.error(error)
+				setTables(originalUsers)
+			}
+		}
+	}
+
 	useEffect(() => {
 		fetchAccounts()
 	}, [])
@@ -30,11 +50,7 @@ const Page = () => {
 		{
 			name: 'username',
 			label: 'Username',
-			content: (user: User) => (
-				<>
-					{user.username}
-				</>
-			),
+			content: (user: User) => <>{user.username}</>,
 		},
 		{
 			name: 'email',
@@ -56,7 +72,9 @@ const Page = () => {
 						}}>
 						Edit
 					</button>
-					<button className='delete'>Delete</button>
+					<button className='delete' onClick={() => handleUserDeletion(user.id)}>
+						Delete
+					</button>
 				</div>
 			),
 		},
@@ -67,9 +85,7 @@ const Page = () => {
 			<div className='page-header'>
 				<h2 className='page-title'>Accounts</h2>
 			</div>
-			<button onClick ={() => route.push("accounts/create")}>
-				Create
-			</button>
+			<button onClick={() => route.push('accounts/create')}>Create</button>
 
 			<Table<User> columns={columns} data={tables} />
 		</div>

@@ -21,55 +21,7 @@
 	object-fit: cover;
 }
 
-.Profile > section {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	width: 60%;
-	min-width: 250px;
-	margin-top: 20%;
-	gap: 1vh;
-}
-.Profile > section:first-of-type {
-	margin-top: 5%;
-}
-
-.Profile .FormContainer h3 {
-	text-align: center;
-}
-.Profile button {
-	width: 75%;
-	min-width: 125px;
-	max-width: 175px;
-}
-
-.Profile .FormContainer {
-	justify-content: center;
-	width: 100%;
-	max-width: 500px;
-}
-.Profile .FormContainer.security {
-	gap: 3vh;
-}
-.Profile .FormContainer .gapped-fields {
-	gap: 5%;
-}
-.Profile .customer-container {
-	display: flex;
-	flex-direction: column;
-	gap: 1vh;
-	margin-top: 4vh;
-}
-
-.Profile .address-container.billing {
-	display: flex;
-	flex-direction: column;
-	gap: 1vh;
-}
 
 @media screen and (min-width: 768px) {
-	.Profile > section {
-		margin-top: 10%;
-	}
+	
 }

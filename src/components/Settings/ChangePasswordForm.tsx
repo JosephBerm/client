@@ -10,16 +10,22 @@ import FormInputTextBox from '@/components/FormInputTextbox'
 import Validations from '@/utilities/validationSchemas'
 import classNames from 'classnames'
 
-import { PasswordForm } from '@/classes/User'
+import User, { PasswordForm } from '@/classes/User'
 
-const ChangePasswordForm = () => {
+interface ChangePasswordFormProps {
+	user: User
+}
+const ChangePasswordForm = ({ user }: ChangePasswordFormProps) => {
 	const [isLoading, setIsLoading] = useState(false)
 	const [isEditEnabled, setIsEditEnabled] = useState(false)
 
 	const handleSubmit = async (e: PasswordForm) => {
 		try {
 			setIsLoading(true)
-			const response = await API.Accounts.changePassword<Boolean>(e.oldPassword, e.newPassword)
+			console.log('user', user)
+			if (!user?.id) throw new Error('User ID is required')
+			console.log('user', user)
+			const response = await API.Accounts.changePasswordById<Boolean>(user.id, e.oldPassword, e.newPassword)
 
 			if (response && response.data.statusCode === 200) return toast.success(response.data.message)
 			else toast.error(response.data.message)
@@ -78,7 +84,7 @@ const ChangePasswordForm = () => {
 				{isEditEnabled && (
 					<button
 						type='button'
-						className={classNames({ 'delete': true })}
+						className={classNames({ delete: true })}
 						onClick={() => {
 							setIsEditEnabled(false)
 							formik.resetForm()
