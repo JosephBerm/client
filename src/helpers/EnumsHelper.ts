@@ -1,4 +1,4 @@
-export default class EnumHelper<T> {
+export default class EnumsHelper<T> {
 	public enumList: ToListItems<T>[]
 
 	constructor(toListItems: ToListItems<T>[]) {

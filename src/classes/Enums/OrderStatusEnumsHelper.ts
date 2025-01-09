@@ -4,11 +4,15 @@ import EnumsHelper, { ToListItems } from '@/helpers/EnumsHelper'
 export default class OrderStatusEnumsHelper extends EnumsHelper<OrderStatus> {
 	static enumList: ToListItems<OrderStatus>[] = [
 		{
+			display: 'Cancelled',
+			value: OrderStatus.Cancelled,
+		},
+		{
 			display: 'Pending',
 			value: OrderStatus.Pending,
 		},
 		{
-			display: 'Waiting Customer Approval',
+			display: 'Waiting For Customer Approval',
 			value: OrderStatus.WaitingCustomerApproval,
 		},
 		{
@@ -26,10 +30,6 @@ export default class OrderStatusEnumsHelper extends EnumsHelper<OrderStatus> {
 		{
 			display: 'Delivered',
 			value: OrderStatus.Delivered,
-		},
-		{
-			display: 'Cancelled',
-			value: OrderStatus.Cancelled,
 		},
 	]
 

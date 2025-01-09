@@ -20,12 +20,11 @@ import { OrderStatus } from '@/src/classes/Enums'
 import { OrderStatusName } from '@/classes/EnumsTranslations'
 import Pill from '@/components/Pill'
 import { OrderStatusVariants } from '@/classes/EnumsTranslations'
-import { EnumToDropdownValues } from '@/services/utils'
-import classNames from 'classnames'
 import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import InputTextArea from '../InputTextArea'
+import OrderStatusEnumsHelper from '@/src/classes/Enums/OrderStatusEnumsHelper'
 
 const OrderDetails = () => {
 	const route = useRouter()
@@ -55,9 +54,7 @@ const OrderDetails = () => {
 
 			if (!exitPage && data.statusCode === 200) {
 				toast.success(
-					order?.status === OrderStatus.Cancelled
-						? 'Order has been cancelled!'
-						: 'Order saved successfully'
+					order?.status === OrderStatus.Cancelled ? 'Order has been cancelled!' : 'Order saved successfully'
 				)
 			} else if (data.statusCode !== 200) {
 				toast.error(data.message ?? 'Failed to save order')
@@ -108,13 +105,7 @@ const OrderDetails = () => {
 			return Object.assign({}, prevState, { products: updatedProducts })
 		})
 	}
-
-	const getSelectedProducts = (): Product[] => {
-		return currentOrder.products
-			.filter((product) => !!product.product)
-			.map((orderItem) => orderItem.product as Product)
-	}
-
+	
 	const handleProductDeletion = async (productId: number | null) => {
 		try {
 			if (currentOrder.id == null || productId == null) {
@@ -149,14 +140,13 @@ const OrderDetails = () => {
 		}
 	}
 
-	const handleSelectCustomer = (customerId: number | string) => {
-		const id = Number(customerId)
-		if (isNaN(id)) {
+	const handleSelectCustomer = (companyId: number) => {
+		if (isNaN(companyId)) {
 			console.error('Invalid customer ID')
 			return
 		}
 
-		const customer = isAdmin ? customers?.find((c) => c.id === id) : User
+		const customer = isAdmin ? customers?.find((c) => c.id === companyId) : User
 
 		if (customer) {
 			setCurrentOrder((prevState) => {
@@ -454,24 +444,8 @@ const OrderDetails = () => {
 		return updatedOrder
 	}
 
-	// Usage Example
-	const filteredOrderStatusList = [
-		OrderStatus.Cancelled,
-		OrderStatus.WaitingCustomerApproval,
-		OrderStatus.Placed,
-		OrderStatus.Processing,
-		OrderStatus.Shipped,
-		OrderStatus.Delivered,
-	].map((status) => ({
-		id: status,
-		name: OrderStatus[status],
-	}))
+	const orderStatusEnumsHelper: OrderStatusEnumsHelper = new OrderStatusEnumsHelper()
 
-	const handleStatusChange = (value: string | number) => {
-		const filtered = filteredOrderStatusList.find((status) => status.id == value)
-		if (!filtered) return
-		setOrderStatus(filtered.id, true)
-	}
 	type Variant = 'info' | 'success' | 'error' | 'warning'
 	const isOrderPlaced = currentOrder.status >= OrderStatus.Placed
 	const deleteColumn: TableColumn<OrderItem> = {
@@ -505,25 +479,27 @@ const OrderDetails = () => {
 				</div>
 				{isAdmin && (
 					<InputDropdown<Company>
-						options={customers}
-						display='name'
 						label='Customer'
-						value={currentOrder.customerId ?? ''}
-						handleChange={handleSelectCustomer}
 						placeholder='Select a Customer'
 						customClass='customer-selector'
+						options={customers}
+						sync={currentOrder.customerId}
+						syncState={handleSelectCustomer}
+						display={(company) => company.name}
+						value={(company) => company.id}
 					/>
 				)}
 
 				<fieldset className='header-options' disabled={!currentOrder.customerId}>
 					{isAdmin && (
 						<InputDropdown
-							options={filteredOrderStatusList}
-							display='name'
+							sync={currentOrder.status}
+							syncState={(newValue: any) => setOrderStatus(newValue, true)}
 							label='Order Status'
-							value={currentOrder.status}
-							handleChange={handleStatusChange}
-							placeholder='Change Order Status'
+							placeholder='Change Status'
+							options={orderStatusEnumsHelper.enumList}
+							display={orderStatusEnumsHelper.getToListItemDisplay}
+							value={orderStatusEnumsHelper.getToListItemValue}
 						/>
 					)}
 					<div className='button-container'>
@@ -576,14 +552,14 @@ const OrderDetails = () => {
 				{isAdmin && (
 					<div className='add-product-container'>
 						<InputDropdown<Product>
-							options={productsList}
-							display='name'
 							label='Add Product To Order'
-							value={product?.id ?? ''}
-							handleChange={handleSelectProduct}
 							placeholder='Select a Product'
+							sync={product?.id}
+							syncState={handleSelectProduct}
+							options={productsList}
+							display={(product) => product.name}
+							value={(product) => product.id}
 							customClass='primary'
-							filterIfSelected={getSelectedProducts}
 						/>
 						<button
 							disabled={!product || hasProductInList}
