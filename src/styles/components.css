@@ -282,6 +282,7 @@
 	justify-content: flex-start;
 	align-items: center;
 	gap: 3vh;
+	width: 100%;
 }
 .AddEditUser section {
 	display: flex;
@@ -311,7 +312,7 @@
 .AddEditUser .FormContainer {
 	justify-content: center;
 	width: 100%;
-	max-width: 500px;
+	max-width: 750px;
 }
 .AddEditUser .FormContainer.security {
 	gap: 3vh;

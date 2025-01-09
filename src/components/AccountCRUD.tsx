@@ -104,7 +104,6 @@ const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User:
 			{currentUserRole == AccountRole.Admin && (
 				<InputSearchDropdown<User>
 					label='Customer'
-					name='name'
 					display={(user: User) => user.name.getFullName()}
 					value={(user: User) => user.id}
 					options={usersList}

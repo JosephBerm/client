@@ -4,7 +4,6 @@ import InputTextBox from '@/components/InputTextBox'
 import useDropdownStore from '../stores/useDropdownStore'
 
 interface IInputSearchDropdownProps<T> {
-	name: keyof T
 	options: T[]
 	label?: string
 	isLoading?: boolean
@@ -16,7 +15,6 @@ interface IInputSearchDropdownProps<T> {
 }
 
 function InputSearchDropdown<T = any>({
-	name,
 	options,
 	label,
 	isLoading = false,
@@ -109,10 +107,11 @@ function InputSearchDropdown<T = any>({
 	return (
 		<div className='InputSearchDropdown' ref={dropdownRef}>
 			<InputTextBox
+				label={label}
 				type={'text'}
 				value={searchQuery}
 				handleChange={handleSearchChange}
-				placeholder='Search'
+				placeholder={placeholder ?? "Search"}
 				handleKeyDown={handleKeyDown}
 				handleFocus={handleFocus}
 				disabled={isLoading}

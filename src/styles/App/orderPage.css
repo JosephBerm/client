@@ -235,6 +235,11 @@
 /* @media screen and (min-width: 1440px) and (min-height: 1618px) {
 } */
 @media screen and (min-width: 1280px) {
+	.OrderDetails {
+		max-width: 1200px;
+		justify-self: center;
+	}
+
 	.OrderDetails section.general .order-title {
 		align-items: flex-start;
 	}
