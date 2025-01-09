@@ -18,6 +18,9 @@ import InputFile from '@/components/InputFile'
 import UploadedFile from '@/src/classes/UploadedFile'
 import { InternalRouteType } from '@/src/classes/Enums'
 
+//	TODO: MAKE THIS INTO THE USEFORMIK HOOK THAT IS USED INSIDE ADDEDITUSER.TSX
+// ADD THE CATEGORIES DROPDOWN.
+
 const AddEditForm = () => {
 	const router = useRouter()
 	const params = useParams()
@@ -34,6 +37,7 @@ const AddEditForm = () => {
 			const { data: res } = await API.Store.Products.get(params?.id.toString())
 
 			if (res.statusCode === 404) toast.error('The product with the given ID not found.')
+			else if (res.statusCode !== 200) throw new Error(res.message ?? 'There was an error fetching the product.')
 			else if (res.payload) {
 				setProduct(new Product(res.payload))
 			}
@@ -52,7 +56,6 @@ const AddEditForm = () => {
 	}
 
 	const uploadImage = async (passFiles: File[]) => {
-		console.log('AA', passFiles)
 		const formData = new FormData()
 		formData.append('productId', product.id)
 		passFiles.forEach((file: File) => {
@@ -75,13 +78,11 @@ const AddEditForm = () => {
 	const deleteImage = async (image: File) => {
 		if (params.id == 'create') {
 			// If product is being created
-			console.log('HERE', files, image)
 			setFiles((prev) => {
 				return prev.filter((file) => file.name !== image.name)
 			})
 		} else {
 			// If product is already creded.
-			console.log('AA', image.name)
 			const res = await API.Store.Products.deleteImage(params.id as string, image.name)
 			if (res.data.payload == true) {
 				setProduct(

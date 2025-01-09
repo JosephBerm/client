@@ -54,7 +54,11 @@ const OrderDetails = () => {
 			}
 
 			if (!exitPage && data.statusCode === 200) {
-				toast.success('Order saved successfully')
+				toast.success(
+					order?.status === OrderStatus.Cancelled
+						? 'Order has been cancelled!'
+						: 'Order saved successfully'
+				)
 			} else if (data.statusCode !== 200) {
 				toast.error(data.message ?? 'Failed to save order')
 			}
@@ -452,6 +456,7 @@ const OrderDetails = () => {
 
 	// Usage Example
 	const filteredOrderStatusList = [
+		OrderStatus.Cancelled,
 		OrderStatus.WaitingCustomerApproval,
 		OrderStatus.Placed,
 		OrderStatus.Processing,
@@ -477,6 +482,11 @@ const OrderDetails = () => {
 				<i className='fa-solid fa-trash-can' />
 			</button>
 		),
+	}
+	const askForCancellationConfirmation = () => {
+		if (confirm('Are you sure you want to cancel this order?')) {
+			setOrderStatus(OrderStatus.Cancelled, true)
+		}
 	}
 
 	if (!isOrderPlaced) columns.push(deleteColumn)
@@ -538,10 +548,7 @@ const OrderDetails = () => {
 							// <button onClick={handleSubmitInvoice}>Generate Invoice</button>
 						)}
 						{isAdmin && currentOrder.status != OrderStatus.Cancelled && (
-							<button
-								disabled={isLoading}
-								className='delete'
-								onClick={() => setOrderStatus(OrderStatus.Cancelled, true)}>
+							<button disabled={isLoading} className='delete' onClick={askForCancellationConfirmation}>
 								Cancel Order
 							</button>
 						)}

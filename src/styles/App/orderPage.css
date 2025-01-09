@@ -215,7 +215,7 @@
 		display: grid;
 		grid-template-columns: auto 1fr 2fr;
 		max-width: unset;
-		align-items: end;
+		align-items: baseline;
 	}
 
 	.OrderDetails section.general .order-title {
