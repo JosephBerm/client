@@ -11,6 +11,7 @@ const Page = () => {
 	const params = useParams()
 
 	const [user, setUser] = useState<User>(new User({}))
+	const [isNewUser, setIsNewUser] = useState<boolean>(false)
 	const [isLoading, setIsLoading] = useState<boolean>(true)
 	const route = useRouter()
 
@@ -29,6 +30,12 @@ const Page = () => {
 	}
 
 	useEffect(() => {
+		//if params has create, then we are creating a new user
+		if (userId === 'create') {
+			setUser(new User({}))
+			setIsNewUser(true)
+			return
+		}
 		fetchUser()
 	}, [])
 

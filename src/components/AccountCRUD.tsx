@@ -22,8 +22,12 @@ import InputDropdown from './InputDropdown'
 import AddEditUser from './AddEditUser'
 
 // This CRUD is for editing/creating accounts
+interface IAccountCrudProps {
+	user: User
+	onUserUpdate?: (User: User) => void
+}
 
-const AccountCRUD = ({ user, onUserUpdate }: { user: User; onUserUpdate?: (User: User) => void }) => {
+const AccountCRUD = ({ user, onUserUpdate }: IAccountCrudProps) => {
 	const [isSavingForm, setIsSavingForm] = React.useState(false)
 	const [isFetchingUsers, setIsFetchingUsers] = React.useState(false)
 	const [usersList, setUsersList] = React.useState<User[]>([])

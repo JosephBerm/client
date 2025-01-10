@@ -18,6 +18,7 @@ interface ChangePasswordFormProps {
 const ChangePasswordForm = ({ user }: ChangePasswordFormProps) => {
 	const [isLoading, setIsLoading] = useState(false)
 	const [isEditEnabled, setIsEditEnabled] = useState(false)
+	const isNewUser = user.id === null
 
 	const handleSubmit = async (e: PasswordForm) => {
 		try {
@@ -65,7 +66,7 @@ const ChangePasswordForm = ({ user }: ChangePasswordFormProps) => {
 	return (
 		<FormikProvider value={formik}>
 			<Form className='FormContainer security change-password' onSubmit={formik.handleSubmit}>
-				<FormInputTextBox label='Old Password' name='oldPassword' type='password' disabled={!isEditEnabled} />
+				{!isNewUser && <FormInputTextBox label='Old Password' name='oldPassword' type='password' disabled={!isEditEnabled} />}
 				<FormInputTextBox label='New Password' name='newPassword' type='password' disabled={!isEditEnabled} />
 				<FormInputTextBox
 					label='Confirm New Password'

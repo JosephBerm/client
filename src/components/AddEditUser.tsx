@@ -242,7 +242,7 @@ function AddEditUser({ user, onUserUpdate }: AddEditUserProps) {
 
 			<section className='Security'>
 				<h3>Security & Privacy</h3>
-				<ChangePasswordForm user={user}/>
+				<ChangePasswordForm user={user} />
 			</section>
 		</div>
 	)
