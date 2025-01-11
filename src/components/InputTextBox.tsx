@@ -7,6 +7,13 @@ type inputMode = 'search' | 'email' | 'tel' | 'text' | 'url' | 'none' | 'numeric
 type HTMLChildren = {
 	children: ReactNode
 }
+declare module 'react' {
+	interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+	  popovertarget?: string;
+	  popovertargetaction?: 'hide' | 'show' | 'toggle';
+	  popover?: 'auto' | 'manual';
+	}
+  }
 export interface InputType {
 	type: string
 	value: string
@@ -26,6 +33,7 @@ export interface InputType {
 	handleBlur?: (value: ChangeEvent<HTMLInputElement>) => void
 	handleKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 	handleFocus?: () => void
+	popovertarget?: string;
 	className?: string
 }
 
@@ -42,9 +50,10 @@ const InputTextBox: React.FC<InputType> = ({
 	inputmode,
 	pattern,
 	handleChange = () => {},
-	handleBlur,
+	handleBlur= () => {},
 	handleFocus,
 	handleKeyDown,
+	popovertarget,
 	className: cssClass,
 }) => {
 	const inputRef = useRef<HTMLInputElement>(null)
@@ -101,6 +110,7 @@ const InputTextBox: React.FC<InputType> = ({
 				onBlur={handleBlur}
 				onFocus={handleFocus}
 				onKeyDown={handleKeyDown}
+				popovertarget={popovertarget}
 				className={`border-b border-gray-300`}
 			/>
 

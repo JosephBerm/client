@@ -242,12 +242,30 @@
 .InputSearchDropdown {
 }
 
-.InputSearchDropdown .dropdown {
+
+.InputSearchDropdown {
+	position: relative;
+  }
+  
+/* Popover styles */
+.InputSearchDropdown .dropdown[popover] {
+	position: fixed;
+	z-index: 1000;
+	margin: 0;
 	padding: 3px;
 	font-size: 0.85em;
 	border: 1px solid var(--brand-color-1);
 	border-radius: 3px;
 	background: var(--bg-color);
+	/* Add default popover hiding */
+	opacity: 0;
+	visibility: hidden;
+}
+  
+  /* Show popover when open */
+.InputSearchDropdown .dropdown[popover]:popover-open {
+	opacity: 1;
+	visibility: visible;
 }
 
 .InputSearchDropdown .dropdown .loading-text {

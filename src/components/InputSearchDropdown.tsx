@@ -25,12 +25,13 @@ function InputSearchDropdown<T = any>({
 	onSelect,
 }: IInputSearchDropdownProps<T>) {
 	const [filteredOptions, setFilteredOptions] = useState<T[]>(options)
-	const [searchQuery, setSearchQuery] = useState('') // Change the type to string
+	const [searchQuery, setSearchQuery] = useState('')
 	const [selected, setSelected] = useState<T | null>(null)
 
 	const { addDropdown, removeDropdown, toggleDropdown, closeAll, isDropdownOpen } = useDropdownStore()
 	const idRef = useRef<number | null>(null)
 	const dropdownRef = useRef<HTMLDivElement | null>(null)
+	const randomGuid = crypto.randomUUID()
 
 	useEffect(() => {
 		if (options.length > 0) {
@@ -41,13 +42,49 @@ function InputSearchDropdown<T = any>({
 	useEffect(() => {
 		if (!dropdownRef) return
 
-		const id = addDropdown(dropdownRef) // Add dropdown to the store and get a unique ID
+		const id = addDropdown(dropdownRef)
 		idRef.current = id
 
 		return () => {
-			if (idRef.current !== null) removeDropdown(idRef.current) // Cleanup on unmount
+			if (idRef.current !== null) removeDropdown(idRef.current)
 		}
 	}, [dropdownRef, addDropdown, removeDropdown])
+
+	// Add event listener to prevent popover from closing when clicking inside
+	useEffect(() => {
+		const handlePopoverMouseDown = (e: MouseEvent) => {
+			e.preventDefault()
+		}
+
+		const popover = document.getElementById(randomGuid)
+		popover?.addEventListener('mousedown', handlePopoverMouseDown)
+
+		return () => {
+			popover?.removeEventListener('mousedown', handlePopoverMouseDown)
+		}
+	}, [randomGuid])
+
+	// Position the dropdown
+	useEffect(() => {
+		const positionDropdown = () => {
+			const input = dropdownRef.current?.querySelector('input')
+			const dropdown = document.getElementById(randomGuid)
+
+			if (input && dropdown) {
+				const rect = input.getBoundingClientRect()
+				dropdown.style.top = `${rect.bottom + window.scrollY}px`
+				dropdown.style.left = `${rect.left + window.scrollX}px`
+				dropdown.style.width = `${rect.width}px`
+			}
+		}
+
+		positionDropdown()
+		window.addEventListener('resize', positionDropdown)
+
+		return () => {
+			window.removeEventListener('resize', positionDropdown)
+		}
+	}, [randomGuid])
 
 	const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
 		if (typeof onSearch == 'function') {
@@ -59,11 +96,9 @@ function InputSearchDropdown<T = any>({
 			)
 			setFilteredOptions(filteredOptions)
 		}
-		// Change the event type
-		setSearchQuery(event.target.value) // Change the event type
+		setSearchQuery(event.target.value)
 	}
 
-	// Handle keyboard navigation
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (filteredOptions.length === 0) return
 		if (selected === null) {
@@ -83,27 +118,45 @@ function InputSearchDropdown<T = any>({
 		} else if (e.key === 'Enter' && selected !== null) {
 			handleSelect(selected)
 		} else if (e.key === 'Escape') {
-			if (idRef.current !== null) toggleDropdown(idRef.current, false)
+			const popover = document.getElementById(randomGuid)
+			if (popover) {
+				(popover as any).hidePopover()
+			}
 			setSelected(null)
 		}
 	}
+
 	const handleSelect = (option: T) => {
 		setSelected(option)
-		setSearchQuery(display(option)) // Change the property name;
+		setSearchQuery(display(option))
 		if (onSelect) onSelect(option)
-		if (idRef.current !== null) toggleDropdown(idRef.current, false)
+
+		const input = dropdownRef.current?.querySelector('input')
+		if (input) {
+			input.blur()
+		}
+	}
+
+
+	const handleBlur = (event: ChangeEvent<HTMLInputElement>) => {
+		const popover = document.getElementById(randomGuid)
+		if (popover) {
+			(popover as any).hidePopover()
+		}
 	}
 
 	const handleFocus = () => {
 		if (idRef.current !== null) {
-			closeAll() // Close all other dropdowns
-			toggleDropdown(idRef.current, true) // Open the current dropdown
+			closeAll()
+			const popover = document.getElementById(randomGuid)
+			if (popover) {
+				(popover as any).showPopover({ signal: AbortSignal.timeout(10000) });
+			}
 		}
 	}
 
 	const isOpen = idRef.current !== null && isDropdownOpen(idRef.current)
 
-	console.log('Rendering Input Search Dropdown')
 	return (
 		<div className='InputSearchDropdown' ref={dropdownRef}>
 			<InputTextBox
@@ -114,27 +167,36 @@ function InputSearchDropdown<T = any>({
 				placeholder={placeholder ?? "Search"}
 				handleKeyDown={handleKeyDown}
 				handleFocus={handleFocus}
+				handleBlur={handleBlur}
 				disabled={isLoading}
+				popovertarget={randomGuid}
 			/>
-			{isOpen && (
-				<div className='dropdown'>
-					{isLoading && (
-						<div className='loading-text'>
-							<i className='fa-solid fa-spinner animate-spin' />
-							Loading dropdown items...
+			<div
+				className='dropdown'
+				id={randomGuid}
+				popover="manual"
+			>
+				{isLoading && (
+					<div className='loading-text'>
+						<i className='fa-solid fa-spinner animate-spin' />
+						Loading dropdown items...
+					</div>
+				)}
+				{!isLoading &&
+					filteredOptions.map((option) => (
+						<div
+							key={value(option)}
+							className={classNames({
+								option: true,
+								clickable: true,
+								active: selected === option
+							})}
+							onClick={() => handleSelect(option)}
+						>
+							{display(option)}
 						</div>
-					)}
-					{!isLoading &&
-						filteredOptions.map((option, index) => (
-							<div
-								key={value(option)}
-								className={classNames({ option: true, clickable: true, active: selected === option })}
-								onClick={() => handleSelect(option)}>
-								{display(option)}
-							</div>
-						))}
-				</div>
-			)}
+					))}
+			</div>
 		</div>
 	)
 }
