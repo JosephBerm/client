@@ -13,6 +13,22 @@ export default class FinanceNumbers {
 			}
 		}
 	}
+
+	/**
+	 * @description Profit Margin
+	 * @returns {number}
+	 */
+	get profitMargin() {
+		return (this.sales.totalProfit / this.sales.totalRevenue) * 100
+	}
+
+	/**
+	 * @description Average Order Value
+	 * @returns {number}
+	 */
+	get averageOrderValue() {
+		return this.sales.totalRevenue / this.orders.totalOrders
+	}
 }
 
 export class FSales {
