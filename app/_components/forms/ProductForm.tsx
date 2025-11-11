@@ -1,3 +1,86 @@
+/**
+ * ProductForm Component
+ *
+ * Comprehensive form for creating and updating medical supply products.
+ * Handles product details, image uploads (create mode), and provider relationships.
+ * Uses React Hook Form with Zod validation and DRY submission pattern.
+ *
+ * **Features:**
+ * - Create and update modes (URL-based detection)
+ * - Product information fields (name, description, price, stock, etc.)
+ * - Multi-file image upload (create mode only)
+ * - Provider selection (future enhancement)
+ * - Zod validation with type safety
+ * - useFormSubmit hook integration
+ * - Responsive grid layout
+ * - Loading states during submission
+ * - Success callback and navigation
+ * - Toast notifications
+ *
+ * **Modes:**
+ * - **Create Mode**: params.id === 'create', includes file upload, uses FormData
+ * - **Update Mode**: params.id is product ID, updates existing product
+ *
+ * **Form Fields:**
+ * - Product Name (required)
+ * - Description (required, textarea)
+ * - SKU (optional)
+ * - Price (required, number)
+ * - Quantity/Stock (required, number)
+ * - Category (required)
+ * - Manufacturer (optional)
+ * - Product Images (create mode only, multi-file)
+ *
+ * **Use Cases:**
+ * - Admin product catalog management
+ * - Adding new products to inventory
+ * - Updating product details and pricing
+ * - Bulk image upload during product creation
+ *
+ * @example
+ * ```tsx
+ * import ProductForm from '@_components/forms/ProductForm';
+ * import { Product } from '@_classes/Product';
+ *
+ * // Create mode (at /medsource-app/store/create)
+ * function CreateProductPage() {
+ *   return (
+ *     <div className="container mx-auto p-6">
+ *       <h1 className="text-2xl font-bold mb-6">Create New Product</h1>
+ *       <ProductForm />
+ *     </div>
+ *   );
+ * }
+ *
+ * // Update mode (at /medsource-app/store/[id])
+ * function EditProductPage() {
+ *   const [product, setProduct] = useState<Product | null>(null);
+ *
+ *   useEffect(() => {
+ *     // Fetch product data
+ *     fetchProduct(id).then(setProduct);
+ *   }, [id]);
+ *
+ *   if (!product) return <div>Loading...</div>;
+ *
+ *   return (
+ *     <div className="container mx-auto p-6">
+ *       <h1 className="text-2xl font-bold mb-6">Edit Product</h1>
+ *       <ProductForm
+ *         product={product}
+ *         onUpdate={(updated) => {
+ *           setProduct(updated);
+ *           console.log('Product updated:', updated);
+ *         }}
+ *       />
+ *     </div>
+ *   );
+ * }
+ * ```
+ *
+ * @module ProductForm
+ */
+
 'use client'
 
 import React, { useState, useEffect } from 'react'
@@ -15,11 +98,59 @@ import API from '@_services/api'
 import { useParams, useRouter } from 'next/navigation'
 import Routes from '@_services/routes'
 
+/**
+ * ProductForm component props interface.
+ */
 interface ProductFormProps {
-  product?: Product
-  onUpdate?: (product: Product) => void
+	/**
+	 * Existing product for update mode.
+	 * If provided, form is in update mode.
+	 * If undefined, form is in create mode.
+	 */
+	product?: Product
+
+	/**
+	 * Callback fired after successful product update.
+	 * Only called in update mode.
+	 * @param product - Updated product object
+	 */
+	onUpdate?: (product: Product) => void
 }
 
+/**
+ * ProductForm Component
+ *
+ * Full-featured product management form with create/update modes.
+ * Handles complex submission logic including file uploads for new products.
+ *
+ * **Create Mode Behavior:**
+ * - Detects create mode via URL params (params.id === 'create')
+ * - Shows file upload field for product images
+ * - Uses FormData to submit product data + files
+ * - Navigates to product list after successful creation
+ *
+ * **Update Mode Behavior:**
+ * - Receives existing product via props
+ * - Pre-fills form with product data
+ * - No file upload (images managed separately)
+ * - Updates product entity while preserving methods
+ * - Calls onUpdate callback with updated product
+ * - Navigates to product list after successful update
+ *
+ * **Submission Logic:**
+ * - Create: FormData with product.* fields and files array
+ * - Update: Product entity constructed to preserve class methods
+ * - Both modes use useFormSubmit for DRY error handling
+ *
+ * **State Management:**
+ * - providers: Array of available providers (future feature)
+ * - files: Selected files for upload (create mode only)
+ * - form: React Hook Form instance with Zod validation
+ * - isSubmitting: Loading state from useFormSubmit
+ *
+ * @param props - Component props including product and onUpdate
+ * @returns ProductForm component
+ */
 export default function ProductForm({ product, onUpdate }: ProductFormProps) {
   const [providers, setProviders] = useState<Provider[]>([])
   const [files, setFiles] = useState<File[]>([])

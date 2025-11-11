@@ -1,3 +1,102 @@
+/**
+ * Data Table Component
+ * 
+ * Generic, reusable data table component built on TanStack Table v8.
+ * Supports both client-side and server-side pagination, sorting, filtering,
+ * loading states, and empty states. Styled with DaisyUI for consistent theming.
+ * 
+ * **Features:**
+ * - Client-side AND server-side pagination
+ * - Sortable columns with visual indicators
+ * - Loading spinner during data fetch
+ * - Empty state with custom message
+ * - Zebra striping (alternating row colors)
+ * - Responsive overflow scrolling
+ * - Page size selector (10, 20, 30, 40, 50)
+ * - First/Previous/Next/Last navigation
+ * - Page number display
+ * - Hover states on rows
+ * - Lucide icon sorting indicators
+ * 
+ * **Modes:**
+ * 1. **Client-Side**: Pass data array, table handles pagination/sorting
+ * 2. **Server-Side**: Pass data + pagination state, parent handles data fetching
+ * 
+ * **Use Cases:**
+ * - User management tables
+ * - Product listings
+ * - Order history
+ * - Any tabular data display
+ * 
+ * @example
+ * ```tsx
+ * import DataTable from '@_components/tables/DataTable';
+ * import { ColumnDef } from '@tanstack/react-table';
+ * 
+ * // Define columns
+ * const columns: ColumnDef<User>[] = [
+ *   {
+ *     accessorKey: 'name',
+ *     header: 'Name',
+ *   },
+ *   {
+ *     accessorKey: 'email',
+ *     header: 'Email',
+ *   },
+ *   {
+ *     accessorKey: 'role',
+ *     header: 'Role',
+ *     cell: ({ getValue }) => <Badge>{getValue()}</Badge>,
+ *   },
+ *   {
+ *     id: 'actions',
+ *     header: 'Actions',
+ *     cell: ({ row }) => (
+ *       <Button size="sm" onClick={() => handleEdit(row.original)}>
+ *         Edit
+ *       </Button>
+ *     ),
+ *   },
+ * ];
+ * 
+ * // Client-side pagination (automatic)
+ * <DataTable
+ *   columns={columns}
+ *   data={allUsers}
+ *   pagination={{ pageIndex: 0, pageSize: 10 }}
+ *   onPaginationChange={setPagination}
+ * />
+ * 
+ * // Server-side pagination (manual)
+ * <DataTable
+ *   columns={columns}
+ *   data={currentPageData}
+ *   pageCount={totalPages}
+ *   pagination={pagination}
+ *   onPaginationChange={setPagination}
+ *   sorting={sorting}
+ *   onSortingChange={setSorting}
+ *   isLoading={isLoading}
+ *   manualPagination
+ *   manualSorting
+ * />
+ * 
+ * // With custom empty message
+ * <DataTable
+ *   columns={columns}
+ *   data={filteredData}
+ *   emptyMessage={
+ *     <div className="text-center">
+ *       <p>No users found matching your search</p>
+ *       <Button onClick={handleReset}>Reset Filters</Button>
+ *     </div>
+ *   }
+ * />
+ * ```
+ * 
+ * @module DataTable
+ */
+
 'use client'
 
 import { ReactNode } from 'react'
@@ -12,23 +111,116 @@ import {
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import classNames from 'classnames'
 
+/**
+ * DataTable component props interface.
+ * 
+ * @template TData - The type of data items in the table rows
+ */
 interface DataTableProps<TData> {
+	/** 
+	 * TanStack Table column definitions.
+	 * Defines table structure, headers, cells, sorting, and rendering.
+	 */
 	columns: ColumnDef<TData>[]
+	
+	/** 
+	 * Array of data items to display in the table.
+	 * For server-side tables, this is the current page data.
+	 */
 	data: TData[]
+	
+	/** 
+	 * Total number of pages (for server-side pagination).
+	 * Required when using manualPagination.
+	 */
 	pageCount?: number
+	
+	/** 
+	 * Current pagination state.
+	 * Object with pageIndex (0-based) and pageSize.
+	 */
 	pagination?: PaginationState
+	
+	/** 
+	 * Callback when pagination changes.
+	 * Receives new pagination state or updater function.
+	 */
 	onPaginationChange?: (updater: PaginationState | ((old: PaginationState) => PaginationState)) => void
+	
+	/** 
+	 * Current sorting state.
+	 * Array of column sort specifications.
+	 */
 	sorting?: SortingState
+	
+	/** 
+	 * Callback when sorting changes.
+	 * Receives new sorting state or updater function.
+	 */
 	onSortingChange?: (updater: SortingState | ((old: SortingState) => SortingState)) => void
+	
+	/** 
+	 * Whether table is currently loading data.
+	 * Shows loading spinner in table body.
+	 * @default false
+	 */
 	isLoading?: boolean
+	
+	/** 
+	 * Enable manual (server-side) pagination.
+	 * When true, table doesn't handle pagination - parent component does.
+	 * @default false
+	 */
 	manualPagination?: boolean
+	
+	/** 
+	 * Enable manual (server-side) sorting.
+	 * When true, table doesn't sort data - parent component does.
+	 * @default false
+	 */
 	manualSorting?: boolean
+	
+	/** 
+	 * Message or component to display when table is empty.
+	 * @default 'No data available'
+	 */
 	emptyMessage?: string | ReactNode
 }
 
 /**
- * Generic DataTable component with TanStack Table
- * Supports both client-side and server-side pagination/sorting
+ * DataTable Component
+ * 
+ * Flexible table component for displaying tabular data with pagination and sorting.
+ * Built on TanStack Table v8 for powerful data management and DaisyUI for styling.
+ * 
+ * **Table Structure:**
+ * 1. Header row with sortable columns
+ * 2. Body rows with zebra striping
+ * 3. Pagination controls (if pagination prop provided)
+ * 
+ * **Sorting:**
+ * - Click column header to toggle sort
+ * - Visual indicators: unsorted (⇅), ascending (↑), descending (↓)
+ * - Supports single column sorting
+ * 
+ * **Pagination:**
+ * - First/Previous/Next/Last buttons
+ * - Page number display
+ * - Page size selector (10, 20, 30, 40, 50)
+ * - Shows current range (e.g., "Showing 1 to 10 of 50")
+ * 
+ * **States:**
+ * - **Loading**: Shows spinner, hides data
+ * - **Empty**: Shows custom message when no data
+ * - **Data**: Shows table with rows
+ * 
+ * **Client vs Server Mode:**
+ * - **Client**: Pass all data, table handles pagination/sorting
+ * - **Server**: Pass current page data, use manualPagination/manualSorting
+ * 
+ * @template TData - Type of data items in the table
+ * @param props - Component props including columns, data, pagination, etc.
+ * @returns DataTable component
  */
 export default function DataTable<TData>({
 	columns,
@@ -43,27 +235,31 @@ export default function DataTable<TData>({
 	manualSorting = false,
 	emptyMessage = 'No data available',
 }: DataTableProps<TData>) {
+	/**
+	 * Initialize TanStack Table instance with configuration.
+	 * Handles all table logic including pagination, sorting, and rendering.
+	 */
 	const table = useReactTable({
-		data,
-		columns,
-		pageCount,
+		data,                    // Data array to display
+		columns,                 // Column definitions
+		pageCount,               // Total pages (server-side)
 		state: {
-			pagination,
-			sorting,
+			pagination,          // Current pagination state
+			sorting,             // Current sorting state
 		},
-		onPaginationChange,
-		onSortingChange,
-		getCoreRowModel: getCoreRowModel(),
-		manualPagination,
-		manualSorting,
+		onPaginationChange,      // Pagination change handler
+		onSortingChange,         // Sorting change handler
+		getCoreRowModel: getCoreRowModel(), // Required: builds row model
+		manualPagination,        // Whether pagination is handled externally
+		manualSorting,           // Whether sorting is handled externally
 	})
 
 	return (
 		<div className="w-full">
-			{/* Table */}
+			{/* Table Container (horizontal scroll on mobile) */}
 			<div className="overflow-x-auto">
 				<table className="table table-zebra w-full">
-					{/* Header */}
+					{/* Table Header */}
 					<thead>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<tr key={headerGroup.id}>
@@ -71,26 +267,30 @@ export default function DataTable<TData>({
 									<th
 										key={header.id}
 										className={classNames({
+											// Make sortable columns clickable
 											'cursor-pointer select-none hover:bg-base-300':
 												header.column.getCanSort(),
 										})}
 										onClick={header.column.getToggleSortingHandler()}
 									>
 										<div className="flex items-center gap-2">
+											{/* Render header content */}
 											{header.isPlaceholder
 												? null
 												: flexRender(
 														header.column.columnDef.header,
 														header.getContext()
 												  )}
+											
+											{/* Sorting indicator icons */}
 											{header.column.getCanSort() && (
 												<span className="text-base-content/50">
 													{header.column.getIsSorted() === 'asc' ? (
-														<ChevronUp className="w-4 h-4" />
+														<ChevronUp className="w-4 h-4" /> // Ascending
 													) : header.column.getIsSorted() === 'desc' ? (
-														<ChevronDown className="w-4 h-4" />
+														<ChevronDown className="w-4 h-4" /> // Descending
 													) : (
-														<ChevronsUpDown className="w-4 h-4" />
+														<ChevronsUpDown className="w-4 h-4" /> // Unsorted
 													)}
 												</span>
 											)}
@@ -101,21 +301,26 @@ export default function DataTable<TData>({
 						))}
 					</thead>
 
-					{/* Body */}
+					{/* Table Body */}
 					<tbody>
+						{/* Loading State */}
 						{isLoading ? (
 							<tr>
 								<td colSpan={columns.length} className="text-center py-8">
 									<span className="loading loading-spinner loading-lg text-primary"></span>
 								</td>
 							</tr>
-						) : table.getRowModel().rows.length === 0 ? (
+						) : 
+						/* Empty State */
+						table.getRowModel().rows.length === 0 ? (
 							<tr>
 								<td colSpan={columns.length} className="text-center py-8 text-base-content/60">
 									{emptyMessage}
 								</td>
 							</tr>
-						) : (
+						) : 
+						/* Data Rows */
+						(
 							table.getRowModel().rows.map((row) => (
 								<tr key={row.id} className="hover">
 									{row.getVisibleCells().map((cell) => (
@@ -130,10 +335,10 @@ export default function DataTable<TData>({
 				</table>
 			</div>
 
-			{/* Pagination */}
+			{/* Pagination Controls */}
 			{pagination && onPaginationChange && (
 				<div className="flex items-center justify-between gap-4 mt-4 flex-wrap">
-					{/* Page info */}
+					{/* Page Information */}
 					<div className="text-sm text-base-content/70">
 						Showing{' '}
 						{pagination.pageIndex * pagination.pageSize + 1} to{' '}
@@ -141,20 +346,23 @@ export default function DataTable<TData>({
 						{pageCount && `of ${pageCount * pagination.pageSize}`}
 					</div>
 
-					{/* Pagination controls */}
+					{/* Navigation Buttons */}
 					<div className="flex items-center gap-2">
+						{/* First Page */}
 						<button
 							className="btn btn-sm"
 							onClick={() =>
 								onPaginationChange({
 									...pagination,
-									pageIndex: 0,
+									pageIndex: 0, // Go to first page (0-based)
 								})
 							}
 							disabled={!table.getCanPreviousPage()}
 						>
 							First
 						</button>
+						
+						{/* Previous Page */}
 						<button
 							className="btn btn-sm"
 							onClick={() =>
@@ -167,9 +375,13 @@ export default function DataTable<TData>({
 						>
 							Previous
 						</button>
+						
+						{/* Current Page Display */}
 						<span className="text-sm">
 							Page {pagination.pageIndex + 1} of {pageCount || 1}
 						</span>
+						
+						{/* Next Page */}
 						<button
 							className="btn btn-sm"
 							onClick={() =>
@@ -182,12 +394,14 @@ export default function DataTable<TData>({
 						>
 							Next
 						</button>
+						
+						{/* Last Page */}
 						<button
 							className="btn btn-sm"
 							onClick={() =>
 								onPaginationChange({
 									...pagination,
-									pageIndex: (pageCount || 1) - 1,
+									pageIndex: (pageCount || 1) - 1, // Go to last page (0-based)
 								})
 							}
 							disabled={!table.getCanNextPage()}
@@ -196,7 +410,7 @@ export default function DataTable<TData>({
 						</button>
 					</div>
 
-					{/* Page size selector */}
+					{/* Page Size Selector */}
 					<select
 						className="select select-sm select-bordered"
 						value={pagination.pageSize}
@@ -204,7 +418,7 @@ export default function DataTable<TData>({
 							onPaginationChange({
 								...pagination,
 								pageSize: Number(e.target.value),
-								pageIndex: 0,
+								pageIndex: 0, // Reset to first page when changing page size
 							})
 						}
 					>

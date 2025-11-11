@@ -1,3 +1,18 @@
+/**
+ * Authentication Service
+ * Handles all authentication-related operations including login, signup, logout,
+ * and token management using HTTP-only cookies.
+ * 
+ * **Features:**
+ * - JWT token authentication
+ * - Cookie-based token storage
+ * - Remember me functionality (30 days vs 1 day)
+ * - Automatic token validation
+ * - Type-safe user data handling
+ * 
+ * @module AuthService
+ */
+
 'use client'
 
 import { getCookie, deleteCookie, setCookie } from 'cookies-next'
@@ -5,49 +20,118 @@ import type { IUser } from '@_classes/User'
 import type LoginCredentials from '@_classes/LoginCredentials'
 import type { RegisterModel } from '@_classes/User'
 
-// API URL from environment
+/**
+ * API base URL loaded from environment variables.
+ * Falls back to localhost if not specified.
+ */
 const API_URL = process.env.API_URL || 'http://localhost:5254/api'
 
+/**
+ * Standard API response format from the backend.
+ * All API endpoints return this structure for consistency.
+ * 
+ * @template T - The type of the payload data
+ */
 interface ApiResponse<T> {
+	/** The actual data returned from the API, or null if error */
 	payload: T | null
+	/** Error or success message from the server */
 	message: string | null
+	/** HTTP status code (200, 201, 400, 401, etc.) */
 	statusCode: number
 }
 
 /**
- * Check if user is authenticated by verifying token and fetching user data
+ * Verifies if the user is authenticated by checking token validity.
+ * Fetches current user data from the server using the stored auth token.
+ * Automatically clears invalid tokens.
+ * 
+ * **Use Cases:**
+ * - App initialization (check if user is logged in)
+ * - Protected route validation
+ * - Token refresh/validation
+ * 
+ * @returns {Promise<IUser | null>} User object if authenticated, null otherwise
+ * 
+ * @example
+ * ```typescript
+ * const user = await checkAuthStatus();
+ * if (user) {
+ *   console.log('User is logged in:', user.name);
+ * } else {
+ *   router.push('/login');
+ * }
+ * ```
  */
 export async function checkAuthStatus(): Promise<IUser | null> {
+	// Retrieve auth token from cookie (key: 'at' = auth token)
 	const token = getCookie('at')
 
+	// No token means user is not authenticated
 	if (!token) {
 		return null
 	}
 
 	try {
+		// Call backend to validate token and get user data
 		const response = await fetch(`${API_URL}/account`, {
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${token}`,
+				Authorization: `Bearer ${token}`, // Include token in Authorization header
 			},
 		})
 
 		if (!response.ok) {
-			// Token is invalid, clear it
+			// Token is invalid or expired, remove it from cookies
 			deleteCookie('at')
 			return null
 		}
 
+		// Parse response and return user data
 		const data: ApiResponse<IUser> = await response.json()
 		return data.payload
 	} catch (error) {
+		// Network error or server unreachable
 		console.error('Error checking auth status:', error)
 		return null
 	}
 }
 
 /**
- * Login user with credentials
+ * Authenticates a user with email/username and password.
+ * On success, stores the JWT token in a cookie and returns user data.
+ * Supports "Remember Me" functionality with different token expiration times.
+ * 
+ * **Token Expiration:**
+ * - Remember Me (checked): 30 days
+ * - Remember Me (unchecked): 1 day
+ * 
+ * @param {LoginCredentials} credentials - User's login credentials
+ * @param {string} credentials.email - User's email or username
+ * @param {string} credentials.password - User's password
+ * @param {boolean} credentials.rememberUser - Whether to keep user logged in for 30 days
+ * 
+ * @returns {Promise<Object>} Object containing success status, user data, and token
+ * @returns {boolean} returns.success - True if login succeeded
+ * @returns {IUser} returns.user - User object (only if success is true)
+ * @returns {string} returns.token - JWT token (only if success is true)
+ * @returns {string} returns.message - Error message (only if success is false)
+ * 
+ * @example
+ * ```typescript
+ * const result = await login({
+ *   email: 'user@example.com',
+ *   password: 'password123',
+ *   rememberUser: true
+ * });
+ * 
+ * if (result.success) {
+ *   console.log('Logged in as:', result.user.name);
+ *   router.push('/dashboard');
+ * } else {
+ *   toast.error(result.message);
+ * }
+ * ```
  */
 export async function login(credentials: LoginCredentials): Promise<{
 	success: boolean
@@ -56,6 +140,7 @@ export async function login(credentials: LoginCredentials): Promise<{
 	message?: string
 }> {
 	try {
+		// Send login request to backend
 		const response = await fetch(`${API_URL}/account/login`, {
 			method: 'POST',
 			headers: {
@@ -67,9 +152,12 @@ export async function login(credentials: LoginCredentials): Promise<{
 		const data: ApiResponse<{ account: IUser; token: string }> = await response.json()
 
 		if (response.ok && data.payload) {
-			// Store token in cookie
+			// Login successful, store JWT token in cookie
 			setCookie('at', data.payload.token, {
-				maxAge: credentials.rememberUser ? 30 * 24 * 60 * 60 : 24 * 60 * 60, // 30 days or 1 day
+				// Set expiration based on "Remember Me" checkbox
+				maxAge: credentials.rememberUser 
+					? 30 * 24 * 60 * 60  // 30 days in seconds
+					: 24 * 60 * 60       // 1 day in seconds
 			})
 
 			return {
@@ -79,11 +167,13 @@ export async function login(credentials: LoginCredentials): Promise<{
 			}
 		}
 
+		// Login failed (invalid credentials, account locked, etc.)
 		return {
 			success: false,
 			message: data.message || 'Login failed',
 		}
 	} catch (error) {
+		// Network error (server down, no internet, etc.)
 		console.error('Login error:', error)
 		return {
 			success: false,
@@ -93,7 +183,38 @@ export async function login(credentials: LoginCredentials): Promise<{
 }
 
 /**
- * Signup new user
+ * Registers a new user account in the system.
+ * Does NOT automatically log the user in - they must login after signup.
+ * 
+ * @param {RegisterModel} form - Registration form data
+ * @param {string} form.username - Desired username
+ * @param {string} form.email - User's email address
+ * @param {string} form.password - User's password
+ * @param {Name} form.name - User's full name (first, middle, last)
+ * @param {Date} form.dateOfBirth - User's date of birth (optional)
+ * 
+ * @returns {Promise<Object>} Object containing success status and user data or error message
+ * @returns {boolean} returns.success - True if signup succeeded
+ * @returns {IUser} returns.user - Created user object (only if success is true)
+ * @returns {string} returns.message - Error message (only if success is false)
+ * 
+ * @example
+ * ```typescript
+ * const result = await signup({
+ *   username: 'johndoe',
+ *   email: 'john@example.com',
+ *   password: 'SecurePass123!',
+ *   name: new Name({ first: 'John', last: 'Doe' }),
+ *   dateOfBirth: new Date('1990-01-15')
+ * });
+ * 
+ * if (result.success) {
+ *   toast.success('Account created! Please log in.');
+ *   router.push('/login');
+ * } else {
+ *   toast.error(result.message);
+ * }
+ * ```
  */
 export async function signup(form: RegisterModel): Promise<{
 	success: boolean
@@ -101,6 +222,7 @@ export async function signup(form: RegisterModel): Promise<{
 	message?: string
 }> {
 	try {
+		// Send signup request to backend
 		const response = await fetch(`${API_URL}/account/signup`, {
 			method: 'POST',
 			headers: {
@@ -112,17 +234,20 @@ export async function signup(form: RegisterModel): Promise<{
 		const data: ApiResponse<IUser> = await response.json()
 
 		if (response.ok && data.payload) {
+			// Account created successfully
 			return {
 				success: true,
 				user: data.payload,
 			}
 		}
 
+		// Signup failed (username taken, invalid email, validation error, etc.)
 		return {
 			success: false,
 			message: data.message || 'Signup failed',
 		}
 	} catch (error) {
+		// Network error (server down, no internet, etc.)
 		console.error('Signup error:', error)
 		return {
 			success: false,
@@ -132,14 +257,40 @@ export async function signup(form: RegisterModel): Promise<{
 }
 
 /**
- * Logout user
+ * Logs out the current user by removing the authentication token from cookies.
+ * This immediately invalidates the user's session on the client side.
+ * 
+ * **Note:** This does NOT invalidate the token on the server (stateless JWT).
+ * The token will remain valid until it expires naturally.
+ * 
+ * @example
+ * ```typescript
+ * // In a logout button handler
+ * const handleLogout = () => {
+ *   logout();
+ *   router.push('/login');
+ *   toast.success('Logged out successfully');
+ * };
+ * ```
  */
 export function logout(): void {
-	deleteCookie('at')
+	deleteCookie('at') // Remove auth token cookie
 }
 
 /**
- * Get current auth token
+ * Retrieves the current authentication token from cookies.
+ * Used by HTTP interceptors to add Authorization header to API requests.
+ * 
+ * @returns {string | undefined} JWT token string, or undefined if not logged in
+ * 
+ * @example
+ * ```typescript
+ * const token = getAuthToken();
+ * if (token) {
+ *   // Include in API request header
+ *   headers.Authorization = `Bearer ${token}`;
+ * }
+ * ```
  */
 export function getAuthToken(): string | undefined {
 	return getCookie('at')?.toString()

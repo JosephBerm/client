@@ -1,8 +1,74 @@
+/**
+ * Centralized Zod Validation Schemas
+ * 
+ * Single source of truth for all form validation rules across the application.
+ * Promotes consistency, reusability, and easy maintenance of validation logic.
+ * Used with useZodForm hook and React Hook Form for type-safe form handling.
+ * 
+ * **Benefits:**
+ * - DRY validation logic (define once, use everywhere)
+ * - Type-safe forms with automatic TypeScript inference
+ * - Consistent error messages
+ * - Composable schemas (reuse common validators)
+ * - Easy to update validation rules globally
+ * 
+ * **Schema Categories:**
+ * - **Common**: Email, password, username, phone (reusable primitives)
+ * - **Complex**: Name, address (nested objects)
+ * - **Auth**: Login, signup, change password
+ * - **User**: Profile update
+ * - **Business**: Product, order, quote, customer, provider
+ * - **Utility**: Contact form, search filters
+ * 
+ * @example
+ * ```typescript
+ * // Use with useZodForm hook
+ * import { loginSchema } from '@_utils/validation-schemas';
+ * import { useZodForm } from '@_hooks/useZodForm';
+ * 
+ * const form = useZodForm(loginSchema, {
+ *   defaultValues: { identifier: '', password: '', rememberMe: false }
+ * });
+ * 
+ * // Type-safe form data (automatically inferred)
+ * const handleSubmit = (data: LoginFormData) => {
+ *   // data.identifier, data.password, data.rememberMe are all typed
+ * };
+ * ```
+ * 
+ * @module validation-schemas
+ */
+
 import { z } from 'zod'
 
-// Common validators
+// ==========================================
+// COMMON VALIDATORS (Reusable Primitives)
+// ==========================================
+
+/**
+ * Email validation schema.
+ * Validates proper email format and ensures non-empty input.
+ * 
+ * @constant
+ * @example emailSchema.parse('user@example.com') // Valid
+ */
 export const emailSchema = z.string().email('Invalid email address').min(1, 'Email is required')
 
+/**
+ * Strong password validation schema.
+ * 
+ * **Requirements:**
+ * - Minimum 8 characters
+ * - At least one uppercase letter (A-Z)
+ * - At least one lowercase letter (a-z)
+ * - At least one number (0-9)
+ * - At least one special character (!@#$%^&*, etc.)
+ * 
+ * @constant
+ * @example
+ * passwordSchema.parse('SecurePass123!') // Valid
+ * passwordSchema.parse('weak') // Invalid
+ */
 export const passwordSchema = z
 	.string()
 	.min(8, 'Password must be at least 8 characters')
@@ -11,26 +77,82 @@ export const passwordSchema = z
 	.regex(/[0-9]/, 'Password must contain at least one number')
 	.regex(/[^a-zA-Z0-9]/, 'Password must contain at least one special character')
 
+/**
+ * Username validation schema.
+ * 
+ * **Requirements:**
+ * - 3-50 characters
+ * - Only letters, numbers, and underscores
+ * - No spaces or special characters
+ * 
+ * @constant
+ * @example
+ * usernameSchema.parse('john_doe123') // Valid
+ * usernameSchema.parse('john doe') // Invalid (contains space)
+ */
 export const usernameSchema = z
 	.string()
 	.min(3, 'Username must be at least 3 characters')
 	.max(50, 'Username must not exceed 50 characters')
 	.regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores')
 
+/**
+ * Phone number validation schema (E.164 format).
+ * 
+ * **Format:** Optional + prefix, 1-15 digits
+ * Optional field (can be empty string or undefined)
+ * 
+ * @constant
+ * @example
+ * phoneSchema.parse('+12025551234') // Valid
+ * phoneSchema.parse('') // Valid (optional)
+ */
 export const phoneSchema = z
 	.string()
 	.regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number')
 	.optional()
 	.or(z.literal(''))
 
-// Name schema
+// ==========================================
+// COMPLEX VALIDATORS (Nested Objects)
+// ==========================================
+
+/**
+ * Person name validation schema.
+ * Validates full name with optional middle name.
+ * 
+ * @constant
+ * @example
+ * ```typescript
+ * nameSchema.parse({
+ *   first: 'John',
+ *   middle: 'Q',
+ *   last: 'Doe'
+ * });
+ * ```
+ */
 export const nameSchema = z.object({
 	first: z.string().min(1, 'First name is required').max(50, 'First name must not exceed 50 characters'),
 	middle: z.string().optional(),
 	last: z.string().min(1, 'Last name is required').max(50, 'Last name must not exceed 50 characters'),
 })
 
-// Address schema
+/**
+ * Physical address validation schema.
+ * Standard address format for shipping and billing.
+ * 
+ * @constant
+ * @example
+ * ```typescript
+ * addressSchema.parse({
+ *   street: '123 Main St',
+ *   city: 'Springfield',
+ *   state: 'IL',
+ *   zipCode: '62701',
+ *   country: 'USA'
+ * });
+ * ```
+ */
 export const addressSchema = z.object({
 	street: z.string().min(1, 'Street is required'),
 	city: z.string().min(1, 'City is required'),
@@ -39,16 +161,51 @@ export const addressSchema = z.object({
 	country: z.string().min(1, 'Country is required'),
 })
 
-// Login schema
+// ==========================================
+// AUTHENTICATION SCHEMAS
+// ==========================================
+
+/**
+ * Login form validation schema.
+ * Accepts email or username as identifier.
+ * 
+ * @constant
+ * @example
+ * ```typescript
+ * loginSchema.parse({
+ *   identifier: 'john@example.com',
+ *   password: 'password123',
+ *   rememberMe: true
+ * });
+ * ```
+ */
 export const loginSchema = z.object({
 	identifier: z.string().min(1, 'Email or username is required'),
 	password: z.string().min(1, 'Password is required'),
 	rememberMe: z.boolean().optional().default(false),
 })
 
+/** Type-safe form data inferred from loginSchema */
 export type LoginFormData = z.infer<typeof loginSchema>
 
-// Signup schema
+/**
+ * Signup/registration form validation schema.
+ * Includes password confirmation and terms acceptance.
+ * Uses `.refine()` for cross-field validation (password matching).
+ * 
+ * @constant
+ * @example
+ * ```typescript
+ * signupSchema.parse({
+ *   username: 'johndoe',
+ *   email: 'john@example.com',
+ *   password: 'SecurePass123!',
+ *   confirmPassword: 'SecurePass123!',
+ *   name: { first: 'John', last: 'Doe' },
+ *   acceptTerms: true
+ * });
+ * ```
+ */
 export const signupSchema = z
 	.object({
 		username: usernameSchema,
@@ -63,12 +220,26 @@ export const signupSchema = z
 	})
 	.refine((data) => data.password === data.confirmPassword, {
 		message: "Passwords don't match",
-		path: ['confirmPassword'],
+		path: ['confirmPassword'], // Show error on confirmPassword field
 	})
 
+/** Type-safe form data inferred from signupSchema */
 export type SignupFormData = z.infer<typeof signupSchema>
 
-// Change password schema
+/**
+ * Change password form validation schema.
+ * Requires current password and new password confirmation.
+ * 
+ * @constant
+ * @example
+ * ```typescript
+ * changePasswordSchema.parse({
+ *   oldPassword: 'OldPass123!',
+ *   newPassword: 'NewPass456!',
+ *   confirmNewPassword: 'NewPass456!'
+ * });
+ * ```
+ */
 export const changePasswordSchema = z
 	.object({
 		oldPassword: z.string().min(1, 'Current password is required'),
@@ -77,12 +248,32 @@ export const changePasswordSchema = z
 	})
 	.refine((data) => data.newPassword === data.confirmNewPassword, {
 		message: "Passwords don't match",
-		path: ['confirmNewPassword'],
+		path: ['confirmNewPassword'], // Show error on confirmation field
 	})
 
+/** Type-safe form data inferred from changePasswordSchema */
 export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>
 
-// Profile update schema
+// ==========================================
+// USER PROFILE SCHEMAS
+// ==========================================
+
+/**
+ * Profile update form validation schema.
+ * Allows users to update personal information.
+ * 
+ * @constant
+ * @example
+ * ```typescript
+ * profileUpdateSchema.parse({
+ *   username: 'johndoe',
+ *   email: 'john@example.com',
+ *   name: { first: 'John', last: 'Doe' },
+ *   phone: '+12025551234',
+ *   shippingDetails: { street: '123 Main St', ... }
+ * });
+ * ```
+ */
 export const profileUpdateSchema = z.object({
 	username: usernameSchema,
 	email: emailSchema,
@@ -93,9 +284,31 @@ export const profileUpdateSchema = z.object({
 	shippingDetails: addressSchema.optional(),
 })
 
+/** Type-safe form data inferred from profileUpdateSchema */
 export type ProfileUpdateFormData = z.infer<typeof profileUpdateSchema>
 
-// Product schema
+// ==========================================
+// BUSINESS ENTITY SCHEMAS
+// ==========================================
+
+/**
+ * Product form validation schema.
+ * Used for creating and updating medical supply products.
+ * 
+ * @constant
+ * @example
+ * ```typescript
+ * productSchema.parse({
+ *   name: 'Surgical Gloves',
+ *   description: 'Latex-free surgical gloves',
+ *   price: 29.99,
+ *   quantity: 100,
+ *   category: 'PPE',
+ *   sku: 'SG-001',
+ *   manufacturer: 'MedSupply Co'
+ * });
+ * ```
+ */
 export const productSchema = z.object({
 	name: z.string().min(1, 'Product name is required').max(200, 'Product name is too long'),
 	description: z.string().min(1, 'Description is required'),
@@ -106,18 +319,42 @@ export const productSchema = z.object({
 	manufacturer: z.string().optional(),
 })
 
+/** Type-safe form data inferred from productSchema */
 export type ProductFormData = z.infer<typeof productSchema>
 
-// Order schema
+/**
+ * Order form validation schema.
+ * For creating new orders with customer and shipping information.
+ * 
+ * @constant
+ */
 export const orderSchema = z.object({
 	customerId: z.coerce.number().positive('Customer is required'),
 	shippingAddress: addressSchema,
 	notes: z.string().optional(),
 })
 
+/** Type-safe form data inferred from orderSchema */
 export type OrderFormData = z.infer<typeof orderSchema>
 
-// Quote schema
+/**
+ * Quote/RFQ form validation schema.
+ * Supports multiple items with expiration date.
+ * 
+ * @constant
+ * @example
+ * ```typescript
+ * quoteSchema.parse({
+ *   customerId: 123,
+ *   items: [
+ *     { productId: 'prod-1', quantity: 10, price: 99.99 },
+ *     { productId: 'prod-2', quantity: 5, price: 49.99 }
+ *   ],
+ *   notes: 'Bulk discount requested',
+ *   validUntil: new Date('2024-12-31')
+ * });
+ * ```
+ */
 export const quoteSchema = z.object({
 	customerId: z.coerce.number().positive('Customer is required'),
 	items: z
@@ -133,19 +370,15 @@ export const quoteSchema = z.object({
 	validUntil: z.coerce.date(),
 })
 
+/** Type-safe form data inferred from quoteSchema */
 export type QuoteFormData = z.infer<typeof quoteSchema>
 
-// Contact form schema
-export const contactSchema = z.object({
-	name: z.string().min(1, 'Name is required'),
-	email: emailSchema,
-	subject: z.string().min(1, 'Subject is required'),
-	message: z.string().min(10, 'Message must be at least 10 characters').max(1000, 'Message is too long'),
-})
-
-export type ContactFormData = z.infer<typeof contactSchema>
-
-// Customer schema
+/**
+ * Customer (Company) form validation schema.
+ * For managing customer/company records.
+ * 
+ * @constant
+ */
 export const customerSchema = z.object({
 	name: z.string().min(1, 'Company name is required'),
 	email: emailSchema,
@@ -155,9 +388,15 @@ export const customerSchema = z.object({
 	website: z.string().url('Invalid URL').optional().or(z.literal('')),
 })
 
+/** Type-safe form data inferred from customerSchema */
 export type CustomerFormData = z.infer<typeof customerSchema>
 
-// Provider schema
+/**
+ * Provider (Supplier) form validation schema.
+ * For managing provider/supplier records.
+ * 
+ * @constant
+ */
 export const providerSchema = z.object({
 	name: z.string().min(1, 'Provider name is required'),
 	email: emailSchema,
@@ -167,9 +406,54 @@ export const providerSchema = z.object({
 	website: z.string().url('Invalid URL').optional().or(z.literal('')),
 })
 
+/** Type-safe form data inferred from providerSchema */
 export type ProviderFormData = z.infer<typeof providerSchema>
 
-// Search filter schema
+// ==========================================
+// UTILITY SCHEMAS
+// ==========================================
+
+/**
+ * Contact form validation schema.
+ * For the public contact us form.
+ * 
+ * @constant
+ * @example
+ * ```typescript
+ * contactSchema.parse({
+ *   name: 'John Doe',
+ *   email: 'john@example.com',
+ *   subject: 'Product Inquiry',
+ *   message: 'I would like more information about...'
+ * });
+ * ```
+ */
+export const contactSchema = z.object({
+	name: z.string().min(1, 'Name is required'),
+	email: emailSchema,
+	subject: z.string().min(1, 'Subject is required'),
+	message: z.string().min(10, 'Message must be at least 10 characters').max(1000, 'Message is too long'),
+})
+
+/** Type-safe form data inferred from contactSchema */
+export type ContactFormData = z.infer<typeof contactSchema>
+
+/**
+ * Search filter validation schema.
+ * For server-side search, pagination, and sorting.
+ * 
+ * @constant
+ * @example
+ * ```typescript
+ * searchFilterSchema.parse({
+ *   query: 'surgical',
+ *   page: 1,
+ *   pageSize: 20,
+ *   sortBy: 'price',
+ *   sortOrder: 'asc'
+ * });
+ * ```
+ */
 export const searchFilterSchema = z.object({
 	query: z.string().optional(),
 	page: z.coerce.number().int().positive().default(1),
@@ -178,6 +462,7 @@ export const searchFilterSchema = z.object({
 	sortOrder: z.enum(['asc', 'desc']).optional(),
 })
 
+/** Type-safe form data inferred from searchFilterSchema */
 export type SearchFilterFormData = z.infer<typeof searchFilterSchema>
 
 

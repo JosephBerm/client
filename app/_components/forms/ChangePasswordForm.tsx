@@ -1,3 +1,53 @@
+/**
+ * ChangePasswordForm Component
+ *
+ * Form for changing user password with validation and security best practices.
+ * Requires current password verification and new password confirmation.
+ * Uses React Hook Form with Zod validation and DRY submission pattern.
+ *
+ * **Features:**
+ * - Current password verification
+ * - New password with confirmation
+ * - Zod validation (strength requirements)
+ * - useFormSubmit hook integration
+ * - Loading states during submission
+ * - Success/error toast notifications
+ * - Form reset on success
+ * - Password autocomplete attributes
+ *
+ * **Security:**
+ * - Requires old password verification (prevents unauthorized changes)
+ * - Password strength validation (min 8 chars, uppercase, lowercase, number, special char)
+ * - Confirmation password must match
+ * - Password fields have appropriate autocomplete attributes
+ *
+ * **Use Cases:**
+ * - User profile settings
+ * - Security settings page
+ * - Admin changing user passwords
+ *
+ * @example
+ * ```tsx
+ * import ChangePasswordForm from '@_components/forms/ChangePasswordForm';
+ * import { useAuthStore } from '@_stores/useAuthStore';
+ *
+ * function ProfilePage() {
+ *   const user = useAuthStore(state => state.user);
+ *
+ *   if (!user) return null;
+ *
+ *   return (
+ *     <div className="max-w-2xl mx-auto p-6">
+ *       <h1 className="text-2xl font-bold mb-6">Change Password</h1>
+ *       <ChangePasswordForm user={user} />
+ *     </div>
+ *   );
+ * }
+ * ```
+ *
+ * @module ChangePasswordForm
+ */
+
 'use client'
 
 import React from 'react'
@@ -11,10 +61,42 @@ import type { IUser } from '@_classes/User'
 import API from '@_services/api'
 import { toast } from 'react-toastify'
 
+/**
+ * ChangePasswordForm component props interface.
+ */
 interface ChangePasswordFormProps {
-  user: IUser
+	/**
+	 * User object for whom the password is being changed.
+	 * Must have an ID for the API call.
+	 */
+	user: IUser
 }
 
+/**
+ * ChangePasswordForm Component
+ *
+ * Password change form with validation, security checks, and user feedback.
+ * Handles form submission via useFormSubmit hook with automatic error handling.
+ *
+ * **Form Fields:**
+ * - Old Password: Current password for verification
+ * - New Password: New password (must meet strength requirements)
+ * - Confirm New Password: Confirmation field (must match new password)
+ *
+ * **Validation:**
+ * - Old password: Required
+ * - New password: Min 8 chars, uppercase, lowercase, number, special char
+ * - Confirm password: Must match new password
+ *
+ * **Submission Flow:**
+ * 1. Validate form data with Zod schema
+ * 2. Call API.Accounts.changePasswordById with user ID and passwords
+ * 3. Show success toast and reset form
+ * 4. Show error toast if submission fails
+ *
+ * @param props - Component props including user
+ * @returns ChangePasswordForm component
+ */
 export default function ChangePasswordForm({ user }: ChangePasswordFormProps) {
   const form = useForm<ChangePasswordFormData>({
     resolver: zodResolver(changePasswordSchema),

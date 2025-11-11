@@ -1,14 +1,99 @@
+/**
+ * Home Page Static Content Class
+ * 
+ * Contains all static content and copy for the MedSource Pro public homepage.
+ * Centralized content management for hero section, sales pitch, product highlights,
+ * and frequently asked questions (FAQs).
+ * 
+ * **Sections:**
+ * - **HeroSection**: Main headline and call-to-action
+ * - **CarouselProducts**: Featured product names for carousel
+ * - **SalesPitch**: Company value proposition and qualities
+ * - **Products**: Product catalog description
+ * - **FAQs**: Frequently asked questions with answers
+ * 
+ * **Benefits:**
+ * - Centralized content management
+ * - Easy content updates without touching JSX
+ * - Type-safe FAQ structure
+ * - Consistent messaging across pages
+ * 
+ * @example
+ * ```typescript
+ * import Home from '@_classes/Home';
+ * 
+ * // Hero Section
+ * <section className="hero">
+ *   <h1>{Home.HeroSection.description}</h1>
+ *   <p>{Home.HeroSection.paragraph}</p>
+ * </section>
+ * 
+ * // Product Carousel
+ * {Home.CarouselProducts.map((product, index) => (
+ *   <div key={index} className="carousel-item">
+ *     <h3>{product}</h3>
+ *   </div>
+ * ))}
+ * 
+ * // Company Qualities
+ * {Home.SalesPitch.companyQualities.map((quality, index) => (
+ *   <Card key={index} title={quality.title}>
+ *     {quality.description}
+ *   </Card>
+ * ))}
+ * 
+ * // FAQs Section
+ * {Home.FAQs.questions.map((faq, index) => (
+ *   <Accordion key={index}>
+ *     <AccordionHeader>{faq.question}</AccordionHeader>
+ *     <AccordionBody>{faq.answer}</AccordionBody>
+ *   </Accordion>
+ * ))}
+ * ```
+ * 
+ * @module Home
+ */
+
+/**
+ * Home Class
+ * 
+ * Static content repository for homepage sections.
+ * All content is defined as static properties for easy access throughout the application.
+ */
 export default class Home {
+	/**
+	 * Hero Section Content
+	 * 
+	 * Main headline and supporting paragraph for the homepage hero.
+	 * First content visitors see when landing on the site.
+	 */
 	public static HeroSection = {
+		/** Main headline describing company value proposition */
 		description: 'Quality medical supply solutions within reach.',
+		/** Supporting paragraph explaining the process */
 		paragraph:
 			'Request a quote by consulting our extensive catalog of medical products through a quick and easy process.',
 	}
+
+	/**
+	 * Carousel Product Names
+	 * 
+	 * Featured product names to display in homepage carousel.
+	 * Highlights key product categories and offerings.
+	 */
 	public static CarouselProducts = ['Medical Tent', 'Regulators', 'KN45 Mask', 'Flowmeters', 'Tri-Gas Adaptor']
 
+	/**
+	 * Sales Pitch Section
+	 * 
+	 * Company value proposition with description and three key qualities.
+	 * Communicates brand promise and differentiators to potential customers.
+	 */
 	public static SalesPitch = {
+		/** Main company description and mission statement */
 		description:
-			'At Medsource Pro, we’re dedicated to delivering excellence in every aspect of our service. From premium-quality medical products to personalized support, we’re here to empower healthcare professionals like you.',
+			'At Medsource Pro, we're dedicated to delivering excellence in every aspect of our service. From premium-quality medical products to personalized support, we're here to empower healthcare professionals like you.',
+		/** Array of three company qualities (title + description) */
 		companyQualities: [
 			{
 				title: 'Tailored Solutions',
@@ -28,13 +113,29 @@ export default class Home {
 		],
 	}
 
+	/**
+	 * Products Section
+	 * 
+	 * Description of product catalog for products page or section.
+	 * Encourages browsing and highlights product diversity.
+	 */
 	public static Products = {
+		/** Product catalog description */
 		description:
 			'Explore our wide range of medical products, from state-of-the-art equipment to essential supplies. Browse through categories such as medical devices, diagnostic tools, laboratory materials, and more.',
 	}
+
+	/**
+	 * Frequently Asked Questions (FAQs)
+	 * 
+	 * Common questions about medical gas systems, installations, certifications, and services.
+	 * Provides transparency and educates potential customers about compliance and capabilities.
+	 */
 	public static FAQs = {
+		/** FAQ section introduction */
 		description:
 			"Find answers to frequently asked questions about our products, ordering process, shipping policies, and more. If you have a question, chances are it's answered here. If not, feel free to reach out to us directly.",
+		/** Array of FAQ objects with questions and answers */
 		questions: [
 			{
 				question: 'Does Medsource Pro do medical gas installs?',
@@ -46,7 +147,7 @@ export default class Home {
 			},
 			{
 				question: 'What are the requirements for medical gas system inspections?',
-				answer: 'Per NFPA guidelines, it is a requirement for any facilities using medical grade gases for the purpose of human consumption to have their gas delivery systems inspected by and ASSE 6040. Read more about Medical Gas Inspections Here.',
+				answer: 'Per NFPA guidelines, it is a requirement for any facilities using medical grade gases for the purpose of human consumption to have their gas delivery systems inspected by and ASSE 6040. Read more about Medical Gas Inspections Here.',
 			},
 			{
 				question: 'Does Medsource Pro provide Medical Gas Inspections?',
@@ -64,7 +165,15 @@ export default class Home {
 	}
 }
 
+/**
+ * FAQ Interface
+ * 
+ * Type definition for FAQ objects.
+ * Ensures consistent structure for all FAQ entries.
+ */
 export interface FAQ {
+	/** The question being asked */
 	question: string
+	/** The answer to the question */
 	answer: string
 }
