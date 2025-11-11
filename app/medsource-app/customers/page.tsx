@@ -1,102 +1,162 @@
 'use client'
-import React, { useState, useEffect } from 'react'
-import { TableColumn } from '@/interfaces/Table'
+
+import { useMemo, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { format } from 'date-fns'
-import Table from '@/common/table'
-import API from '@/services/api'
-import Company from '@/src/classes/Company'
+import { ColumnDef } from '@tanstack/react-table'
+import { Eye, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'react-toastify'
-import Routes from '@/services/routes'
+import ServerDataTable from '@_components/tables/ServerDataTable'
+import ClientPageLayout from '@_components/layouts/ClientPageLayout'
+import Button from '@_components/ui/Button'
+import Modal from '@_components/ui/Modal'
+import { formatDate } from '@_utils/table-helpers'
+import API from '@_services/api'
+import type Company from '@_classes/Company'
+import Routes from '@_services/routes'
 
-const Page = () => {
-	const [tables, setTables] = useState<Company[]>([])
-	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const route = useRouter()
+export default function CustomersPage() {
+  const router = useRouter()
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; customer: Company | null }>({
+    isOpen: false,
+    customer: null,
+  })
+  const [refreshKey, setRefreshKey] = useState(0)
 
-	const createCustomer = async () => {
-		route.push(`${Routes.InternalAppRoute}/customers/create`)
-	}
+  // Column definitions
+  const columns = useMemo<ColumnDef<Company>[]>(
+    () => [
+      {
+        accessorKey: 'name',
+        header: 'Company Name',
+        cell: ({ row }) => (
+          <Link
+            href={`/medsource-app/customers/${row.original.id}`}
+            className="link link-primary font-semibold"
+          >
+            {row.original.name}
+          </Link>
+        ),
+      },
+      {
+        accessorKey: 'email',
+        header: 'Email',
+      },
+      {
+        accessorKey: 'phone',
+        header: 'Phone',
+        cell: ({ row }) => row.original.phone || 'N/A',
+      },
+      {
+        accessorKey: 'taxId',
+        header: 'Tax ID',
+        cell: ({ row }) => row.original.taxId || 'N/A',
+      },
+      {
+        accessorKey: 'createdAt',
+        header: 'Created',
+        cell: ({ row }) => formatDate(row.original.createdAt),
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => (
+          <div className="flex gap-2">
+            <Link href={`/medsource-app/customers/${row.original.id}`}>
+              <Button variant="ghost" size="sm">
+                <Eye className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-error hover:text-error"
+              onClick={() =>
+                setDeleteModal({ isOpen: true, customer: row.original })
+              }
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    []
+  )
 
-	const fetchCustomers = async () => {
-		try {
-			const { data } = await API.Customers.getAll()
-			if (data.payload) {
-				//TODO: FIX as cuustomerarray
-				setTables((data.payload as Company[]) || [])
-			}
-		} finally {
-			setIsLoading(true)
-		}
-	}
+  const handleDelete = async () => {
+    if (!deleteModal.customer) return
 
-	const deleteCompany = async (id: number) => {
-		try {
-			setIsLoading(true)
-			const { data } = await API.Customers.delete(id)
-			if (data?.statusCode != 200) return toast.error(data.message)
-			toast.success(data.message)
-			fetchCustomers()
-		} catch (err: any) {
-			toast.error(err.message)
-		} finally {
-			setIsLoading(false)
-		}
-	}
+    try {
+      const { data } = await API.Customers.delete(deleteModal.customer.id!)
 
-	useEffect(() => {
-		fetchCustomers()
-	}, [])
+      if (data.statusCode !== 200) {
+        toast.error(data.message || 'Failed to delete customer')
+        return
+      }
 
-	const columns: TableColumn<Company>[] = [
-		{
-			name: 'id',
-			label: 'Customer ID',
-			content: (user: Company) => <>{user.id}</>,
-		},
-		{
-			name: 'name',
-			label: 'Name',
-			content: (user: Company) => <>{user.name}</>,
-		},
-		{
-			name: 'email',
-			label: 'Email',
-		},
-		{
-			name: 'createdAt',
-			label: 'Date Created',
-			content: (customer: Company) => <>{format(new Date(customer.createdAt), 'MM/dd/yyyy')}</>,
-		},
-		{
-			name: 'id',
-			label: 'actions',
-			content: (customer: Company) => (
-				<div className='flex gap-5'>
-					<button
-						onClick={() => {
-							route.push(`${Routes.InternalAppRoute}/customers/${customer.id}`)
-						}}>
-						Edit
-					</button>
-					<button className='delete' onClick={() => deleteCompany(customer.id!)}>
-						Delete
-					</button>
-				</div>
-			),
-		},
-	]
+      toast.success(data.message || 'Customer deleted successfully')
+      setDeleteModal({ isOpen: false, customer: null })
+      // Refresh the table
+      setRefreshKey((prev) => prev + 1)
+    } catch (error) {
+      console.error('Error deleting customer:', error)
+      toast.error('An error occurred while deleting the customer')
+    }
+  }
 
-	return (
-		<div className='page-container'>
-			<div className='page-header'>
-				<h2 className='page-title'>Customers</h2>
-			</div>
-			<button onClick={createCustomer}>Create</button>
+  return (
+    <>
+      <ClientPageLayout title="Customers" description="Manage customer companies">
+        <div className="flex justify-between items-center mb-6">
+          <div></div>
+          <Button
+            variant="primary"
+            onClick={() => router.push(`${Routes.InternalAppRoute}/customers/create`)}
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Create Customer
+          </Button>
+        </div>
 
-			<Table<Company> columns={columns} data={tables} />
-		</div>
-	)
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <ServerDataTable<Company>
+              key={refreshKey}
+              columns={columns}
+              endpoint="/customers/search"
+              initialPageSize={10}
+              emptyMessage="No customers found"
+            />
+          </div>
+        </div>
+      </ClientPageLayout>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, customer: null })}
+        title="Delete Customer"
+      >
+        <div className="space-y-4">
+          <p>
+            Are you sure you want to delete{' '}
+            <strong>{deleteModal.customer?.name}</strong>?
+          </p>
+          <p className="text-error text-sm">This action cannot be undone.</p>
+          <div className="flex justify-end gap-4 mt-6">
+            <Button
+              variant="ghost"
+              onClick={() => setDeleteModal({ isOpen: false, customer: null })}
+            >
+              Cancel
+            </Button>
+            <Button variant="error" onClick={handleDelete}>
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </>
+  )
 }
-
-export default Page

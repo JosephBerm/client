@@ -1,60 +1,63 @@
 import type { Metadata } from 'next'
 import { ToastContainer } from 'react-toastify'
-import Header from '@/components/Header'
-import WrapperHandlerPublic from '@/components/WrapperHandlerPublic'
-import { cookies } from 'next/headers'
-import DropdownProvider from '@/src/context/DropdownProvider'
+import NavigationLayout from '@_components/navigation/NavigationLayout'
+import AuthInitializer from '@_components/common/AuthInitializer'
+import UserSettingsInitializer from '@_components/common/UserSettingsInitializer'
 
 import 'react-toastify/dist/ReactToastify.css'
-import '@fortawesome/fontawesome-free/css/all.min.css'
-import '@/styles/navigations.css'
-import '@/styles/App/app.css'
 import './globals.css'
 
 export const metadata: Metadata = {
-	title: 'MedSource',
-	description: 'Created by Code Prodigies',
+	title: 'MedSource Pro - Medical B2B Marketplace',
+	description: 'Professional medical supply marketplace for healthcare providers',
 }
 
-async function getUserData(token: string | null) {
-	if (token == null) return token
-
-	try {
-		const response = await fetch(process.env.API_URL + '/account', {
-			cache: 'no-store',
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		})
-
-		if (response.ok) return await response.json()
-	} catch (err) {
-		console.error(err)
-	}
-
-	return null
-}
-
-export default async function RootLayout(props: any) {
-	const cookiesStore = cookies()
-	const token = cookiesStore.get('at')
-	let response = null
-
-	// Load user data into state management library.
-	if (token != null) {
-		response = await getUserData(token.value)
-	}
-
+/**
+ * Root layout for the entire application
+ * Sets up theme, authentication, and navigation
+ */
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang='en'>
+		<html lang="en" suppressHydrationWarning>
+			<head>
+				<script
+					dangerouslySetInnerHTML={{
+						__html: `
+							// Prevent flash of unstyled content (FOUC) for theme
+							try {
+								const settings = JSON.parse(localStorage.getItem('user-settings') || '{}');
+								const theme = settings.state?.theme || 'medsource-classic';
+								document.documentElement.setAttribute('data-theme', theme);
+							} catch (e) {
+								document.documentElement.setAttribute('data-theme', 'medsource-classic');
+							}
+						`,
+					}}
+				/>
+			</head>
 			<body>
-				<WrapperHandlerPublic User={response?.payload} />
-				<Header />
+				{/* Initialize user settings and auth on app load */}
+				<UserSettingsInitializer />
+				<AuthInitializer />
 
-				<DropdownProvider>
-					<main className='page-container'>{props.children}</main>
-					<ToastContainer />
-				</DropdownProvider>
+				{/* Main navigation wrapper */}
+				<NavigationLayout>
+					{children}
+				</NavigationLayout>
+
+				{/* Toast notifications */}
+				<ToastContainer
+					position="top-right"
+					autoClose={3000}
+					hideProgressBar={false}
+					newestOnTop
+					closeOnClick
+					rtl={false}
+					pauseOnFocusLoss
+					draggable
+					pauseOnHover
+					theme="light"
+				/>
 			</body>
 		</html>
 	)

@@ -1,11 +1,10 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import API from '@/src/services/api'
+import API from '@_services/api'
 import { useRouter, useParams } from 'next/navigation'
-import Provider from '@/src/classes/Provider'
-import UpdateProviderForm from '@/src/components/UpdateProviderForm'
-import "@/styles/forms.css"
-import "@/styles/pages/providers.css"
+import Provider from '@_classes/Provider'
+import UpdateProviderForm from '@_components/forms/UpdateProviderForm'
+// Styles migrated to Tailwind
 
 const Page = () => {
 	const params = useParams()

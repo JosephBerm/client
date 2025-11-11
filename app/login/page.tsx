@@ -1,122 +1,138 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { toast } from 'react-toastify'
-import { useAccountStore } from '@/src/stores/user'
-import { Formik, Form, FormikProps } from 'formik'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCookies, setCookie } from 'cookies-next'
-import '@/styles/pages/login.css'
-
-import LoginCredentials from '@/classes/LoginCredentials'
-import Validations from '@/utilities/validationSchemas'
-import instance from '@/services/httpService'
-import API from '@/services/api'
 import Image from 'next/image'
+import Link from 'next/link'
+import { toast } from 'react-toastify'
+import { useZodForm } from '@_hooks/useZodForm'
+import { loginSchema, type LoginFormData } from '@_utils/validation-schemas'
+import { login } from '@_services/AuthService'
+import { useAuthStore } from '@_stores/useAuthStore'
+import FormInput from '@_components/forms/FormInput'
+import FormCheckbox from '@_components/forms/FormCheckbox'
+import Button from '@_components/ui/Button'
 import Logo from '@/public/big-logo.png'
 
-import FormInputTextBox from '@/components/FormInputTextbox'
-import InputCheckbox from '@/components/InputCheckbox'
-import Routes from '@/services/routes'
-
-const Page = () => {
-	const [credentials, setCredentials] = useState(new LoginCredentials())
+export default function LoginPage() {
 	const router = useRouter()
-	const user = useAccountStore((state) => state.User)
 	const [isLoading, setIsLoading] = useState(false)
+	const loginUser = useAuthStore((state) => state.login)
 
-	const handleForgotPasswordClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-		e.preventDefault()
-		console.log('Forgot password clicked')
-	}
+	const form = useZodForm(loginSchema, {
+		defaultValues: {
+			identifier: '',
+			password: '',
+			rememberMe: false,
+		},
+	})
 
-	const handleLogin = async (credentials: LoginCredentials) => {
+	const handleSubmit = async (values: LoginFormData) => {
+		setIsLoading(true)
+
 		try {
-			setIsLoading(true)
-			const { data: authenticated } = await API.login(credentials)
-			if (authenticated.payload) {
-				toast.success('Logged in successfully')
+			const result = await login({
+				username: values.identifier, // Backend expects username field
+				password: values.password,
+				rememberUser: values.rememberMe,
+			})
 
-				const JWTToken = authenticated.payload
-				setCookie('at', JWTToken)
-				instance.defaults.headers.common['Authorization'] = `Bearer ${JWTToken}`
-
-				//save if remember me is checked
-
-
-				//route to dashboard
-				router.push(Routes.InternalAppRoute)
+			if (result.success && result.user) {
+				// Update auth store
+				loginUser(result.user)
+				
+				toast.success('Logged in successfully!')
+				
+				// Redirect to dashboard
+				router.push('/medsource-app')
 			} else {
-				toast.error(authenticated.message)
+				toast.error(result.message || 'Login failed. Please check your credentials.')
 			}
-		} catch (err: any) {
-			toast.error(err.message)
+		} catch (error) {
+			console.error('Login error:', error)
+			toast.error('An error occurred during login. Please try again.')
 		} finally {
 			setIsLoading(false)
 		}
 	}
 
-	const routeToSignUp = () => {
-		//route to sign up
-		router.push(Routes.Signup.location)
-	}
-
-	const isMissingFields = (form: FormikProps<LoginCredentials>) => {
-		return !form.isValid || form.isSubmitting || !form.values.username.length
-	}
-
-	const handleRememberMeChange = () =>
-	{
-		setCredentials((prev) => ({ ...prev, rememberUser: !prev.rememberUser }))
-	}
-
 	return (
-		<div className='Login'>
-			<div className='container'>
-				{/* <h1 className='page-title'>MEDSOURCE</h1> */}
-				<Image priority src={Logo} alt='logo' />
+		<div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
+			<div className="card w-full max-w-md bg-base-100 shadow-xl">
+				<div className="card-body">
+					{/* Logo */}
+					<div className="flex justify-center mb-6">
+						<Image
+							src={Logo}
+							alt="MedSource Pro Logo"
+							priority
+							className="h-20 w-auto"
+						/>
+					</div>
 
-				<div className='form-container'>
-					<h3>Log in</h3>
-					<Formik
-						initialValues={credentials}
-						validationSchema={Validations.loginSchema}
-						onSubmit={(values, { setSubmitting }) => {
-							handleLogin(values)
-							setSubmitting(false)
-						}}>
-						{(form) => (
-							<Form className='min-h-96 flex flex-col gap-8 w-2/4 relative'>
-								<FormInputTextBox label='Email Address' autofocused={true} name='username' />
-								<FormInputTextBox type='password' label='Password' name='password' />
-								<div className='form-footer flex flex-col items-center justify-center gap-10'>
-									<div className='login-options-container'>
-										<InputCheckbox
-											checked={credentials.rememberUser}
-											label='Remember Me'
-											onChange={() => handleRememberMeChange()}
-										/>
-										<a className='clickable forgot-password' onClick={handleForgotPasswordClick}>
-											Forgot Password?
-										</a>
-									</div>
-									<button disabled={isMissingFields(form) || isLoading}>
-										{isLoading ? <i className='fa-solid fa-spinner animate-spin' /> : 'Login'}
-									</button>
-									<span className='button-subtitle'>
-										Don&apos;t have an account?&nbsp;
-										<a className='clickable inline-link' onClick={routeToSignUp}>
-											Sign up!
-										</a>
-									</span>
-								</div>
-							</Form>
-						)}
-					</Formik>
+					{/* Header */}
+					<h1 className="text-3xl font-bold text-center text-primary mb-2">
+						Welcome Back
+					</h1>
+					<p className="text-center text-base-content/70 mb-6">
+						Sign in to your account
+					</p>
+
+					{/* Login Form */}
+					<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+						<FormInput
+							label="Email or Username"
+							type="text"
+							placeholder="Enter your email or username"
+							autoFocus
+							{...form.register('identifier')}
+							error={form.formState.errors.identifier}
+						/>
+
+						<FormInput
+							label="Password"
+							type="password"
+							placeholder="Enter your password"
+							{...form.register('password')}
+							error={form.formState.errors.password}
+						/>
+
+						<div className="flex items-center justify-between">
+							<FormCheckbox
+								label="Remember me"
+								{...form.register('rememberMe')}
+							/>
+
+							<Link
+								href="/forgot-password"
+								className="text-sm link link-primary"
+							>
+								Forgot password?
+							</Link>
+						</div>
+
+						<Button
+							type="submit"
+							variant="primary"
+							fullWidth
+							loading={isLoading}
+							disabled={isLoading || !form.formState.isValid}
+							className="mt-6"
+						>
+							Sign In
+						</Button>
+					</form>
+
+					{/* Sign up link */}
+					<div className="divider">OR</div>
+					<p className="text-center text-sm">
+						Don't have an account?{' '}
+						<Link href="/signup" className="link link-primary font-semibold">
+							Sign up
+						</Link>
+					</p>
 				</div>
 			</div>
 		</div>
 	)
 }
-
-export default Page

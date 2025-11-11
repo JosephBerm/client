@@ -1,22 +1,114 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { useAccountStore } from '@/src/stores/user'
+import { useMemo } from 'react'
+import Link from 'next/link'
+import { ColumnDef } from '@tanstack/react-table'
+import { Eye, Plus } from 'lucide-react'
+import { useAuthStore } from '@_stores/useAuthStore'
+import ServerDataTable from '@_components/tables/ServerDataTable'
+import PageLayout from '@_components/layouts/PageLayout'
+import Button from '@_components/ui/Button'
+import OrderStatusBadge from '@_components/common/OrderStatusBadge'
+import { createServerTableFetcher, formatDate, formatCurrency } from '@_utils/table-helpers'
+import type { IUser } from '@_classes/User'
 
-import { AccountRole } from '@/classes/Enums'
-
-import CustomerOrdersPage from '@/components/Orders/CustomerOrdersPage'
-import AdminView from '@/components/Orders/AdminView'
-
-const Page = () => {
-	const User = useAccountStore((state) => state.User)
-	const isAdmin = User.role == AccountRole.Admin
-
-	function getPageComponent() {
-		if (isAdmin) return <AdminView />
-		return <CustomerOrdersPage />
-	}
-	return <div className='Orders page-container'>{getPageComponent()}</div>
+interface Order {
+	id: number
+	customerId: number
+	customerName?: string
+	totalAmount: number
+	status: number
+	createdAt: string | Date
+	shippingAddress?: string
 }
 
-export default Page
+export default function OrdersPage() {
+	const user = useAuthStore((state) => state.user)
+	const isAdmin = user?.role === 9999999 // Admin role
+
+	// Column definitions
+	const columns: ColumnDef<Order>[] = useMemo(
+		() => [
+			{
+				accessorKey: 'id',
+				header: 'Order #',
+				cell: ({ row }) => (
+					<Link
+						href={`/medsource-app/orders/${row.original.id}`}
+						className="link link-primary font-semibold"
+					>
+						#{row.original.id}
+					</Link>
+				),
+			},
+			...(isAdmin
+				? [
+						{
+							accessorKey: 'customerName',
+							header: 'Customer',
+							cell: ({ row }: any) => row.original.customerName || 'N/A',
+						},
+				  ]
+				: []),
+			{
+				accessorKey: 'totalAmount',
+				header: 'Total',
+				cell: ({ row }) => formatCurrency(row.original.totalAmount),
+			},
+			{
+				accessorKey: 'status',
+				header: 'Status',
+				cell: ({ row }) => <OrderStatusBadge status={row.original.status} />,
+			},
+			{
+				accessorKey: 'createdAt',
+				header: 'Created',
+				cell: ({ row }) => formatDate(row.original.createdAt),
+			},
+			{
+				id: 'actions',
+				header: 'Actions',
+				cell: ({ row }) => (
+					<Link href={`/medsource-app/orders/${row.original.id}`}>
+						<Button variant="ghost" size="sm">
+							<Eye className="w-4 h-4" />
+						</Button>
+					</Link>
+				),
+			},
+		],
+		[isAdmin]
+	)
+
+	// Fetch function for server-side table
+	const fetchOrders = createServerTableFetcher<Order>('/orders/search')
+
+	return (
+		<PageLayout
+			title="Orders"
+			description={
+				isAdmin
+					? 'Manage all orders in the system'
+					: 'View and track your orders'
+			}
+			actions={
+				isAdmin && (
+					<Button variant="primary" leftIcon={<Plus className="w-5 h-5" />}>
+						Create Order
+					</Button>
+				)
+			}
+		>
+			<div className="card bg-base-100 shadow-xl">
+				<div className="card-body">
+					<ServerDataTable
+						columns={columns}
+						fetchData={fetchOrders}
+						initialPageSize={10}
+						emptyMessage="No orders found"
+					/>
+				</div>
+			</div>
+		</PageLayout>
+	)
+}

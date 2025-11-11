@@ -1,8 +1,9 @@
 import React from 'react'
-import FirstComponent from '@/src/components/About/FirstComponent'
-import BulletComponent from '@/src/components/About/BulletComponent'
+// TODO: Migrate About page components
+// import FirstComponent from '@/components/About/FirstComponent'
+// import BulletComponent from '@/components/About/BulletComponent'
 
-import '@/styles/pages/about.css'
+// Styles migrated to Tailwind
 
 import Aboutus11 from '@/public/aboutus11.png'
 import Aboutus22 from '@/public/aboutus22.png'
@@ -43,18 +44,21 @@ const page = () => {
 		},
 	]
 	return (
-		<div className='about-us-page'>
-			<FirstComponent />
+		<div className='about-us-page p-8'>
+			{/* TODO: Restore FirstComponent */}
+			<div className="text-center mb-8">
+				<h1 className="text-4xl font-bold">About Us</h1>
+			</div>
 
-			<div className='bullets-wrapper'>
+			<div className='bullets-wrapper grid gap-6'>
 				{bullets.map((bullet, index) => (
-					<BulletComponent
-						key={index}
-						Title={bullet.Title}
-						Description={bullet.Description}
-						Img={bullet.Img}
-					/>
-				))}
+				<div key={index} className="card bg-base-100 shadow-xl">
+					<div className="card-body">
+						<h2 className="card-title">{bullet.Title}</h2>
+						<p>{bullet.Description}</p>
+					</div>
+				</div>
+			))}
 			</div>
 		</div>
 	)

@@ -1,12 +1,13 @@
-import "@/styles/pages/productdetails.css"
-import API from '@/src/services/api'
-import { redirect, useParams, useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+// Styles migrated to Tailwind
+import API from '@_services/api'
+import { redirect } from 'next/navigation'
+import React from 'react'
 import Image from "next/image"
-import { Product } from "@/src/classes/Product"
-import ProductDetails from "@/src/components/ProductDetails/ProductDetails"
-import ProductDescription from "@/src/components/ProductDetails/ProductDescription"
-import RelatedProducts from "@/src/components/ProductDetails/RelatedProducts"
+import { Product } from "@_classes/Product"
+// TODO: Migrate ProductDetails components
+// import ProductDetails from "@/components/ProductDetails/ProductDetails"
+// import ProductDescription from "@/components/ProductDetails/ProductDescription"
+// import RelatedProducts from "@/components/ProductDetails/RelatedProducts"
 
 const page = async ({params, searchParams}: {params: Record<string, string>, searchParams: Record<string, string>}) => {
 
@@ -43,12 +44,11 @@ const page = async ({params, searchParams}: {params: Record<string, string>, sea
 						<i className='fa-regular fa-image' />
 					)}
 				</div>
-				{/* Product Descrption */}
-				<ProductDetails product={productResult} />
+				{/* Product Description */}
+				<div className="alert alert-info mt-4">
+					<span>TODO: Migrate ProductDetails, ProductDescription, and RelatedProducts components</span>
+				</div>
 			</div>
-
-			<ProductDescription product={productResult}/>
-			<RelatedProducts />
 
 
 		</div>

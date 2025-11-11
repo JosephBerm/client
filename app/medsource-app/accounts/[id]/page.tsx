@@ -1,9 +1,10 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import User from '@/classes/User'
-import API from '@/services/api'
+import User from '@_classes/User'
+import API from '@_services/api'
 import { useRouter, useParams } from 'next/navigation'
-import AccountCRUD from '@/components/AccountCRUD'
+// TODO: Migrate AccountCRUD component
+// import AccountCRUD from '@/components/AccountCRUD'
 import '@/styles/pages/accounts.css'
 import '@/styles/forms.css'
 
@@ -49,8 +50,12 @@ const Page = () => {
 			<div className='page-header'>
 				<h2 className='page-title'>User Settings</h2>
 			</div>
-			{!user && <i className='fa-solid fa-spinner animate-spin' />}
-			{user && <AccountCRUD user={user} />}
+			{!user && <div className="flex justify-center"><span className="loading loading-spinner loading-lg"></span></div>}
+			{user && (
+				<div className="alert alert-info">
+					<span>TODO: Migrate AccountCRUD component. User ID: {user.id}</span>
+				</div>
+			)}
 		</div>
 	)
 }

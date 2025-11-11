@@ -1,9 +1,10 @@
 'use client'
 import React from 'react'
-import AddEditForm from '@/components/Store/Products/AddEditForm'
+// TODO: Migrate AddEditForm component
+// import AddEditForm from '@/components/Store/Products/AddEditForm'
 
 import Link from 'next/link'
-import Routes from '@/services/routes'
+import Routes from '@_services/routes'
 
 const page = () => {
 	return (
@@ -16,7 +17,9 @@ const page = () => {
 			</div>
 			<div className='creation-container'>
 				<h2 id='page-header-text'>Create a product</h2>
-				<AddEditForm />
+				<div className="alert alert-info">
+					<span>TODO: Migrate AddEditForm component</span>
+				</div>
 			</div>
 		</div>
 	)

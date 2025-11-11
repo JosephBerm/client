@@ -5,39 +5,29 @@ const config: Config = {
 		'./pages/**/*.{js,ts,jsx,tsx,mdx}',
 		'./components/**/*.{js,ts,jsx,tsx,mdx}',
 		'./app/**/*.{js,ts,jsx,tsx,mdx}',
+		'./src/**/*.{js,ts,jsx,tsx,mdx}',
 	],
 	theme: {
 		extend: {
+			fontFamily: {
+				sans: ['var(--font-sans)'],
+				mono: ['var(--font-mono)'],
+			},
+			// Custom brand colors for use in Tailwind classes
 			colors: {
-				main: '#a264ff',
-				'main-tinted': '#29114',
-				accent: '#fff',
-				bg: '#0d1224',
-				header: '#0e1326',
-				text: '#d3d8e8',
-				'section-bg': '#181d2f',
-				error: '#b22222',
-				slate: '#8892b0',
-				'dark-slate': '#495670',
-				'darker-slate': '#0a0f1c',
+				'brand-1': '#416706',
+				'brand-2': '#4d7a07',
+				'brand-3': '#355405',
+				'brand-4': '#2a4204',
+				'brand-5': '#1e2f03',
+				'teal': '#06614a',
+				'darker-teal': '#055541',
 			},
-			backgroundImage: {
-				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-			},
-		},
-		fontSize: {
-			xxsm: '1.2rem',
-			xsm: '1.3rem',
-			sm: '1.4rem',
-			base: '1.6rem',
-			xl: '2rem',
-			'2xl': '2.2rem',
-			'3xl': '2.5rem',
-			'4xl': '3rem',
-			'5xl': '3.5rem',
 		},
 	},
-	plugins: [],
+	plugins: [
+		require('daisyui'),
+	],
 }
+
 export default config

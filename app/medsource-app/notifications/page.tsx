@@ -1,50 +1,51 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Table from '@/common/table'
-import Notification from '@/classes/Notification'
-import { useAccountStore } from '@/src/stores/user'
-import { TableColumn } from '@/interfaces/Table'
+// TODO: Migrate to DataTable component
+// import Table from '@/common/table'
+import Notification from '@_classes/Notification'
+import { useAuthStore } from '@_stores/useAuthStore'
+// import { TableColumn } from '@/interfaces/Table'
 import { format } from 'date-fns'
 import { useRouter, usePathname } from 'next/navigation'
-import '@/styles/notifications.css'
+// Styles migrated to Tailwind
 
 function Page() {
-	const columns: TableColumn<Notification>[] = [
-		{
-			name: 'read',
-			label: 'Read/Unread',
-		},
-		{
-			name: 'createdAt',
-			label: 'Created',
-			content: (notification) => <>{format(new Date(notification.createdAt), 'mm/dd/yyyy')}</>,
-		},
-		{
-			name: 'message',
-			label: 'Message',
-		},
-	]
 	const router = useRouter()
 	const pathName = usePathname()
-	const user = useAccountStore((state) => state.User)
+	const user = useAuthStore((state) => state.user)
 
-	const showUnread = (item: Notification): string => {
-		return !item.read ? 'unread' : ''
+	const handleRowClick = (notification: any) => {
+		router.push(`${pathName}/${notification.id}`)
 	}
-	const handleRowClick = (item: Notification) => {
-		router.push(`${pathName}/${item.id}`)
-	}
+
 	return (
-		<div className='Notifications'>
-			<Table<Notification>
-				columns={columns}
-				data={user.notifications}
-				isSortable={false}
-				isSearchable={true}
-				cssRowClass={showUnread}
-				onRowClick={handleRowClick}
-			/>
+		<div className='Notifications p-8'>
+			<div className="alert alert-info mb-4">
+				<span>TODO: Migrate notifications table to use DataTable component</span>
+			</div>
+			<div className="mt-4">
+				{user?.notifications && user.notifications.length > 0 ? (
+					<div className="space-y-2">
+						{user.notifications.map((notification: any) => (
+							<div 
+								key={notification.id} 
+								className="card bg-base-100 shadow cursor-pointer hover:shadow-lg"
+								onClick={() => handleRowClick(notification)}
+							>
+								<div className="card-body">
+									<p>{notification.message}</p>
+									<span className="text-sm text-base-content/60">
+										{format(new Date(notification.createdAt), 'MM/dd/yyyy')}
+									</span>
+								</div>
+							</div>
+						))}
+					</div>
+				) : (
+					<p>No notifications</p>
+				)}
+			</div>
 		</div>
 	)
 }

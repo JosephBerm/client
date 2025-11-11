@@ -3,16 +3,17 @@
 import '@/styles/pages/store.css'
 import React, { useEffect, useState, useMemo } from 'react'
 
-import ProductsCategory, { sanitizeCategoriesList } from '@/classes/ProductsCategory'
-import { Product } from '@/classes/Product'
-import TreeSelect from '@/components/TreeSelect'
-import ProductsList from '@/components/Store/ProductsList'
-import { GenericSearchFilter } from '@/classes/Base/GenericSearchFilter'
+import ProductsCategory, { sanitizeCategoriesList } from '@_classes/ProductsCategory'
+import { Product } from '@_classes/Product'
+// TODO: Migrate TreeSelect and ProductsList components
+// import TreeSelect from '@/components/TreeSelect'
+// import ProductsList from '@/components/Store/ProductsList'
+import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import { isEmpty } from 'lodash'
-import API from '@/services/api'
+import API from '@_services/api'
 import { toast } from 'react-toastify'
 import debounce from 'lodash/debounce'
-import { PagedResult } from '@/classes/Base/PagedResult'
+import { PagedResult } from '@_classes/Base/PagedResult'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 const Page = () => {
@@ -146,25 +147,13 @@ const Page = () => {
 		setSearchText(searchQuery)
 	}
 	return (
-		<div className='Store'>
+		<div className='Store p-8'>
 			<h2 className='page-title'>
 				<strong>Store</strong>
 			</h2>
-			<div className='CategoriesMenu'>
-				<TreeSelect<ProductsCategory>
-					list={categories}
-					label='name'
-					childKey='subCategories'
-					onItemSelected={handleCategorySelection}
-				/>
+			<div className="alert alert-info">
+				<span>TODO: Migrate TreeSelect and ProductsList components. Total products: {products.length}</span>
 			</div>
-			<ProductsList
-				list={products}
-				searchText={searchText}
-				onSearch={handleSearchQuery}
-				hasMoreProducts={hasMoreProducts}
-				getMoreProducts={setSearch}
-			/>
 		</div>
 	)
 }

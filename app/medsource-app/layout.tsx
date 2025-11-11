@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { IUser } from '@/classes/User'
+import { IUser } from '@_classes/User'
 
-import Sidebar from '@/components/Sidebar'
-import WrapperHandler from '@/components/WrapperHandler'
-import Breadcrumb from '@/components/Navigation/BreadCrumb'
-import SecuredNavBar from '@/components/Navigation/SecuredNavBar'
+// Old components - now using modernized navigation in root layout
+// import Sidebar from '@/components/Sidebar'
+// import WrapperHandler from '@/components/WrapperHandler'
+// import Breadcrumb from '@/components/Navigation/BreadCrumb'
+// import SecuredNavBar from '@/components/Navigation/SecuredNavBar'
 
 import '@/styles/store.css'
 import '@/styles/App/orderPage.css'
@@ -40,7 +41,7 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode
 }>) {
-	const cookiesStore = cookies()
+	const cookiesStore = await cookies()
 	const token = cookiesStore.get('at')
 
 	// Load user data into state management library.
@@ -48,14 +49,10 @@ export default async function RootLayout({
 	const response = await getUserData(token.value)
 	if (response?.payload == null) return redirect('/login') // Ensure the Authorization token is valiud.
 
+	// Navigation is now handled by root layout with modernized components
 	return (
 		<div className='App'>
-			<Sidebar />
-			<WrapperHandler User={response.payload as IUser} />
-			<div className='body'>
-				<SecuredNavBar />
-				{children}
-			</div>
+			{children}
 		</div>
 	)
 }

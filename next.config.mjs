@@ -14,7 +14,25 @@ const Environments = {
 const nextConfig = {
 	env: { ...Environments['production'] },
 	images: {
-		domains: ['img.freepik.com', 'localhost', 'prod-server20241205193558.azurewebsites.net'],
+		remotePatterns: [
+			{
+				protocol: 'https',
+				hostname: 'img.freepik.com',
+			},
+			{
+				protocol: 'http',
+				hostname: 'localhost',
+			},
+			{
+				protocol: 'https',
+				hostname: 'prod-server20241205193558.azurewebsites.net',
+			},
+		],
+	},
+	experimental: {
+		turbo: {
+			resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
+		},
 	},
 }
 

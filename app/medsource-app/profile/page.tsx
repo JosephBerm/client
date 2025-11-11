@@ -1,20 +1,31 @@
 'use client'
 
 import React from 'react'
-
-import '@/styles/pages/profile.css'
-import { useAccountStore } from '@/src/stores/user'
-import AddEditUser from '@/src/components/AddEditUser'
+import { useAuthStore } from '@_stores/useAuthStore'
+import UpdateAccountForm from '@_components/forms/UpdateAccountForm'
+import ClientPageLayout from '@_components/layouts/ClientPageLayout'
 
 const Page = () => {
-	const { User: UserFromStore } = useAccountStore((state) => state)
+	const user = useAuthStore((state) => state.user)
+
+	if (!user) {
+		return (
+			<ClientPageLayout title="Profile">
+				<div className="alert alert-warning">
+					<span>Please log in to view your profile.</span>
+				</div>
+			</ClientPageLayout>
+		)
+	}
 
 	return (
-		<div className='Profile page-container'>
-			<h2 className='page-title'>Profile Settings</h2>
-
-			<AddEditUser user={UserFromStore} />
-		</div>
+		<ClientPageLayout title="Profile Settings" description="Manage your account information">
+			<div className="card bg-base-100 shadow-xl max-w-4xl mx-auto">
+				<div className="card-body">
+					<UpdateAccountForm user={user} />
+				</div>
+			</div>
+		</ClientPageLayout>
 	)
 }
 

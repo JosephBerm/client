@@ -1,11 +1,11 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Notification from '@/classes/Notification'
-import API from '@/services/api'
+import Notification from '@_classes/Notification'
+import API from '@_services/api'
 import { useRouter, useParams } from 'next/navigation'
 import { toast } from 'react-toastify'
-import { NotificationType } from '@/classes/Enums'
+import { NotificationType } from '@_classes/Enums'
 import { format } from 'date-fns'
 
 function Page() {

@@ -1,285 +1,271 @@
 'use client'
 
-import '@/styles/pages/cart.css'
-
-import React, { useEffect, useState } from 'react'
-import { FormikProvider, useFormik, Form } from 'formik'
-import { useAccountStore } from '@/src/stores/user'
-import { useCartStore } from '@/src/stores/store'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-
-import { CartProduct } from '@/classes/Product'
-import Address from '@/classes/common/Address'
-import Quote from '@/classes/Quote'
-import Name from '@/classes/common/Name'
-
-import Routes from '@/services/routes'
-import API from '@/services/api'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Trash2, ShoppingBag, CheckCircle } from 'lucide-react'
+import { useZodForm } from '@_hooks/useZodForm'
+import { quoteSchema, type QuoteFormData } from '@_utils/validation-schemas'
+import { useAuthStore } from '@_stores/useAuthStore'
+import { useUserSettingsStore } from '@_stores/useUserSettingsStore'
+import FormInput from '@_components/forms/FormInput'
+import FormTextArea from '@_components/forms/FormTextArea'
+import Button from '@_components/ui/Button'
+import PageContainer from '@_components/layouts/PageContainer'
+import EmptyState from '@_components/common/EmptyState'
+import API from '@_services/api'
+import Quote from '@_classes/Quote'
+import { CartProduct } from '@_classes/Product'
+import Name from '@_classes/common/Name'
 
-import FormInputTextBox from '@/components/FormInputTextbox'
-import QuantitySelector from '@/components/QuantitySelector'
-import IsBusyLoading from '@/components/isBusyLoading'
-import InputTextBox from '@/components/InputTextBox'
-
-const Page = () => {
+export default function CartPage() {
 	const router = useRouter()
-	const formik = useFormik({
-		initialValues: new Quote(),
-		onSubmit: (values) => {
-			submitQuote(values)
+	const [submitted, setSubmitted] = useState(false)
+	const [isLoading, setIsLoading] = useState(false)
+	
+	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+	const user = useAuthStore((state) => state.user)
+	const cart = useUserSettingsStore((state) => state.cart)
+	const updateCartQuantity = useUserSettingsStore((state) => state.updateCartQuantity)
+	const removeFromCart = useUserSettingsStore((state) => state.removeFromCart)
+	const clearCart = useUserSettingsStore((state) => state.clearCart)
+
+	const form = useZodForm(quoteSchema, {
+		defaultValues: {
+			customerId: user?.customerId || 0,
+			items: [],
+			notes: '',
+			validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
 		},
 	})
 
-	const loggedIn = useAccountStore((state) => state.LoggedIn)
-	const user = useAccountStore((state) => state.User)
-	const cartStore = useCartStore((state) => state.Cart)
-	const setCart = useCartStore((state) => state.setCart)
-	const deleteProdFromCart = useCartStore((state) => state.removeProduct)
-	const [submitted, setSubmitted] = useState<boolean>(false)
-	const [isLoading, setIsLoading] = useState<boolean>(false)
+	// Calculate totals
+	const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+	const tax = subtotal * 0.08 // 8% tax
+	const total = subtotal + tax
 
-	const submitQuote = async (values: Quote) => {
-		values.products = cartStore.map((cartProduct) => {
-			const product = new CartProduct({ quantity: cartProduct.quantity })
-			product.product = null
-			product.productId = cartProduct.product!.id
-			return product
-		})
-		values.id = crypto.randomUUID()
+	const handleSubmit = async (values: QuoteFormData) => {
+		setIsLoading(true)
 
 		try {
-			setIsLoading(true)
-			const response = await API.Public.sendQuote(values)
-			if (response.data.statusCode == 200) {
+			// Convert cart to quote items format
+			const quoteItems = cart.map((item) => new CartProduct({
+				productId: item.productId,
+				quantity: item.quantity,
+				product: null, // Product reference can be null for submission
+			}))
+
+			// Construct a proper Quote object
+			const quoteData = new Quote({
+				companyName: user?.customer?.name || '',
+				emailAddress: user?.email || '',
+				phoneNumber: user?.phone || '',
+				products: quoteItems,
+				description: values.notes || '',
+			})
+
+			const response = await API.Public.sendQuote(quoteData)
+			
+			if (response.data.statusCode === 200) {
 				setSubmitted(true)
-				setCart([])
+				clearCart()
 			}
-		} catch (err) {
-			console.error(err)
+		} catch (error) {
+			console.error('Error submitting quote:', error)
 		} finally {
 			setIsLoading(false)
 		}
 	}
 
-	const getImage = (item: CartProduct) => {
-		if (item.product == null || item.product?.files.length <= 0) return <i className='fa-regular fa-image' />
-
+	// Empty cart state
+	if (cart.length === 0 && !submitted) {
 		return (
-			<Image
-				src={`${process.env.API_URL}/products/image?productId=${item.product?.id}&image=${
-					item.product?.files[0]?.name ?? ''
-				}`}
-				width={125}
-				height={125}
-				style={{ width: 'auto' }}
-				alt='Product Image'
-			/>
+			<PageContainer className="max-w-4xl">
+				<EmptyState
+					icon={<ShoppingBag className="w-16 h-16" />}
+					title="Your cart is empty"
+					description="Add some products to your cart to get started"
+					action={{
+						label: 'Browse Products',
+						onClick: () => router.push('/store'),
+					}}
+				/>
+			</PageContainer>
 		)
 	}
 
-	const updateName = (key: keyof Name, newValue: string) => {
-		formik.setFieldValue(`name.${key}`, newValue)
-	}
+	// Success state
+	if (submitted) {
+		return (
+			<PageContainer className="max-w-2xl">
+				<div className="card bg-base-100 shadow-xl">
+					<div className="card-body items-center text-center py-12">
+						<CheckCircle className="w-20 h-20 text-success mb-4" />
+						
+						<h2 className="card-title text-3xl mb-2">Quote Request Submitted!</h2>
+						
+						<p className="text-base-content/70 mb-6">
+							Thank you for your quote request. Our team will review it and get back to you within 24-48 hours.
+						</p>
 
-	const updateAddress = (key: keyof Address, newValue: string) => {
-		formik.setFieldValue(`transitDetails.${key}`, newValue)
-	}
-	const handleQuantityChange = (item: CartProduct, quantity: number) => {
-		const productsToSet = cartStore.map((p: CartProduct) =>
-			p.product!.id === item.product!.id ? { ...p, quantity } : p
+						<div className="flex gap-4">
+							<Button variant="primary" onClick={() => router.push('/store')}>
+								Continue Shopping
+							</Button>
+							{isAuthenticated && (
+								<Button variant="outline" onClick={() => router.push('/medsource-app/quotes')}>
+									View My Quotes
+								</Button>
+							)}
+						</div>
+					</div>
+				</div>
+			</PageContainer>
 		)
-		setCart(productsToSet)
 	}
-	const goToDashBoard = () => {
-		if (loggedIn) router.push(Routes.InternalAppRoute)
-		else router.push(Routes.Login.location)
-	}
-
-	useEffect(() => {}, [cartStore, isLoading])
-	useEffect(() => {
-		// Check if the user has the necessary details
-		if (user) {
-			// Create a new object to hold the updated form values
-			const updatedValues = { ...formik.values }
-
-			// Update transitDetails with the user's shipping address if available
-			if (user.customer?.shippingAddress) {
-				updatedValues.transitDetails = user.customer.shippingAddress
-			}
-
-			// Update the name field with the user's name if available
-			if (user.name) {
-				updatedValues.name = user.name
-			}
-
-			// Set the updated form values using formik's setValues
-			formik.setValues(updatedValues)
-		}
-	}, [user])
 
 	return (
-		<div className='Cart'>
-			<h2 className='page-title'>Quote Request</h2>
-			<IsBusyLoading isBusy={isLoading} />
-			{!isLoading && (
-				<div className='page-body'>
-					{!submitted && (
-						<div className='cart-items'>
-							{cartStore.length === 0 && (
-								<div className='no-order-container flex flex-col items-center mt-7'>
-									There&apos;s nothing in your cart.
-								</div>
-							)}
-							{cartStore.length > 0 &&
-								cartStore.map((item) => (
-									// create component out of this called CartItemPreview, have it hold a state
-									<div className='details-container' key={item.product?.id}>
-										<div className='details'>
-											<div className='image-container'>{getImage(item)}</div>
+		<PageContainer className="max-w-7xl py-8">
+			<h1 className="text-3xl md:text-4xl font-bold text-primary mb-8">Shopping Cart</h1>
 
-											<div className='description'>
-												<span className='name'>{item.product?.name}</span>
-												<span className='desc'>{item.product?.description}</span>
-											</div>
-										</div>
-										<div className='item-quantity-toggler'>
-											<QuantitySelector
-												handleDelete={() => deleteProdFromCart(item)}
-												quantity={item.quantity}
-												handleChange={(quantity: number) =>
-													handleQuantityChange(item, quantity)
+			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+				{/* Cart Items */}
+				<div className="lg:col-span-2 space-y-4">
+					{cart.map((item) => (
+						<div key={item.productId} className="card bg-base-100 shadow-md">
+							<div className="card-body p-4">
+								<div className="flex gap-4">
+									{/* Product Image */}
+									<div className="w-24 h-24 bg-base-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+										<ShoppingBag className="w-12 h-12 text-base-content/30" />
+									</div>
+
+									{/* Product Info */}
+									<div className="flex-1">
+										<h3 className="font-semibold text-lg">{item.name}</h3>
+										<p className="text-sm text-base-content/70">
+											${item.price.toFixed(2)} each
+										</p>
+
+										{/* Quantity Controls */}
+										<div className="flex items-center gap-2 mt-2">
+											<button
+												className="btn btn-xs btn-circle"
+												onClick={() =>
+													updateCartQuantity(
+														item.productId,
+														Math.max(1, item.quantity - 1)
+													)
 												}
-											/>
-											<button className='delete w-full' onClick={() => deleteProdFromCart(item)}>
-												Delete
+											>
+												-
+											</button>
+											<span className="w-12 text-center">{item.quantity}</span>
+											<button
+												className="btn btn-xs btn-circle"
+												onClick={() =>
+													updateCartQuantity(item.productId, item.quantity + 1)
+												}
+											>
+												+
 											</button>
 										</div>
 									</div>
-								))}
-							<Link className='inline-link' href={Routes.Store.location}>
-								Add Products
-								<i className='fa-solid fa-plus ml-2' />
-							</Link>
-						</div>
-					)}
-					<div className='quote'>
-						{!submitted && (
-							<FormikProvider value={formik}>
-								<h3>Your Quote Request</h3>
-								<p className='subtitle my-2 text-center'>
-									Complete the form below to submit your quote request and a staff member will contact
-									you within 24 hours.
-								</p>
-								<Form onSubmit={formik.handleSubmit} className='FormContainer'>
-									<div className='gapped-fields'>
-										<InputTextBox
-											label='First Name'
-											type='text'
-											handleChange={(e) => updateName('first', e.currentTarget.value)}
-											value={formik.values.name.first}
-											className='faded-bg'
-										/>
-										<InputTextBox
-											label='Last Name'
-											type='text'
-											handleChange={(e) => updateName('last', e.currentTarget.value)}
-											value={formik.values.name.last}
-											className='faded-bg'
-										/>
-									</div>
-									<FormInputTextBox
-										label='Email Address'
-										name='emailAddress'
-										value={formik.values.emailAddress}
-										className='faded-bg'
-									/>
-									<div className='address-container'>
-										<InputTextBox
-											label='Country'
-											type='text'
-											handleChange={(e) => updateAddress('country', e.currentTarget.value)}
-											value={formik.values.transitDetails.country}
-											className='faded-bg'
-										/>
-										<div className='gapped-fields'>
-											<InputTextBox
-												label='City'
-												type='text'
-												handleChange={(e) => updateAddress('city', e.currentTarget.value)}
-												value={formik.values.transitDetails.city}
-												className='faded-bg'
-											/>
-											<InputTextBox
-												label='State'
-												type='text'
-												handleChange={(e) => updateAddress('state', e.currentTarget.value)}
-												value={formik.values.transitDetails.state}
-												className='faded-bg'
-											/>
-										</div>
-										<InputTextBox
-											label='Zip Code'
-											type='text'
-											handleChange={(e) => updateAddress('zipCode', e.currentTarget.value)}
-											value={formik.values.transitDetails.zipCode}
-											className='faded-bg'
-										/>
-									</div>
-									<div className='gapped-fields'>
-										<FormInputTextBox
-											label='Phone Number'
-											name='phoneNumber'
-											value={formik.values.phoneNumber}
-											className='faded-bg'
-										/>
-										<FormInputTextBox
-											label='Company Name'
-											name='companyName'
-											value={formik.values.companyName}
-											className='faded-bg'
-										/>
-									</div>
-									<FormInputTextBox
-										type='textarea'
-										rows={6}
-										label='Personal Note'
-										name='description'
-										value={formik.values.description}
-										className='faded-bg'
-									/>
-									<button className='submit-btn' onClick={() => formik.submitForm()}>
-										Place Request
-									</button>
-								</Form>
-							</FormikProvider>
-						)}
-						{submitted && (
-							<div className='message-container'>
-								<div className='message-icon'>
-									<i className='fa-solid fa-check-to-slot' />
-								</div>
-								<h3>Request Sent!</h3>
-								<p className='message'>
-									We have successfully received your order and our staff will contact you shortly.
-								</p>
 
-								<p className='sign-up'>
-									In the meantime you can login to your customer account and track the status of your
-									quotes, as well as place orders directly.
-								</p>
-
-								<div className='button-container'>
-									<button onClick={() => goToDashBoard()}>Go To My Dashboard</button>
+									{/* Price & Remove */}
+									<div className="flex flex-col items-end justify-between">
+										<p className="font-semibold text-lg">
+											${(item.price * item.quantity).toFixed(2)}
+										</p>
+										<button
+											className="btn btn-ghost btn-sm text-error"
+											onClick={() => removeFromCart(item.productId)}
+										>
+											<Trash2 className="w-4 h-4" />
+										</button>
+									</div>
 								</div>
 							</div>
-						)}
+						</div>
+					))}
+				</div>
+
+				{/* Order Summary & Quote Form */}
+				<div className="space-y-6">
+					{/* Order Summary */}
+					<div className="card bg-base-100 shadow-xl">
+						<div className="card-body">
+							<h2 className="card-title">Order Summary</h2>
+							
+							<div className="space-y-2 py-4">
+								<div className="flex justify-between">
+									<span>Subtotal</span>
+									<span>${subtotal.toFixed(2)}</span>
+								</div>
+								<div className="flex justify-between">
+									<span>Tax (8%)</span>
+									<span>${tax.toFixed(2)}</span>
+								</div>
+								<div className="divider my-2"></div>
+								<div className="flex justify-between font-bold text-lg">
+									<span>Total</span>
+									<span>${total.toFixed(2)}</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{/* Quote Request Form */}
+					<div className="card bg-base-100 shadow-xl">
+						<div className="card-body">
+							<h2 className="card-title">Request Quote</h2>
+							
+							<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+								<FormInput
+									label="Valid Until"
+									type="date"
+									{...form.register('validUntil')}
+									error={form.formState.errors.validUntil}
+								/>
+
+								<FormTextArea
+									label="Additional Notes (Optional)"
+									placeholder="Any special requirements or questions?"
+									rows={4}
+									{...form.register('notes')}
+									error={form.formState.errors.notes}
+								/>
+
+								{isAuthenticated ? (
+									<Button
+										type="submit"
+										variant="primary"
+										fullWidth
+										loading={isLoading}
+										disabled={isLoading}
+									>
+										Submit Quote Request
+									</Button>
+								) : (
+									<div className="space-y-2">
+										<p className="text-sm text-center text-base-content/70">
+											Please log in to submit a quote
+										</p>
+										<Button
+											variant="primary"
+											fullWidth
+											onClick={() => router.push('/login')}
+										>
+											Log In
+										</Button>
+									</div>
+								)}
+							</form>
+						</div>
 					</div>
 				</div>
-			)}
-		</div>
+			</div>
+		</PageContainer>
 	)
 }
-
-export default Page

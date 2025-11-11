@@ -1,8 +1,9 @@
 'use client'
-import Quote from '@/classes/Quote'
-import IsBusyLoading from '@/components/isBusyLoading'
-import API from '@/services/api'
-import Routes from '@/services/routes'
+import Quote from '@_classes/Quote'
+// TODO: Migrate IsBusyLoading component
+// import IsBusyLoading from '@/components/isBusyLoading'
+import API from '@_services/api'
+import Routes from '@_services/routes'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { format } from 'date-fns'
@@ -52,7 +53,7 @@ const Page = () => {
 	return (
 		<div className='page-container EditQuoteForm'>
 			<h2 className='page-title'>Quote</h2>
-			<IsBusyLoading isBusy={isLoading} />
+			{isLoading && <div className="flex justify-center"><span className="loading loading-spinner loading-lg"></span></div>}
 			{!isLoading && (
 				<div className='buttons-container'>
 					<div className='w-full flex justify-between mb-10 mt-10'>

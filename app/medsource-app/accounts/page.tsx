@@ -1,95 +1,168 @@
 'use client'
-import React, { useState, useEffect } from 'react'
-import User from '@/classes/User'
-import { TableColumn } from '@/interfaces/Table'
+
+import { useMemo } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { format } from 'date-fns'
-import Table from '@/common/table'
-import API from '@/services/api'
-import Routes from '@/services/routes'
+import { ColumnDef } from '@tanstack/react-table'
+import { Eye, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'react-toastify'
+import ServerDataTable from '@_components/tables/ServerDataTable'
+import PageLayout from '@_components/layouts/PageLayout'
+import Button from '@_components/ui/Button'
+import Modal from '@_components/ui/Modal'
+import RoleBadge from '@_components/common/RoleBadge'
+import { createServerTableFetcher, formatDate } from '@_utils/table-helpers'
+import API from '@_services/api'
+import { useState } from 'react'
 
-const Page = () => {
-	const [tables, setTables] = useState<User[]>([])
-	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const route = useRouter()
-
-	const fetchAccounts = async () => {
-		try {
-			const { data } = await API.Accounts.getAll()
-			setTables(data.payload || []) // Handle null case by providing an empty array as the default value
-		} finally {
-			setIsLoading(true)
-		}
-	}
-
-	//handle optimistic update for user deletion
-	const handleUserDeletion = async (id: string | null) => {
-		if (!id) return
-		if (window.confirm(`Are you sure you want to delete user #${id}?`)) {
-			const updatedUsers = tables.filter((user) => user.id !== id)
-			const originalUsers = [...tables]
-			setTables(updatedUsers)
-			try {
-				const { data } = await API.Accounts.delete(id)
-				if (data.statusCode !== 200 && data.message) throw new Error(data.message)
-
-				toast.success(data.message)
-			} catch (error: any) {
-				console.error(error)
-				setTables(originalUsers)
-			}
-		}
-	}
-
-	useEffect(() => {
-		fetchAccounts()
-	}, [])
-
-	const columns: TableColumn<User>[] = [
-		{
-			name: 'username',
-			label: 'Username',
-			content: (user: User) => <>{user.username}</>,
-		},
-		{
-			name: 'email',
-			label: 'Email',
-		},
-		{
-			name: 'createdAt',
-			label: 'Date Created',
-			content: (user: User) => <>{format(new Date(user.createdAt), 'MM/dd/yyyy')}</>,
-		},
-		{
-			name: 'id',
-			label: 'actions',
-			content: (user: User) => (
-				<div className='flex gap-5'>
-					<button
-						onClick={() => {
-							route.push(`${Routes.InternalAppRoute}/accounts/${user.id}`)
-						}}>
-						Edit
-					</button>
-					<button className='delete' onClick={() => handleUserDeletion(user.id)}>
-						Delete
-					</button>
-				</div>
-			),
-		},
-	]
-
-	return (
-		<div className='page-container'>
-			<div className='page-header'>
-				<h2 className='page-title'>Accounts</h2>
-			</div>
-			<button onClick={() => route.push('accounts/create')}>Create</button>
-
-			<Table<User> columns={columns} data={tables} />
-		</div>
-	)
+interface Account {
+	id: string
+	username: string
+	email: string
+	role: number
+	createdAt: string | Date
 }
 
-export default Page
+export default function AccountsPage() {
+	const router = useRouter()
+	const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; account: Account | null }>({
+		isOpen: false,
+		account: null,
+	})
+	const [refreshKey, setRefreshKey] = useState(0)
+
+	// Column definitions
+	const columns: ColumnDef<Account>[] = useMemo(
+		() => [
+			{
+				accessorKey: 'username',
+				header: 'Username',
+				cell: ({ row }) => (
+					<Link
+						href={`/medsource-app/accounts/${row.original.id}`}
+						className="link link-primary font-semibold"
+					>
+						{row.original.username}
+					</Link>
+				),
+			},
+			{
+				accessorKey: 'email',
+				header: 'Email',
+			},
+			{
+				accessorKey: 'role',
+				header: 'Role',
+				cell: ({ row }) => <RoleBadge role={row.original.role} />,
+			},
+			{
+				accessorKey: 'createdAt',
+				header: 'Created',
+				cell: ({ row }) => formatDate(row.original.createdAt),
+			},
+			{
+				id: 'actions',
+				header: 'Actions',
+				cell: ({ row }) => (
+					<div className="flex gap-2">
+						<Link href={`/medsource-app/accounts/${row.original.id}`}>
+							<Button variant="ghost" size="sm">
+								<Eye className="w-4 h-4" />
+							</Button>
+						</Link>
+						<Button
+							variant="ghost"
+							size="sm"
+							className="text-error hover:text-error"
+							onClick={() =>
+								setDeleteModal({ isOpen: true, account: row.original })
+							}
+						>
+							<Trash2 className="w-4 h-4" />
+						</Button>
+					</div>
+				),
+			},
+		],
+		[]
+	)
+
+	// Fetch function for server-side table
+	const fetchAccounts = createServerTableFetcher<Account>('/account/search')
+
+	const handleDelete = async () => {
+		if (!deleteModal.account) return
+
+		try {
+			const { data } = await API.Accounts.delete(deleteModal.account.id)
+			
+			if (data.statusCode === 200) {
+				toast.success('Account deleted successfully')
+				setDeleteModal({ isOpen: false, account: null })
+				// Refresh the table
+				setRefreshKey((prev) => prev + 1)
+			} else {
+				toast.error(data.message || 'Failed to delete account')
+			}
+		} catch (error) {
+			console.error('Error deleting account:', error)
+			toast.error('An error occurred while deleting the account')
+		}
+	}
+
+	return (
+		<>
+			<PageLayout
+				title="Accounts"
+				description="Manage user accounts in the system"
+				actions={
+					<Button
+						variant="primary"
+						leftIcon={<Plus className="w-5 h-5" />}
+						onClick={() => router.push('/medsource-app/accounts/create')}
+					>
+						Create Account
+					</Button>
+				}
+			>
+				<div className="card bg-base-100 shadow-xl">
+					<div className="card-body">
+						<ServerDataTable
+							key={refreshKey}
+							columns={columns}
+							fetchData={fetchAccounts}
+							initialPageSize={10}
+							emptyMessage="No accounts found"
+						/>
+					</div>
+				</div>
+			</PageLayout>
+
+			{/* Delete Confirmation Modal */}
+			<Modal
+				isOpen={deleteModal.isOpen}
+				onClose={() => setDeleteModal({ isOpen: false, account: null })}
+				title="Delete Account"
+				footer={
+					<>
+						<Button
+							variant="ghost"
+							onClick={() => setDeleteModal({ isOpen: false, account: null })}
+						>
+							Cancel
+						</Button>
+						<Button variant="error" onClick={handleDelete}>
+							Delete
+						</Button>
+					</>
+				}
+			>
+				<p>
+					Are you sure you want to delete the account{' '}
+					<strong>{deleteModal.account?.username}</strong>?
+				</p>
+				<p className="text-error text-sm mt-2">This action cannot be undone.</p>
+			</Modal>
+		</>
+	)
+}

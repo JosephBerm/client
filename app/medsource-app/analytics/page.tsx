@@ -1,13 +1,14 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import FinanceNumbers from '@/classes/FinanceNumbers'
-import API from '@/services/api'
-import DatePicker from '@/src/components/DatePicker'
-import FinanceSearchFilter from '@/src/classes/FinanceSearchFilter'
+import FinanceNumbers from '@_classes/FinanceNumbers'
+import API from '@_services/api'
+// TODO: Migrate or replace DatePicker
+// import DatePicker from '@/components/DatePicker'
+import FinanceSearchFilter from '@_classes/FinanceSearchFilter'
 import 'react-calendar/dist/Calendar.css'
 
-import '@/styles/pages/analytics.css'
+// Styles migrated to Tailwind
 
 function Page() {
 	const [financeNumbers, setFinanceNumbers] = useState(new FinanceNumbers())
@@ -159,21 +160,27 @@ function Page() {
 				</fieldset>
 
 				{timeRange === 'custom' && (
-					<div className='custom-date-range'>
-						<DatePicker
-							label='From Date'
-							onChange={(date) => setFilter({ ...filter, FromDate: date })}
-							value={filter.FromDate}
-							clearIcon={null}
-						/>
-						<DatePicker
-							label='To Date'
-							onChange={(date) => setFilter({ ...filter, ToDate: date })}
-							value={filter.ToDate}
-							clearIcon={null}
-						/>
+					<div className='custom-date-range flex flex-col md:flex-row gap-4'>
+						<div className="form-control w-full">
+							<label className="label"><span className="label-text">From Date</span></label>
+							<input
+								type="date"
+								className="input input-bordered w-full"
+								value={filter.FromDate ? filter.FromDate.toISOString().split('T')[0] : ''}
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilter({ ...filter, FromDate: e.target.value ? new Date(e.target.value) : null })}
+							/>
+						</div>
+						<div className="form-control w-full">
+							<label className="label"><span className="label-text">To Date</span></label>
+							<input
+								type="date"
+								className="input input-bordered w-full"
+								value={filter.ToDate ? filter.ToDate.toISOString().split('T')[0] : ''}
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilter({ ...filter, ToDate: e.target.value ? new Date(e.target.value) : null })}
+							/>
+						</div>
 						<button
-							className='btn btn-primary'
+							className='btn btn-primary w-full md:w-auto'
 							onClick={search}
 							disabled={isLoading}>
 							{isLoading ? 'Loading...' : 'Apply Filter'}

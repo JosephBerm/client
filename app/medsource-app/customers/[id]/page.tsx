@@ -1,15 +1,16 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import API from '@/src/services/api'
+import API from '@_services/api'
 import { useRouter, useParams } from 'next/navigation'
-import Company from '@/src/classes/Company'
-import UpdateCustomerForm from '@/src/components/UpdateCustomerForm'
-import User from '@/src/classes/User'
-import { GenericSearchFilter } from '@/src/classes/Base/GenericSearchFilter'
-import Table from '@/src/common/table'
-import { TableColumn } from '@/src/interfaces/Table'
+import Company from '@_classes/Company'
+import UpdateCustomerForm from '@_components/forms/UpdateCustomerForm'
+import User from '@_classes/User'
+import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
+// TODO: Migrate Table component to use DataTable
+// import Table from '@/common/table'
+// import { TableColumn } from '@/interfaces/Table'
 import { format } from 'date-fns'
-import Routes from '@/src/services/routes'
+import Routes from '@_services/routes'
 
 const Page = () => {
 	const params = useParams()
@@ -61,42 +62,6 @@ const Page = () => {
 
 	if (!userId) return route.back()
 
-	const columns: TableColumn<User>[] = [
-		{
-			name: 'name',
-			label: 'Name',
-			content: (user: User) => (
-				<>
-					{user.customer?.name}
-				</>
-			),
-		},
-		{
-			name: 'email',
-			label: 'Email',
-		},
-		{
-			name: 'createdAt',
-			label: 'Date Created',
-			content: (user: User) => <>{format(new Date(user.createdAt), 'MM/dd/yyyy')}</>,
-		},
-		{
-			name: 'id',
-			label: 'actions',
-			content: (user: User) => (
-				<div className='flex gap-5'>
-					<button
-						onClick={() => {
-							route.push(`${Routes.InternalAppRoute}/accounts/${user.id}`)
-						}}>
-						Edit
-					</button>
-					<button className='delete'>Delete</button>
-				</div>
-			),
-		},
-	]
-
 	return (
 		<div className='page-container'>
 			<button className='mb-10' onClick={() => route.back()}>
@@ -108,15 +73,13 @@ const Page = () => {
 					<div className="mb-20">
 						<h1 className="mb-10">Customer</h1>
 						<UpdateCustomerForm customer={customer} />
-						{/* <UpdateAccountForm user={user} /> */}
 					</div>
 
 					<div >
 						<h2 className="mb-10">Customer Accounts</h2>
-						<Table<User>
-							data={accountsForCustomer}
-							columns={columns}
-							/>
+						<div className="alert alert-info">
+							<span>TODO: Migrate Table component to use DataTable. Accounts: {accountsForCustomer.length}</span>
+						</div>
 					</div>
 				</>
 			)}
