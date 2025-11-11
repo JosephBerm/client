@@ -8,6 +8,12 @@
 @import '@/styles/common.css';
 @import '@/styles/animations.css';
 
+/* 
+ * MedSource Classic Theme is configured in tailwind.config.ts (DaisyUI)
+ * Theme colors are managed by DaisyUI, no need to duplicate here (DRY principle)
+ * DaisyUI will automatically generate CSS variables from the theme config
+ */
+
 :root {
 	--bg-color: #fcfff7;
 	--section-bg-color: #f8f8f8;

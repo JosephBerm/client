@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "ES2015",
+		"target": "ES2022",
 		"baseUrl": "./",
 		"experimentalDecorators": true,
 		"lib": ["dom", "dom.iterable", "esnext"],
@@ -22,6 +22,13 @@
 		],
 		"paths": {
 			"@/*": ["./*"],
+			"@_classes/*": ["app/_classes/*"],
+			"@_components/*": ["app/_components/*"],
+			"@_hooks/*": ["app/_hooks/*"],
+			"@_services/*": ["app/_services/*"],
+			"@_stores/*": ["app/_stores/*"],
+			"@_types/*": ["app/_types/*"],
+			"@_utils/*": ["app/_utils/*"],
 			"@/components/*": ["src/components/*"],
 			"@/interfaces/*": ["src/interfaces/*"],
 			"@/decorators/*": ["src/decorators/*"],

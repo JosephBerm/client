@@ -5,6 +5,7 @@ const config: Config = {
 		'./pages/**/*.{js,ts,jsx,tsx,mdx}',
 		'./components/**/*.{js,ts,jsx,tsx,mdx}',
 		'./app/**/*.{js,ts,jsx,tsx,mdx}',
+		'./src/**/*.{js,ts,jsx,tsx,mdx}',
 	],
 	theme: {
 		extend: {
@@ -38,6 +39,38 @@ const config: Config = {
 			'5xl': '3.5rem',
 		},
 	},
-	plugins: [],
+	plugins: [require('daisyui')],
+	daisyui: {
+		themes: [
+			{
+				'medsource-classic': {
+					primary: '#416706',
+					'primary-content': '#ffffff',
+					secondary: '#2a4204',
+					'secondary-content': '#ffffff',
+					accent: '#06614a',
+					'accent-content': '#ffffff',
+					neutral: '#393939',
+					'neutral-content': '#ffffff',
+					'base-100': '#fcfff7',
+					'base-200': '#f8f8f8',
+					'base-300': '#d8d8d8',
+					'base-content': '#393939',
+					info: '#00008b',
+					success: '#4d7a07',
+					warning: '#ffcc00',
+					error: '#d22b2b',
+				},
+			},
+			'winter',
+			'luxury',
+		],
+		base: true,
+		styled: true,
+		utils: true,
+		prefix: '',
+		logs: true,
+		themeRoot: ':root',
+	},
 }
 export default config
