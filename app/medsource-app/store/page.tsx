@@ -169,7 +169,7 @@ export default function StorePage() {
             <strong>{archiveModal.product?.name}</strong>?
           </p>
           <p className="text-warning text-sm">
-            This will hide the product from the store but won't delete it permanently.
+            This will hide the product from the store but won&apos;t delete it permanently.
           </p>
           <div className="flex justify-end gap-4 mt-6">
             <Button

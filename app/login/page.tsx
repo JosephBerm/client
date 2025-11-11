@@ -126,7 +126,7 @@ export default function LoginPage() {
 					{/* Sign up link */}
 					<div className="divider">OR</div>
 					<p className="text-center text-sm">
-						Don't have an account?{' '}
+						Don&apos;t have an account?{' '}
 						<Link href="/signup" className="link link-primary font-semibold">
 							Sign up
 						</Link>

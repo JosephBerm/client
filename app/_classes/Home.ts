@@ -91,8 +91,7 @@ export default class Home {
 	 */
 	public static SalesPitch = {
 		/** Main company description and mission statement */
-		description:
-			'At Medsource Pro, we're dedicated to delivering excellence in every aspect of our service. From premium-quality medical products to personalized support, we're here to empower healthcare professionals like you.',
+		description: `At Medsource Pro, we're dedicated to delivering excellence in every aspect of our service. From premium-quality medical products to personalized support, we're here to empower healthcare professionals like you.`,
 		/** Array of three company qualities (title + description) */
 		companyQualities: [
 			{

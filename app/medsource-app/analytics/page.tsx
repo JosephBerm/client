@@ -1,77 +1,96 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
+import ClientPageLayout from '@_components/layouts/ClientPageLayout'
+import Button from '@_components/ui/Button'
 import FinanceNumbers from '@_classes/FinanceNumbers'
-import API from '@_services/api'
-// TODO: Migrate or replace DatePicker
-// import DatePicker from '@/components/DatePicker'
 import FinanceSearchFilter from '@_classes/FinanceSearchFilter'
-import 'react-calendar/dist/Calendar.css'
+import API from '@_services/api'
 
-// Styles migrated to Tailwind
+const TIME_RANGES = ['7d', '30d', '90d', '1y', 'custom'] as const
+type TimeRange = (typeof TIME_RANGES)[number]
 
-function Page() {
-	const [financeNumbers, setFinanceNumbers] = useState(new FinanceNumbers())
-	const [filter, setFilter] = useState<FinanceSearchFilter>(new FinanceSearchFilter())
+const rangeLabels: Record<TimeRange, string> = {
+	'7d': '7 Days',
+	'30d': '30 Days',
+	'90d': '90 Days',
+	'1y': '1 Year',
+	custom: 'Custom',
+}
+
+const formatCurrency = (value: number) =>
+	new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: 'USD',
+		maximumFractionDigits: 2,
+	}).format(Number.isFinite(value) ? value : 0)
+
+const mergeFilter = (base: FinanceSearchFilter, updates: Partial<FinanceSearchFilter>) =>
+	Object.assign(new FinanceSearchFilter(), base, updates)
+
+const Page = () => {
+	const [financeNumbers, setFinanceNumbers] = useState(() => new FinanceNumbers())
+	const [filter, setFilter] = useState(() => new FinanceSearchFilter())
 	const [isLoading, setIsLoading] = useState(false)
-	const [timeRange, setTimeRange] = useState('30d') // 7d, 30d, 90d, 1y, custom
+	const [hasLoaded, setHasLoaded] = useState(false)
+	const [timeRange, setTimeRange] = useState<TimeRange>('30d')
+	const [error, setError] = useState<string | null>(null)
 
-	const getFinanceNumbers = async () => {
+	useEffect(() => {
+		const fetchFinanceNumbers = async () => {
+			setIsLoading(true)
+			setError(null)
+
+			try {
+				const { data } = await API.Finance.getFinanceNumbers()
+				if (data.statusCode !== 200 || !data.payload) {
+					throw new Error(data?.message ?? 'Unable to fetch finance numbers')
+				}
+
+				setFinanceNumbers(new FinanceNumbers(data.payload))
+			} catch (err) {
+				console.error('Error fetching finance numbers', err)
+				setError(err instanceof Error ? err.message : 'Unable to fetch finance numbers')
+			} finally {
+				setIsLoading(false)
+				setHasLoaded(true)
+			}
+		}
+
+		void fetchFinanceNumbers()
+	}, [])
+
+	const applySearch = async (override?: FinanceSearchFilter) => {
+		const payload = override ?? filter
+
 		setIsLoading(true)
-		try {
-			const { data } = await API.Finance.getFinanceNumbers()
-			if (data.statusCode !== 200 || !data.payload)
-				throw new Error(data?.message ?? 'An error occurred while fetching finance numbers')
+		setError(null)
 
-			console.log('FINANCE NUMBERS', data.payload)
+		try {
+			const { data } = await API.Finance.searchFinnanceNumbers(payload)
+			if (data.statusCode !== 200 || !data.payload) {
+				throw new Error(data?.message ?? 'Unable to fetch finance numbers')
+			}
+
 			setFinanceNumbers(new FinanceNumbers(data.payload))
-		} catch (e) {
-			console.error('Error fetching finance numbers', e)
+		} catch (err) {
+			console.error('Error fetching finance numbers', err)
+			setError(err instanceof Error ? err.message : 'Unable to fetch finance numbers')
 		} finally {
 			setIsLoading(false)
+			setHasLoaded(true)
 		}
 	}
 
-	const search = async () => {
-		setIsLoading(true)
-		try {
-			const { data } = await API.Finance.searchFinnanceNumbers(filter)
-			if (data.statusCode !== 200 || !data.payload)
-				throw new Error(data?.message ?? 'An error occurred while fetching finance numbers')
-
-			console.log('FINANCE NUMBERS', data.payload)
-			setFinanceNumbers(new FinanceNumbers(data.payload))
-		} catch (e) {
-			console.error('Error fetching finance numbers', e)
-		} finally {
-			setIsLoading(false)
-		}
-	}
-
-	const download = async () => {
-		alert('This feature is not available yet!')
-		// try {
-
-		// 	const { data } = await API.Finance.downloadFinanceNumbers(filter)
-
-		// 	console.log(data)
-		// 	if (data == null) throw new Error('No data to download')
-		// 	const url = window.URL.createObjectURL(data)
-		// 	const link = document.createElement('a')
-		// 	link.href = url
-		// 	link.setAttribute('download', 'finance-numbers.csv')
-		// 	document.body.appendChild(link)
-		// 	link.click()
-		// } catch (e) {
-		// 	console.error('Error downloading finance numbers', e)
-		// }
-	}
-
-	const handleTimeRangeChange = (range: string) => {
+	const handleTimeRangeChange = (range: TimeRange) => {
 		setTimeRange(range)
-		// Auto-apply filter based on time range
+
+		if (range === 'custom') {
+			return
+		}
+
 		const now = new Date()
-		let fromDate = new Date()
+		const fromDate = new Date(now)
 
 		switch (range) {
 			case '7d':
@@ -86,299 +105,262 @@ function Page() {
 			case '1y':
 				fromDate.setFullYear(now.getFullYear() - 1)
 				break
-			case 'custom':
-				return // Don't auto-apply for custom
 		}
 
-		setFilter({ ...filter, FromDate: fromDate, ToDate: now })
+		const updatedFilter = mergeFilter(filter, { FromDate: fromDate, ToDate: now })
+		setFilter(updatedFilter)
+		void applySearch(updatedFilter)
 	}
 
-	function getProductsPerOrder() {
-		if (financeNumbers.orders.totalOrders === 0) return '0.0'
+	const handleDateChange =
+		(key: 'FromDate' | 'ToDate') =>
+		(event: ChangeEvent<HTMLInputElement>) => {
+			const value = event.target.value ? new Date(event.target.value) : null
+			const updatedFilter = mergeFilter(filter, { [key]: value } as Partial<FinanceSearchFilter>)
+			setFilter(updatedFilter)
+		}
 
-		const productsPerOrder = financeNumbers.orders.totalProductsSold / financeNumbers.orders.totalOrders
-
-		return productsPerOrder.toFixed(1)
+	const handleApplyFilter = () => {
+		void applySearch()
 	}
 
-	useEffect(() => {
-		getFinanceNumbers()
-	}, [])
+	const handleDownload = () => {
+		alert('This feature is not available yet!')
+	}
 
-	// Calculate additional metrics
-	const profitMargin = financeNumbers.profitMargin.toFixed(1)
-	const averageOrderValue = financeNumbers.averageOrderValue.toFixed(2)
+	const profitMarginValue = Number.isFinite(financeNumbers.profitMargin) ? financeNumbers.profitMargin : 0
+	const averageOrderValueValue = Number.isFinite(financeNumbers.averageOrderValue)
+		? financeNumbers.averageOrderValue
+		: 0
+	const productsPerOrderValue = financeNumbers.orders.totalOrders
+		? financeNumbers.orders.totalProductsSold / financeNumbers.orders.totalOrders
+		: 0
+
+	const summaryCards = [
+		{
+			title: 'Total Revenue',
+			value: formatCurrency(financeNumbers.sales.totalRevenue),
+			borderClass: 'border-primary/20',
+			bgClass: 'bg-primary/10',
+			titleClass: 'text-primary',
+			subtitleClass: 'text-primary/80',
+			trend: '-% vs last period',
+		},
+		{
+			title: 'Total Profit',
+			value: formatCurrency(financeNumbers.sales.totalProfit),
+			borderClass: 'border-success/20',
+			bgClass: 'bg-success/10',
+			titleClass: 'text-success',
+			subtitleClass: 'text-success/80',
+			trend: '-% vs last period',
+		},
+		{
+			title: 'Total Orders',
+			value: financeNumbers.orders.totalOrders.toLocaleString(),
+			borderClass: 'border-warning/20',
+			bgClass: 'bg-warning/10',
+			titleClass: 'text-warning',
+			subtitleClass: 'text-warning/80',
+			trend: '-% vs last period',
+		},
+		{
+			title: 'Profit Margin',
+			value: `${profitMarginValue.toFixed(1)}%`,
+			borderClass: 'border-info/20',
+			bgClass: 'bg-info/10',
+			titleClass: 'text-info',
+			subtitleClass: 'text-info/80',
+			trend: '-% vs last period',
+		},
+	]
+
+	const salesMetrics = [
+		{ label: 'Total Sales', value: formatCurrency(financeNumbers.sales.totalSales) },
+		{ label: 'Total Cost', value: formatCurrency(financeNumbers.sales.totalCost) },
+		{ label: 'Total Discount', value: formatCurrency(financeNumbers.sales.totalDiscount) },
+		{ label: 'Total Tax', value: formatCurrency(financeNumbers.sales.totalTax) },
+		{ label: 'Total Shipping', value: formatCurrency(financeNumbers.sales.totalShipping) },
+		{ label: 'Average Order Value', value: formatCurrency(averageOrderValueValue) },
+	]
+
+	const orderMetrics = [
+		{ label: 'Total Products Sold', value: financeNumbers.orders.totalProductsSold.toLocaleString() },
+		{ label: 'Products per Order', value: productsPerOrderValue.toFixed(1) },
+		{ label: 'Conversion Rate', value: '—' },
+		{ label: 'Customer Lifetime Value', value: '—' },
+	]
+
+	const healthMetrics = [
+		{ label: 'Cash Flow', value: '—' },
+		{ label: 'Expense Ratio', value: '—' },
+		{ label: 'Return on Investment', value: '—' },
+		{ label: 'Break-even Point', value: '—' },
+	]
 
 	return (
-		<div className='analytics-dashboard page-container'>
-			{/* Header Section */}
-			<fieldset className='dashboard-header' disabled={true}>
-				<div className='header-content'>
-					<h1 className='dashboard-title'>Analytics Dashboard</h1>
-					<p className='dashboard-subtitle'>Track your business performance and financial metrics</p>
-				</div>
-				<div className='header-actions'>
-					<button
-						className='btn btn-secondary'
-						onClick={download}>
-						<svg
-							className='icon'
-							viewBox='0 0 24 24'
-							fill='none'
-							stroke='currentColor'>
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								strokeWidth={2}
-								d='M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-							/>
-						</svg>
-						Export Data
-					</button>
-				</div>
-			</fieldset>
-
-			{/* Quick Filters */}
-			<div className='quick-filters'>
-				<fieldset className='filter-tabs' disabled={true}>
-					{['7d', '30d', '90d', '1y', 'custom'].map((range) => (
-						<button
-							key={range}
-							className={`filter-tab ${timeRange === range ? 'active' : ''}`}
-							onClick={() => handleTimeRangeChange(range)}>
-							{range === '7d'
-								? '7 Days'
-								: range === '30d'
-								? '30 Days'
-								: range === '90d'
-								? '90 Days'
-								: range === '1y'
-								? '1 Year'
-								: 'Custom'}
-						</button>
-					))}
-				</fieldset>
-
-				{timeRange === 'custom' && (
-					<div className='custom-date-range flex flex-col md:flex-row gap-4'>
-						<div className="form-control w-full">
-							<label className="label"><span className="label-text">From Date</span></label>
-							<input
-								type="date"
-								className="input input-bordered w-full"
-								value={filter.FromDate ? filter.FromDate.toISOString().split('T')[0] : ''}
-								onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilter({ ...filter, FromDate: e.target.value ? new Date(e.target.value) : null })}
-							/>
-						</div>
-						<div className="form-control w-full">
-							<label className="label"><span className="label-text">To Date</span></label>
-							<input
-								type="date"
-								className="input input-bordered w-full"
-								value={filter.ToDate ? filter.ToDate.toISOString().split('T')[0] : ''}
-								onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilter({ ...filter, ToDate: e.target.value ? new Date(e.target.value) : null })}
-							/>
-						</div>
-						<button
-							className='btn btn-primary w-full md:w-auto'
-							onClick={search}
-							disabled={isLoading}>
-							{isLoading ? 'Loading...' : 'Apply Filter'}
-						</button>
+		<ClientPageLayout
+			title="Analytics Dashboard"
+			description="Track your business performance and financial metrics."
+			loading={!hasLoaded && isLoading}
+			maxWidth="full"
+			actions={
+				<Button variant="secondary" onClick={handleDownload} disabled={isLoading}>
+					Export Data
+				</Button>
+			}
+		>
+			<div className="space-y-8">
+				{error && (
+					<div className="alert alert-error">
+						<span>{error}</span>
 					</div>
 				)}
+
+				{isLoading && hasLoaded && (
+					<div className="alert alert-info flex items-center gap-2">
+						<span className="loading loading-spinner loading-sm" aria-hidden="true"></span>
+						<span>Refreshing analytics&hellip;</span>
+					</div>
+				)}
+
+				<section className="rounded-xl border border-base-300 bg-base-100/80 p-6 shadow-sm">
+					<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+						<div>
+							<h2 className="text-lg font-semibold text-base-content">Quick Filters</h2>
+							<p className="text-sm text-base-content/70">
+								Select a time range to update the analytics shown below.
+							</p>
+						</div>
+						<div className="flex flex-wrap gap-2">
+							{TIME_RANGES.map((range) => (
+								<Button
+									key={range}
+									variant={timeRange === range ? 'primary' : 'ghost'}
+									onClick={() => handleTimeRangeChange(range)}
+									className="min-w-[96px]"
+									disabled={isLoading && !hasLoaded}
+								>
+									{rangeLabels[range]}
+								</Button>
+							))}
+						</div>
+					</div>
+
+					{timeRange === 'custom' && (
+						<div className="mt-6 grid gap-4 md:grid-cols-[repeat(3,minmax(0,1fr))]">
+							<label className="form-control w-full">
+								<span className="label-text text-sm font-medium text-base-content">From date</span>
+								<input
+									type="date"
+									className="input input-bordered mt-1"
+									value={filter.FromDate ? filter.FromDate.toISOString().split('T')[0] : ''}
+									onChange={handleDateChange('FromDate')}
+								/>
+							</label>
+
+							<label className="form-control w-full">
+								<span className="label-text text-sm font-medium text-base-content">To date</span>
+								<input
+									type="date"
+									className="input input-bordered mt-1"
+									value={filter.ToDate ? filter.ToDate.toISOString().split('T')[0] : ''}
+									onChange={handleDateChange('ToDate')}
+								/>
+							</label>
+
+							<div className="flex items-end">
+								<Button
+									variant="primary"
+									className="w-full"
+									onClick={handleApplyFilter}
+									disabled={isLoading || !filter.FromDate || !filter.ToDate}
+								>
+									Apply Filter
+								</Button>
+							</div>
+						</div>
+					)}
+				</section>
+
+				<section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+					{summaryCards.map((card) => (
+						<div
+							key={card.title}
+							className={`rounded-xl border ${card.borderClass} ${card.bgClass} p-6 shadow-sm`}
+						>
+							<p className={`text-sm font-medium ${card.titleClass}`}>{card.title}</p>
+							<p className={`mt-2 text-2xl font-bold ${card.titleClass}`}>{card.value}</p>
+							<p className={`mt-1 text-xs ${card.subtitleClass}`}>{card.trend}</p>
+						</div>
+					))}
+				</section>
+
+				<section className="grid gap-6 lg:grid-cols-3">
+					<div className="rounded-xl border border-base-300 bg-base-100 p-6 shadow-sm lg:col-span-2">
+						<h3 className="text-base font-semibold text-base-content">Sales Performance</h3>
+						<div className="mt-4 grid gap-4 sm:grid-cols-2">
+							{salesMetrics.map((metric) => (
+								<div key={metric.label} className="rounded-lg border border-base-200 p-4">
+									<p className="text-xs uppercase tracking-wide text-base-content/60">{metric.label}</p>
+									<p className="mt-2 text-lg font-semibold text-base-content">{metric.value}</p>
+								</div>
+							))}
+						</div>
+					</div>
+
+					<div className="rounded-xl border border-base-300 bg-base-100 p-6 shadow-sm">
+						<h3 className="text-base font-semibold text-base-content">Order Analytics</h3>
+						<div className="mt-4 space-y-4">
+							{orderMetrics.map((metric) => (
+								<div key={metric.label} className="rounded-lg border border-base-200 p-4">
+									<p className="text-xs uppercase tracking-wide text-base-content/60">{metric.label}</p>
+									<p className="mt-2 text-lg font-semibold text-base-content">{metric.value}</p>
+								</div>
+							))}
+						</div>
+					</div>
+				</section>
+
+				<section className="grid gap-6 lg:grid-cols-3">
+					<div className="rounded-xl border border-base-300 bg-base-100 p-6 shadow-sm">
+						<h3 className="text-base font-semibold text-base-content">Financial Health</h3>
+						<div className="mt-4 space-y-4">
+							{healthMetrics.map((metric) => (
+								<div key={metric.label} className="rounded-lg border border-base-200 p-4">
+									<p className="text-xs uppercase tracking-wide text-base-content/60">{metric.label}</p>
+									<p className="mt-2 text-lg font-semibold text-base-content">{metric.value}</p>
+								</div>
+							))}
+						</div>
+					</div>
+
+					<div className="rounded-xl border border-dashed border-base-300 bg-base-100 p-6 shadow-sm lg:col-span-2">
+						<h3 className="text-base font-semibold text-base-content">Performance Trends</h3>
+						<div className="mt-6 flex flex-col items-center justify-center rounded-lg border border-dashed border-base-200 p-8 text-center text-sm text-base-content/70">
+							<svg
+								className="mb-4 h-12 w-12 text-base-content/50"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								aria-hidden="true"
+							>
+								<path d="M3 3v18h18" />
+								<path d="M7 14l4-4 3 3 4-5" />
+							</svg>
+							<p className="font-medium text-base-content">Analytics chart coming soon</p>
+							<p className="mt-2 max-w-sm">
+								Tie into your preferred charting library to visualize revenue, profit, and order trends over
+								time.
+							</p>
+						</div>
+					</div>
+				</section>
 			</div>
-
-			{/* Key Metrics Overview */}
-			<div className='metrics-overview'>
-				<div className='metric-card primary'>
-					<div className='metric-icon'>
-						<svg
-							viewBox='0 0 24 24'
-							fill='none'
-							stroke='currentColor'>
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								strokeWidth={2}
-								d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1'
-							/>
-						</svg>
-					</div>
-					<div className='metric-content'>
-						<h3 className='metric-label'>Total Revenue</h3>
-						<p className='metric-value'>${financeNumbers.sales.totalRevenue}</p>
-						<p className='metric-change positive'>-% vs last period</p>
-					</div>
-				</div>
-
-				<div className='metric-card success'>
-					<div className='metric-icon'>
-						<svg
-							viewBox='0 0 24 24'
-							fill='none'
-							stroke='currentColor'>
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								strokeWidth={2}
-								d='M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
-							/>
-						</svg>
-					</div>
-					<div className='metric-content'>
-						<h3 className='metric-label'>Total Profit</h3>
-						<p className='metric-value'>${financeNumbers.sales.totalProfit}</p>
-						<p className='metric-change positive'>-% vs last period</p>
-					</div>
-				</div>
-
-				<div className='metric-card warning'>
-					<div className='metric-icon'>
-						<svg
-							viewBox='0 0 24 24'
-							fill='none'
-							stroke='currentColor'>
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								strokeWidth={2}
-								d='M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'
-							/>
-						</svg>
-					</div>
-					<div className='metric-content'>
-						<h3 className='metric-label'>Total Orders</h3>
-						<p className='metric-value'>{financeNumbers.orders.totalOrders}</p>
-						<p className='metric-change positive'>-% vs last period</p>
-					</div>
-				</div>
-
-				<div className='metric-card info'>
-					<div className='metric-icon'>
-						<svg
-							viewBox='0 0 24 24'
-							fill='none'
-							stroke='currentColor'>
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								strokeWidth={2}
-								d='M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'
-							/>
-						</svg>
-					</div>
-					<div className='metric-content'>
-						<h3 className='metric-label'>Profit Margin</h3>
-						<p className='metric-value'>{profitMargin}%</p>
-						<p className='metric-change positive'>-% vs last period</p>
-					</div>
-				</div>
-			</div>
-
-			{/* Detailed Metrics Grid */}
-			<div className='metrics-grid'>
-				{/* Sales Performance */}
-				<div className='metric-section'>
-					<h3 className='section-title'>Sales Performance</h3>
-					<div className='section-grid'>
-						<div className='metric-item'>
-							<span className='metric-name'>Total Sales</span>
-							<span className='metric-value'>${financeNumbers.sales.totalSales}</span>
-						</div>
-						<div className='metric-item'>
-							<span className='metric-name'>Total Cost</span>
-							<span className='metric-value'>${financeNumbers.sales.totalCost}</span>
-						</div>
-						<div className='metric-item'>
-							<span className='metric-name'>Total Discount</span>
-							<span className='metric-value'>${financeNumbers.sales.totalDiscount}</span>
-						</div>
-						<div className='metric-item'>
-							<span className='metric-name'>Total Tax</span>
-							<span className='metric-value'>${financeNumbers.sales.totalTax}</span>
-						</div>
-						<div className='metric-item'>
-							<span className='metric-name'>Total Shipping</span>
-							<span className='metric-value'>${financeNumbers.sales.totalShipping}</span>
-						</div>
-						<div className='metric-item'>
-							<span className='metric-name'>Average Order Value</span>
-							<span className='metric-value'>${averageOrderValue}</span>
-						</div>
-					</div>
-				</div>
-
-				{/* Order Analytics */}
-				<div className='metric-section'>
-					<h3 className='section-title'>Order Analytics</h3>
-					<div className='section-grid'>
-						<div className='metric-item'>
-							<span className='metric-name'>Total Products Sold</span>
-							<span className='metric-value'>{financeNumbers.orders.totalProductsSold}</span>
-						</div>
-						<div className='metric-item'>
-							<span className='metric-name'>Products per Order</span>
-							<span className='metric-value'>{getProductsPerOrder()}</span>
-						</div>
-						<div className='metric-item'>
-							<span className='metric-name'>Conversion Rate</span>
-							<span className='metric-value'>-%</span>
-						</div>
-						<div className='metric-item'>
-							<span className='metric-name'>Customer Lifetime Value</span>
-							<span className='metric-value'>$-</span>
-						</div>
-					</div>
-				</div>
-
-				{/* Financial Health */}
-				<div className='metric-section'>
-					<h3 className='section-title'>Financial Health</h3>
-					<div className='section-grid'>
-						<div className='metric-item'>
-							<span className='metric-name'>Cash Flow</span>
-							<span className='metric-value positive'>$-</span>
-						</div>
-						<div className='metric-item'>
-							<span className='metric-name'>Expense Ratio</span>
-							<span className='metric-value'>-%</span>
-						</div>
-						<div className='metric-item'>
-							<span className='metric-name'>Return on Investment</span>
-							<span className='metric-value positive'>-%</span>
-						</div>
-						<div className='metric-item'>
-							<span className='metric-name'>Break-even Point</span>
-							<span className='metric-value'>$-</span>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			{/* Performance Chart Placeholder */}
-			<div className='chart-section'>
-				<h3 className='section-title'>Performance Trends</h3>
-				<div className='chart-placeholder'>
-					<div className='chart-content'>
-						<svg
-							className='chart-icon'
-							viewBox='0 0 24 24'
-							fill='none'
-							stroke='currentColor'>
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								strokeWidth={2}
-								d='M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
-							/>
-						</svg>
-						<p>Chart visualization would go here</p>
-						<p className='chart-note'>Revenue, Profit, and Order trends over time</p>
-					</div>
-				</div>
-			</div>
-		</div>
+		</ClientPageLayout>
 	)
 }
 

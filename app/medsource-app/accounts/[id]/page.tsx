@@ -1,62 +1,87 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+
+import { useEffect, useMemo, useState } from 'react'
+import { useRouter, useParams } from 'next/navigation'
+import ClientPageLayout from '@_components/layouts/ClientPageLayout'
+import Button from '@_components/ui/Button'
 import User from '@_classes/User'
 import API from '@_services/api'
-import { useRouter, useParams } from 'next/navigation'
-// TODO: Migrate AccountCRUD component
-// import AccountCRUD from '@/components/AccountCRUD'
-import '@/styles/pages/accounts.css'
-import '@/styles/forms.css'
 
 const Page = () => {
-	const params = useParams()
+	const params = useParams<{ id?: string }>()
+	const router = useRouter()
+	const userId = useMemo(() => params?.id, [params])
 
-	const [user, setUser] = useState<User>(new User({}))
-	const [isNewUser, setIsNewUser] = useState<boolean>(false)
-	const [isLoading, setIsLoading] = useState<boolean>(true)
-	const route = useRouter()
-
-	const userId = params.id
-
-	const fetchUser = async () => {
-		try {
-			setIsLoading(true)
-			const { data } = await API.Accounts.get(userId as string)
-			if (data.payload) {
-				setUser(data.payload)
-			}
-		} finally {
-			setIsLoading(false)
-		}
-	}
+	const [user, setUser] = useState<User | null>(null)
+	const [isNewUser, setIsNewUser] = useState(false)
+	const [isLoading, setIsLoading] = useState(true)
 
 	useEffect(() => {
-		//if params has create, then we are creating a new user
-		if (userId === 'create') {
-			setUser(new User({}))
-			setIsNewUser(true)
-			return
-		}
-		fetchUser()
-	}, [])
+		const initialize = async () => {
+			if (!userId) {
+				router.back()
+				return
+			}
 
-	if (!userId) return route.back()
+			if (userId === 'create') {
+				setUser(new User({}))
+				setIsNewUser(true)
+				setIsLoading(false)
+				return
+			}
+
+			try {
+				setIsLoading(true)
+				const { data } = await API.Accounts.get(userId)
+				if (data.payload) {
+					setUser(data.payload)
+				} else {
+					setUser(null)
+				}
+			} finally {
+				setIsLoading(false)
+			}
+		}
+
+		void initialize()
+	}, [router, userId])
+
+	const pageTitle = isNewUser ? 'Create Account' : 'User Settings'
+	const pageDescription = isNewUser
+		? 'Add a new MedSource Pro account. Complete the form below to create a user.'
+		: 'Review and update account details, access, and settings.'
 
 	return (
-		<div className='page-container'>
-			<button className='mb-10' onClick={() => route.back()}>
-				Back
-			</button>
-			<div className='page-header'>
-				<h2 className='page-title'>User Settings</h2>
-			</div>
-			{!user && <div className="flex justify-center"><span className="loading loading-spinner loading-lg"></span></div>}
-			{user && (
-				<div className="alert alert-info">
-					<span>TODO: Migrate AccountCRUD component. User ID: {user.id}</span>
+		<ClientPageLayout
+			title={pageTitle}
+			description={pageDescription}
+			loading={isLoading}
+			actions={
+				<Button variant="ghost" onClick={() => router.back()}>
+					Back
+				</Button>
+			}
+		>
+			{user ? (
+				<div className="alert alert-info mt-4">
+					<span>
+						TODO: Migrate AccountCRUD component. User ID: {user.id ?? 'New user'}
+					</span>
+				</div>
+			) : (
+				<div className="card bg-base-100 shadow-md p-6">
+					<h3 className="text-lg font-semibold mb-2 text-error">User not found</h3>
+					<p className="text-sm text-base-content/70">
+						The account you are looking for could not be located. Please return to the accounts list and try again.
+					</p>
+					<div className="mt-4">
+						<Button variant="primary" onClick={() => router.push('/medsource-app/accounts')}>
+							Go to Accounts
+						</Button>
+					</div>
 				</div>
 			)}
-		</div>
+		</ClientPageLayout>
 	)
 }
 

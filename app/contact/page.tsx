@@ -108,7 +108,7 @@ export default function ContactPage() {
 					<p className="text-base md:text-lg text-base-content/70 max-w-2xl mx-auto">
 						Check out the{' '}
 						<Link href="/#faq" className="link link-primary">
-							FAQ's
+							FAQs
 						</Link>
 						!
 						<br />
@@ -119,7 +119,7 @@ export default function ContactPage() {
 					<p className="text-base md:text-lg text-base-content/70 max-w-2xl mx-auto">
 						Check out the{' '}
 						<Link href="/#faq" className="link link-primary">
-							FAQ's
+							FAQs
 						</Link>
 						!
 						<br />

@@ -9,9 +9,6 @@ import { IUser } from '@_classes/User'
 // import Breadcrumb from '@/components/Navigation/BreadCrumb'
 // import SecuredNavBar from '@/components/Navigation/SecuredNavBar'
 
-import '@/styles/store.css'
-import '@/styles/App/orderPage.css'
-
 export const metadata: Metadata = {
 	title: 'MedSource Pro',
 	description: 'Best Medical Marketplace for your business needs.',
@@ -50,9 +47,5 @@ export default async function RootLayout({
 	if (response?.payload == null) return redirect('/login') // Ensure the Authorization token is valiud.
 
 	// Navigation is now handled by root layout with modernized components
-	return (
-		<div className='App'>
-			{children}
-		</div>
-	)
+	return <div className="min-h-screen bg-base-200">{children}</div>
 }
