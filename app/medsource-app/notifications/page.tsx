@@ -1,53 +1,95 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-// TODO: Migrate to DataTable component
-// import Table from '@/common/table'
+import { useMemo } from 'react'
+import { ColumnDef } from '@tanstack/react-table'
+import Link from 'next/link'
+
+import ClientPageLayout from '@_components/layouts/ClientPageLayout'
+import DataTable from '@_components/tables/DataTable'
+import Badge from '@_components/ui/Badge'
 import Notification from '@_classes/Notification'
+import { NotificationType } from '@_classes/Enums'
 import { useAuthStore } from '@_stores/useAuthStore'
-// import { TableColumn } from '@/interfaces/Table'
-import { format } from 'date-fns'
-import { useRouter, usePathname } from 'next/navigation'
-// Styles migrated to Tailwind
+import { formatDate } from '@_utils/table-helpers'
 
-function Page() {
-	const router = useRouter()
-	const pathName = usePathname()
-	const user = useAuthStore((state) => state.user)
-
-	const handleRowClick = (notification: any) => {
-		router.push(`${pathName}/${notification.id}`)
-	}
-
-	return (
-		<div className='Notifications p-8'>
-			<div className="alert alert-info mb-4">
-				<span>TODO: Migrate notifications table to use DataTable component</span>
-			</div>
-			<div className="mt-4">
-				{user?.notifications && user.notifications.length > 0 ? (
-					<div className="space-y-2">
-						{user.notifications.map((notification: any) => (
-							<div 
-								key={notification.id} 
-								className="card bg-base-100 shadow cursor-pointer hover:shadow-lg"
-								onClick={() => handleRowClick(notification)}
-							>
-								<div className="card-body">
-									<p>{notification.message}</p>
-									<span className="text-sm text-base-content/60">
-										{format(new Date(notification.createdAt), 'MM/dd/yyyy')}
-									</span>
-								</div>
-							</div>
-						))}
-					</div>
-				) : (
-					<p>No notifications</p>
-				)}
-			</div>
-		</div>
-	)
+const TYPE_VARIANT: Record<NotificationType, { label: string; variant: 'info' | 'warning' | 'error' }> = {
+	[NotificationType.Info]: { label: 'Info', variant: 'info' },
+	[NotificationType.Warning]: { label: 'Warning', variant: 'warning' },
+	[NotificationType.Error]: { label: 'Alert', variant: 'error' },
 }
 
-export default Page
+export default function NotificationsPage() {
+	const user = useAuthStore((state) => state.user)
+
+	const notifications = useMemo(() => {
+		if (!user?.notifications) return []
+		return user.notifications.map((notification: any) => new Notification(notification))
+	}, [user?.notifications])
+
+	const columns = useMemo<ColumnDef<Notification>[]>(
+		() => [
+			{
+				accessorKey: 'message',
+				header: 'Message',
+				cell: ({ row }) => (
+					<div className="flex flex-col">
+						<span className="font-medium text-base-content">{row.original.message}</span>
+						<span className="text-xs text-base-content/60">
+							Created {formatDate(row.original.createdAt)}
+							{row.original.readAt ? ` · Read ${formatDate(row.original.readAt)}` : ''}
+						</span>
+					</div>
+				),
+			},
+			{
+				accessorKey: 'type',
+				header: 'Type',
+				cell: ({ row }) => {
+					const config = TYPE_VARIANT[row.original.type] ?? TYPE_VARIANT[NotificationType.Info]
+					return <Badge variant={config.variant}>{config.label}</Badge>
+				},
+			},
+			{
+				accessorKey: 'read',
+				header: 'Status',
+				cell: ({ row }) =>
+					row.original.read ? (
+						<Badge variant="neutral" size="sm">
+							Read
+						</Badge>
+					) : (
+						<Badge variant="warning" size="sm">
+							Unread
+						</Badge>
+					),
+			},
+			{
+				id: 'actions',
+				header: '',
+				cell: ({ row }) =>
+					row.original.linkUrl ? (
+						<Link href={row.original.linkUrl} className="btn btn-ghost btn-sm">
+							View
+						</Link>
+					) : (
+						<span className="text-xs text-base-content/50">No action</span>
+					),
+			},
+		],
+		[]
+	)
+
+	return (
+		<ClientPageLayout
+			title="Notifications"
+			description="Review recent system notifications and follow up on important actions."
+			maxWidth="xl"
+		>
+			<DataTable<Notification>
+				columns={columns}
+				data={notifications}
+				emptyMessage="You have no notifications yet."
+			/>
+		</ClientPageLayout>
+	)
+}

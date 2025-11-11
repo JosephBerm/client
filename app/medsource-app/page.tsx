@@ -1,24 +1,26 @@
 'use client'
 
-// TODO: Migrate AccountOverview component
-// import AccountOverview from '@/components/AccountOverview'
+import AccountOverview from '@_components/dashboard/AccountOverview'
+import ClientPageLayout from '@_components/layouts/ClientPageLayout'
 import AccountOrdersTable from '@_components/tables/AccountOrdersTable'
 import AccountQuotesTable from '@_components/tables/AccountQuotesTable'
 
 const Page = () => {
 	return (
-		<div className='min-h-screen bg-base-200 p-4 md:p-8'>
-			<div className='container mx-auto space-y-6'>
-				{/* TODO: Restore AccountOverview */}
-				<div className="alert alert-info">
-					<span>Dashboard Overview - TODO: Migrate AccountOverview component</span>
-				</div>
-				<div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+		<ClientPageLayout
+			title="Dashboard"
+			description="Monitor recent activity, manage your account, and review the latest quotes and orders."
+			maxWidth="full"
+		>
+			<div className="space-y-8">
+				<AccountOverview />
+
+				<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 					<AccountQuotesTable />
 					<AccountOrdersTable />
 				</div>
 			</div>
-		</div>
+		</ClientPageLayout>
 	)
 }
 

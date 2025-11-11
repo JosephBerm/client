@@ -1,9 +1,7 @@
-import React from 'react'
-// TODO: Migrate About page components
-// import FirstComponent from '@/components/About/FirstComponent'
-// import BulletComponent from '@/components/About/BulletComponent'
+import Image from 'next/image'
 
-// Styles migrated to Tailwind
+import PageLayout from '@_components/layouts/PageLayout'
+import Card from '@_components/ui/Card'
 
 import Aboutus11 from '@/public/aboutus11.png'
 import Aboutus22 from '@/public/aboutus22.png'
@@ -11,57 +9,71 @@ import Aboutus33 from '@/public/aboutus33.png'
 import Aboutus44 from '@/public/aboutus44.png'
 import Aboutus55 from '@/public/aboutus55.png'
 
-const page = () => {
-	const bullets = [
-		{
-			Title: 'Our Mission',
-			Description:
-				'Our mission at Medsource Pro is simple yet powerful: to facilitate access to high-quality medical supplies and provide exceptional service that empowers healthcare professionals to deliver the best possible care to their patients. We believe that by doing so, we are contributing to a healthier and more prosperous world for all.',
-			Img: Aboutus11,
-		},
-		{
-			Title: 'Our Commitment to Quality',
-			Description:
-				'At Medsource Pro, quality is our number one priority. We partner with leading manufacturers and suppliers in the industry to ensure that every product we offer meets the highest standards of safety and efficacy. From cutting-edge medical equipment to diagnostic supplies and laboratory material, each item in our catalog has been carefully selected to ensure its quality and reliability.',
-			Img: Aboutus22,
-		},
-		{
-			Title: 'Personalized Customer Service',
-			Description:
-				'We believe in the importance of building strong relationships with our customers. Our customer service team is here to provide you with the support you need at every step of the way, from product selection to the purchasing process and beyond. We strive to exceed our customers expectations and make their experience with us as smooth and satisfactory as possible.',
-			Img: Aboutus33,
-		},
-		{
-			Title: 'Our Commitment to the Community',
-			Description:
-				'At Medsource Pro, we also recognize the importance of positively contributing to our local and global communities. Through corporate social responsibility programs and partnerships with nonprofit organizations, we are committed to doing our part to improve the health and well-being of people around the world.',
-			Img: Aboutus44,
-		},
-		{
-			Title: 'Join Us on Our Mission',
-			Description: `We are honored to be your choice for all your medical supply needs. Whether you're a healthcare professional, a clinic, or a hospital, we look forward to serving you and being part of your continued success in healthcare.`,
-			Img: Aboutus55,
-		},
-	]
-	return (
-		<div className='about-us-page p-8'>
-			{/* TODO: Restore FirstComponent */}
-			<div className="text-center mb-8">
-				<h1 className="text-4xl font-bold">About Us</h1>
-			</div>
+const bullets = [
+	{
+		title: 'Our Mission',
+		description:
+			'Our mission at MedSource Pro is to connect healthcare providers with trusted medical supplies and services that improve patient care. By doing so, we help build healthier communities and a more resilient healthcare system.',
+		image: Aboutus11,
+	},
+	{
+		title: 'Our Commitment to Quality',
+		description:
+			'We partner exclusively with vetted manufacturers that meet stringent regulatory standards. Every item in our catalog is evaluated for safety, efficacy, and reliability before it reaches your facility.',
+		image: Aboutus22,
+	},
+	{
+		title: 'Personalized Customer Service',
+		description:
+			'MedSource Pro is built on relationships. Our customer success team supports you from product discovery through post-delivery follow-up, ensuring every interaction feels tailored to your needs.',
+		image: Aboutus33,
+	},
+	{
+		title: 'Community Impact',
+		description:
+			'We invest in community health initiatives and collaborate with nonprofit partners to increase access to essential medical supplies in underserved regions.',
+		image: Aboutus44,
+	},
+	{
+		title: 'Join Our Journey',
+		description:
+			'Whether you run a clinic, manage a hospital, or coordinate care networks, MedSource Pro is here to help you deliver better outcomes. Let’s build the future of healthcare together.',
+		image: Aboutus55,
+	},
+]
 
-			<div className='bullets-wrapper grid gap-6'>
-				{bullets.map((bullet, index) => (
-				<div key={index} className="card bg-base-100 shadow-xl">
-					<div className="card-body">
-						<h2 className="card-title">{bullet.Title}</h2>
-						<p>{bullet.Description}</p>
-					</div>
-				</div>
-			))}
-			</div>
-		</div>
+export default function AboutPage() {
+	return (
+		<PageLayout
+			title="About MedSource Pro"
+			description="Delivering reliable medical supply solutions, exceptional service, and measurable impact for the healthcare organizations we serve."
+			maxWidth="xl"
+		>
+			<section className="rounded-3xl bg-primary/10 p-8 text-center shadow-sm md:p-12">
+				<h2 className="text-3xl font-semibold text-primary md:text-4xl">
+					Trusted medical supply partners for providers nationwide.
+				</h2>
+				<p className="mt-4 text-base text-base-content/70 md:text-lg">
+					Since our founding, we have focused on harmonizing dependable logistics, curated product sourcing, and
+					relationship-driven service to give clinicians the confidence to focus on patient care.
+				</p>
+			</section>
+
+			<section className="mt-12 grid gap-6 md:grid-cols-2">
+				{bullets.map((section) => (
+					<Card key={section.title} className="h-full border border-base-200 bg-base-100 shadow-sm" compact={false}>
+						<div className="flex flex-col gap-4 lg:flex-row">
+							<div className="overflow-hidden rounded-2xl bg-base-200/60 lg:w-1/3">
+								<Image src={section.image} alt={section.title} className="h-full w-full object-cover" />
+							</div>
+							<div className="flex-1 space-y-3">
+								<h3 className="text-xl font-semibold text-base-content">{section.title}</h3>
+								<p className="text-base text-base-content/70">{section.description}</p>
+							</div>
+						</div>
+					</Card>
+				))}
+			</section>
+		</PageLayout>
 	)
 }
-
-export default page

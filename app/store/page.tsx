@@ -299,10 +299,8 @@ const StorePageContent = () => {
 						</div>
 					)}
 
-					<div className="alert alert-info mt-6">
-						<span>
-							TODO: Migrate TreeSelect and ProductsList components into the modern store experience.
-						</span>
+					<div className="mt-6 rounded-lg border border-dashed border-base-300 p-4 text-sm text-base-content/70">
+						Select one or more categories to refine results. Products update automatically as you adjust filters.
 					</div>
 				</section>
 
