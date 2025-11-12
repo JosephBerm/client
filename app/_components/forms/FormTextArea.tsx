@@ -96,6 +96,15 @@ import { forwardRef, TextareaHTMLAttributes } from 'react'
 import { FieldError } from 'react-hook-form'
 import classNames from 'classnames'
 
+import {
+	baseFieldClass,
+	errorClass,
+	errorFieldClass,
+	fieldWrapperClass,
+	helperClass,
+	labelClass,
+} from './fieldStyles'
+
 /**
  * FormTextArea component props interface.
  * Extends standard HTML textarea attributes.
@@ -150,39 +159,32 @@ interface FormTextAreaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> 
  * @returns FormTextArea component
  */
 const FormTextArea = forwardRef<HTMLTextAreaElement, FormTextAreaProps>(
-	({ label, error, helperText, className, ...props }, ref) => {
+	({ label, error, helperText, className, rows = 4, ...props }, ref) => {
+		const showMessaging = error || helperText
+
 		return (
-			<div className="form-control w-full">
+			<div className={fieldWrapperClass}>
 				{label && (
-					<label className="label">
-						<span className="label-text font-semibold">
-							{label}
-							{props.required && <span className="text-error ml-1">*</span>}
-						</span>
+					<label className={labelClass}>
+						{label}
+						{props.required && <span className="text-[var(--error-color)]">*</span>}
 					</label>
 				)}
 
 				<textarea
 					ref={ref}
+					rows={rows}
 					className={classNames(
-						'textarea textarea-bordered w-full',
-						{
-							'textarea-error': error,
-						},
+						baseFieldClass,
+						'min-h-[120px] resize-y',
+						{ [errorFieldClass]: Boolean(error) },
 						className
 					)}
 					{...props}
 				/>
 
-				{(error || helperText) && (
-					<label className="label">
-						{error && (
-							<span className="label-text-alt text-error">{error.message}</span>
-						)}
-						{!error && helperText && (
-							<span className="label-text-alt">{helperText}</span>
-						)}
-					</label>
+				{showMessaging && (
+					<p className={error ? errorClass : helperClass}>{error ? error.message : helperText}</p>
 				)}
 			</div>
 		)

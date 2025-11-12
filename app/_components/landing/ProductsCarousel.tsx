@@ -1,3 +1,5 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -61,8 +63,8 @@ export default function ProductsCarousel() {
 
 				{/* Mobile horizontal scroll */}
 				<div className="-mx-4 flex gap-6 overflow-x-auto px-4 pb-6 md:hidden">
-						{FEATURED_PRODUCTS.map((product) => (
-						<ProductCard key={product.name} {...product} className="min-w-[18rem] shrink-0" />
+					{FEATURED_PRODUCTS.map((product) => (
+						<ProductCard key={product.name} product={product} className="min-w-[18rem] shrink-0" />
 					))}
 				</div>
 
@@ -70,7 +72,7 @@ export default function ProductsCarousel() {
 				<div className="marquee-container hidden rounded-[32px] border border-white/40 bg-white/80 py-12 pl-12 pr-20 shadow-[0_24px_48px_rgba(58,71,52,0.15)] md:block">
 					<div className="marquee-track gap-10">
 						{MARQUEE_PRODUCTS.map((product, index) => (
-							<ProductCard key={`${product.name}-${index}`} {...product} className="w-[260px]" />
+							<ProductCard key={`${product.name}-${index}`} product={product} className="w-[260px]" />
 						))}
 					</div>
 				</div>
@@ -79,9 +81,13 @@ export default function ProductsCarousel() {
 	)
 }
 
-type ProductCardProps = (typeof FEATURED_PRODUCTS)[number] & { className?: string }
+type ProductCardProps = {
+	product: (typeof FEATURED_PRODUCTS)[number]
+	className?: string
+}
 
-function ProductCard({ name, description, priceNote, image, className }: ProductCardProps) {
+function ProductCard({ product, className }: ProductCardProps) {
+	const { name, description, priceNote, image } = product
 	return (
 		<article
 			className={`group relative flex flex-col gap-4 rounded-3xl border border-brand-1/15 bg-white/95 px-6 py-6 text-left shadow-[0_18px_32px_rgba(41,66,4,0.12)] transition hover:-translate-y-1 hover:shadow-[0_26px_40px_rgba(41,66,4,0.18)] ${className ?? ''}`}

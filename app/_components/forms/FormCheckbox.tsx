@@ -88,6 +88,8 @@ import { forwardRef, InputHTMLAttributes } from 'react'
 import { FieldError } from 'react-hook-form'
 import classNames from 'classnames'
 
+import { errorClass, fieldWrapperClass, helperClass } from './fieldStyles'
+
 /**
  * FormCheckbox component props interface.
  * Extends standard HTML input attributes (excluding type, since it's always "checkbox").
@@ -140,36 +142,29 @@ interface FormCheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  */
 const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
 	({ label, error, helperText, className, ...props }, ref) => {
+		const showMessaging = error || helperText
+
 		return (
-			<div className="form-control">
-				<label className="label cursor-pointer justify-start gap-3">
+			<div className={classNames(fieldWrapperClass, 'gap-1')}>
+				<label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-brand-4">
 					<input
 						ref={ref}
 						type="checkbox"
 						className={classNames(
-							'checkbox',
-							{
-								'checkbox-error': error,
-							},
+							'h-5 w-5 rounded border border-brand-1/25 bg-white text-brand-4 transition focus:outline-none focus:ring-2 focus:ring-brand-3/30 accent-brand-3',
+							{ 'border-[var(--error-color)] focus:ring-[var(--error-color)]/40': error },
 							className
 						)}
 						{...props}
 					/>
-					<span className="label-text">
+					<span>
 						{label}
-						{props.required && <span className="text-error ml-1">*</span>}
+						{props.required && <span className="ml-1 text-[var(--error-color)]">*</span>}
 					</span>
 				</label>
 
-				{(error || helperText) && (
-					<label className="label">
-						{error && (
-							<span className="label-text-alt text-error">{error.message}</span>
-						)}
-						{!error && helperText && (
-							<span className="label-text-alt">{helperText}</span>
-						)}
-					</label>
+				{showMessaging && (
+					<p className={error ? errorClass : helperClass}>{error ? error.message : helperText}</p>
 				)}
 			</div>
 		)

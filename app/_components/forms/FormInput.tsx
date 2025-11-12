@@ -83,6 +83,15 @@ import { forwardRef, InputHTMLAttributes } from 'react'
 import { FieldError } from 'react-hook-form'
 import classNames from 'classnames'
 
+import {
+	baseFieldClass,
+	errorClass,
+	errorFieldClass,
+	fieldWrapperClass,
+	helperClass,
+	labelClass,
+} from './fieldStyles'
+
 /**
  * FormInput component props interface.
  * Extends native HTML input attributes with form-specific options.
@@ -136,45 +145,25 @@ interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
  */
 const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
 	({ label, error, helperText, className, ...props }, ref) => {
+		const showMessaging = error || helperText
+
 		return (
-			<div className="form-control w-full">
-				{/* Label with optional required indicator */}
+			<div className={fieldWrapperClass}>
 				{label && (
-					<label className="label">
-						<span className="label-text font-semibold">
-							{label}
-							{/* Show red asterisk for required fields */}
-							{props.required && <span className="text-error ml-1">*</span>}
-						</span>
+					<label className={labelClass}>
+						{label}
+						{props.required && <span className="text-[var(--error-color)]">*</span>}
 					</label>
 				)}
 
-				{/* Input field with error styling */}
 				<input
-					ref={ref} // Forward ref to React Hook Form
-					className={classNames(
-						'input input-bordered w-full', // DaisyUI base classes
-						{
-							'input-error': error, // Red border on error
-						},
-						className // Allow custom classes to be passed
-					)}
-					{...props} // Spread all other HTML input attributes
+					ref={ref}
+					className={classNames(baseFieldClass, { [errorFieldClass]: Boolean(error) }, className)}
+					{...props}
 				/>
 
-				{/* Error message or helper text */}
-				{(error || helperText) && (
-					<label className="label">
-						{/* Error message (takes precedence over helper text) */}
-						{error && (
-							<span className="label-text-alt text-error">{error.message}</span>
-						)}
-						
-						{/* Helper text (only shown when no error) */}
-						{!error && helperText && (
-							<span className="label-text-alt">{helperText}</span>
-						)}
-					</label>
+				{showMessaging && (
+					<p className={error ? errorClass : helperClass}>{error ? error.message : helperText}</p>
 				)}
 			</div>
 		)

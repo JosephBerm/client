@@ -124,6 +124,38 @@ interface BadgeProps {
  * @param props - Badge configuration props
  * @returns Badge component (span element)
  */
+const baseClasses =
+	'inline-flex items-center justify-center rounded-full font-semibold uppercase tracking-[0.25em] transition-colors'
+
+const variantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
+	primary: 'bg-brand-4 text-white',
+	secondary: 'bg-brand-3 text-white',
+	accent: 'bg-[var(--teal)] text-white',
+	success: 'bg-brand-2 text-white',
+	warning: 'bg-[var(--highlight)] text-brand-4',
+	error: 'bg-[var(--error-color)] text-white',
+	info: 'bg-[var(--link-color)] text-white',
+	neutral: 'bg-[var(--light-gray)] text-brand-4',
+}
+
+const outlineVariantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
+	primary: 'border border-brand-4 text-brand-4',
+	secondary: 'border border-brand-3 text-brand-3',
+	accent: 'border border-[var(--teal)] text-[var(--teal)]',
+	success: 'border border-brand-2 text-brand-2',
+	warning: 'border border-[var(--highlight)] text-[var(--highlight)]',
+	error: 'border border-[var(--error-color)] text-[var(--error-color)]',
+	info: 'border border-[var(--link-color)] text-[var(--link-color)]',
+	neutral: 'border border-[var(--light-gray)] text-brand-4',
+}
+
+const sizeClasses: Record<NonNullable<BadgeProps['size']>, string> = {
+	xs: 'px-2 py-1 text-[0.45rem]',
+	sm: 'px-3 py-1 text-[0.55rem]',
+	md: 'px-4 py-1.5 text-[0.65rem]',
+	lg: 'px-5 py-2 text-[0.75rem]',
+}
+
 export default function Badge({
 	children,
 	variant = 'neutral',
@@ -134,13 +166,13 @@ export default function Badge({
 	return (
 		<span
 			className={classNames(
-				'badge', // Base DaisyUI badge class
-				`badge-${variant}`, // Color variant (badge-primary, badge-success, etc.)
-				`badge-${size}`, // Size class (badge-xs, badge-sm, etc.)
+				baseClasses,
+				sizeClasses[size],
+				outline ? outlineVariantClasses[variant] : variantClasses[variant],
 				{
-					'badge-outline': outline, // Outline style (transparent bg, colored border)
+					'bg-transparent': outline,
 				},
-				className // Additional custom classes
+				className
 			)}
 		>
 			{children}

@@ -108,6 +108,16 @@
 import { forwardRef, SelectHTMLAttributes } from 'react'
 import { FieldError } from 'react-hook-form'
 import classNames from 'classnames'
+import { ChevronDown } from 'lucide-react'
+
+import {
+	baseFieldClass,
+	errorClass,
+	errorFieldClass,
+	fieldWrapperClass,
+	helperClass,
+	labelClass,
+} from './fieldStyles'
 
 /**
  * FormSelect component props interface.
@@ -176,49 +186,44 @@ interface FormSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
  */
 const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
 	({ label, error, helperText, options, placeholder, className, ...props }, ref) => {
+		const showMessaging = error || helperText
+
 		return (
-			<div className="form-control w-full">
+			<div className={fieldWrapperClass}>
 				{label && (
-					<label className="label">
-						<span className="label-text font-semibold">
-							{label}
-							{props.required && <span className="text-error ml-1">*</span>}
-						</span>
+					<label className={labelClass}>
+						{label}
+						{props.required && <span className="text-[var(--error-color)]">*</span>}
 					</label>
 				)}
 
-				<select
-					ref={ref}
-					className={classNames(
-						'select select-bordered w-full',
-						{
-							'select-error': error,
-						},
-						className
-					)}
-					{...props}
-				>
-					{placeholder && (
-						<option value="" disabled>
-							{placeholder}
-						</option>
-					)}
-					{options.map((option) => (
-						<option key={option.value} value={option.value}>
-							{option.label}
-						</option>
-					))}
-				</select>
+				<div className="relative">
+					<select
+						ref={ref}
+						className={classNames(
+							baseFieldClass,
+							'appearance-none pr-12 bg-white',
+							{ [errorFieldClass]: Boolean(error) },
+							className
+						)}
+						{...props}
+					>
+						{placeholder && (
+							<option value="" disabled>
+								{placeholder}
+							</option>
+						)}
+						{options.map((option) => (
+							<option key={option.value} value={option.value}>
+								{option.label}
+							</option>
+						))}
+					</select>
+					<ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-3" />
+				</div>
 
-				{(error || helperText) && (
-					<label className="label">
-						{error && (
-							<span className="label-text-alt text-error">{error.message}</span>
-						)}
-						{!error && helperText && (
-							<span className="label-text-alt">{helperText}</span>
-						)}
-					</label>
+				{showMessaging && (
+					<p className={error ? errorClass : helperClass}>{error ? error.message : helperText}</p>
 				)}
 			</div>
 		)

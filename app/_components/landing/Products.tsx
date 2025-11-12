@@ -1,5 +1,7 @@
+'use client'
+
 import Link from 'next/link'
-import { Activity, TestTube2, Scalpel, Building2 } from 'lucide-react'
+import { Activity, TestTube2, Stethoscope, Building2 } from 'lucide-react'
 
 import PageContainer from '@_components/layouts/PageContainer'
 
@@ -20,7 +22,7 @@ const PRODUCT_CATEGORIES = [
 		name: 'Surgical & Sterile',
 		description: 'Sterile packs, surgical instruments, and draping solutions with full traceability.',
 		items: '260+ SKUs',
-		icon: Scalpel,
+		icon: Stethoscope,
 	},
 	{
 		name: 'Facility Essentials',

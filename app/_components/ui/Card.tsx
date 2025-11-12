@@ -66,79 +66,32 @@
  * @module Card
  */
 
-import { ReactNode } from 'react'
+import { HTMLAttributes, ReactNode } from 'react'
 import classNames from 'classnames'
 
-/**
- * Card component props interface.
- */
-interface CardProps {
-	/** Card content (body) */
+type CardVariant = 'elevated' | 'soft' | 'outline' | 'ghost'
+
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
 	children: ReactNode
-	
-	/** Optional title displayed in card header */
 	title?: string
-	
-	/** Optional subtitle displayed below title */
 	subtitle?: string
-	
-	/** Optional actions area (typically buttons), displayed at bottom */
 	actions?: ReactNode
-	
-	/** Optional image URL to display at top of card */
 	image?: string
-	
-	/** Alt text for image (accessibility) */
 	imageAlt?: string
-	
-	/** Additional classes for card container */
-	className?: string
-	
-	/** Additional classes for card body */
 	bodyClassName?: string
-	
-	/** 
-	 * Compact mode (smaller padding).
-	 * @default false
-	 */
 	compact?: boolean
-	
-	/** 
-	 * Show border around card.
-	 * @default false
-	 */
-	bordered?: boolean
-	
-	/** 
-	 * Show shadow beneath card.
-	 * @default true
-	 */
-	shadow?: boolean
+	variant?: CardVariant
+	hover?: boolean
 }
 
-/**
- * Card Component
- * 
- * Container component for grouping content with optional image, header, and actions.
- * Uses DaisyUI card classes for consistent styling across themes.
- * 
- * **Structure:**
- * 1. Figure (optional) - image element
- * 2. Card body - main content area
- *    - Title and subtitle (optional)
- *    - Children content
- *    - Actions (optional)
- * 
- * **Styling:**
- * - DaisyUI card base class
- * - Optional compact mode (card-compact)
- * - Optional border (card-bordered)
- * - Optional shadow (shadow-xl)
- * - Custom classes can be added via className props
- * 
- * @param props - Card configuration props
- * @returns Card component
- */
+const variantClasses: Record<CardVariant, string> = {
+	elevated:
+		'bg-white border border-brand-1/10 shadow-[0_22px_40px_rgba(41,66,4,0.16)]',
+	soft: 'bg-[var(--soft-brand-color)] border border-brand-1/10 shadow-[0_18px_32px_rgba(65,103,6,0.12)]',
+	outline: 'bg-white border border-dashed border-brand-1/20',
+	ghost: 'bg-transparent border border-brand-1/15',
+}
+
 export default function Card({
 	children,
 	title,
@@ -149,43 +102,43 @@ export default function Card({
 	className,
 	bodyClassName,
 	compact = false,
-	bordered = false,
-	shadow = true,
+	variant = 'elevated',
+	hover = true,
+	...props
 }: CardProps) {
+	const bodyPadding = compact ? 'p-6' : 'p-8'
+
 	return (
 		<div
 			className={classNames(
-				'card bg-base-100', // Base DaisyUI card with background
+				'relative flex flex-col overflow-hidden rounded-[32px] transition duration-200',
+				variantClasses[variant],
 				{
-					'card-compact': compact, // Smaller padding
-					'card-bordered': bordered, // Border around card
-					'shadow-xl': shadow, // Shadow beneath card
+					'hover:-translate-y-1 hover:shadow-[0_28px_48px_rgba(41,66,4,0.2)]': hover && variant === 'elevated',
+					'hover:-translate-y-1 hover:shadow-[0_24px_44px_rgba(41,66,4,0.18)]': hover && variant === 'soft',
+					'hover:-translate-y-1 hover:border-brand-1/25': hover && variant === 'outline',
 				},
-				className // Additional custom classes
+				className
 			)}
+			{...props}
 		>
-			{/* Optional image at top of card */}
 			{image && (
-				<figure>
-					<img src={image} alt={imageAlt || ''} />
+				<figure className="relative h-48 w-full overflow-hidden">
+					<img src={image} alt={imageAlt || ''} className="h-full w-full object-cover" />
 				</figure>
 			)}
 
-			{/* Card body (main content area) */}
-			<div className={classNames('card-body', bodyClassName)}>
-				{/* Title and subtitle section */}
+			<div className={classNames('flex flex-col gap-4', bodyPadding, bodyClassName)}>
 				{(title || subtitle) && (
-					<div>
-						{title && <h2 className="card-title">{title}</h2>}
-						{subtitle && <p className="text-sm text-base-content/70">{subtitle}</p>}
-					</div>
+					<header className="space-y-2">
+						{title && <h2 className="text-xl font-semibold text-brand-4">{title}</h2>}
+						{subtitle && <p className="text-sm uppercase tracking-[0.3em] text-brand-3">{subtitle}</p>}
+					</header>
 				)}
 
-				{/* Main content (children) */}
 				{children}
 
-				{/* Actions area (typically buttons) */}
-				{actions && <div className="card-actions justify-end mt-4">{actions}</div>}
+				{actions && <div className="mt-4 flex flex-wrap items-center justify-end gap-3">{actions}</div>}
 			</div>
 		</div>
 	)

@@ -132,6 +132,33 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
  * @param ref - Forwarded ref to the underlying button element
  * @returns Button component
  */
+const baseClasses =
+	'inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-[0.12em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2'
+
+const variantClasses: Record<NonNullable<ButtonProps['variant']>, string> = {
+	primary:
+		'bg-brand-4 text-white shadow-[0_12px_28px_rgba(41,66,4,0.35)] hover:-translate-y-0.5 hover:bg-brand-5 focus-visible:outline-brand-3',
+	secondary:
+		'bg-white text-brand-4 border border-brand-1/15 shadow-[0_6px_18px_rgba(41,66,4,0.18)] hover:-translate-y-0.5 hover:bg-[var(--soft-brand-color)] focus-visible:outline-brand-3',
+	accent:
+		'bg-[var(--teal)] text-white shadow-[0_12px_28px_rgba(6,97,74,0.3)] hover:-translate-y-0.5 hover:bg-[var(--darker-teal)] focus-visible:outline-[var(--teal)]',
+	ghost:
+		'bg-transparent text-brand-4 hover:bg-[var(--soft-brand-color)] hover:text-brand-3 focus-visible:outline-brand-3',
+	outline:
+		'border border-brand-1/30 bg-transparent text-brand-4 hover:bg-white/60 focus-visible:outline-brand-3',
+	error:
+		'bg-[var(--error-color)] text-white shadow-[0_12px_24px_rgba(210,43,43,0.35)] hover:-translate-y-0.5 hover:bg-[#bb2424] focus-visible:outline-[#520606]',
+	success:
+		'bg-brand-2 text-white shadow-[0_12px_28px_rgba(77,122,7,0.28)] hover:-translate-y-0.5 hover:bg-brand-3 focus-visible:outline-brand-3',
+}
+
+const sizeClasses: Record<NonNullable<ButtonProps['size']>, string> = {
+	xs: 'px-4 py-2 text-[0.6rem] uppercase',
+	sm: 'px-5 py-2.5 text-xs uppercase',
+	md: 'px-6 py-3 text-sm uppercase',
+	lg: 'px-8 py-4 text-base uppercase',
+}
+
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 	(
 		{
@@ -148,33 +175,33 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 		},
 		ref
 	) => {
+		const isDisabled = disabled || loading
+
 		return (
 			<button
 				ref={ref}
 				className={classNames(
-					'btn', // Base DaisyUI button class
-					`btn-${variant}`, // Variant class (btn-primary, btn-secondary, etc.)
-					`btn-${size}`, // Size class (btn-xs, btn-sm, etc.)
+					baseClasses,
+					variantClasses[variant],
+					sizeClasses[size],
 					{
-						'w-full sm:w-auto': fullWidth, // Full width on mobile, auto on desktop
-						'btn-disabled': disabled || loading, // Disabled styling
+						'w-full sm:w-auto': fullWidth,
+						'cursor-not-allowed opacity-60': isDisabled,
 					},
-					className // Additional custom classes
+					className
 				)}
-				disabled={disabled || loading} // Disable interaction when loading or disabled
-				{...props} // Pass through all other HTML button attributes
+				disabled={isDisabled}
+				{...props}
 			>
-				{/* Show spinner when loading */}
-				{loading && <span className="loading loading-spinner"></span>}
-				
-				{/* Show left icon when not loading */}
-				{!loading && leftIcon && <span>{leftIcon}</span>}
-				
-				{/* Button text content */}
-				{children}
-				
-				{/* Show right icon when not loading */}
-				{!loading && rightIcon && <span>{rightIcon}</span>}
+				{loading && (
+					<span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden />
+				)}
+
+				{!loading && leftIcon && <span className="flex items-center">{leftIcon}</span>}
+
+				<span className="whitespace-nowrap">{children}</span>
+
+				{!loading && rightIcon && <span className="flex items-center">{rightIcon}</span>}
 			</button>
 		)
 	}

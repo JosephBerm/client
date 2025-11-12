@@ -255,179 +255,164 @@ export default function DataTable<TData>({
 	})
 
 	return (
-		<div className="w-full">
-			{/* Table Container (horizontal scroll on mobile) */}
-			<div className="overflow-x-auto">
-				<table className="table table-zebra w-full">
-					{/* Table Header */}
-					<thead>
-						{table.getHeaderGroups().map((headerGroup) => (
-							<tr key={headerGroup.id}>
-								{headerGroup.headers.map((header) => (
-									<th
-										key={header.id}
-										className={classNames({
-											// Make sortable columns clickable
-											'cursor-pointer select-none hover:bg-base-300':
-												header.column.getCanSort(),
-										})}
-										onClick={header.column.getToggleSortingHandler()}
-									>
-										<div className="flex items-center gap-2">
-											{/* Render header content */}
-											{header.isPlaceholder
-												? null
-												: flexRender(
-														header.column.columnDef.header,
-														header.getContext()
-												  )}
-											
-											{/* Sorting indicator icons */}
-											{header.column.getCanSort() && (
-												<span className="text-base-content/50">
-													{header.column.getIsSorted() === 'asc' ? (
-														<ChevronUp className="w-4 h-4" /> // Ascending
-													) : header.column.getIsSorted() === 'desc' ? (
-														<ChevronDown className="w-4 h-4" /> // Descending
-													) : (
-														<ChevronsUpDown className="w-4 h-4" /> // Unsorted
-													)}
-												</span>
+		<div className="flex w-full flex-col gap-6">
+			<div className="overflow-hidden rounded-[32px] border border-brand-1/15 bg-white shadow-[0_24px_48px_rgba(41,66,4,0.12)]">
+				<div className="relative overflow-x-auto">
+					<table className="min-w-full divide-y divide-brand-1/15">
+						<thead className="bg-brand-4/95">
+							{table.getHeaderGroups().map((headerGroup) => (
+								<tr key={headerGroup.id}>
+									{headerGroup.headers.map((header) => (
+										<th
+											key={header.id}
+											className={classNames(
+												'px-6 py-4 text-left text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-white',
+												{
+													'cursor-pointer select-none transition hover:bg-brand-5/80':
+														header.column.getCanSort(),
+												}
 											)}
-										</div>
-									</th>
-								))}
-							</tr>
-						))}
-					</thead>
+											onClick={header.column.getToggleSortingHandler()}
+										>
+											<div className="flex items-center gap-2">
+												{header.isPlaceholder
+													? null
+													: flexRender(header.column.columnDef.header, header.getContext())}
 
-					{/* Table Body */}
-					<tbody>
-						{/* Loading State */}
-						{isLoading ? (
-							<tr>
-								<td colSpan={columns.length} className="text-center py-8">
-									<span className="loading loading-spinner loading-lg text-primary"></span>
-								</td>
-							</tr>
-						) : 
-						/* Empty State */
-						table.getRowModel().rows.length === 0 ? (
-							<tr>
-								<td colSpan={columns.length} className="text-center py-8 text-base-content/60">
-									{emptyMessage}
-								</td>
-							</tr>
-						) : 
-						/* Data Rows */
-						(
-							table.getRowModel().rows.map((row) => (
-								<tr key={row.id} className="hover">
-									{row.getVisibleCells().map((cell) => (
-										<td key={cell.id}>
-											{flexRender(cell.column.columnDef.cell, cell.getContext())}
-										</td>
+												{header.column.getCanSort() && (
+													<span className="text-white/70">
+														{header.column.getIsSorted() === 'asc' ? (
+															<ChevronUp className="h-4 w-4" />
+														) : header.column.getIsSorted() === 'desc' ? (
+															<ChevronDown className="h-4 w-4" />
+														) : (
+															<ChevronsUpDown className="h-4 w-4" />
+														)}
+													</span>
+												)}
+											</div>
+										</th>
 									))}
 								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+							))}
+						</thead>
+
+						<tbody className="divide-y divide-brand-1/20">
+							{isLoading ? (
+								<tr>
+									<td colSpan={columns.length} className="px-6 py-12 text-center">
+										<span className="inline-flex h-10 w-10 animate-spin rounded-full border-4 border-brand-1/20 border-t-brand-4" />
+									</td>
+								</tr>
+							) : table.getRowModel().rows.length === 0 ? (
+								<tr>
+									<td
+										colSpan={columns.length}
+										className="px-6 py-12 text-center text-sm font-semibold uppercase tracking-[0.3em] text-brand-4/60"
+									>
+										{emptyMessage}
+									</td>
+								</tr>
+							) : (
+								table.getRowModel().rows.map((row) => (
+									<tr
+										key={row.id}
+										className="transition hover:bg-[var(--soft-brand-color)]/80"
+									>
+										{row.getVisibleCells().map((cell) => (
+											<td key={cell.id} className="px-6 py-4 text-sm text-brand-4">
+												{flexRender(cell.column.columnDef.cell, cell.getContext())}
+											</td>
+										))}
+									</tr>
+								))
+							)}
+						</tbody>
+					</table>
+				</div>
 			</div>
 
-			{/* Pagination Controls */}
 			{pagination && onPaginationChange && (
-				<div className="flex items-center justify-between gap-4 mt-4 flex-wrap">
-					{/* Page Information */}
-					<div className="text-sm text-base-content/70">
+				<div className="flex flex-col gap-4 rounded-[28px] border border-brand-1/20 bg-white/70 px-6 py-4 shadow-[0_16px_32px_rgba(41,66,4,0.1)] sm:flex-row sm:items-center sm:justify-between">
+					<div className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-4/70">
 						Showing{' '}
-						{pagination.pageIndex * pagination.pageSize + 1} to{' '}
-						{Math.min((pagination.pageIndex + 1) * pagination.pageSize, pageCount ? pageCount * pagination.pageSize : data.length)}{' '}
-						{pageCount && `of ${pageCount * pagination.pageSize}`}
+						{pagination.pageIndex * pagination.pageSize + 1}-
+						{Math.min(
+							(pagination.pageIndex + 1) * pagination.pageSize,
+							manualPagination && pageCount ? pageCount * pagination.pageSize : data.length
+						)}{' '}
+						{pageCount ? `of ${pageCount * pagination.pageSize}` : `of ${data.length}`}
 					</div>
 
-					{/* Navigation Buttons */}
-					<div className="flex items-center gap-2">
-						{/* First Page */}
-						<button
-							className="btn btn-sm"
-							onClick={() =>
-								onPaginationChange({
-									...pagination,
-									pageIndex: 0, // Go to first page (0-based)
-								})
-							}
-							disabled={!table.getCanPreviousPage()}
-						>
-							First
-						</button>
-						
-						{/* Previous Page */}
-						<button
-							className="btn btn-sm"
-							onClick={() =>
-								onPaginationChange({
-									...pagination,
-									pageIndex: pagination.pageIndex - 1,
-								})
-							}
-							disabled={!table.getCanPreviousPage()}
-						>
-							Previous
-						</button>
-						
-						{/* Current Page Display */}
-						<span className="text-sm">
-							Page {pagination.pageIndex + 1} of {pageCount || 1}
-						</span>
-						
-						{/* Next Page */}
-						<button
-							className="btn btn-sm"
-							onClick={() =>
-								onPaginationChange({
-									...pagination,
-									pageIndex: pagination.pageIndex + 1,
-								})
-							}
-							disabled={!table.getCanNextPage()}
-						>
-							Next
-						</button>
-						
-						{/* Last Page */}
-						<button
-							className="btn btn-sm"
-							onClick={() =>
-								onPaginationChange({
-									...pagination,
-									pageIndex: (pageCount || 1) - 1, // Go to last page (0-based)
-								})
-							}
-							disabled={!table.getCanNextPage()}
-						>
-							Last
-						</button>
-					</div>
-
-					{/* Page Size Selector */}
-					<select
-						className="select select-sm select-bordered"
-						value={pagination.pageSize}
-						onChange={(e) =>
-							onPaginationChange({
-								...pagination,
-								pageSize: Number(e.target.value),
-								pageIndex: 0, // Reset to first page when changing page size
-							})
-						}
-					>
-						{[10, 20, 30, 40, 50].map((size) => (
-							<option key={size} value={size}>
-								Show {size}
-							</option>
+					<div className="flex flex-wrap items-center gap-3">
+						{[
+							{ label: 'First', action: () => ({ ...pagination, pageIndex: 0 }), disabled: !table.getCanPreviousPage() },
+							{
+								label: 'Previous',
+								action: () => ({ ...pagination, pageIndex: Math.max(pagination.pageIndex - 1, 0) }),
+								disabled: !table.getCanPreviousPage(),
+							},
+						].map(({ label, action, disabled }) => (
+							<button
+								key={label}
+								className="inline-flex h-9 items-center rounded-full border border-brand-1/20 px-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-4 transition hover:-translate-y-0.5 hover:border-brand-3 hover:text-brand-3 disabled:cursor-not-allowed disabled:opacity-40"
+								onClick={() => onPaginationChange(action())}
+								disabled={disabled}
+							>
+								{label}
+							</button>
 						))}
-					</select>
+
+						<span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-3">
+							Page {pagination.pageIndex + 1} of {pageCount || Math.max(1, Math.ceil(data.length / pagination.pageSize))}
+						</span>
+
+						{[
+							{
+								label: 'Next',
+								action: () => ({ ...pagination, pageIndex: pagination.pageIndex + 1 }),
+								disabled: !table.getCanNextPage(),
+							},
+							{
+								label: 'Last',
+								action: () => ({
+									...pagination,
+									pageIndex: Math.max((pageCount || Math.ceil(data.length / pagination.pageSize)) - 1, 0),
+								}),
+								disabled: !table.getCanNextPage(),
+							},
+						].map(({ label, action, disabled }) => (
+							<button
+								key={label}
+								className="inline-flex h-9 items-center rounded-full border border-brand-1/20 px-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-4 transition hover:-translate-y-0.5 hover:border-brand-3 hover:text-brand-3 disabled:cursor-not-allowed disabled:opacity-40"
+								onClick={() => onPaginationChange(action())}
+								disabled={disabled}
+							>
+								{label}
+							</button>
+						))}
+					</div>
+
+					<div className="flex items-center gap-2">
+						<span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-3">Show</span>
+						<select
+							className="rounded-full border border-brand-1/20 bg-white px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-4 focus:border-brand-3 focus:outline-none focus:ring-2 focus:ring-brand-3/20"
+							value={pagination.pageSize}
+							onChange={(e) =>
+								onPaginationChange({
+									...pagination,
+									pageSize: Number(e.target.value),
+									pageIndex: 0,
+								})
+							}
+						>
+							{[10, 20, 30, 40, 50].map((size) => (
+								<option key={size} value={size}>
+									{size}
+								</option>
+							))}
+						</select>
+					</div>
 				</div>
 			)}
 		</div>
