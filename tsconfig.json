@@ -26,6 +26,7 @@
 			"@_services/*": ["app/_services/*"],
 			"@_stores/*": ["app/_stores/*"],
 			"@_hooks/*": ["app/_hooks/*"],
+			"@_helpers/*": ["app/_helpers/*"],
 			"@_classes/*": ["app/_classes/*"],
 			"@_types/*": ["app/_types/*"],
 			"@_utils/*": ["app/_utils/*"]

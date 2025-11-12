@@ -59,9 +59,10 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import classNames from 'classnames'
 import { useAuthStore } from '@_stores/useAuthStore'
+import { useMediaQuery } from '@_hooks/useMediaQuery'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 
@@ -110,16 +111,55 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
 	const [sidebarOpen, setSidebarOpen] = useState(false)
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 
+	// Use media query hook for responsive behavior
+	const isMobile = useMediaQuery('(max-width: 1023px)')
+
+	// Close sidebar on escape key
+	useEffect(() => {
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === 'Escape' && sidebarOpen) {
+				setSidebarOpen(false)
+			}
+		}
+
+		window.addEventListener('keydown', handleEscape)
+		return () => window.removeEventListener('keydown', handleEscape)
+	}, [sidebarOpen])
+
+	// Prevent body scroll when sidebar is open on mobile
+	useEffect(() => {
+		// Only run on client
+		if (typeof window === 'undefined') return
+
+		if (sidebarOpen && isMobile) {
+			document.body.style.overflow = 'hidden'
+		} else {
+			document.body.style.overflow = ''
+		}
+
+		return () => {
+			document.body.style.overflow = ''
+		}
+	}, [sidebarOpen, isMobile])
+
+	const toggleSidebar = () => {
+		setSidebarOpen((prev) => !prev)
+	}
+
+	const closeSidebar = () => {
+		setSidebarOpen(false)
+	}
+
 	return (
-		<div className="relative min-h-screen bg-base-100">
-			<Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+		<div className="relative min-h-screen w-full bg-base-100">
+			<Navbar onMenuClick={toggleSidebar} />
 
 			<div className="relative mx-auto flex w-full max-w-[1600px] gap-0 lg:gap-10">
 				{isAuthenticated && (
 					<Sidebar
 						isOpen={sidebarOpen}
-						onClose={() => setSidebarOpen(false)}
-						ariaLabel="MedSource navigation"
+						onClose={closeSidebar}
+						ariaLabel="MedSource Pro navigation"
 					/>
 				)}
 

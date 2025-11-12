@@ -1,38 +1,48 @@
 @import 'tailwindcss';
 
 @layer base {
-:root {
+	/* ========================================
+	   CSS Custom Properties (Design Tokens)
+	   ======================================== */
+	:root {
+		/* Layout & Background Colors */
 		--bg-color: #fcfff7;
 		--section-bg-color: #f8f8f8;
 		--footer-color: #fcfff7;
+		--row-color: #fff;
+		--alternating-row-color: #f8f8f8;
 
-  --brand-color-1: #416706;
-  --brand-color-2: #4d7a07;
-  --brand-color-3: #355405;
-  --brand-color-4: #2a4204;
-  --brand-color-5: #1e2f03;
-  --teal: #06614a;
-  --darker-teal: #055541;
-  
-  --link-color: #00008b;
-  --soft-brand-color: #f2fcef;
+		/* Brand Colors */
+		--brand-color-1: #416706;
+		--brand-color-2: #4d7a07;
+		--brand-color-3: #355405;
+		--brand-color-4: #2a4204;
+		--brand-color-5: #1e2f03;
+		--teal: #06614a;
+		--darker-teal: #055541;
+		--soft-brand-color: #f2fcef;
 		--soft-brand-color-hovered: #ffdb9e;
+
+		/* Semantic Colors */
+		--link-color: #00008b;
 		--black-text-color: #393939;
 		--disabled-color: #949494;
-		--black: #000;
-		--white: #fff;
-		--gray: #a1a1a1;
-  --light-gray: #d8d8d8;
 		--highlight: #ffcc00;
-		--blue: #0f52ba;
-
 		--toastify-color-error: #d22b2b !important;
 		--error-color: var(--toastify-color-error);
 		--error-color-tint: #520606;
-		--row-color: #fff;
-		--alternating-row-color: #f8f8f8;
+
+		/* Neutral Colors */
+		--black: #000;
+		--white: #fff;
+		--gray: #a1a1a1;
+		--light-gray: #d8d8d8;
+		--blue: #0f52ba;
+
+		/* UI Element Colors */
 		--tooltip-background: rgba(0, 0, 0, 0.35);
 
+		/* Typography Scale */
 		--fz-xxs: 1.2rem;
 		--fz-xs: 1.3rem;
 		--fz-s: 1.4rem;
@@ -42,57 +52,62 @@
 		--fz-xxl: 2.5rem;
 		--fz-heading: 2.7rem;
 
-  --border-radius: 4px;
-		--nav-height: 100px;
-		--nav-scroll-height: 70px;
-		--nav-title-width: 250px;
-		--easing: cubic-bezier(0.645, 0.045, 0.355, 1);
-
+		/* Font Families */
 		--font-sans: 'Montserrat', 'Inter', 'Roboto', 'Fira Sans', -apple-system, BlinkMacSystemFont,
 			'Segoe UI', sans-serif;
 		--font-mono: 'Fira Code', 'Courier New', Courier, monospace;
-  --transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1);
-}
 
-html {
-  box-sizing: border-box;
-		font-size: 62.5%;
-  scroll-behavior: smooth;
+		/* Spacing & Layout */
+		--border-radius: 4px;
+		--nav-height: 96px;
+		--nav-scroll-height: 70px;
+		--nav-title-width: 250px;
+
+		/* Animation & Transitions */
+		--easing: cubic-bezier(0.645, 0.045, 0.355, 1);
+		--transition: all 0.25s var(--easing);
+	}
+
+	/* ========================================
+	   Base HTML & Body Styles
+	   ======================================== */
+	html {
+		box-sizing: border-box;
+		font-size: 62.5%; /* 1rem = 10px for easier calculations */
+		scroll-behavior: smooth;
 		scrollbar-color: var(--light-gray) transparent;
-  scrollbar-width: thin;
+		scrollbar-width: thin;
 		width: 100%;
-}
+	}
 
-*,
-*::before,
-*::after {
-  box-sizing: inherit;
-}
+	*,
+	*::before,
+	*::after {
+		box-sizing: inherit;
+	}
 
-body {
-  font-family: var(--font-sans);
+	body {
+		font-family: var(--font-sans);
 		font-size: var(--fz-lg);
-  color: var(--black-text-color);
-  background-color: var(--bg-color);
+		color: var(--black-text-color);
+		background-color: var(--bg-color);
 		width: 100%;
-  margin: 0;
-  line-height: 1.3;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+		margin: 0;
+		line-height: 1.3;
+		overflow-x: hidden;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
 
 	::selection {
 		background: var(--highlight);
 		color: var(--black);
 	}
 
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
+	/* ========================================
+	   Typography Defaults
+	   ======================================== */
+	h1, h2, h3, h4, h5, h6 {
 		margin: 0;
 		font-weight: 600;
 		line-height: 1.1;
@@ -106,6 +121,9 @@ body {
 		color: var(--black-text-color);
 	}
 
+	/* ========================================
+	   Interactive Elements
+	   ======================================== */
 	a {
 		display: inline-block;
 		position: relative;
@@ -120,88 +138,470 @@ body {
 		color: var(--link-color) !important;
 	}
 
+	/* ========================================
+	   Modern Button System
+	   ======================================== */
+
+	/* Base Button Reset & Foundation */
 	button {
 		font-family: var(--font-sans);
-		font-size: var(--fz-xs);
-		line-height: 1;
-		color: var(--white);
-		background-color: var(--brand-color-1);
-		border-radius: var(--border-radius);
+		font-size: 1.4rem;
+		font-weight: 500;
+		line-height: 1.5;
 		border: none;
-		padding: 1.25rem 1.75rem;
+		border-radius: 8px;
 		cursor: pointer;
-		transition: var(--transition);
+		transition: all 0.2s ease-in-out;
+		text-align: center;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.875rem 1.5rem;
+		position: relative;
+		overflow: hidden;
+		user-select: none;
+		-webkit-tap-highlight-color: transparent;
 	}
 
-	button:hover {
-		background-color: var(--brand-color-4);
+	/* Primary Button (Default Brand) - Theme Aware */
+	button:not([class*="btn-"]):not([class*="transparent"]):not([class*="action"]):not([class*="outline"]):not([class*="ghost"]):not([class*="link"]) {
+		background: linear-gradient(135deg, hsl(var(--p)), hsl(var(--s)));
+		color: hsl(var(--pc));
+		box-shadow: 0 2px 8px hsl(var(--p) / 0.2);
+	}
+
+	button:not([class*="btn-"]):not([class*="transparent"]):not([class*="action"]):not([class*="outline"]):not([class*="ghost"]):not([class*="link"]):hover {
+		background: linear-gradient(135deg, hsl(var(--s)), hsl(var(--a)));
+		box-shadow: 0 4px 12px hsl(var(--p) / 0.3);
+		transform: translateY(-1px);
+	}
+
+	button:not([class*="btn-"]):not([class*="transparent"]):not([class*="action"]):not([class*="outline"]):not([class*="ghost"]):not([class*="link"]):active {
+		transform: translateY(0);
+		box-shadow: 0 1px 4px hsl(var(--p) / 0.2);
 	}
 
 	button:focus-visible {
-		outline: 2px solid var(--brand-color-3);
+		outline: 3px solid hsl(var(--p));
 		outline-offset: 2px;
 	}
 
 	button:disabled {
-		opacity: 0.7;
+		opacity: 0.5;
 		cursor: not-allowed;
+		transform: none !important;
+		box-shadow: none !important;
 	}
 
-	button.transparent {
+	/* Button Variants */
+
+	/* Transparent/Ghost Button - Theme Aware */
+	button.transparent,
+	button.ghost {
 		background-color: transparent;
-		color: var(--brand-color-1);
+		color: hsl(var(--p));
+		box-shadow: none;
 	}
 
-	button.action {
-		color: var(--gray);
+	button.transparent:hover,
+	button.ghost:hover {
+		background-color: hsl(var(--p) / 0.1);
+		color: hsl(var(--s));
+	}
+
+	/* Outline Button - Theme Aware */
+	button.outline {
 		background-color: transparent;
-		border: 1px solid var(--gray);
+		color: hsl(var(--p));
+		border: 2px solid hsl(var(--p));
+		box-shadow: none;
 	}
 
-	button.action:hover {
-		color: var(--gray);
+	button.outline:hover {
+		background-color: hsl(var(--p));
+		color: hsl(var(--pc));
+		border-color: hsl(var(--p));
+	}
+
+	/* Secondary/Action Button - Theme Aware */
+	button.action,
+	button.secondary {
+		background-color: hsl(var(--b3));
+		color: hsl(var(--bc));
+		border: 2px solid hsl(var(--bc) / 0.3);
+		box-shadow: 0 2px 4px hsl(var(--bc) / 0.1);
+	}
+
+	button.action:hover,
+	button.secondary:hover {
+		background-color: hsl(var(--n));
+		color: hsl(var(--nc));
+		border-color: hsl(var(--n));
+	}
+
+	/* Danger/Destructive Button - Theme Aware */
+	button.danger,
+	button.destructive {
+		background: linear-gradient(135deg, hsl(var(--er)), hsl(var(--er) / 0.9));
+		color: hsl(var(--erc));
+		box-shadow: 0 2px 8px hsl(var(--er) / 0.2);
+	}
+
+	button.danger:hover,
+	button.destructive:hover {
+		background: linear-gradient(135deg, hsl(var(--er) / 0.9), hsl(var(--er) / 0.8));
+		box-shadow: 0 4px 12px hsl(var(--er) / 0.3);
+		transform: translateY(-1px);
+	}
+
+	/* Success Button - Theme Aware */
+	button.success {
+		background: linear-gradient(135deg, hsl(var(--su)), hsl(var(--su) / 0.9));
+		color: hsl(var(--suc));
+		box-shadow: 0 2px 8px hsl(var(--su) / 0.2);
+	}
+
+	button.success:hover {
+		background: linear-gradient(135deg, hsl(var(--su) / 0.9), hsl(var(--su) / 0.8));
+		box-shadow: 0 4px 12px hsl(var(--su) / 0.3);
+		transform: translateY(-1px);
+	}
+
+	/* Link Button - Theme Aware */
+	button.link {
+		background-color: transparent;
+		color: hsl(var(--p));
+		padding: 0.5rem 1rem;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		box-shadow: none;
+	}
+
+	button.link:hover {
+		color: hsl(var(--s));
+		text-decoration-thickness: 2px;
+	}
+
+	/* Button Sizes */
+	button.btn-xs,
+	button.btn-sm {
+		padding: 0.5rem 1rem;
+		font-size: 1.2rem;
+	}
+
+	button.btn-lg {
+		padding: 1.125rem 2rem;
+		font-size: 1.6rem;
+	}
+
+	button.btn-xl {
+		padding: 1.375rem 2.5rem;
+		font-size: 1.8rem;
+		font-weight: 600;
+	}
+
+	/* Icon Buttons */
+	button.btn-circle,
+	button.btn-square {
+		padding: 0.75rem;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		min-width: 40px;
+		min-height: 40px;
+	}
+
+	button.btn-square {
+		border-radius: 8px;
+	}
+
+	/* Icon Button Color Fix - Ensure proper contrast - Theme Aware */
+	button.btn-circle:not(.ghost):not(.transparent):not(.outline),
+	button.btn-square:not(.ghost):not(.transparent):not(.outline) {
+		background: linear-gradient(135deg, hsl(var(--p)), hsl(var(--s)));
+		color: hsl(var(--pc));
+	}
+
+	button.btn-circle.ghost,
+	button.btn-square.ghost,
+	button.btn-circle.transparent,
+	button.btn-square.transparent {
+		background: transparent;
+		color: hsl(var(--p));
+	}
+
+	button.btn-circle.ghost:hover,
+	button.btn-square.ghost:hover {
+		background: hsl(var(--p) / 0.1);
+		color: hsl(var(--s));
+	}
+
+	/* Button Groups */
+	.btn-group {
+		display: inline-flex;
+		gap: 0;
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.btn-group button {
+		border-radius: 0;
+		margin: 0;
+	}
+
+	.btn-group button:first-child {
+		border-top-left-radius: 8px;
+		border-bottom-left-radius: 8px;
+	}
+
+	.btn-group button:last-child {
+		border-top-right-radius: 8px;
+		border-bottom-right-radius: 8px;
+	}
+
+	.btn-group button:not(:last-child) {
+		border-right: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
+	/* Loading State */
+	button.loading {
+		position: relative;
+		color: transparent !important;
+		pointer-events: none;
+	}
+
+	button.loading::after {
+		content: '';
+		position: absolute;
+		width: 16px;
+		height: 16px;
+		top: 50%;
+		left: 50%;
+		margin-left: -8px;
+		margin-top: -8px;
+		border: 2px solid transparent;
+		border-top-color: currentColor;
+		border-radius: 50%;
+		animation: button-spin 0.6s linear infinite;
+		color: var(--white);
+	}
+
+	@keyframes button-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	/* ========================================
+	   Industry Best Practice: Modern Button Enhancements
+	   ======================================== */
+
+	/* Ripple Effect on Click */
+	button:not(.no-ripple) {
+		position: relative;
+		overflow: hidden;
+	}
+
+	button:not(.no-ripple)::before {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 0;
+		height: 0;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.5);
+		transform: translate(-50%, -50%);
+		transition: width 0.6s, height 0.6s;
+	}
+
+	button:not(.no-ripple):active::before {
+		width: 300px;
+		height: 300px;
+		transition: width 0s, height 0s;
+	}
+
+	/* Smooth Scale on Hover (Elegant Interaction) */
+	button:not(:disabled):hover {
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	/* Focus Ring - Modern Accessibility - Theme Aware */
+	button:focus-visible {
+		outline: 3px solid hsl(var(--p));
+		outline-offset: 3px;
+		transition: outline-offset 0.2s ease;
+	}
+
+	button:focus-visible:active {
+		outline-offset: 1px;
+	}
+
+	/* Pressed State - Industry Standard */
+	button:active:not(:disabled) {
+		transition: transform 0.1s cubic-bezier(0.4, 0, 0.6, 1);
+	}
+
+	/* Elevated Button Variant (Premium Look) */
+	button.elevated {
+		box-shadow: 
+			0 1px 3px rgba(0, 0, 0, 0.12),
+			0 1px 2px rgba(0, 0, 0, 0.24);
+		transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+	}
+
+	button.elevated:hover:not(:disabled) {
+		box-shadow: 
+			0 14px 28px rgba(0, 0, 0, 0.25),
+			0 10px 10px rgba(0, 0, 0, 0.22);
+		transform: translateY(-2px);
+	}
+
+	button.elevated:active:not(:disabled) {
+		box-shadow: 
+			0 1px 3px rgba(0, 0, 0, 0.12),
+			0 1px 2px rgba(0, 0, 0, 0.24);
+		transform: translateY(0);
+	}
+
+	/* Soft Button Variant (Subtle, Modern) - Theme Aware */
+	button.soft {
+		background: hsl(var(--p) / 0.1);
+		color: hsl(var(--p));
+		border: 1px solid transparent;
+		box-shadow: none;
+		transition: all 0.2s ease;
+	}
+
+	button.soft:hover:not(:disabled) {
+		background: hsl(var(--p));
+		color: hsl(var(--pc));
+		border-color: hsl(var(--p));
+		box-shadow: 0 4px 12px hsl(var(--p) / 0.2);
+	}
+
+	/* Glass Morphism Button (Modern Trend) */
+	button.glass {
+		background: rgba(255, 255, 255, 0.1);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+		transition: all 0.3s ease;
+	}
+
+	button.glass:hover:not(:disabled) {
+		background: rgba(255, 255, 255, 0.2);
+		border-color: rgba(255, 255, 255, 0.3);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+		transform: translateY(-2px);
+	}
+
+	/* Pulsing Effect (For Important CTAs) - Theme Aware */
+	button.pulse {
+		animation: button-pulse 2s infinite;
+	}
+
+	button.pulse:hover {
+		animation: none;
+	}
+
+	@keyframes button-pulse {
+		0%, 100% {
+			box-shadow: 0 0 0 0 hsl(var(--p) / 0.4);
+		}
+		50% {
+			box-shadow: 0 0 0 10px hsl(var(--p) / 0);
+		}
+	}
+
+	/* Shimmer Effect (Premium Look) - Theme Aware */
+	@keyframes button-shimmer {
+		0% {
+			background-position: -100% 0;
+		}
+		100% {
+			background-position: 200% 0;
+		}
+	}
+
+	button.shimmer {
+		background: linear-gradient(
+			135deg,
+			hsl(var(--p)) 0%,
+			hsl(var(--s)) 25%,
+			rgba(255, 255, 255, 0.3) 50%,
+			hsl(var(--s)) 75%,
+			hsl(var(--p)) 100%
+		);
+		background-size: 200% 100%;
+		animation: button-shimmer 3s ease-in-out infinite;
+		color: hsl(var(--pc));
+	}
+
+	/* Icon Animation on Hover */
+	button:hover svg,
+	button:hover .icon {
+		transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+		transform: scale(1.1) rotate(5deg);
+	}
+
+	button:active svg,
+	button:active .icon {
+		transform: scale(0.95);
+	}
+
+	/* ========================================
+	   Custom Scrollbar Styles
+	   ======================================== */
+	::-webkit-scrollbar {
+		width: 12px;
+	}
+
+	::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	::-webkit-scrollbar-thumb {
+		border-radius: 10px;
 		background-color: var(--light-gray);
-		border-color: var(--gray);
 	}
 
-::-webkit-scrollbar {
-  width: 12px;
-}
+	/* ========================================
+	   Utility Classes
+	   ======================================== */
+	.gradiant-text-brand {
+		background-image: linear-gradient(
+			90deg,
+			var(--darker-teal),
+			var(--teal),
+			var(--teal),
+			var(--brand-color-1),
+			var(--brand-color-1),
+			var(--brand-color-4),
+			var(--brand-color-4),
+			var(--brand-color-4)
+		);
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		-moz-background-clip: text;
+		-moz-text-fill-color: transparent;
+		user-select: none;
+	}
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  border-radius: 10px;
-  background-color: var(--light-gray);
-}
-
-.gradiant-text-brand {
-  background-image: linear-gradient(
-    90deg,
-    var(--darker-teal),
-    var(--teal),
-    var(--teal),
-    var(--brand-color-1),
-    var(--brand-color-1),
-    var(--brand-color-4),
-    var(--brand-color-4),
-    var(--brand-color-4)
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -moz-background-clip: text;
-  -moz-text-fill-color: transparent;
-  user-select: none;
-}
-
+	/* ========================================
+	   Theme: MedSource Classic
+	   ======================================== */
 	[data-theme='medsource-classic'] {
+		/* Layout & Background Colors */
 		--bg-color: #fcfff7;
 		--section-bg-color: #f8f8f8;
 		--footer-color: #fcfff7;
+		--row-color: #fff;
+		--alternating-row-color: #f8f8f8;
 
+		/* Brand Colors */
 		--brand-color-1: #416706;
 		--brand-color-2: #4d7a07;
 		--brand-color-3: #355405;
@@ -209,26 +609,29 @@ body {
 		--brand-color-5: #1e2f03;
 		--teal: #06614a;
 		--darker-teal: #055541;
-
-		--link-color: #00008b;
 		--soft-brand-color: #f2fcef;
 		--soft-brand-color-hovered: #ffdb9e;
+
+		/* Semantic Colors */
+		--link-color: #00008b;
 		--black-text-color: #393939;
 		--disabled-color: #949494;
+		--highlight: #ffcc00;
+		--toastify-color-error: #d22b2b !important;
+		--error-color: var(--toastify-color-error);
+		--error-color-tint: #520606;
+
+		/* Neutral Colors */
 		--black: #000;
 		--white: #fff;
 		--gray: #a1a1a1;
 		--light-gray: #d8d8d8;
-		--highlight: #ffcc00;
 		--blue: #0f52ba;
 
-		--toastify-color-error: #d22b2b !important;
-		--error-color: var(--toastify-color-error);
-		--error-color-tint: #520606;
-		--row-color: #fff;
-		--alternating-row-color: #f8f8f8;
+		/* UI Element Colors */
 		--tooltip-background: rgba(0, 0, 0, 0.35);
 
+		/* Font Families */
 		--font-sans: 'Montserrat', 'Inter', 'Roboto', 'Fira Sans', -apple-system, BlinkMacSystemFont,
 			'Segoe UI', sans-serif;
 		--font-mono: 'Fira Code', 'Courier New', Courier, monospace;
@@ -236,6 +639,9 @@ body {
 }
 
 @layer components {
+	/* ========================================
+	   Link Components
+	   ======================================== */
 	.inline-link {
 		--inline-link-color: var(--brand-color-1);
 		color: var(--inline-link-color);
@@ -257,14 +663,17 @@ body {
 		background-color: var(--inline-link-color);
 		opacity: 0.5;
 		width: 0;
-  transition: var(--transition);
-}
+		transition: var(--transition);
+	}
 
 	.inline-link:focus-visible::after,
 	.inline-link:hover::after {
 		width: 100%;
 	}
 
+	/* ========================================
+	   Page Layout Components
+	   ======================================== */
 	.page-header {
 		display: flex;
 		flex-direction: column;
@@ -275,7 +684,7 @@ body {
 
 	.page-header button {
 		align-self: flex-start;
-}
+	}
 
 	.page-title {
 		font-family: 'Montserrat', var(--font-sans);
@@ -283,35 +692,47 @@ body {
 		color: var(--brand-color-1);
 	}
 
-.clickable {
+	/* ========================================
+	   Text & Display Utilities
+	   ======================================== */
+	.clickable {
 		cursor: pointer !important;
-}
-
-.two-line-limit {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.three-line-limit {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+	}
 
 	.nowrap {
 		white-space: nowrap;
 	}
 
+	/* Multi-line Text Truncation */
+	.two-line-limit,
+	.three-line-limit {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.two-line-limit {
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+	}
+
+	.three-line-limit {
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+	}
+
+	/* ========================================
+	   Layout Utilities
+	   ======================================== */
 	.gapped-fields {
 		display: flex;
 		gap: 1.25em;
 	}
 
+	/* ========================================
+	   Tooltip Component
+	   ======================================== */
 	.titled {
 		position: relative;
 		padding: 10px;
@@ -343,6 +764,9 @@ body {
 		opacity: 1;
 	}
 
+	/* ========================================
+	   Floating Menu Component
+	   ======================================== */
 	.FloatingMenu {
 		position: relative;
 		font-size: 0.85em;
@@ -410,6 +834,9 @@ body {
 		color: var(--bg-color);
 	}
 
+	/* ========================================
+	   Scroll & Marquee Components
+	   ======================================== */
 	.scroll-horizontal-container {
 		display: flex;
 		flex-direction: row;
@@ -424,6 +851,7 @@ body {
 		min-width: 200px;
 	}
 
+	/* Marquee Container with Gradient Fade */
 	.marquee-container {
 		position: relative;
 		overflow: hidden;
@@ -463,47 +891,46 @@ body {
 	}
 }
 
-@keyframes flipDown {
-  from {
-    opacity: 0;
-    transform: rotateX(-90deg);
-  }
+/* ========================================
+   Keyframe Animations
+   ======================================== */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
 
-  to {
-    opacity: 1;
-    transform: rotateX(0);
-  }
+@keyframes flipDown {
+	from {
+		opacity: 0;
+		transform: rotateX(-90deg);
+	}
+	to {
+		opacity: 1;
+		transform: rotateX(0);
+	}
 }
 
 @keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateX(-20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
 }
 
 @keyframes marquee {
 	from {
 		transform: translateX(0);
 	}
-
 	to {
 		transform: translateX(-50%);
 	}
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
 }
 

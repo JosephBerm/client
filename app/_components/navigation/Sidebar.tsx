@@ -1,30 +1,39 @@
 /**
  * Sidebar Component
  *
- * Collapsible sidebar navigation menu with role-based access control.
- * Displays navigation sections and items based on user permissions.
- * Responsive design with drawer overlay on mobile and persistent sidebar on desktop.
+ * Modern sidebar navigation with collapsible sections and role-based access control.
+ * Inspired by industry-leading designs with a clean, light theme and intuitive UX.
  *
- * **Features:**
+ * **Design Features:**
+ * - Light, spacious design (base-200 background)
+ * - Large, prominent section headers
+ * - Clean icon and text layout
+ * - Smooth hover effects
+ * - Professional spacing and typography
+ * - Settings button in header
+ * - "Report an Issue" footer link
+ *
+ * **Navigation Features:**
  * - Role-based navigation (uses NavigationService)
- * - Collapsible navigation sections with expand/collapse
+ * - Collapsible navigation sections
+ * - External link indicators
+ * - Badge support for notifications
  * - Active route highlighting
- * - Mobile drawer with overlay
- * - Desktop sticky sidebar
- * - Click-outside-to-close on mobile
- * - Section badges (notification counts, etc.)
- * - Smooth animations
- * - App version display in footer
+ * - Mobile overlay with backdrop
+ * - Click-outside-to-close
+ * - Escape key support
+ * - Body scroll lock on mobile
  *
  * **Responsive Behavior:**
- * - Mobile (< 1024px): Fixed drawer overlay, closes on item click or outside click
- * - Desktop (>= 1024px): Sticky sidebar, always visible when authenticated
+ * - Mobile (< 1024px): Full-screen overlay, closes on link click
+ * - Desktop (>= 1024px): Slide-in drawer (controlled by parent)
+ * - Width: 320px (mobile) to 384px (desktop)
  *
- * **Use Cases:**
- * - Main application navigation
- * - Admin panel menu
- * - Protected route navigation
- * - Role-based feature access
+ * **Performance:**
+ * - Memoized sections with useMemo
+ * - Memoized callbacks with useCallback
+ * - SSR-safe media query hook
+ * - Optimized re-renders
  *
  * @example
  * ```tsx
@@ -35,14 +44,14 @@
  *   const [sidebarOpen, setSidebarOpen] = useState(false);
  *
  *   return (
- *     <div>
+ *     <>
  *       <Navbar onMenuClick={() => setSidebarOpen(true)} />
  *       <Sidebar
  *         isOpen={sidebarOpen}
  *         onClose={() => setSidebarOpen(false)}
  *       />
  *       <main>{children}</main>
- *     </div>
+ *     </>
  *   );
  * }
  * ```
@@ -52,13 +61,14 @@
 
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo, useCallback, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { X, ChevronDown, ChevronRight } from 'lucide-react'
+import { X, Settings, ChevronDown, ExternalLink } from 'lucide-react'
 import { useAuthStore } from '@_stores/useAuthStore'
-import { getNavigationSections } from '@_services/NavigationService'
-import { useState } from 'react'
+import { NavigationService } from '@_services/NavigationService'
+import { useMediaQuery } from '@_hooks/useMediaQuery'
+import NavigationIcon from './NavigationIcon'
 import classNames from 'classnames'
 
 /**
@@ -86,34 +96,31 @@ interface SidebarProps {
 /**
  * Sidebar Component
  *
- * Dynamic navigation sidebar that adapts to user role and device size.
- * Fetches navigation structure from NavigationService based on user permissions.
+ * Modern, spacious navigation sidebar with clean design and intuitive UX.
+ * Adapts to user role (Customer vs Admin) and provides role-based navigation.
+ *
+ * **Design:**
+ * - Light background (base-200) with clean typography
+ * - Wide layout (320px mobile, 384px desktop)
+ * - Prominent section headers with bold text
+ * - Icon + Label + Description layout
+ * - Smooth hover effects with base-300 background
+ * - Professional spacing and padding
  *
  * **Navigation Structure:**
- * - Sections: Top-level categories (Dashboard, Store, Orders, etc.)
- * - Items: Individual links within sections
- * - Badges: Optional notification counts or indicators
+ * - Main: Dashboard, Store (all users)
+ * - My Orders: Orders, Quotes (customers)
+ * - Management: Products, Orders, Quotes (admins)
+ * - Users: Accounts, Customers, Providers (admins)
+ * - Analytics: Dashboard (admins)
+ * - Account: Profile, Notifications (all users)
  *
- * **Mobile Drawer:**
- * - Fixed positioning with transform animation
- * - Dark overlay backdrop
- * - Close button in header
- * - Closes on item click or outside click
- *
- * **Desktop Sidebar:**
- * - Sticky positioning below navbar
- * - Always visible when authenticated
- * - No close button or overlay
- *
- * **Section Collapsing:**
- * - Click section header to toggle expand/collapse
- * - All sections expanded by default
- * - Chevron icon indicates state
- *
- * **Active Route:**
- * - Highlights current page
- * - Primary background color
- * - Bold font weight
+ * **Interactions:**
+ * - Collapsible sections (click header to toggle)
+ * - Hover effect on route items (background change)
+ * - Click outside or Escape key to close
+ * - Auto-close on mobile after link click
+ * - Body scroll lock when open on mobile
  *
  * @param props - Component props including isOpen and onClose
  * @returns Sidebar component
@@ -121,25 +128,51 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 	const pathname = usePathname()
 	const user = useAuthStore((state) => state.user)
-	const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
 
-	const sections = getNavigationSections(user?.role)
+	// Use media query hook instead of window.innerWidth (prevents hydration issues)
+	const isMobile = useMediaQuery('(max-width: 1023px)')
 
-	useEffect(() => {
-		const expanded: Record<string, boolean> = {}
+	// Memoize navigation sections - recomputes when user role changes
+	const sections = useMemo(() => {
+		return NavigationService.getNavigationSections(user?.role)
+	}, [user?.role])
+
+	// State for collapsible sections
+	const initialCollapsed = useMemo<Set<string>>(() => {
+		const collapsed = new Set<string>()
 		sections.forEach((section) => {
-			expanded[section.title] = true
+			if (section.defaultCollapsed) {
+				collapsed.add(section.id)
+			}
 		})
-		setExpandedSections(expanded)
+		return collapsed
 	}, [sections])
 
-	const toggleSection = (title: string) => {
-		setExpandedSections((prev) => ({
-			...prev,
-			[title]: !prev[title],
-		}))
-	}
+	const [collapsedSections, setCollapsedSections] = useState<Set<string>>(initialCollapsed)
+	const [settingsModalOpen, setSettingsModalOpen] = useState(false)
 
+	// Memoized toggle function for section collapse
+	const toggleSection = useCallback((sectionId: string) => {
+		setCollapsedSections((prev) => {
+			const next = new Set(prev)
+			if (next.has(sectionId)) {
+				next.delete(sectionId)
+			} else {
+				next.add(sectionId)
+			}
+			return next
+		})
+	}, [])
+
+	// Memoized link click handler
+	const handleLinkClick = useCallback(() => {
+		// Close sidebar on mobile when link is clicked
+		if (isMobile) {
+			onClose()
+		}
+	}, [isMobile, onClose])
+
+	// Handle outside click and body scroll lock
 	useEffect(() => {
 		const handleOutsideClick = (e: MouseEvent) => {
 			const sidebar = document.getElementById('app-sidebar')
@@ -148,109 +181,134 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 			}
 		}
 
-		if (isOpen) {
+		// Disable body scroll when sidebar is open on mobile
+		if (isOpen && isMobile) {
+			document.body.style.overflow = 'hidden'
 			document.addEventListener('mousedown', handleOutsideClick)
+		} else {
+			document.body.style.overflow = ''
 		}
 
 		return () => {
+			document.body.style.overflow = ''
 			document.removeEventListener('mousedown', handleOutsideClick)
 		}
-	}, [isOpen, onClose])
+	}, [isOpen, isMobile, onClose])
 
 	return (
 		<>
+			{/* Overlay - visible on all screen sizes when sidebar is open */}
 			{isOpen && (
 				<div
-					className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity lg:hidden"
+					className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
 					onClick={onClose}
 					aria-hidden="true"
 				/>
 			)}
 
+			{/* Sidebar */}
 			<aside
 				id="app-sidebar"
 				aria-label={ariaLabel}
 				className={classNames(
-					'fixed top-0 left-0 z-50 flex h-full w-[min(82vw,320px)] flex-col overflow-hidden border-r border-brand-1/10 bg-white/95 backdrop-blur transition-transform duration-300 ease-in-out',
-					'shadow-2xl shadow-brand-5/20 lg:shadow-none',
-					'lg:sticky lg:top-[var(--nav-height)] lg:h-[calc(100vh-var(--nav-height))] lg:w-[var(--nav-title-width)] lg:translate-x-0 lg:bg-white',
+					'fixed top-0 left-0 h-full bg-base-200 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl border-r border-base-300',
+					'w-80 lg:w-96 overflow-y-auto',
 					{
 						'translate-x-0': isOpen,
 						'-translate-x-full': !isOpen,
 					}
 				)}
+				onClick={(e) => e.stopPropagation()}
+				style={{
+					boxShadow: isOpen
+						? '4px 0 24px rgba(0, 0, 0, 0.15), 2px 0 8px rgba(0, 0, 0, 0.1)'
+						: 'none',
+				}}
 			>
-				<div className="flex items-center justify-between border-b border-brand-1/10 px-5 py-4 lg:hidden">
-					<h2 className="text-xs font-semibold uppercase tracking-[0.35em] text-brand-3">Navigation</h2>
-					<button
-						onClick={onClose}
-						className="btn btn-ghost btn-square btn-sm text-brand-4"
-						aria-label="Close menu"
-					>
-						<X className="h-5 w-5" />
-					</button>
-				</div>
+				<div className="flex flex-col h-full">
+					{/* Header */}
+					<div className="flex items-center justify-between p-4 md:p-6 border-b border-base-300">
+						<h2 className="text-xl md:text-2xl font-bold text-base-content">MedSource</h2>
+						{/* Settings Button */}
+						<button
+							onClick={() => setSettingsModalOpen(true)}
+							className="btn-circle ghost"
+							aria-label="Settings"
+							title="Settings"
+						>
+							<Settings size={20} className="text-base-content" />
+						</button>
+					</div>
 
-				<nav className="flex-1 overflow-y-auto px-4 pb-24 pt-6 lg:px-0 lg:pt-8">
-					<ul className="flex flex-col gap-4">
+					{/* Navigation Content */}
+					<nav className="flex-1 overflow-y-auto p-4">
 						{sections.map((section) => (
-							<li key={section.title}>
-								<button
-									onClick={() => toggleSection(section.title)}
-									className="flex w-full items-center justify-between rounded-full bg-white/70 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-4 transition hover:bg-white hover:text-brand-3 lg:px-6 lg:py-3"
-								>
-									<span>{section.title}</span>
-									{expandedSections[section.title] ? (
-										<ChevronDown className="h-4 w-4" />
+							<div key={section.id} className="mb-4 md:mb-8">
+								{/* Section Header */}
+								<div className="mb-3 md:mb-4">
+									{section.collapsible ? (
+										<button
+											onClick={() => toggleSection(section.id)}
+											className="flex items-center justify-between w-full text-left"
+										>
+											<h3 className="text-lg font-bold text-base-content">{section.title}</h3>
+											<ChevronDown
+												size={20}
+												className={classNames('transition-transform', {
+													'': collapsedSections.has(section.id),
+													'rotate-180': !collapsedSections.has(section.id),
+												})}
+											/>
+										</button>
 									) : (
-										<ChevronRight className="h-4 w-4" />
+										<h3 className="text-lg font-bold text-base-content">{section.title}</h3>
 									)}
-								</button>
+								</div>
 
-								{expandedSections[section.title] && (
-									<ul className="mt-3 space-y-1 lg:mt-4">
-										{section.items.map((item) => {
-											const Icon = item.icon
-											const isActive = pathname === item.href
+								{/* Section Routes */}
+								{!collapsedSections.has(section.id) && (
+									<ul className="space-y-2">
+										{section.routes.map((route) => {
+											const isActive = pathname === route.href
 
 											return (
-												<li key={item.href}>
+												<li key={route.id}>
 													<Link
-														href={item.href}
-														className={classNames(
-															'group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors lg:px-6',
-															{
-																'bg-brand-4 text-white shadow-md shadow-brand-5/20':
-																	isActive,
-																'text-brand-4 hover:bg-[var(--soft-brand-color)] hover:text-brand-3':
-																	!isActive,
-															}
-														)}
-														onClick={() => {
-															if (window.innerWidth < 1024) {
-																onClose()
-															}
-														}}
+														href={route.href}
+														onClick={handleLinkClick}
+														className="flex items-start gap-3 p-3 rounded-lg hover:bg-base-300 transition-colors group"
+														target={route.isExternal ? '_blank' : undefined}
+														rel={route.isExternal ? 'noopener noreferrer' : undefined}
 													>
-														<Icon
-															className={classNames('h-5 w-5', {
-																'text-white': isActive,
-																'text-brand-3 transition-colors group-hover:text-brand-4':
-																	!isActive,
-															})}
-														/>
-														<span className="flex-1">{item.title}</span>
-														{item.badge && (
-															<span
-																className={classNames(
-																	'rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider',
-																	isActive
-																		? 'bg-white/30 text-white'
-																		: 'bg-brand-1/10 text-brand-4'
+														{/* Icon */}
+														<div className="shrink-0 mt-0.5">
+															<NavigationIcon
+																icon={route.icon}
+																size={24}
+																className="text-base-content"
+															/>
+														</div>
+
+														{/* Content */}
+														<div className="flex-1 min-w-0">
+															<div className="flex items-center gap-2">
+																<span className="font-medium text-base-content group-hover:text-primary">
+																	{route.label}
+																</span>
+																{route.isExternal && (
+																	<ExternalLink size={16} className="text-base-content/60" />
 																)}
-															>
-																{item.badge}
-															</span>
+															</div>
+															{route.description && (
+																<p className="text-sm text-base-content/70 mt-1">{route.description}</p>
+															)}
+														</div>
+
+														{/* Badge */}
+														{route.badge && (
+															<div className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-content">
+																{route.badge}
+															</div>
 														)}
 													</Link>
 												</li>
@@ -258,18 +316,78 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 										})}
 									</ul>
 								)}
-							</li>
+							</div>
 						))}
-					</ul>
-				</nav>
+					</nav>
 
-				<div className="absolute inset-x-0 bottom-0 border-t border-brand-1/10 bg-white/95 px-6 py-5 text-center text-[0.7rem] uppercase tracking-[0.3em] text-brand-4">
-					<div className="flex flex-col gap-1">
-						<span className="font-semibold text-brand-3">MedSource Pro</span>
-						<span>v1.0.0</span>
+					{/* Footer */}
+					<div className="p-4 border-t border-base-300">
+						<Link
+							href="/contact"
+							onClick={handleLinkClick}
+							className="text-sm text-base-content/70 hover:text-base-content transition-colors"
+						>
+							Report an Issue
+						</Link>
 					</div>
 				</div>
 			</aside>
+
+			{/* Settings Modal */}
+			{settingsModalOpen && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+					{/* Backdrop */}
+					<div
+						className="fixed inset-0 bg-black/50"
+						onClick={() => setSettingsModalOpen(false)}
+					/>
+					
+					{/* Modal Content */}
+					<div className="relative z-10 w-full max-w-md rounded-lg bg-base-100 p-6 shadow-2xl">
+						{/* Header */}
+						<div className="mb-6 flex items-center justify-between">
+							<h2 className="text-2xl font-bold text-base-content">Settings</h2>
+							<button
+								onClick={() => setSettingsModalOpen(false)}
+								className="btn-circle ghost"
+								aria-label="Close settings"
+								title="Close"
+							>
+								<X size={20} className="text-base-content" />
+							</button>
+						</div>
+
+						{/* Settings Content */}
+						<div className="space-y-6">
+							{/* Theme Selection */}
+							<div>
+								<h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-base-content/70">
+									Appearance
+								</h3>
+								<p className="text-sm text-base-content/60 mb-2">Choose your preferred theme</p>
+								<div className="space-y-2">
+									<button className="flex w-full items-center gap-3 rounded-lg border border-base-300 p-3 transition-colors hover:border-primary hover:bg-base-200">
+										<div className="h-4 w-4 rounded-full border-2 border-primary"></div>
+										<span className="font-medium text-base-content">Light Mode</span>
+									</button>
+									<button className="flex w-full items-center gap-3 rounded-lg border border-base-300 p-3 transition-colors hover:border-primary hover:bg-base-200">
+										<div className="h-4 w-4 rounded-full border-2 border-base-300"></div>
+										<span className="font-medium text-base-content">Dark Mode</span>
+									</button>
+								</div>
+							</div>
+
+							{/* Language (Future) */}
+							<div>
+								<h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-base-content/70">
+									Language
+								</h3>
+								<p className="text-sm text-base-content/60">Coming soon...</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 		</>
 	)
 }
