@@ -18,11 +18,11 @@ interface PillProps {
 }
 
 const toneClasses: Record<PillTone, string> = {
-	brand: 'bg-brand-4/10 text-brand-4',
-	success: 'bg-brand-2/10 text-brand-3',
-	warning: 'bg-[var(--highlight)]/20 text-brand-4',
-	info: 'bg-[var(--link-color)]/15 text-[var(--link-color)]',
-	neutral: 'bg-[var(--light-gray)]/40 text-brand-4',
+	brand: 'bg-primary/10 text-primary',
+	success: 'bg-success/10 text-success',
+	warning: 'bg-warning/20 text-warning',
+	info: 'bg-info/15 text-info',
+	neutral: 'bg-base-300/40 text-base-content',
 }
 
 export default function Pill({ children, tone = 'brand', icon, className }: PillProps) {

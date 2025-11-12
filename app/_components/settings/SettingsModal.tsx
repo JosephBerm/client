@@ -1,0 +1,248 @@
+/**
+ * Settings Modal Component
+ * 
+ * Modern, scalable settings modal with two-pane layout inspired by Church of God project.
+ * Features a left sidebar for section navigation and right content area for settings.
+ * 
+ * **Features:**
+ * - Two-pane layout (sidebar + content)
+ * - Section-based navigation with icons
+ * - Active state indication
+ * - Scalable configuration (easy to add new sections)
+ * - Type-safe settings structure
+ * - Fully accessible (ARIA labels, keyboard navigation)
+ * - Mobile-responsive design
+ * 
+ * **Layout:**
+ * - **Left Sidebar**: Navigation menu with section icons and titles
+ * - **Right Content**: Selected section's settings items
+ * - **Header**: Close button
+ * 
+ * **Usage:**
+ * ```tsx
+ * const [isOpen, setIsOpen] = useState(false)
+ * 
+ * <SettingsModal
+ *   isOpen={isOpen}
+ *   onClose={() => setIsOpen(false)}
+ *   defaultSectionId="general"
+ * />
+ * ```
+ * 
+ * @module SettingsModal
+ */
+
+'use client'
+
+import { useState, useMemo, useEffect } from 'react'
+import { X } from 'lucide-react'
+import SettingRow from './SettingRow'
+import { getSettingsSections } from '@_services/SettingsService'
+
+/**
+ * Settings Modal component props interface.
+ */
+interface SettingsModalProps {
+	/**
+	 * Whether the settings modal is currently open/visible.
+	 * Controls the visibility and rendering of the modal.
+	 */
+	isOpen: boolean
+	/**
+	 * Callback function called when the modal should be closed.
+	 * Triggered by close button, overlay click, or escape key.
+	 */
+	onClose: () => void
+	/**
+	 * Optional ID of the section to select by default when modal opens.
+	 * If not provided, the first section is selected.
+	 */
+	defaultSectionId?: string
+}
+
+/**
+ * Settings Modal Component
+ * 
+ * Comprehensive settings modal with two-pane layout for organized settings management.
+ * 
+ * **Accessibility:**
+ * - ARIA labels and roles
+ * - Keyboard navigation (Escape to close)
+ * - Focus management
+ * - Screen reader support
+ * - Active section indication (aria-current)
+ * 
+ * @param props - Settings modal component props
+ * @returns Settings modal element or null if not open
+ */
+export default function SettingsModal({
+	isOpen,
+	onClose,
+	defaultSectionId,
+}: SettingsModalProps) {
+	const sections = getSettingsSections()
+
+	// Get default section (first section if not specified)
+	const defaultSection = useMemo(() => {
+		if (defaultSectionId) {
+			return sections.find((s) => s.id === defaultSectionId) || sections[0]
+		}
+		return sections[0]
+	}, [sections, defaultSectionId])
+
+	const [selectedSectionId, setSelectedSectionId] = useState<string>(
+		defaultSection?.id || sections[0]?.id || ''
+	)
+
+	// Reset selected section when modal opens
+	useEffect(() => {
+		if (isOpen && defaultSection) {
+			setSelectedSectionId(defaultSection.id)
+		}
+	}, [isOpen, defaultSection])
+
+	// Get currently selected section
+	const selectedSection = useMemo(() => {
+		return sections.find((s) => s.id === selectedSectionId) || sections[0]
+	}, [sections, selectedSectionId])
+
+	// Handle escape key
+	useEffect(() => {
+		if (!isOpen) return
+
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') {
+				onClose()
+			}
+		}
+
+		window.addEventListener('keydown', handleEscape)
+		return () => window.removeEventListener('keydown', handleEscape)
+	}, [isOpen, onClose])
+
+	// Prevent body scroll when modal is open
+	useEffect(() => {
+		if (isOpen) {
+			document.body.style.overflow = 'hidden'
+		} else {
+			document.body.style.overflow = ''
+		}
+
+		return () => {
+			document.body.style.overflow = ''
+		}
+	}, [isOpen])
+
+	if (!isOpen) return null
+
+	return (
+		<div
+			className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="settings-modal-title"
+		>
+			{/* Overlay */}
+			<div
+				className="fixed inset-0 bg-black/50 transition-opacity duration-300"
+				onClick={onClose}
+				aria-hidden="true"
+			/>
+
+		{/* Modal Content - Two-pane layout */}
+		<div
+			className="relative z-10 bg-base-100 rounded-lg shadow-2xl w-full max-w-4xl h-[80vh] max-h-[800px] overflow-hidden flex flex-col transform transition-all duration-300"
+			onClick={(e) => e.stopPropagation()}
+			tabIndex={-1}
+		>
+				{/* Header - Close button only */}
+				<div className="flex items-center justify-between p-4 border-b border-base-300">
+					<button
+						onClick={onClose}
+						className="btn btn-ghost btn-sm btn-circle"
+						aria-label="Close settings"
+					>
+						<X size={20} />
+					</button>
+				</div>
+
+				{/* Two-pane layout */}
+				<div className="flex flex-1 overflow-hidden">
+			{/* Left Sidebar - Navigation */}
+			<aside className="w-64 bg-base-200 border-r border-base-300 flex flex-col">
+						{/* Section Title */}
+						<div className="p-3 md:p-4 border-b border-base-300">
+							<h2 className="text-lg font-semibold text-base-content">
+								Settings
+							</h2>
+						</div>
+
+						{/* Navigation Menu */}
+						<nav className="flex-1 overflow-y-auto p-2 md:p-3">
+							<ul className="space-y-1">
+								{sections.map((section) => {
+									const Icon = section.icon
+									const isActive = section.id === selectedSectionId
+
+									return (
+										<li key={section.id}>
+											<button
+												onClick={() => setSelectedSectionId(section.id)}
+												className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${
+													isActive
+														? 'bg-primary/10 text-primary border border-primary/20'
+														: 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
+												}`}
+												aria-label={`${section.title} settings section`}
+												aria-current={isActive ? 'page' : undefined}
+											>
+												<Icon size={20} className="flex-shrink-0" />
+												<span className="font-medium">{section.title}</span>
+											</button>
+										</li>
+									)
+								})}
+							</ul>
+						</nav>
+					</aside>
+
+			{/* Right Content Area */}
+			<div className="flex-1 bg-base-100 overflow-y-auto">
+						{selectedSection && (
+							<div className="p-4 md:p-6">
+								{/* Section Header */}
+								<div className="mb-4 md:mb-6">
+									<h3
+										id="settings-modal-title"
+										className="text-xl md:text-2xl font-bold text-base-content mb-2"
+									>
+										{selectedSection.title}
+									</h3>
+									{selectedSection.description && (
+										<p className="text-sm text-base-content/70">
+											{selectedSection.description}
+										</p>
+									)}
+								</div>
+
+				{/* Settings List */}
+				<div className="space-y-0 bg-base-200 rounded-lg border border-base-300 overflow-hidden">
+									{selectedSection.items.map((item, index) => (
+										<div key={item.id}>
+											<SettingRow setting={item} />
+											{/* Divider between items (except last) */}
+											{index < selectedSection.items.length - 1 && (
+												<div className="border-b border-base-300 mx-6" />
+											)}
+										</div>
+									))}
+								</div>
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+		</div>
+	)
+}
+

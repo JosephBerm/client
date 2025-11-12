@@ -8,7 +8,7 @@ import { Trash2, ShoppingBag, CheckCircle } from 'lucide-react'
 import { useZodForm } from '@_hooks/useZodForm'
 import { quoteSchema, type QuoteFormData } from '@_utils/validation-schemas'
 import { useAuthStore } from '@_stores/useAuthStore'
-import { useUserSettingsStore } from '@_stores/useUserSettingsStore'
+import { useCartStore } from '@_stores/useCartStore'
 import FormInput from '@_components/forms/FormInput'
 import FormTextArea from '@_components/forms/FormTextArea'
 import Button from '@_components/ui/Button'
@@ -26,10 +26,10 @@ export default function CartPage() {
 	
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 	const user = useAuthStore((state) => state.user)
-	const cart = useUserSettingsStore((state) => state.cart)
-	const updateCartQuantity = useUserSettingsStore((state) => state.updateCartQuantity)
-	const removeFromCart = useUserSettingsStore((state) => state.removeFromCart)
-	const clearCart = useUserSettingsStore((state) => state.clearCart)
+	const cart = useCartStore((state) => state.cart)
+	const updateCartQuantity = useCartStore((state) => state.updateCartQuantity)
+	const removeFromCart = useCartStore((state) => state.removeFromCart)
+	const clearCart = useCartStore((state) => state.clearCart)
 
 	const form = useZodForm(quoteSchema, {
 		defaultValues: {

@@ -5,27 +5,35 @@
  * Manages theme application to the document root and ensures settings persist across sessions.
  * Should be rendered once in the root layout alongside AuthInitializer.
  *
- * **Features:**
- * - Automatic theme application on mount
- * - Reactive theme updates when user changes preferences
- * - Applies theme to document.documentElement data-theme attribute
- * - No visual rendering (returns null)
- * - Persists via localStorage (handled by useUserSettingsStore)
- * - Client-side only ('use client' directive)
+ * **Architecture (Church of God Pattern):**
+ * - Single initialization point via `initialize()` method
+ * - Called once on mount with empty dependency array
+ * - Initializes theme, preferences, and applies them to DOM
+ * - Handles migration from legacy storage format
+ * - MutationObserver in store handles reactive updates
  *
- * **Settings Managed:**
+ * **Changes from Old Implementation:**
+ * - **Before**: Reactive theme application via useEffect watching theme state
+ * - **After**: One-time initialization via `initialize()` method
+ * - **Benefit**: Cleaner separation, prevents unnecessary re-renders
+ * - **Benefit**: Service layer handles persistence and DOM updates
+ * - **Benefit**: Better performance and predictability
+ *
+ * **Settings Initialized:**
  * - Theme (DaisyUI theme names)
- * - User preferences (stored in useUserSettingsStore)
- * - Shopping cart state (persisted)
+ * - Table page size preference
+ * - Sidebar collapsed state
+ * - Custom user preferences
  *
  * **Theme Application:**
- * The component applies the theme by setting the data-theme attribute on the
- * HTML root element, which DaisyUI uses to apply theme-specific CSS variables.
+ * The `initialize()` method retrieves stored theme and applies it via
+ * ThemeService, which sets the data-theme attribute on the HTML root element.
+ * DaisyUI then applies theme-specific CSS variables.
  *
- * **Use Cases:**
- * - Root layout initialization
- * - Theme persistence across sessions
- * - Applying user preferences on app load
+ * **SSR Considerations:**
+ * - Initialization only runs client-side ('use client' directive)
+ * - Returns null (no UI rendering)
+ * - May cause brief flash of unstyled content (FOUC) on first load
  *
  * @example
  * ```tsx
@@ -44,11 +52,6 @@
  *     </html>
  *   );
  * }
- *
- * // Theme will be automatically applied from localStorage
- * // When user changes theme in settings:
- * const setTheme = useUserSettingsStore(state => state.setTheme);
- * setTheme('dark'); // UserSettingsInitializer will apply it reactively
  * ```
  *
  * @module UserSettingsInitializer
@@ -62,44 +65,47 @@ import { useUserSettingsStore } from '@_stores/useUserSettingsStore'
 /**
  * UserSettingsInitializer Component
  *
- * Invisible component that applies user settings (especially theme) to the DOM.
+ * Invisible component that initializes all user settings on app mount.
  * Must be rendered in a client component context.
  *
  * **Implementation Details:**
- * - Subscribes to theme from useUserSettingsStore
- * - Runs effect whenever theme changes
- * - Sets data-theme attribute on document root element
+ * - Calls `initialize()` method from useUserSettingsStore
+ * - Runs once on mount (empty dependency array)
+ * - Handles errors gracefully with console logging
  * - Returns null (no UI rendering)
  *
- * **Theme Application:**
- * DaisyUI themes are applied via the data-theme attribute on the HTML element:
- * ```html
- * <html data-theme="light">  <!-- Light theme -->
- * <html data-theme="dark">   <!-- Dark theme -->
- * <html data-theme="medsource-classic">  <!-- Custom theme -->
- * ```
+ * **Initialization Process:**
+ * 1. Retrieve stored settings from localStorage (via UserSettingsService)
+ * 2. Migrate from legacy format if needed
+ * 3. Apply theme to document (via ThemeService)
+ * 4. Load preferences into store
+ * 5. Set up MutationObserver for theme sync (handled by store)
  *
- * **SSR Considerations:**
- * - Checks typeof document !== 'undefined' for SSR safety
- * - Theme is applied client-side after hydration
- * - May cause brief flash of unstyled content (FOUC)
+ * **Performance:**
+ * - Single initialization call (not reactive)
+ * - Subsequent theme changes handled by store's MutationObserver
+ * - No unnecessary re-renders
  *
  * **Important Notes:**
  * - Must be placed in a client component ('use client')
  * - Should be rendered high in the component tree (root layout)
- * - Reacts to theme changes in real-time
- * - localStorage persistence handled by useUserSettingsStore
+ * - Only runs once per application load
+ * - Do not call initialize() elsewhere in the app
  *
  * @returns null - Component does not render any UI
  */
 export default function UserSettingsInitializer() {
-	const theme = useUserSettingsStore((state) => state.theme)
+	const initialize = useUserSettingsStore((state) => state.initialize)
 
 	useEffect(() => {
-		if (typeof document !== 'undefined') {
-			document.documentElement.setAttribute('data-theme', theme)
-		}
-	}, [theme])
+		// Initialize all user settings (theme and preferences) on mount
+		// Only run once - empty dependency array ensures this
+		initialize().catch((error) => {
+			console.error('Failed to initialize user settings:', error)
+		})
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []) // Empty array - only run once on mount
 
+	// This component doesn't render anything
 	return null
 }

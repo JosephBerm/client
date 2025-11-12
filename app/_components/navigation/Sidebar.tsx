@@ -342,8 +342,8 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 						onClick={() => setSettingsModalOpen(false)}
 					/>
 					
-					{/* Modal Content */}
-					<div className="relative z-10 w-full max-w-md rounded-lg bg-base-100 p-6 shadow-2xl">
+				{/* Modal Content */}
+				<div className="relative z-10 bg-base-100 w-full max-w-md rounded-lg p-6 shadow-2xl">
 						{/* Header */}
 						<div className="mb-6 flex items-center justify-between">
 							<h2 className="text-2xl font-bold text-base-content">Settings</h2>

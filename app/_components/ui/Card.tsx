@@ -86,10 +86,10 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
 const variantClasses: Record<CardVariant, string> = {
 	elevated:
-		'bg-white border border-brand-1/10 shadow-[0_22px_40px_rgba(41,66,4,0.16)]',
-	soft: 'bg-[var(--soft-brand-color)] border border-brand-1/10 shadow-[0_18px_32px_rgba(65,103,6,0.12)]',
-	outline: 'bg-white border border-dashed border-brand-1/20',
-	ghost: 'bg-transparent border border-brand-1/15',
+		'card bg-base-100 border border-base-300 shadow-xl',
+	soft: 'card bg-base-200 border border-base-300 shadow-lg',
+	outline: 'card bg-base-100 border border-dashed border-base-300',
+	ghost: 'card bg-transparent border border-base-300',
 }
 
 export default function Card({
@@ -114,9 +114,9 @@ export default function Card({
 				'relative flex flex-col overflow-hidden rounded-[32px] transition duration-200',
 				variantClasses[variant],
 				{
-					'hover:-translate-y-1 hover:shadow-[0_28px_48px_rgba(41,66,4,0.2)]': hover && variant === 'elevated',
-					'hover:-translate-y-1 hover:shadow-[0_24px_44px_rgba(41,66,4,0.18)]': hover && variant === 'soft',
-					'hover:-translate-y-1 hover:border-brand-1/25': hover && variant === 'outline',
+					'hover:-translate-y-1 hover:shadow-2xl': hover && variant === 'elevated',
+					'hover:-translate-y-1 hover:shadow-xl': hover && variant === 'soft',
+					'hover:-translate-y-1 hover:border-base-content/20': hover && variant === 'outline',
 				},
 				className
 			)}
@@ -131,8 +131,8 @@ export default function Card({
 			<div className={classNames('flex flex-col gap-4', bodyPadding, bodyClassName)}>
 				{(title || subtitle) && (
 					<header className="space-y-2">
-						{title && <h2 className="text-xl font-semibold text-brand-4">{title}</h2>}
-						{subtitle && <p className="text-sm uppercase tracking-[0.3em] text-brand-3">{subtitle}</p>}
+					{title && <h2 className="text-xl font-semibold text-base-content">{title}</h2>}
+					{subtitle && <p className="text-sm uppercase tracking-[0.3em] text-primary">{subtitle}</p>}
 					</header>
 				)}
 

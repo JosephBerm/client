@@ -146,15 +146,15 @@ const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
 
 		return (
 			<div className={classNames(fieldWrapperClass, 'gap-1')}>
-				<label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-brand-4">
-					<input
-						ref={ref}
-						type="checkbox"
-						className={classNames(
-							'h-5 w-5 rounded border border-brand-1/25 bg-white text-brand-4 transition focus:outline-none focus:ring-2 focus:ring-brand-3/30 accent-brand-3',
-							{ 'border-[var(--error-color)] focus:ring-[var(--error-color)]/40': error },
-							className
-						)}
+			<label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-base-content">
+				<input
+					ref={ref}
+					type="checkbox"
+					className={classNames(
+						'checkbox checkbox-primary h-5 w-5',
+						{ 'checkbox-error': error },
+						className
+					)}
 						{...props}
 					/>
 					<span>

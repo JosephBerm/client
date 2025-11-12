@@ -41,22 +41,22 @@ const MARQUEE_PRODUCTS = [...FEATURED_PRODUCTS, ...FEATURED_PRODUCTS]
  */
 export default function ProductsCarousel() {
 	return (
-		<section id="featured-products" className="bg-[var(--light-gray)] py-20 lg:py-28">
+		<section id="featured-products" className="bg-base-200 py-20 lg:py-28">
 			<PageContainer className="space-y-12">
 				<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 					<div className="max-w-2xl space-y-3 text-left">
-						<h2 className="text-3xl font-semibold leading-tight text-brand-4 md:text-4xl lg:text-[3rem]">
-							Featured inventory ready to ship.
-						</h2>
-						<p className="text-base text-brand-4/70 md:text-lg">
+					<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-[3rem]">
+						Featured inventory ready to ship.
+					</h2>
+					<p className="text-base text-base-content/70 md:text-lg">
 							Premium supplies sourced from trusted manufacturers, staged in regional warehouses for fast delivery
 							across acute, ambulatory, and specialty care settings.
 							</p>
 						</div>
 					<Link
-						href="/store"
-						className="inline-flex items-center justify-center rounded-full border border-brand-1/30 bg-white px-6 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-brand-4 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-3 hover:text-brand-3"
-					>
+					href="/store"
+					className="btn btn-outline btn-primary px-6 py-2 text-sm uppercase tracking-[0.3em] transition hover:-translate-y-0.5"
+				>
 						View full catalog
 					</Link>
 					</div>
@@ -68,8 +68,8 @@ export default function ProductsCarousel() {
 					))}
 				</div>
 
-				{/* Desktop marquee */}
-				<div className="marquee-container hidden rounded-[32px] border border-white/40 bg-white/80 py-12 pl-12 pr-20 shadow-[0_24px_48px_rgba(58,71,52,0.15)] md:block">
+			{/* Desktop marquee */}
+			<div className="marquee-container hidden rounded-[32px] border border-base-300/40 bg-base-100/80 py-12 pl-12 pr-20 shadow-[0_24px_48px_rgba(58,71,52,0.15)] md:block">
 					<div className="marquee-track gap-10">
 						{MARQUEE_PRODUCTS.map((product, index) => (
 							<ProductCard key={`${product.name}-${index}`} product={product} className="w-[260px]" />
@@ -90,18 +90,18 @@ function ProductCard({ product, className }: ProductCardProps) {
 	const { name, description, priceNote, image } = product
 	return (
 		<article
-			className={`group relative flex flex-col gap-4 rounded-3xl border border-brand-1/15 bg-white/95 px-6 py-6 text-left shadow-[0_18px_32px_rgba(41,66,4,0.12)] transition hover:-translate-y-1 hover:shadow-[0_26px_40px_rgba(41,66,4,0.18)] ${className ?? ''}`}
-		>
-			<div className="flex items-start justify-between gap-4">
-				<div className="space-y-2">
-					<h3 className="text-lg font-semibold text-brand-4">{name}</h3>
-					<p className="text-sm text-brand-4/70">{description}</p>
-				</div>
-				<span className="inline-flex rounded-full bg-[var(--soft-brand-color)] px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-3">
-					{priceNote}
-				</span>
+		className={`card bg-base-100 group relative flex flex-col gap-4 border border-base-300 px-6 py-6 text-left shadow-xl transition hover:-translate-y-1 hover:shadow-2xl ${className ?? ''}`}
+	>
+		<div className="flex items-start justify-between gap-4">
+			<div className="space-y-2">
+				<h3 className="text-lg font-semibold text-base-content">{name}</h3>
+				<p className="text-sm text-base-content/70">{description}</p>
 			</div>
-			<div className="relative mt-2 overflow-hidden rounded-2xl bg-[var(--soft-brand-color)]/60">
+			<span className="badge badge-primary inline-flex px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em]">
+				{priceNote}
+			</span>
+		</div>
+		<div className="relative mt-2 overflow-hidden rounded-2xl bg-base-200/60">
 				<Image
 					src={image}
 					alt={name}

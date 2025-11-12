@@ -115,7 +115,7 @@ export default function LoadingSpinner({
 
 	if (fullScreen) {
 		return (
-			<div className="fixed inset-0 bg-base-100/80 backdrop-blur-sm z-50 flex items-center justify-center">
+			<div className="fixed inset-0 bg-base-100/95 backdrop-blur-sm z-50 flex items-center justify-center">
 				{spinner}
 			</div>
 		)

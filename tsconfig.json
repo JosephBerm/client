@@ -29,7 +29,8 @@
 			"@_helpers/*": ["app/_helpers/*"],
 			"@_classes/*": ["app/_classes/*"],
 			"@_types/*": ["app/_types/*"],
-			"@_utils/*": ["app/_utils/*"]
+			"@_utils/*": ["app/_utils/*"],
+			"@_scripts/*": ["app/_scripts/*"]
 		}
 	},
 	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

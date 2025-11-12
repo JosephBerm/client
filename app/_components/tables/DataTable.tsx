@@ -256,21 +256,21 @@ export default function DataTable<TData>({
 
 	return (
 		<div className="flex w-full flex-col gap-6">
-			<div className="overflow-hidden rounded-[32px] border border-brand-1/15 bg-white shadow-[0_24px_48px_rgba(41,66,4,0.12)]">
+			<div className="overflow-hidden rounded-[32px] border border-base-300 bg-base-100 shadow-xl">
 				<div className="relative overflow-x-auto">
-					<table className="min-w-full divide-y divide-brand-1/15">
-						<thead className="bg-brand-4/95">
+					<table className="table table-zebra min-w-full">
+						<thead className="bg-primary text-primary-content">
 							{table.getHeaderGroups().map((headerGroup) => (
 								<tr key={headerGroup.id}>
 									{headerGroup.headers.map((header) => (
 										<th
 											key={header.id}
 											className={classNames(
-												'px-6 py-4 text-left text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-white',
-												{
-													'cursor-pointer select-none transition hover:bg-brand-5/80':
-														header.column.getCanSort(),
-												}
+											'px-6 py-4 text-left text-[0.7rem] font-semibold uppercase tracking-[0.3em]',
+											{
+												'cursor-pointer select-none transition hover:bg-primary-focus':
+													header.column.getCanSort(),
+											}
 											)}
 											onClick={header.column.getToggleSortingHandler()}
 										>
@@ -280,7 +280,7 @@ export default function DataTable<TData>({
 													: flexRender(header.column.columnDef.header, header.getContext())}
 
 												{header.column.getCanSort() && (
-													<span className="text-white/70">
+													<span className="text-primary-content/70">
 														{header.column.getIsSorted() === 'asc' ? (
 															<ChevronUp className="h-4 w-4" />
 														) : header.column.getIsSorted() === 'desc' ? (
@@ -297,32 +297,32 @@ export default function DataTable<TData>({
 							))}
 						</thead>
 
-						<tbody className="divide-y divide-brand-1/20">
-							{isLoading ? (
-								<tr>
-									<td colSpan={columns.length} className="px-6 py-12 text-center">
-										<span className="inline-flex h-10 w-10 animate-spin rounded-full border-4 border-brand-1/20 border-t-brand-4" />
-									</td>
-								</tr>
-							) : table.getRowModel().rows.length === 0 ? (
-								<tr>
-									<td
-										colSpan={columns.length}
-										className="px-6 py-12 text-center text-sm font-semibold uppercase tracking-[0.3em] text-brand-4/60"
-									>
-										{emptyMessage}
+					<tbody>
+						{isLoading ? (
+							<tr>
+								<td colSpan={columns.length} className="px-6 py-12 text-center">
+									<span className="loading loading-spinner loading-lg text-primary" />
+								</td>
+							</tr>
+						) : table.getRowModel().rows.length === 0 ? (
+							<tr>
+								<td
+									colSpan={columns.length}
+									className="px-6 py-12 text-center text-sm font-semibold uppercase tracking-[0.3em] text-base-content/60"
+								>
+									{emptyMessage}
 									</td>
 								</tr>
 							) : (
 								table.getRowModel().rows.map((row) => (
 									<tr
 										key={row.id}
-										className="transition hover:bg-[var(--soft-brand-color)]/80"
-									>
-										{row.getVisibleCells().map((cell) => (
-											<td key={cell.id} className="px-6 py-4 text-sm text-brand-4">
-												{flexRender(cell.column.columnDef.cell, cell.getContext())}
-											</td>
+										className="hover"
+								>
+									{row.getVisibleCells().map((cell) => (
+										<td key={cell.id} className="px-6 py-4 text-sm text-base-content">
+											{flexRender(cell.column.columnDef.cell, cell.getContext())}
+										</td>
 										))}
 									</tr>
 								))
@@ -332,9 +332,9 @@ export default function DataTable<TData>({
 				</div>
 			</div>
 
-			{pagination && onPaginationChange && (
-				<div className="flex flex-col gap-4 rounded-[28px] border border-brand-1/20 bg-white/70 px-6 py-4 shadow-[0_16px_32px_rgba(41,66,4,0.1)] sm:flex-row sm:items-center sm:justify-between">
-					<div className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-4/70">
+		{pagination && onPaginationChange && (
+			<div className="flex flex-col gap-4 rounded-[28px] border border-base-300 bg-base-200/70 px-6 py-4 shadow-lg sm:flex-row sm:items-center sm:justify-between">
+				<div className="text-xs font-semibold uppercase tracking-[0.3em] text-base-content/70">
 						Showing{' '}
 						{pagination.pageIndex * pagination.pageSize + 1}-
 						{Math.min(
@@ -355,7 +355,7 @@ export default function DataTable<TData>({
 						].map(({ label, action, disabled }) => (
 							<button
 								key={label}
-								className="inline-flex h-9 items-center rounded-full border border-brand-1/20 px-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-4 transition hover:-translate-y-0.5 hover:border-brand-3 hover:text-brand-3 disabled:cursor-not-allowed disabled:opacity-40"
+								className="btn btn-sm btn-ghost inline-flex h-9 items-center rounded-full border border-base-300 px-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em] transition hover:-translate-y-0.5 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
 								onClick={() => onPaginationChange(action())}
 								disabled={disabled}
 							>
@@ -363,9 +363,9 @@ export default function DataTable<TData>({
 							</button>
 						))}
 
-						<span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-3">
-							Page {pagination.pageIndex + 1} of {pageCount || Math.max(1, Math.ceil(data.length / pagination.pageSize))}
-						</span>
+					<span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-primary">
+						Page {pagination.pageIndex + 1} of {pageCount || Math.max(1, Math.ceil(data.length / pagination.pageSize))}
+					</span>
 
 						{[
 							{
@@ -384,7 +384,7 @@ export default function DataTable<TData>({
 						].map(({ label, action, disabled }) => (
 							<button
 								key={label}
-								className="inline-flex h-9 items-center rounded-full border border-brand-1/20 px-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-4 transition hover:-translate-y-0.5 hover:border-brand-3 hover:text-brand-3 disabled:cursor-not-allowed disabled:opacity-40"
+								className="btn btn-sm btn-ghost inline-flex h-9 items-center rounded-full border border-base-300 px-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em] transition hover:-translate-y-0.5 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
 								onClick={() => onPaginationChange(action())}
 								disabled={disabled}
 							>
@@ -393,11 +393,11 @@ export default function DataTable<TData>({
 						))}
 					</div>
 
-					<div className="flex items-center gap-2">
-						<span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-3">Show</span>
-						<select
-							className="rounded-full border border-brand-1/20 bg-white px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-4 focus:border-brand-3 focus:outline-none focus:ring-2 focus:ring-brand-3/20"
-							value={pagination.pageSize}
+				<div className="flex items-center gap-2">
+					<span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-primary">Show</span>
+					<select
+						className="select select-bordered select-sm rounded-full px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.3em]"
+						value={pagination.pageSize}
 							onChange={(e) =>
 								onPaginationChange({
 									...pagination,

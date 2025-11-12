@@ -125,28 +125,28 @@ interface BadgeProps {
  * @returns Badge component (span element)
  */
 const baseClasses =
-	'inline-flex items-center justify-center rounded-full font-semibold uppercase tracking-[0.25em] transition-colors'
+	'badge inline-flex items-center justify-center rounded-full font-semibold uppercase tracking-[0.25em] transition-colors'
 
 const variantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
-	primary: 'bg-brand-4 text-white',
-	secondary: 'bg-brand-3 text-white',
-	accent: 'bg-[var(--teal)] text-white',
-	success: 'bg-brand-2 text-white',
-	warning: 'bg-[var(--highlight)] text-brand-4',
-	error: 'bg-[var(--error-color)] text-white',
-	info: 'bg-[var(--link-color)] text-white',
-	neutral: 'bg-[var(--light-gray)] text-brand-4',
+	primary: 'badge-primary',
+	secondary: 'badge-secondary',
+	accent: 'badge-accent',
+	success: 'badge-success',
+	warning: 'badge-warning',
+	error: 'badge-error',
+	info: 'badge-info',
+	neutral: 'badge-neutral',
 }
 
 const outlineVariantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
-	primary: 'border border-brand-4 text-brand-4',
-	secondary: 'border border-brand-3 text-brand-3',
-	accent: 'border border-[var(--teal)] text-[var(--teal)]',
-	success: 'border border-brand-2 text-brand-2',
-	warning: 'border border-[var(--highlight)] text-[var(--highlight)]',
-	error: 'border border-[var(--error-color)] text-[var(--error-color)]',
-	info: 'border border-[var(--link-color)] text-[var(--link-color)]',
-	neutral: 'border border-[var(--light-gray)] text-brand-4',
+	primary: 'badge-outline badge-primary',
+	secondary: 'badge-outline badge-secondary',
+	accent: 'badge-outline badge-accent',
+	success: 'badge-outline badge-success',
+	warning: 'badge-outline badge-warning',
+	error: 'badge-outline badge-error',
+	info: 'badge-outline badge-info',
+	neutral: 'badge-outline badge-neutral',
 }
 
 const sizeClasses: Record<NonNullable<BadgeProps['size']>, string> = {

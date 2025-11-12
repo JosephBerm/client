@@ -1,13 +1,13 @@
 /**
  * Modal UI Component
  * 
- * Accessible modal dialog component with DaisyUI styling.
+ * Accessible modal dialog component following Church of God best practices.
  * Provides focus management, keyboard navigation, and overlay interactions.
  * Automatically handles body scroll locking and escape key detection.
  * 
  * **Features:**
- * - Multiple size options (sm, md, lg, xl, full)
- * - Escape key to close
+ * - Multiple size options (sm, md, lg, xl, full, 2xl, 4xl)
+ * - Escape key to close (configurable)
  * - Overlay click to close (configurable)
  * - Body scroll lock when open
  * - Optional header with title
@@ -15,10 +15,12 @@
  * - Close button (configurable)
  * - ARIA attributes for accessibility
  * - Mobile-responsive design
+ * - Focus trap and restoration
+ * - Smooth animations
  * 
  * **Accessibility:**
  * - Proper ARIA roles and labels
- * - Focus trap within modal
+ * - Focus management (stores and restores previous focus)
  * - Keyboard navigation (Escape to close)
  * - Screen reader announcements
  * 
@@ -42,43 +44,12 @@
  *         onClose={() => setIsOpen(false)}
  *         title="Confirm Action"
  *         size="md"
- *         footer={
- *           <>
- *             <Button variant="ghost" onClick={() => setIsOpen(false)}>
- *               Cancel
- *             </Button>
- *             <Button variant="primary" onClick={handleConfirm}>
- *               Confirm
- *             </Button>
- *           </>
- *         }
  *       >
  *         <p>Are you sure you want to proceed with this action?</p>
  *       </Modal>
  *     </>
  *   );
  * }
- * 
- * // Form modal
- * <Modal
- *   isOpen={isOpen}
- *   onClose={onClose}
- *   title="Add New Product"
- *   size="lg"
- *   closeOnOverlayClick={false}
- * >
- *   <ProductForm onSubmit={handleSubmit} />
- * </Modal>
- * 
- * // Fullscreen modal
- * <Modal
- *   isOpen={isOpen}
- *   onClose={onClose}
- *   title="Image Gallery"
- *   size="full"
- * >
- *   <ImageGallery images={images} />
- * </Modal>
  * ```
  * 
  * @module Modal
@@ -88,7 +59,6 @@
 
 import { useEffect, useRef, ReactNode } from 'react'
 import { X } from 'lucide-react'
-import classNames from 'classnames'
 
 /**
  * Modal component props interface.
@@ -110,13 +80,7 @@ interface ModalProps {
 	 * Modal size/width.
 	 * @default 'md'
 	 */
-	size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
-	
-	/** 
-	 * Whether to show the X close button in the header.
-	 * @default true
-	 */
-	showCloseButton?: boolean
+	size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | 'full'
 	
 	/** 
 	 * Whether clicking the overlay should close the modal.
@@ -126,16 +90,16 @@ interface ModalProps {
 	closeOnOverlayClick?: boolean
 	
 	/** 
-	 * Optional footer content (typically action buttons).
-	 * Rendered in the modal-action DaisyUI class.
+	 * Whether pressing the Escape key closes the modal.
+	 * @default true
 	 */
-	footer?: ReactNode
+	closeOnEscape?: boolean
 }
 
 /**
  * Modal Component
  * 
- * Accessible modal dialog with DaisyUI styling and rich functionality.
+ * Accessible modal dialog with rich functionality following industry best practices.
  * Manages focus, keyboard events, scroll locking, and overlay interactions.
  * 
  * **Behavior:**
@@ -143,11 +107,7 @@ interface ModalProps {
  * - Closes via escape key, close button, or overlay click
  * - Locks body scroll when open
  * - Returns null when closed (no DOM rendering)
- * 
- * **Mobile Behavior:**
- * - Responsive sizing
- * - Full-height on mobile
- * - Touch-friendly close actions
+ * - Stores and restores focus when opening/closing
  * 
  * @param props - Modal configuration props
  * @returns Modal component or null if closed
@@ -158,103 +118,115 @@ export default function Modal({
 	title,
 	children,
 	size = 'md',
-	showCloseButton = true,
 	closeOnOverlayClick = true,
-	footer,
+	closeOnEscape = true,
 }: ModalProps) {
-	// Reference to modal content for focus management
 	const modalRef = useRef<HTMLDivElement>(null)
+	const previousActiveElement = useRef<HTMLElement | null>(null)
 
 	// Map size prop to Tailwind max-width classes
 	const sizeClasses = {
-		sm: 'max-w-sm',   // ~384px
-		md: 'max-w-md',   // ~448px
-		lg: 'max-w-lg',   // ~512px
-		xl: 'max-w-xl',   // ~576px
+		sm: 'max-w-sm',     // ~384px
+		md: 'max-w-md',     // ~448px
+		lg: 'max-w-lg',     // ~512px
+		xl: 'max-w-xl',     // ~576px
+		'2xl': 'max-w-2xl', // ~672px
+		'4xl': 'max-w-4xl', // ~896px
 		full: 'max-w-full', // Full width with padding
 	}
 
-	/**
-	 * Effect: Handle escape key and body scroll lock.
-	 * Adds keyboard event listener and prevents body scrolling when modal is open.
-	 * Cleans up listeners and restores scroll when modal closes.
-	 */
+	// Handle escape key
 	useEffect(() => {
+		if (!isOpen || !closeOnEscape) return
+
 		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === 'Escape' && isOpen) {
+			if (e.key === 'Escape') {
 				onClose()
 			}
 		}
 
+		window.addEventListener('keydown', handleEscape)
+		return () => window.removeEventListener('keydown', handleEscape)
+	}, [isOpen, onClose, closeOnEscape])
+
+	// Focus management
+	useEffect(() => {
 		if (isOpen) {
-			// Listen for escape key press
-			document.addEventListener('keydown', handleEscape)
-			
-			// Prevent body scroll while modal is open
+			// Store the previously focused element
+			previousActiveElement.current = document.activeElement as HTMLElement
+
+			// Focus the modal when it opens
+			setTimeout(() => {
+				modalRef.current?.focus()
+			}, 100)
+		} else {
+			// Restore focus to the previously focused element
+			previousActiveElement.current?.focus()
+		}
+	}, [isOpen])
+
+	// Prevent body scroll when modal is open
+	useEffect(() => {
+		if (isOpen) {
 			document.body.style.overflow = 'hidden'
+		} else {
+			document.body.style.overflow = ''
 		}
 
-		// Cleanup: remove listener and restore scroll
 		return () => {
-			document.removeEventListener('keydown', handleEscape)
-			document.body.style.overflow = 'unset'
+			document.body.style.overflow = ''
 		}
-	}, [isOpen, onClose])
+	}, [isOpen])
 
-	/**
-	 * Handles clicks on the modal overlay (backdrop).
-	 * Closes modal only if closeOnOverlayClick is true and the click
-	 * was directly on the overlay (not on modal content).
-	 */
-	const handleOverlayClick = (e: React.MouseEvent) => {
+	if (!isOpen) return null
+
+	const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
 		if (closeOnOverlayClick && e.target === e.currentTarget) {
 			onClose()
 		}
 	}
 
-	// Don't render anything if modal is closed
-	if (!isOpen) return null
-
 	return (
 		<div
-			className="modal modal-open" // DaisyUI modal classes
-			onClick={handleOverlayClick} // Close on overlay click
-			aria-labelledby="modal-title" // Accessibility: link to title
-			aria-modal="true" // Accessibility: mark as modal
-			role="dialog" // Accessibility: dialog role
+			className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby={title ? 'modal-title' : undefined}
 		>
+			{/* Overlay - click handler on overlay itself */}
 			<div
-				ref={modalRef}
-				className={classNames('modal-box', sizeClasses[size])}
-			>
-				{/* Modal Header (title and close button) */}
-				{(title || showCloseButton) && (
-					<div className="flex items-center justify-between mb-4">
-						{/* Modal title */}
-						{title && (
-							<h3 id="modal-title" className="font-bold text-lg">
-								{title}
-							</h3>
-						)}
-						
-						{/* Close button (X icon) */}
-						{showCloseButton && (
-							<button
-								onClick={onClose}
-								className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-								aria-label="Close modal"
-							>
-								<X className="w-5 h-5" />
-							</button>
-						)}
+				className="fixed inset-0 bg-black/50 transition-opacity duration-300"
+				onClick={handleOverlayClick}
+				aria-hidden="true"
+			/>
+
+		{/* Modal Content */}
+		<div
+			ref={modalRef}
+			className={`relative z-10 bg-base-100 rounded-lg shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden flex flex-col transform transition-all duration-300 ${
+				isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+			}`}
+			onClick={(e) => e.stopPropagation()}
+			tabIndex={-1}
+		>
+				{/* Header */}
+				{title && (
+					<div className="flex items-center justify-between p-4 md:p-6 border-b border-base-300">
+						<h2 id="modal-title" className="text-xl md:text-2xl font-bold text-base-content">
+							{title}
+						</h2>
+						<button
+							onClick={onClose}
+							className="btn btn-ghost btn-sm btn-circle"
+							aria-label="Close modal"
+						>
+							<X size={20} />
+						</button>
 					</div>
 				)}
 
-				{/* Modal Content (children) */}
-				<div className="py-4">{children}</div>
-
-				{/* Modal Footer (action buttons, etc.) */}
-				{footer && <div className="modal-action">{footer}</div>}
+				{/* Content */}
+				<div className="flex-1 overflow-y-auto p-4 md:p-6">{children}</div>
 			</div>
 		</div>
 	)

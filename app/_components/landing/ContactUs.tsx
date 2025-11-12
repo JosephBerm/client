@@ -9,7 +9,7 @@ import PageContainer from '@_components/layouts/PageContainer'
  */
 export default function ContactUs() {
 	return (
-		<section id="contact" className="relative overflow-hidden bg-brand-4 py-20 text-white lg:py-28">
+		<section id="contact" className="relative overflow-hidden bg-primary text-primary-content py-20 lg:py-28">
 			<div
 				aria-hidden="true"
 				className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_45%)]"
@@ -30,18 +30,18 @@ export default function ContactUs() {
 				</div>
 
 				<div className="flex w-full flex-col items-center gap-4 rounded-3xl border border-white/20 bg-white/10 p-6 backdrop-blur md:flex-row md:justify-center md:gap-6 md:p-8 lg:w-auto">
-					<Link
-						href="/contact"
-						className="inline-flex w-full items-center justify-center rounded-full bg-white px-8 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-brand-4 shadow-lg shadow-brand-5/20 transition hover:-translate-y-0.5 hover:bg-[var(--soft-brand-color)] md:w-auto"
-					>
-						Request a consultation
-					</Link>
-					<a
-						href="tel:+17865782145"
-						className="inline-flex w-full items-center justify-center rounded-full border border-white/40 px-8 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:-translate-y-0.5 hover:border-white md:w-auto"
-					>
-						Call (786) 578-2145
-					</a>
+				<Link
+					href="/contact"
+					className="btn btn-secondary shadow-lg transition hover:-translate-y-0.5 text-sm uppercase tracking-[0.3em] md:w-auto"
+				>
+					Request a consultation
+				</Link>
+				<a
+					href="tel:+17865782145"
+					className="btn btn-outline btn-primary-content transition hover:-translate-y-0.5 text-sm uppercase tracking-[0.3em] md:w-auto"
+				>
+					Call (786) 578-2145
+				</a>
 				</div>
 			</PageContainer>
 		</section>

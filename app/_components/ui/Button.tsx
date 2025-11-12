@@ -137,19 +137,19 @@ const baseClasses =
 
 const variantClasses: Record<NonNullable<ButtonProps['variant']>, string> = {
 	primary:
-		'bg-brand-4 text-white shadow-[0_12px_28px_rgba(41,66,4,0.35)] hover:-translate-y-0.5 hover:bg-brand-5 focus-visible:outline-brand-3',
+		'btn btn-primary shadow-lg hover:-translate-y-0.5',
 	secondary:
-		'bg-white text-brand-4 border border-brand-1/15 shadow-[0_6px_18px_rgba(41,66,4,0.18)] hover:-translate-y-0.5 hover:bg-[var(--soft-brand-color)] focus-visible:outline-brand-3',
+		'btn btn-secondary shadow-md hover:-translate-y-0.5',
 	accent:
-		'bg-[var(--teal)] text-white shadow-[0_12px_28px_rgba(6,97,74,0.3)] hover:-translate-y-0.5 hover:bg-[var(--darker-teal)] focus-visible:outline-[var(--teal)]',
+		'btn btn-accent shadow-lg hover:-translate-y-0.5',
 	ghost:
-		'bg-transparent text-brand-4 hover:bg-[var(--soft-brand-color)] hover:text-brand-3 focus-visible:outline-brand-3',
+		'btn btn-ghost hover:-translate-y-0.5',
 	outline:
-		'border border-brand-1/30 bg-transparent text-brand-4 hover:bg-white/60 focus-visible:outline-brand-3',
+		'btn btn-outline hover:-translate-y-0.5',
 	error:
-		'bg-[var(--error-color)] text-white shadow-[0_12px_24px_rgba(210,43,43,0.35)] hover:-translate-y-0.5 hover:bg-[#bb2424] focus-visible:outline-[#520606]',
+		'btn btn-error shadow-lg hover:-translate-y-0.5',
 	success:
-		'bg-brand-2 text-white shadow-[0_12px_28px_rgba(77,122,7,0.28)] hover:-translate-y-0.5 hover:bg-brand-3 focus-visible:outline-brand-3',
+		'btn btn-success shadow-lg hover:-translate-y-0.5',
 }
 
 const sizeClasses: Record<NonNullable<ButtonProps['size']>, string> = {

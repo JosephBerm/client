@@ -1,43 +1,21 @@
 @import 'tailwindcss';
 
+@plugin 'daisyui' {
+	themes: winter --default, luxury --prefersdark;
+}
+
+@custom-variant dark (&:where([data-theme=luxury], [data-theme=luxury] *));
+
 @layer base {
 	/* ========================================
 	   CSS Custom Properties (Design Tokens)
 	   ======================================== */
 	:root {
-		/* Layout & Background Colors */
-		--bg-color: #fcfff7;
-		--section-bg-color: #f8f8f8;
-		--footer-color: #fcfff7;
-		--row-color: #fff;
-		--alternating-row-color: #f8f8f8;
 
-		/* Brand Colors */
-		--brand-color-1: #416706;
-		--brand-color-2: #4d7a07;
-		--brand-color-3: #355405;
-		--brand-color-4: #2a4204;
-		--brand-color-5: #1e2f03;
-		--teal: #06614a;
-		--darker-teal: #055541;
-		--soft-brand-color: #f2fcef;
-		--soft-brand-color-hovered: #ffdb9e;
-
-		/* Semantic Colors */
-		--link-color: #00008b;
-		--black-text-color: #393939;
-		--disabled-color: #949494;
-		--highlight: #ffcc00;
+		/* Semantic Colors (kept for backward compatibility) */
 		--toastify-color-error: #d22b2b !important;
 		--error-color: var(--toastify-color-error);
 		--error-color-tint: #520606;
-
-		/* Neutral Colors */
-		--black: #000;
-		--white: #fff;
-		--gray: #a1a1a1;
-		--light-gray: #d8d8d8;
-		--blue: #0f52ba;
 
 		/* UI Element Colors */
 		--tooltip-background: rgba(0, 0, 0, 0.35);
@@ -75,7 +53,7 @@
 		box-sizing: border-box;
 		font-size: 62.5%; /* 1rem = 10px for easier calculations */
 		scroll-behavior: smooth;
-		scrollbar-color: var(--light-gray) transparent;
+		scrollbar-color: oklch(var(--b3)) transparent;
 		scrollbar-width: thin;
 		width: 100%;
 	}
@@ -100,8 +78,8 @@
 	}
 
 	::selection {
-		background: var(--highlight);
-		color: var(--black);
+		background: oklch(var(--wa));
+		color: oklch(var(--wac));
 	}
 
 	/* ========================================
@@ -135,7 +113,7 @@
 
 	a:hover,
 	a:focus {
-		color: var(--link-color) !important;
+		color: oklch(var(--p)) !important;
 	}
 
 	/* ========================================
@@ -564,7 +542,7 @@
 
 	::-webkit-scrollbar-thumb {
 		border-radius: 10px;
-		background-color: var(--light-gray);
+		background-color: oklch(var(--b3));
 	}
 
 	/* ========================================
@@ -573,14 +551,14 @@
 	.gradiant-text-brand {
 		background-image: linear-gradient(
 			90deg,
-			var(--darker-teal),
-			var(--teal),
-			var(--teal),
-			var(--brand-color-1),
-			var(--brand-color-1),
-			var(--brand-color-4),
-			var(--brand-color-4),
-			var(--brand-color-4)
+			oklch(var(--a)),
+			oklch(var(--p)),
+			oklch(var(--p)),
+			oklch(var(--p)),
+			oklch(var(--p)),
+			oklch(var(--pf)),
+			oklch(var(--pf)),
+			oklch(var(--pf))
 		);
 		background-clip: text;
 		-webkit-background-clip: text;
@@ -590,52 +568,6 @@
 		user-select: none;
 	}
 
-	/* ========================================
-	   Theme: MedSource Classic
-	   ======================================== */
-	[data-theme='medsource-classic'] {
-		/* Layout & Background Colors */
-		--bg-color: #fcfff7;
-		--section-bg-color: #f8f8f8;
-		--footer-color: #fcfff7;
-		--row-color: #fff;
-		--alternating-row-color: #f8f8f8;
-
-		/* Brand Colors */
-		--brand-color-1: #416706;
-		--brand-color-2: #4d7a07;
-		--brand-color-3: #355405;
-		--brand-color-4: #2a4204;
-		--brand-color-5: #1e2f03;
-		--teal: #06614a;
-		--darker-teal: #055541;
-		--soft-brand-color: #f2fcef;
-		--soft-brand-color-hovered: #ffdb9e;
-
-		/* Semantic Colors */
-		--link-color: #00008b;
-		--black-text-color: #393939;
-		--disabled-color: #949494;
-		--highlight: #ffcc00;
-		--toastify-color-error: #d22b2b !important;
-		--error-color: var(--toastify-color-error);
-		--error-color-tint: #520606;
-
-		/* Neutral Colors */
-		--black: #000;
-		--white: #fff;
-		--gray: #a1a1a1;
-		--light-gray: #d8d8d8;
-		--blue: #0f52ba;
-
-		/* UI Element Colors */
-		--tooltip-background: rgba(0, 0, 0, 0.35);
-
-		/* Font Families */
-		--font-sans: 'Montserrat', 'Inter', 'Roboto', 'Fira Sans', -apple-system, BlinkMacSystemFont,
-			'Segoe UI', sans-serif;
-		--font-mono: 'Fira Code', 'Courier New', Courier, monospace;
-	}
 }
 
 @layer components {
@@ -643,7 +575,7 @@
 	   Link Components
 	   ======================================== */
 	.inline-link {
-		--inline-link-color: var(--brand-color-1);
+		--inline-link-color: oklch(var(--p));
 		color: var(--inline-link-color);
 		cursor: pointer;
 	}
@@ -689,7 +621,7 @@
 	.page-title {
 		font-family: 'Montserrat', var(--font-sans);
 		font-size: clamp(2.2rem, 5vw, 3.2rem);
-		color: var(--brand-color-1);
+		color: oklch(var(--p));
 	}
 
 	/* ========================================
@@ -788,12 +720,12 @@
 	}
 
 	.FloatingMenu .icon-container:hover {
-		border-color: var(--brand-color-2);
+		border-color: oklch(var(--s));
 	}
 
 	.FloatingMenu.isOpen .icon-container {
 		border-radius: 0;
-		border-color: var(--brand-color-2);
+		border-color: oklch(var(--s));
 	}
 
 	.FloatingMenu .childrens-container {
@@ -805,8 +737,8 @@
 		gap: 5px;
 		padding: 5px;
 		border-radius: var(--border-radius);
-		border: 1px solid var(--brand-color-1);
-		background: var(--soft-brand-color);
+		border: 1px solid oklch(var(--p));
+		background: oklch(var(--b2));
 		box-sizing: border-box;
 		z-index: 10;
 	}
@@ -826,12 +758,12 @@
 		top: -3px;
 		width: 90%;
 		height: 1px;
-		background-color: var(--brand-color-1);
+		background-color: oklch(var(--p));
 	}
 
 	.FloatingMenu .childrens-container .option:hover {
-		background-color: var(--brand-color-3);
-		color: var(--bg-color);
+		background-color: oklch(var(--pf));
+		color: oklch(var(--pc));
 	}
 
 	/* ========================================
@@ -870,12 +802,12 @@
 
 	.marquee-container::before {
 		left: 0;
-		background: linear-gradient(90deg, var(--light-gray), rgba(248, 248, 248, 0));
+		background: linear-gradient(90deg, oklch(var(--b2)), transparent);
 	}
 
 	.marquee-container::after {
 		right: 0;
-		background: linear-gradient(270deg, var(--light-gray), rgba(248, 248, 248, 0));
+		background: linear-gradient(270deg, oklch(var(--b2)), transparent);
 	}
 
 	.marquee-track {
