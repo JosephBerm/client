@@ -32,29 +32,38 @@ const VALUE_PROPS = [
  */
 export default function SalesPitch() {
 	return (
-		<section id="why-medsource" className="bg-base-100 py-16 lg:py-24">
-			<PageContainer>
-				<div className="mx-auto flex max-w-5xl flex-col items-center gap-12 text-center">
-					<div className="space-y-4">
-						<h2 className="text-3xl font-semibold text-base-content md:text-4xl">
-							Focused on quality, driven by outcomes.
+		<section id="why-medsource" className="bg-base-100 py-20 lg:py-28">
+			<PageContainer className="space-y-16 lg:space-y-20">
+				<div className="grid gap-12 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)] lg:items-start">
+					<div className="space-y-6 text-left lg:sticky lg:top-[calc(var(--nav-height)+2rem)]">
+						<span className="inline-flex items-center gap-2 rounded-full bg-[var(--soft-brand-color)] px-4 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-brand-3 shadow-sm shadow-brand-5/10">
+							<span className="h-2 w-2 rounded-full bg-brand-1" />
+							Why MedSource Pro
+						</span>
+						<h2 className="text-3xl font-semibold leading-tight text-brand-4 md:text-4xl lg:text-[3rem]">
+							Focused on quality. Driven by patient outcomes.
 						</h2>
-						<p className="text-base text-base-content/70 md:text-lg">
-							From sourcing to delivery, every part of our process is engineered to serve healthcare
-							professionals with reliability, transparency, and speed.
+						<p className="max-w-xl text-base text-black/70 md:text-lg">
+							From sourcing to delivery, every part of our process is engineered to serve healthcare professionals
+							with reliability, transparency, and speed. Your supply chain stays resilient, and your teams stay
+							focused on care.
 						</p>
 					</div>
 
-					<div className="grid gap-6 md:grid-cols-2">
+					<div className="grid gap-6 sm:grid-cols-2">
 						{VALUE_PROPS.map(({ title, description, icon: Icon }) => (
-							<div key={title} className="rounded-3xl border border-base-200 bg-base-100/80 p-6 text-left shadow-lg">
-								<div className="flex items-start gap-4">
-									<span className="rounded-full bg-primary/10 p-3 text-primary">
+							<div
+								key={title}
+								className="group relative overflow-hidden rounded-3xl border border-brand-1/10 bg-[var(--soft-brand-color)] px-8 py-10 shadow-[0_18px_40px_rgba(65,103,6,0.12)] transition hover:-translate-y-1 hover:shadow-[0_22px_45px_rgba(41,66,4,0.22)]"
+							>
+								<div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-brand-1/10 blur-2xl transition group-hover:bg-brand-1/20" />
+								<div className="relative flex flex-col gap-4">
+									<span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand-4 shadow shadow-brand-4/10">
 										<Icon className="h-6 w-6" strokeWidth={1.5} />
 									</span>
-									<div className="space-y-2">
-										<h3 className="text-xl font-semibold text-base-content">{title}</h3>
-										<p className="text-base text-base-content/70">{description}</p>
+									<div className="space-y-3">
+										<h3 className="text-xl font-semibold text-brand-4">{title}</h3>
+										<p className="text-base leading-relaxed text-black/70">{description}</p>
 									</div>
 								</div>
 							</div>

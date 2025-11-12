@@ -60,6 +60,7 @@
 'use client'
 
 import { useState } from 'react'
+import classNames from 'classnames'
 import { useAuthStore } from '@_stores/useAuthStore'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
@@ -110,14 +111,30 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 
 	return (
-		<>
+		<div className="relative min-h-screen bg-base-100">
 			<Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-			<div className="flex">
-				{isAuthenticated && <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />}
+			<div className="relative mx-auto flex w-full max-w-[1600px] gap-0 lg:gap-10">
+				{isAuthenticated && (
+					<Sidebar
+						isOpen={sidebarOpen}
+						onClose={() => setSidebarOpen(false)}
+						ariaLabel="MedSource navigation"
+					/>
+				)}
 
-				<main className="flex-1 min-h-screen bg-base-100">{children}</main>
+				<main
+					id="page-content"
+					className={classNames(
+						'relative flex-1 bg-base-100',
+						'min-h-[calc(100vh-var(--nav-height))]',
+						'px-4 pb-16 pt-8 sm:px-6 lg:px-12 xl:px-16',
+						'transition-[padding] duration-300 ease-in-out'
+					)}
+				>
+					{children}
+				</main>
 			</div>
-		</>
+		</div>
 	)
 }

@@ -9,22 +9,37 @@ import PageContainer from '@_components/layouts/PageContainer'
  */
 export default function ContactUs() {
 	return (
-		<section id="contact" className="bg-primary py-16 text-primary-content lg:py-24">
-			<PageContainer className="flex flex-col items-center gap-8 text-center lg:flex-row lg:justify-between lg:text-left">
-				<div className="space-y-4">
-					<h2 className="text-3xl font-semibold md:text-4xl">
+		<section id="contact" className="relative overflow-hidden bg-brand-4 py-20 text-white lg:py-28">
+			<div
+				aria-hidden="true"
+				className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_45%)]"
+			/>
+			<PageContainer className="relative flex flex-col gap-10 text-center lg:flex-row lg:items-center lg:justify-between lg:text-left">
+				<div className="space-y-6">
+					<span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-white">
+						<span className="h-2 w-2 rounded-full bg-white" />
+						Let’s collaborate
+					</span>
+					<h2 className="text-3xl font-semibold leading-tight md:text-4xl lg:text-[3.1rem]">
 						Need a sourcing partner you can rely on?
 					</h2>
-					<p className="text-base md:text-lg text-primary-content/90">
-						Our consultants are ready to help you solve procurement challenges, reduce costs, and maintain
-						supply continuity.
+					<p className="max-w-2xl text-base text-white/80 md:text-lg">
+						Our consultants help you solve procurement challenges, reduce total cost of ownership, and maintain
+						supply continuity across every care setting.
 					</p>
 				</div>
-				<div className="flex flex-col gap-4 sm:flex-row">
-					<Link href="/contact" className="btn btn-secondary btn-lg w-full sm:w-auto">
+
+				<div className="flex w-full flex-col items-center gap-4 rounded-3xl border border-white/20 bg-white/10 p-6 backdrop-blur md:flex-row md:justify-center md:gap-6 md:p-8 lg:w-auto">
+					<Link
+						href="/contact"
+						className="inline-flex w-full items-center justify-center rounded-full bg-white px-8 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-brand-4 shadow-lg shadow-brand-5/20 transition hover:-translate-y-0.5 hover:bg-[var(--soft-brand-color)] md:w-auto"
+					>
 						Request a consultation
 					</Link>
-					<a href="tel:+17865782145" className="btn btn-ghost btn-lg w-full border border-primary-content sm:w-auto">
+					<a
+						href="tel:+17865782145"
+						className="inline-flex w-full items-center justify-center rounded-full border border-white/40 px-8 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:-translate-y-0.5 hover:border-white md:w-auto"
+					>
 						Call (786) 578-2145
 					</a>
 				</div>

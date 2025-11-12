@@ -76,6 +76,11 @@ interface SidebarProps {
 	 * Used primarily for mobile drawer.
 	 */
 	onClose: () => void
+
+	/**
+	 * Accessible name for the navigation landmark.
+	 */
+	ariaLabel?: string
 }
 
 /**
@@ -113,7 +118,7 @@ interface SidebarProps {
  * @param props - Component props including isOpen and onClose
  * @returns Sidebar component
  */
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 	const pathname = usePathname()
 	const user = useAuthStore((state) => state.user)
 	const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
@@ -154,46 +159,56 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
 	return (
 		<>
-			{isOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={onClose} />}
+			{isOpen && (
+				<div
+					className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity lg:hidden"
+					onClick={onClose}
+					aria-hidden="true"
+				/>
+			)}
 
 			<aside
 				id="app-sidebar"
+				aria-label={ariaLabel}
 				className={classNames(
-					'fixed top-0 left-0 h-full w-72 bg-base-200 z-50 transform transition-transform duration-300 ease-in-out',
-					'lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:translate-x-0',
+					'fixed top-0 left-0 z-50 flex h-full w-[min(82vw,320px)] flex-col overflow-hidden border-r border-brand-1/10 bg-white/95 backdrop-blur transition-transform duration-300 ease-in-out',
+					'shadow-2xl shadow-brand-5/20 lg:shadow-none',
+					'lg:sticky lg:top-[var(--nav-height)] lg:h-[calc(100vh-var(--nav-height))] lg:w-[var(--nav-title-width)] lg:translate-x-0 lg:bg-white',
 					{
 						'translate-x-0': isOpen,
 						'-translate-x-full': !isOpen,
 					}
 				)}
 			>
-				<div className="flex items-center justify-between p-4 border-b border-base-300 lg:hidden">
-					<h2 className="text-xl font-bold text-primary">Menu</h2>
-					<button onClick={onClose} className="btn btn-ghost btn-square btn-sm" aria-label="Close menu">
-						<X className="w-5 h-5" />
+				<div className="flex items-center justify-between border-b border-brand-1/10 px-5 py-4 lg:hidden">
+					<h2 className="text-xs font-semibold uppercase tracking-[0.35em] text-brand-3">Navigation</h2>
+					<button
+						onClick={onClose}
+						className="btn btn-ghost btn-square btn-sm text-brand-4"
+						aria-label="Close menu"
+					>
+						<X className="h-5 w-5" />
 					</button>
 				</div>
 
-				<nav className="overflow-y-auto h-full p-4 pb-20">
-					<ul className="menu menu-compact">
+				<nav className="flex-1 overflow-y-auto px-4 pb-24 pt-6 lg:px-0 lg:pt-8">
+					<ul className="flex flex-col gap-4">
 						{sections.map((section) => (
-							<li key={section.title} className="mb-2">
+							<li key={section.title}>
 								<button
 									onClick={() => toggleSection(section.title)}
-									className="menu-title flex items-center justify-between w-full p-2 hover:bg-base-300 rounded-lg"
+									className="flex w-full items-center justify-between rounded-full bg-white/70 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-4 transition hover:bg-white hover:text-brand-3 lg:px-6 lg:py-3"
 								>
-									<span className="text-xs font-semibold uppercase text-base-content/70">
-										{section.title}
-									</span>
+									<span>{section.title}</span>
 									{expandedSections[section.title] ? (
-										<ChevronDown className="w-4 h-4" />
+										<ChevronDown className="h-4 w-4" />
 									) : (
-										<ChevronRight className="w-4 h-4" />
+										<ChevronRight className="h-4 w-4" />
 									)}
 								</button>
 
 								{expandedSections[section.title] && (
-									<ul className="mt-1">
+									<ul className="mt-3 space-y-1 lg:mt-4">
 										{section.items.map((item) => {
 											const Icon = item.icon
 											const isActive = pathname === item.href
@@ -203,11 +218,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 													<Link
 														href={item.href}
 														className={classNames(
-															'flex items-center gap-3 p-3 rounded-lg transition-colors',
+															'group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors lg:px-6',
 															{
-																'bg-primary text-primary-content font-semibold':
+																'bg-brand-4 text-white shadow-md shadow-brand-5/20':
 																	isActive,
-																'hover:bg-base-300': !isActive,
+																'text-brand-4 hover:bg-[var(--soft-brand-color)] hover:text-brand-3':
+																	!isActive,
 															}
 														)}
 														onClick={() => {
@@ -216,10 +232,23 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 															}
 														}}
 													>
-														<Icon className="w-5 h-5" />
+														<Icon
+															className={classNames('h-5 w-5', {
+																'text-white': isActive,
+																'text-brand-3 transition-colors group-hover:text-brand-4':
+																	!isActive,
+															})}
+														/>
 														<span className="flex-1">{item.title}</span>
 														{item.badge && (
-															<span className="badge badge-primary badge-sm">
+															<span
+																className={classNames(
+																	'rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider',
+																	isActive
+																		? 'bg-white/30 text-white'
+																		: 'bg-brand-1/10 text-brand-4'
+																)}
+															>
 																{item.badge}
 															</span>
 														)}
@@ -234,10 +263,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 					</ul>
 				</nav>
 
-				<div className="absolute bottom-0 left-0 right-0 p-4 bg-base-200 border-t border-base-300">
-					<div className="text-xs text-center text-base-content/60">
-						<p className="font-semibold">MedSource Pro</p>
-						<p>v1.0.0</p>
+				<div className="absolute inset-x-0 bottom-0 border-t border-brand-1/10 bg-white/95 px-6 py-5 text-center text-[0.7rem] uppercase tracking-[0.3em] text-brand-4">
+					<div className="flex flex-col gap-1">
+						<span className="font-semibold text-brand-3">MedSource Pro</span>
+						<span>v1.0.0</span>
 					</div>
 				</div>
 			</aside>
