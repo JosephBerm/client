@@ -1,54 +1,37 @@
 /**
  * Navbar Component
  *
- * Main navigation bar for the MedSource Pro application.
- * Provides site-wide navigation, search, shopping cart, and user menu.
- * Sticky positioned at the top of the page with responsive design.
+ * Beautiful, modern navigation bar for the MedSource Pro application.
+ * Mobile-first responsive design with clean aesthetics matching the brand.
  *
  * **Features:**
- * - Responsive design (mobile + desktop layouts)
+ * - Mobile-first responsive design
+ * - Hamburger menu for mobile navigation
  * - Sticky positioning (always visible)
- * - Mobile menu burger button (authenticated users only)
- * - Brand logo with link to home
- * - Product search bar (desktop) / search button (mobile)
+ * - Brand logo with medical cross icon
+ * - Clean navigation links: Home, About Us, Store, Contact
  * - Shopping cart with item count badge
- * - User authentication dropdown menu
- * - Login button for unauthenticated users
- * - Profile picture support
- * - Logout functionality
+ * - Login button or user menu based on authentication
+ * - Accessible and semantic HTML
+ * - Integration with sidebar for authenticated users
  *
- * **Authentication States:**
- * - Unauthenticated: Shows login button
- * - Authenticated: Shows menu button (mobile), user avatar/menu, cart
+ * **Navigation Links:**
+ * - Home (/)
+ * - About Us (/about-us)
+ * - Store (/store)
+ * - Contact (/contact)
+ * - Cart (/cart)
+ * - Login (/login)
  *
- * **Layout Structure:**
- * - navbar-start: Burger menu + Logo
- * - navbar-center: Search bar (desktop only)
- * - navbar-end: Search button (mobile), Cart, User menu/Login
+ * **Mobile Behavior (< 768px):**
+ * - Shows hamburger menu button
+ * - Navigation links hidden in mobile menu
+ * - Compact layout with essential elements
  *
- * **Use Cases:**
- * - Main site navigation
- * - User account access
- * - Product search
- * - Shopping cart access
- * - Mobile menu toggle
- *
- * @example
- * ```tsx
- * import Navbar from '@_components/navigation/Navbar';
- * import { useState } from 'react';
- *
- * function Layout({ children }) {
- *   const [sidebarOpen, setSidebarOpen] = useState(false);
- *
- *   return (
- *     <div>
- *       <Navbar onMenuClick={() => setSidebarOpen(true)} />
- *       <main>{children}</main>
- *     </div>
- *   );
- * }
- * ```
+ * **Desktop Behavior (>= 768px):**
+ * - Full horizontal navigation
+ * - All links visible in navbar
+ * - Spacious, clean layout
  *
  * @module Navbar
  */
@@ -56,178 +39,246 @@
 'use client'
 
 import Link from 'next/link'
-import { Menu, Search, ShoppingCart, User, LogIn } from 'lucide-react'
-import { useAuthStore } from '@_stores/useAuthStore'
+import { Menu, ShoppingCart, X, User, LogOut } from 'lucide-react'
 import { useUserSettingsStore } from '@_stores/useUserSettingsStore'
+import { useAuthStore } from '@_stores/useAuthStore'
+import { useState } from 'react'
+import Routes from '@_services/routes'
 
 /**
  * Navbar component props interface.
  */
 interface NavbarProps {
 	/**
-	 * Callback fired when the mobile menu button is clicked.
-	 * Used to toggle the sidebar drawer on mobile devices.
+	 * Optional callback for menu click (opens sidebar for authenticated users).
 	 */
-	onMenuClick: () => void
+	onMenuClick?: () => void
 }
 
 /**
  * Navbar Component
  *
- * Top navigation bar with authentication-aware features.
- * Integrates with auth and user settings stores for dynamic content.
+ * Clean, modern navigation bar with mobile-first responsive design.
+ * Features a medical cross logo, navigation links, shopping cart, and authentication.
  *
- * **Mobile Behavior (< 1024px):**
- * - Shows burger menu button (authenticated only)
- * - Logo text abbreviated to "MSP"
- * - Search bar hidden (shows button instead)
- * - Compact cart and user icons
- *
- * **Desktop Behavior (>= 1024px):**
- * - Burger menu hidden (sidebar always visible)
- * - Full "MedSource Pro" logo
- * - Centered search bar
- * - Full cart and user menu dropdowns
- *
- * **User Menu (Authenticated):**
- * - Profile link
- * - Notifications link
- * - Logout button (red text)
- *
- * **Cart Badge:**
- * - Displays total item quantity
- * - Only visible when cart has items
- * - Updates reactively from user settings store
- *
- * @param props - Component props including onMenuClick
+ * @param props - Component props including optional onMenuClick
  * @returns Navbar component
  */
 export default function Navbar({ onMenuClick }: NavbarProps) {
+	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+	const [userMenuOpen, setUserMenuOpen] = useState(false)
+	const cart = useUserSettingsStore((state) => state.cart)
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 	const user = useAuthStore((state) => state.user)
-	const cart = useUserSettingsStore((state) => state.cart)
 
 	const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
+	const publicNavigationLinks = [
+		{ name: 'Home', href: Routes.Home.location },
+		{ name: 'About Us', href: Routes.AboutUs.location },
+		{ name: 'Store', href: Routes.Store.location },
+		{ name: 'Contact', href: Routes.Contact.location },
+	]
+
+	const handleLogout = () => {
+		useAuthStore.getState().logout()
+		window.location.href = '/login'
+	}
+
 	return (
-		<header className="sticky top-0 z-50 border-b border-brand-1/10 bg-white/90 shadow-[0_8px_24px_rgba(0,0,0,0.04)] backdrop-blur">
-			<div className="mx-auto flex h-[var(--nav-height)] w-full max-w-[1600px] items-center justify-between px-4 sm:px-6 lg:px-10">
-				<div className="flex items-center gap-4">
-				{isAuthenticated && (
-					<button
-							className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-brand-1/20 bg-white text-brand-4 shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--soft-brand-color)] lg:hidden"
-						onClick={onMenuClick}
-							aria-label="Open navigation"
-					>
-							<Menu className="h-5 w-5" />
-					</button>
-				)}
+		<>
+			<header className="sticky top-0 z-50 bg-white/90 shadow-sm backdrop-blur-md">
+				<nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+					{/* Left Section: Sidebar Button (authenticated) + Logo */}
+					<div className="flex items-center gap-3">
+						{/* Sidebar Menu Button (authenticated users on mobile) */}
+						{isAuthenticated && onMenuClick && (
+							<button
+								onClick={onMenuClick}
+								className="rounded-lg p-2 text-gray-700 transition-colors hover:bg-gray-100 lg:hidden"
+								aria-label="Open sidebar menu"
+							>
+								<Menu className="h-6 w-6" />
+							</button>
+						)}
 
-					<Link
-						href="/"
-						className="inline-flex items-baseline gap-2 text-lg font-extrabold uppercase tracking-[0.35em] text-brand-4 transition hover:text-brand-2"
-					>
-						<span className="hidden text-base sm:inline">MedSource</span>
-						<span className="text-brand-1 sm:text-brand-3">Pro</span>
-				</Link>
-			</div>
-
-				<div className="hidden flex-1 justify-center md:flex">
-					<div className="relative w-full max-w-xl">
-						<Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-brand-3/70" />
-						<input
-							type="search"
-							placeholder="Search products, orders, or providers"
-							className="w-full rounded-full border border-brand-1/15 bg-white/80 py-3 pl-12 pr-32 text-sm text-brand-4 shadow-inner shadow-brand-1/5 transition focus:border-brand-3 focus:outline-none focus:ring-2 focus:ring-brand-3/20"
-						/>
-						<button
-							type="button"
-							className="absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center gap-2 rounded-full bg-brand-4 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-brand-5/20 transition hover:bg-brand-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-3"
-						>
-							<span>Search</span>
-						</button>
-				</div>
-			</div>
-
-				<div className="flex items-center gap-2 md:gap-3">
-					<button
-						className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-transparent text-brand-4 transition hover:bg-[var(--soft-brand-color)] md:hidden"
-						aria-label="Open search"
-					>
-						<Search className="h-5 w-5" />
-				</button>
-
-					<Link
-						href="/cart"
-						className="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-brand-1/15 text-brand-4 transition hover:-translate-y-0.5 hover:border-brand-3 hover:text-brand-3"
-						aria-label="View cart"
-					>
-						<ShoppingCart className="h-5 w-5" />
-					{cartItemCount > 0 && (
-							<span className="absolute -right-1 -top-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand-4 px-1 text-[0.65rem] font-semibold text-white">
-							{cartItemCount}
-						</span>
-					)}
-				</Link>
-
-				{isAuthenticated ? (
-					<div className="dropdown dropdown-end">
-						<button
-							tabIndex={0}
-								className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-brand-1/15 bg-white text-brand-4 transition hover:-translate-y-0.5 hover:border-brand-3"
-							aria-label="User menu"
-						>
-							{user?.profilePicturePath ? (
-									<div className="h-10 w-10 overflow-hidden rounded-full border border-brand-1/15">
-									<img
-										src={user.profilePicturePath}
-											alt={user.username || 'User avatar'}
-											className="h-full w-full object-cover"
-									/>
-								</div>
-							) : (
-									<User className="h-5 w-5" />
-							)}
-						</button>
-							<ul className="dropdown-content menu mt-3 w-60 rounded-2xl border border-brand-1/15 bg-white/95 p-3 text-sm text-brand-4 shadow-2xl shadow-brand-5/15 backdrop-blur">
-								<li className="mb-1 px-2 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-3">
-									{user?.username || 'User'}
-							</li>
-							<li>
-									<Link href="/medsource-app/profile" className="rounded-lg px-3 py-2 hover:bg-[var(--soft-brand-color)]">
-										Profile
-									</Link>
-							</li>
-							<li>
-									<Link href="/medsource-app/notifications" className="rounded-lg px-3 py-2 hover:bg-[var(--soft-brand-color)]">
-										Notifications
-									</Link>
-							</li>
-							<li>
-								<button
-									onClick={() => {
-										useAuthStore.getState().logout()
-										window.location.href = '/login'
-									}}
-										className="mt-2 w-full rounded-lg px-3 py-2 text-left font-semibold text-error hover:bg-error/10"
-								>
-									Logout
-								</button>
-							</li>
-						</ul>
-					</div>
-				) : (
+						{/* Logo */}
 						<Link
-							href="/login"
-							className="inline-flex items-center gap-2 rounded-full border border-brand-1/20 bg-brand-4 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-brand-5/20 transition hover:-translate-y-0.5 hover:bg-brand-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-3"
+							href={Routes.Home.location}
+							className="flex items-center gap-2 transition-opacity hover:opacity-80"
 						>
-							<LogIn className="h-4 w-4" />
-						<span className="hidden md:inline">Login</span>
-							<span className="md:hidden">Sign in</span>
-					</Link>
-				)}
+							<div className="flex h-10 w-10 items-center justify-center rounded-md bg-[var(--brand-color-1)]">
+								<svg
+									className="h-6 w-6 text-white"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+									xmlns="http://www.w3.org/2000/svg"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										strokeWidth={2.5}
+										d="M12 4v16m8-8H4"
+									/>
+								</svg>
+							</div>
+							<span className="text-xl font-bold uppercase tracking-wide text-[var(--brand-color-1)]">
+								MedSource
+							</span>
+						</Link>
+					</div>
+
+					{/* Center: Desktop Navigation Links (public routes only when not authenticated) */}
+					{!isAuthenticated && (
+						<div className="hidden items-center gap-8 md:flex">
+							{publicNavigationLinks.map((link) => (
+								<Link
+									key={link.name}
+									href={link.href}
+									className="text-base font-medium text-gray-700 transition-colors hover:text-[var(--brand-color-1)]"
+								>
+									{link.name}
+								</Link>
+							))}
+						</div>
+					)}
+
+					{/* Right Side: Cart, Login/User Menu, Mobile Menu */}
+					<div className="flex items-center gap-2">
+						{/* Shopping Cart */}
+						<Link
+							href={Routes.Cart.location}
+							className="relative rounded-lg p-2 text-gray-700 transition-colors hover:bg-gray-100 hover:text-[var(--brand-color-1)]"
+							aria-label="Shopping cart"
+						>
+							<ShoppingCart className="h-6 w-6" />
+							{cartItemCount > 0 && (
+								<span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--brand-color-1)] px-1 text-xs font-semibold text-white">
+									{cartItemCount}
+								</span>
+							)}
+						</Link>
+
+						{/* Authentication: Login Button or User Menu */}
+						{isAuthenticated ? (
+							<div className="relative">
+								<button
+									onClick={() => setUserMenuOpen(!userMenuOpen)}
+									className="flex items-center gap-2 rounded-lg p-2 text-gray-700 transition-colors hover:bg-gray-100"
+									aria-label="User menu"
+								>
+									{user?.profilePicturePath ? (
+										<img
+											src={user.profilePicturePath}
+											alt={user.username || 'User'}
+											className="h-8 w-8 rounded-full border border-gray-200 object-cover"
+										/>
+									) : (
+										<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--brand-color-1)] text-white">
+											<User className="h-5 w-5" />
+										</div>
+									)}
+								</button>
+
+								{/* User Dropdown Menu */}
+								{userMenuOpen && (
+									<div className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-lg">
+										<div className="border-b border-gray-100 px-4 py-3">
+											<p className="text-sm font-semibold text-gray-900">
+												{user?.username || 'User'}
+											</p>
+											<p className="text-xs text-gray-500">{user?.email}</p>
+										</div>
+										<div className="py-2">
+											<Link
+												href={Routes.Profile.location}
+												onClick={() => setUserMenuOpen(false)}
+												className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+											>
+												Profile
+											</Link>
+											<Link
+												href={Routes.Dashboard.location}
+												onClick={() => setUserMenuOpen(false)}
+												className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+											>
+												Dashboard
+											</Link>
+										</div>
+										<div className="border-t border-gray-100 py-2">
+											<button
+												onClick={handleLogout}
+												className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50"
+											>
+												<LogOut className="h-4 w-4" />
+												<span>Logout</span>
+											</button>
+										</div>
+									</div>
+								)}
+							</div>
+						) : (
+							<Link
+								href={Routes.Login.location}
+								className="rounded-md bg-[var(--brand-color-1)] px-6 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[var(--brand-color-2)] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-color-1)]"
+							>
+								Login
+							</Link>
+						)}
+
+						{/* Mobile Menu Button (for public navigation) */}
+						{!isAuthenticated && (
+							<button
+								onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+								className="rounded-lg p-2 text-gray-700 transition-colors hover:bg-gray-100 md:hidden"
+								aria-label="Toggle menu"
+							>
+								{mobileMenuOpen ? (
+									<X className="h-6 w-6" />
+								) : (
+									<Menu className="h-6 w-6" />
+								)}
+							</button>
+						)}
+					</div>
+				</nav>
+			</header>
+
+			{/* Mobile Menu (public navigation for non-authenticated users) */}
+			{mobileMenuOpen && !isAuthenticated && (
+				<div className="fixed inset-0 z-40 md:hidden">
+					{/* Backdrop */}
+					<div
+						className="fixed inset-0 bg-black/20 backdrop-blur-sm"
+						onClick={() => setMobileMenuOpen(false)}
+					/>
+
+					{/* Menu Panel */}
+					<div className="fixed right-0 top-20 h-[calc(100vh-5rem)] w-64 bg-white shadow-xl">
+						<nav className="flex flex-col gap-1 p-4">
+							{publicNavigationLinks.map((link) => (
+								<Link
+									key={link.name}
+									href={link.href}
+									onClick={() => setMobileMenuOpen(false)}
+									className="rounded-lg px-4 py-3 text-base font-medium text-gray-700 transition-colors hover:bg-[var(--soft-brand-color)] hover:text-[var(--brand-color-1)]"
+								>
+									{link.name}
+								</Link>
+							))}
+						</nav>
+					</div>
 				</div>
-			</div>
-		</header>
+			)}
+
+			{/* Click outside to close user menu */}
+			{userMenuOpen && (
+				<div
+					className="fixed inset-0 z-30"
+					onClick={() => setUserMenuOpen(false)}
+				/>
+			)}
+		</>
 	)
 }
