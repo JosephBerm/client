@@ -71,10 +71,10 @@ export default function LoginPage() {
 					</div>
 
 					{/* Header */}
-					<h1 className="text-3xl font-bold text-center text-primary mb-2">
+					<h1 className="text-4xl font-bold text-center text-primary mb-2">
 						Welcome Back
 					</h1>
-					<p className="text-center text-base-content/70 mb-6">
+					<p className="text-center text-base text-base-content/70 mb-6">
 						Sign in to your account
 					</p>
 
@@ -125,7 +125,7 @@ export default function LoginPage() {
 
 					{/* Sign up link */}
 					<div className="divider">OR</div>
-					<p className="text-center text-sm">
+					<p className="text-center text-base">
 						Don&apos;t have an account?{' '}
 						<Link href="/signup" className="link link-primary font-semibold">
 							Sign up

@@ -150,10 +150,10 @@ const outlineVariantClasses: Record<NonNullable<BadgeProps['variant']>, string> 
 }
 
 const sizeClasses: Record<NonNullable<BadgeProps['size']>, string> = {
-	xs: 'px-2 py-1 text-[0.45rem]',
-	sm: 'px-3 py-1 text-[0.55rem]',
-	md: 'px-4 py-1.5 text-[0.65rem]',
-	lg: 'px-5 py-2 text-[0.75rem]',
+	xs: 'px-2 py-0.5 text-xs',
+	sm: 'px-2.5 py-1 text-xs',
+	md: 'px-3 py-1 text-sm',
+	lg: 'px-4 py-1.5 text-sm',
 }
 
 export default function Badge({

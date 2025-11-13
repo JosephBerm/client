@@ -228,7 +228,7 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 				<div className="flex flex-col h-full">
 					{/* Header */}
 					<div className="flex items-center justify-between p-4 md:p-6 border-b border-base-300">
-						<h2 className="text-xl md:text-2xl font-bold text-base-content">MedSource</h2>
+						<h2 className="text-xl md:text-2xl font-semibold text-base-content">MedSource</h2>
 						{/* Settings Button */}
 						<button
 							onClick={() => setSettingsModalOpen(true)}
@@ -251,7 +251,7 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 											onClick={() => toggleSection(section.id)}
 											className="flex items-center justify-between w-full text-left"
 										>
-											<h3 className="text-lg font-bold text-base-content">{section.title}</h3>
+											<h3 className="text-lg font-semibold text-base-content">{section.title}</h3>
 											<ChevronDown
 												size={20}
 												className={classNames('transition-transform', {

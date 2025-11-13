@@ -45,7 +45,7 @@ export default function ProductsCarousel() {
 			<PageContainer className="space-y-12">
 				<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 					<div className="max-w-2xl space-y-3 text-left">
-					<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-[3rem]">
+					<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-5xl">
 						Featured inventory ready to ship.
 					</h2>
 					<p className="text-base text-base-content/70 md:text-lg">
@@ -97,7 +97,7 @@ function ProductCard({ product, className }: ProductCardProps) {
 				<h3 className="text-lg font-semibold text-base-content">{name}</h3>
 				<p className="text-sm text-base-content/70">{description}</p>
 			</div>
-			<span className="badge badge-primary inline-flex px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em]">
+			<span className="badge badge-primary inline-flex px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em]">
 				{priceNote}
 			</span>
 		</div>

@@ -42,12 +42,12 @@ export default function Products() {
 		<section id="categories" className="bg-base-100 py-20 lg:py-28">
 			<PageContainer className="space-y-16">
 				<div className="space-y-6 text-center lg:text-left">
-				<span className="badge badge-lg badge-primary gap-2 px-4 py-3 text-[0.7rem] font-semibold uppercase tracking-[0.35em] shadow-sm">
+				<span className="badge badge-lg badge-primary gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-[0.35em] shadow-sm">
 					<span className="h-2 w-2 rounded-full bg-primary-content" />
 					Product catalog
 				</span>
 				<div className="lg:grid lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-end lg:gap-10">
-					<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-[3rem]">
+					<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-5xl">
 						Built for every care setting across your network.
 					</h2>
 					<p className="mt-4 text-base text-base-content/70 md:text-lg lg:mt-0">

@@ -20,15 +20,25 @@
 		/* UI Element Colors */
 		--tooltip-background: rgba(0, 0, 0, 0.35);
 
-		/* Typography Scale */
-		--fz-xxs: 1.2rem;
-		--fz-xs: 1.3rem;
-		--fz-s: 1.4rem;
-		--fz-md: 1.6rem;
-		--fz-lg: 1.8rem;
-		--fz-xl: 2rem;
-		--fz-xxl: 2.5rem;
-		--fz-heading: 2.7rem;
+		/* Typography Scale - Industry Best Practice (WCAG 2.1 Compliant)
+		 * Base: 16px (1rem) - WCAG recommended minimum for accessibility
+		 * All sizes use rem for scalability and user preference respect
+		 */
+		--fz-xs: 0.75rem;      /* 12px - Captions, fine print */
+		--fz-sm: 0.875rem;     /* 14px - Small text, labels, helper text */
+		--fz-base: 1rem;       /* 16px - Body text, default (WCAG minimum) */
+		--fz-lg: 1.125rem;     /* 18px - Large body, emphasized text */
+		--fz-xl: 1.25rem;      /* 20px - Small headings, subheadings */
+		--fz-2xl: 1.5rem;      /* 24px - Section headings */
+		--fz-3xl: 1.875rem;    /* 30px - Page subheadings */
+		--fz-4xl: 2.25rem;     /* 36px - Page headings */
+		--fz-5xl: 3rem;        /* 48px - Hero headings */
+		--fz-6xl: 3.75rem;     /* 60px - Display headings */
+		
+		/* Line Heights - Industry Standard */
+		--lh-tight: 1.25;      /* Headings */
+		--lh-normal: 1.5;      /* Body text */
+		--lh-relaxed: 1.75;    /* Long-form content */
 
 		/* Font Families */
 		--font-sans: 'Montserrat', 'Inter', 'Roboto', 'Fira Sans', -apple-system, BlinkMacSystemFont,
@@ -40,10 +50,17 @@
 		--nav-height: 96px;
 		--nav-scroll-height: 70px;
 		--nav-title-width: 250px;
+		
+		/* Sticky Positioning - Industry Best Practice */
+		--sticky-top-offset: var(--nav-height); /* Always matches navbar height */
 
 		/* Animation & Transitions */
 		--easing: cubic-bezier(0.645, 0.045, 0.355, 1);
+		--easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+		--easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 		--transition: all 0.25s var(--easing);
+		--transition-fast: all 0.15s var(--easing-smooth);
+		--transition-slow: all 0.4s var(--easing-smooth);
 	}
 
 	/* ========================================
@@ -51,7 +68,7 @@
 	   ======================================== */
 	html {
 		box-sizing: border-box;
-		font-size: 62.5%; /* 1rem = 10px for easier calculations */
+		font-size: 100%; /* 1rem = 16px - Industry standard, WCAG compliant */
 		scroll-behavior: smooth;
 		scrollbar-color: oklch(var(--b3)) transparent;
 		scrollbar-width: thin;
@@ -66,12 +83,12 @@
 
 	body {
 		font-family: var(--font-sans);
-		font-size: var(--fz-lg);
+		font-size: var(--fz-base); /* 16px - WCAG compliant base size */
 		color: var(--black-text-color);
 		background-color: var(--bg-color);
 		width: 100%;
 		margin: 0;
-		line-height: 1.3;
+		line-height: var(--lh-normal); /* 1.5 - Industry standard */
 		overflow-x: hidden;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
@@ -83,18 +100,132 @@
 	}
 
 	/* ========================================
-	   Typography Defaults
+	   Modern Animations - Industry Best Practices
 	   ======================================== */
-	h1, h2, h3, h4, h5, h6 {
-		margin: 0;
-		font-weight: 600;
-		line-height: 1.1;
+	
+	/* Fade In - Smooth entrance */
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	.animate-fade-in {
+		animation: fade-in 0.3s var(--easing-smooth);
+	}
+
+	/* Shake - Error feedback (Apple style) */
+	@keyframes shake {
+		0%, 100% {
+			transform: translateX(0);
+		}
+		10%, 30%, 50%, 70%, 90% {
+			transform: translateX(-4px);
+		}
+		20%, 40%, 60%, 80% {
+			transform: translateX(4px);
+		}
+	}
+
+	.animate-shake {
+		animation: shake 0.5s var(--easing);
+	}
+
+	/* Pulse - Loading/attention */
+	@keyframes pulse-smooth {
+		0%, 100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.6;
+		}
+	}
+
+	.animate-pulse-smooth {
+		animation: pulse-smooth 2s var(--easing-smooth) infinite;
+	}
+
+	/* Scale In - Modern entrance */
+	@keyframes scale-in {
+		from {
+			transform: scale(0.95);
+			opacity: 0;
+		}
+		to {
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+
+	.animate-scale-in {
+		animation: scale-in 0.2s var(--easing-smooth);
+	}
+
+	/* Slide Up - Elegant reveal */
+	@keyframes slide-up {
+		from {
+			transform: translateY(10px);
+			opacity: 0;
+		}
+		to {
+			transform: translateY(0);
+			opacity: 1;
+		}
+	}
+
+	.animate-slide-up {
+		animation: slide-up 0.3s var(--easing-smooth);
+	}
+
+	/* ========================================
+	   Typography Defaults - Industry Best Practice
+	   ======================================== */
+	h1 {
+		font-size: var(--fz-4xl); /* 36px */
+		font-weight: 700;
+		line-height: var(--lh-tight);
 		color: var(--black-text-color);
+		margin: 0;
+	}
+
+	h2 {
+		font-size: var(--fz-3xl); /* 30px */
+		font-weight: 600;
+		line-height: var(--lh-tight);
+		color: var(--black-text-color);
+		margin: 0;
+	}
+
+	h3 {
+		font-size: var(--fz-2xl); /* 24px */
+		font-weight: 600;
+		line-height: var(--lh-tight);
+		color: var(--black-text-color);
+		margin: 0;
+	}
+
+	h4 {
+		font-size: var(--fz-xl); /* 20px */
+		font-weight: 600;
+		line-height: var(--lh-tight);
+		color: var(--black-text-color);
+		margin: 0;
+	}
+
+	h5, h6 {
+		font-size: var(--fz-lg); /* 18px */
+		font-weight: 600;
+		line-height: var(--lh-tight);
+		color: var(--black-text-color);
+		margin: 0;
 	}
 
 	p {
-		font-size: clamp(1.4rem, 2vw, 1.6rem);
-		line-height: 1.4;
+		font-size: var(--fz-base); /* 16px */
+		line-height: var(--lh-normal);
 		margin: 0;
 		color: var(--black-text-color);
 	}
@@ -123,9 +254,9 @@
 	/* Base Button Reset & Foundation */
 	button {
 		font-family: var(--font-sans);
-		font-size: 1.4rem;
+		font-size: var(--fz-base); /* 16px - Industry standard */
 		font-weight: 500;
-		line-height: 1.5;
+		line-height: var(--lh-normal);
 		border: none;
 		border-radius: 8px;
 		cursor: pointer;
@@ -173,84 +304,45 @@
 	}
 
 	/* Button Variants */
-
-	/* Transparent/Ghost Button - Theme Aware */
-	button.transparent,
-	button.ghost {
-		background-color: transparent;
-		color: hsl(var(--p));
-		box-shadow: none;
-	}
-
-	button.transparent:hover,
-	button.ghost:hover {
-		background-color: hsl(var(--p) / 0.1);
-		color: hsl(var(--s));
-	}
-
-	/* Outline Button - Theme Aware */
 	button.outline {
-		background-color: transparent;
+		background: transparent;
 		color: hsl(var(--p));
 		border: 2px solid hsl(var(--p));
 		box-shadow: none;
 	}
 
 	button.outline:hover {
-		background-color: hsl(var(--p));
-		color: hsl(var(--pc));
-		border-color: hsl(var(--p));
+		background: hsl(var(--p) / 0.1);
+		border-color: hsl(var(--s));
+		color: hsl(var(--s));
 	}
 
-	/* Secondary/Action Button - Theme Aware */
-	button.action,
-	button.secondary {
-		background-color: hsl(var(--b3));
+	button.ghost {
+		background: transparent;
 		color: hsl(var(--bc));
-		border: 2px solid hsl(var(--bc) / 0.3);
-		box-shadow: 0 2px 4px hsl(var(--bc) / 0.1);
+		box-shadow: none;
 	}
 
-	button.action:hover,
-	button.secondary:hover {
-		background-color: hsl(var(--n));
-		color: hsl(var(--nc));
-		border-color: hsl(var(--n));
-	}
-
-	/* Danger/Destructive Button - Theme Aware */
-	button.danger,
-	button.destructive {
-		background: linear-gradient(135deg, hsl(var(--er)), hsl(var(--er) / 0.9));
-		color: hsl(var(--erc));
-		box-shadow: 0 2px 8px hsl(var(--er) / 0.2);
-	}
-
-	button.danger:hover,
-	button.destructive:hover {
-		background: linear-gradient(135deg, hsl(var(--er) / 0.9), hsl(var(--er) / 0.8));
-		box-shadow: 0 4px 12px hsl(var(--er) / 0.3);
-		transform: translateY(-1px);
-	}
-
-	/* Success Button - Theme Aware */
-	button.success {
-		background: linear-gradient(135deg, hsl(var(--su)), hsl(var(--su) / 0.9));
-		color: hsl(var(--suc));
-		box-shadow: 0 2px 8px hsl(var(--su) / 0.2);
-	}
-
-	button.success:hover {
-		background: linear-gradient(135deg, hsl(var(--su) / 0.9), hsl(var(--su) / 0.8));
-		box-shadow: 0 4px 12px hsl(var(--su) / 0.3);
-		transform: translateY(-1px);
-	}
-
-	/* Link Button - Theme Aware */
-	button.link {
-		background-color: transparent;
+	button.ghost:hover {
+		background: hsl(var(--p) / 0.1);
 		color: hsl(var(--p));
+	}
+
+	button.transparent {
+		background: transparent;
+		color: hsl(var(--bc));
+		box-shadow: none;
 		padding: 0.5rem 1rem;
+	}
+
+	button.transparent:hover {
+		background: hsl(var(--bc) / 0.05);
+	}
+
+	button.link {
+		background: none;
+		color: hsl(var(--p));
+		padding: 0;
 		text-decoration: underline;
 		text-underline-offset: 3px;
 		box-shadow: none;
@@ -261,21 +353,25 @@
 		text-decoration-thickness: 2px;
 	}
 
-	/* Button Sizes */
-	button.btn-xs,
+	/* Button Sizes - Industry Standard */
+	button.btn-xs {
+		padding: 0.5rem 0.875rem;
+		font-size: var(--fz-sm); /* 14px */
+	}
+
 	button.btn-sm {
-		padding: 0.5rem 1rem;
-		font-size: 1.2rem;
+		padding: 0.625rem 1.125rem;
+		font-size: var(--fz-sm); /* 14px */
 	}
 
 	button.btn-lg {
-		padding: 1.125rem 2rem;
-		font-size: 1.6rem;
+		padding: 1rem 1.75rem;
+		font-size: var(--fz-lg); /* 18px */
 	}
 
 	button.btn-xl {
-		padding: 1.375rem 2.5rem;
-		font-size: 1.8rem;
+		padding: 1.25rem 2.25rem;
+		font-size: var(--fz-xl); /* 20px */
 		font-weight: 600;
 	}
 
@@ -345,283 +441,61 @@
 	/* Loading State */
 	button.loading {
 		position: relative;
-		color: transparent !important;
 		pointer-events: none;
+		opacity: 0.7;
 	}
 
-	button.loading::after {
-		content: '';
+	/* ========================================
+	   Form Elements - Modern Styling
+	   ======================================== */
+	
+	input[type='text'],
+	input[type='email'],
+	input[type='password'],
+	input[type='number'],
+	input[type='tel'],
+	input[type='url'],
+	input[type='search'],
+	textarea {
+		font-family: var(--font-sans);
+		transition: var(--transition-fast);
+	}
+
+	input:focus,
+	textarea:focus,
+	select:focus {
+		transform: scale(1.01);
+	}
+
+	/* Modern Select Styling - Enhanced */
+	select {
+		background-image: linear-gradient(45deg, transparent 50%, oklch(var(--bc) / 0.5) 50%),
+			linear-gradient(135deg, oklch(var(--bc) / 0.5) 50%, transparent 50%);
+		background-position: calc(100% - 20px) calc(1em + 2px),
+			calc(100% - 15px) calc(1em + 2px);
+		background-size: 5px 5px, 5px 5px;
+		background-repeat: no-repeat;
+		padding-right: 2.5rem !important;
+	}
+
+	select:hover {
+		background-image: linear-gradient(45deg, transparent 50%, oklch(var(--p) / 0.7) 50%),
+			linear-gradient(135deg, oklch(var(--p) / 0.7) 50%, transparent 50%);
+	}
+
+	/* ========================================
+	   Floating Menu Component (Tooltips, Dropdowns)
+	   ======================================== */
+	.FloatingMenu {
 		position: absolute;
-		width: 16px;
-		height: 16px;
-		top: 50%;
-		left: 50%;
-		margin-left: -8px;
-		margin-top: -8px;
-		border: 2px solid transparent;
-		border-top-color: currentColor;
-		border-radius: 50%;
-		animation: button-spin 0.6s linear infinite;
-		color: var(--white);
-	}
-
-	@keyframes button-spin {
-		to {
-			transform: rotate(360deg);
-		}
-	}
-
-	/* ========================================
-	   Industry Best Practice: Modern Button Enhancements
-	   ======================================== */
-
-	/* Ripple Effect on Click */
-	button:not(.no-ripple) {
-		position: relative;
-		overflow: hidden;
-	}
-
-	button:not(.no-ripple)::before {
-		content: '';
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		width: 0;
-		height: 0;
-		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.5);
-		transform: translate(-50%, -50%);
-		transition: width 0.6s, height 0.6s;
-	}
-
-	button:not(.no-ripple):active::before {
-		width: 300px;
-		height: 300px;
-		transition: width 0s, height 0s;
-	}
-
-	/* Smooth Scale on Hover (Elegant Interaction) */
-	button:not(:disabled):hover {
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	/* Focus Ring - Modern Accessibility - Theme Aware */
-	button:focus-visible {
-		outline: 3px solid hsl(var(--p));
-		outline-offset: 3px;
-		transition: outline-offset 0.2s ease;
-	}
-
-	button:focus-visible:active {
-		outline-offset: 1px;
-	}
-
-	/* Pressed State - Industry Standard */
-	button:active:not(:disabled) {
-		transition: transform 0.1s cubic-bezier(0.4, 0, 0.6, 1);
-	}
-
-	/* Elevated Button Variant (Premium Look) */
-	button.elevated {
-		box-shadow: 
-			0 1px 3px rgba(0, 0, 0, 0.12),
-			0 1px 2px rgba(0, 0, 0, 0.24);
-		transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-	}
-
-	button.elevated:hover:not(:disabled) {
-		box-shadow: 
-			0 14px 28px rgba(0, 0, 0, 0.25),
-			0 10px 10px rgba(0, 0, 0, 0.22);
-		transform: translateY(-2px);
-	}
-
-	button.elevated:active:not(:disabled) {
-		box-shadow: 
-			0 1px 3px rgba(0, 0, 0, 0.12),
-			0 1px 2px rgba(0, 0, 0, 0.24);
-		transform: translateY(0);
-	}
-
-	/* Soft Button Variant (Subtle, Modern) - Theme Aware */
-	button.soft {
-		background: hsl(var(--p) / 0.1);
-		color: hsl(var(--p));
-		border: 1px solid transparent;
-		box-shadow: none;
-		transition: all 0.2s ease;
-	}
-
-	button.soft:hover:not(:disabled) {
-		background: hsl(var(--p));
-		color: hsl(var(--pc));
-		border-color: hsl(var(--p));
-		box-shadow: 0 4px 12px hsl(var(--p) / 0.2);
-	}
-
-	/* Glass Morphism Button (Modern Trend) */
-	button.glass {
-		background: rgba(255, 255, 255, 0.1);
-		backdrop-filter: blur(10px);
-		border: 1px solid rgba(255, 255, 255, 0.2);
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-		transition: all 0.3s ease;
-	}
-
-	button.glass:hover:not(:disabled) {
-		background: rgba(255, 255, 255, 0.2);
-		border-color: rgba(255, 255, 255, 0.3);
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-		transform: translateY(-2px);
-	}
-
-	/* Pulsing Effect (For Important CTAs) - Theme Aware */
-	button.pulse {
-		animation: button-pulse 2s infinite;
-	}
-
-	button.pulse:hover {
-		animation: none;
-	}
-
-	@keyframes button-pulse {
-		0%, 100% {
-			box-shadow: 0 0 0 0 hsl(var(--p) / 0.4);
-		}
-		50% {
-			box-shadow: 0 0 0 10px hsl(var(--p) / 0);
-		}
-	}
-
-	/* Shimmer Effect (Premium Look) - Theme Aware */
-	@keyframes button-shimmer {
-		0% {
-			background-position: -100% 0;
-		}
-		100% {
-			background-position: 200% 0;
-		}
-	}
-
-	button.shimmer {
-		background: linear-gradient(
-			135deg,
-			hsl(var(--p)) 0%,
-			hsl(var(--s)) 25%,
-			rgba(255, 255, 255, 0.3) 50%,
-			hsl(var(--s)) 75%,
-			hsl(var(--p)) 100%
-		);
-		background-size: 200% 100%;
-		animation: button-shimmer 3s ease-in-out infinite;
-		color: hsl(var(--pc));
-	}
-
-	/* Icon Animation on Hover */
-	button:hover svg,
-	button:hover .icon {
-		transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-		transform: scale(1.1) rotate(5deg);
-	}
-
-	button:active svg,
-	button:active .icon {
-		transform: scale(0.95);
-	}
-
-	/* ========================================
-	   Custom Scrollbar Styles
-	   ======================================== */
-	::-webkit-scrollbar {
-		width: 12px;
-	}
-
-	::-webkit-scrollbar-track {
-		background: transparent;
-	}
-
-	::-webkit-scrollbar-thumb {
-		border-radius: 10px;
-		background-color: oklch(var(--b3));
-	}
-
-	/* ========================================
-	   Utility Classes
-	   ======================================== */
-	.gradiant-text-brand {
-		background-image: linear-gradient(
-			90deg,
-			oklch(var(--a)),
-			oklch(var(--p)),
-			oklch(var(--p)),
-			oklch(var(--p)),
-			oklch(var(--p)),
-			oklch(var(--pf)),
-			oklch(var(--pf)),
-			oklch(var(--pf))
-		);
-		background-clip: text;
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		-moz-background-clip: text;
-		-moz-text-fill-color: transparent;
-		user-select: none;
-	}
-
-}
-
-@layer components {
-	/* ========================================
-	   Link Components
-	   ======================================== */
-	.inline-link {
-		--inline-link-color: oklch(var(--p));
-		color: var(--inline-link-color);
-		cursor: pointer;
-	}
-
-	.inline-link:hover,
-	.inline-link:focus {
-		color: var(--inline-link-color) !important;
-	}
-
-	.inline-link::after {
-		content: '';
-		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: 0.1em;
-		height: 1px;
-		background-color: var(--inline-link-color);
-		opacity: 0.5;
-		width: 0;
-		transition: var(--transition);
-	}
-
-	.inline-link:focus-visible::after,
-	.inline-link:hover::after {
-		width: 100%;
-	}
-
-	/* ========================================
-	   Page Layout Components
-	   ======================================== */
-	.page-header {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		width: 100%;
-	}
-
-	.page-header button {
-		align-self: flex-start;
-	}
-
-	.page-title {
-		font-family: 'Montserrat', var(--font-sans);
-		font-size: clamp(2.2rem, 5vw, 3.2rem);
-		color: oklch(var(--p));
+		border: 1px solid oklch(var(--b3));
+		background: oklch(var(--b1));
+		box-shadow: 0 4px 20px oklch(var(--b3) / 0.3);
+		border-radius: 8px;
+		padding: 0.5rem;
+		z-index: 1000;
+		font-size: var(--fz-sm);
+		backdrop-filter: blur(8px);
 	}
 
 	/* ========================================
@@ -679,190 +553,133 @@
 		position: absolute;
 		top: 110%;
 		left: 50%;
-		transform: translateX(-50%);
-		padding: 0.5em 0.75em;
-		font-size: 1rem;
-		color: var(--black-text-color);
-		background-color: var(--tooltip-background);
-		border-radius: var(--border-radius);
+		transform: translateX(-50%) scale(0.9);
+		padding: 8px 12px;
+		background: var(--tooltip-background);
+		color: white;
+		font-size: var(--fz-sm);
+		border-radius: 6px;
+		white-space: nowrap;
 		opacity: 0;
-		transition: var(--transition);
 		pointer-events: none;
-		z-index: 10;
+		transition: var(--transition-fast);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		backdrop-filter: blur(8px);
 	}
 
 	.titled:hover::after,
 	.titled:focus::after {
 		opacity: 1;
+		transform: translateX(-50%) scale(1);
 	}
 
 	/* ========================================
-	   Floating Menu Component
+	   Page Layout Components
 	   ======================================== */
-	.FloatingMenu {
-		position: relative;
-		font-size: 0.85em;
-		width: 100%;
-		user-select: none;
-		background: transparent;
-		transition: var(--transition);
-	}
-
-	.FloatingMenu .icon-container {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 30px;
-		aspect-ratio: 1 / 1;
-		border-radius: 50%;
-		border: 2px solid transparent;
-		transition: var(--transition);
-	}
-
-	.FloatingMenu .icon-container:hover {
-		border-color: oklch(var(--s));
-	}
-
-	.FloatingMenu.isOpen .icon-container {
-		border-radius: 0;
-		border-color: oklch(var(--s));
-	}
-
-	.FloatingMenu .childrens-container {
-		position: absolute;
-		right: 5px;
+	.page-header {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 5px;
-		padding: 5px;
-		border-radius: var(--border-radius);
-		border: 1px solid oklch(var(--p));
-		background: oklch(var(--b2));
-		box-sizing: border-box;
-		z-index: 10;
-	}
-
-	.FloatingMenu .childrens-container .option {
-		position: relative;
+		justify-content: center;
 		width: 100%;
-		padding: 10px;
-		transition: var(--transition);
-		text-wrap: nowrap;
-		text-align: left;
 	}
 
-	.FloatingMenu .childrens-container .option:not(:first-of-type)::before {
+	.page-header button {
+		align-self: flex-start;
+	}
+
+	.page-title {
+		font-family: 'Montserrat', var(--font-sans);
+		font-size: clamp(var(--fz-3xl), 5vw, var(--fz-5xl)); /* 30px - 48px responsive */
+		color: oklch(var(--p));
+		line-height: var(--lh-tight);
+	}
+
+	.inline-link {
+		position: relative;
+		display: inline-block;
+		padding: 0;
+		font-weight: 500;
+		background-color: transparent;
+		transition: var(--transition);
+		color: var(--inline-link-color) !important;
+	}
+
+	.inline-link::after {
 		content: '';
 		position: absolute;
-		top: -3px;
-		width: 90%;
+		left: 0;
+		right: 0;
+		bottom: 0.1em;
 		height: 1px;
-		background-color: oklch(var(--p));
+		background-color: var(--inline-link-color);
+		opacity: 0.5;
+		width: 0;
+		transition: var(--transition);
 	}
 
-	.FloatingMenu .childrens-container .option:hover {
-		background-color: oklch(var(--pf));
-		color: oklch(var(--pc));
+	.inline-link:focus-visible::after,
+	.inline-link:hover::after {
+		width: 100%;
 	}
 
 	/* ========================================
-	   Scroll & Marquee Components
+	   Skeleton Loader Shimmer Animation
 	   ======================================== */
-	.scroll-horizontal-container {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		gap: 20px;
-		margin-top: 50px;
-		overflow-x: auto;
-		white-space: nowrap;
+	@keyframes shimmer {
+		0% {
+			background-position: -1000px 0;
+		}
+		100% {
+			background-position: 1000px 0;
+		}
 	}
 
-	.scroll-horizontal-container > * {
-		min-width: 200px;
+	@keyframes skeleton-pulse {
+		0%, 100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.5;
+		}
 	}
 
-	/* Marquee Container with Gradient Fade */
-	.marquee-container {
+	.skeleton {
+		animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		background: linear-gradient(
+			90deg,
+			oklch(var(--b2)) 0%,
+			oklch(var(--b3)) 20%,
+			oklch(var(--b2)) 40%,
+			oklch(var(--b2)) 100%
+		);
+		background-size: 200% 100%;
+		animation: shimmer 1.5s ease-in-out infinite;
+	}
+
+	.skeleton-shimmer {
 		position: relative;
 		overflow: hidden;
+		background: oklch(var(--b2));
 	}
 
-	.marquee-container::before,
-	.marquee-container::after {
+	.skeleton-shimmer::after {
 		content: '';
 		position: absolute;
 		top: 0;
-		bottom: 0;
-		width: 80px;
-		pointer-events: none;
-		z-index: 1;
-	}
-
-	.marquee-container::before {
-		left: 0;
-		background: linear-gradient(90deg, oklch(var(--b2)), transparent);
-	}
-
-	.marquee-container::after {
 		right: 0;
-		background: linear-gradient(270deg, oklch(var(--b2)), transparent);
-	}
-
-	.marquee-track {
-		display: inline-flex;
-		align-items: stretch;
-		gap: 2.5rem;
-		min-width: max-content;
-		animation: marquee 28s linear infinite;
-	}
-
-	.marquee-track:hover {
-		animation-play-state: paused;
-	}
-}
-
-/* ========================================
-   Keyframe Animations
-   ======================================== */
-@keyframes fadeIn {
-	from {
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
+		bottom: 0;
+		left: 0;
+		transform: translateX(-100%);
+		background: linear-gradient(
+			90deg,
+			rgba(255, 255, 255, 0) 0%,
+			rgba(255, 255, 255, 0.05) 20%,
+			rgba(255, 255, 255, 0.1) 40%,
+			rgba(255, 255, 255, 0.1) 60%,
+			rgba(255, 255, 255, 0.05) 80%,
+			rgba(255, 255, 255, 0) 100%
+		);
+		animation: shimmer 2s ease-in-out infinite;
 	}
 }
-
-@keyframes flipDown {
-	from {
-		opacity: 0;
-		transform: rotateX(-90deg);
-	}
-	to {
-		opacity: 1;
-		transform: rotateX(0);
-	}
-}
-
-@keyframes slideInFromLeft {
-	from {
-		opacity: 0;
-		transform: translateX(-20px);
-	}
-	to {
-		opacity: 1;
-		transform: translateX(0);
-	}
-}
-
-@keyframes marquee {
-	from {
-		transform: translateX(0);
-	}
-	to {
-		transform: translateX(-50%);
-	}
-}
-

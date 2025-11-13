@@ -39,11 +39,11 @@ export default function FAQ() {
 		<section id="faq" className="bg-base-100 py-20 lg:py-28">
 			<PageContainer className="max-w-5xl space-y-12">
 			<div className="text-center">
-				<span className="badge badge-lg badge-primary gap-2 px-4 py-3 text-[0.7rem] font-semibold uppercase tracking-[0.35em] shadow-sm">
+				<span className="badge badge-lg badge-primary gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-[0.35em] shadow-sm">
 					<span className="h-2 w-2 rounded-full bg-primary-content" />
 					FAQ
 				</span>
-				<h2 className="mt-6 text-3xl font-semibold text-base-content md:text-4xl lg:text-[3rem]">
+				<h2 className="mt-6 text-3xl font-semibold text-base-content md:text-4xl lg:text-5xl">
 					Your questions, answered.
 				</h2>
 				<p className="mt-4 text-base text-base-content/70 md:text-lg">

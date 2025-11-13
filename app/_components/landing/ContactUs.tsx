@@ -16,11 +16,11 @@ export default function ContactUs() {
 			/>
 			<PageContainer className="relative flex flex-col gap-10 text-center lg:flex-row lg:items-center lg:justify-between lg:text-left">
 				<div className="space-y-6">
-					<span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-white">
+					<span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-white">
 						<span className="h-2 w-2 rounded-full bg-white" />
 						Let’s collaborate
 					</span>
-					<h2 className="text-3xl font-semibold leading-tight md:text-4xl lg:text-[3.1rem]">
+					<h2 className="text-3xl font-semibold leading-tight md:text-4xl lg:text-5xl">
 						Need a sourcing partner you can rely on?
 					</h2>
 					<p className="max-w-2xl text-base text-white/80 md:text-lg">

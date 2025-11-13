@@ -160,7 +160,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 								/>
 							</svg>
 						</div>
-					<span className="text-3xl font-bold uppercase tracking-wide text-primary">
+					<span className="text-2xl font-bold uppercase tracking-wide text-primary">
 						MedSource
 					</span>
 					</Link>
@@ -173,7 +173,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 						<Link
 							key={link.name}
 							href={link.href}
-							className="text-xl font-medium text-base-content transition-all hover:scale-105 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+							className="text-lg font-medium text-base-content transition-all hover:scale-105 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
 						>
 							{link.name}
 						</Link>
@@ -191,7 +191,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 					>
 						<ShoppingCart className="h-7 w-7" />
 						{cartItemCount > 0 && (
-							<span className="absolute -right-1 -top-1 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-primary px-1.5 text-sm font-semibold text-white">
+							<span className="absolute -right-1 -top-1 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-white">
 								{cartItemCount}
 							</span>
 						)}
@@ -234,7 +234,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 								{userMenuOpen && (
 								<div className="absolute right-0 top-full mt-2 w-60 rounded-lg border border-base-300 bg-base-100 shadow-lg">
 									<div className="flex flex-col gap-1 border-b border-base-300 px-5 py-4">
-										<p className="text-base font-semibold text-base-content">
+										<p className="text-lg font-semibold text-base-content">
 											{user?.username || 'User'}
 										</p>
 										<p className="text-sm text-base-content/70">{user?.email}</p>
@@ -303,7 +303,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 				<div className="fixed left-0 top-24 h-[calc(100vh-6rem)] w-72 bg-base-100 shadow-2xl transition-transform">
 					{/* Menu Header with Settings */}
 					<div className="flex items-center justify-between border-b border-base-300 px-6 py-4">
-						<h2 className="text-xl font-bold text-base-content">Menu</h2>
+						<h2 className="text-xl font-semibold text-base-content">Menu</h2>
 						<button
 							onClick={() => setSettingsModalOpen(true)}
 							className="btn-circle ghost"
@@ -327,7 +327,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 								>
 									<Icon className="mt-0.5 h-6 w-6 shrink-0 text-primary" />
 									<div className="flex flex-1 flex-col gap-1">
-										<span className="text-lg font-medium text-base-content">{link.name}</span>
+										<span className="text-base font-semibold text-base-content">{link.name}</span>
 										<span className="text-sm text-base-content/70">{link.description}</span>
 									</div>
 								</Link>

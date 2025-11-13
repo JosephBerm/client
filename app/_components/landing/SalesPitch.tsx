@@ -36,11 +36,11 @@ export default function SalesPitch() {
 			<PageContainer className="space-y-16 lg:space-y-20">
 				<div className="grid gap-12 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)] lg:items-start">
 					<div className="space-y-6 text-left lg:sticky lg:top-[calc(var(--nav-height)+2rem)]">
-					<span className="badge badge-lg badge-primary gap-2 px-4 py-3 text-[0.7rem] font-semibold uppercase tracking-[0.35em] shadow-sm">
+					<span className="badge badge-lg badge-primary gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-[0.35em] shadow-sm">
 						<span className="h-2 w-2 rounded-full bg-primary-content" />
 						Why MedSource Pro
 					</span>
-					<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-[3rem]">
+					<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-5xl">
 						Focused on quality. Driven by patient outcomes.
 					</h2>
 					<p className="max-w-xl text-base text-base-content/70 md:text-lg">

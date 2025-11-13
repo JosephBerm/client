@@ -266,7 +266,7 @@ export default function DataTable<TData>({
 										<th
 											key={header.id}
 											className={classNames(
-											'px-6 py-4 text-left text-[0.7rem] font-semibold uppercase tracking-[0.3em]',
+											'px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.3em]',
 											{
 												'cursor-pointer select-none transition hover:bg-primary-focus':
 													header.column.getCanSort(),
@@ -308,7 +308,7 @@ export default function DataTable<TData>({
 							<tr>
 								<td
 									colSpan={columns.length}
-									className="px-6 py-12 text-center text-sm font-semibold uppercase tracking-[0.3em] text-base-content/60"
+									className="px-6 py-12 text-center text-base font-semibold uppercase tracking-[0.3em] text-base-content/60"
 								>
 									{emptyMessage}
 									</td>
@@ -320,7 +320,7 @@ export default function DataTable<TData>({
 										className="hover"
 								>
 									{row.getVisibleCells().map((cell) => (
-										<td key={cell.id} className="px-6 py-4 text-sm text-base-content">
+										<td key={cell.id} className="px-6 py-4 text-base text-base-content">
 											{flexRender(cell.column.columnDef.cell, cell.getContext())}
 										</td>
 										))}
@@ -334,7 +334,7 @@ export default function DataTable<TData>({
 
 		{pagination && onPaginationChange && (
 			<div className="flex flex-col gap-4 rounded-[28px] border border-base-300 bg-base-200/70 px-6 py-4 shadow-lg sm:flex-row sm:items-center sm:justify-between">
-				<div className="text-xs font-semibold uppercase tracking-[0.3em] text-base-content/70">
+				<div className="text-sm font-semibold uppercase tracking-[0.3em] text-base-content/70">
 						Showing{' '}
 						{pagination.pageIndex * pagination.pageSize + 1}-
 						{Math.min(
@@ -355,7 +355,7 @@ export default function DataTable<TData>({
 						].map(({ label, action, disabled }) => (
 							<button
 								key={label}
-								className="btn btn-sm btn-ghost inline-flex h-9 items-center rounded-full border border-base-300 px-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em] transition hover:-translate-y-0.5 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+								className="btn btn-sm btn-ghost inline-flex h-9 items-center rounded-full border border-base-300 px-4 text-xs font-semibold uppercase tracking-[0.3em] transition hover:-translate-y-0.5 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
 								onClick={() => onPaginationChange(action())}
 								disabled={disabled}
 							>
@@ -363,7 +363,7 @@ export default function DataTable<TData>({
 							</button>
 						))}
 
-					<span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-primary">
+					<span className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
 						Page {pagination.pageIndex + 1} of {pageCount || Math.max(1, Math.ceil(data.length / pagination.pageSize))}
 					</span>
 
@@ -384,7 +384,7 @@ export default function DataTable<TData>({
 						].map(({ label, action, disabled }) => (
 							<button
 								key={label}
-								className="btn btn-sm btn-ghost inline-flex h-9 items-center rounded-full border border-base-300 px-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em] transition hover:-translate-y-0.5 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+								className="btn btn-sm btn-ghost inline-flex h-9 items-center rounded-full border border-base-300 px-4 text-xs font-semibold uppercase tracking-[0.3em] transition hover:-translate-y-0.5 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
 								onClick={() => onPaginationChange(action())}
 								disabled={disabled}
 							>
@@ -394,9 +394,9 @@ export default function DataTable<TData>({
 					</div>
 
 				<div className="flex items-center gap-2">
-					<span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-primary">Show</span>
+					<span className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Show</span>
 					<select
-						className="select select-bordered select-sm rounded-full px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.3em]"
+						className="select select-bordered select-sm rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em]"
 						value={pagination.pageSize}
 							onChange={(e) =>
 								onPaginationChange({

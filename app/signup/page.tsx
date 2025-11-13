@@ -75,7 +75,7 @@ export default function SignupPage() {
 					</div>
 
 					{/* Header */}
-					<h1 className="text-3xl font-bold text-center text-primary mb-2">
+					<h1 className="text-4xl font-bold text-center text-primary mb-2">
 						Create Account
 					</h1>
 					<p className="text-center text-base-content/70 mb-6">

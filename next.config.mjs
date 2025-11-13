@@ -2,11 +2,11 @@
 
 const Environments = {
 	development: {
-		API_URL: 'http://localhost:5254/api',
+		NEXT_PUBLIC_API_URL: 'http://localhost:5254/api',
 		CLIENT_DOMAIN: 'https://localhost:3000',
 	},
 	production: {
-		API_URL: 'https://prod-server20241205193558.azurewebsites.net/api',
+		NEXT_PUBLIC_API_URL: 'https://prod-server20241205193558.azurewebsites.net/api',
 		CLIENT_DOMAIN: 'https://www.medsourcepro.com',
 	},
 }
