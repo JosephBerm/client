@@ -276,24 +276,24 @@
 
 	/* Primary Button (Default Brand) - Theme Aware */
 	button:not([class*="btn-"]):not([class*="transparent"]):not([class*="action"]):not([class*="outline"]):not([class*="ghost"]):not([class*="link"]) {
-		background: linear-gradient(135deg, hsl(var(--p)), hsl(var(--s)));
-		color: hsl(var(--pc));
-		box-shadow: 0 2px 8px hsl(var(--p) / 0.2);
+		background: linear-gradient(135deg, oklch(var(--p)), oklch(var(--s)));
+		color: oklch(var(--pc));
+		box-shadow: 0 2px 8px oklch(var(--p) / 0.2);
 	}
 
 	button:not([class*="btn-"]):not([class*="transparent"]):not([class*="action"]):not([class*="outline"]):not([class*="ghost"]):not([class*="link"]):hover {
-		background: linear-gradient(135deg, hsl(var(--s)), hsl(var(--a)));
-		box-shadow: 0 4px 12px hsl(var(--p) / 0.3);
+		background: linear-gradient(135deg, oklch(var(--s)), oklch(var(--a)));
+		box-shadow: 0 4px 12px oklch(var(--p) / 0.3);
 		transform: translateY(-1px);
 	}
 
 	button:not([class*="btn-"]):not([class*="transparent"]):not([class*="action"]):not([class*="outline"]):not([class*="ghost"]):not([class*="link"]):active {
 		transform: translateY(0);
-		box-shadow: 0 1px 4px hsl(var(--p) / 0.2);
+		box-shadow: 0 1px 4px oklch(var(--p) / 0.2);
 	}
 
 	button:focus-visible {
-		outline: 3px solid hsl(var(--p));
+		outline: 3px solid oklch(var(--p));
 		outline-offset: 2px;
 	}
 
@@ -307,42 +307,42 @@
 	/* Button Variants */
 	button.outline {
 		background: transparent;
-		color: hsl(var(--p));
-		border: 2px solid hsl(var(--p));
+		color: oklch(var(--p));
+		border: 2px solid oklch(var(--p));
 		box-shadow: none;
 	}
 
 	button.outline:hover {
-		background: hsl(var(--p) / 0.1);
-		border-color: hsl(var(--s));
-		color: hsl(var(--s));
+		background: oklch(var(--p) / 0.1);
+		border-color: oklch(var(--s));
+		color: oklch(var(--s));
 	}
 
 	button.ghost {
 		background: transparent;
-		color: hsl(var(--bc));
+		color: oklch(var(--bc));
 		box-shadow: none;
 	}
 
 	button.ghost:hover {
-		background: hsl(var(--p) / 0.1);
-		color: hsl(var(--p));
+		background: oklch(var(--p) / 0.1);
+		color: oklch(var(--p));
 	}
 
 	button.transparent {
 		background: transparent;
-		color: hsl(var(--bc));
+		color: oklch(var(--bc));
 		box-shadow: none;
 		padding: 0.5rem 1rem;
 	}
 
 	button.transparent:hover {
-		background: hsl(var(--bc) / 0.05);
+		background: oklch(var(--bc) / 0.05);
 	}
 
 	button.link {
 		background: none;
-		color: hsl(var(--p));
+		color: oklch(var(--p));
 		padding: 0;
 		text-decoration: underline;
 		text-underline-offset: 3px;
@@ -350,7 +350,7 @@
 	}
 
 	button.link:hover {
-		color: hsl(var(--s));
+		color: oklch(var(--s));
 		text-decoration-thickness: 2px;
 	}
 
@@ -393,8 +393,8 @@
 	/* Icon Button Color Fix - Ensure proper contrast - Theme Aware */
 	button.btn-circle:not(.ghost):not(.transparent):not(.outline),
 	button.btn-square:not(.ghost):not(.transparent):not(.outline) {
-		background: linear-gradient(135deg, hsl(var(--p)), hsl(var(--s)));
-		color: hsl(var(--pc));
+		background: linear-gradient(135deg, oklch(var(--p)), oklch(var(--s)));
+		color: oklch(var(--pc));
 	}
 
 	button.btn-circle.ghost,
@@ -402,13 +402,13 @@
 	button.btn-circle.transparent,
 	button.btn-square.transparent {
 		background: transparent;
-		color: hsl(var(--p));
+		color: oklch(var(--p));
 	}
 
 	button.btn-circle.ghost:hover,
 	button.btn-square.ghost:hover {
-		background: hsl(var(--p) / 0.1);
-		color: hsl(var(--s));
+		background: oklch(var(--p) / 0.1);
+		color: oklch(var(--s));
 	}
 
 	/* Button Groups */
