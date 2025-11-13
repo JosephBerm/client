@@ -1,12 +1,12 @@
 /**
  * Select UI Component - Industry Best Practices
- *
+ * 
  * Enhanced select/dropdown component following design patterns from:
  * - Material UI (size variants, states)
  * - Ant Design (responsive behavior)
  * - Apple Design (minimal, clean)
  * - DaisyUI (theme integration)
- *
+ * 
  * **Features:**
  * - Size variants (xs, sm, base, lg)
  * - Theme-aware styling via DaisyUI
@@ -22,7 +22,7 @@
  * - Touch-friendly (min 44x44px - Apple HIG)
  * - Keyboard accessible
  * - Screen reader support
- *
+ * 
  * @example
  * ```tsx
  * // Basic usage
@@ -42,7 +42,7 @@
  *   onChange={handler}
  *   options={options}
  * />
- *
+ * 
  * // With width preset
  * <Select
  *   width="auto"
@@ -59,7 +59,7 @@
  *   options={options}
  * />
  * ```
- *
+ * 
  * @module Select
  */
 
@@ -136,12 +136,14 @@ export interface SelectProps<T = string | number> {
 
 /**
  * Size-specific class mappings following DaisyUI conventions.
+ * Includes proper padding for breathing room (Apple/Microsoft standard).
+ * Using !important modifier to override DaisyUI's default padding.
  */
 const sizeClasses: Record<SelectSize, string> = {
-	xs: 'select-xs h-7 text-xs',
-	sm: 'select-sm h-8 text-sm',
-	base: 'h-12 text-base',
-	lg: 'select-lg h-14 text-lg',
+	xs: 'select-xs h-7 text-xs !pl-2.5 !pr-8',      // 10px left, 32px right
+	sm: 'select-sm h-8 text-sm !pl-3 !pr-9',        // 12px left, 36px right
+	base: 'h-12 text-base !pl-4 !pr-10',            // 16px left, 40px right
+	lg: 'select-lg h-14 text-lg !pl-5 !pr-12',      // 20px left, 48px right
 }
 
 /**
@@ -158,9 +160,9 @@ const widthClasses: Record<SelectWidth, string> = {
 
 /**
  * Select Component
- *
+ * 
  * Enhanced dropdown/select component with industry-standard features.
- *
+ * 
  * **Accessibility:**
  * - ARIA labels for screen readers
  * - Keyboard navigation (Arrow keys, Enter, Escape)
@@ -179,7 +181,7 @@ const widthClasses: Record<SelectWidth, string> = {
  * - Disabled: Reduced opacity, no interaction
  * - Loading: Spinner indicator
  * - Error: Red border and text
- *
+ * 
  * @param props - Select configuration props
  * @returns Select component
  */
@@ -212,10 +214,8 @@ export default function Select<T = string | number>({
 		'duration-300',
 		'ease-out',
 		
-		// Elegant shadows - Apple/Microsoft inspired
+		// Subtle shadows - Input-like feel
 		'shadow-sm',
-		'hover:shadow-md',
-		'focus:shadow-lg',
 		
 		// Border & Background - Clean and modern
 		'border-base-300',
@@ -225,30 +225,29 @@ export default function Select<T = string | number>({
 		// Rounded corners - Soft and friendly
 		'rounded-lg',
 		
-		// Hover state - Subtle lift effect
-		!disabled && !loading && 'hover:-translate-y-0.5',
-		!disabled && !loading && 'hover:border-primary/60',
+		// Hover state - Subtle and refined (no translation)
+		!disabled && !loading && 'hover:border-primary/50',
+		!disabled && !loading && 'hover:shadow-md',
 		
-		// Focus state - Clear and accessible
+		// Focus state - Clear and accessible (input-like)
 		'focus:border-primary',
 		'focus:outline-none',
 		'focus:ring-2',
-		'focus:ring-primary/30',
-		'focus:ring-offset-2',
-		'focus:ring-offset-base-100',
-		'focus:scale-[1.01]',
+		'focus:ring-primary/20',
+		'focus:ring-offset-1',
+		'focus:shadow-lg',
 		
 		// Error state - Clear but not aggressive
 		error && 'border-error/70',
-		error && 'focus:ring-error/30',
+		error && 'focus:ring-error/20',
 		error && 'animate-shake',
 		
 		// Disabled state - Elegant degradation
 		disabled && 'opacity-60',
 		disabled && 'cursor-not-allowed',
 		disabled && 'bg-base-200/50',
-		disabled && 'hover:shadow-none',
-		disabled && 'hover:translate-y-0',
+		disabled && 'hover:shadow-sm',
+		disabled && 'hover:border-base-300',
 		
 		// Loading state - Subtle indication
 		loading && 'opacity-75',
@@ -266,33 +265,33 @@ export default function Select<T = string | number>({
 
 	return (
 		<div className="relative inline-block group">
-			<select
+		<select
 				id={id}
 				name={name}
 				value={String(value)}
-				onChange={onChange}
+			onChange={onChange}
 				className={classes}
 				disabled={disabled || loading}
 				required={required}
-				aria-label={ariaLabel}
+			aria-label={ariaLabel}
 				aria-invalid={error}
 				aria-busy={loading}
-			>
-				{placeholder && (
-					<option value="" disabled>
-						{placeholder}
-					</option>
-				)}
-				{options.map((option) => (
+		>
+			{placeholder && (
+				<option value="" disabled>
+					{placeholder}
+				</option>
+			)}
+			{options.map((option) => (
 					<option
 						key={String(option.value)}
 						value={String(option.value)}
 						disabled={option.disabled}
 					>
-						{option.label}
-					</option>
-				))}
-			</select>
+					{option.label}
+				</option>
+			))}
+		</select>
 
 			{/* Loading indicator - Elegant spinner */}
 			{loading && (
@@ -301,11 +300,11 @@ export default function Select<T = string | number>({
 				</div>
 			)}
 
-			{/* Focus glow effect - Subtle elegance */}
+			{/* Focus glow effect - Very subtle (input-like) */}
 			<div 
 				className="pointer-events-none absolute inset-0 rounded-lg opacity-0 transition-opacity duration-300 group-focus-within:opacity-100"
 				style={{
-					background: 'radial-gradient(circle at center, oklch(var(--p) / 0.05) 0%, transparent 70%)',
+					background: 'radial-gradient(circle at center, oklch(var(--p) / 0.02) 0%, transparent 70%)',
 				}}
 				aria-hidden="true"
 			/>

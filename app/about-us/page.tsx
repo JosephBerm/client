@@ -49,11 +49,11 @@ export default function AboutPage() {
 			description="Delivering reliable medical supply solutions, exceptional service, and measurable impact for the healthcare organizations we serve."
 			maxWidth="xl"
 		>
-			<section className="rounded-3xl bg-primary/10 p-8 text-center shadow-sm md:p-12">
-				<h2 className="text-3xl font-semibold text-primary md:text-4xl">
+			<section className="rounded-3xl border border-base-300 bg-neutral p-8 text-center shadow-sm md:p-12">
+				<h2 className="text-3xl font-semibold text-neutral-content md:text-4xl">
 					Trusted medical supply partners for providers nationwide.
 				</h2>
-				<p className="mt-4 text-base text-base-content/70 md:text-lg">
+				<p className="mt-4 text-base text-neutral-content/80 md:text-lg">
 					Since our founding, we have focused on harmonizing dependable logistics, curated product sourcing, and
 					relationship-driven service to give clinicians the confidence to focus on patient care.
 				</p>
@@ -63,7 +63,7 @@ export default function AboutPage() {
 				{bullets.map((section) => (
 					<Card key={section.title} className="h-full border border-base-200 bg-base-100 shadow-sm" compact={false}>
 						<div className="flex flex-col gap-4 lg:flex-row">
-							<div className="overflow-hidden rounded-2xl bg-base-200/60 lg:w-1/3">
+							<div className="overflow-hidden rounded-2xl bg-base-200 lg:w-1/3">
 								<Image src={section.image} alt={section.title} className="h-full w-full object-cover" />
 							</div>
 							<div className="flex-1 space-y-3">

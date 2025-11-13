@@ -36,14 +36,14 @@ export default function SalesPitch() {
 			<PageContainer className="space-y-16 lg:space-y-20">
 				<div className="grid gap-12 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)] lg:items-start">
 					<div className="space-y-6 text-left lg:sticky lg:top-[calc(var(--nav-height)+2rem)]">
-					<span className="badge badge-lg badge-primary gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-[0.35em] shadow-sm">
-						<span className="h-2 w-2 rounded-full bg-primary-content" />
-						Why MedSource Pro
-					</span>
-					<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-5xl">
-						Focused on quality. Driven by patient outcomes.
-					</h2>
-					<p className="max-w-xl text-base text-base-content/70 md:text-lg">
+						<span className="badge badge-accent gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.3em] shadow-sm">
+							<span className="h-2 w-2 rounded-full bg-accent-content" />
+							Why MedSource Pro
+						</span>
+						<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-5xl">
+							Focused on quality. Driven by patient outcomes.
+						</h2>
+						<p className="max-w-xl text-base text-base-content/70 md:text-lg">
 							From sourcing to delivery, every part of our process is engineered to serve healthcare professionals
 							with reliability, transparency, and speed. Your supply chain stays resilient, and your teams stay
 							focused on care.
@@ -54,18 +54,18 @@ export default function SalesPitch() {
 						{VALUE_PROPS.map(({ title, description, icon: Icon }) => (
 							<div
 								key={title}
-							className="card bg-base-200 group relative overflow-hidden border border-base-300 px-8 py-10 shadow-xl transition hover:-translate-y-1 hover:shadow-2xl"
+								className="card group relative overflow-hidden rounded-2xl border border-base-300 bg-base-200 px-8 py-10 shadow-sm transition-all duration-300 hover:shadow-xl"
 						>
-							<div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-primary/10 blur-2xl transition group-hover:bg-primary/20" />
+								<div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-base-content/5 blur-2xl transition duration-300 group-hover:bg-base-content/10" />
 							<div className="relative flex flex-col gap-4">
-								<span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-base-100 text-primary shadow">
+								<span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-base-300 bg-base-100 text-base-content shadow-sm transition-all duration-300 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-content group-hover:shadow-md">
 									<Icon className="h-6 w-6" strokeWidth={1.5} />
 								</span>
 								<div className="space-y-3">
 									<h3 className="text-xl font-semibold text-base-content">{title}</h3>
 									<p className="text-base leading-relaxed text-base-content/70">{description}</p>
-									</div>
 								</div>
+							</div>
 							</div>
 						))}
 					</div>

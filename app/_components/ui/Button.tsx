@@ -114,8 +114,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 /**
  * Button Component
  * 
- * Reusable button component with DaisyUI styling and multiple customization options.
- * Supports loading states, icons, variants, and sizes. Fully accessible.
+ * Modern, elegant button component with subtle interactions and smooth animations.
+ * Matches the refined feel of Select and Input components.
  * 
  * **Accessibility:**
  * - Proper disabled state handling
@@ -125,38 +125,44 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
  * 
  * **Mobile-First:**
  * - Responsive sizing
- * - Touch-friendly tap targets
+ * - Touch-friendly tap targets (min 44px)
  * - Optional full width on mobile
+ * 
+ * **Design Philosophy:**
+ * - Subtle hover effects (no vertical translation)
+ * - Smooth 300ms transitions
+ * - Elegant shadows and borders
+ * - Clean, modern aesthetics
  * 
  * @param props - Button props including variant, size, loading state, etc.
  * @param ref - Forwarded ref to the underlying button element
  * @returns Button component
  */
 const baseClasses =
-	'inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-[0.12em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2'
+	'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
 
 const variantClasses: Record<NonNullable<ButtonProps['variant']>, string> = {
 	primary:
-		'btn btn-primary shadow-lg hover:-translate-y-0.5',
+		'btn btn-primary shadow-sm hover:shadow-md focus-visible:shadow-lg focus-visible:ring-primary/30',
 	secondary:
-		'btn btn-secondary shadow-md hover:-translate-y-0.5',
+		'btn btn-secondary shadow-sm hover:shadow-md focus-visible:shadow-lg focus-visible:ring-secondary/30',
 	accent:
-		'btn btn-accent shadow-lg hover:-translate-y-0.5',
+		'btn btn-accent shadow-sm hover:shadow-md focus-visible:shadow-lg focus-visible:ring-accent/30',
 	ghost:
-		'btn btn-ghost hover:-translate-y-0.5',
+		'btn btn-ghost hover:bg-base-200 focus-visible:ring-base-content/20',
 	outline:
-		'btn btn-outline hover:-translate-y-0.5',
+		'btn btn-outline hover:shadow-sm focus-visible:ring-primary/30',
 	error:
-		'btn btn-error shadow-lg hover:-translate-y-0.5',
+		'btn btn-error shadow-sm hover:shadow-md focus-visible:shadow-lg focus-visible:ring-error/30',
 	success:
-		'btn btn-success shadow-lg hover:-translate-y-0.5',
+		'btn btn-success shadow-sm hover:shadow-md focus-visible:shadow-lg focus-visible:ring-success/30',
 }
 
 const sizeClasses: Record<NonNullable<ButtonProps['size']>, string> = {
-	xs: 'px-4 py-2 text-xs uppercase',
-	sm: 'px-5 py-2.5 text-sm uppercase',
-	md: 'px-6 py-3 text-base uppercase',
-	lg: 'px-8 py-4 text-lg uppercase',
+	xs: 'btn-xs px-3 py-1.5 text-xs',
+	sm: 'btn-sm px-4 py-2 text-sm',
+	md: 'btn-md px-5 py-2.5 text-base',
+	lg: 'btn-lg px-6 py-3 text-lg',
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -186,7 +192,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 					sizeClasses[size],
 					{
 						'w-full sm:w-auto': fullWidth,
-						'cursor-not-allowed opacity-60': isDisabled,
+						'cursor-not-allowed opacity-60 hover:shadow-none': isDisabled,
 					},
 					className
 				)}
@@ -194,14 +200,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 				{...props}
 			>
 				{loading && (
-					<span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden />
+					<span 
+						className="h-4 w-4 animate-spin rounded-full border-2 border-current/30 border-t-current animate-fade-in" 
+						aria-hidden 
+					/>
 				)}
 
-				{!loading && leftIcon && <span className="flex items-center">{leftIcon}</span>}
+				{!loading && leftIcon && <span className="flex items-center shrink-0">{leftIcon}</span>}
 
 				<span className="whitespace-nowrap">{children}</span>
 
-				{!loading && rightIcon && <span className="flex items-center">{rightIcon}</span>}
+				{!loading && rightIcon && <span className="flex items-center shrink-0">{rightIcon}</span>}
 			</button>
 		)
 	}

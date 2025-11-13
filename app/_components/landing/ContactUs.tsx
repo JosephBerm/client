@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import PageContainer from '@_components/layouts/PageContainer'
+import Button from '@_components/ui/Button'
 
 /**
  * Contact Section
@@ -30,17 +31,15 @@ export default function ContactUs() {
 				</div>
 
 				<div className="flex w-full flex-col items-center gap-4 rounded-3xl border border-white/20 bg-white/10 p-6 backdrop-blur md:flex-row md:justify-center md:gap-6 md:p-8 lg:w-auto">
-				<Link
-					href="/contact"
-					className="btn btn-secondary shadow-lg transition hover:-translate-y-0.5 text-sm uppercase tracking-[0.3em] md:w-auto"
-				>
+					<Link href="/contact" className="inline-flex w-full md:w-auto">
+						<Button variant="secondary" size="lg" fullWidth className="md:w-auto uppercase tracking-[0.3em]">
 					Request a consultation
+						</Button>
 				</Link>
-				<a
-					href="tel:+17865782145"
-					className="btn btn-outline btn-primary-content transition hover:-translate-y-0.5 text-sm uppercase tracking-[0.3em] md:w-auto"
-				>
+					<a href="tel:+17865782145" className="inline-flex w-full md:w-auto">
+						<Button variant="outline" size="lg" fullWidth className="md:w-auto uppercase tracking-[0.3em] !border-white !text-white hover:!bg-white/10">
 					Call (786) 578-2145
+						</Button>
 				</a>
 				</div>
 			</PageContainer>

@@ -78,23 +78,24 @@ export default function AppearanceSetting() {
 	}
 
 	return (
-		<div className="flex items-start justify-between gap-4 md:gap-6 py-4 md:py-5">
-			<div className="flex-1 min-w-0 pr-2 md:pr-4">
+		<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 md:gap-6 py-4 md:py-5 px-4 sm:px-6">
+			<div className="flex-1 min-w-0">
 				<label className="block text-sm md:text-base font-semibold text-base-content mb-1 md:mb-1.5">
 					Theme
 				</label>
-				<p className="text-sm text-base-content/70 leading-relaxed">
+				<p className="text-xs sm:text-sm text-base-content/70 leading-relaxed">
 					Choose your preferred color theme for the application
 				</p>
 			</div>
-			<div className="shrink-0">
+			<div className="shrink-0 w-full sm:w-auto">
 				<Select
 					value={currentTheme}
 					onChange={(e) => handleThemeChange(e.target.value)}
 					options={themeOptions}
-					className="min-w-[180px] w-[180px]"
-					fullWidth={false}
+					width="full"
+					size="sm"
 					aria-label="Select theme"
+					className="sm:!w-44"
 				/>
 			</div>
 		</div>

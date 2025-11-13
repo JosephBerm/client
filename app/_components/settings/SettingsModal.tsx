@@ -37,6 +37,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { X } from 'lucide-react'
 import SettingRow from './SettingRow'
+import Button from '@_components/ui/Button'
 import { getSettingsSections } from '@_services/SettingsService'
 
 /**
@@ -137,7 +138,7 @@ export default function SettingsModal({
 
 	return (
 		<div
-			className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+			className="fixed inset-0 z-[100] flex items-center justify-center sm:p-4"
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="settings-modal-title"
@@ -149,72 +150,76 @@ export default function SettingsModal({
 				aria-hidden="true"
 			/>
 
-		{/* Modal Content - Two-pane layout */}
+			{/* Modal Content - Responsive layout */}
 		<div
-			className="relative z-10 bg-base-100 rounded-lg shadow-2xl w-full max-w-4xl h-[80vh] max-h-[800px] overflow-hidden flex flex-col transform transition-all duration-300"
+				className="relative z-10 bg-base-100 w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:shadow-2xl sm:max-w-2xl md:max-w-3xl lg:max-w-4xl overflow-hidden flex flex-col transform transition-all duration-300"
 			onClick={(e) => e.stopPropagation()}
 			tabIndex={-1}
 		>
-				{/* Header - Close button only */}
-				<div className="flex items-center justify-between p-4 border-b border-base-300">
+				{/* Header - Mobile: Title + Close | Desktop: Close only */}
+				<div className="flex items-center justify-between p-4 sm:p-5 border-b border-base-300 lg:justify-end">
+					{/* Mobile/Tablet: Section Title */}
+					<h2 className="text-lg font-bold text-base-content lg:hidden">
+						{selectedSection?.title || 'Settings'}
+					</h2>
+
+					{/* Close button */}
 					<button
 						onClick={onClose}
-						className="btn btn-ghost btn-sm btn-circle"
+						className="btn btn-ghost btn-sm btn-circle hover:bg-base-200"
 						aria-label="Close settings"
 					>
 						<X size={20} />
 					</button>
 				</div>
 
-				{/* Two-pane layout */}
-				<div className="flex flex-1 overflow-hidden">
-			{/* Left Sidebar - Navigation */}
-			<aside className="w-64 bg-base-200 border-r border-base-300 flex flex-col">
-						{/* Section Title */}
-						<div className="p-3 md:p-4 border-b border-base-300">
+				{/* Content Wrapper */}
+				<div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+					{/* Navigation - Mobile: Horizontal pills | Desktop: Vertical sidebar */}
+					<nav className="lg:w-64 bg-base-100 lg:bg-base-200 border-b lg:border-b-0 lg:border-r border-base-300 overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto">
+						{/* Desktop: Settings Title */}
+						<div className="hidden lg:block p-4 border-b border-base-300">
 							<h2 className="text-lg font-semibold text-base-content">
 								Settings
 							</h2>
 						</div>
 
-						{/* Navigation Menu */}
-						<nav className="flex-1 overflow-y-auto p-2 md:p-3">
-							<ul className="space-y-1">
+						{/* Navigation Items */}
+						<div className="flex lg:flex-col gap-2 p-3 lg:p-3">
 								{sections.map((section) => {
 									const Icon = section.icon
 									const isActive = section.id === selectedSectionId
 
 									return (
-										<li key={section.id}>
-											<button
+									<Button
+										key={section.id}
 												onClick={() => setSelectedSectionId(section.id)}
-												className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${
-													isActive
-														? 'bg-primary/10 text-primary border border-primary/20'
-														: 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
-												}`}
+										variant={isActive ? 'primary' : 'ghost'}
+										size="sm"
+										leftIcon={<Icon size={18} />}
+										className={`
+											whitespace-nowrap lg:w-full lg:justify-start
+											${isActive ? '!rounded-lg' : '!rounded-lg'}
+										`}
 												aria-label={`${section.title} settings section`}
 												aria-current={isActive ? 'page' : undefined}
 											>
-												<Icon size={20} className="flex-shrink-0" />
-												<span className="font-medium">{section.title}</span>
-											</button>
-										</li>
+										{section.title}
+									</Button>
 									)
 								})}
-							</ul>
+						</div>
 						</nav>
-					</aside>
 
-			{/* Right Content Area */}
+					{/* Content Area */}
 			<div className="flex-1 bg-base-100 overflow-y-auto">
 						{selectedSection && (
-							<div className="p-4 md:p-6">
-								{/* Section Header */}
-								<div className="mb-4 md:mb-6">
+							<div className="p-4 sm:p-5 lg:p-6">
+								{/* Section Header - Desktop only (mobile shows in modal header) */}
+								<div className="hidden lg:block mb-6">
 									<h3
 										id="settings-modal-title"
-										className="text-xl md:text-2xl font-bold text-base-content mb-2"
+										className="text-2xl font-bold text-base-content mb-2"
 									>
 										{selectedSection.title}
 									</h3>
@@ -225,14 +230,23 @@ export default function SettingsModal({
 									)}
 								</div>
 
+								{/* Mobile/Tablet: Show description */}
+								{selectedSection.description && (
+									<div className="lg:hidden mb-4">
+										<p className="text-sm text-base-content/70">
+											{selectedSection.description}
+										</p>
+									</div>
+								)}
+
 				{/* Settings List */}
-				<div className="space-y-0 bg-base-200 rounded-lg border border-base-300 overflow-hidden">
+								<div className="space-y-0 bg-base-200/50 sm:bg-base-200 rounded-lg border border-base-300 overflow-hidden">
 									{selectedSection.items.map((item, index) => (
 										<div key={item.id}>
 											<SettingRow setting={item} />
 											{/* Divider between items (except last) */}
 											{index < selectedSection.items.length - 1 && (
-												<div className="border-b border-base-300 mx-6" />
+												<div className="border-b border-base-300 mx-4 sm:mx-6" />
 											)}
 										</div>
 									))}

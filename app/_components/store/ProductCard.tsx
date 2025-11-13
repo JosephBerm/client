@@ -235,7 +235,7 @@ export default function ProductCard({
 							{product.categories.slice(0, 2).map((cat) => (
 								<span
 									key={cat.id}
-									className="group inline-flex items-center gap-1 max-w-32 rounded-md border border-primary/20 bg-primary/5 px-2 py-1 text-xs font-medium text-primary transition-all duration-200 hover:border-primary/40 hover:bg-primary/10"
+									className="badge badge-secondary badge-outline max-w-32"
 									title={cat.name}
 								>
 									<span className="text-[0.65rem] opacity-70">#</span>
@@ -243,7 +243,7 @@ export default function ProductCard({
 								</span>
 							))}
 							{product.categories.length > 2 && (
-								<span className="inline-flex items-center rounded-md border border-base-300 bg-base-200/50 px-2 py-1 text-xs font-medium text-base-content/70">
+								<span className="badge badge-neutral badge-sm">
 									+{product.categories.length - 2}
 								</span>
 							)}

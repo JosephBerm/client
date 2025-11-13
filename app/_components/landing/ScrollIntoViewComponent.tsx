@@ -23,7 +23,7 @@ export default function ScrollIntoViewComponent() {
 					<a
 						key={section.id}
 						href={`#${section.id}`}
-						className="flex-shrink-0 rounded-full border border-base-200 px-4 py-2 text-base-content/80 transition hover:border-primary hover:bg-primary/10 hover:text-primary md:flex-1 md:text-center"
+						className="btn btn-sm btn-outline btn-neutral flex-shrink-0 md:flex-1"
 					>
 						{section.label}
 					</a>

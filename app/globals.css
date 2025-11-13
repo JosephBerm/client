@@ -12,10 +12,10 @@
 	   ======================================== */
 	:root {
 
-		/* Semantic Colors (kept for backward compatibility) */
-		--toastify-color-error: #d22b2b !important;
-		--error-color: var(--toastify-color-error);
-		--error-color-tint: #520606;
+		/* Semantic Colors - Use DaisyUI theme tokens */
+		--toastify-color-error: oklch(var(--er));
+		--error-color: oklch(var(--er));
+		--error-color-tint: oklch(var(--er) / 0.8);
 
 		/* UI Element Colors */
 		--tooltip-background: rgba(0, 0, 0, 0.35);
@@ -84,8 +84,8 @@
 	body {
 		font-family: var(--font-sans);
 		font-size: var(--fz-base); /* 16px - WCAG compliant base size */
-		color: var(--black-text-color);
-		background-color: var(--bg-color);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
+		background-color: oklch(var(--b1)); /* DaisyUI base-100 */
 		width: 100%;
 		margin: 0;
 		line-height: var(--lh-normal); /* 1.5 - Industry standard */
@@ -187,7 +187,7 @@
 		font-size: var(--fz-4xl); /* 36px */
 		font-weight: 700;
 		line-height: var(--lh-tight);
-		color: var(--black-text-color);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
 		margin: 0;
 	}
 
@@ -195,7 +195,7 @@
 		font-size: var(--fz-3xl); /* 30px */
 		font-weight: 600;
 		line-height: var(--lh-tight);
-		color: var(--black-text-color);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
 		margin: 0;
 	}
 
@@ -203,7 +203,7 @@
 		font-size: var(--fz-2xl); /* 24px */
 		font-weight: 600;
 		line-height: var(--lh-tight);
-		color: var(--black-text-color);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
 		margin: 0;
 	}
 
@@ -211,7 +211,7 @@
 		font-size: var(--fz-xl); /* 20px */
 		font-weight: 600;
 		line-height: var(--lh-tight);
-		color: var(--black-text-color);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
 		margin: 0;
 	}
 
@@ -219,7 +219,7 @@
 		font-size: var(--fz-lg); /* 18px */
 		font-weight: 600;
 		line-height: var(--lh-tight);
-		color: var(--black-text-color);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
 		margin: 0;
 	}
 
@@ -227,7 +227,7 @@
 		font-size: var(--fz-base); /* 16px */
 		line-height: var(--lh-normal);
 		margin: 0;
-		color: var(--black-text-color);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
 	}
 
 	/* ========================================
@@ -242,9 +242,10 @@
 		transition: var(--transition);
 	}
 
+	/* Links inherit hover behavior from DaisyUI's .link class */
 	a:hover,
 	a:focus {
-		color: oklch(var(--p)) !important;
+		opacity: 0.8;
 	}
 
 	/* ========================================
@@ -544,7 +545,7 @@
 		padding: 10px;
 		border: none;
 		font-family: var(--font-sans);
-		color: var(--black-text-color);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
 		transition: var(--transition);
 	}
 
@@ -591,7 +592,7 @@
 	.page-title {
 		font-family: 'Montserrat', var(--font-sans);
 		font-size: clamp(var(--fz-3xl), 5vw, var(--fz-5xl)); /* 30px - 48px responsive */
-		color: oklch(var(--p));
+		color: oklch(var(--bc)); /* DaisyUI base-content */
 		line-height: var(--lh-tight);
 	}
 
@@ -602,7 +603,7 @@
 		font-weight: 500;
 		background-color: transparent;
 		transition: var(--transition);
-		color: var(--inline-link-color) !important;
+		color: oklch(var(--p)); /* DaisyUI primary */
 	}
 
 	.inline-link::after {
@@ -612,7 +613,7 @@
 		right: 0;
 		bottom: 0.1em;
 		height: 1px;
-		background-color: var(--inline-link-color);
+		background-color: oklch(var(--p)); /* DaisyUI primary */
 		opacity: 0.5;
 		width: 0;
 		transition: var(--transition);

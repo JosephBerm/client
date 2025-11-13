@@ -100,7 +100,7 @@ export default function ContactPage() {
 		<PageContainer className="max-w-4xl py-8 md:py-12">
 			{/* Header */}
 			<div className="text-center mb-8 md:mb-12">
-				<h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4">
+				<h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-base-content mb-4">
 					Have Questions Or Need Assistance?
 				</h1>
 				
@@ -190,23 +190,44 @@ export default function ContactPage() {
 			{/* Direct Contact Buttons for authenticated users */}
 			{isAuthenticated && (
 				<div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-					<a href="tel:+1234567890" className="btn btn-outline btn-primary">
-						<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-						</svg>
-						Call Us
+					<a href="tel:+1234567890" className="inline-flex">
+						<Button 
+							variant="outline" 
+							fullWidth
+							leftIcon={
+								<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+								</svg>
+							}
+						>
+							Call Us
+						</Button>
 					</a>
-					<a href="mailto:support@medsourcepro.com" className="btn btn-outline btn-primary">
-						<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-						</svg>
-						Email Us
+					<a href="mailto:support@medsourcepro.com" className="inline-flex">
+						<Button 
+							variant="outline" 
+							fullWidth
+							leftIcon={
+								<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+								</svg>
+							}
+						>
+							Email Us
+						</Button>
 					</a>
-					<a href="/medsource-app/support" className="btn btn-outline btn-primary">
-						<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-						</svg>
-						Live Chat
+					<a href="/medsource-app/support" className="inline-flex">
+						<Button 
+							variant="outline" 
+							fullWidth
+							leftIcon={
+								<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+								</svg>
+							}
+						>
+							Live Chat
+						</Button>
 					</a>
 				</div>
 			)}
