@@ -34,11 +34,12 @@
 
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import SettingRow from './SettingRow'
 import Button from '@_components/ui/Button'
 import { getSettingsSections } from '@_services/SettingsService'
+import { useFocusTrap } from '@_hooks/useFocusTrap'
 
 /**
  * Settings Modal component props interface.
@@ -83,6 +84,13 @@ export default function SettingsModal({
 }: SettingsModalProps) {
 	const sections = getSettingsSections()
 
+	// Refs for focus management
+	const modalRef = useRef<HTMLDivElement>(null)
+	const closeButtonRef = useRef<HTMLButtonElement>(null)
+	const previousFocusRef = useRef<HTMLElement | null>(null)
+	const sectionButtonRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
+	const liveRegionRef = useRef<HTMLDivElement>(null)
+
 	// Get default section (first section if not specified)
 	const defaultSection = useMemo(() => {
 		if (defaultSectionId) {
@@ -106,6 +114,91 @@ export default function SettingsModal({
 	const selectedSection = useMemo(() => {
 		return sections.find((s) => s.id === selectedSectionId) || sections[0]
 	}, [sections, selectedSectionId])
+
+	// Store previous focus when modal opens
+	useEffect(() => {
+		if (isOpen) {
+			previousFocusRef.current = document.activeElement as HTMLElement
+		}
+	}, [isOpen])
+
+	// Focus trap - traps focus within modal
+	useFocusTrap(
+		modalRef,
+		isOpen,
+		previousFocusRef,
+		{
+			initialFocus: closeButtonRef,
+			restoreFocus: true,
+		}
+	)
+
+	// Announce section changes to screen readers
+	useEffect(() => {
+		if (isOpen && selectedSection && liveRegionRef.current) {
+			liveRegionRef.current.textContent = `Settings section changed to ${selectedSection.title}`
+			// Clear after announcement
+			setTimeout(() => {
+				if (liveRegionRef.current) {
+					liveRegionRef.current.textContent = ''
+				}
+			}, 1000)
+		}
+	}, [isOpen, selectedSection])
+
+	// Handle keyboard navigation for sections
+	useEffect(() => {
+		if (!isOpen) return
+
+		const handleKeyDown = (e: KeyboardEvent) => {
+			// Only handle arrow keys when focus is on a section button
+			const activeElement = document.activeElement
+			const isSectionButton = Array.from(sectionButtonRefs.current.values()).includes(
+				activeElement as HTMLButtonElement
+			)
+
+			if (!isSectionButton) return
+
+			const currentIndex = sections.findIndex((s) => s.id === selectedSectionId)
+			let newIndex = currentIndex
+
+			switch (e.key) {
+				case 'ArrowDown':
+				case 'ArrowRight':
+					e.preventDefault()
+					newIndex = (currentIndex + 1) % sections.length
+					break
+				case 'ArrowUp':
+				case 'ArrowLeft':
+					e.preventDefault()
+					newIndex = currentIndex === 0 ? sections.length - 1 : currentIndex - 1
+					break
+				case 'Home':
+					e.preventDefault()
+					newIndex = 0
+					break
+				case 'End':
+					e.preventDefault()
+					newIndex = sections.length - 1
+					break
+				default:
+					return
+			}
+
+			const newSection = sections[newIndex]
+			if (newSection) {
+				setSelectedSectionId(newSection.id)
+				// Focus the newly selected section button
+				const buttonRef = sectionButtonRefs.current.get(newSection.id)
+				if (buttonRef) {
+					setTimeout(() => buttonRef.focus(), 0)
+				}
+			}
+		}
+
+		window.addEventListener('keydown', handleKeyDown)
+		return () => window.removeEventListener('keydown', handleKeyDown)
+	}, [isOpen, sections, selectedSectionId])
 
 	// Handle escape key
 	useEffect(() => {
@@ -137,25 +230,36 @@ export default function SettingsModal({
 	if (!isOpen) return null
 
 	return (
-		<div
-			className="fixed inset-0 z-[100] flex items-center justify-center sm:p-4"
-			role="dialog"
-			aria-modal="true"
-			aria-labelledby="settings-modal-title"
-		>
-			{/* Overlay */}
+		<>
+			{/* Screen reader live region for announcements */}
 			<div
-				className="fixed inset-0 bg-black/50 transition-opacity duration-300"
-				onClick={onClose}
-				aria-hidden="true"
+				ref={liveRegionRef}
+				role="status"
+				aria-live="polite"
+				aria-atomic="true"
+				className="sr-only"
 			/>
 
-			{/* Modal Content - Responsive layout */}
-		<div
-				className="relative z-10 bg-base-100 w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:shadow-2xl sm:max-w-2xl md:max-w-3xl lg:max-w-4xl overflow-hidden flex flex-col transform transition-all duration-300"
-			onClick={(e) => e.stopPropagation()}
-			tabIndex={-1}
-		>
+			<div
+				className="fixed inset-0 z-[100] flex items-center justify-center sm:p-4"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="settings-modal-title"
+			>
+				{/* Overlay */}
+				<div
+					className="fixed inset-0 bg-black/50 transition-opacity duration-300"
+					onClick={onClose}
+					aria-hidden="true"
+				/>
+
+				{/* Modal Content - Responsive layout */}
+				<div
+					ref={modalRef}
+					className="relative z-10 bg-base-100 w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:shadow-2xl sm:max-w-2xl md:max-w-3xl lg:max-w-4xl overflow-hidden flex flex-col transform transition-all duration-300 focus:outline-none"
+					onClick={(e) => e.stopPropagation()}
+					tabIndex={-1}
+				>
 				{/* Header - Mobile: Title + Close | Desktop: Close only */}
 				<div className="flex items-center justify-between p-4 sm:p-5 border-b border-base-300 lg:justify-end">
 					{/* Mobile/Tablet: Section Title */}
@@ -165,8 +269,9 @@ export default function SettingsModal({
 
 					{/* Close button */}
 					<button
+						ref={closeButtonRef}
 						onClick={onClose}
-						className="btn btn-ghost btn-sm btn-circle hover:bg-base-200"
+						className="btn btn-ghost btn-sm btn-circle hover:bg-base-200 focus:outline-2 focus:outline-offset-2 focus:outline-primary"
 						aria-label="Close settings"
 					>
 						<X size={20} />
@@ -185,34 +290,58 @@ export default function SettingsModal({
 						</div>
 
 						{/* Navigation Items */}
-						<div className="flex lg:flex-col gap-2 p-3 lg:p-3">
-								{sections.map((section) => {
-									const Icon = section.icon
-									const isActive = section.id === selectedSectionId
+						<div
+							className="flex lg:flex-col gap-2 p-3 lg:p-3"
+							role="tablist"
+							aria-label="Settings sections"
+						>
+							{sections.map((section, index) => {
+								const Icon = section.icon
+								const isActive = section.id === selectedSectionId
 
-									return (
+								return (
 									<Button
 										key={section.id}
-												onClick={() => setSelectedSectionId(section.id)}
+										ref={(el) => {
+											if (el) {
+												sectionButtonRefs.current.set(section.id, el)
+											} else {
+												sectionButtonRefs.current.delete(section.id)
+											}
+										}}
+										onClick={() => {
+											setSelectedSectionId(section.id)
+											// Focus the button after selection
+											const buttonRef = sectionButtonRefs.current.get(section.id)
+											if (buttonRef) {
+												setTimeout(() => buttonRef.focus(), 0)
+											}
+										}}
 										variant={isActive ? 'primary' : 'ghost'}
 										size="sm"
 										leftIcon={<Icon size={18} />}
-										className={`
-											whitespace-nowrap lg:w-full lg:justify-start
-											${isActive ? '!rounded-lg' : '!rounded-lg'}
-										`}
-												aria-label={`${section.title} settings section`}
-												aria-current={isActive ? 'page' : undefined}
-											>
+										className="whitespace-nowrap lg:w-full lg:justify-start focus:outline-2 focus:outline-offset-2 focus:outline-primary rounded-lg"
+										role="tab"
+										id={`settings-tab-${section.id}`}
+										aria-selected={isActive}
+										aria-controls={`settings-section-${section.id}`}
+										tabIndex={isActive ? 0 : -1}
+										aria-label={`${section.title} settings section`}
+									>
 										{section.title}
 									</Button>
-									)
-								})}
+								)
+							})}
 						</div>
 						</nav>
 
 					{/* Content Area */}
-			<div className="flex-1 bg-base-100 overflow-y-auto">
+					<div
+						className="flex-1 bg-base-100 overflow-y-auto"
+						role="tabpanel"
+						id={`settings-section-${selectedSection?.id}`}
+						aria-labelledby={`settings-tab-${selectedSection?.id}`}
+					>
 						{selectedSection && (
 							<div className="p-4 sm:p-5 lg:p-6">
 								{/* Section Header - Desktop only (mobile shows in modal header) */}
@@ -257,6 +386,7 @@ export default function SettingsModal({
 				</div>
 			</div>
 		</div>
+		</>
 	)
 }
 

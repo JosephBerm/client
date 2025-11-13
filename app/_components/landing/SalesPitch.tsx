@@ -38,12 +38,12 @@ export default function SalesPitch() {
 					<div className="space-y-6 text-left lg:sticky lg:top-[calc(var(--nav-height)+2rem)]">
 						<span className="badge badge-accent gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.3em] shadow-sm">
 							<span className="h-2 w-2 rounded-full bg-accent-content" />
-							Why MedSource Pro
-						</span>
-						<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-5xl">
-							Focused on quality. Driven by patient outcomes.
-						</h2>
-						<p className="max-w-xl text-base text-base-content/70 md:text-lg">
+						Why MedSource Pro
+					</span>
+					<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-5xl">
+						Focused on quality. Driven by patient outcomes.
+					</h2>
+					<p className="max-w-xl text-base text-base-content/70 md:text-lg">
 							From sourcing to delivery, every part of our process is engineered to serve healthcare professionals
 							with reliability, transparency, and speed. Your supply chain stays resilient, and your teams stay
 							focused on care.
@@ -64,8 +64,8 @@ export default function SalesPitch() {
 								<div className="space-y-3">
 									<h3 className="text-xl font-semibold text-base-content">{title}</h3>
 									<p className="text-base leading-relaxed text-base-content/70">{description}</p>
+									</div>
 								</div>
-							</div>
 							</div>
 						))}
 					</div>

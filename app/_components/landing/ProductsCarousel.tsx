@@ -46,14 +46,14 @@ export default function ProductsCarousel() {
 			<PageContainer className="space-y-12">
 				<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 					<div className="max-w-2xl space-y-3 text-left">
-						<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-5xl">
-							Featured inventory ready to ship.
-						</h2>
-						<p className="text-base text-base-content/70 md:text-lg">
+					<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-5xl">
+						Featured inventory ready to ship.
+					</h2>
+					<p className="text-base text-base-content/70 md:text-lg">
 							Premium supplies sourced from trusted manufacturers, staged in regional warehouses for fast delivery
 							across acute, ambulatory, and specialty care settings.
-						</p>
-					</div>
+							</p>
+						</div>
 					<Link href="/store" className="inline-flex shrink-0">
 						<Button variant="outline" size="md" fullWidth className="sm:w-auto">
 						View full catalog
@@ -91,16 +91,16 @@ function ProductCard({ product, className }: ProductCardProps) {
 	return (
 		<article
 			className={`card group relative flex flex-col gap-4 rounded-2xl border border-base-300 bg-base-100 px-6 py-6 text-left shadow-sm transition-all duration-300 hover:shadow-xl ${className ?? ''}`}
-		>
-			<div className="flex items-start justify-between gap-4">
-				<div className="space-y-2">
-					<h3 className="text-lg font-semibold text-base-content">{name}</h3>
-					<p className="text-sm text-base-content/70">{description}</p>
-				</div>
-				<span className="badge badge-secondary shrink-0 px-3 py-3 text-xs font-medium uppercase tracking-[0.3em]">
-					{priceNote}
-				</span>
+	>
+		<div className="flex items-start justify-between gap-4">
+			<div className="space-y-2">
+				<h3 className="text-lg font-semibold text-base-content">{name}</h3>
+				<p className="text-sm text-base-content/70">{description}</p>
 			</div>
+				<span className="badge badge-secondary shrink-0 px-3 py-3 text-xs font-medium uppercase tracking-[0.3em]">
+				{priceNote}
+			</span>
+		</div>
 		<div className="relative mt-2 overflow-hidden rounded-2xl bg-base-200/60">
 				<Image
 					src={image}

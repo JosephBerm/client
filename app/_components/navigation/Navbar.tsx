@@ -42,9 +42,10 @@ import Link from 'next/link'
 import { Menu, ShoppingCart, X, User, LogOut, Home, Info, Store, Mail, Settings } from 'lucide-react'
 import { useCartStore } from '@_stores/useCartStore'
 import { useAuthStore } from '@_stores/useAuthStore'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Routes from '@_services/routes'
 import SettingsModal from '@_components/settings/SettingsModal'
+import { useMediaQuery } from '@_hooks/useMediaQuery'
 
 /**
  * Navbar component props interface.
@@ -73,7 +74,28 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 	const user = useAuthStore((state) => state.user)
 
+	// Detect when screen size changes to desktop (md breakpoint: 768px)
+	// The mobile menu is only rendered on screens smaller than md (md:hidden)
+	// This matches Tailwind's 'md' breakpoint used in className="md:hidden"
+	const isDesktop = useMediaQuery('(min-width: 768px)')
+	const prevIsDesktop = useRef(isDesktop)
+
+	// Close mobile menu when screen size changes to desktop
+	// This prevents the menu from remaining open when resizing from mobile to desktop and back
+	// Only closes when transitioning from mobile to desktop (not on initial mount or when already desktop)
+	useEffect(() => {
+		// Only close if we transitioned from mobile to desktop AND menu is currently open
+		if (isDesktop && !prevIsDesktop.current && mobileMenuOpen) {
+			setMobileMenuOpen(false)
+		}
+		// Update ref to track current breakpoint state
+		prevIsDesktop.current = isDesktop
+	}, [isDesktop, mobileMenuOpen])
+
 	const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+
+	// Shared settings button styling - DRY pattern
+	const settingsButtonClassName = "flex items-center justify-center rounded-lg p-2.5 text-base-content transition-all hover:scale-105 hover:bg-base-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 
 	const publicNavigationLinks = [
 		{ 
@@ -173,7 +195,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 						<Link
 							key={link.name}
 							href={link.href}
-							className="text-lg font-medium text-base-content transition-all hover:scale-105 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+							className="whitespace-nowrap text-base font-medium text-base-content transition-all hover:scale-105 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
 						>
 							{link.name}
 						</Link>
@@ -182,7 +204,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 					)}
 
 			{/* Right Side: Cart, Settings (desktop), Login/User Menu, Mobile Menu */}
-			<div className="flex shrink-0 items-center gap-4">
+			<div className="flex shrink-0 items-center gap-2">
 					{/* Shopping Cart */}
 					<Link
 						href={Routes.Cart.location}
@@ -197,17 +219,22 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 						)}
 						</Link>
 
-						{/* Settings Button - Desktop Only (when sidebar is hidden) */}
-						{isAuthenticated && (
-							<button
-								onClick={() => setSettingsModalOpen(true)}
-								className="hidden lg:flex items-center justify-center rounded-lg p-2.5 text-base-content transition-all hover:scale-105 hover:bg-base-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-								aria-label="Settings"
-								title="Settings"
-							>
-								<Settings className="h-7 w-7" />
-							</button>
-						)}
+						{/* Settings Button - Desktop Only
+							- Authenticated users: Show on lg+ (when sidebar is hidden)
+							- Unauthenticated users: Show on md+ (when mobile menu is hidden)
+							Industry best practice: Settings button placed next to user/profile button for easy access */}
+						<button
+							onClick={() => setSettingsModalOpen(true)}
+							className={`${settingsButtonClassName} ${
+								isAuthenticated 
+									? 'hidden lg:flex' // Authenticated: only on lg+ when sidebar is hidden
+									: 'hidden md:flex' // Unauthenticated: on md+ when mobile menu is hidden
+							}`}
+							aria-label="Settings"
+							title="Settings"
+						>
+							<Settings className="h-7 w-7" />
+						</button>
 
 						{/* Authentication: Login Button or User Menu */}
 						{isAuthenticated ? (
@@ -295,7 +322,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 				<div className="fixed inset-0 z-40 md:hidden">
 					{/* Backdrop */}
 					<div
-						className="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
+						className="fixed inset-0 bg-black/30 transition-opacity"
 						onClick={() => setMobileMenuOpen(false)}
 					/>
 

@@ -59,7 +59,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import classNames from 'classnames'
 import { useAuthStore } from '@_stores/useAuthStore'
 import { useMediaQuery } from '@_hooks/useMediaQuery'
@@ -112,7 +112,23 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 
 	// Use media query hook for responsive behavior
+	// Breakpoint matches Tailwind's 'lg' breakpoint (1024px) used in Sidebar component
+	// Mobile: < 1024px (drawer overlay), Desktop: >= 1024px (persistent sidebar)
 	const isMobile = useMediaQuery('(max-width: 1023px)')
+	const prevIsMobile = useRef(isMobile)
+
+	// Close sidebar when screen size changes to desktop
+	// This prevents the sidebar drawer from remaining open when resizing from mobile to desktop and back
+	// On desktop (>= 1024px), the sidebar should be persistent, not a drawer
+	// Only closes when transitioning from mobile to desktop (not on initial mount or when already desktop)
+	useEffect(() => {
+		// Only close if we transitioned from mobile to desktop AND sidebar is currently open
+		if (!isMobile && prevIsMobile.current && sidebarOpen) {
+			setSidebarOpen(false)
+		}
+		// Update ref to track current breakpoint state
+		prevIsMobile.current = isMobile
+	}, [isMobile, sidebarOpen])
 
 	// Close sidebar on escape key
 	useEffect(() => {

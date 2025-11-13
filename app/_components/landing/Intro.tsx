@@ -34,7 +34,7 @@ export default function Intro() {
 								Everything your practice needs—in one place.
 							</span>
 						</h1>
-						<p className="max-w-xl text-base text-base-content/70 sm:text-lg">
+					<p className="max-w-xl text-base text-base-content/70 sm:text-lg">
 							MedSource Pro connects care teams with vetted suppliers, curated product catalogs, and
 							time-critical logistics so you never compromise on patient outcomes.
 						</p>

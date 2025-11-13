@@ -45,19 +45,19 @@ export default function Products() {
 				<div className="space-y-6 text-center lg:text-left">
 					<span className="badge badge-info gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.3em] shadow-sm">
 						<span className="h-2 w-2 rounded-full bg-info-content" />
-						Product catalog
-					</span>
-					<div className="lg:grid lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-end lg:gap-10">
-						<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-5xl">
-							Built for every care setting across your network.
-						</h2>
-						<p className="mt-4 text-base text-base-content/70 md:text-lg lg:mt-0">
+					Product catalog
+				</span>
+				<div className="lg:grid lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-end lg:gap-10">
+					<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-5xl">
+						Built for every care setting across your network.
+					</h2>
+					<p className="mt-4 text-base text-base-content/70 md:text-lg lg:mt-0">
 							Curated assortments for acute care, ambulatory surgery, physician groups, and post-acute markets.
 							Consolidated pricing, predictable fulfillment, and SKU rationalization keep teams supplied without
 							excess inventory.
 						</p>
 					</div>
-				</div>
+					</div>
 
 				<div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 					{PRODUCT_CATEGORIES.map(({ name, description, items, icon: Icon }) => (
