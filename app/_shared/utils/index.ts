@@ -7,4 +7,5 @@
  */
 
 export * from './table-helpers'
+export * from './scrollUtils'
 
