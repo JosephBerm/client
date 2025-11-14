@@ -270,18 +270,13 @@ export default function Carousel({
 							isActive={index === selectedIndex}
 							showGradientOverlay={showGradientOverlay}
 							className='flex-[0_0_100%] min-w-0 max-w-full'
-							// For text slides, pass control props to render controls inside slide
-							emblaApi={slide.type === 'text' ? emblaApi : undefined}
-							canScrollPrev={slide.type === 'text' ? canScrollPrev : undefined}
-							canScrollNext={slide.type === 'text' ? canScrollNext : undefined}
-							showArrows={slide.type === 'text' ? showArrows : undefined}
 						/>
 					))}
 				</div>
 			</div>
 
-			{/* Navigation Controls - Only for image/video slides (text slides render controls inside) */}
-			{slides.length > 0 && slides[selectedIndex]?.type !== 'text' && (
+			{/* Navigation Controls - Show for all slide types (positioned on sides) */}
+			{slides.length > 0 && (
 				<CarouselControls
 					emblaApi={emblaApi}
 					canScrollPrev={canScrollPrev}

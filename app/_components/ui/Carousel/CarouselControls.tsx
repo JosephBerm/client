@@ -41,7 +41,7 @@ const CarouselControls = memo(function CarouselControls({
 			<button
 				onClick={scrollPrev}
 				disabled={!canScrollPrev}
-				className={`absolute left-2 sm:left-3 md:left-4 top-1/2 -translate-y-1/2 z-10 btn btn-circle btn-sm sm:btn-sm md:btn-md min-h-[44px] min-w-[44px] bg-black/30 hover:bg-black/50 active:bg-black/60 border border-white/20 text-white transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 ${
+				className={`absolute left-2 sm:left-3 md:left-4 top-1/2 -translate-y-1/2 z-10 btn btn-circle btn-sm sm:btn-sm md:btn-md min-h-[44px] min-w-[44px] bg-base-100/90 hover:bg-base-100 active:bg-base-200 border border-base-300/60 text-base-content shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 ${
 					!canScrollPrev ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:scale-110 active:scale-95'
 				}`}
 				aria-label='Previous slide'
@@ -53,7 +53,7 @@ const CarouselControls = memo(function CarouselControls({
 			<button
 				onClick={scrollNext}
 				disabled={!canScrollNext}
-				className={`absolute right-2 sm:right-3 md:right-4 top-1/2 -translate-y-1/2 z-10 btn btn-circle btn-sm sm:btn-sm md:btn-md min-h-[44px] min-w-[44px] bg-black/30 hover:bg-black/50 active:bg-black/60 border border-white/20 text-white transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 ${
+				className={`absolute right-2 sm:right-3 md:right-4 top-1/2 -translate-y-1/2 z-10 btn btn-circle btn-sm sm:btn-sm md:btn-md min-h-[44px] min-w-[44px] bg-base-100/90 hover:bg-base-100 active:bg-base-200 border border-base-300/60 text-base-content shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 ${
 					!canScrollNext ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:scale-110 active:scale-95'
 				}`}
 				aria-label='Next slide'

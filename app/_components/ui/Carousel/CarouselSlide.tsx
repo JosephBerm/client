@@ -4,7 +4,7 @@ import { memo, useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { CarouselSlide as CarouselSlideType } from './types'
-import { Volume2, VolumeX, Play, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Volume2, VolumeX, Play } from 'lucide-react'
 import Button from '@_components/ui/Button'
 
 interface CarouselSlideProps {
@@ -13,11 +13,6 @@ interface CarouselSlideProps {
 	showGradientOverlay?: boolean
 	className?: string
 	style?: React.CSSProperties
-	// Control props for text slides (rendered inside slide)
-	emblaApi?: any
-	canScrollPrev?: boolean
-	canScrollNext?: boolean
-	showArrows?: boolean
 }
 
 /**
@@ -30,10 +25,6 @@ const CarouselSlideComponent = memo(function CarouselSlide({
 	showGradientOverlay = false,
 	className = '',
 	style,
-	emblaApi,
-	canScrollPrev,
-	canScrollNext,
-	showArrows = true,
 }: CarouselSlideProps) {
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const [isMuted, setIsMuted] = useState(true)
@@ -303,71 +294,25 @@ const CarouselSlideComponent = memo(function CarouselSlide({
 		)
 	}
 
-	// Render inline controls for text slides (in bottom section)
-	const renderInlineControls = () => {
-		if (slide.type !== 'text' || !showArrows || !emblaApi) return null
-
-		const scrollPrev = () => {
-			if (emblaApi) emblaApi.scrollPrev()
-		}
-
-		const scrollNext = () => {
-			if (emblaApi) emblaApi.scrollNext()
-		}
-
-		return (
-			<div className='flex items-center justify-center gap-3 sm:gap-4 md:gap-6 w-full h-full bg-base-200/60 border-t border-base-300/40'>
-				{/* Previous Button */}
-				<button
-					onClick={scrollPrev}
-					disabled={!canScrollPrev}
-					className={`btn btn-square btn-sm sm:btn-sm md:btn-md min-h-[44px] min-w-[44px] bg-base-100 hover:bg-base-200 active:bg-base-300 border border-base-300 text-base-content transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 ${
-						!canScrollPrev ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:scale-105 active:scale-95'
-					}`}
-					aria-label='Previous slide'
-					type='button'>
-					<ChevronLeft size={18} className='sm:w-5 sm:h-5 md:w-6 md:h-6' />
-				</button>
-
-				{/* Next Button */}
-				<button
-					onClick={scrollNext}
-					disabled={!canScrollNext}
-					className={`btn btn-square btn-sm sm:btn-sm md:btn-md min-h-[44px] min-w-[44px] bg-base-100 hover:bg-base-200 active:bg-base-300 border border-base-300 text-base-content transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 ${
-						!canScrollNext ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:scale-105 active:scale-95'
-					}`}
-					aria-label='Next slide'
-					type='button'>
-					<ChevronRight size={18} className='sm:w-5 sm:h-5 md:w-6 md:h-6' />
-				</button>
-			</div>
-		)
-	}
 
 	// Render media (image, video, or text)
 	const renderMedia = () => {
 		if (slide.type === 'text') {
-			// Text-only slide - split layout: top half for text, bottom half for controls - Mobile-first
+			// Text-only slide - full height with centered content - Mobile-first
 			return (
-				<div className='flex flex-col w-full h-full max-w-full overflow-hidden'>
-					{/* Top Section - Text Content */}
-					<div className='flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 bg-gradient-to-br from-base-200/50 via-base-200/40 to-base-300/30 min-w-0'>
-						<div className='text-center px-2 sm:px-4 w-full max-w-full min-w-0'>
-							{slide.text && (
-								<h3 className='text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-base-content leading-tight tracking-tight break-words overflow-wrap-anywhere'>
-									{slide.text}
-								</h3>
-							)}
-							{slide.title && !slide.text && (
-								<h3 className='text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-base-content leading-tight tracking-tight break-words overflow-wrap-anywhere'>
-									{slide.title}
-								</h3>
-							)}
-						</div>
+				<div className='flex items-center justify-center w-full h-full p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 bg-gradient-to-br from-base-200/50 via-base-200/40 to-base-300/30 min-w-0'>
+					<div className='text-center px-2 sm:px-4 w-full max-w-full min-w-0'>
+						{slide.text && (
+							<h3 className='text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-base-content leading-tight tracking-tight break-words overflow-wrap-anywhere'>
+								{slide.text}
+							</h3>
+						)}
+						{slide.title && !slide.text && (
+							<h3 className='text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-base-content leading-tight tracking-tight break-words overflow-wrap-anywhere'>
+								{slide.title}
+							</h3>
+						)}
 					</div>
-
-					{/* Bottom Section - Navigation Controls */}
-					{renderInlineControls()}
 				</div>
 			)
 		}
@@ -428,9 +373,8 @@ const CarouselSlideComponent = memo(function CarouselSlide({
 	// Determine slide height based on type - Mobile-first approach
 	const getSlideHeight = () => {
 		if (slide.type === 'text') {
-			// Text slides: top half for text, bottom half for controls - Mobile-first
-			// Total height accounts for both sections
-			return 'min-h-[200px] sm:min-h-[240px] md:min-h-[280px] lg:min-h-[320px] xl:min-h-[360px]'
+			// Text slides: full height for elegant presentation - Mobile-first
+			return 'h-[280px] sm:h-[320px] md:h-[360px] lg:h-[400px] xl:h-[440px]'
 		}
 		// Image and video slides use the original aspect-video height - Mobile-first
 		return 'aspect-video min-h-[400px] sm:min-h-[450px] md:min-h-[550px] lg:min-h-[650px] xl:min-h-[750px] 2xl:min-h-[850px]'
@@ -440,7 +384,7 @@ const CarouselSlideComponent = memo(function CarouselSlide({
 		<div 
 			className={`shrink-0 w-full max-w-full overflow-hidden ${className}`}
 			style={style}>
-			<div className={`relative w-full max-w-full ${getSlideHeight()}`}>
+			<div className={`relative w-full max-w-full ${getSlideHeight()} flex`}>
 				{/* Media (Image, Video, or Text) */}
 				{renderMedia()}
 
