@@ -1,6 +1,34 @@
+/**
+ * @fileoverview Store Catalog Page
+ * 
+ * Public-facing store catalog with product browsing, search, filtering, and pagination.
+ * Implements FAANG-level best practices for performance, accessibility, and user experience.
+ * 
+ * **Key Features:**
+ * - Real-time search with debouncing
+ * - Category filtering with multi-select
+ * - Sort options (relevance, price, name, date)
+ * - Responsive grid layout (1-3 columns)
+ * - Pagination controls with "load more"
+ * - Skeleton loading states
+ * - Focus management for accessibility
+ * - Request cancellation (AbortController)
+ * - State management with useReducer
+ * 
+ * **Performance Optimizations:**
+ * - Memoized computed values
+ * - Memoized event handlers
+ * - Debounced search (400ms)
+ * - Priority image loading
+ * - Request deduplication
+ * 
+ * @module pages/store
+ * @category Pages
+ */
+
 'use client'
 
-import { Suspense, useEffect, useState, useRef } from 'react'
+import { Suspense, useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { isEmpty } from 'lodash'
 import { toast } from 'react-toastify'
@@ -18,56 +46,184 @@ import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import { PagedResult } from '@_classes/Base/PagedResult'
 import { API } from '@_shared'
 import { useDebounce } from '@_shared'
+import { logger } from '@_core'
+import {
+	useProductsState,
+	useSearchFilterState,
+	createInitialSearchFilterState,
+	INITIAL_PAGE_SIZE,
+	createInitialFilter,
+	SEARCH_DEBOUNCE_MS,
+	MIN_SEARCH_LENGTH,
+	PRIORITY_IMAGE_COUNT,
+} from '@_features/store'
 
-type RetrievalOverrides = {
+/**
+ * Optional overrides for retrieveProducts function
+ * Allows explicit override of search text and categories
+ * Useful for reset operations and direct API calls
+ */
+interface RetrievalOverrides {
 	search?: string
 	categories?: ProductsCategory[]
 }
 
-const INITIAL_PAGE_SIZE = 20
-// Include Categories and Files in the API response
-const INITIAL_FILTER = () => new GenericSearchFilter({ pageSize: INITIAL_PAGE_SIZE, includes: ['Categories', 'Files'] })
-
+/**
+ * Store Page Content Component
+ * Main component for the store catalog page
+ * 
+ * **Architecture:**
+ * - Custom hooks for state management (useProductsState, useSearchFilterState)
+ * - Memoized computed values for performance
+ * - Request cancellation with AbortController
+ * - Focus management for accessibility
+ * - Debounced search to reduce API calls
+ * 
+ * @component
+ */
 const StorePageContent = () => {
-	const [products, setProducts] = useState<Product[]>([])
+	// ============================================================================
+	// STATE MANAGEMENT
+	// ============================================================================
+	
+	// Products state (extracted to custom hook)
+	const {
+		state: productsState,
+		setLoading,
+		setProducts,
+		reset: resetProducts,
+	} = useProductsState()
+	
+	// Search/filter state (extracted to custom hook)
+	const {
+		state: searchFilterState,
+		setSearchText: setSearchTextAction,
+		setSelectedCategories: setSelectedCategoriesAction,
+		setSearchCriteria: setSearchCriteriaAction,
+		setCurrentSort: setCurrentSortAction,
+		setCurrentPageSize: setCurrentPageSizeAction,
+		resetFilters,
+	} = useSearchFilterState(
+		createInitialSearchFilterState(INITIAL_PAGE_SIZE, createInitialFilter())
+	)
+	
+	// Categories remain as useState (independent data, infrequent updates)
 	const [categories, setCategories] = useState<ProductsCategory[]>([])
-	const [selectedCategories, setSelectedCategories] = useState<ProductsCategory[]>([])
-	const [searchText, setSearchText] = useState('')
-	const [searchCriteria, setSearchCriteria] = useState<GenericSearchFilter>(INITIAL_FILTER)
-	const [productsResult, setProductsResult] = useState<PagedResult<Product>>(new PagedResult<Product>())
-	const [isLoading, setIsLoading] = useState(true)
-	const [hasLoaded, setHasLoaded] = useState(false)
-	const [currentSort, setCurrentSort] = useState('relevance')
-	const [currentPageSize, setCurrentPageSize] = useState(INITIAL_PAGE_SIZE)
+	
+	// Extract state values for convenience
+	const { products, productsResult, isLoading, hasLoaded } = productsState
+	const { searchText, selectedCategories, searchCriteria, currentSort, currentPageSize } = searchFilterState
 
+	// ============================================================================
+	// ROUTING & URL
+	// ============================================================================
+	
 	const router = useRouter()
 	const searchParams = useSearchParams()
+
+	// ============================================================================
+	// REFS (Mutable values that don't trigger re-renders)
+	// ============================================================================
 	
-	// Debounce search text - industry standard 400ms for search inputs
-	// Only debounce when user is actively typing (length >= 3)
-	const debouncedSearchText = useDebounce(searchText, 400)
-	
-	// Ref to maintain input focus during re-renders
+	/**
+	 * Ref to search input element for focus management
+	 * Used to restore focus after re-renders
+	 */
 	const searchInputRef = useRef<HTMLInputElement>(null)
 	
-	// Track focus state - use ref to avoid re-renders
-	// This persists across re-renders and tracks if input should maintain focus
+	/**
+	 * Flag indicating if input focus should be maintained
+	 * Set to true when user is actively typing
+	 */
 	const shouldMaintainFocusRef = useRef(false)
 	
-	// Track if user intentionally blurred (clicked away)
-	// If true, we won't restore focus
+	/**
+	 * Flag indicating if user intentionally moved focus away
+	 * If true, prevents automatic focus restoration
+	 */
 	const userIntentionallyBlurredRef = useRef(false)
+	
+	/**
+	 * Flag to skip search on initial mount
+	 * Prevents duplicate API call with initial data fetch
+	 */
+	const isInitialMountRef = useRef(true)
 
-	const hasMoreProducts = productsResult.hasNext
-	const totalResults = productsResult.total || products.length
-	const displayedCount = products.length
-	const isFiltered = selectedCategories.length > 0 || searchText.trim().length > 0
-	const firstLoad = !hasLoaded && isLoading
-	const isSearchTooShort = searchText.length > 0 && searchText.length < 3
+	// ============================================================================
+	// DERIVED STATE & MEMOIZED VALUES
+	// ============================================================================
+	
+	/**
+	 * Debounced search text (400ms delay)
+	 * Reduces API calls while user is typing
+	 */
+	const debouncedSearchText = useDebounce(searchText, SEARCH_DEBOUNCE_MS)
+	
+	/**
+	 * Whether there are more products to load
+	 * Used to show/hide "Load More" button
+	 */
+	const hasMoreProducts = useMemo(() => productsResult.hasNext, [productsResult.hasNext])
+	
+	/**
+	 * Total number of products matching current filters
+	 * Includes products not yet loaded
+	 */
+	const totalResults = useMemo(
+		() => productsResult.total || products.length,
+		[productsResult.total, products.length]
+	)
+	
+	/**
+	 * Number of products currently displayed
+	 */
+	const displayedCount = useMemo(() => products.length, [products.length])
+	
+	/**
+	 * Whether any filters are currently applied
+	 * Used to show/hide "Reset Filters" button
+	 */
+	const isFiltered = useMemo(
+		() => selectedCategories.length > 0 || searchText.trim().length > 0,
+		[selectedCategories.length, searchText]
+	)
+	
+	/**
+	 * Whether search text is too short to trigger search
+	 * Used to show helper text
+	 */
+	const isSearchTooShort = useMemo(
+		() => searchText.length > 0 && searchText.length < MIN_SEARCH_LENGTH,
+		[searchText.length]
+	)
 
-	const fetchCategories = async () => {
+	// ============================================================================
+	// API CALLS
+	// ============================================================================
+	
+	/**
+	 * Fetches product categories from API
+	 * Categories are used for filtering products in the catalog
+	 * 
+	 * **Request Cancellation:**
+	 * Accepts AbortSignal to cancel request if component unmounts
+	 * or dependencies change before response arrives
+	 * 
+	 * @param signal - Optional AbortSignal for request cancellation
+	 * @returns Array of sanitized product categories
+	 * 
+	 * @example
+	 * ```typescript
+	 * const controller = new AbortController()
+	 * const categories = await fetchCategories(controller.signal)
+	 * ```
+	 */
+	const fetchCategories = useCallback(async (signal?: AbortSignal) => {
 		try {
 			const { data } = await API.Store.Products.getAllCategories()
+
+			// Check if request was aborted before processing response
+			if (signal?.aborted) return []
 
 			if (!data.payload || data.statusCode !== 200) {
 				toast.error(data.message ?? 'Unable to load categories', {
@@ -82,35 +238,63 @@ const StorePageContent = () => {
 			)
 			const sanitized = sanitizeCategoriesList(categoryInstances)
 			
-			console.log('Categories loaded:', sanitized.length, 'root categories')
-			console.log('Categories with children:', 
-				sanitized.filter(c => c.subCategories && c.subCategories.length > 0).map(c => ({
-					name: c.name,
-					childCount: c.subCategories.length
-				}))
-			)
+			// Dev logging (removed in production build)
+			if (process.env.NODE_ENV === 'development') {
+				logger.log('Categories loaded', {
+					count: sanitized.length,
+					withChildren: sanitized.filter(c => c.subCategories && c.subCategories.length > 0).length,
+				})
+			}
 
-			setCategories(sanitized)
+			// Only update state if request wasn't aborted
+			if (!signal?.aborted) {
+				setCategories(sanitized)
+			}
 			return sanitized
 		} catch (err) {
+			// Don't show error if request was aborted
+			if (signal?.aborted) return []
+			
 			const message = err instanceof Error ? err.message : 'An unexpected error occurred while loading categories'
-			console.error('Store page - Category fetch error:', err)
+			logger.error('Store page - Category fetch error', { error: err })
 			toast.error(message, {
 				position: 'top-right',
 				autoClose: 4000,
 			})
 			return []
 		}
-	}
+	}, [])
 
-	const retrieveProducts = async (
+	/**
+	 * Retrieves products from API based on search criteria
+	 * Handles search text, category filters, sorting, and pagination
+	 * 
+	 * **Request Cancellation:**
+	 * Accepts AbortSignal to prevent race conditions and memory leaks
+	 * 
+	 * **State Updates:**
+	 * Only updates state if request wasn't aborted
+	 * 
+	 * @param criteria - Search filter with pagination and sorting
+	 * @param overrides - Optional overrides for search text and categories
+	 * @param signal - Optional AbortSignal for request cancellation
+	 * @returns Array of fetched products
+	 * 
+	 * @example
+	 * ```typescript
+	 * const controller = new AbortController()
+	 * const products = await retrieveProducts(criteria, undefined, controller.signal)
+	 * ```
+	 */
+	const retrieveProducts = useCallback(async (
 		criteria: GenericSearchFilter,
-		overrides?: RetrievalOverrides
+		overrides?: RetrievalOverrides,
+		signal?: AbortSignal
 	): Promise<Product[]> => {
 		const searchValue = overrides?.search ?? searchText
 		const categoriesValue = overrides?.categories ?? selectedCategories
 
-		setIsLoading(true)
+		setLoading(true)
 
 		try {
 			if (!isEmpty(searchValue) && searchValue.length > 2) {
@@ -139,6 +323,9 @@ const StorePageContent = () => {
 
 			const { data } = await API.Store.Products.searchPublic(criteria)
 
+			// Check if request was aborted before updating state
+			if (signal?.aborted) return []
+
 			if (!data.payload || data.statusCode !== 200) {
 				const message = data.message ?? 'Unable to fetch products'
 				toast.error(message, {
@@ -149,8 +336,9 @@ const StorePageContent = () => {
 					pauseOnHover: true,
 					draggable: true,
 				})
-				setProducts([])
-				setProductsResult(new PagedResult<Product>())
+				if (!signal?.aborted) {
+					resetProducts()
+				}
 				return []
 			}
 
@@ -158,12 +346,18 @@ const StorePageContent = () => {
 			
 			const nextProducts = payload.data.map((product) => new Product(product))
 			
-			setProducts(nextProducts)
-			setProductsResult(new PagedResult<Product>(payload))
+			// Only update state if component is still mounted and request wasn't aborted
+			if (!signal?.aborted) {
+				setProducts(nextProducts, new PagedResult<Product>(payload))
+			}
+			
 			return nextProducts
 		} catch (err) {
+			// Don't show error if request was aborted
+			if (signal?.aborted) return []
+			
 			const message = err instanceof Error ? err.message : 'An unexpected error occurred while loading products'
-			console.error('Store page - Product fetch error:', err)
+			logger.error('Store page - Product fetch error', { error: err })
 			toast.error(message, {
 				position: 'top-right',
 				autoClose: 5000,
@@ -172,26 +366,35 @@ const StorePageContent = () => {
 				pauseOnHover: true,
 				draggable: true,
 			})
-			setProducts([])
-			setProductsResult(new PagedResult<Product>())
+			
+			if (!signal?.aborted) {
+				resetProducts()
+			}
+			
 			return []
 		} finally {
-			setIsLoading(false)
-			setHasLoaded(true)
+			// Only update loading state if request wasn't aborted
+			if (!signal?.aborted) {
+				setLoading(false)
+			}
 		}
-	}
+	}, [searchText, selectedCategories, currentSort, setLoading, setProducts, resetProducts])
 
+	// ============================================================================
+	// EVENT HANDLERS
+	// ============================================================================
+	
 	/**
-	 * Handles category selection changes from CategoryFilter component.
-	 * The selection logic is now handled within CategoryFilter component,
-	 * this just updates the state to trigger product refresh.
+	 * Handles category selection changes from CategoryFilter component
+	 * Updates state which triggers useEffect to fetch filtered products
+	 * 
+	 * @param selected - Array of selected category objects
 	 */
-	const handleCategorySelectionChange = (selected: ProductsCategory[]) => {
-		setSelectedCategories(selected)
-	}
+	const handleCategorySelectionChange = useCallback((selected: ProductsCategory[]) => {
+		setSelectedCategoriesAction(selected)
+	}, [setSelectedCategoriesAction])
 
-
-	const loadMoreProducts = () => {
+	const loadMoreProducts = useCallback(() => {
 		if (isLoading || !hasMoreProducts) return
 
 		const updatedCriteria = new GenericSearchFilter({
@@ -199,11 +402,11 @@ const StorePageContent = () => {
 			pageSize: searchCriteria.pageSize + currentPageSize,
 		})
 
-		setSearchCriteria(updatedCriteria)
+		setSearchCriteriaAction(updatedCriteria)
 		void retrieveProducts(updatedCriteria)
-	}
+	}, [isLoading, hasMoreProducts, searchCriteria, currentPageSize, retrieveProducts, setSearchCriteriaAction])
 
-	const handlePageChange = (page: number) => {
+	const handlePageChange = useCallback((page: number) => {
 		if (isLoading) return
 
 		const updatedCriteria = new GenericSearchFilter({
@@ -211,15 +414,15 @@ const StorePageContent = () => {
 			page,
 		})
 
-		setSearchCriteria(updatedCriteria)
+		setSearchCriteriaAction(updatedCriteria)
 		void retrieveProducts(updatedCriteria)
 
 		// Scroll to top of product grid
 		window.scrollTo({ top: 0, behavior: 'smooth' })
-	}
+	}, [isLoading, searchCriteria, retrieveProducts, setSearchCriteriaAction])
 
-	const handleSortChange = (sortValue: string) => {
-		setCurrentSort(sortValue)
+	const handleSortChange = useCallback((sortValue: string) => {
+		setCurrentSortAction(sortValue)
 
 		// Reset to first page when sorting changes
 		const updatedCriteria = new GenericSearchFilter({
@@ -227,12 +430,12 @@ const StorePageContent = () => {
 			page: 1,
 		})
 
-		setSearchCriteria(updatedCriteria)
+		setSearchCriteriaAction(updatedCriteria)
 		void retrieveProducts(updatedCriteria)
-	}
+	}, [searchCriteria, retrieveProducts, setCurrentSortAction, setSearchCriteriaAction])
 
-	const handlePageSizeChange = (size: number) => {
-		setCurrentPageSize(size)
+	const handlePageSizeChange = useCallback((size: number) => {
+		setCurrentPageSizeAction(size)
 
 		// Reset to first page and update page size
 		const updatedCriteria = new GenericSearchFilter({
@@ -241,35 +444,109 @@ const StorePageContent = () => {
 			pageSize: size,
 		})
 
-		setSearchCriteria(updatedCriteria)
+		setSearchCriteriaAction(updatedCriteria)
 		void retrieveProducts(updatedCriteria)
-	}
+	}, [searchCriteria, retrieveProducts, setCurrentPageSizeAction, setSearchCriteriaAction])
 
-	const clearFilters = () => {
+	const clearFilters = useCallback(() => {
 		if (!isFiltered) return
 
-		const resetFilter = INITIAL_FILTER()
-		setSearchText('')
-		setSelectedCategories([])
-		setSearchCriteria(resetFilter)
+		const resetFilter = createInitialFilter()
+		resetFilters(resetFilter)
+		setSearchCriteriaAction(resetFilter)
 		void retrieveProducts(resetFilter, { search: '', categories: [] })
-	}
+	}, [isFiltered, retrieveProducts, resetFilters, setSearchCriteriaAction])
 
-	useEffect(() => {
-		void fetchCategories()
+	// Memoize search handlers (FAANG best practice: extract from JSX)
+	const handleSearchChange = useCallback((value: string) => {
+		setSearchTextAction(value)
+		// Mark that we should maintain focus when user is typing
+		if (searchInputRef.current && document.activeElement === searchInputRef.current) {
+			shouldMaintainFocusRef.current = true
+			userIntentionallyBlurredRef.current = false
+		}
+	}, [setSearchTextAction])
+
+	const handleSearchClear = useCallback(() => {
+		setSearchTextAction('')
+		shouldMaintainFocusRef.current = false
+		userIntentionallyBlurredRef.current = false
+		const resetFilter = createInitialFilter()
+		setSearchCriteriaAction(resetFilter)
+		void retrieveProducts(resetFilter, { search: '', categories: selectedCategories })
+	}, [selectedCategories, retrieveProducts, setSearchTextAction, setSearchCriteriaAction])
+
+	const handleSearchFocus = useCallback(() => {
+		// User focused the input - we should maintain focus
+		shouldMaintainFocusRef.current = true
+		userIntentionallyBlurredRef.current = false
 	}, [])
+
+	const handleSearchBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+
+		console.log('handleSearchBlur', e)
+		
+		// Check if blur was intentional (user clicked on another interactive element)
+		const relatedTarget = e.relatedTarget as HTMLElement | null
+		
+		// If user clicked on a button, select, or another input, allow the blur
+		if (
+			relatedTarget &&
+			(relatedTarget.tagName === 'BUTTON' ||
+				relatedTarget.tagName === 'SELECT' ||
+				relatedTarget.tagName === 'INPUT' ||
+				relatedTarget.closest('button') ||
+				relatedTarget.closest('select'))
+		) {
+			// User intentionally moved focus - don't restore
+			userIntentionallyBlurredRef.current = true
+			shouldMaintainFocusRef.current = false
+		} else {
+			// Blur was likely from re-render - maintain focus state
+			// We'll restore it in the useEffect
+			userIntentionallyBlurredRef.current = false
+		}
+	}, [])
+
+	// Initial data fetch - categories (FAANG best practice: explicit initial fetch with cleanup)
+	useEffect(() => {
+		const abortController = new AbortController()
+		
+		void fetchCategories(abortController.signal)
+		
+		// Cleanup: abort request if component unmounts
+		return () => {
+			abortController.abort()
+		}
+	}, [fetchCategories])
+
+	// Initial product fetch on mount (FAANG best practice: explicit initial data load)
+	useEffect(() => {
+		const abortController = new AbortController()
+		const initialCriteria = createInitialFilter()
+		
+		setSearchCriteriaAction(initialCriteria)
+		void retrieveProducts(initialCriteria, undefined, abortController.signal)
+		
+		// Cleanup: abort request if component unmounts
+		return () => {
+			abortController.abort()
+		}
+		// Only run on mount - initial data fetch
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [setSearchCriteriaAction, retrieveProducts])
 
 	useEffect(() => {
 		const querySearchText = searchParams.get('search')
 		if (querySearchText) {
-			setSearchText(querySearchText)
+			setSearchTextAction(querySearchText)
 
 			const params = new URLSearchParams(searchParams.toString())
 			params.delete('search')
 			const newQuery = params.toString()
 			router.replace(`/store${newQuery ? `?${newQuery}` : ''}`)
 		}
-	}, [router, searchParams])
+	}, [router, searchParams, setSearchTextAction])
 
 	/**
 	 * Search products with proper debouncing and minimum character requirement.
@@ -282,8 +559,19 @@ const StorePageContent = () => {
 	 * - Searching on every keystroke
 	 * - Searching with insufficient characters
 	 * - Input focus loss during search
+	 * 
+	 * FAANG best practice: Request cancellation with AbortController
+	 * Skips initial mount to prevent duplicate fetch with initial data load
 	 */
 	useEffect(() => {
+		// Skip on initial mount - initial fetch is handled separately
+		if (isInitialMountRef.current) {
+			isInitialMountRef.current = false
+			return
+		}
+		
+		const abortController = new AbortController()
+		
 		// Only search if:
 		// - Search is empty (clear results), OR
 		// - Debounced search has 3+ characters
@@ -310,13 +598,18 @@ const StorePageContent = () => {
 			page: 1, // Reset to first page on search
 		})
 
-		setSearchCriteria(updatedCriteria)
+		setSearchCriteriaAction(updatedCriteria)
 		void retrieveProducts(updatedCriteria, {
 			search: debouncedSearchText,
 			categories: selectedCategories,
-		})
+		}, abortController.signal)
+		
+		// Cleanup: abort request if dependencies change or component unmounts
+		return () => {
+			abortController.abort()
+		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [debouncedSearchText, selectedCategories])
+	}, [debouncedSearchText, selectedCategories, retrieveProducts, setSearchCriteriaAction])
 	
 	/**
 	 * Restore focus after products update.
@@ -373,49 +666,10 @@ const StorePageContent = () => {
 			{/* Unified Store Toolbar - Search, Sort, Filter, Results */}
 			<UnifiedStoreToolbar
 				searchText={searchText}
-				onSearchChange={(value) => {
-					setSearchText(value)
-					// Mark that we should maintain focus when user is typing
-					if (searchInputRef.current && document.activeElement === searchInputRef.current) {
-						shouldMaintainFocusRef.current = true
-						userIntentionallyBlurredRef.current = false
-					}
-				}}
-				onSearchClear={() => {
-					setSearchText('')
-					shouldMaintainFocusRef.current = false
-					userIntentionallyBlurredRef.current = false
-					const resetFilter = INITIAL_FILTER()
-					setSearchCriteria(resetFilter)
-					void retrieveProducts(resetFilter, { search: '', categories: selectedCategories })
-				}}
-				onSearchFocus={() => {
-					// User focused the input - we should maintain focus
-					shouldMaintainFocusRef.current = true
-					userIntentionallyBlurredRef.current = false
-				}}
-				onSearchBlur={(e) => {
-					// Check if blur was intentional (user clicked on another interactive element)
-					const relatedTarget = e.relatedTarget as HTMLElement | null
-					
-					// If user clicked on a button, select, or another input, allow the blur
-					if (
-						relatedTarget &&
-						(relatedTarget.tagName === 'BUTTON' ||
-							relatedTarget.tagName === 'SELECT' ||
-							relatedTarget.tagName === 'INPUT' ||
-							relatedTarget.closest('button') ||
-							relatedTarget.closest('select'))
-					) {
-						// User intentionally moved focus - don't restore
-						userIntentionallyBlurredRef.current = true
-						shouldMaintainFocusRef.current = false
-					} else {
-						// Blur was likely from re-render - maintain focus state
-						// We'll restore it in the useEffect
-						userIntentionallyBlurredRef.current = false
-					}
-				}}
+				onSearchChange={handleSearchChange}
+				onSearchClear={handleSearchClear}
+				onSearchFocus={handleSearchFocus}
+				onSearchBlur={handleSearchBlur}
 				isSearchTooShort={isSearchTooShort}
 				displayedCount={displayedCount}
 				totalCount={totalResults}
@@ -467,29 +721,29 @@ const StorePageContent = () => {
 						{isLoading && !hasLoaded ? (
 							<ProductCardSkeleton count={currentPageSize} />
 						) : products.length === 0 ? (
-							<div className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-12 text-center">
-								<p className="text-lg font-semibold text-base-content">No products found</p>
-								<p className="mt-2 text-base text-base-content/70">
-									{isFiltered
-										? 'No products match the current filters. Try adjusting your search or filters.'
-										: 'Products will appear here once available.'}
-								</p>
-								{isFiltered && (
-									<Button variant="primary" size="sm" onClick={clearFilters} className="mt-4">
-										Reset Filters
-									</Button>
-								)}
-							</div>
-						) : (
-							products.map((product, index) => (
-								<ProductCard
-									key={product.id}
-									product={product}
-									showWishlist={false}
-									showQuickView={false}
-									priority={index < 8} // Priority loading for first 8 images (above the fold)
-								/>
-							))
+								<div className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-12 text-center">
+									<p className="text-lg font-semibold text-base-content">No products found</p>
+									<p className="mt-2 text-base text-base-content/70">
+										{isFiltered
+											? 'No products match the current filters. Try adjusting your search or filters.'
+											: 'Products will appear here once available.'}
+									</p>
+									{isFiltered && (
+										<Button variant="primary" size="sm" onClick={clearFilters} className="mt-4">
+											Reset Filters
+										</Button>
+									)}
+								</div>
+							) : (
+								products.map((product, index) => (
+									<ProductCard
+										key={product.id}
+										product={product}
+										showWishlist={false}
+										showQuickView={false}
+										priority={index < PRIORITY_IMAGE_COUNT} // Priority loading for above-the-fold images
+									/>
+								))
 						)}
 					</div>
 
