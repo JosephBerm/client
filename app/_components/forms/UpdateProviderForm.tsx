@@ -47,7 +47,7 @@
  *       <UpdateProviderForm
  *         provider={newProvider}
  *         onUpdate={(created) => {
- *           console.log('Provider created:', created);
+ *           logger.info('Provider created', { providerId: created.id });
  *           router.push('/medsource-app/providers');
  *         }}
  *       />
@@ -72,7 +72,7 @@
  *         provider={provider}
  *         onUpdate={(updated) => {
  *           setProvider(updated);
- *           console.log('Provider updated:', updated);
+ *           logger.info('Provider updated', { providerId: updated.id });
  *         }}
  *       />
  *     </div>

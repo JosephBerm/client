@@ -21,6 +21,7 @@ import {
 	SortingState,
 	ColumnFiltersState,
 } from '@tanstack/react-table'
+import { logger } from '@_core'
 
 /**
  * Configuration options for the server table hook.
@@ -192,8 +193,15 @@ export function useServerTable<T>(
 			setTotalItems(result.total)
 		} catch (err) {
 			// Handle fetch errors
-			setError(err as Error)
-			console.error('Error loading table data:', err)
+			const error = err as Error
+			setError(error)
+			logger.error('Table data fetch failed', {
+				error,
+				page: pagination.pageIndex + 1,
+				pageSize: pagination.pageSize,
+				sorting,
+				filters: columnFilters,
+			})
 		} finally {
 			// Always reset loading state
 			setIsLoading(false)

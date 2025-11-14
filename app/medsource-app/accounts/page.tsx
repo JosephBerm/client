@@ -12,6 +12,7 @@ import Button from '@_components/ui/Button'
 import Modal from '@_components/ui/Modal'
 import RoleBadge from '@_components/common/RoleBadge'
 import { createServerTableFetcher, formatDate } from '@_shared'
+import { logger } from '@_core'
 import { API } from '@_shared'
 import { useState } from 'react'
 
@@ -105,7 +106,11 @@ export default function AccountsPage() {
 				toast.error(data.message || 'Failed to delete account')
 			}
 		} catch (error) {
-			console.error('Error deleting account:', error)
+			logger.error('Failed to delete account', {
+				error,
+				accountId: deleteModal.account?.id,
+				component: 'AccountsPage',
+			})
 			toast.error('An error occurred while deleting the account')
 		}
 	}

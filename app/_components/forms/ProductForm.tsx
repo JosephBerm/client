@@ -70,7 +70,7 @@
  *         product={product}
  *         onUpdate={(updated) => {
  *           setProduct(updated);
- *           console.log('Product updated:', updated);
+ *           logger.info('Product updated', { productId: updated.id });
  *         }}
  *       />
  *     </div>
@@ -87,6 +87,7 @@ import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { productSchema, type ProductFormData } from '@_core'
+import { logger } from '@_core'
 import { useFormSubmit } from '@_shared'
 import FormInput from './FormInput'
 import FormTextArea from './FormTextArea'
@@ -182,7 +183,10 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
         setProviders((data.payload as Provider[]) || [])
       }
     } catch (err) {
-      console.error('Failed to fetch providers:', err)
+      logger.error('Failed to fetch providers', {
+        error: err,
+        component: 'ProductForm',
+      })
     }
   }
 

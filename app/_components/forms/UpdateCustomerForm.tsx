@@ -47,7 +47,7 @@
  *       <UpdateCustomerForm
  *         customer={newCustomer}
  *         onUserUpdate={(created) => {
- *           console.log('Customer created:', created);
+ *           logger.info('Customer created', { customerId: created.id });
  *           router.push('/medsource-app/customers');
  *         }}
  *       />
@@ -72,7 +72,7 @@
  *         customer={customer}
  *         onUserUpdate={(updated) => {
  *           setCustomer(updated);
- *           console.log('Customer updated:', updated);
+ *           logger.info('Customer updated', { customerId: updated.id });
  *         }}
  *       />
  *     </div>

@@ -204,7 +204,7 @@ export function useAdvancedLazyLoad(
 			setStrategy(customStrategy || loadingStrategy)
 
 			if (process.env.NODE_ENV === 'development') {
-				logger.log('useAdvancedLazyLoad: Connection detected', {
+				logger.debug('useAdvancedLazyLoad: Connection detected', {
 					type,
 					effectiveType,
 					downlink: connection.downlink,
@@ -331,4 +331,5 @@ export function useAdvancedLazyLoad(
 		estimatedBandwidth,
 	}
 }
+
 

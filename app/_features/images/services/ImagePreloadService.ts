@@ -387,8 +387,13 @@ export class ImagePreloadService {
 	 * 
 	 * @example
 	 * ```typescript
-	 * const stats = ImagePreloadService.getStats();
-	 * console.log(`Preloaded: ${stats.preloadedCount}, Queue: ${stats.queueLength}`);
+ * import { logger } from '@_core';
+ * 
+ * const stats = ImagePreloadService.getStats();
+ * logger.debug('Image preload stats', {
+ *   preloadedCount: stats.preloadedCount,
+ *   queueLength: stats.queueLength
+ * });
 	 * ```
 	 */
 	static getStats(): {

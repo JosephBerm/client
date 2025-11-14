@@ -80,8 +80,8 @@ export interface UseImageReturn {
  * // With retry and callbacks
  * const { src, isLoading, isError, retry } = useImage(imageUrl, {
  *   retryCount: 3,
- *   onLoad: () => console.log('Image loaded'),
- *   onError: (error) => console.error('Image failed', error)
+ *   onLoad: () => logger.info('Image loaded', { imageUrl }),
+ *   onError: (error) => logger.error('Image failed to load', { error, imageUrl })
  * });
  * 
  * // Lazy loading

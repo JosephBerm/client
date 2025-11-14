@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { toast } from 'react-toastify'
 import { useZodForm } from '@_shared'
 import { signupSchema, type SignupFormData } from '@_core'
+import { logger } from '@_core'
 import { signup } from '@_features/auth'
 import FormInput from '@_components/forms/FormInput'
 import FormCheckbox from '@_components/forms/FormCheckbox'
@@ -53,7 +54,10 @@ export default function SignupPage() {
 				toast.error(result.message || 'Signup failed. Please try again.')
 			}
 		} catch (error) {
-			console.error('Signup error:', error)
+			logger.error('Signup page submission failed', {
+				error,
+				component: 'SignupPage',
+			})
 			toast.error('An error occurred during signup. Please try again.')
 		} finally {
 			setIsLoading(false)

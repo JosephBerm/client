@@ -28,8 +28,8 @@ export const themeInitScript = `
           themeSource = 'localStorage (old format)';
         }
       } catch (e) {
-        // Invalid JSON, fall through to system preference
-        console.warn('[Theme Init] Invalid localStorage JSON:', e);
+        // Invalid JSON, fall through to system preference silently
+        // Error is non-fatal and handled gracefully
       }
     }
     
@@ -41,10 +41,14 @@ export const themeInitScript = `
     }
     
     document.documentElement.setAttribute('data-theme', theme);
-    console.log('[Theme Init] Applied theme "' + theme + '" from ' + themeSource);
+    // Theme applied successfully - no logging needed (handled by logger system after React loads)
   } catch (e) {
     // Fallback to default if anything fails
-    console.error('[Theme Init] Fatal error, falling back to winter:', e);
+    // Only log fatal errors - this runs before logger system is available
+    // This is the ONLY necessary console.* usage (critical initialization failure)
+    if (typeof console !== 'undefined' && console.error) {
+      console.error('[Theme Init] Fatal error, falling back to winter:', e);
+    }
     document.documentElement.setAttribute('data-theme', 'winter');
   }
 })();

@@ -12,6 +12,7 @@ import Button from '@_components/ui/Button'
 import Badge from '@_components/ui/Badge'
 import Modal from '@_components/ui/Modal'
 import { formatDate, formatCurrency } from '@_shared'
+import { logger } from '@_core'
 import type { Product } from '@_classes/Product'
 import { API } from '@_shared'
 import { Routes } from '@_features/navigation'
@@ -122,7 +123,11 @@ export default function StorePage() {
       // Refresh the table
       setRefreshKey((prev) => prev + 1)
     } catch (error) {
-      console.error('Error archiving product:', error)
+      logger.error('Failed to archive product', {
+        error,
+        productId: archiveModal.product?.id,
+        component: 'StorePage',
+      })
       toast.error('An error occurred while archiving the product')
     }
   }

@@ -101,7 +101,7 @@ export default function ImageServiceInitializer() {
 				// No initialization needed - service is ready to use
 				
 				if (process.env.NODE_ENV === 'development') {
-					logger.log('ImageServiceInitializer: ImagePreloadService ready', {
+					logger.info('ImageServiceInitializer: ImagePreloadService ready', {
 						note: 'Service uses static defaults (maxConcurrent: 3)',
 					})
 				}
@@ -118,7 +118,7 @@ export default function ImageServiceInitializer() {
 				await ImageCacheService.initialize('browser', 50 * 1024 * 1024)
 				
 				if (process.env.NODE_ENV === 'development') {
-					logger.log('ImageServiceInitializer: ImageCacheService initialized', {
+					logger.info('ImageServiceInitializer: ImageCacheService initialized', {
 						strategy: 'browser',
 						maxSize: '50MB',
 					})

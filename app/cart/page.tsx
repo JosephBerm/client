@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Trash2, ShoppingBag, CheckCircle } from 'lucide-react'
 import { useZodForm } from '@_shared'
 import { quoteSchema, type QuoteFormData } from '@_core'
+import { logger } from '@_core'
 import { useAuthStore } from '@_features/auth'
 import { useCartStore } from '@_features/cart'
 import FormInput from '@_components/forms/FormInput'
@@ -72,7 +73,10 @@ export default function CartPage() {
 				clearCart()
 			}
 		} catch (error) {
-			console.error('Error submitting quote:', error)
+			logger.error('Quote submission failed', {
+				error,
+				component: 'CartPage',
+			})
 		} finally {
 			setIsLoading(false)
 		}

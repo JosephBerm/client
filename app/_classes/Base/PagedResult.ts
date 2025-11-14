@@ -14,8 +14,12 @@
  *   data: productsArray
  * });
  * 
- * console.log(result.hasNext); // true (more pages available)
- * console.log(result.nextPage); // "?page=2&pageSize=10"
+ * import { logger } from '@_core';
+ * 
+ * logger.debug('Pagination info', {
+ *   hasNext: result.hasNext, // true (more pages available)
+ *   nextPage: result.nextPage // "?page=2&pageSize=10"
+ * });
  * ```
  */
 export class PagedResult<T> {

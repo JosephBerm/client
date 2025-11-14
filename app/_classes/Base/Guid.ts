@@ -8,8 +8,10 @@
  * const id = Guid.newGuid();
  * 
  * // Check if GUID is empty
+ * import { logger } from '@_core';
+ * 
  * if (Guid.isEmpty(id)) {
- *   console.log('Empty GUID');
+ *   logger.warn('Empty GUID detected');
  * }
  * ```
  */

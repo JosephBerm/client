@@ -157,7 +157,7 @@ export class CDNService {
 		this.fallbackChain = this.cdnConfigs.map((config) => config.provider)
 
 		if (process.env.NODE_ENV === 'development') {
-			logger.log('CDNService: Initialized', {
+			logger.debug('CDNService: Initialized', {
 				providers: this.cdnConfigs.length,
 				activeProvider: this.activeProvider,
 				fallbackChain: this.fallbackChain,
@@ -401,4 +401,5 @@ export class CDNService {
 		this.fallbackChain = []
 	}
 }
+
 

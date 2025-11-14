@@ -20,8 +20,10 @@
  * import { OrderStatusName, OrderStatusVariants } from '@_classes/EnumsTranslations';
  * 
  * // Display order status name
+ * import { logger } from '@_core';
+ * 
  * const statusName = OrderStatusName[order.status];
- * console.log(statusName); // e.g., "Awaiting Customer Approval"
+ * logger.debug('Order status', { status: statusName }); // e.g., "Awaiting Customer Approval"
  * 
  * // Display order status badge
  * const variant = OrderStatusVariants[order.status];

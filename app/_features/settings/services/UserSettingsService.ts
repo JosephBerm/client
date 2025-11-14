@@ -1,4 +1,5 @@
 import { Theme } from '@_classes/SharedEnums'
+import { logger } from '@_core'
 
 /**
  * User Settings Service
@@ -166,9 +167,13 @@ export class UserSettingsService {
 	 * 
 	 * @example
 	 * ```tsx
+ * import { logger } from '@_core';
+ * 
 	 * const settings = UserSettingsService.getSettings()
-	 * console.log(settings.theme) // Theme.MedsourceClassic
-	 * console.log(settings.tablePageSize) // 10
+ * logger.debug('User settings retrieved', {
+ *   theme: settings.theme, // Theme.MedsourceClassic
+ *   tablePageSize: settings.tablePageSize // 10
+ * })
 	 * ```
 	 */
 	static getSettings(): UserSettings {
@@ -185,7 +190,11 @@ export class UserSettingsService {
 					// New unified format
 					// Validate version and migrate if needed
 					if (parsed.version !== CURRENT_VERSION) {
-						console.warn(`Settings version ${parsed.version} detected, migration may be needed`)
+					logger.warn('Settings version mismatch detected', {
+						currentVersion: parsed.version,
+						expectedVersion: CURRENT_VERSION,
+						component: 'UserSettingsService',
+					})
 					}
 					
 					// Merge with defaults to ensure all settings exist
@@ -202,7 +211,11 @@ export class UserSettingsService {
 			// No settings found, return defaults
 			return DEFAULT_SETTINGS
 		} catch (error) {
-			console.warn('Failed to read user settings:', error)
+			logger.warn('Failed to read user settings', {
+				error,
+				component: 'UserSettingsService',
+				fallback: 'using_defaults',
+			})
 			return DEFAULT_SETTINGS
 		}
 	}
@@ -256,7 +269,11 @@ export class UserSettingsService {
 		try {
 			// Validate value based on key
 			if (!this.validateSetting(key, value)) {
-				console.warn(`Invalid value for setting ${String(key)}:`, value)
+				logger.warn('Invalid setting value rejected', {
+					setting: String(key),
+					value,
+					component: 'UserSettingsService',
+				})
 				return
 			}
 
@@ -277,7 +294,12 @@ export class UserSettingsService {
 
 			localStorage.setItem(STORAGE_KEY, JSON.stringify(stored))
 		} catch (error) {
-			console.warn(`Failed to save setting ${String(key)}:`, error)
+			logger.warn('Failed to save setting', {
+				error,
+				setting: String(key),
+				value,
+				component: 'UserSettingsService',
+			})
 		}
 	}
 
@@ -309,7 +331,11 @@ export class UserSettingsService {
 			// Validate all new settings
 			for (const [key, value] of Object.entries(settings)) {
 				if (value !== undefined && !this.validateSetting(key as keyof UserSettings, value)) {
-					console.warn(`Invalid value for setting ${key}:`, value)
+					logger.warn('Invalid setting value rejected', {
+						setting: key,
+						value,
+						component: 'UserSettingsService',
+					})
 					return
 				}
 			}
@@ -328,7 +354,11 @@ export class UserSettingsService {
 
 			localStorage.setItem(STORAGE_KEY, JSON.stringify(stored))
 		} catch (error) {
-			console.warn('Failed to save settings:', error)
+			logger.warn('Failed to save settings', {
+				error,
+				settings,
+				component: 'UserSettingsService',
+			})
 		}
 	}
 
@@ -440,9 +470,15 @@ export class UserSettingsService {
 			}
 			localStorage.setItem(STORAGE_KEY, JSON.stringify(stored))
 			
-			console.info('Successfully migrated legacy settings to unified format')
+			logger.info('Legacy settings migrated successfully', {
+				component: 'UserSettingsService',
+				migratedSettings: migrated,
+			})
 		} catch (error) {
-			console.warn('Failed to migrate legacy settings:', error)
+			logger.warn('Failed to migrate legacy settings', {
+				error,
+				component: 'UserSettingsService',
+			})
 		}
 
 		return migrated
@@ -468,7 +504,10 @@ export class UserSettingsService {
 		try {
 			localStorage.removeItem(STORAGE_KEY)
 		} catch (error) {
-			console.warn('Failed to clear settings:', error)
+			logger.warn('Failed to clear settings', {
+				error,
+				component: 'UserSettingsService',
+			})
 		}
 	}
 }

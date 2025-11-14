@@ -70,6 +70,7 @@ import DataTable from './DataTable'
 import Button from '@_components/ui/Button'
 import Badge from '@_components/ui/Badge'
 import OrderStatusBadge from '@_components/common/OrderStatusBadge'
+import { logger } from '@_core'
 import { formatDate, formatCurrency } from '@_shared'
 import { useAuthStore } from '@_features/auth'
 import Order from '@_classes/Order'
@@ -136,7 +137,11 @@ export default function AccountOrdersTable() {
 
 			setOrders(sortedOrders)
 		} catch (error: any) {
-			console.error('Failed to fetch orders:', error)
+			logger.error('Failed to fetch orders', {
+				error,
+				component: 'AccountOrdersTable',
+				userId: user?.id ?? undefined,
+			})
 			toast.error(error.message || 'Failed to load orders')
 		} finally {
 			setIsLoading(false)

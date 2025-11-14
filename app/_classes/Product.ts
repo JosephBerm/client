@@ -35,9 +35,11 @@
  * });
  * 
  * // Check if product has images
+ * import { logger } from '@_core';
+ * 
  * if (product.hasImage()) {
  *   const fileName = product.getFileName();
- *   console.log('Product image:', fileName);
+ *   logger.debug('Product image found', { fileName, productId: product.id });
  * }
  * 
  * // Product with categories

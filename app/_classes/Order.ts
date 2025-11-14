@@ -63,9 +63,11 @@
  * });
  * 
  * // Create order from quote
+ * import { logger } from '@_core';
+ * 
  * const order2 = new Order();
  * order2.CreateFromQuote(quote);
- * console.log('Order total:', order2.total);
+ * logger.info('Order created from quote', { orderTotal: order2.total, quoteId: quote.id });
  * 
  * // Add transit details to item
  * const orderItem = new OrderItem({
@@ -141,11 +143,13 @@ export default class Order {
 	 * 
 	 * @example
 	 * ```typescript
+	 * import { logger } from '@_core';
+	 * 
 	 * const order = new Order();
 	 * order.CreateFromQuote(quote);
 	 * order.customerId = quote.customer.id;
 	 * order.status = OrderStatus.Pending;
-	 * console.log('Order total:', order.total);
+	 * logger.info('Order created from quote', { orderTotal: order.total, quoteId: quote.id });
 	 * ```
 	 */
 	CreateFromQuote(quote: Quote) {
@@ -414,12 +418,14 @@ export class Dimensions {
 	 * 
 	 * @example
 	 * ```typescript
+	 * import { logger } from '@_core';
+	 * 
 	 * const dimensions = new Dimensions({
 	 *   width: 30,
 	 *   length: 45,
 	 *   height: 20
 	 * });
-	 * console.log(dimensions.toString()); // "30 x 45 x 20cm"
+	 * logger.debug('Dimensions formatted', { formatted: dimensions.toString() }); // "30 x 45 x 20cm"
 	 * ```
 	 */
 	constructor(param?: Partial<Dimensions>) {
@@ -436,8 +442,10 @@ export class Dimensions {
 	 * 
 	 * @example
 	 * ```typescript
+	 * import { logger } from '@_core';
+	 * 
 	 * const dimensions = new Dimensions({ width: 12, length: 18, height: 6 });
-	 * console.log(dimensions.toString()); // "12 x 18 x 6cm"
+	 * logger.debug('Dimensions formatted', { formatted: dimensions.toString() }); // "12 x 18 x 6cm"
 	 * ```
 	 */
 	toString = () => {

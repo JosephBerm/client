@@ -14,6 +14,7 @@ import RoleBadge from '@_components/common/RoleBadge'
 import Company from '@_classes/Company'
 import User from '@_classes/User'
 import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
+import { logger } from '@_core'
 import { API } from '@_shared'
 import { Routes } from '@_features/navigation'
 
@@ -54,7 +55,11 @@ const Page = () => {
 
 				setCustomer(new Company(data.payload))
 			} catch (error) {
-				console.error(error)
+				logger.error('Failed to load customer', {
+					error,
+					customerId,
+					component: 'CustomerDetailPage',
+				})
 				toast.error('Unable to load customer')
 				router.back()
 			} finally {
@@ -85,7 +90,11 @@ const Page = () => {
 					setAccounts([])
 				}
 			} catch (error) {
-				console.error(error)
+				logger.error('Failed to load customer accounts', {
+					error,
+					customerId,
+					component: 'CustomerDetailPage',
+				})
 				toast.error('Unable to load customer accounts')
 				setAccounts([])
 			} finally {

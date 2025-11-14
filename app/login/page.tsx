@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { toast } from 'react-toastify'
 import { useZodForm } from '@_shared'
 import { loginSchema, type LoginFormData } from '@_core'
+import { logger } from '@_core'
 import { login, useAuthStore } from '@_features/auth'
 import FormInput from '@_components/forms/FormInput'
 import FormCheckbox from '@_components/forms/FormCheckbox'
@@ -48,7 +49,10 @@ export default function LoginPage() {
 				toast.error(result.message || 'Login failed. Please check your credentials.')
 			}
 		} catch (error) {
-			console.error('Login error:', error)
+			logger.error('Login page submission failed', {
+				error,
+				component: 'LoginPage',
+			})
 			toast.error('An error occurred during login. Please try again.')
 		} finally {
 			setIsLoading(false)

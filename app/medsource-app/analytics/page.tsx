@@ -5,6 +5,7 @@ import ClientPageLayout from '@_components/layouts/ClientPageLayout'
 import Button from '@_components/ui/Button'
 import FinanceNumbers from '@_classes/FinanceNumbers'
 import FinanceSearchFilter from '@_classes/FinanceSearchFilter'
+import { logger } from '@_core'
 import { API } from '@_shared'
 
 const TIME_RANGES = ['7d', '30d', '90d', '1y', 'custom'] as const
@@ -49,7 +50,11 @@ const Page = () => {
 
 				setFinanceNumbers(new FinanceNumbers(data.payload))
 			} catch (err) {
-				console.error('Error fetching finance numbers', err)
+				logger.error('Failed to fetch finance numbers', {
+					error: err,
+					component: 'AnalyticsPage',
+					context: 'initial_load',
+				})
 				setError(err instanceof Error ? err.message : 'Unable to fetch finance numbers')
 			} finally {
 				setIsLoading(false)
@@ -74,7 +79,12 @@ const Page = () => {
 
 			setFinanceNumbers(new FinanceNumbers(data.payload))
 		} catch (err) {
-			console.error('Error fetching finance numbers', err)
+			logger.error('Failed to fetch finance numbers', {
+				error: err,
+				component: 'AnalyticsPage',
+				context: 'search',
+				filter: payload,
+			})
 			setError(err instanceof Error ? err.message : 'Unable to fetch finance numbers')
 		} finally {
 			setIsLoading(false)

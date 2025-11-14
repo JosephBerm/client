@@ -1,12 +1,16 @@
 /**
- * @fileoverview Store Feature - Barrel Export
+ * Store Feature Barrel Export
  * 
- * Public API for the store/catalog feature.
- * Exports hooks, constants, and utilities.
- * 
- * @module features/store
+ * Centralized exports for the store feature module.
+ * Follows FAANG best practice of feature-based architecture.
  */
 
-export * from './hooks'
+// Constants
 export * from './constants'
 
+// Hooks
+export * from './hooks/useProductsState'
+export * from './hooks/useSearchFilterState'
+
+// Utils
+export * from './utils/requestCache'

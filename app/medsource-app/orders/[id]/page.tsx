@@ -10,6 +10,7 @@ import Badge from '@_components/ui/Badge'
 import OrderStatusBadge, { OrderStatus as BadgeOrderStatus } from '@_components/common/OrderStatusBadge'
 import Order from '@_classes/Order'
 import { OrderStatus as DomainOrderStatus } from '@_classes/Enums'
+import { logger } from '@_core'
 import { API } from '@_shared'
 import { Routes } from '@_features/navigation'
 import { formatCurrency, formatDate } from '@_shared'
@@ -41,7 +42,11 @@ export default function OrderDetailsPage() {
 
 				setOrder(new Order(data.payload))
 			} catch (error) {
-				console.error(error)
+				logger.error('Failed to load order', {
+					error,
+					orderId: orderIdParam,
+					component: 'OrderDetailPage',
+				})
 				toast.error('Unable to load order')
 				router.push(Routes.Orders.location)
 			} finally {

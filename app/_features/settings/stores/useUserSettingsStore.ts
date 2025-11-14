@@ -54,6 +54,7 @@ import { create } from 'zustand'
 import { Theme } from '@_classes/SharedEnums'
 import { ThemeService } from '../services/ThemeService'
 import { UserSettingsService } from '../services/UserSettingsService'
+import { logger } from '@_core'
 
 /**
  * User preferences for UI behavior and display.
@@ -246,7 +247,11 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 
 				set({ themeLoading: false })
 			} catch (error) {
-				console.error('Failed to set theme:', error)
+				logger.error('Failed to set theme', {
+					error,
+					theme,
+					component: 'useUserSettingsStore',
+				})
 				set({ themeLoading: false })
 			}
 		},
@@ -271,7 +276,12 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 					[key]: value,
 				})
 			} catch (error) {
-				console.error(`Failed to persist preference ${String(key)}:`, error)
+				logger.error('Failed to persist preference', {
+					error,
+					preference: String(key),
+					value,
+					component: 'useUserSettingsStore',
+				})
 			}
 		},
 
@@ -291,7 +301,11 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 			try {
 				UserSettingsService.setSetting('tablePageSize', size)
 			} catch (error) {
-				console.error('Failed to persist table page size:', error)
+				logger.error('Failed to persist table page size', {
+					error,
+					size,
+					component: 'useUserSettingsStore',
+				})
 			}
 		},
 
@@ -311,7 +325,11 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 			try {
 				UserSettingsService.setSetting('sidebarCollapsed', collapsed)
 			} catch (error) {
-				console.error('Failed to persist sidebar state:', error)
+				logger.error('Failed to persist sidebar state', {
+					error,
+					collapsed,
+					component: 'useUserSettingsStore',
+				})
 			}
 		},
 
@@ -363,7 +381,10 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 					themeLoading: false,
 				})
 			} catch (error) {
-				console.error('Failed to initialize user settings:', error)
+				logger.error('Failed to initialize user settings', {
+					error,
+					component: 'useUserSettingsStore',
+				})
 				set({ themeLoading: false })
 			}
 		},

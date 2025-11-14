@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'react-toastify'
+import { logger } from '@_core'
 
 /**
  * Generic form submission hook following DRY (Don't Repeat Yourself) principles.
@@ -53,7 +54,7 @@ import { toast } from 'react-toastify'
  * const handleSubmit = async (formData) => {
  *   const result = await submit(formData);
  *   if (result.success) {
- *     console.log('Submitted successfully:', result.data);
+ *     logger.debug('Form submitted successfully', { data: result.data });
  *   }
  * };
  * ```
@@ -109,6 +110,11 @@ export function useFormSubmit<TData, TResult = any>(
     } catch (err: any) {
       // Network error or unexpected exception
       const errorMsg = err.message || options?.errorMessage || 'An unexpected error occurred'
+      logger.error('Form submission failed', {
+        error: err,
+        errorMessage: errorMsg,
+        context: 'form_submit',
+      })
       toast.error(errorMsg)
       setError(err)
 
@@ -162,7 +168,7 @@ export function useFormSubmit<TData, TResult = any>(
  * const { create, update, remove, isLoading } = useCRUDSubmit(API.Users, {
  *   entityName: 'User',
  *   onCreateSuccess: (user) => {
- *     console.log('Created user:', user);
+ *     logger.info('User created successfully', { userId: user.id });
  *     router.push(`/users/${user.id}`);
  *   },
  *   onUpdateSuccess: () => {

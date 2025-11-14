@@ -12,6 +12,7 @@ import Badge from '@_components/ui/Badge'
 import Button from '@_components/ui/Button'
 import Quote from '@_classes/Quote'
 import { QuoteStatus } from '@_classes/Enums'
+import { logger } from '@_core'
 import { API } from '@_shared'
 import { Routes } from '@_features/navigation'
 
@@ -63,7 +64,11 @@ export default function QuoteDetailsPage() {
 
 				setQuote(new Quote(data.payload))
 			} catch (error) {
-				console.error(error)
+				logger.error('Failed to load quote', {
+					error,
+					quoteId,
+					component: 'QuoteDetailPage',
+				})
 				toast.error('Unable to load quote')
 				router.back()
 			} finally {
@@ -89,7 +94,11 @@ export default function QuoteDetailsPage() {
 			toast.success('Order created successfully')
 			router.push(`${Routes.Orders.location}/${data.payload.id}`)
 		} catch (error) {
-			console.error(error)
+			logger.error('Failed to create order from quote', {
+				error,
+				quoteId,
+				component: 'QuoteDetailPage',
+			})
 			toast.error('Failed to create order from quote')
 		} finally {
 			setIsConverting(false)

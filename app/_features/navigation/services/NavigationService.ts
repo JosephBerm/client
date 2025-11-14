@@ -66,12 +66,14 @@ export class NavigationService {
 	 * const user = useAuthStore(state => state.user)
 	 * const sections = NavigationService.getNavigationSections(user?.role)
 	 * 
-	 * sections.forEach(section => {
-	 *   console.log(section.title) // "Main", "My Orders", etc.
-	 *   section.routes.forEach(route => {
-	 *     console.log(route.href) // "/medsource-app", "/store", etc.
-	 *   })
-	 * })
+ * import { logger } from '@_core';
+ * 
+ * sections.forEach(section => {
+ *   logger.debug('Navigation section', { title: section.title }) // "Main", "My Orders", etc.
+ *   section.routes.forEach(route => {
+ *     logger.debug('Navigation route', { href: route.href }) // "/medsource-app", "/store", etc.
+ *   })
+ * })
 	 * ```
 	 */
 	static getNavigationSections(userRole?: number | null): NavigationSection[] {

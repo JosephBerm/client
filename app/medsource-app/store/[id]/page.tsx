@@ -8,6 +8,7 @@ import ClientPageLayout from '@_components/layouts/ClientPageLayout'
 import Card from '@_components/ui/Card'
 import ProductForm from '@_components/forms/ProductForm'
 import { Product } from '@_classes/Product'
+import { logger } from '@_core'
 import { API } from '@_shared'
 import { Routes } from '@_features/navigation'
 
@@ -43,7 +44,11 @@ export default function ManageProductPage() {
 
 				setProduct(new Product(data.payload))
 			} catch (error) {
-				console.error(error)
+				logger.error('Failed to load product', {
+					error,
+					productId,
+					component: 'ProductDetailPage',
+				})
 				toast.error('Unable to load product')
 				router.push(Routes.InternalStore.location)
 			} finally {

@@ -198,7 +198,7 @@ export function useImageAnalytics(
 			metricsRef.current.set(url, metric)
 
 			if (logMetrics) {
-				logger.log('ImageAnalytics: Load start', { url, startTime })
+				logger.debug('ImageAnalytics: Load start', { url, startTime })
 			}
 		},
 		[shouldTrack, logMetrics]
@@ -228,7 +228,7 @@ export function useImageAnalytics(
 			loadStartTimesRef.current.delete(url)
 
 			if (logMetrics) {
-				logger.log('ImageAnalytics: Load complete', { url, loadTime, success })
+				logger.debug('ImageAnalytics: Load complete', { url, loadTime, success })
 			}
 
 			// Call custom analytics handler
@@ -299,7 +299,7 @@ export function useImageAnalytics(
 			}
 
 			if (logMetrics) {
-				logger.log('ImageAnalytics: Interaction', interaction)
+				logger.debug('ImageAnalytics: Interaction', { interaction })
 			}
 
 			// Call custom analytics handler
@@ -334,4 +334,5 @@ export function useImageAnalytics(
 		clearMetrics,
 	}
 }
+
 

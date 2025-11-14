@@ -363,8 +363,10 @@ export default class Address {
 	 * // ['country', 'addressOne', 'city', 'state', 'zipCode']
 	 * 
 	 * // Use for form field generation
+	 * import { logger } from '@_core';
+	 * 
 	 * keys.forEach(key => {
-	 *   console.log(`Field: ${key}`);
+	 *   logger.debug('Address field', { field: key });
 	 * });
 	 * ```
 	 */

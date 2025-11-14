@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Notification from '@_classes/Notification'
+import { logger } from '@_core'
 import { API } from '@_shared'
 import { useRouter, useParams } from 'next/navigation'
 import { toast } from 'react-toastify'
@@ -24,7 +25,11 @@ function Page() {
 				toast.error(data.message)
 			}
 		} catch (err) {
-			console.error(err)
+			logger.error('Failed to load notification', {
+				error: err,
+				notificationId: params?.id,
+				component: 'NotificationDetailPage',
+			})
 			toast.error('Error Retrieving The Notification Info')
 			// route.push('/not-found')
 		} finally {

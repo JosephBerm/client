@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { CheckCircle } from 'lucide-react'
 import { useZodForm } from '@_shared'
 import { contactSchema, type ContactFormData } from '@_core'
+import { logger } from '@_core'
 import { useAuthStore } from '@_features/auth'
 import FormInput from '@_components/forms/FormInput'
 import FormTextArea from '@_components/forms/FormTextArea'
@@ -52,10 +53,17 @@ export default function ContactPage() {
 			if (response.data.statusCode === 200) {
 				setSubmitted(true)
 			} else {
-				console.error('Contact request failed:', response.data.message)
+				logger.error('Contact request failed', {
+					statusCode: response.data.statusCode,
+					message: response.data.message,
+					component: 'ContactPage',
+				})
 			}
 		} catch (error) {
-			console.error('Error sending contact request:', error)
+			logger.error('Error sending contact request', {
+				error,
+				component: 'ContactPage',
+			})
 		} finally {
 			setIsLoading(false)
 		}

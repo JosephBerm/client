@@ -36,9 +36,11 @@
  * });
  * 
  * // Submit to backend
+ * import { logger } from '@_core';
+ * 
  * const response = await API.Public.sendContactRequest(contactRequest);
  * if (response.data.statusCode === 200) {
- *   console.log('Contact request submitted successfully');
+ *   logger.info('Contact request submitted successfully');
  * }
  * 
  * // Form submission handler

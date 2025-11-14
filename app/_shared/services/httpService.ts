@@ -22,13 +22,15 @@
  * ```typescript
  * import { HttpService } from '@_shared';
  * 
+ * import { logger } from '@_core';
+ * 
  * // GET request
  * const response = await HttpService.get<User[]>('/users');
- * console.log(response.data.payload); // User[]
+ * logger.debug('Users retrieved', { count: response.data.payload?.length }); // User[]
  * 
  * // POST request
  * const createResponse = await HttpService.post<User>('/users', userData);
- * console.log(createResponse.data.statusCode); // 201
+ * logger.info('User created', { statusCode: createResponse.data.statusCode }); // 201
  * ```
  * 
  * @module httpService
@@ -36,6 +38,7 @@
 
 import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios'
 import { getCookies } from 'cookies-next'
+import { logger } from '@_core'
 
 /**
  * Base Axios instance configured with interceptors.
@@ -92,7 +95,11 @@ baseInstance.interceptors.response.use(
 			// }
 		} else {
 			// Network error (no response from server)
-			console.error('Network Error:', error)
+			logger.warn('Network error occurred', {
+				error,
+				url: error.config?.url,
+				method: error.config?.method,
+			})
 		}
 		
 		// Reject the promise so calling code can handle errors
@@ -150,10 +157,12 @@ export interface ApiResponse<T> {
  * 
  * @example
  * ```typescript
+ * import { logger } from '@_core';
+ * 
  * // GET request
  * const users = await HttpService.get<User[]>('/users');
  * if (users.data.statusCode === 200) {
- *   console.log(users.data.payload); // User[]
+ *   logger.debug('Users retrieved', { count: users.data.payload?.length }); // User[]
  * }
  * 
  * // POST request with data

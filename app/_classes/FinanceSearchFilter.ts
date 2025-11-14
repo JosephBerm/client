@@ -30,9 +30,11 @@
  * filter.FromStatus = OrderStatus.Placed;
  * filter.ToStatus = OrderStatus.Delivered;
  * 
+ * import { logger } from '@_core';
+ * 
  * const response = await API.Finance.searchFinnanceNumbers(filter);
  * const analytics = new FinanceNumbers(response.data.payload);
- * console.log('Q1 Revenue:', analytics.sales.totalRevenue);
+ * logger.info('Q1 revenue retrieved', { revenue: analytics.sales.totalRevenue });
  * 
  * // Filter for specific customer
  * const customerFilter = new FinanceSearchFilter();

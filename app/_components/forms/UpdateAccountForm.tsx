@@ -48,7 +48,7 @@
  *         user={user}
  *         onUserUpdate={(updatedUser) => {
  *           setUser(updatedUser);
- *           console.log('Profile updated successfully');
+ *           logger.info('Profile updated successfully', { userId: updatedUser.id });
  *         }}
  *       />
  *     </div>

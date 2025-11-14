@@ -17,6 +17,7 @@
 import { memo } from 'react'
 import type { NavigationIconType } from '@_types/navigation'
 import { getIconComponent } from '@_helpers/icon-mapping'
+import { logger } from '@_core'
 
 interface NavigationIconProps {
 	/** Icon identifier from NavigationIconType */
@@ -51,7 +52,10 @@ const NavigationIcon = memo(function NavigationIcon({
 	const IconComponent = getIconComponent(icon)
 
 	if (!IconComponent) {
-		console.warn(`Icon not found: ${icon}`)
+		logger.warn('Icon not found', {
+			icon,
+			component: 'NavigationIcon',
+		})
 		return null
 	}
 

@@ -45,6 +45,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { IUser } from '@_classes/User'
+import { logger } from '@_core'
 
 /**
  * Authentication state interface.
@@ -176,7 +177,7 @@ export const useAuthStore = create<AuthStore>()(
 					}
 				} catch (error) {
 					// Auth check failed (network error, server down, etc.)
-					console.error('Auth check failed:', error)
+					logger.debug('Auth check failed', { error })
 					set({ user: null, isAuthenticated: false, isLoading: false })
 				}
 			},

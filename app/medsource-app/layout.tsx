@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { IUser } from '@_classes/User'
+import { logger } from '@_core'
 
 // Old components - now using modernized navigation in root layout
 // import Sidebar from '@/components/Sidebar'
@@ -27,7 +28,10 @@ async function getUserData(token: string | null) {
 
 		if (response.ok) return await response.json()
 	} catch (err) {
-		console.error(err)
+		logger.error('Failed to fetch user in layout', {
+			error: err,
+			component: 'MedsourceAppLayout',
+		})
 	}
 
 	return null

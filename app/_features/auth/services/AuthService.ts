@@ -19,6 +19,7 @@ import { getCookie, deleteCookie, setCookie } from 'cookies-next'
 import type { IUser } from '@_classes/User'
 import type LoginCredentials from '@_classes/LoginCredentials'
 import type { RegisterModel } from '@_classes/User'
+import { logger } from '@_core'
 
 /**
  * API base URL loaded from environment variables.
@@ -55,9 +56,11 @@ interface ApiResponse<T> {
  * 
  * @example
  * ```typescript
+ * import { logger } from '@_core';
+ * 
  * const user = await checkAuthStatus();
  * if (user) {
- *   console.log('User is logged in:', user.name);
+ *   logger.info('User authenticated', { userId: user.id, userName: user.name });
  * } else {
  *   router.push('/login');
  * }
@@ -91,8 +94,8 @@ export async function checkAuthStatus(): Promise<IUser | null> {
 		const data: ApiResponse<IUser> = await response.json()
 		return data.payload
 	} catch (error) {
-		// Network error or server unreachable
-		console.error('Error checking auth status:', error)
+		// Network error or server unreachable - this is expected when offline
+		logger.debug('Auth status check failed', { error })
 		return null
 	}
 }
@@ -125,8 +128,10 @@ export async function checkAuthStatus(): Promise<IUser | null> {
  *   rememberUser: true
  * });
  * 
+ * import { logger } from '@_core';
+ * 
  * if (result.success) {
- *   console.log('Logged in as:', result.user.name);
+ *   logger.info('User logged in successfully', { userId: result.user.id, userName: result.user.name });
  *   router.push('/dashboard');
  * } else {
  *   toast.error(result.message);
@@ -174,7 +179,7 @@ export async function login(credentials: LoginCredentials): Promise<{
 		}
 	} catch (error) {
 		// Network error (server down, no internet, etc.)
-		console.error('Login error:', error)
+		logger.error('Login failed', { error, context: 'network_error' })
 		return {
 			success: false,
 			message: 'Network error occurred',
@@ -248,7 +253,7 @@ export async function signup(form: RegisterModel): Promise<{
 		}
 	} catch (error) {
 		// Network error (server down, no internet, etc.)
-		console.error('Signup error:', error)
+		logger.error('Signup failed', { error, context: 'network_error' })
 		return {
 			success: false,
 			message: 'Network error occurred',

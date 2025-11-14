@@ -146,7 +146,9 @@ export interface UseProductsStateReturn {
  * setProducts(products, pagedResult)
  * 
  * // Access current state
- * console.log(state.products.length)
+ * import { logger } from '@_core';
+ * 
+ * logger.debug('Products state', { productCount: state.products.length })
  * ```
  */
 export function useProductsState(): UseProductsStateReturn {

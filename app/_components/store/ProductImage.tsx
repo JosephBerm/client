@@ -179,7 +179,7 @@ export default function ProductImage({
 			trackLoad(currentUrl, true)
 		}
 		if (process.env.NODE_ENV === 'development') {
-			logger.log('ProductImage: Image loaded', {
+			logger.debug('ProductImage: Image loaded', {
 				productId: product.id,
 				productName: product.name,
 			})
@@ -249,4 +249,5 @@ export default function ProductImage({
 		</div>
 	)
 }
+
 

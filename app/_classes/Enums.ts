@@ -26,8 +26,10 @@
  * import { OrderStatus, AccountRole, NotificationType } from '@_classes/Enums';
  * 
  * // Check order status
+ * import { logger } from '@_core';
+ * 
  * if (order.status === OrderStatus.Shipped) {
- *   console.log('Order is on the way!');
+ *   logger.info('Order is on the way!');
  * }
  * 
  * // Check user role

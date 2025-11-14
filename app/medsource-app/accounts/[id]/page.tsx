@@ -12,6 +12,7 @@ import UpdateAccountForm from '@_components/forms/UpdateAccountForm'
 import RoleBadge from '@_components/common/RoleBadge'
 import Card from '@_components/ui/Card'
 import User from '@_classes/User'
+import { logger } from '@_core'
 import { API } from '@_shared'
 import { Routes } from '@_features/navigation'
 
@@ -49,7 +50,11 @@ const Page = () => {
 
 				setAccount(new User(data.payload))
 			} catch (error) {
-				console.error(error)
+				logger.error('Failed to load account', {
+					error,
+					accountId,
+					component: 'AccountDetailPage',
+				})
 				toast.error('Unable to load account')
 				router.back()
 			} finally {

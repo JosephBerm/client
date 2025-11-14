@@ -46,8 +46,12 @@
  * });
  * 
  * // Calculate KPIs
- * console.log('Profit Margin:', analytics.profitMargin + '%'); // 40%
- * console.log('Average Order Value:', analytics.averageOrderValue); // $833.33
+ * import { logger } from '@_core';
+ * 
+ * logger.info('Financial KPIs calculated', {
+ *   profitMargin: analytics.profitMargin + '%',
+ *   averageOrderValue: analytics.averageOrderValue
+ * }); // Profit Margin: 40%, Average Order Value: $833.33
  * 
  * // Display on dashboard
  * <Card>
@@ -124,6 +128,8 @@ export default class FinanceNumbers {
 	 * 
 	 * @example
 	 * ```typescript
+	 * import { logger } from '@_core';
+	 * 
 	 * const finance = new FinanceNumbers({
 	 *   sales: new FSales({
 	 *     totalRevenue: 100000,
@@ -131,7 +137,7 @@ export default class FinanceNumbers {
 	 *   })
 	 * });
 	 * 
-	 * console.log(finance.profitMargin); // 35
+	 * logger.debug('Profit margin calculated', { profitMargin: finance.profitMargin }); // 35
 	 * ```
 	 */
 	get profitMargin() {
@@ -146,12 +152,14 @@ export default class FinanceNumbers {
 	 * 
 	 * @example
 	 * ```typescript
+	 * import { logger } from '@_core';
+	 * 
 	 * const finance = new FinanceNumbers({
 	 *   sales: new FSales({ totalRevenue: 50000 }),
 	 *   orders: new COrders({ totalOrders: 100 })
 	 * });
 	 * 
-	 * console.log(finance.averageOrderValue); // 500
+	 * logger.debug('Average order value calculated', { averageOrderValue: finance.averageOrderValue }); // 500
 	 * ```
 	 */
 	get averageOrderValue() {
@@ -232,13 +240,15 @@ export class COrders {
 	 * 
 	 * @example
 	 * ```typescript
+	 * import { logger } from '@_core';
+	 * 
 	 * const orders = new COrders({
 	 *   totalOrders: 150,
 	 *   totalProductsSold: 3500
 	 * });
 	 * 
-	 * console.log('Average products per order:', orders.totalProductsSold / orders.totalOrders);
-	 * // Average products per order: 23.33
+	 * const avgProducts = orders.totalProductsSold / orders.totalOrders;
+	 * logger.debug('Average products per order calculated', { averageProductsPerOrder: avgProducts }); // 23.33
 	 * ```
 	 */
 	constructor(partial?: Partial<COrders>) {

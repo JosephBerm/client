@@ -72,6 +72,7 @@ import DataTable from './DataTable'
 import Button from '@_components/ui/Button'
 import Badge from '@_components/ui/Badge'
 import { formatDate } from '@_shared'
+import { logger } from '@_core'
 import { useAuthStore } from '@_features/auth'
 import Quote from '@_classes/Quote'
 import { API } from '@_shared'
@@ -146,7 +147,11 @@ export default function AccountQuotesTable() {
 
 			setQuotes(sortedQuotes)
 		} catch (error: any) {
-			console.error('Failed to fetch quotes:', error)
+			logger.error('Failed to fetch quotes', {
+				error,
+				component: 'AccountQuotesTable',
+				userId: user?.id ?? undefined,
+			})
 			toast.error(error.message || 'Failed to load quotes')
 		} finally {
 			setIsLoading(false)

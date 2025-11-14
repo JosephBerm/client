@@ -85,8 +85,10 @@ export default class Name {
 	 * 
 	 * @example
 	 * ```typescript
+	 * import { logger } from '@_core';
+	 * 
 	 * const name = new Name({ first: 'John', last: 'Doe' });
-	 * console.log(name.toString()); // "Doe, John"
+	 * logger.debug('Name formatted', { formatted: name.toString() }); // "Doe, John"
 	 * String(name); // "Doe, John"
 	 * ```
 	 */

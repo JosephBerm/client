@@ -120,7 +120,7 @@ export class ImageCacheService {
 		}
 
 		if (process.env.NODE_ENV === 'development') {
-			logger.log('ImageCacheService: Initialized', {
+			logger.debug('ImageCacheService: Initialized', {
 				strategy,
 				maxSize: `${(maxSize / 1024 / 1024).toFixed(2)}MB`,
 			})
@@ -146,7 +146,7 @@ export class ImageCacheService {
 			this.serviceWorkerRegistration = registration
 
 			if (process.env.NODE_ENV === 'development') {
-				logger.log('ImageCacheService: Service Worker registered', {
+				logger.debug('ImageCacheService: Service Worker registered', {
 					scope: registration.scope,
 				})
 			}
@@ -207,7 +207,7 @@ export class ImageCacheService {
 		}
 
 		if (process.env.NODE_ENV === 'development') {
-			logger.log('ImageCacheService: Cached image', { url, ttl: `${(ttl / 1000 / 60).toFixed(0)}min` })
+			logger.debug('ImageCacheService: Cached image', { url, ttl: `${(ttl / 1000 / 60).toFixed(0)}min` })
 		}
 	}
 
@@ -281,7 +281,7 @@ export class ImageCacheService {
 		}
 
 		if (process.env.NODE_ENV === 'development') {
-			logger.log('ImageCacheService: Invalidated cache', { url })
+			logger.debug('ImageCacheService: Invalidated cache', { url })
 		}
 	}
 
@@ -313,7 +313,7 @@ export class ImageCacheService {
 		this.stats.misses = 0
 
 		if (process.env.NODE_ENV === 'development') {
-			logger.log('ImageCacheService: Cache cleared')
+			logger.debug('ImageCacheService: Cache cleared')
 		}
 	}
 
@@ -398,4 +398,5 @@ export class ImageCacheService {
 		return Promise.all(promises)
 	}
 }
+
 

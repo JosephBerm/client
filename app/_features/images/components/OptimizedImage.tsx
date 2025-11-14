@@ -286,7 +286,7 @@ const OptimizedImage = forwardRef<HTMLImageElement, OptimizedImageProps>(
 			}
 			onLoad?.()
 			if (process.env.NODE_ENV === 'development') {
-				logger.log('OptimizedImage: Image loaded', { src: currentUrl, alt, variant, size })
+				logger.debug('OptimizedImage: Image loaded', { src: currentUrl, alt, variant, size })
 			}
 		}
 
@@ -372,4 +372,5 @@ const OptimizedImage = forwardRef<HTMLImageElement, OptimizedImageProps>(
 OptimizedImage.displayName = 'OptimizedImage'
 
 export default OptimizedImage
+
 

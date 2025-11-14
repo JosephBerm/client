@@ -103,10 +103,12 @@ export class ImageService {
 	 * 
 	 * @example
 	 * ```typescript
-	 * const success = await ImageService.retryLoad(imageUrl, 3, 1000);
-	 * if (success) {
-	 *   console.log('Image loaded successfully');
-	 * }
+ * import { logger } from '@_core';
+ * 
+ * const success = await ImageService.retryLoad(imageUrl, 3, 1000);
+ * if (success) {
+ *   logger.info('Image loaded successfully', { imageUrl });
+ * }
 	 * ```
 	 */
 	static async retryLoad(
@@ -167,8 +169,10 @@ export class ImageService {
 	 * 
 	 * @example
 	 * ```typescript
-	 * const cacheSize = await ImageService.getCacheSize();
-	 * console.log(`Cache contains ${cacheSize} URLs`);
+ * import { logger } from '@_core';
+ * 
+ * const cacheSize = await ImageService.getCacheSize();
+ * logger.debug('Image cache size', { cacheSize });
 	 * ```
 	 */
 	static async getCacheSize(): Promise<number> {

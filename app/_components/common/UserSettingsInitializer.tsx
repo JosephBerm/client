@@ -61,6 +61,7 @@
 
 import { useEffect } from 'react'
 import { useUserSettingsStore } from '@_features/settings'
+import { logger } from '@_core'
 
 /**
  * UserSettingsInitializer Component
@@ -101,7 +102,10 @@ export default function UserSettingsInitializer() {
 		// Initialize all user settings (theme and preferences) on mount
 		// Only run once - empty dependency array ensures this
 		initialize().catch((error) => {
-			console.error('Failed to initialize user settings:', error)
+			logger.error('Failed to initialize user settings', {
+				error,
+				component: 'UserSettingsInitializer',
+			})
 		})
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []) // Empty array - only run once on mount

@@ -29,13 +29,15 @@
  * });
  * 
  * // Get file extension
- * console.log(uploadedFile.GetFileType()); // 'jpg'
+ * import { logger } from '@_core';
+ * 
+ * logger.debug('File type detected', { fileType: uploadedFile.GetFileType() }); // 'jpg'
  * 
  * // Image upload response
  * const response = await API.Store.Products.uploadImage(productId, formData);
  * const files: UploadedFile[] = response.data.payload;
  * files.forEach(file => {
- *   console.log(`Uploaded: ${file.name} at ${file.filePath}`);
+ *   logger.info('File uploaded successfully', { fileName: file.name, filePath: file.filePath });
  * });
  * ```
  * 
@@ -99,17 +101,19 @@ export default class UploadedFile {
 	 * 
 	 * @example
 	 * ```typescript
+	 * import { logger } from '@_core';
+	 * 
 	 * const file1 = new UploadedFile({ name: 'image.jpg' });
-	 * console.log(file1.GetFileType()); // 'jpg'
+	 * logger.debug('File type detected', { fileType: file1.GetFileType() }); // 'jpg'
 	 * 
 	 * const file2 = new UploadedFile({ name: 'document.backup.pdf' });
-	 * console.log(file2.GetFileType()); // 'pdf' (last part only)
+	 * logger.debug('File type detected', { fileType: file2.GetFileType() }); // 'pdf' (last part only)
 	 * 
 	 * const file3 = new UploadedFile({ name: 'noextension' });
-	 * console.log(file3.GetFileType()); // null
+	 * logger.debug('File type detected', { fileType: file3.GetFileType() }); // null
 	 * 
 	 * const file4 = new UploadedFile({ name: null });
-	 * console.log(file4.GetFileType()); // null
+	 * logger.debug('File type detected', { fileType: file4.GetFileType() }); // null
 	 * ```
 	 */
 	public GetFileType(): string | null {

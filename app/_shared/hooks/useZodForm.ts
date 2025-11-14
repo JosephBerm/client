@@ -55,9 +55,11 @@ import { z } from 'zod'
  * });
  * 
  * // TypeScript knows the form data shape!
+ * import { logger } from '@_core';
+ * 
  * const handleSubmit = (data) => {
  *   // data.email and data.password are fully typed
- *   console.log(data.email); // string
+ *   logger.debug('Form submitted', { email: data.email }); // string
  * };
  * 
  * // Use in component

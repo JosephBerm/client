@@ -11,6 +11,7 @@ import ClientPageLayout from '@_components/layouts/ClientPageLayout'
 import Button from '@_components/ui/Button'
 import Modal from '@_components/ui/Modal'
 import { formatDate } from '@_shared'
+import { logger } from '@_core'
 import { API } from '@_shared'
 import type Provider from '@_classes/Provider'
 import { Routes } from '@_features/navigation'
@@ -100,7 +101,11 @@ export default function ProvidersPage() {
       // Refresh the table
       setRefreshKey((prev) => prev + 1)
     } catch (error) {
-      console.error('Error deleting provider:', error)
+      logger.error('Failed to delete provider', {
+        error,
+        providerId: deleteModal.provider?.id,
+        component: 'ProvidersPage',
+      })
       toast.error('An error occurred while deleting the provider')
     }
   }

@@ -34,6 +34,7 @@ import Button from '@_components/ui/Button'
 import ProductImage from '@_components/store/ProductImage'
 import { Routes } from '@_features/navigation'
 import { ImagePreloadService } from '@_features/images'
+import { logger } from '@_core'
 
 export interface ProductCardProps {
 	/** Product data to display */
@@ -126,9 +127,12 @@ export default function ProductCard({
 				delay: 0, // No additional delay after hover
 			}).catch((error) => {
 				// Silent failure - preloading is a performance optimization, not critical
-				if (process.env.NODE_ENV === 'development') {
-					console.error('[ProductCard] Navigation preload failed', { productId: product.id, error })
-				}
+				logger.debug('Image preload failed', {
+					error,
+					productId: product.id,
+					component: 'ProductCard',
+					context: 'navigation_preload',
+				})
 			})
 
 			hasPreloadedRef.current = true

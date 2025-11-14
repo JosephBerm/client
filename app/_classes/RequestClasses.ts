@@ -33,9 +33,11 @@
  *   emails: ['customer@example.com', 'procurement@example.com']
  * });
  * 
+ * import { logger } from '@_core';
+ * 
  * const response = await API.Orders.submitQuote(submitRequest);
  * if (response.data.statusCode === 200) {
- *   console.log('Quote submitted successfully');
+ *   logger.info('Quote submitted successfully', { quoteId: submitRequest.quoteId });
  * }
  * 
  * // Submit invoice after order approval
