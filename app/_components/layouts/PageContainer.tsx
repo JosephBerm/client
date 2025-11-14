@@ -102,5 +102,9 @@ interface PageContainerProps {
  * @returns PageContainer component
  */
 export default function PageContainer({ children, className }: PageContainerProps) {
-	return <div className={classNames('container mx-auto p-4 md:p-8', className)}>{children}</div>
+	return (
+		<div className={classNames('container mx-auto p-4 md:p-8 w-full max-w-full', className)}>
+			{children}
+		</div>
+	)
 }

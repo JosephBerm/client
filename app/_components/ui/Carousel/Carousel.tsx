@@ -111,9 +111,10 @@ export default function Carousel({
 	const [emblaRef, emblaApi] = useEmblaCarousel(
 		{
 			loop,
-			align: 'center',
+			align: 'start', // Changed from 'center' to 'start' to prevent width calculation issues
 			dragFree: false,
 			duration: 25,
+			watchDrag: true,
 		},
 		[]
 	)
@@ -238,7 +239,7 @@ export default function Carousel({
 
 	return (
 		<div
-			className={`relative w-full ${className} [&>*]:rounded-none`}
+			className={`relative w-full max-w-full overflow-hidden ${className} *:rounded-none`}
 			role='region'
 			aria-label='Carousel'
 			tabIndex={0}>
@@ -257,28 +258,37 @@ export default function Carousel({
 				</>
 			)}
 
-			{/* Embla Carousel Viewport */}
-			<div className='overflow-hidden' ref={emblaRef}>
-				<div className='flex'>
+			{/* Embla Carousel Viewport - Constrained to prevent overflow */}
+			<div 
+				className='overflow-hidden w-full max-w-full' 
+				ref={emblaRef}>
+				<div className='flex min-w-0'>
 					{slides.map((slide, index) => (
 						<CarouselSlide
 							key={slide.id}
 							slide={slide}
 							isActive={index === selectedIndex}
 							showGradientOverlay={showGradientOverlay}
-							className='min-w-0'
+							className='flex-[0_0_100%] min-w-0 max-w-full'
+							// For text slides, pass control props to render controls inside slide
+							emblaApi={slide.type === 'text' ? emblaApi : undefined}
+							canScrollPrev={slide.type === 'text' ? canScrollPrev : undefined}
+							canScrollNext={slide.type === 'text' ? canScrollNext : undefined}
+							showArrows={slide.type === 'text' ? showArrows : undefined}
 						/>
 					))}
 				</div>
 			</div>
 
-			{/* Navigation Controls */}
-			<CarouselControls
-				emblaApi={emblaApi}
-				canScrollPrev={canScrollPrev}
-				canScrollNext={canScrollNext}
-				showArrows={showArrows}
-			/>
+			{/* Navigation Controls - Only for image/video slides (text slides render controls inside) */}
+			{slides.length > 0 && slides[selectedIndex]?.type !== 'text' && (
+				<CarouselControls
+					emblaApi={emblaApi}
+					canScrollPrev={canScrollPrev}
+					canScrollNext={canScrollNext}
+					showArrows={showArrows}
+				/>
+			)}
 
 			{/* Dot Indicators - Positioned below carousel */}
 			{showDots && (

@@ -41,7 +41,7 @@ export default function ProductCategoriesCarousel() {
 	}
 
 	return (
-		<section id="product-categories" className="bg-base-100 py-8 md:py-12">
+		<section id="product-categories" className="bg-base-100 py-8 md:py-12 w-full">
 			<PageContainer className="max-w-7xl">
 				<Carousel
 					slides={slides}
@@ -52,7 +52,7 @@ export default function ProductCategoriesCarousel() {
 					showDots={false}
 					showSlideNumbers={false}
 					showGradientOverlay={false}
-					className="rounded-2xl border border-base-300/40 bg-base-100 shadow-sm overflow-hidden"
+					className="rounded-2xl border border-base-300/40 bg-base-100 shadow-sm overflow-hidden w-full"
 				/>
 			</PageContainer>
 		</section>

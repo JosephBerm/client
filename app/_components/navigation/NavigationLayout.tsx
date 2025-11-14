@@ -170,7 +170,7 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
 		<div className="relative min-h-screen w-full bg-base-100">
 			<Navbar onMenuClick={toggleSidebar} />
 
-			<div className="relative mx-auto flex w-full max-w-[1600px] gap-0 lg:gap-10">
+			<div className="relative mx-auto flex w-full max-w-[1600px] gap-0 lg:gap-10 overflow-x-hidden">
 				{isAuthenticated && (
 					<Sidebar
 						isOpen={sidebarOpen}
@@ -185,7 +185,8 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
 						'relative flex-1 bg-base-100',
 						'min-h-[calc(100vh-var(--nav-height))]',
 						'px-4 pb-16 pt-8 sm:px-6 lg:px-12 xl:px-16',
-						'transition-[padding] duration-300 ease-in-out'
+						'transition-[padding] duration-300 ease-in-out',
+						'overflow-x-hidden w-full min-w-0'
 					)}
 				>
 					{children}

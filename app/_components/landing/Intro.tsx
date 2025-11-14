@@ -20,7 +20,7 @@ export default function Intro() {
 				className="absolute inset-x-0 top-0 hidden h-[420px] -translate-y-1/2 bg-gradient-to-b from-base-content/5 via-transparent to-transparent blur-3xl md:block"
 			/>
 
-			<PageContainer className="relative grid gap-16 py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-start xl:gap-24">
+			<PageContainer className="relative grid gap-16 py-20 lg:grid-cols-[1fr_1fr] lg:items-start xl:gap-24">
 				<div className="flex flex-col items-start gap-8">
 					<span className="badge badge-neutral gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.3em] shadow-sm">
 						<span className="h-2 w-2 animate-pulse rounded-full bg-success" />
