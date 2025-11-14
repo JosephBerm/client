@@ -25,7 +25,8 @@
  */
 
 // Service Worker version - update to invalidate caches
-const VERSION = 'v1.0.0'
+// CRITICAL: Increment this after major code refactorings to force cache clear
+const VERSION = 'v1.1.0' // Updated after INITIAL_FILTER fix
 const CACHE_NAME = `medsource-images-${VERSION}`
 const API_CACHE_NAME = `medsource-api-${VERSION}`
 const STATIC_CACHE_NAME = `medsource-static-${VERSION}`
@@ -48,13 +49,17 @@ const API_CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
  * **Pattern**: Google Workbox precaching
  */
 self.addEventListener('install', (event) => {
-	console.log('[ServiceWorker] Installing...', VERSION)
+	console.group('📦 [SW Install] Starting installation...')
+	console.log('📍 Version:', VERSION)
+	console.log('📍 Timestamp:', new Date().toISOString())
+	console.log('📍 Cache names:', { CACHE_NAME, API_CACHE_NAME, STATIC_CACHE_NAME })
 
 	event.waitUntil(
 		caches
 			.open(STATIC_CACHE_NAME)
 			.then((cache) => {
-				console.log('[ServiceWorker] Caching static assets')
+				console.log('✅ Static cache opened:', STATIC_CACHE_NAME)
+				console.log('📦 Caching critical static assets...')
 				// Cache critical static assets
 				return cache.addAll([
 					'/', // Homepage
@@ -63,12 +68,18 @@ self.addEventListener('install', (event) => {
 				])
 			})
 			.then(() => {
-				console.log('[ServiceWorker] Installed successfully')
+				console.log('✅ Static assets cached successfully')
+				console.log('⏭️  Calling skipWaiting() for immediate activation...')
 				// Skip waiting to activate immediately
 				return self.skipWaiting()
 			})
+			.then(() => {
+				console.log('✅ [SW Install] Installation complete!')
+				console.groupEnd()
+			})
 			.catch((error) => {
-				console.error('[ServiceWorker] Installation failed:', error)
+				console.error('❌ [SW Install] Installation failed:', error)
+				console.groupEnd()
 			})
 	)
 })
@@ -82,34 +93,51 @@ self.addEventListener('install', (event) => {
  * **Pattern**: Google Workbox cache cleanup
  */
 self.addEventListener('activate', (event) => {
-	console.log('[ServiceWorker] Activating...', VERSION)
+	console.group('🚀 [SW Activate] Starting activation...')
+	console.log('📍 Version:', VERSION)
+	console.log('📍 Timestamp:', new Date().toISOString())
 
 	event.waitUntil(
 		caches
 			.keys()
 			.then((cacheNames) => {
+				console.log('📋 Found existing caches:', cacheNames)
+				console.log('📍 Current caches to keep:', [CACHE_NAME, API_CACHE_NAME, STATIC_CACHE_NAME])
+				
+				const currentCaches = [CACHE_NAME, API_CACHE_NAME, STATIC_CACHE_NAME]
+				const cachesToDelete = cacheNames.filter(name => !currentCaches.includes(name))
+				
+				if (cachesToDelete.length > 0) {
+					console.log('🗑️  Deleting old caches:', cachesToDelete)
+				} else {
+					console.log('✅ No old caches to delete')
+				}
+				
 				// Delete old caches
 				return Promise.all(
 					cacheNames.map((cacheName) => {
 						// Keep only current version caches
-						if (
-							cacheName !== CACHE_NAME &&
-							cacheName !== API_CACHE_NAME &&
-							cacheName !== STATIC_CACHE_NAME
-						) {
-							console.log('[ServiceWorker] Deleting old cache:', cacheName)
+						if (!currentCaches.includes(cacheName)) {
+							console.log('🗑️  Deleting:', cacheName)
 							return caches.delete(cacheName)
 						}
 					})
 				)
 			})
 			.then(() => {
-				console.log('[ServiceWorker] Activated successfully')
+				console.log('✅ Cache cleanup complete')
+				console.log('👥 Claiming clients for immediate control...')
 				// Claim clients to activate immediately
 				return self.clients.claim()
 			})
+			.then(() => {
+				console.log('✅ [SW Activate] Activation complete!')
+				console.log('📍 Service Worker now controls all pages')
+				console.groupEnd()
+			})
 			.catch((error) => {
-				console.error('[ServiceWorker] Activation failed:', error)
+				console.error('❌ [SW Activate] Activation failed:', error)
+				console.groupEnd()
 			})
 	)
 })
@@ -135,25 +163,39 @@ self.addEventListener('fetch', (event) => {
 		return
 	}
 
+	// FAANG Best Practice #1: NEVER cache JavaScript chunks
+	// This prevents issues like the INITIAL_FILTER error you experienced
+	// JavaScript should always come fresh from the server to get latest code
+	if (isJavaScriptChunk(url)) {
+		console.log('🔴 [Fetch] JavaScript - NEVER CACHED:', url.pathname)
+		event.respondWith(fetch(request, { cache: 'no-store' }))
+		return
+	}
+
 	// Image requests - Cache-first strategy
 	if (request.destination === 'image' || isImageUrl(url)) {
+		console.log('🖼️  [Fetch] Image - Cache-first:', url.pathname)
 		event.respondWith(handleImageRequest(request))
 		return
 	}
 
 	// API requests - Network-first strategy
 	if (isAPIUrl(url)) {
+		console.log('🌐 [Fetch] API - Network-first:', url.pathname)
 		event.respondWith(handleAPIRequest(request))
 		return
 	}
 
-	// Static assets - Cache-first strategy
+	// Static assets - Cache-first strategy (CSS, fonts, etc.)
+	// Note: Excludes JavaScript - see above
 	if (isStaticAsset(url)) {
+		console.log('📄 [Fetch] Static - Cache-first:', url.pathname)
 		event.respondWith(handleStaticRequest(request))
 		return
 	}
 
 	// Default: network only
+	console.log('🔵 [Fetch] Other - Network only:', url.pathname)
 	event.respondWith(fetch(request))
 })
 
@@ -180,19 +222,21 @@ async function handleImageRequest(request) {
 			const age = now - cachedDate
 
 			if (age < IMAGE_CACHE_DURATION) {
-				console.log('[ServiceWorker] Serving image from cache:', request.url)
+				console.log('  ✅ Cache HIT - serving from cache')
 				return cachedResponse
 			} else {
-				console.log('[ServiceWorker] Cached image expired, fetching fresh')
+				console.log('  ⏰ Cache EXPIRED - fetching fresh')
 			}
+		} else {
+			console.log('  ❌ Cache MISS - fetching from network')
 		}
 
 		// Fetch from network
-		console.log('[ServiceWorker] Fetching image from network:', request.url)
 		const networkResponse = await fetch(request)
 
 		// Cache successful responses only
 		if (networkResponse.ok) {
+			console.log('  💾 Caching image for future requests')
 			const cache = await caches.open(CACHE_NAME)
 			await cache.put(request, networkResponse.clone())
 
@@ -202,15 +246,16 @@ async function handleImageRequest(request) {
 
 		return networkResponse
 	} catch (error) {
-		console.error('[ServiceWorker] Image fetch failed:', error)
+		console.error('  ❌ Network fetch failed:', error.message)
 
 		// Try to serve stale cache as fallback
 		const staleCache = await caches.match(request)
 		if (staleCache) {
-			console.log('[ServiceWorker] Serving stale image from cache')
+			console.log('  🔄 Serving STALE cache as fallback')
 			return staleCache
 		}
 
+		console.log('  ❌ No fallback available')
 		// Return placeholder if everything fails
 		return new Response('', {
 			status: 404,
@@ -234,9 +279,11 @@ async function handleAPIRequest(request) {
 	try {
 		// Try network first (fresh data preferred)
 		const networkResponse = await fetch(request)
+		console.log('  ✅ Network SUCCESS - serving fresh data')
 
 		// Cache successful responses
 		if (networkResponse.ok) {
+			console.log('  💾 Caching API response')
 			const cache = await caches.open(API_CACHE_NAME)
 			await cache.put(request, networkResponse.clone())
 
@@ -246,15 +293,16 @@ async function handleAPIRequest(request) {
 
 		return networkResponse
 	} catch (error) {
-		console.error('[ServiceWorker] API fetch failed, using cache fallback:', error)
+		console.error('  ❌ Network FAILED:', error.message)
 
 		// Fallback to cache
 		const cachedResponse = await caches.match(request)
 		if (cachedResponse) {
-			console.log('[ServiceWorker] Serving API response from cache')
+			console.log('  🔄 Serving from CACHE fallback')
 			return cachedResponse
 		}
 
+		console.log('  ❌ No cache fallback available')
 		// Return error if no cache available
 		return new Response(JSON.stringify({ error: 'Network error and no cache available' }), {
 			status: 503,
@@ -375,13 +423,41 @@ function isAPIUrl(url) {
 }
 
 /**
+ * Checks if URL is a JavaScript chunk (NEVER cache these!)
+ * 
+ * **CRITICAL:** JavaScript chunks must NEVER be cached by Service Worker.
+ * This prevents stale code issues like the INITIAL_FILTER error.
+ * 
+ * **FAANG Pattern:** Google, Meta, Amazon never cache JavaScript chunks.
+ * They use cache-busting hashes in filenames instead (e.g., app.abc123.js).
+ * 
+ * @param {URL} url - URL object
+ * @returns {boolean} True if JavaScript chunk
+ */
+function isJavaScriptChunk(url) {
+	const pathname = url.pathname.toLowerCase()
+	return (
+		pathname.endsWith('.js') &&
+		(pathname.includes('/_next/') || 
+		 pathname.includes('/static/') ||
+		 pathname.includes('/chunks/') ||
+		 pathname.includes('/app_') ||
+		 pathname.includes('/main') ||
+		 pathname.includes('/pages'))
+	)
+}
+
+/**
  * Checks if URL is a static asset.
+ * 
+ * **Note:** Excludes JavaScript files - they're handled separately.
  * 
  * @param {URL} url - URL object
  * @returns {boolean} True if static asset
  */
 function isStaticAsset(url) {
-	const staticExtensions = ['.js', '.css', '.woff', '.woff2', '.ttf', '.eot', '.json']
+	// CSS, fonts, manifests - safe to cache
+	const staticExtensions = ['.css', '.woff', '.woff2', '.ttf', '.eot', '.json']
 	return staticExtensions.some((ext) => url.pathname.toLowerCase().endsWith(ext))
 }
 
@@ -397,20 +473,32 @@ function isStaticAsset(url) {
  */
 self.addEventListener('message', (event) => {
 	if (event.data && event.data.type) {
+		console.log('📨 [SW Message] Received:', event.data.type)
+		
 		switch (event.data.type) {
 			case 'SKIP_WAITING':
+				console.log('⏭️  [SW Message] Calling skipWaiting()...')
 				self.skipWaiting()
+				console.log('✅ [SW Message] skipWaiting() called - will activate immediately')
 				break
 
 			case 'CLEAR_CACHE':
+				console.log('🗑️  [SW Message] Clearing all caches...')
 				event.waitUntil(
 					caches.keys().then((cacheNames) => {
-						return Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)))
+						console.log('📋 Caches to clear:', cacheNames)
+						return Promise.all(cacheNames.map((cacheName) => {
+							console.log('🗑️  Deleting:', cacheName)
+							return caches.delete(cacheName)
+						}))
+					}).then(() => {
+						console.log('✅ [SW Message] All caches cleared')
 					})
 				)
 				break
 
 			case 'GET_CACHE_SIZE':
+				console.log('📊 [SW Message] Getting cache stats...')
 				event.waitUntil(
 					caches
 						.keys()
@@ -424,16 +512,26 @@ self.addEventListener('message', (event) => {
 							)
 						})
 						.then((cacheStats) => {
+							console.log('📊 Cache stats:', cacheStats)
 							event.ports[0].postMessage({ type: 'CACHE_SIZE', stats: cacheStats })
 						})
 				)
 				break
 
 			default:
-				console.log('[ServiceWorker] Unknown message type:', event.data.type)
+				console.warn('⚠️  [SW Message] Unknown message type:', event.data.type)
 		}
 	}
 })
 
-console.log('[ServiceWorker] Loaded', VERSION)
+console.log('%c🚀 Service Worker Loaded', 'background: #2196F3; color: white; padding: 8px 16px; border-radius: 4px; font-weight: bold;')
+console.log('📍 Version:', VERSION)
+console.log('📍 Cache Names:', { CACHE_NAME, API_CACHE_NAME, STATIC_CACHE_NAME })
+console.log('📍 Cache Limits:', {
+	maxImageItems: MAX_IMAGE_CACHE_ITEMS,
+	maxAPIItems: MAX_API_CACHE_ITEMS,
+	imageTTL: `${IMAGE_CACHE_DURATION / (24 * 60 * 60 * 1000)} days`,
+	apiTTL: `${API_CACHE_DURATION / (60 * 1000)} minutes`
+})
+console.log('📍 Strategy: JavaScript NEVER cached, Images cache-first, API network-first')
 

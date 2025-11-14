@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * useDebounce Hook - Industry Best Practice
  * 
