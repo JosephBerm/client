@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Notification from '@_classes/Notification'
-import API from '@_services/api'
+import { API } from '@_shared'
 import { useRouter, useParams } from 'next/navigation'
 import { toast } from 'react-toastify'
 import { NotificationType } from '@_classes/Enums'

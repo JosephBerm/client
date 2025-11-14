@@ -49,3 +49,4 @@ export default async function RootLayout({
 	// Navigation is now handled by root layout with modernized components
 	return <div className="min-h-screen bg-base-200">{children}</div>
 }
+

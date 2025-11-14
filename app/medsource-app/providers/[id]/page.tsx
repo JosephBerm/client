@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import API from '@_services/api'
+import { API } from '@_shared'
 import { useRouter, useParams } from 'next/navigation'
 import Provider from '@_classes/Provider'
 import UpdateProviderForm from '@_components/forms/UpdateProviderForm'

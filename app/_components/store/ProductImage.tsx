@@ -47,14 +47,10 @@
 
 import { useState, useEffect } from 'react'
 import { Product } from '@_classes/Product'
-import OptimizedImage from '@_components/ui/OptimizedImage'
-import ImagePlaceholder from '@_components/ui/ImagePlaceholder'
+import { OptimizedImage, ImagePlaceholder, getProductImageUrl, useImageError, useImageAnalytics } from '@_features/images'
 import Badge from '@_components/ui/Badge'
-import { getProductImageUrl } from '@_utils/imageUtils'
-import { getStockStatus } from '@_utils/productUtils'
-import { logger } from '@_utils/logger'
-import { useImageError } from '@_hooks/useImageError'
-import { useImageAnalytics } from '@_hooks/useImageAnalytics'
+import { getStockStatus } from '@_shared'
+import { logger } from '@_core'
 
 /**
  * ProductImage component props interface.

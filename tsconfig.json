@@ -22,14 +22,19 @@
 		],
 		"paths": {
 			"@/*": ["./*"],
-			"@_components/*": ["app/_components/*"],
-			"@_services/*": ["app/_services/*"],
-			"@_stores/*": ["app/_stores/*"],
-			"@_hooks/*": ["app/_hooks/*"],
-			"@_helpers/*": ["app/_helpers/*"],
+			// Feature-based architecture (FAANG best practice)
+			"@_features/*": ["app/_features/*"],
+			"@_core": ["app/_core"],
+			"@_core/*": ["app/_core/*"],
+			"@_lib": ["app/_lib"],
+			"@_lib/*": ["app/_lib/*"],
+			"@_shared": ["app/_shared"],
+			"@_shared/*": ["app/_shared/*"],
+			// Domain & UI paths (not feature-specific)
 			"@_classes/*": ["app/_classes/*"],
+			"@_components/*": ["app/_components/*"],
 			"@_types/*": ["app/_types/*"],
-			"@_utils/*": ["app/_utils/*"],
+			"@_helpers/*": ["app/_helpers/*"],
 			"@_scripts/*": ["app/_scripts/*"]
 		}
 	},

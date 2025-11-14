@@ -1,5 +1,4 @@
-import { ThemeService } from '@_services/ThemeService'
-import { UserSettingsService } from '@_services/UserSettingsService'
+import { ThemeService, UserSettingsService } from '@_features/settings'
 
 /**
  * Theme initialization script that runs after React hydrates

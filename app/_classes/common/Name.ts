@@ -192,3 +192,4 @@ export default class Name {
 		return this.first.trim() !== '' && this.last.trim() !== ''
 	}
 }
+

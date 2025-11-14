@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useAuthStore } from '@_stores/useAuthStore'
+import { useAuthStore } from '@_features/auth'
 import UpdateAccountForm from '@_components/forms/UpdateAccountForm'
 import ClientPageLayout from '@_components/layouts/ClientPageLayout'
 
@@ -30,3 +30,4 @@ const Page = () => {
 }
 
 export default Page
+

@@ -53,9 +53,8 @@
 'use client'
 
 import { useEffect } from 'react'
-import { ImagePreloadService } from '@_services/ImagePreloadService'
-import { ImageCacheService } from '@_services/ImageCacheService'
-import { logger } from '@_utils/logger'
+import { ImagePreloadService, ImageCacheService } from '@_features/images'
+import { logger } from '@_core'
 
 /**
  * ImageServiceInitializer Component

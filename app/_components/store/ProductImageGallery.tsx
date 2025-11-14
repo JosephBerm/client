@@ -37,8 +37,7 @@ import { useState, useMemo } from 'react'
 import { Product } from '@_classes/Product'
 import ProductImage from '@_components/store/ProductImage'
 import ImageGallery, { GalleryImage } from '@_components/store/ImageGallery'
-import ImageLightbox from '@_components/ui/ImageLightbox'
-import { getProductImageUrl } from '@_utils/imageUtils'
+import { ImageLightbox, getProductImageUrl } from '@_features/images'
 
 /**
  * ProductImageGallery component props interface.

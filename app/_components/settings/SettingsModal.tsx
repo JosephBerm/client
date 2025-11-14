@@ -38,8 +38,8 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import SettingRow from './SettingRow'
 import Button from '@_components/ui/Button'
-import { getSettingsSections } from '@_services/SettingsService'
-import { useModal } from '@_hooks/useModal'
+import { getSettingsSections } from '@_features/settings'
+import { useModal } from '@_shared'
 
 /**
  * Settings Modal component props interface.

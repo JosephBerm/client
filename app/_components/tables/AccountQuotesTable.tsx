@@ -71,12 +71,12 @@ import { Eye } from 'lucide-react'
 import DataTable from './DataTable'
 import Button from '@_components/ui/Button'
 import Badge from '@_components/ui/Badge'
-import { formatDate } from '@_utils/table-helpers'
-import { useAuthStore } from '@_stores/useAuthStore'
+import { formatDate } from '@_shared'
+import { useAuthStore } from '@_features/auth'
 import Quote from '@_classes/Quote'
-import API from '@_services/api'
+import { API } from '@_shared'
 import { toast } from 'react-toastify'
-import Routes from '@_services/routes'
+import { Routes } from '@_features/navigation'
 
 /**
  * AccountQuotesTable Component

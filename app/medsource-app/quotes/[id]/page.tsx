@@ -12,8 +12,8 @@ import Badge from '@_components/ui/Badge'
 import Button from '@_components/ui/Button'
 import Quote from '@_classes/Quote'
 import { QuoteStatus } from '@_classes/Enums'
-import API from '@_services/api'
-import Routes from '@_services/routes'
+import { API } from '@_shared'
+import { Routes } from '@_features/navigation'
 
 const STATUS_CONFIG: Record<
 	QuoteStatus,

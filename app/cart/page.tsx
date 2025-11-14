@@ -5,16 +5,16 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Trash2, ShoppingBag, CheckCircle } from 'lucide-react'
-import { useZodForm } from '@_hooks/useZodForm'
-import { quoteSchema, type QuoteFormData } from '@_utils/validation-schemas'
-import { useAuthStore } from '@_stores/useAuthStore'
-import { useCartStore } from '@_stores/useCartStore'
+import { useZodForm } from '@_shared'
+import { quoteSchema, type QuoteFormData } from '@_core'
+import { useAuthStore } from '@_features/auth'
+import { useCartStore } from '@_features/cart'
 import FormInput from '@_components/forms/FormInput'
 import FormTextArea from '@_components/forms/FormTextArea'
 import Button from '@_components/ui/Button'
 import PageContainer from '@_components/layouts/PageContainer'
 import EmptyState from '@_components/common/EmptyState'
-import API from '@_services/api'
+import { API } from '@_shared'
 import Quote from '@_classes/Quote'
 import { CartProduct } from '@_classes/Product'
 import Name from '@_classes/common/Name'
@@ -269,3 +269,4 @@ export default function CartPage() {
 		</PageContainer>
 	)
 }
+

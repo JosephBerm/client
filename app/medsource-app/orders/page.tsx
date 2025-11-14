@@ -4,12 +4,12 @@ import { useMemo } from 'react'
 import Link from 'next/link'
 import { ColumnDef } from '@tanstack/react-table'
 import { Eye, Plus } from 'lucide-react'
-import { useAuthStore } from '@_stores/useAuthStore'
+import { useAuthStore } from '@_features/auth'
 import ServerDataTable from '@_components/tables/ServerDataTable'
 import PageLayout from '@_components/layouts/PageLayout'
 import Button from '@_components/ui/Button'
 import OrderStatusBadge from '@_components/common/OrderStatusBadge'
-import { createServerTableFetcher, formatDate, formatCurrency } from '@_utils/table-helpers'
+import { createServerTableFetcher, formatDate, formatCurrency } from '@_shared'
 import type { IUser } from '@_classes/User'
 
 interface Order {
@@ -112,3 +112,4 @@ export default function OrdersPage() {
 		</PageLayout>
 	)
 }
+

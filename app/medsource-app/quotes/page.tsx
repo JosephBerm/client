@@ -8,7 +8,7 @@ import ServerDataTable from '@_components/tables/ServerDataTable'
 import ClientPageLayout from '@_components/layouts/ClientPageLayout'
 import Button from '@_components/ui/Button'
 import Badge from '@_components/ui/Badge'
-import { formatDate, formatCurrency } from '@_utils/table-helpers'
+import { formatDate, formatCurrency } from '@_shared'
 import type Quote from '@_classes/Quote'
 import { QuoteStatus } from '@_classes/Enums'
 
@@ -90,3 +90,4 @@ export default function QuotesPage() {
     </ClientPageLayout>
   )
 }
+

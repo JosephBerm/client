@@ -88,14 +88,14 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { customerSchema, type CustomerFormData } from '@_utils/validation-schemas'
-import { useFormSubmit } from '@_hooks/useFormSubmit'
+import { customerSchema, type CustomerFormData } from '@_core'
+import { useFormSubmit } from '@_shared'
 import FormInput from './FormInput'
 import FormCheckbox from './FormCheckbox'
 import Button from '../ui/Button'
 import Company from '@_classes/Company'
 import Address from '@_classes/common/Address'
-import API from '@_services/api'
+import { API } from '@_shared'
 import { useParams } from 'next/navigation'
 
 /**

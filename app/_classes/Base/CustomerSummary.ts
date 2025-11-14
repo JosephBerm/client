@@ -137,3 +137,4 @@ class OverviewDetail {
 export { CustomerSummary, OverviewDetail }
 
 export default CustomerSummary
+

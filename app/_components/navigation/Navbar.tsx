@@ -40,12 +40,12 @@
 
 import Link from 'next/link'
 import { Menu, ShoppingCart, X, User, LogOut, Home, Info, Store, Mail, Settings } from 'lucide-react'
-import { useCartStore } from '@_stores/useCartStore'
-import { useAuthStore } from '@_stores/useAuthStore'
+import { useCartStore } from '@_features/cart'
+import { useAuthStore } from '@_features/auth'
 import { useState, useEffect, useRef } from 'react'
-import Routes from '@_services/routes'
+import { Routes } from '@_features/navigation'
 import SettingsModal from '@_components/settings/SettingsModal'
-import { useMediaQuery } from '@_hooks/useMediaQuery'
+import { useMediaQuery } from '@_shared'
 
 /**
  * Navbar component props interface.

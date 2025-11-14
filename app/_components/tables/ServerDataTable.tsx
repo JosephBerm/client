@@ -100,8 +100,7 @@
 import { ReactNode, useMemo } from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import DataTable from './DataTable'
-import { useServerTable } from '@_hooks/useServerTable'
-import { createServerTableFetcher } from '@_utils/table-helpers'
+import { createServerTableFetcher, useServerTable } from '@_shared'
 
 /**
  * ServerDataTable component props interface.

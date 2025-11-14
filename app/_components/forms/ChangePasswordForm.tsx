@@ -53,12 +53,12 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { changePasswordSchema, type ChangePasswordFormData } from '@_utils/validation-schemas'
-import { useFormSubmit } from '@_hooks/useFormSubmit'
+import { changePasswordSchema, type ChangePasswordFormData } from '@_core'
+import { useFormSubmit } from '@_shared'
 import FormInput from './FormInput'
 import Button from '../ui/Button'
 import type { IUser } from '@_classes/User'
-import API from '@_services/api'
+import { API } from '@_shared'
 import { toast } from 'react-toastify'
 
 /**

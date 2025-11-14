@@ -61,8 +61,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import classNames from 'classnames'
-import { useAuthStore } from '@_stores/useAuthStore'
-import { useMediaQuery } from '@_hooks/useMediaQuery'
+import { useAuthStore } from '@_features/auth'
+import { useMediaQuery } from '@_shared'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 

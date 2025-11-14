@@ -372,3 +372,4 @@ export default class Address {
         return Object.keys(new Address()) as (keyof Address)[];
     }
 }
+

@@ -67,11 +67,8 @@ import { useState, forwardRef, ImgHTMLAttributes, useEffect } from 'react'
 import Image from 'next/image'
 import classNames from 'classnames'
 import { Package } from 'lucide-react'
-import { logger } from '@_utils/logger'
-import { getBlurDataUrl } from '@_utils/imageUtils'
-import { useImageError } from '@_hooks/useImageError'
-import ImageLoadingState from '@_components/ui/ImageLoadingState'
-import { useImageAnalytics } from '@_hooks/useImageAnalytics'
+import { logger } from '@_core'
+import { getBlurDataUrl, useImageError, ImageLoadingState, useImageAnalytics } from '@_features/images'
 
 /**
  * OptimizedImage component props interface.

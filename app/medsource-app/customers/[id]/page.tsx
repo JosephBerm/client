@@ -14,8 +14,8 @@ import RoleBadge from '@_components/common/RoleBadge'
 import Company from '@_classes/Company'
 import User from '@_classes/User'
 import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
-import API from '@_services/api'
-import Routes from '@_services/routes'
+import { API } from '@_shared'
+import { Routes } from '@_features/navigation'
 
 const Page = () => {
 	const params = useParams<{ id?: string }>()

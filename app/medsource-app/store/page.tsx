@@ -11,10 +11,10 @@ import ClientPageLayout from '@_components/layouts/ClientPageLayout'
 import Button from '@_components/ui/Button'
 import Badge from '@_components/ui/Badge'
 import Modal from '@_components/ui/Modal'
-import { formatDate, formatCurrency } from '@_utils/table-helpers'
+import { formatDate, formatCurrency } from '@_shared'
 import type { Product } from '@_classes/Product'
-import API from '@_services/api'
-import Routes from '@_services/routes'
+import { API } from '@_shared'
+import { Routes } from '@_features/navigation'
 
 export default function StorePage() {
   const router = useRouter()
@@ -187,3 +187,4 @@ export default function StorePage() {
     </>
   )
 }
+

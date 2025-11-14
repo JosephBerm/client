@@ -5,7 +5,7 @@ import ClientPageLayout from '@_components/layouts/ClientPageLayout'
 import Button from '@_components/ui/Button'
 import FinanceNumbers from '@_classes/FinanceNumbers'
 import FinanceSearchFilter from '@_classes/FinanceSearchFilter'
-import API from '@_services/api'
+import { API } from '@_shared'
 
 const TIME_RANGES = ['7d', '30d', '90d', '1y', 'custom'] as const
 type TimeRange = (typeof TIME_RANGES)[number]
@@ -365,3 +365,4 @@ const Page = () => {
 }
 
 export default Page
+

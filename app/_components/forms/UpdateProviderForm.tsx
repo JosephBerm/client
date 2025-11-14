@@ -88,13 +88,13 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { providerSchema, type ProviderFormData } from '@_utils/validation-schemas'
-import { useFormSubmit } from '@_hooks/useFormSubmit'
+import { providerSchema, type ProviderFormData } from '@_core'
+import { useFormSubmit } from '@_shared'
 import FormInput from './FormInput'
 import Button from '../ui/Button'
 import Provider from '@_classes/Provider'
 import Address from '@_classes/common/Address'
-import API from '@_services/api'
+import { API } from '@_shared'
 import { useParams } from 'next/navigation'
 
 /**

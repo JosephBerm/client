@@ -22,7 +22,7 @@
  * @example
  * ```tsx
  * import FormInput from '@_components/forms/FormInput';
- * import { useZodForm } from '@_hooks/useZodForm';
+ * import { useZodForm } from '@_shared';
  * import { z } from 'zod';
  * 
  * const schema = z.object({

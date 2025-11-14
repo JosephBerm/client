@@ -32,8 +32,8 @@ import { Package, Warehouse, Heart, Eye } from 'lucide-react'
 import { Product } from '@_classes/Product'
 import Button from '@_components/ui/Button'
 import ProductImage from '@_components/store/ProductImage'
-import Routes from '@_services/routes'
-import { ImagePreloadService } from '@_services/ImagePreloadService'
+import { Routes } from '@_features/navigation'
+import { ImagePreloadService } from '@_features/images'
 
 export interface ProductCardProps {
 	/** Product data to display */

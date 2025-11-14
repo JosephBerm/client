@@ -6,8 +6,8 @@ import Card from '@_components/ui/Card'
 import Badge from '@_components/ui/Badge'
 import ProductImageGallery from '@_components/store/ProductImageGallery'
 import { Product } from '@_classes/Product'
-import API from '@_services/api'
-import Routes from '@_services/routes'
+import { API } from '@_shared'
+import { Routes } from '@_features/navigation'
 
 interface ProductPageParams {
 	params: {

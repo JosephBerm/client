@@ -45,7 +45,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { logger } from '@_utils/logger'
+import { logger } from '@_core'
 
 /**
  * ServiceWorkerRegistration Component

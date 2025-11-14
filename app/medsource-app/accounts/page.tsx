@@ -11,8 +11,8 @@ import PageLayout from '@_components/layouts/PageLayout'
 import Button from '@_components/ui/Button'
 import Modal from '@_components/ui/Modal'
 import RoleBadge from '@_components/common/RoleBadge'
-import { createServerTableFetcher, formatDate } from '@_utils/table-helpers'
-import API from '@_services/api'
+import { createServerTableFetcher, formatDate } from '@_shared'
+import { API } from '@_shared'
 import { useState } from 'react'
 
 interface Account {
@@ -166,3 +166,4 @@ export default function AccountsPage() {
 		</>
 	)
 }
+

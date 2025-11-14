@@ -60,7 +60,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useUserSettingsStore } from '@_stores/useUserSettingsStore'
+import { useUserSettingsStore } from '@_features/settings'
 
 /**
  * UserSettingsInitializer Component

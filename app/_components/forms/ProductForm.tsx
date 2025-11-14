@@ -86,17 +86,17 @@
 import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { productSchema, type ProductFormData } from '@_utils/validation-schemas'
-import { useFormSubmit } from '@_hooks/useFormSubmit'
+import { productSchema, type ProductFormData } from '@_core'
+import { useFormSubmit } from '@_shared'
 import FormInput from './FormInput'
 import FormTextArea from './FormTextArea'
 import FormSelect from './FormSelect'
 import Button from '../ui/Button'
 import { Product } from '@_classes/Product'
 import type Provider from '@_classes/Provider'
-import API from '@_services/api'
+import { API } from '@_shared'
 import { useParams, useRouter } from 'next/navigation'
-import Routes from '@_services/routes'
+import { Routes } from '@_features/navigation'
 
 /**
  * ProductForm component props interface.

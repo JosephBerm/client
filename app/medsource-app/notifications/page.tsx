@@ -9,8 +9,8 @@ import DataTable from '@_components/tables/DataTable'
 import Badge from '@_components/ui/Badge'
 import Notification from '@_classes/Notification'
 import { NotificationType } from '@_classes/Enums'
-import { useAuthStore } from '@_stores/useAuthStore'
-import { formatDate } from '@_utils/table-helpers'
+import { useAuthStore } from '@_features/auth'
+import { formatDate } from '@_shared'
 
 const TYPE_VARIANT: Record<NotificationType, { label: string; variant: 'info' | 'warning' | 'error' }> = {
 	[NotificationType.Info]: { label: 'Info', variant: 'info' },
@@ -93,3 +93,4 @@ export default function NotificationsPage() {
 		</ClientPageLayout>
 	)
 }
+

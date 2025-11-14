@@ -4,14 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CheckCircle } from 'lucide-react'
-import { useZodForm } from '@_hooks/useZodForm'
-import { contactSchema, type ContactFormData } from '@_utils/validation-schemas'
-import { useAuthStore } from '@_stores/useAuthStore'
+import { useZodForm } from '@_shared'
+import { contactSchema, type ContactFormData } from '@_core'
+import { useAuthStore } from '@_features/auth'
 import FormInput from '@_components/forms/FormInput'
 import FormTextArea from '@_components/forms/FormTextArea'
 import Button from '@_components/ui/Button'
 import PageContainer from '@_components/layouts/PageContainer'
-import API from '@_services/api'
+import { API } from '@_shared'
 import ContactRequest from '@_classes/ContactRequest'
 import Name from '@_classes/common/Name'
 
@@ -234,3 +234,4 @@ export default function ContactPage() {
 		</PageContainer>
 	)
 }
+

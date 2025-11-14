@@ -91,3 +91,4 @@ export class GenericSearchFilter {
 		delete this.filters[key]
 	}
 }
+

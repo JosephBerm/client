@@ -49,7 +49,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useAuthStore } from '@_stores/useAuthStore'
+import { useAuthStore } from '@_features/auth'
 
 /**
  * AuthInitializer Component

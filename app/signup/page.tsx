@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { toast } from 'react-toastify'
-import { useZodForm } from '@_hooks/useZodForm'
-import { signupSchema, type SignupFormData } from '@_utils/validation-schemas'
-import { signup } from '@_services/AuthService'
+import { useZodForm } from '@_shared'
+import { signupSchema, type SignupFormData } from '@_core'
+import { signup } from '@_features/auth'
 import FormInput from '@_components/forms/FormInput'
 import FormCheckbox from '@_components/forms/FormCheckbox'
 import Button from '@_components/ui/Button'
@@ -200,3 +200,4 @@ export default function SignupPage() {
 		</div>
 	)
 }
+

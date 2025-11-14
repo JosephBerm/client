@@ -8,8 +8,8 @@ import ClientPageLayout from '@_components/layouts/ClientPageLayout'
 import Card from '@_components/ui/Card'
 import ProductForm from '@_components/forms/ProductForm'
 import { Product } from '@_classes/Product'
-import API from '@_services/api'
-import Routes from '@_services/routes'
+import { API } from '@_shared'
+import { Routes } from '@_features/navigation'
 
 export default function ManageProductPage() {
 	const params = useParams<{ id?: string }>()

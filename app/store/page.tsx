@@ -16,8 +16,8 @@ import ProductsCategory, { sanitizeCategoriesList } from '@_classes/ProductsCate
 import { Product } from '@_classes/Product'
 import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import { PagedResult } from '@_classes/Base/PagedResult'
-import API from '@_services/api'
-import { useDebounce } from '@_hooks/useDebounce'
+import { API } from '@_shared'
+import { useDebounce } from '@_shared'
 
 type RetrievalOverrides = {
 	search?: string
@@ -550,4 +550,5 @@ const Page = () => (
 )
 
 export default Page
+
 

@@ -10,9 +10,9 @@ import Badge from '@_components/ui/Badge'
 import OrderStatusBadge, { OrderStatus as BadgeOrderStatus } from '@_components/common/OrderStatusBadge'
 import Order from '@_classes/Order'
 import { OrderStatus as DomainOrderStatus } from '@_classes/Enums'
-import API from '@_services/api'
-import Routes from '@_services/routes'
-import { formatCurrency, formatDate } from '@_utils/table-helpers'
+import { API } from '@_shared'
+import { Routes } from '@_features/navigation'
+import { formatCurrency, formatDate } from '@_shared'
 
 export default function OrderDetailsPage() {
 	const params = useParams<{ id?: string }>()

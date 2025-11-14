@@ -70,12 +70,12 @@ import DataTable from './DataTable'
 import Button from '@_components/ui/Button'
 import Badge from '@_components/ui/Badge'
 import OrderStatusBadge from '@_components/common/OrderStatusBadge'
-import { formatDate, formatCurrency } from '@_utils/table-helpers'
-import { useAuthStore } from '@_stores/useAuthStore'
+import { formatDate, formatCurrency } from '@_shared'
+import { useAuthStore } from '@_features/auth'
 import Order from '@_classes/Order'
-import API from '@_services/api'
+import { API } from '@_shared'
 import { toast } from 'react-toastify'
-import Routes from '@_services/routes'
+import { Routes } from '@_features/navigation'
 
 /**
  * AccountOrdersTable Component

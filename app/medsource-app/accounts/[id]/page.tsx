@@ -12,8 +12,8 @@ import UpdateAccountForm from '@_components/forms/UpdateAccountForm'
 import RoleBadge from '@_components/common/RoleBadge'
 import Card from '@_components/ui/Card'
 import User from '@_classes/User'
-import API from '@_services/api'
-import Routes from '@_services/routes'
+import { API } from '@_shared'
+import { Routes } from '@_features/navigation'
 
 const Page = () => {
 	const params = useParams<{ id?: string }>()

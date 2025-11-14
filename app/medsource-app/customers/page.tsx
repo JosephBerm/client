@@ -10,10 +10,10 @@ import ServerDataTable from '@_components/tables/ServerDataTable'
 import ClientPageLayout from '@_components/layouts/ClientPageLayout'
 import Button from '@_components/ui/Button'
 import Modal from '@_components/ui/Modal'
-import { formatDate } from '@_utils/table-helpers'
-import API from '@_services/api'
+import { formatDate } from '@_shared'
+import { API } from '@_shared'
 import type Company from '@_classes/Company'
-import Routes from '@_services/routes'
+import { Routes } from '@_features/navigation'
 
 export default function CustomersPage() {
   const router = useRouter()
@@ -160,3 +160,4 @@ export default function CustomersPage() {
     </>
   )
 }
+

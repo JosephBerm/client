@@ -59,7 +59,7 @@
 
 import { useRef, ReactNode } from 'react'
 import { X } from 'lucide-react'
-import { useModal } from '@_hooks/useModal'
+import { useModal } from '@_shared'
 
 /**
  * Modal component props interface.

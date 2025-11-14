@@ -8,7 +8,7 @@ import type { ComponentType } from 'react'
 import Card from '@_components/ui/Card'
 import Badge from '@_components/ui/Badge'
 import RoleBadge from '@_components/common/RoleBadge'
-import { useAuthStore } from '@_stores/useAuthStore'
+import { useAuthStore } from '@_features/auth'
 
 const MULTI_LINE_INFO_CLASS = 'text-sm text-base-content/70'
 
