@@ -283,8 +283,6 @@ const StorePageContent = () => {
 	 * - Searching with insufficient characters
 	 * - Input focus loss during search
 	 */
-	// 🎨 TEMPORARY: Disabled to show skeleton loaders
-	/*
 	useEffect(() => {
 		// Only search if:
 		// - Search is empty (clear results), OR
@@ -319,7 +317,6 @@ const StorePageContent = () => {
 		})
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [debouncedSearchText, selectedCategories])
-	*/
 	
 	/**
 	 * Restore focus after products update.
@@ -467,37 +464,33 @@ const StorePageContent = () => {
 				<main className="flex-1">
 					{/* Products Grid - Responsive breakpoints optimized for card size */}
 					<div className="grid gap-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-						{/* 🎨 TEMPORARY: Always show skeleton loaders */}
-						<ProductCardSkeleton count={8} />
-
-						{/* Products - TEMPORARILY HIDDEN */}
-						{/* {!isLoading || hasLoaded ? (
-							products.length === 0 ? (
-								<div className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-12 text-center">
-									<p className="text-lg font-semibold text-base-content">No products found</p>
-									<p className="mt-2 text-base text-base-content/70">
-										{isFiltered
-											? 'No products match the current filters. Try adjusting your search or filters.'
-											: 'Products will appear here once available.'}
-									</p>
-									{isFiltered && (
-										<Button variant="primary" size="sm" onClick={clearFilters} className="mt-4">
-											Reset Filters
-										</Button>
-									)}
-								</div>
-							) : (
-								products.map((product, index) => (
-									<ProductCard
-										key={product.id}
-										product={product}
-										showWishlist={false}
-										showQuickView={false}
-										priority={index < 8} // Priority loading for first 8 images (above the fold)
-									/>
-								))
-							)
-						) : null} */}
+						{isLoading && !hasLoaded ? (
+							<ProductCardSkeleton count={currentPageSize} />
+						) : products.length === 0 ? (
+							<div className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-12 text-center">
+								<p className="text-lg font-semibold text-base-content">No products found</p>
+								<p className="mt-2 text-base text-base-content/70">
+									{isFiltered
+										? 'No products match the current filters. Try adjusting your search or filters.'
+										: 'Products will appear here once available.'}
+								</p>
+								{isFiltered && (
+									<Button variant="primary" size="sm" onClick={clearFilters} className="mt-4">
+										Reset Filters
+									</Button>
+								)}
+							</div>
+						) : (
+							products.map((product, index) => (
+								<ProductCard
+									key={product.id}
+									product={product}
+									showWishlist={false}
+									showQuickView={false}
+									priority={index < 8} // Priority loading for first 8 images (above the fold)
+								/>
+							))
+						)}
 					</div>
 
 					{/* Pagination Controls - Industry Standard */}
