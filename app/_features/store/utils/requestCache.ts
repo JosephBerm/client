@@ -86,13 +86,6 @@ class RequestCacheManager {
 
 		// Case 1: Request is currently in-flight - return existing Promise
 		if (existing && existing.status === 'pending') {
-			if (process.env.NODE_ENV === 'development') {
-				logger.debug('RequestCache: Returning in-flight request', {
-					cacheKey,
-					component,
-					age: Date.now() - existing.timestamp,
-				})
-			}
 			return existing.promise
 		}
 
@@ -104,29 +97,10 @@ class RequestCacheManager {
 			Date.now() - existing.timestamp < ttl &&
 			existing.result !== undefined
 		) {
-			if (process.env.NODE_ENV === 'development') {
-				logger.debug('RequestCache: Returning cached response', {
-					cacheKey,
-					component,
-					age: Date.now() - existing.timestamp,
-				})
-			}
 			return Promise.resolve(existing.result)
 		}
 
 		// Case 3: Make new request
-		if (process.env.NODE_ENV === 'development') {
-			logger.info('RequestCache: Initiating new request', {
-				cacheKey,
-				component,
-				reason: existing
-					? existing.status === 'error'
-						? 'Previous request failed'
-						: 'Cache expired'
-					: 'First request',
-			})
-		}
-
 		// Cancel previous request if it exists (shouldn't happen, but be safe)
 		if (existing) {
 			existing.controller.abort()
@@ -142,26 +116,11 @@ class RequestCacheManager {
 				if (entry) {
 					entry.status = 'success'
 					entry.result = result
-					
-					if (process.env.NODE_ENV === 'development') {
-						logger.debug('RequestCache: Request succeeded', {
-							cacheKey,
-							component,
-							duration: Date.now() - entry.timestamp,
-						})
-					}
 				}
 				return result
 			})
 			.catch((error) => {
 				// Remove from cache on error (allows retry)
-				if (process.env.NODE_ENV === 'development') {
-					logger.debug('RequestCache: Request failed', {
-						cacheKey,
-						component,
-						error: error.message,
-					})
-				}
 				this.cache.delete(cacheKey)
 				throw error
 			})
@@ -186,10 +145,6 @@ class RequestCacheManager {
 		if (entry) {
 			entry.controller.abort()
 			this.cache.delete(cacheKey)
-			
-			if (process.env.NODE_ENV === 'development') {
-				logger.debug('RequestCache: Cache invalidated', { cacheKey })
-			}
 		}
 	}
 
@@ -204,10 +159,6 @@ class RequestCacheManager {
 		})
 		
 		this.cache.clear()
-		
-		if (process.env.NODE_ENV === 'development') {
-			logger.debug('RequestCache: All cache cleared')
-		}
 	}
 
 	/**
@@ -260,13 +211,6 @@ class RequestCacheManager {
 				entry.controller.abort()
 				this.cache.delete(key)
 			})
-			
-			if (process.env.NODE_ENV === 'development') {
-				logger.debug('RequestCache: Cleaned up old entries', {
-					removed: toRemove.length,
-					remaining: this.cache.size,
-				})
-			}
 		}
 	}
 }

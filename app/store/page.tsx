@@ -84,41 +84,6 @@ interface RetrievalOverrides {
  */
 const StorePageContent = () => {
 	// ============================================================================
-	// COMPONENT LIFECYCLE LOGGING (FAANG DEBUGGING PATTERN)
-	// ============================================================================
-	
-	// Generate unique component ID for tracking mount/unmount
-	const componentId = useRef(`StorePageContent-${Math.random().toString(36).substr(2, 9)}`)
-	const mountTimestamp = useRef(Date.now())
-	const isFirstRender = useRef(true)
-	
-	// Log mount (only once per actual mount, not on every render)
-	useEffect(() => {
-		if (isFirstRender.current && process.env.NODE_ENV === 'development') {
-			logger.info('🔵 [StorePageContent] Component MOUNTED', {
-				componentId: componentId.current,
-				url: typeof window !== 'undefined' ? window.location.href : 'SSR',
-			})
-			isFirstRender.current = false
-		}
-	}, [])
-	
-	// Log unmount
-	useEffect(() => {
-		const id = componentId.current
-		const mountTime = mountTimestamp.current
-		
-		return () => {
-			if (process.env.NODE_ENV === 'development') {
-				logger.info('🔴 [StorePageContent] Component UNMOUNTED', {
-					componentId: id,
-					lifetime: `${Date.now() - mountTime}ms`,
-				})
-			}
-		}
-	}, [])
-	
-	// ============================================================================
 	// STATE MANAGEMENT
 	// ============================================================================
 	
@@ -266,13 +231,6 @@ const StorePageContent = () => {
 	 */
 	const fetchCategories = useCallback(async () => {
 		const cacheKey = createCacheKey('/Products/categories/clean')
-		
-		if (process.env.NODE_ENV === 'development') {
-			logger.info('📥 [fetchCategories] Requesting categories', {
-				componentId: componentId.current,
-				cacheKey,
-			})
-		}
 
 		return requestCache.execute(
 			cacheKey,
@@ -280,15 +238,7 @@ const StorePageContent = () => {
 				try {
 					const { data } = await API.Store.Products.getAllCategories()
 
-					// Check if request was aborted before processing response
-					if (signal?.aborted) {
-						if (process.env.NODE_ENV === 'development') {
-							logger.debug('📥 [fetchCategories] Request aborted', {
-								componentId: componentId.current,
-							})
-						}
-						return []
-					}
+					if (signal?.aborted) return []
 
 					if (!data.payload || data.statusCode !== 200) {
 						toast.error(data.message ?? 'Unable to load categories', {
@@ -302,40 +252,29 @@ const StorePageContent = () => {
 						(category: Partial<ProductsCategory>) => new ProductsCategory(category)
 					)
 					const sanitized = sanitizeCategoriesList(categoryInstances)
-					
-					if (process.env.NODE_ENV === 'development') {
-						logger.info('✅ [fetchCategories] Categories loaded', {
-							componentId: componentId.current,
-							count: sanitized.length,
-							withChildren: sanitized.filter(c => c.subCategories && c.subCategories.length > 0).length,
-						})
-					}
 
 					// Update state
 					setCategories(sanitized)
 					return sanitized
 				} catch (err) {
-					// Don't show error if request was aborted
 					if (signal?.aborted) return []
 					
 					const message = err instanceof Error ? err.message : 'An unexpected error occurred while loading categories'
-					logger.error('❌ [fetchCategories] Error', {
-						componentId: componentId.current,
-						error: err,
-					})
+					logger.error('Store page - Category fetch error', { error: err })
 					toast.error(message, {
 						position: 'top-right',
 						autoClose: 4000,
 					})
-					throw err // Re-throw to mark as failed in cache
+					throw err
 				}
 			},
 			{
 				component: 'StorePageContent',
-				ttl: 5000, // Cache for 5 seconds
+				ttl: 5000,
 			}
 		)
-	}, [setCategories])
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [])
 
 	/**
 	 * Retrieves products from API based on search criteria
@@ -431,7 +370,8 @@ const StorePageContent = () => {
 		} finally {
 			setLoading(false)
 		}
-	}, [searchText, selectedCategories, currentSort, setLoading, setProducts, resetProducts])
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [])
 
 	// ============================================================================
 	// EVENT HANDLERS
@@ -560,39 +500,19 @@ const StorePageContent = () => {
 		}
 	}, [])
 
-	// Initial data fetch - categories (FAANG best practice: explicit initial fetch)
-	// FIXED: Removed fetchCategories from dependencies + uses global cache
+	// Initial data fetch - categories
 	useEffect(() => {
-		if (process.env.NODE_ENV === 'development') {
-			logger.info('🔄 [useEffect:categories] Triggering category fetch', {
-				componentId: componentId.current,
-			})
-		}
-		
 		void fetchCategories()
-		
-		// No cleanup needed - global cache handles abort
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
-	// Initial product fetch on mount (FAANG best practice: explicit initial data load)
-	// FIXED: Removed retrieveProducts from dependencies + uses global cache
+	// Initial product fetch on mount
 	useEffect(() => {
 		const initialCriteria = createInitialFilter()
 		
-		if (process.env.NODE_ENV === 'development') {
-			logger.info('🔄 [useEffect:initialProducts] Triggering initial product fetch', {
-				componentId: componentId.current,
-			})
-		}
-		
 		setSearchCriteriaAction(initialCriteria)
 		void retrieveProducts(initialCriteria, undefined)
-		
-		// No cleanup needed - global cache handles abort
-		// Only run on mount - initial data fetch
-		// Empty dependency array ensures this runs ONLY ONCE on mount
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
 	useEffect(() => {
@@ -652,40 +572,18 @@ const StorePageContent = () => {
 		
 		// Skip if this exact request is already pending or just completed
 		if (lastRequestKeyRef.current === requestKey && pendingRequestRef.current) {
-			if (process.env.NODE_ENV === 'development') {
-				logger.debug('Store: Skipping duplicate API request', {
-					requestKey,
-					reason: 'Same parameters as pending/recent request'
-				})
-			}
 			return
 		}
 		
 		// Cancel any pending request before starting new one
 		if (pendingRequestRef.current) {
 			pendingRequestRef.current.abort()
-			if (process.env.NODE_ENV === 'development') {
-				logger.debug('Store: Cancelled previous API request', {
-					previousKey: lastRequestKeyRef.current,
-					newKey: requestKey
-				})
-			}
 		}
 		
 		// Create new abort controller for this request
 		const abortController = new AbortController()
 		pendingRequestRef.current = abortController
 		lastRequestKeyRef.current = requestKey
-		
-		if (process.env.NODE_ENV === 'development') {
-			logger.info('Store: Initiating product search', {
-				searchText: debouncedSearchText,
-				categoriesCount: selectedCategories.length,
-				sort: currentSort,
-				pageSize: currentPageSize,
-				requestKey
-			})
-		}
 
 		// Mark that we should maintain focus if input is currently focused
 		const currentInput = searchInputRef.current
