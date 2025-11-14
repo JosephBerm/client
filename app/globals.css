@@ -646,80 +646,58 @@
 	.inline-link:hover::after {
 		width: 100%;
 }
+}
 
-/* ========================================
-	   Skeleton Loader Animations - REMOVED
-   ======================================== */
-	/* Old implementation removed - See triple-layer system below (lines 684+) */
+/* ============================================================
+ * SKELETON LOADING ANIMATIONS - Tailwind v4 + DaisyUI 5 Compatible
+ * ============================================================
+ * 
+ * Triple-layer animation system for FAANG-standard loading states
+ * Keyframes first, then utilities in @layer utilities
+ */
 
-	/* ============================================================
-	 * SKELETON LOADING ANIMATIONS - Industry Standard Implementation
-	 * ============================================================
-	 * 
-	 * Triple-layer animation system inspired by FAANG companies:
-	 * 1. PULSE: Pronounced breathing effect (LinkedIn/Facebook pattern)
-	 * 2. SHIMMER: Gradient wave sweep (Google Material Design)
-	 * 3. GLOW: Subtle brightness shift (Premium feel)
-	 * 
-	 * Performance: GPU-accelerated only (opacity, transform, filter)
-	 * Accessibility: Respects prefers-reduced-motion
-	 * Compatibility: Works globally with .skeleton-shimmer class
-	 * 
-	 * @see https://web.dev/patterns/animation/skeleton/
-	 */
-	
-	/* Keyframe: Pronounced pulse effect - Opacity 1 → 0.5 → 1 */
-	@keyframes skeleton-pulse {
-		0%, 100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0.5;
-		}
+/* Keyframe Definitions - Must be at root level */
+@keyframes skeleton-pulse {
+	0%, 100% {
+		opacity: 1;
 	}
-
-	/* Keyframe: Shimmer wave effect - Sweeps left to right */
-	@keyframes skeleton-shimmer-wave {
-		0% {
-			transform: translateX(-100%);
-		}
-		100% {
-			transform: translateX(100%);
-		}
+	50% {
+		opacity: 0.5;
 	}
+}
 
-	/* Keyframe: Subtle glow effect - Brightness variation */
-	@keyframes skeleton-glow {
-		0%, 100% {
-			filter: brightness(1);
-		}
-		50% {
-			filter: brightness(1.05);
-		}
+@keyframes skeleton-shimmer-wave {
+	0% {
+		transform: translateX(-100%);
 	}
+	100% {
+		transform: translateX(100%);
+	}
+}
 
-	/* Base skeleton element with dual animation */
+@keyframes skeleton-glow {
+	0%, 100% {
+		filter: brightness(1);
+	}
+	50% {
+		filter: brightness(1.05);
+	}
+}
+
+/* Utility Classes in @layer utilities for proper cascade */
+@layer utilities {
 	.skeleton-shimmer {
-		position: relative;
-		overflow: hidden;
-		background: oklch(var(--b2));
-		
-		/* Triple animation: pulse + glow for pronounced effect */
-		animation: 
-			skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite,
-			skeleton-glow 2s ease-in-out infinite;
-		
-		/* Optimize for GPU rendering */
-		will-change: opacity, filter;
+		position: relative !important;
+		overflow: hidden !important;
+		background: oklch(var(--b2) / 1) !important;
+		animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite, skeleton-glow 2s ease-in-out infinite !important;
+		will-change: opacity, filter !important;
 	}
-
-	/* Shimmer overlay - Creates the wave effect */
+	
 	.skeleton-shimmer::after {
-		content: '';
-		position: absolute;
-		inset: 0;
-		
-		/* Enhanced gradient for more visibility */
+		content: '' !important;
+		position: absolute !important;
+		inset: 0 !important;
 		background: linear-gradient(
 			90deg,
 			rgba(255, 255, 255, 0) 0%,
@@ -729,19 +707,13 @@
 			rgba(255, 255, 255, 0.2) 60%,
 			rgba(255, 255, 255, 0.1) 80%,
 			rgba(255, 255, 255, 0) 100%
-		);
-		
-		/* Shimmer animation */
-		animation: skeleton-shimmer-wave 2s ease-in-out infinite;
-		
-		/* GPU optimization */
-		will-change: transform;
-		
-		/* Ensure shimmer is above base but below content */
-		z-index: 1;
+		) !important;
+		animation: skeleton-shimmer-wave 2s ease-in-out infinite !important;
+		will-change: transform !important;
+		z-index: 1 !important;
 	}
-
-	/* Dark mode enhancement - Slightly different gradient for better visibility */
+	
+	/* Dark mode - adjusted gradient */
 	@media (prefers-color-scheme: dark) {
 		.skeleton-shimmer::after {
 			background: linear-gradient(
@@ -753,19 +725,19 @@
 				rgba(255, 255, 255, 0.1) 60%,
 				rgba(255, 255, 255, 0.05) 80%,
 				rgba(255, 255, 255, 0) 100%
-			);
+			) !important;
 		}
 	}
-
-	/* Accessibility: Respect reduced motion preference */
+	
+	/* Reduced motion preference */
 	@media (prefers-reduced-motion: reduce) {
 		.skeleton-shimmer {
-			animation: skeleton-pulse 3s ease-in-out infinite;
+			animation: skeleton-pulse 3s ease-in-out infinite !important;
 		}
 		
 		.skeleton-shimmer::after {
-			animation: none;
-			opacity: 0.3;
+			animation: none !important;
+			opacity: 0.3 !important;
 		}
 	}
 }
