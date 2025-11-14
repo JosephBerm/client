@@ -7,5 +7,4 @@
  */
 
 export * from './table-helpers'
-export * from './productUtils'
 

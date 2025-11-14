@@ -35,8 +35,6 @@ const StorePageContent = () => {
 	const [searchText, setSearchText] = useState('')
 	const [searchCriteria, setSearchCriteria] = useState<GenericSearchFilter>(INITIAL_FILTER)
 	const [productsResult, setProductsResult] = useState<PagedResult<Product>>(new PagedResult<Product>())
-	
-	// 🎨 TEMPORARY: Force skeleton loaders to show
 	const [isLoading, setIsLoading] = useState(true)
 	const [hasLoaded, setHasLoaded] = useState(false)
 	const [currentSort, setCurrentSort] = useState('relevance')
@@ -112,8 +110,7 @@ const StorePageContent = () => {
 		const searchValue = overrides?.search ?? searchText
 		const categoriesValue = overrides?.categories ?? selectedCategories
 
-		// 🎨 TEMPORARY: Disabled to keep skeleton loaders showing
-		// setIsLoading(true)
+		setIsLoading(true)
 
 		try {
 			if (!isEmpty(searchValue) && searchValue.length > 2) {
@@ -179,9 +176,8 @@ const StorePageContent = () => {
 			setProductsResult(new PagedResult<Product>())
 			return []
 		} finally {
-			// 🎨 TEMPORARY: Disabled to keep skeleton loaders showing
-			// setIsLoading(false)
-			// setHasLoaded(true)
+			setIsLoading(false)
+			setHasLoaded(true)
 		}
 	}
 
@@ -259,10 +255,9 @@ const StorePageContent = () => {
 		void retrieveProducts(resetFilter, { search: '', categories: [] })
 	}
 
-	// 🎨 TEMPORARY: Disabled to show skeleton loaders
-	// useEffect(() => {
-	// 	void fetchCategories()
-	// }, [])
+	useEffect(() => {
+		void fetchCategories()
+	}, [])
 
 	useEffect(() => {
 		const querySearchText = searchParams.get('search')

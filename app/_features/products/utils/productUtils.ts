@@ -1,13 +1,13 @@
 /**
- * Product Utilities - Shared Product-Related Functions
+ * Product Utilities - Product-Related Utility Functions
  * 
  * Centralized utility functions for product-related operations.
- * Follows DRY principle and ensures consistency across components.
+ * Part of the Products feature module.
  * 
  * **Functions:**
  * - `getStockStatus()` - Get stock status configuration for Badge component
  * 
- * @module productUtils
+ * @module products/utils
  */
 
 import type { BadgeProps } from '@_components/ui/Badge'
@@ -41,6 +41,8 @@ export interface StockStatusConfig {
  * 
  * @example
  * ```typescript
+ * import { getStockStatus } from '@_features/products';
+ * 
  * const status = getStockStatus(5);
  * // Returns: { label: 'Low Stock', variant: 'warning', tone: 'solid', size: 'sm' }
  * 

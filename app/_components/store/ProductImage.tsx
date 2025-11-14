@@ -49,7 +49,7 @@ import { useState, useEffect } from 'react'
 import { Product } from '@_classes/Product'
 import { OptimizedImage, ImagePlaceholder, getProductImageUrl, useImageError, useImageAnalytics } from '@_features/images'
 import Badge from '@_components/ui/Badge'
-import { getStockStatus } from '@_shared'
+import { getStockStatus } from '@_features/products'
 import { logger } from '@_core'
 
 /**
