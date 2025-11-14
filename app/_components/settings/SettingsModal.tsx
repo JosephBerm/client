@@ -39,7 +39,7 @@ import { X } from 'lucide-react'
 import SettingRow from './SettingRow'
 import Button from '@_components/ui/Button'
 import { getSettingsSections } from '@_services/SettingsService'
-import { useFocusTrap } from '@_hooks/useFocusTrap'
+import { useModal } from '@_hooks/useModal'
 
 /**
  * Settings Modal component props interface.
@@ -84,10 +84,9 @@ export default function SettingsModal({
 }: SettingsModalProps) {
 	const sections = getSettingsSections()
 
-	// Refs for focus management
+	// Refs for modal and focus management
 	const modalRef = useRef<HTMLDivElement>(null)
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
-	const previousFocusRef = useRef<HTMLElement | null>(null)
 	const sectionButtonRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
 	const liveRegionRef = useRef<HTMLDivElement>(null)
 
@@ -115,19 +114,14 @@ export default function SettingsModal({
 		return sections.find((s) => s.id === selectedSectionId) || sections[0]
 	}, [sections, selectedSectionId])
 
-	// Store previous focus when modal opens
-	useEffect(() => {
-		if (isOpen) {
-			previousFocusRef.current = document.activeElement as HTMLElement
-		}
-	}, [isOpen])
-
-	// Focus trap - traps focus within modal
-	useFocusTrap(
+	// Common modal behaviors (focus trap, escape key, body scroll lock)
+	useModal(
 		modalRef,
 		isOpen,
-		previousFocusRef,
+		onClose,
 		{
+			closeOnEscape: true,
+			lockBodyScroll: true,
 			initialFocus: closeButtonRef,
 			restoreFocus: true,
 		}
@@ -200,32 +194,6 @@ export default function SettingsModal({
 		return () => window.removeEventListener('keydown', handleKeyDown)
 	}, [isOpen, sections, selectedSectionId])
 
-	// Handle escape key
-	useEffect(() => {
-		if (!isOpen) return
-
-		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') {
-				onClose()
-			}
-		}
-
-		window.addEventListener('keydown', handleEscape)
-		return () => window.removeEventListener('keydown', handleEscape)
-	}, [isOpen, onClose])
-
-	// Prevent body scroll when modal is open
-	useEffect(() => {
-		if (isOpen) {
-			document.body.style.overflow = 'hidden'
-		} else {
-			document.body.style.overflow = ''
-		}
-
-		return () => {
-			document.body.style.overflow = ''
-		}
-	}, [isOpen])
 
 	if (!isOpen) return null
 
@@ -240,26 +208,26 @@ export default function SettingsModal({
 				className="sr-only"
 			/>
 
+		<div
+			className="fixed inset-0 z-[100] flex items-center justify-center sm:p-4"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="settings-modal-title"
+		>
+			{/* Overlay */}
 			<div
-				className="fixed inset-0 z-[100] flex items-center justify-center sm:p-4"
-				role="dialog"
-				aria-modal="true"
-				aria-labelledby="settings-modal-title"
-			>
-				{/* Overlay */}
-				<div
-					className="fixed inset-0 bg-black/50 transition-opacity duration-300"
-					onClick={onClose}
-					aria-hidden="true"
-				/>
+				className="fixed inset-0 bg-black/50 transition-opacity duration-300"
+				onClick={onClose}
+				aria-hidden="true"
+			/>
 
-				{/* Modal Content - Responsive layout */}
-				<div
+			{/* Modal Content - Responsive layout */}
+		<div
 					ref={modalRef}
 					className="relative z-10 bg-base-100 w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:shadow-2xl sm:max-w-2xl md:max-w-3xl lg:max-w-4xl overflow-hidden flex flex-col transform transition-all duration-300 focus:outline-none"
-					onClick={(e) => e.stopPropagation()}
-					tabIndex={-1}
-				>
+			onClick={(e) => e.stopPropagation()}
+			tabIndex={-1}
+		>
 				{/* Header - Mobile: Title + Close | Desktop: Close only */}
 				<div className="flex items-center justify-between p-4 sm:p-5 border-b border-base-300 lg:justify-end">
 					{/* Mobile/Tablet: Section Title */}
@@ -296,10 +264,10 @@ export default function SettingsModal({
 							aria-label="Settings sections"
 						>
 							{sections.map((section, index) => {
-								const Icon = section.icon
-								const isActive = section.id === selectedSectionId
+									const Icon = section.icon
+									const isActive = section.id === selectedSectionId
 
-								return (
+									return (
 									<Button
 										key={section.id}
 										ref={(el) => {
@@ -326,12 +294,12 @@ export default function SettingsModal({
 										aria-selected={isActive}
 										aria-controls={`settings-section-${section.id}`}
 										tabIndex={isActive ? 0 : -1}
-										aria-label={`${section.title} settings section`}
-									>
+												aria-label={`${section.title} settings section`}
+											>
 										{section.title}
 									</Button>
-								)
-							})}
+									)
+								})}
 						</div>
 						</nav>
 

@@ -67,9 +67,6 @@ export const SORT_OPTIONS: SortOption[] = [
  */
 export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100]
 
-// Export types for reuse
-export type { SortOption }
-
 /**
  * Products Toolbar Component Props
  */

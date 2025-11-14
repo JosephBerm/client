@@ -151,7 +151,7 @@ function getLastFocusableElement(container: HTMLElement): HTMLElement | null {
  * @param options - Additional options
  */
 export function useFocusTrap(
-	containerRef: RefObject<HTMLElement>,
+	containerRef: RefObject<HTMLElement | null>,
 	enabled: boolean = true,
 	previousFocusRef?: RefObject<HTMLElement | null>,
 	options: FocusTrapOptions = {}

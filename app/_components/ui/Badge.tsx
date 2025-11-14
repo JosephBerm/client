@@ -1,63 +1,52 @@
 /**
- * Badge UI Component
+ * Badge UI Component - Industry Best Practice
  * 
- * DaisyUI-styled badge component for displaying status indicators, labels, counts, and tags.
- * Provides multiple color variants, sizes, and outline option for diverse use cases.
+ * Modern, powerful badge component for counts, status indicators, labels, and tags.
+ * Built with fixed dimensions, theme awareness, and multiple visual tones.
  * 
  * **Features:**
  * - 8 color variants (primary, secondary, accent, success, warning, error, info, neutral)
+ * - 3 visual tones (default, subtle, solid)
  * - 4 size options (xs, sm, md, lg)
- * - Outline style option
- * - Theme-aware (respects DaisyUI theme)
- * - Inline display (span element)
- * - Customizable with additional classes
+ * - Fixed shape (no morphing between states)
+ * - Theme-aware (respects DaisyUI theme colors)
+ * - Locked dimensions (no size changes on interaction)
+ * - Accessible (proper contrast ratios)
  * 
  * **Use Cases:**
- * - Order status indicators (pending, approved, shipped, delivered)
- * - User role badges (Admin, Customer)
- * - Item counts (Cart: 3 items)
- * - Feature tags (New, Popular, Sale)
- * - Category labels
- * - Notification badges
+ * - Item counts (category counts, cart items, notifications)
+ * - Status indicators (order status, payment status)
+ * - Labels and tags (product tags, feature labels)
+ * - Selection state indicators (selected, partial, default)
  * 
  * @example
  * ```tsx
  * import Badge from '@_components/ui/Badge';
  * 
- * // Status indicators
- * <Badge variant="success">Approved</Badge>
- * <Badge variant="warning">Pending</Badge>
- * <Badge variant="error">Rejected</Badge>
- * <Badge variant="info">In Progress</Badge>
+ * // Count badges (default tone)
+ * <Badge>7</Badge>
+ * <Badge variant="primary">12</Badge>
+ * <Badge variant="accent" size="sm">3</Badge>
+ * 
+ * // Status indicators (solid tone)
+ * <Badge variant="success" tone="solid">Approved</Badge>
+ * <Badge variant="error" tone="solid">Rejected</Badge>
+ * <Badge variant="warning" tone="solid">Pending</Badge>
+ * 
+ * // Subtle highlights (subtle tone)
+ * <Badge variant="primary" tone="subtle">Featured</Badge>
+ * <Badge variant="info" tone="subtle">New</Badge>
  * 
  * // Sizes
- * <Badge size="xs" variant="primary">XS Badge</Badge>
- * <Badge size="sm" variant="primary">Small Badge</Badge>
- * <Badge size="md" variant="primary">Medium Badge</Badge>
- * <Badge size="lg" variant="primary">Large Badge</Badge>
+ * <Badge size="xs">XS</Badge>
+ * <Badge size="sm">SM</Badge>
+ * <Badge size="md">MD</Badge>
+ * <Badge size="lg">LG</Badge>
  * 
- * // Outline style
- * <Badge variant="primary" outline>Outlined</Badge>
- * <Badge variant="success" outline>Outlined Success</Badge>
- * 
- * // Item counts
- * <button className="btn">
- *   Cart
- *   <Badge variant="accent" size="sm">3</Badge>
- * </button>
- * 
- * // User role badge
- * <div className="flex items-center gap-2">
- *   <span>John Doe</span>
- *   <Badge variant="error" size="xs">Admin</Badge>
- * </div>
- * 
- * // Product tags
- * <div className="flex gap-1">
- *   <Badge variant="success" size="sm">New</Badge>
- *   <Badge variant="warning" size="sm">Sale</Badge>
- *   <Badge variant="info" size="sm">Popular</Badge>
- * </div>
+ * // Selection states (CategoryFilter example)
+ * <Badge>4</Badge>                              // Default
+ * <Badge variant="primary" tone="subtle">4</Badge>  // Partial selection
+ * <Badge variant="primary" tone="solid">4</Badge>   // Full selection
  * ```
  * 
  * @module Badge
@@ -69,27 +58,31 @@ import classNames from 'classnames'
 /**
  * Badge component props interface.
  */
-interface BadgeProps {
+export interface BadgeProps {
 	/** Badge content (text, number, icon, etc.) */
 	children: ReactNode
 	
 	/** 
 	 * Badge color variant.
+	 * Determines the color scheme (uses DaisyUI theme colors).
 	 * @default 'neutral'
 	 */
 	variant?: 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error' | 'info' | 'neutral'
 	
 	/** 
-	 * Badge size.
-	 * @default 'md'
+	 * Visual tone/intensity of the badge.
+	 * - **default**: Light background, subtle (e.g., bg-base-300)
+	 * - **subtle**: Variant color with opacity (e.g., bg-primary/20)
+	 * - **solid**: Full variant color (e.g., bg-primary)
+	 * @default 'default'
 	 */
-	size?: 'xs' | 'sm' | 'md' | 'lg'
+	tone?: 'default' | 'subtle' | 'solid'
 	
 	/** 
-	 * Outline style (transparent background with colored border).
-	 * @default false
+	 * Badge size (affects padding and dimensions).
+	 * @default 'sm'
 	 */
-	outline?: boolean
+	size?: 'xs' | 'sm' | 'md' | 'lg'
 	
 	/** Additional custom classes */
 	className?: string
@@ -98,69 +91,75 @@ interface BadgeProps {
 /**
  * Badge Component
  * 
- * Display component for status indicators, labels, counts, and tags.
- * Uses DaisyUI badge classes for consistent theming.
+ * Modern badge component with fixed dimensions and consistent shape.
+ * Shape never changes - only colors adapt to variant and tone.
  * 
- * **Color Variants:**
- * - **primary**: Main brand color, for primary labels
- * - **secondary**: Secondary brand color
- * - **accent**: Accent color for highlights
- * - **success**: Green, for positive states (approved, completed)
- * - **warning**: Yellow/orange, for cautionary states (pending, review)
- * - **error**: Red, for negative states (rejected, failed, admin)
- * - **info**: Blue, for informational states (in progress, processing)
- * - **neutral**: Gray, for neutral states (draft, inactive)
+ * **Design Philosophy:**
+ * - Fixed circular shape (rounded-full)
+ * - Locked minimum dimensions (prevents morphing)
+ * - Theme-aware colors (uses DaisyUI semantic tokens)
+ * - Smooth color transitions only
  * 
- * **Sizes:**
- * - **xs**: Extra small (12px height)
- * - **sm**: Small (16px height)
- * - **md**: Medium (20px height) - default
- * - **lg**: Large (24px height)
- * 
- * **Outline Mode:**
- * - Transparent background with colored border and text
- * - Useful for less prominent badges
+ * **Tone System:**
+ * - **default**: Neutral, subtle presence (bg-base-300)
+ * - **subtle**: Highlighted with opacity (bg-variant/20)
+ * - **solid**: Full color, high prominence (bg-variant)
  * 
  * @param props - Badge configuration props
  * @returns Badge component (span element)
  */
+
+// Base classes - consistent shape, always applied
 const baseClasses =
-	'badge inline-flex items-center justify-center rounded-full font-semibold uppercase tracking-[0.25em] transition-colors'
+	'flex shrink-0 items-center justify-center rounded-full font-semibold transition-colors duration-150'
 
-const variantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
-	primary: 'badge-primary',
-	secondary: 'badge-secondary',
-	accent: 'badge-accent',
-	success: 'badge-success',
-	warning: 'badge-warning',
-	error: 'badge-error',
-	info: 'badge-info',
-	neutral: 'badge-neutral',
-}
-
-const outlineVariantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
-	primary: 'badge-outline badge-primary',
-	secondary: 'badge-outline badge-secondary',
-	accent: 'badge-outline badge-accent',
-	success: 'badge-outline badge-success',
-	warning: 'badge-outline badge-warning',
-	error: 'badge-outline badge-error',
-	info: 'badge-outline badge-info',
-	neutral: 'badge-outline badge-neutral',
-}
-
+// Size classes - fixed dimensions, padding, and text size
 const sizeClasses: Record<NonNullable<BadgeProps['size']>, string> = {
-	xs: 'px-2 py-0.5 text-xs',
-	sm: 'px-2.5 py-1 text-xs',
-	md: 'px-3 py-1 text-sm',
-	lg: 'px-4 py-1.5 text-sm',
+	xs: 'px-2 py-0.5 min-w-[24px] min-h-[20px] text-xs',
+	sm: 'px-2.5 py-1 min-w-[28px] min-h-[24px] text-xs',
+	md: 'px-3 py-1.5 min-w-[32px] min-h-[28px] text-sm',
+	lg: 'px-4 py-2 min-w-[36px] min-h-[32px] text-sm',
 }
+
+// Tone classes - color combinations per variant
+const toneClasses = {
+	default: {
+		primary: 'bg-base-300 text-base-content/60',
+		secondary: 'bg-base-300 text-base-content/60',
+		accent: 'bg-base-300 text-base-content/60',
+		success: 'bg-base-300 text-base-content/60',
+		warning: 'bg-base-300 text-base-content/60',
+		error: 'bg-base-300 text-base-content/60',
+		info: 'bg-base-300 text-base-content/60',
+		neutral: 'bg-base-300 text-base-content/60',
+	},
+	subtle: {
+		primary: 'bg-primary/20 text-primary',
+		secondary: 'bg-secondary/20 text-secondary',
+		accent: 'bg-accent/20 text-accent',
+		success: 'bg-success/20 text-success',
+		warning: 'bg-warning/20 text-warning',
+		error: 'bg-error/20 text-error',
+		info: 'bg-info/20 text-info',
+		neutral: 'bg-neutral/20 text-neutral',
+	},
+	solid: {
+		primary: 'bg-primary text-primary-content',
+		secondary: 'bg-secondary text-secondary-content',
+		accent: 'bg-accent text-accent-content',
+		success: 'bg-success text-success-content',
+		warning: 'bg-warning text-warning-content',
+		error: 'bg-error text-error-content',
+		info: 'bg-info text-info-content',
+		neutral: 'bg-neutral text-neutral-content',
+	},
+} as const
 
 export default function Badge({
 	children,
 	variant = 'neutral',
-	size = 'md',
-	outline = false,
+	tone = 'default',
+	size = 'sm',
 	className,
 }: BadgeProps) {
 	return (
@@ -168,10 +167,7 @@ export default function Badge({
 			className={classNames(
 				baseClasses,
 				sizeClasses[size],
-				outline ? outlineVariantClasses[variant] : variantClasses[variant],
-				{
-					'bg-transparent': outline,
-				},
+				toneClasses[tone][variant],
 				className
 			)}
 		>

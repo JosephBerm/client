@@ -143,8 +143,14 @@ export default function AccountsPage() {
 				isOpen={deleteModal.isOpen}
 				onClose={() => setDeleteModal({ isOpen: false, account: null })}
 				title="Delete Account"
-				footer={
-					<>
+			>
+				<div className="space-y-4">
+					<p>
+						Are you sure you want to delete the account{' '}
+						<strong>{deleteModal.account?.username}</strong>?
+					</p>
+					<p className="text-error text-sm">This action cannot be undone.</p>
+					<div className="flex justify-end gap-4 mt-6">
 						<Button
 							variant="ghost"
 							onClick={() => setDeleteModal({ isOpen: false, account: null })}
@@ -154,14 +160,8 @@ export default function AccountsPage() {
 						<Button variant="error" onClick={handleDelete}>
 							Delete
 						</Button>
-					</>
-				}
-			>
-				<p>
-					Are you sure you want to delete the account{' '}
-					<strong>{deleteModal.account?.username}</strong>?
-				</p>
-				<p className="text-error text-sm mt-2">This action cannot be undone.</p>
+					</div>
+				</div>
 			</Modal>
 		</>
 	)

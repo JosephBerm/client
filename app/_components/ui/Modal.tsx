@@ -57,8 +57,9 @@
 
 'use client'
 
-import { useEffect, useRef, ReactNode } from 'react'
+import { useRef, ReactNode } from 'react'
 import { X } from 'lucide-react'
+import { useModal } from '@_hooks/useModal'
 
 /**
  * Modal component props interface.
@@ -122,7 +123,7 @@ export default function Modal({
 	closeOnEscape = true,
 }: ModalProps) {
 	const modalRef = useRef<HTMLDivElement>(null)
-	const previousActiveElement = useRef<HTMLElement | null>(null)
+	const closeButtonRef = useRef<HTMLButtonElement>(null)
 
 	// Map size prop to Tailwind max-width classes
 	const sizeClasses = {
@@ -135,48 +136,18 @@ export default function Modal({
 		full: 'max-w-full', // Full width with padding
 	}
 
-	// Handle escape key
-	useEffect(() => {
-		if (!isOpen || !closeOnEscape) return
-
-		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') {
-				onClose()
-			}
+	// Common modal behaviors (focus trap, escape key, body scroll lock)
+	useModal(
+		modalRef,
+		isOpen,
+		onClose,
+		{
+			closeOnEscape,
+			lockBodyScroll: true,
+			initialFocus: title ? closeButtonRef : undefined,
+			restoreFocus: true,
 		}
-
-		window.addEventListener('keydown', handleEscape)
-		return () => window.removeEventListener('keydown', handleEscape)
-	}, [isOpen, onClose, closeOnEscape])
-
-	// Focus management
-	useEffect(() => {
-		if (isOpen) {
-			// Store the previously focused element
-			previousActiveElement.current = document.activeElement as HTMLElement
-
-			// Focus the modal when it opens
-			setTimeout(() => {
-				modalRef.current?.focus()
-			}, 100)
-		} else {
-			// Restore focus to the previously focused element
-			previousActiveElement.current?.focus()
-		}
-	}, [isOpen])
-
-	// Prevent body scroll when modal is open
-	useEffect(() => {
-		if (isOpen) {
-			document.body.style.overflow = 'hidden'
-		} else {
-			document.body.style.overflow = ''
-		}
-
-		return () => {
-			document.body.style.overflow = ''
-		}
-	}, [isOpen])
+	)
 
 	if (!isOpen) return null
 
@@ -203,7 +174,7 @@ export default function Modal({
 		{/* Modal Content */}
 		<div
 			ref={modalRef}
-			className={`relative z-10 bg-base-100 rounded-lg shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden flex flex-col transform transition-all duration-300 ${
+			className={`relative z-10 bg-base-100 rounded-lg shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden flex flex-col transform transition-all duration-300 focus:outline-none ${
 				isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
 			}`}
 			onClick={(e) => e.stopPropagation()}
@@ -216,8 +187,9 @@ export default function Modal({
 							{title}
 						</h2>
 						<button
+							ref={closeButtonRef}
 							onClick={onClose}
-							className="btn btn-ghost btn-sm btn-circle"
+							className="btn btn-ghost btn-sm btn-circle focus:outline-2 focus:outline-offset-2 focus:outline-primary"
 							aria-label="Close modal"
 						>
 							<X size={20} />

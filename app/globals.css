@@ -227,7 +227,33 @@
 		font-size: var(--fz-base); /* 16px */
 		line-height: var(--lh-normal);
 		margin: 0;
-		color: oklch(var(--bc)); /* DaisyUI base-content */
+	}
+
+	/* ========================================
+	   Form Field Focus Styles - Industry Best Practice
+	   ======================================== */
+	
+	/**
+	 * Remove default browser outline from form inputs and selects.
+	 * Our custom components provide elegant focus rings via formFieldStyles.
+	 * 
+	 * **Accessibility Note:**
+	 * - We use :focus-visible for keyboard navigation (WCAG 2.1 best practice)
+	 * - Custom focus rings are provided via Tailwind classes in formFieldStyles
+	 * - This ensures consistent, elegant focus indicators across all form fields
+	 * 
+	 * **Implementation:**
+	 * - Removes default browser outline (often inconsistent across browsers)
+	 * - Our Input and Select components handle focus styling via shared formFieldStyles
+	 * - Maintains accessibility with custom focus rings (ring-2, ring-primary/20)
+	 */
+	select:focus,
+	select:focus-visible,
+	select:focus-within,
+	input:focus,
+	input:focus-visible,
+	input:focus-within {
+		outline: none !important;
 	}
 
 	/* ========================================
@@ -462,11 +488,8 @@
 		transition: var(--transition-fast);
 	}
 
-	input:focus,
-	textarea:focus,
-	select:focus {
-		transform: scale(1.01);
-	}
+	/* Removed transform scale on focus - no animation/transformation on focus */
+	/* Focus styling is handled by formFieldStyles for consistent, elegant appearance */
 
 	/* Modern Select Styling - Enhanced */
 	select {

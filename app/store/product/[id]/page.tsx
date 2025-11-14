@@ -1,10 +1,10 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import PageLayout from '@_components/layouts/PageLayout'
 import Card from '@_components/ui/Card'
 import Badge from '@_components/ui/Badge'
+import ProductImageGallery from '@_components/store/ProductImageGallery'
 import { Product } from '@_classes/Product'
 import API from '@_services/api'
 import Routes from '@_services/routes'
@@ -14,8 +14,6 @@ interface ProductPageParams {
 		id: string
 	}
 }
-
-const imageBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || ''
 
 const formatCurrency = (value: number) =>
 	new Intl.NumberFormat('en-US', {
@@ -34,13 +32,6 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 
 	const product = new Product(productPayload)
 
-	const productImageUrl =
-		product.hasImage() && product.files.length > 0
-			? `${imageBaseUrl?.replace(/\/api$/, '')}/products/image?productId=${product.id}&image=${
-					product.files[0]?.name ?? ''
-			  }`
-			: null
-
 	return (
 		<PageLayout
 			title={product.name || 'Product Details'}
@@ -51,22 +42,11 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 				<Card className="border border-base-300 bg-base-100 shadow-sm">
 					<div className="flex flex-col gap-6 md:flex-row">
 						<div className="flex w-full items-center justify-center md:w-1/2">
-							<div className="relative aspect-square w-full max-w-md overflow-hidden rounded-3xl border border-base-200 bg-base-200/60">
-								{productImageUrl ? (
-									<Image
-										src={productImageUrl}
-										alt={product.name || 'Product image'}
-										fill
-										className="object-cover"
-										sizes="(min-width: 1024px) 400px, 60vw"
-										priority
-									/>
-								) : (
-									<div className="flex h-full w-full items-center justify-center text-base-content/40">
-										<span className="text-sm">Image coming soon</span>
-									</div>
-								)}
-							</div>
+							<ProductImageGallery
+								product={product}
+								priority={true}
+								showThumbnails={true}
+							/>
 						</div>
 
 						<div className="flex w-full flex-col justify-between md:w-1/2">
@@ -91,12 +71,12 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 								<div className="flex flex-wrap gap-2">
 									{product.categories.length > 0
 										? product.categories.map((category) => (
-												<Badge key={category.id} variant="accent" size="sm" outline>
+												<Badge key={category.id} variant="accent" size="sm" tone="subtle">
 													{category.name}
 												</Badge>
 										  ))
 										: product.category && (
-												<Badge variant="accent" size="sm" outline>
+												<Badge variant="accent" size="sm" tone="subtle">
 													{product.category}
 												</Badge>
 										  )}

@@ -26,14 +26,14 @@
 
 'use client'
 
-import { useState } from 'react'
-import Image from 'next/image'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { Package, Warehouse, Heart, Eye } from 'lucide-react'
 import { Product } from '@_classes/Product'
-import Badge from '@_components/ui/Badge'
 import Button from '@_components/ui/Button'
+import ProductImage from '@_components/store/ProductImage'
 import Routes from '@_services/routes'
+import { ImagePreloadService } from '@_services/ImagePreloadService'
 
 export interface ProductCardProps {
 	/** Product data to display */
@@ -50,6 +50,9 @@ export interface ProductCardProps {
 	
 	/** Optional: Additional CSS classes */
 	className?: string
+	
+	/** Optional: Priority loading for above-the-fold images */
+	priority?: boolean
 }
 
 /**
@@ -63,59 +66,23 @@ const formatCurrency = (value: number) =>
 	}).format(Number.isFinite(value) ? value : 0)
 
 /**
- * Get stock status configuration
- */
-const getStockStatus = (stock: number) => {
-	if (stock === 0) {
-		return {
-			label: 'Out of Stock',
-			variant: 'error' as const,
-			bgColor: 'bg-error',
-			textColor: 'text-white',
-		}
-	}
-	if (stock < 10) {
-		return {
-			label: 'Low Stock',
-			variant: 'warning' as const,
-			bgColor: 'bg-warning',
-			textColor: 'text-warning-content',
-		}
-	}
-	return {
-		label: 'In Stock',
-		variant: 'success' as const,
-		bgColor: 'bg-success',
-		textColor: 'text-success-content',
-	}
-}
-
-/**
  * ProductCard Component
  * 
  * Enhanced product card with industry-leading design patterns.
  * Displays product information in a visually appealing, accessible format.
  */
+
 export default function ProductCard({
 	product,
 	showWishlist = false,
 	showQuickView = false,
 	onClick,
 	className = '',
+	priority = false,
 }: ProductCardProps) {
 	const [isWishlisted, setIsWishlisted] = useState(false)
-	const [imageError, setImageError] = useState(false)
-	
-	const stockStatus = getStockStatus(product.stock ?? 0)
-	const hasImage = product.hasImage() && product.files.length > 0 && !imageError
-	
-	// Get image URL (you may need to adjust this based on your API)
-	const imageBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || ''
-	const productImageUrl = hasImage
-		? `${imageBaseUrl?.replace(/\/api$/, '')}/products/image?productId=${product.id}&image=${
-				product.files[0]?.name ?? ''
-		  }`
-		: null
+	const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+	const hasPreloadedRef = useRef(false)
 
 	const handleWishlistToggle = (e: React.MouseEvent) => {
 		e.preventDefault()
@@ -136,35 +103,75 @@ export default function ProductCard({
 		}
 	}
 
+	// Navigation preloading - preload product images before navigation (Shopify/Amazon pattern)
+	// This combines hover preloading with navigation preloading for optimal UX
+	const handleMouseEnter = useCallback(() => {
+		// Only preload if product has images and hasn't been preloaded yet
+		if (!product.hasImage() || product.files.length === 0 || hasPreloadedRef.current) {
+			return
+		}
+
+		// Debounce preloading (200ms delay - industry standard)
+		// Prevents excessive preloading on quick mouse movements
+		if (hoverTimeoutRef.current) {
+			clearTimeout(hoverTimeoutRef.current)
+		}
+
+		hoverTimeoutRef.current = setTimeout(() => {
+			// Preload product images with 'navigation' strategy and 'high' priority
+			// This preloads images before user clicks, making navigation instant
+			ImagePreloadService.preloadProduct(product.id, product.files, {
+				strategy: 'navigation',
+				priority: 'high',
+				delay: 0, // No additional delay after hover
+			}).catch((error) => {
+				// Silent failure - preloading is a performance optimization, not critical
+				if (process.env.NODE_ENV === 'development') {
+					console.error('[ProductCard] Navigation preload failed', { productId: product.id, error })
+				}
+			})
+
+			hasPreloadedRef.current = true
+		}, 200) // 200ms debounce - Amazon/Shopify standard
+	}, [product])
+
+	// Cleanup timeout on mouse leave
+	const handleMouseLeave = useCallback(() => {
+		if (hoverTimeoutRef.current) {
+			clearTimeout(hoverTimeoutRef.current)
+			hoverTimeoutRef.current = null
+		}
+	}, [])
+
+	// Cleanup timeout on unmount
+	useEffect(() => {
+		return () => {
+			if (hoverTimeoutRef.current) {
+				clearTimeout(hoverTimeoutRef.current)
+			}
+		}
+	}, [])
+
 	return (
 		<Link
 			href={`${Routes.Store.location}/product/${product.id}`}
 			onClick={handleCardClick}
+			onMouseEnter={handleMouseEnter}
+			onMouseLeave={handleMouseLeave}
+			prefetch={true}
 			className={`group relative flex flex-col overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-xl ${className}`}
 		>
 			{/* Image Container - Fixed aspect ratio */}
 			<div className="relative aspect-square w-full shrink-0 overflow-hidden bg-base-200">
-				{productImageUrl ? (
-					<Image
-						src={productImageUrl}
-						alt={product.name || 'Product image'}
-						fill
-						sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-						className="object-cover transition-transform duration-300 group-hover:scale-105"
-						onError={() => setImageError(true)}
-					/>
-				) : (
-					<div className="flex h-full items-center justify-center">
-						<Package className="h-16 w-16 text-base-content/20" strokeWidth={1.5} />
-					</div>
-				)}
-
-				{/* Stock Status Badge Overlay */}
-				{product.stock !== undefined && (
-					<div className={`absolute top-3 right-3 rounded-full ${stockStatus.bgColor} px-3 py-1.5 shadow-md`} style={{ fontSize: '0.75rem', fontWeight: 600, lineHeight: 1 }}>
-						<span className={stockStatus.textColor}>{stockStatus.label}</span>
-					</div>
-				)}
+				{/* Product Image with stock badge overlay */}
+				<ProductImage
+					product={product}
+					priority={priority}
+					showStockBadge={product.stock !== undefined}
+					size="md"
+					hover={true}
+					className="h-full w-full"
+				/>
 
 				{/* Quick Actions Overlay (appears on hover) */}
 				<div className="absolute inset-x-0 bottom-0 flex gap-2 p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
@@ -228,26 +235,28 @@ export default function ProductCard({
 					</div>
 				</div>
 
-				{/* Categories - Elegant hashtag-style tags */}
-				<div className="mt-3 flex flex-wrap gap-2" style={{ minHeight: '1.5rem' }}>
+				{/* Categories - Elegant hashtag-style tags (single line, no wrap) */}
+				{/* Industry best practice: Tags expand fully without truncation, excess tags go to +1 count */}
+				{/* Container uses overflow-hidden to prevent tags from going outside card bounds */}
+				<div className="mt-3 overflow-hidden" style={{ minHeight: '1.5rem' }}>
 					{product.categories.length > 0 ? (
-						<>
+						<div className="flex items-center gap-2 min-w-0">
 							{product.categories.slice(0, 2).map((cat) => (
 								<span
 									key={cat.id}
-									className="badge badge-secondary badge-outline max-w-32"
+									className="badge badge-secondary badge-outline inline-flex items-center gap-1 whitespace-nowrap shrink min-w-0"
 									title={cat.name}
 								>
-									<span className="text-[0.65rem] opacity-70">#</span>
+									<span className="text-[0.65rem] opacity-70 shrink-0">#</span>
 									<span className="truncate">{cat.name}</span>
 								</span>
 							))}
 							{product.categories.length > 2 && (
-								<span className="badge badge-neutral badge-sm">
+								<span className="badge badge-neutral badge-sm shrink-0">
 									+{product.categories.length - 2}
 								</span>
 							)}
-						</>
+						</div>
 					) : (
 						<span style={{ fontSize: '0.75rem' }} className="text-base-content/40">No categories</span>
 					)}
@@ -256,13 +265,12 @@ export default function ProductCard({
 				{/* Spacer - Pushes button to bottom */}
 				<div className="flex-1" style={{ minHeight: '0.5rem' }} />
 
-				{/* Call to Action - Always at bottom */}
-				<div className="mt-4">
+				{/* Call to Action - Centered, elegant button */}
+				<div className="mt-4 flex justify-center">
 					<Button
 						variant="primary"
 						size="md"
-						fullWidth
-						className="transition-transform group-hover:scale-[1.02]"
+						className="w-full transition-transform group-hover:scale-[1.02]"
 						style={{ fontSize: '0.875rem', padding: '0.625rem 1rem', minHeight: '2.5rem' }}
 					>
 						View Details

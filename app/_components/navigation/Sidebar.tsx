@@ -64,7 +64,8 @@
 import { useEffect, useMemo, useCallback, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { X, Settings, ChevronDown, ExternalLink } from 'lucide-react'
+import { Settings, ChevronDown, ExternalLink } from 'lucide-react'
+import SettingsModal from '@_components/settings/SettingsModal'
 import { useAuthStore } from '@_stores/useAuthStore'
 import { NavigationService } from '@_services/NavigationService'
 import { useMediaQuery } from '@_hooks/useMediaQuery'
@@ -334,60 +335,10 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 			</aside>
 
 			{/* Settings Modal */}
-			{settingsModalOpen && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-					{/* Backdrop */}
-					<div
-						className="fixed inset-0 bg-black/50"
-						onClick={() => setSettingsModalOpen(false)}
-					/>
-					
-				{/* Modal Content */}
-				<div className="relative z-10 bg-base-100 w-full max-w-md rounded-lg p-6 shadow-2xl">
-						{/* Header */}
-						<div className="mb-6 flex items-center justify-between">
-							<h2 className="text-2xl font-bold text-base-content">Settings</h2>
-							<button
-								onClick={() => setSettingsModalOpen(false)}
-								className="btn-circle ghost"
-								aria-label="Close settings"
-								title="Close"
-							>
-								<X size={20} className="text-base-content" />
-							</button>
-						</div>
-
-						{/* Settings Content */}
-						<div className="space-y-6">
-							{/* Theme Selection */}
-							<div>
-								<h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-base-content/70">
-									Appearance
-								</h3>
-								<p className="text-sm text-base-content/60 mb-2">Choose your preferred theme</p>
-								<div className="space-y-2">
-									<button className="flex w-full items-center gap-3 rounded-lg border border-base-300 p-3 transition-colors hover:border-primary hover:bg-base-200">
-										<div className="h-4 w-4 rounded-full border-2 border-primary"></div>
-										<span className="font-medium text-base-content">Light Mode</span>
-									</button>
-									<button className="flex w-full items-center gap-3 rounded-lg border border-base-300 p-3 transition-colors hover:border-primary hover:bg-base-200">
-										<div className="h-4 w-4 rounded-full border-2 border-base-300"></div>
-										<span className="font-medium text-base-content">Dark Mode</span>
-									</button>
-								</div>
-							</div>
-
-							{/* Language (Future) */}
-							<div>
-								<h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-base-content/70">
-									Language
-								</h3>
-								<p className="text-sm text-base-content/60">Coming soon...</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
+			<SettingsModal
+				isOpen={settingsModalOpen}
+				onClose={() => setSettingsModalOpen(false)}
+			/>
 		</>
 	)
 }

@@ -27,6 +27,7 @@
 import React, { useState, useCallback } from 'react'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 import ProductsCategory from '@_classes/ProductsCategory'
+import Badge from '@_components/ui/Badge'
 
 export interface CategoryFilterProps {
 	/** Hierarchical categories array */
@@ -198,12 +199,12 @@ export default function CategoryFilter({
 
 			return (
 				<div key={category.id} className="select-none">
-					{/* Category Row - Entire row is clickable for selection */}
+					{/* Category Row - Fixed height, entire row clickable */}
 					<div
 						role="treeitem"
 						aria-selected={isSelected}
 						onClick={() => handleToggle(category)}
-						className={`group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 transition-all duration-150 ease-out ${
+						className={`group flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg px-3 transition-all duration-150 ease-out ${
 							isSelected
 								? 'bg-primary/10 shadow-sm ring-1 ring-primary/20'
 								: isPartial
@@ -212,8 +213,8 @@ export default function CategoryFilter({
 				}`}
 						style={{ paddingLeft: `${indentWidth + 12}px` }}
 			>
-						{/* 1. Expand/Collapse Icon - Fixed width column for alignment */}
-						<div className="flex h-5 w-5 shrink-0 items-center justify-center">
+						{/* 1. Expand/Collapse Icon - Fixed 20px square column */}
+						<div className="flex h-5 w-5 shrink-0 grow-0 items-center justify-center">
 							{hasChildren ? (
 								<button
 									type="button"
@@ -221,7 +222,7 @@ export default function CategoryFilter({
 										e.stopPropagation()
 										toggleExpand(category.id, e)
 									}}
-									className="flex h-5 w-5 items-center justify-center rounded active:scale-95 transition-transform duration-150"
+									className="flex h-5 w-5 shrink-0 items-center justify-center rounded active:scale-95 transition-transform duration-150"
 									aria-label={isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
 									aria-expanded={isExpanded}
 								>
@@ -234,8 +235,8 @@ export default function CategoryFilter({
 							) : null}
 						</div>
 
-						{/* 2. Checkbox - Fixed width column for perfect alignment */}
-						<div className="flex h-5 w-5 shrink-0 items-center justify-center">
+						{/* 2. Checkbox - Fixed 20px square, no size changes */}
+						<div className="flex h-5 w-5 shrink-0 grow-0 items-center justify-center overflow-hidden">
 							<input
 								type="checkbox"
 								checked={isSelected}
@@ -246,7 +247,7 @@ export default function CategoryFilter({
 								}}
 								onChange={() => {}} // Controlled by row onClick
 								onClick={(e) => e.stopPropagation()} // Prevent double-toggle
-								className="checkbox checkbox-primary checkbox-sm h-5 w-5 pointer-events-none"
+								className="checkbox checkbox-primary checkbox-sm h-5! w-5! min-h-5! min-w-5! max-h-5! max-w-5! shrink-0 pointer-events-none scale-100!"
 								aria-label={`${category.name} is ${isSelected ? 'selected' : 'not selected'}`}
 								tabIndex={-1}
 							/>
@@ -267,19 +268,15 @@ export default function CategoryFilter({
 							{category.name ?? 'Untitled category'}
 						</span>
 
-						{/* 4. Subcategory Count Badge - Right-aligned */}
+						{/* 4. Subcategory Count Badge - Powered by Badge component */}
 						{hasChildren && (
-							<span
-								className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
-									isSelected
-										? 'bg-primary text-primary-content'
-										: isPartial
-											? 'bg-primary/20 text-primary'
-											: 'badge badge-neutral badge-sm'
-								}`}
+							<Badge
+								variant="primary"
+								tone={isSelected ? 'solid' : isPartial ? 'subtle' : 'default'}
+								size="sm"
 							>
 								{category.subCategories.length}
-							</span>
+							</Badge>
 						)}
 				</div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { isEmpty } from 'lodash'
 import { toast } from 'react-toastify'
@@ -17,6 +17,7 @@ import { Product } from '@_classes/Product'
 import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import { PagedResult } from '@_classes/Base/PagedResult'
 import API from '@_services/api'
+import { useDebounce } from '@_hooks/useDebounce'
 
 type RetrievalOverrides = {
 	search?: string
@@ -24,7 +25,8 @@ type RetrievalOverrides = {
 }
 
 const INITIAL_PAGE_SIZE = 20
-const INITIAL_FILTER = () => new GenericSearchFilter({ pageSize: INITIAL_PAGE_SIZE, includes: ['Categories'] })
+// Include Categories and Files in the API response
+const INITIAL_FILTER = () => new GenericSearchFilter({ pageSize: INITIAL_PAGE_SIZE, includes: ['Categories', 'Files'] })
 
 const StorePageContent = () => {
 	const [products, setProducts] = useState<Product[]>([])
@@ -40,6 +42,21 @@ const StorePageContent = () => {
 
 	const router = useRouter()
 	const searchParams = useSearchParams()
+	
+	// Debounce search text - industry standard 400ms for search inputs
+	// Only debounce when user is actively typing (length >= 3)
+	const debouncedSearchText = useDebounce(searchText, 400)
+	
+	// Ref to maintain input focus during re-renders
+	const searchInputRef = useRef<HTMLInputElement>(null)
+	
+	// Track focus state - use ref to avoid re-renders
+	// This persists across re-renders and tracks if input should maintain focus
+	const shouldMaintainFocusRef = useRef(false)
+	
+	// Track if user intentionally blurred (clicked away)
+	// If true, we won't restore focus
+	const userIntentionallyBlurredRef = useRef(false)
 
 	const hasMoreProducts = productsResult.hasNext
 	const totalResults = productsResult.total || products.length
@@ -138,7 +155,9 @@ const StorePageContent = () => {
 			}
 
 			const payload = data.payload
+			
 			const nextProducts = payload.data.map((product) => new Product(product))
+			
 			setProducts(nextProducts)
 			setProductsResult(new PagedResult<Product>(payload))
 			return nextProducts
@@ -252,14 +271,98 @@ const StorePageContent = () => {
 		}
 	}, [router, searchParams])
 
+	/**
+	 * Search products with proper debouncing and minimum character requirement.
+	 * Only searches when:
+	 * 1. Search text is empty (clear search), OR
+	 * 2. Search text has 3+ characters (debounced)
+	 * 
+	 * This prevents:
+	 * - Excessive API calls
+	 * - Searching on every keystroke
+	 * - Searching with insufficient characters
+	 * - Input focus loss during search
+	 */
 	useEffect(() => {
-		const timer = setTimeout(() => {
-			void retrieveProducts(searchCriteria)
-		}, 300)
+		// Only search if:
+		// - Search is empty (clear results), OR
+		// - Debounced search has 3+ characters
+		const shouldSearch = debouncedSearchText.trim().length === 0 || debouncedSearchText.trim().length >= 3
+		
+		if (!shouldSearch) {
+			// If search is too short, clear results but don't trigger API call
+			if (debouncedSearchText.trim().length > 0 && debouncedSearchText.trim().length < 3) {
+				return
+			}
+		}
 
-		return () => clearTimeout(timer)
+		// Mark that we should maintain focus if input is currently focused
+		const currentInput = searchInputRef.current
+		const isCurrentlyFocused = document.activeElement === currentInput
+		
+		if (isCurrentlyFocused) {
+			shouldMaintainFocusRef.current = true
+			userIntentionallyBlurredRef.current = false
+		}
+
+		const updatedCriteria = new GenericSearchFilter({
+			...searchCriteria,
+			page: 1, // Reset to first page on search
+		})
+
+		setSearchCriteria(updatedCriteria)
+		void retrieveProducts(updatedCriteria, {
+			search: debouncedSearchText,
+			categories: selectedCategories,
+		})
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [searchText, selectedCategories])
+	}, [debouncedSearchText, selectedCategories])
+	
+	/**
+	 * Restore focus after products update.
+	 * Industry best practice: Use double requestAnimationFrame + setTimeout
+	 * for maximum reliability across all browsers and React rendering cycles.
+	 * 
+	 * This ensures focus is restored after:
+	 * - Product list updates
+	 * - Loading state changes
+	 * - Any re-renders caused by state updates
+	 */
+	useEffect(() => {
+		// Only restore focus if:
+		// 1. We should maintain focus (user was typing)
+		// 2. User didn't intentionally blur
+		// 3. Input ref exists
+		if (
+			shouldMaintainFocusRef.current &&
+			!userIntentionallyBlurredRef.current &&
+			searchInputRef.current
+		) {
+			const input = searchInputRef.current
+			
+			// Double RAF + setTimeout ensures DOM is fully updated
+			// This is the most reliable method across all browsers
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					setTimeout(() => {
+						// Double-check conditions before focusing
+						if (
+							shouldMaintainFocusRef.current &&
+							!userIntentionallyBlurredRef.current &&
+							searchInputRef.current &&
+							document.activeElement !== searchInputRef.current
+						) {
+							searchInputRef.current.focus()
+							
+							// Restore cursor position to end of input
+							const length = searchInputRef.current.value.length
+							searchInputRef.current.setSelectionRange(length, length)
+						}
+					}, 0)
+				})
+			})
+		}
+	}, [products, isLoading]) // Restore focus when products or loading state changes
 
 	return (
 		<ClientPageLayout
@@ -270,12 +373,48 @@ const StorePageContent = () => {
 			{/* Unified Store Toolbar - Search, Sort, Filter, Results */}
 			<UnifiedStoreToolbar
 				searchText={searchText}
-				onSearchChange={setSearchText}
+				onSearchChange={(value) => {
+					setSearchText(value)
+					// Mark that we should maintain focus when user is typing
+					if (searchInputRef.current && document.activeElement === searchInputRef.current) {
+						shouldMaintainFocusRef.current = true
+						userIntentionallyBlurredRef.current = false
+					}
+				}}
 				onSearchClear={() => {
 					setSearchText('')
+					shouldMaintainFocusRef.current = false
+					userIntentionallyBlurredRef.current = false
 					const resetFilter = INITIAL_FILTER()
 					setSearchCriteria(resetFilter)
 					void retrieveProducts(resetFilter, { search: '', categories: selectedCategories })
+				}}
+				onSearchFocus={() => {
+					// User focused the input - we should maintain focus
+					shouldMaintainFocusRef.current = true
+					userIntentionallyBlurredRef.current = false
+				}}
+				onSearchBlur={(e) => {
+					// Check if blur was intentional (user clicked on another interactive element)
+					const relatedTarget = e.relatedTarget as HTMLElement | null
+					
+					// If user clicked on a button, select, or another input, allow the blur
+					if (
+						relatedTarget &&
+						(relatedTarget.tagName === 'BUTTON' ||
+							relatedTarget.tagName === 'SELECT' ||
+							relatedTarget.tagName === 'INPUT' ||
+							relatedTarget.closest('button') ||
+							relatedTarget.closest('select'))
+					) {
+						// User intentionally moved focus - don't restore
+						userIntentionallyBlurredRef.current = true
+						shouldMaintainFocusRef.current = false
+					} else {
+						// Blur was likely from re-render - maintain focus state
+						// We'll restore it in the useEffect
+						userIntentionallyBlurredRef.current = false
+					}
 				}}
 				isSearchTooShort={isSearchTooShort}
 				displayedCount={displayedCount}
@@ -287,6 +426,7 @@ const StorePageContent = () => {
 				currentPageSize={currentPageSize}
 				onPageSizeChange={handlePageSizeChange}
 				isLoading={isLoading}
+				searchInputRef={searchInputRef}
 			/>
 
 			{/* Main Content: Sidebar + Product Grid */}
@@ -323,7 +463,7 @@ const StorePageContent = () => {
 				{/* Product Grid - Main Content */}
 				<main className="flex-1">
 					{/* Products Grid - Responsive breakpoints optimized for card size */}
-					<div className="grid gap-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+					<div className="grid gap-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
 						{/* Loading Skeleton */}
 						{isLoading && !hasLoaded && (
 							<ProductCardSkeleton count={8} />
@@ -346,12 +486,13 @@ const StorePageContent = () => {
 									)}
 								</div>
 							) : (
-								products.map((product) => (
+								products.map((product, index) => (
 									<ProductCard
 										key={product.id}
 										product={product}
 										showWishlist={false}
 										showQuickView={false}
+										priority={index < 8} // Priority loading for first 8 images (above the fold)
 									/>
 								))
 							)

@@ -66,6 +66,15 @@
 'use client'
 
 import React from 'react'
+import {
+	formFieldBaseClasses,
+	formFieldHoverClasses,
+	formFieldFocusClasses,
+	formFieldErrorClasses,
+	formFieldDisabledClasses,
+	formFieldLoadingClasses,
+	formFieldTextClasses,
+} from './formFieldStyles'
 
 /**
  * Option interface for select dropdown.
@@ -201,7 +210,8 @@ export default function Select<T = string | number>({
 	'aria-label': ariaLabel,
 	className = '',
 }: SelectProps<T>) {
-	// Build class names with modern, elegant styling
+	// Build class names with modern, elegant styling using shared form field styles
+	const isDisabled = disabled || loading
 	const classes = [
 		// Base DaisyUI classes
 		'select',
@@ -209,53 +219,20 @@ export default function Select<T = string | number>({
 		sizeClasses[size],
 		widthClasses[width],
 		
-		// Modern transitions - smooth and performant
-		'transition-all',
-		'duration-300',
-		'ease-out',
-		
-		// Subtle shadows - Input-like feel
-		'shadow-sm',
-		
-		// Border & Background - Clean and modern
-		'border-base-300',
-		'bg-base-100',
+		// Additional select-specific styling
 		'backdrop-blur-sm',
 		
-		// Rounded corners - Soft and friendly
-		'rounded-lg',
+		// Shared form field styles (border, shadow, transitions, states)
+		formFieldBaseClasses,
+		formFieldHoverClasses(isDisabled),
+		formFieldFocusClasses,
+		formFieldErrorClasses(error),
+		formFieldDisabledClasses(isDisabled),
+		formFieldLoadingClasses(loading),
+		formFieldTextClasses,
 		
-		// Hover state - Subtle and refined (no translation)
-		!disabled && !loading && 'hover:border-primary/50',
-		!disabled && !loading && 'hover:shadow-md',
-		
-		// Focus state - Clear and accessible (input-like)
-		'focus:border-primary',
-		'focus:outline-none',
-		'focus:ring-2',
-		'focus:ring-primary/20',
-		'focus:ring-offset-1',
-		'focus:shadow-lg',
-		
-		// Error state - Clear but not aggressive
-		error && 'border-error/70',
-		error && 'focus:ring-error/20',
+		// Error animation (select-specific)
 		error && 'animate-shake',
-		
-		// Disabled state - Elegant degradation
-		disabled && 'opacity-60',
-		disabled && 'cursor-not-allowed',
-		disabled && 'bg-base-200/50',
-		disabled && 'hover:shadow-sm',
-		disabled && 'hover:border-base-300',
-		
-		// Loading state - Subtle indication
-		loading && 'opacity-75',
-		loading && 'cursor-wait',
-		
-		// Text styling - Clean and readable
-		'font-medium',
-		'text-base-content',
 		
 		// Custom className
 		className,
