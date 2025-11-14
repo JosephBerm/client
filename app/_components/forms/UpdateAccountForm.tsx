@@ -33,7 +33,7 @@
  * @example
  * ```tsx
  * import UpdateAccountForm from '@_components/forms/UpdateAccountForm';
- * import { useAuthStore } from '@_stores/useAuthStore';
+ * import { useAuthStore } from '@_features/auth';
  *
  * function ProfileSettingsPage() {
  *   const user = useAuthStore(state => state.user);
@@ -67,7 +67,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { profileUpdateSchema, type ProfileUpdateFormData } from '@_core'
 import { useFormSubmit } from '@_shared'
 import FormInput from './FormInput'
-import Button from '../ui/Button'
+import Button from '@_components/ui/Button'
 import type { IUser } from '@_classes/User'
 import User from '@_classes/User'
 import Name from '@_classes/common/Name'

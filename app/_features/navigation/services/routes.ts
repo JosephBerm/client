@@ -17,7 +17,7 @@
  * 
  * @example
  * ```typescript
- * import Routes from '@_services/routes';
+ * import { Routes } from '@_features/navigation';
  * 
  * // Navigate to dashboard
  * router.push(Routes.Dashboard.location); // "/medsource-app"

@@ -23,8 +23,8 @@
  * @example
  * ```typescript
  * // Use with useZodForm hook
- * import { loginSchema } from '@_utils/validation-schemas';
- * import { useZodForm } from '@_hooks/useZodForm';
+ * import { loginSchema } from '@_core';
+ * import { useZodForm } from '@_shared';
  * 
  * const form = useZodForm(loginSchema, {
  *   defaultValues: { identifier: '', password: '', rememberMe: false }

@@ -25,7 +25,7 @@
  * 
  * @example
  * ```typescript
- * import API from '@_services/api';
+ * import { API } from '@_shared';
  * 
  * // Get all products
  * const response = await API.Store.Products.getAllProducts();

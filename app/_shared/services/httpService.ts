@@ -20,7 +20,7 @@
  * 
  * @example
  * ```typescript
- * import { HttpService } from '@_services/httpService';
+ * import { HttpService } from '@_shared';
  * 
  * // GET request
  * const response = await HttpService.get<User[]>('/users');

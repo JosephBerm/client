@@ -17,7 +17,7 @@
  * 
  * @example
  * ```typescript
- * import { createServerTableFetcher, formatCurrency, formatDate } from '@_utils/table-helpers';
+ * import { createServerTableFetcher, formatCurrency, formatDate } from '@_shared';
  * 
  * // Create a fetcher for products
  * const fetchProducts = createServerTableFetcher<Product>('/api/products');

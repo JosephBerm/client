@@ -23,18 +23,26 @@
 		"paths": {
 			"@/*": ["./*"],
 			// Feature-based architecture (FAANG best practice)
+			// Features are self-contained modules with services, hooks, stores, components
 			"@_features/*": ["app/_features/*"],
+			// Core infrastructure - foundational utilities used across all features
 			"@_core": ["app/_core"],
 			"@_core/*": ["app/_core/*"],
+			// Library utilities - pure functions, formatters, validators
 			"@_lib": ["app/_lib"],
 			"@_lib/*": ["app/_lib/*"],
+			// Shared - cross-feature utilities, hooks, services (used by 3+ features)
 			"@_shared": ["app/_shared"],
 			"@_shared/*": ["app/_shared/*"],
-			// Domain & UI paths (not feature-specific)
+			// Domain entities - business logic classes
 			"@_classes/*": ["app/_classes/*"],
+			// UI components - reusable presentation components
 			"@_components/*": ["app/_components/*"],
+			// Type definitions - TypeScript interfaces and types
 			"@_types/*": ["app/_types/*"],
+			// Helper utilities - small utility functions
 			"@_helpers/*": ["app/_helpers/*"],
+			// Scripts - build-time and runtime scripts
 			"@_scripts/*": ["app/_scripts/*"]
 		}
 	},

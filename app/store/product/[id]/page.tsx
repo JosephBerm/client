@@ -10,9 +10,9 @@ import { API } from '@_shared'
 import { Routes } from '@_features/navigation'
 
 interface ProductPageParams {
-	params: {
+	params: Promise<{
 		id: string
-	}
+	}>
 }
 
 const formatCurrency = (value: number) =>
@@ -23,7 +23,10 @@ const formatCurrency = (value: number) =>
 	}).format(Number.isFinite(value) ? value : 0)
 
 export default async function ProductDetailPage({ params }: ProductPageParams) {
-	const productResponse = await API.Store.Products.get(params.id)
+	// Next.js 15+ requires awaiting params before accessing properties
+	const { id } = await params
+	
+	const productResponse = await API.Store.Products.get(id)
 	const productPayload = productResponse.data.payload
 
 	if (!productPayload) {
