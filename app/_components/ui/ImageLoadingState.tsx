@@ -6,16 +6,22 @@
  * 
  * **Features:**
  * - Multiple skeleton variants (product, thumbnail, gallery, hero)
- * - Smooth shimmer animations
- * - Theme-aware styling
- * - Accessible (reduces motion for users who prefer it)
- * - Performance-optimized animations
+ * - Triple-layer animation system (pulse + shimmer + glow)
+ * - Theme-aware styling with dark mode optimization
+ * - Accessible (respects prefers-reduced-motion)
+ * - Performance-optimized animations (GPU-accelerated)
+ * 
+ * **Animation System:**
+ * Uses global `.skeleton-shimmer` class with triple-layer animations:
+ * 1. **Pulse**: Pronounced opacity breathing (0.5 ↔ 1.0)
+ * 2. **Shimmer**: Enhanced gradient wave sweep (30% peak opacity)
+ * 3. **Glow**: Subtle brightness shift (1.0 ↔ 1.05)
  * 
  * **Variants:**
- * - **product**: Product card skeleton
- * - **thumbnail**: Thumbnail skeleton
- * - **gallery**: Gallery image skeleton
- * - **hero**: Hero/banner skeleton
+ * - **product**: Product card skeleton (aspect-square)
+ * - **thumbnail**: Thumbnail skeleton (aspect-square, smaller radius)
+ * - **gallery**: Gallery image skeleton (aspect-square)
+ * - **hero**: Hero/banner skeleton (aspect-video)
  * 
  * **Use Cases:**
  * - Image loading states
@@ -33,6 +39,7 @@
  * <ImageLoadingState variant="gallery" size="lg" />
  * ```
  * 
+ * @see app/globals.css - Global skeleton animation definitions
  * @module ImageLoadingState
  */
 
@@ -98,19 +105,22 @@ const variantConfig = {
 /**
  * ImageLoadingState Component
  * 
- * Professional skeleton loader for images with shimmer effect.
+ * Professional skeleton loader for images with triple-layer animation system.
  * Matches the design of ProductCardSkeleton for consistency.
  * 
  * **Animation:**
- * - Uses CSS gradient animation (GPU-accelerated)
- * - Shimmer effect moves left to right
- * - Smooth easing function
- * - Respects prefers-reduced-motion
+ * - Triple-layer system: Pulse + Shimmer + Glow
+ * - Pulse: Pronounced opacity breathing (0.5 ↔ 1.0)
+ * - Shimmer: Enhanced gradient wave (30% peak opacity)
+ * - Glow: Subtle brightness shift (1.0 ↔ 1.05)
+ * - All GPU-accelerated for 60fps performance
+ * - Automatically simplified for prefers-reduced-motion
  * 
  * **Accessibility:**
  * - Proper ARIA attributes
  * - Screen reader announcements
  * - Respects motion preferences
+ * - Dark mode optimized gradients
  * 
  * @param props - ImageLoadingState configuration props
  * @returns ImageLoadingState component

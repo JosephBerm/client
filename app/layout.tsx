@@ -4,6 +4,7 @@ import NavigationLayout from '@_components/navigation/NavigationLayout'
 import AuthInitializer from '@_components/common/AuthInitializer'
 import UserSettingsInitializer from '@_components/common/UserSettingsInitializer'
 import ImageServiceInitializer from '@_components/common/ImageServiceInitializer'
+import ServiceWorkerRegistration from '@_components/common/ServiceWorkerRegistration'
 import { themeInitScript } from '@_scripts/theme-init-inline'
 
 import 'react-toastify/dist/ReactToastify.css'
@@ -27,16 +28,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				{/* This CANNOT use next/script as it needs to run immediately, not async */}
 				<script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
 			</head>
-			<body>
-				{/* Initialize services on app load */}
-				<UserSettingsInitializer />
-				<AuthInitializer />
-				<ImageServiceInitializer />
+		<body>
+			{/* Initialize services on app load */}
+			<UserSettingsInitializer />
+			<AuthInitializer />
+			<ImageServiceInitializer />
+			<ServiceWorkerRegistration />
 
-				{/* Main navigation wrapper */}
-				<NavigationLayout>
-					{children}
-				</NavigationLayout>
+			{/* Main navigation wrapper */}
+			<NavigationLayout>
+				{children}
+			</NavigationLayout>
 
 				{/* Toast notifications */}
 				<ToastContainer

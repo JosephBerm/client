@@ -35,7 +35,9 @@ const StorePageContent = () => {
 	const [searchText, setSearchText] = useState('')
 	const [searchCriteria, setSearchCriteria] = useState<GenericSearchFilter>(INITIAL_FILTER)
 	const [productsResult, setProductsResult] = useState<PagedResult<Product>>(new PagedResult<Product>())
-	const [isLoading, setIsLoading] = useState(false)
+	
+	// 🎨 TEMPORARY: Force skeleton loaders to show
+	const [isLoading, setIsLoading] = useState(true)
 	const [hasLoaded, setHasLoaded] = useState(false)
 	const [currentSort, setCurrentSort] = useState('relevance')
 	const [currentPageSize, setCurrentPageSize] = useState(INITIAL_PAGE_SIZE)
@@ -110,7 +112,8 @@ const StorePageContent = () => {
 		const searchValue = overrides?.search ?? searchText
 		const categoriesValue = overrides?.categories ?? selectedCategories
 
-		setIsLoading(true)
+		// 🎨 TEMPORARY: Disabled to keep skeleton loaders showing
+		// setIsLoading(true)
 
 		try {
 			if (!isEmpty(searchValue) && searchValue.length > 2) {
@@ -176,8 +179,9 @@ const StorePageContent = () => {
 			setProductsResult(new PagedResult<Product>())
 			return []
 		} finally {
-			setIsLoading(false)
-			setHasLoaded(true)
+			// 🎨 TEMPORARY: Disabled to keep skeleton loaders showing
+			// setIsLoading(false)
+			// setHasLoaded(true)
 		}
 	}
 
@@ -255,9 +259,10 @@ const StorePageContent = () => {
 		void retrieveProducts(resetFilter, { search: '', categories: [] })
 	}
 
-	useEffect(() => {
-		void fetchCategories()
-	}, [])
+	// 🎨 TEMPORARY: Disabled to show skeleton loaders
+	// useEffect(() => {
+	// 	void fetchCategories()
+	// }, [])
 
 	useEffect(() => {
 		const querySearchText = searchParams.get('search')
@@ -283,6 +288,8 @@ const StorePageContent = () => {
 	 * - Searching with insufficient characters
 	 * - Input focus loss during search
 	 */
+	// 🎨 TEMPORARY: Disabled to show skeleton loaders
+	/*
 	useEffect(() => {
 		// Only search if:
 		// - Search is empty (clear results), OR
@@ -317,6 +324,7 @@ const StorePageContent = () => {
 		})
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [debouncedSearchText, selectedCategories])
+	*/
 	
 	/**
 	 * Restore focus after products update.
@@ -464,13 +472,11 @@ const StorePageContent = () => {
 				<main className="flex-1">
 					{/* Products Grid - Responsive breakpoints optimized for card size */}
 					<div className="grid gap-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-						{/* Loading Skeleton */}
-						{isLoading && !hasLoaded && (
-							<ProductCardSkeleton count={8} />
-						)}
+						{/* 🎨 TEMPORARY: Always show skeleton loaders */}
+						<ProductCardSkeleton count={8} />
 
-						{/* Products */}
-						{!isLoading || hasLoaded ? (
+						{/* Products - TEMPORARILY HIDDEN */}
+						{/* {!isLoading || hasLoaded ? (
 							products.length === 0 ? (
 								<div className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-12 text-center">
 									<p className="text-lg font-semibold text-base-content">No products found</p>
@@ -496,7 +502,7 @@ const StorePageContent = () => {
 									/>
 								))
 							)
-						) : null}
+						) : null} */}
 					</div>
 
 					{/* Pagination Controls - Industry Standard */}

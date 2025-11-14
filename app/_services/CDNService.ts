@@ -92,9 +92,36 @@ export class CDNService {
 
 	/**
 	 * Initializes CDN service with configurations.
+	 * Sets up multi-CDN with priority-based fallback.
+	 * 
+	 * **FAANG Pattern**: Amazon CloudFront, Cloudflare multi-CDN
 	 * 
 	 * @param {CDNConfig[]} configs - Array of CDN configurations
 	 * @returns {void}
+	 * 
+	 * @example
+	 * ```typescript
+	 * // Initialize with Cloudflare + AWS CloudFront
+	 * CDNService.initialize([
+	 *   {
+	 *     provider: 'cloudflare',
+	 *     baseUrl: 'https://imagedelivery.net/account-id',
+	 *     enabled: true,
+	 *     priority: 1,
+	 *     options: {
+	 *       autoOptimize: true,
+	 *       defaultFormat: 'webp',
+	 *       autoFormat: true
+	 *     }
+	 *   },
+	 *   {
+	 *     provider: 'aws-cloudfront',
+	 *     baseUrl: 'https://d111111abcdef8.cloudfront.net',
+	 *     enabled: true,
+	 *     priority: 2
+	 *   }
+	 * ]);
+	 * ```
 	 * 
 	 * @example
 	 * ```typescript
