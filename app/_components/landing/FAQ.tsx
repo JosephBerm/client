@@ -2,6 +2,8 @@
 
 import PageContainer from '@_components/layouts/PageContainer'
 import Accordion, { AccordionItemData } from '@_components/ui/Accordion'
+import Pill from '@_components/ui/Pill'
+import StatusDot from '@_components/ui/StatusDot'
 
 const FAQ_ITEMS: AccordionItemData[] = [
 	{
@@ -41,10 +43,16 @@ export default function FAQ() {
 		<section id="faq" className="bg-base-100 py-20 lg:py-28">
 			<PageContainer className="max-w-5xl space-y-12">
 				<div className="text-center">
-					<span className="badge badge-warning gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.3em] shadow-sm">
-						<span className="h-2 w-2 rounded-full bg-warning-content" />
+					<Pill
+						tone="warning"
+						size="md"
+						shadow="sm"
+						fontWeight="medium"
+						icon={<StatusDot variant="warning" size="sm" />}
+						className="inline-flex"
+					>
 						FAQ
-					</span>
+					</Pill>
 					<h2 className="mt-6 text-3xl font-semibold text-base-content md:text-4xl lg:text-5xl">
 						Your questions, answered.
 					</h2>

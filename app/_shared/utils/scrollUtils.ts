@@ -21,6 +21,9 @@
 
 /**
  * Scroll to an element with smooth behavior and offset
+ * 
+ * Industry best practice: Use reliable position calculation that works for all elements
+ * FAANG approach: Handle edge cases (top of page, fixed headers, dynamic content)
  *
  * @param elementId - ID of the element to scroll to
  * @param options - Scroll options including offset and behavior
@@ -51,9 +54,53 @@ export function scrollToElement(
 		? window.matchMedia('(prefers-reduced-motion: reduce)').matches
 		: false
 
-	// Calculate scroll position with offset
-	const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
-	const offsetPosition = elementPosition - offset
+	// Industry best practice: Calculate element position relative to document
+	// FAANG approach: Use multiple calculation methods for maximum reliability
+	// 
+	// Primary method: Use getBoundingClientRect() + current scroll position
+	// This works correctly regardless of element position or scroll state
+	const rect = element.getBoundingClientRect()
+	const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop
+	
+	// Calculate element's absolute position in the document using getBoundingClientRect
+	// This is the most reliable method for elements with any positioning context
+	const elementPositionFromRect = rect.top + currentScrollTop
+	
+	// Alternative method: Use offsetTop (for validation and edge cases)
+	// This is more reliable for elements at the very top of the document
+	let elementPositionFromOffset = 0
+	let currentElement: HTMLElement | null = element
+	while (currentElement && currentElement !== document.body) {
+		elementPositionFromOffset += currentElement.offsetTop
+		currentElement = currentElement.offsetParent as HTMLElement | null
+	}
+	
+	// Use the more reliable of the two methods
+	// For elements at the top, offsetTop is more accurate
+	// For elements with complex positioning, getBoundingClientRect is better
+	const elementPosition = elementPositionFromOffset < 50 
+		? elementPositionFromOffset  // Use offsetTop for top-of-page elements
+		: elementPositionFromRect    // Use getBoundingClientRect for others
+
+	// Calculate final scroll position with offset
+	// Industry best practice: Handle top-of-page elements specially
+	// FAANG approach: For elements at document start (position 0 or very close), scroll to top
+	// For other elements, apply offset to account for fixed header
+	let offsetPosition: number
+	
+	// Check if element is at the very top of the document (within 10px tolerance)
+	// This handles hero sections and other top-of-page elements
+	// Tolerance accounts for potential margin/padding on body or html
+	if (elementPosition <= 10) {
+		// Element is at the very top of the document
+		// Industry best practice: Scroll to absolute top (0) for hero/top sections
+		// The fixed header will naturally cover the top, so we don't need offset
+		offsetPosition = 0
+	} else {
+		// Element is further down the page, apply offset to account for fixed header
+		// This ensures the element appears just below the fixed header
+		offsetPosition = Math.max(0, elementPosition - offset)
+	}
 
 	// Scroll to element
 	window.scrollTo({

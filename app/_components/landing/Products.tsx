@@ -5,6 +5,8 @@ import { Activity, TestTube2, Stethoscope, Building2 } from 'lucide-react'
 
 import PageContainer from '@_components/layouts/PageContainer'
 import Button from '@_components/ui/Button'
+import Pill from '@_components/ui/Pill'
+import StatusDot from '@_components/ui/StatusDot'
 
 const PRODUCT_CATEGORIES = [
 	{
@@ -43,10 +45,16 @@ export default function Products() {
 		<section id="categories" className="bg-base-100 py-20 lg:py-28">
 			<PageContainer className="space-y-16">
 				<div className="space-y-6 text-center lg:text-left">
-					<span className="badge badge-info gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.3em] shadow-sm">
-						<span className="h-2 w-2 rounded-full bg-info-content" />
-					Product catalog
-				</span>
+					<Pill
+						tone="info"
+						size="md"
+						shadow="sm"
+						fontWeight="medium"
+						icon={<StatusDot variant="info" size="sm" />}
+						className="inline-flex"
+					>
+						Product catalog
+					</Pill>
 				<div className="lg:grid lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-end lg:gap-10">
 					<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-5xl">
 						Built for every care setting across your network.
