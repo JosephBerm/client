@@ -212,9 +212,9 @@ export default function ContactUs() {
 									</span>
 								)}
 							</div>
-							<address className="not-italic space-y-2.5 text-sm text-base-content/70" itemProp="openingHours">
+							<address className="not-italic space-y-4 text-sm text-base-content/70" itemProp="openingHours">
 								{businessHours.map((schedule, index) => (
-									<div key={index} className="flex items-center justify-between gap-6 border-b border-base-200 pb-2.5 last:border-b-0 last:pb-0">
+									<div key={index} className="flex items-center justify-between gap-6">
 										<span className="font-medium text-base-content/90 min-w-[140px]">{schedule.days}</span>
 										{'closed' in schedule ? (
 											<span className="text-base-content/50 text-right">Closed</span>
