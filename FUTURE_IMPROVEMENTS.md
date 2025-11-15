@@ -2,7 +2,7 @@
 
 > **Purpose**: This document tracks planned improvements, refactoring opportunities, and technical debt items for the MedSource Pro codebase. It serves as a roadmap for maintaining code quality, consistency, and following industry best practices.
 
-> **Last Updated**: 2025-01-XX  
+> **Last Updated**: 2025-01-15  
 > **Maintained By**: Development Team  
 > **Status**: Active
 
@@ -329,6 +329,175 @@ This section tracks component-level refactoring opportunities for better archite
 
 ---
 
+### LiveChatBubble - Real-Time Chat Service Integration
+
+**Priority**: P2  
+**Category**: Feature Enhancement  
+**Status**: Not Started  
+**Estimated Effort**: L  
+**Dependencies**: Third-party chat service selection (Intercom, Drift, Crisp, or custom)
+
+**Description**:  
+Integrate a real-time live chat service into the LiveChatBubble component to enable instant customer communication. The UI scaffold is already in place with a "Coming Soon" placeholder - this enhancement will connect it to an actual chat backend.
+
+**Current Implementation**:  
+The `LiveChatBubble` component (`app/_components/ui/LiveChatBubble.tsx`) is a fully functional UI component with:
+- Fixed position bubble in bottom-right corner
+- "Coming Soon" tooltip on click
+- Unread message badge support (UI ready)
+- Smooth animations and transitions
+- Mobile-first responsive design
+- Full accessibility (WCAG 2.1 AA)
+- Performance optimized
+
+Currently displayed in the ContactUs section as an alternative to form-based contact methods.
+
+**Proposed Solution**:  
+
+**Option 1: Third-Party Service (Recommended)**
+1. **Intercom** (https://www.intercom.com)
+   - Pros: Enterprise-ready, rich features, great analytics
+   - Cons: Higher cost, potential data privacy concerns
+   - Integration: Script tag + React wrapper
+
+2. **Drift** (https://www.drift.com)
+   - Pros: Sales-focused, good for B2B, conversation routing
+   - Cons: Premium pricing
+   - Integration: Script tag + React wrapper
+
+3. **Crisp** (https://crisp.chat)
+   - Pros: Affordable, good features, easy integration
+   - Cons: Less enterprise-focused
+   - Integration: Script tag + React wrapper
+
+4. **Tawk.to** (https://www.tawk.to)
+   - Pros: Free tier, easy setup
+   - Cons: Less polished UI
+   - Integration: Script tag + React wrapper
+
+**Option 2: Custom Solution**
+1. Build WebSocket-based chat with Socket.io
+2. Create backend chat service with message persistence
+3. Implement operator dashboard
+4. Add typing indicators, file uploads, etc.
+
+**Recommended Approach**: Start with Crisp or Tawk.to for MVP, upgrade to Intercom/Drift when scaling.
+
+**Implementation Steps**:
+1. Choose and sign up for chat service
+2. Create `useLiveChat` hook to manage chat state
+3. Update `LiveChatBubble` to connect to chat service
+4. Add chat window component (expandable from bubble)
+5. Implement unread message badge with real data
+6. Add operator status (online/offline)
+7. Set up chat routing rules
+8. Configure business hours integration
+9. Add analytics tracking for chat interactions
+10. Test across devices and browsers
+
+**Benefits**:  
+- Real-time customer support
+- Reduced response times
+- Better customer engagement
+- Lead capture during browsing
+- Proactive outreach capabilities
+- Analytics on customer questions
+- Integration with CRM/support tools
+
+**Implementation Notes**:  
+
+**Example: Intercom Integration**
+```tsx
+// hooks/useLiveChat.ts
+import { useEffect } from 'react'
+
+export function useLiveChat() {
+  useEffect(() => {
+    // Load Intercom
+    window.Intercom('boot', {
+      app_id: process.env.NEXT_PUBLIC_INTERCOM_APP_ID,
+      // user data
+    })
+
+    return () => {
+      window.Intercom('shutdown')
+    }
+  }, [])
+
+  const openChat = () => {
+    window.Intercom('show')
+  }
+
+  const getUnreadCount = () => {
+    return window.Intercom('getUnreadCount')
+  }
+
+  return { openChat, getUnreadCount }
+}
+```
+
+**Example: LiveChatBubble Update**
+```tsx
+// Update LiveChatBubble.tsx
+import { useLiveChat } from '@_shared/hooks/useLiveChat'
+
+export default function LiveChatBubble({ ... }: LiveChatBubbleProps) {
+  const { openChat, getUnreadCount } = useLiveChat()
+  const unreadCount = getUnreadCount()
+
+  const handleClick = () => {
+    openChat()
+    // Track analytics
+    trackEvent('live_chat_opened', { ... })
+  }
+
+  // ... rest of component
+}
+```
+
+**Analytics Events to Add**:
+- `live_chat_opened` - When user opens chat
+- `live_chat_message_sent` - When user sends message
+- `live_chat_closed` - When user closes chat
+- `live_chat_operator_joined` - When operator joins conversation
+
+**Configuration Considerations**:
+- Business hours visibility (hide/show based on availability)
+- Welcome message customization
+- Proactive message triggers (time on page, exit intent)
+- Mobile vs desktop experience
+- Chat history persistence
+- Multi-language support
+- GDPR compliance (data handling, consent)
+
+**Testing Checklist**:
+- [ ] Chat opens correctly on all devices
+- [ ] Unread badge updates in real-time
+- [ ] Messages sent and received successfully
+- [ ] Typing indicators work
+- [ ] File uploads work (if supported)
+- [ ] Chat persists across page navigation
+- [ ] Accessibility with screen readers
+- [ ] Performance impact minimal
+- [ ] Analytics events fire correctly
+- [ ] Works with ad blockers (fallback)
+
+**Related Files**:  
+- `app/_components/ui/LiveChatBubble.tsx` (current UI)
+- `app/_components/landing/ContactUs.tsx` (integration point)
+- `app/_shared/utils/analytics.ts` (event tracking)
+- `app/_shared/hooks/useLiveChat.ts` (future hook)
+
+**References**:  
+- Intercom React Integration: https://developers.intercom.com/installing-intercom/docs/intercom-for-web
+- Drift React Integration: https://devdocs.drift.com/docs/react-drift
+- Crisp React Integration: https://docs.crisp.chat/guides/chatbox-sdks/web-sdk/dollar-crisp/
+- Industry Best Practices: https://www.intercom.com/blog/live-chat-best-practices/
+
+**Completion Date**: TBD
+
+---
+
 ## Performance Optimizations
 
 This section tracks performance improvement opportunities.
@@ -435,6 +604,11 @@ When adding a new improvement entry to this document:
 ---
 
 ## Changelog
+
+### 2025-01-15
+- Added LiveChatBubble real-time chat service integration plan
+- Documented third-party service options and custom solution approach
+- Added implementation steps, analytics events, and testing checklist
 
 ### 2025-01-XX
 - Initial document creation

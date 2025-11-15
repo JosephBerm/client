@@ -8,4 +8,6 @@
 
 export * from './table-helpers'
 export * from './scrollUtils'
+export * from './businessHours'
+export * from './analytics'
 
