@@ -38,6 +38,8 @@ import { ArrowRight } from 'lucide-react'
 
 import PageContainer from '@_components/layouts/PageContainer'
 import Button from '@_components/ui/Button'
+import Pill from '@_components/ui/Pill'
+import StatusDot from '@_components/ui/StatusDot'
 import ProductCard from '@_components/store/ProductCard'
 import ProductCardSkeleton from '@_components/store/ProductCardSkeleton'
 import { Product } from '@_classes/Product'
@@ -228,10 +230,15 @@ export default function ProductsCarousel() {
 				{/* Header Section - Elegant Typography & CTA */}
 				<div className="space-y-6">
 					{/* Badge Label */}
-					<span className="badge badge-primary gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.3em] shadow-sm">
-						<span className="h-2 w-2 animate-pulse rounded-full bg-primary-content" />
+					<Pill
+						tone="primary"
+						size="md"
+						shadow="sm"
+						fontWeight="medium"
+						icon={<StatusDot variant="primary" size="sm" animated />}
+					>
 						Featured inventory
-					</span>
+					</Pill>
 
 					{/* Title & Description Grid - Elegant Layout */}
 					<div className="lg:grid lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-center lg:gap-10">

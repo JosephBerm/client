@@ -1,6 +1,8 @@
 import { ShieldCheck, PackageCheck, Truck, Headset } from 'lucide-react'
 
 import PageContainer from '@_components/layouts/PageContainer'
+import Pill from '@_components/ui/Pill'
+import StatusDot from '@_components/ui/StatusDot'
 
 const VALUE_PROPS = [
 	{
@@ -36,10 +38,15 @@ export default function SalesPitch() {
 			<PageContainer className="space-y-16 lg:space-y-20">
 				<div className="grid gap-12 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)] lg:items-start">
 					<div className="space-y-6 text-left lg:sticky lg:top-[calc(var(--nav-height)+2rem)]">
-						<span className="badge badge-accent gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.3em] shadow-sm">
-							<span className="h-2 w-2 rounded-full bg-accent-content" />
-						Why MedSource Pro
-					</span>
+						<Pill
+							tone="accent"
+							size="md"
+							shadow="sm"
+							fontWeight="medium"
+							icon={<StatusDot variant="primary" size="sm" />}
+						>
+							Why MedSource Pro
+						</Pill>
 					<h2 className="text-3xl font-semibold leading-tight text-base-content md:text-4xl lg:text-5xl">
 						Focused on quality. Driven by patient outcomes.
 					</h2>

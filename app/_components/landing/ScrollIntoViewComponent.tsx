@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
 import PageContainer from '@_components/layouts/PageContainer'
-import { useScrollSpy, useKeyboardNavigation, useElementRefs, useMediaQuery } from '@_shared/hooks'
+import { useScrollSpy, useKeyboardNavigation, useElementRefs, useMediaQuery, useSectionMetrics, useScrollProgress } from '@_shared/hooks'
 import { getCSSVariable, calculateScrollOffset } from '@_shared/utils/scrollUtils'
 import classNames from 'classnames'
 
@@ -19,8 +19,12 @@ const SECTIONS = [
 ] as const
 
 /**
- * Calculate scroll progress for timeline visualization
- * Returns progress percentage (0-100) based on scroll position
+ * Legacy calculateScrollProgress function - DEPRECATED
+ * 
+ * This function is kept for backward compatibility but is no longer used.
+ * The component now uses the useScrollProgress hook for better performance and reusability.
+ * 
+ * @deprecated Use useScrollProgress hook instead
  */
 function calculateScrollProgress(): number {
 	if (typeof window === 'undefined') return 0
@@ -203,12 +207,17 @@ export default function ScrollIntoViewComponent() {
 	const { getRef: getButtonRef, getElement: getButtonElement } = useElementRefs<HTMLAnchorElement>()
 
 	// Use scroll spy hook (must be before whitespace detection to avoid dependency issues)
+	// Industry best practice: Adjust rootMargin to account for scroll offset
+	// When scrolling to a section, it should immediately become active
+	// rootMargin: top margin accounts for offset, bottom margin keeps section active longer
+	// Calculation: offset (112px) + small buffer (16px) = ~128px = ~12% of typical viewport (1080px)
+	// More lenient bottom margin (-60%) allows section to stay active longer
 	const { activeSection, scrollToSection, isSectionActive } = useScrollSpy({
 		sectionIds: SECTIONS.map((s) => s.id),
-		rootMargin: '-20% 0px -80% 0px', // Section becomes active when 20% from top
+		rootMargin: `-${scrollOffset + 16}px 0px -60% 0px`, // Account for offset + buffer, lenient bottom
 		threshold: 0,
 		offset: scrollOffset,
-		debounceDelay: 100,
+		debounceDelay: 50, // Reduced delay for more responsive updates
 	})
 
 	// Progressive enhancement: Timeline only appears when labels can be displayed without overlap
@@ -442,149 +451,146 @@ export default function ScrollIntoViewComponent() {
 		}
 	}, [getButtonRef])
 
+	// Reusable section metrics hook - DRY, scalable, future-proof
+	// Industry best practice: Single source of truth for section positions
+	// FAANG approach: Reusable hook for scroll-triggered animations
+	// Future-ready: Can be used for beautiful scroll animations
+	const { metrics: sectionMetrics, isReady: metricsReady, getMetric } = useSectionMetrics({
+		sectionIds: SECTIONS.map((s) => s.id),
+		scrollOffset,
+		enableViewportProgress: false, // Enable in future for animations
+	})
+
+	// Reusable scroll progress hook - DRY, scalable, future-proof
+	// Industry best practice: Single source of truth for scroll progress
+	// FAANG approach: Pixel-perfect scrollbar synchronization
+	// Future-ready: Can be used for progress bars, animations, etc.
+	const { progress: smoothTimelineProgress, scrollTop } = useScrollProgress({
+		throttleMs: 16, // ~60fps
+		enableImmediateUpdates: true, // For scrollbar drag
+	})
+
+	// Single source of truth for active section with user intent priority
+	// FAANG approach: User intent (click) always takes priority over scroll-based detection
+	// Industry best practice: Only use scroll-based detection during natural scrolling
+	// 
+	// Priority order:
+	// 1. User intent (clicked section) - highest priority, immediate
+	// 2. Scroll-based detection (natural scrolling) - secondary, after scroll settles
+	// 3. Intersection Observer (fallback) - tertiary, when metrics not ready
+	const [userIntentSection, setUserIntentSection] = useState<string | null>(null)
+	const userIntentTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+	// Enhanced active section detection: Synchronize with timeline progress
+	// Industry best practice: Active section should align with timeline position
+	// FAANG approach: Use section metrics for accurate detection, but respect user intent
+	// DRY: Reuses section metrics hook instead of duplicating measurement logic
+	const [enhancedActiveSection, setEnhancedActiveSection] = useState<string | null>(activeSection)
+
+	useEffect(() => {
+		// If user has explicitly clicked a section, don't override with scroll-based detection
+		// User intent takes priority - this ensures clicked sections stay active
+		if (userIntentSection) {
+			setEnhancedActiveSection(userIntentSection)
+			return
+		}
+
+		if (!metricsReady || sectionMetrics.length === 0) {
+			// Fallback to Intersection Observer if metrics not ready
+			setEnhancedActiveSection(activeSection)
+			return
+		}
+
+		// Calculate which section should be active based on scroll position
+		// Industry best practice: Section becomes active when scroll position reaches it
+		// Use section metrics from hook (DRY principle)
+		// Only applies during natural scrolling (not when user has clicked)
+		let determinedSection: string | null = null
+
+		// Calculate scroll reference (accounting for offset)
+		const scrollReference = scrollTop + scrollOffset
+
+		// Iterate backwards to find the last section we've passed
+		// This ensures we get the most recent section we've reached
+		for (let i = sectionMetrics.length - 1; i >= 0; i--) {
+			const metric = sectionMetrics[i]
+			
+			// If scroll position has reached or passed this section's top
+			// The section should be active when we've scrolled to it
+			// Use a small buffer (16px) to account for timing differences
+			if (scrollReference >= metric.top - 16) {
+				determinedSection = metric.id
+				break
+			}
+		}
+
+		// Special case: If we're at or near the bottom (timeline at 100%)
+		// The last section should always be active
+		if (smoothTimelineProgress >= 95 && sectionMetrics.length > 0) {
+			determinedSection = sectionMetrics[sectionMetrics.length - 1]?.id || null
+		}
+
+		// Fallback to first section if we're before all sections
+		if (!determinedSection) {
+			determinedSection = sectionMetrics[0]?.id || null
+		}
+
+		// Use timeline-based detection for visual alignment
+		// This ensures timeline and active section are perfectly synchronized
+		// When timeline reaches a section, that section becomes active
+		setEnhancedActiveSection(determinedSection)
+	}, [activeSection, scrollOffset, scrollTop, smoothTimelineProgress, sectionMetrics, metricsReady, userIntentSection])
+
+	// Single source of truth: Determine final active section with priority
+	// FAANG approach: User intent > Enhanced detection > Intersection Observer
+	// Industry best practice: Clear priority order ensures consistent behavior
+	const finalActiveSection = useMemo(() => {
+		// Priority 1: User intent (clicked section) - highest priority
+		if (userIntentSection) {
+			return userIntentSection
+		}
+		
+		// Priority 2: Enhanced detection (scroll-based, timeline-aligned)
+		if (enhancedActiveSection) {
+			return enhancedActiveSection
+		}
+		
+		// Priority 3: Intersection Observer (fallback)
+		return activeSection
+	}, [userIntentSection, enhancedActiveSection, activeSection])
+
 	// Calculate active section index for timeline progress
 	const activeSectionIndex = useMemo(() => {
-		if (!activeSection) return 0
-		const index = SECTIONS.findIndex((s) => s.id === activeSection)
+		if (!finalActiveSection) return 0
+		const index = SECTIONS.findIndex((s) => s.id === finalActiveSection)
 		return index >= 0 ? index : 0
-	}, [activeSection])
+	}, [finalActiveSection])
 
-	// Smooth timeline progress calculation based on actual scroll position
-	// Industry best practice: Interpolate between sections for fluid animation (FAANG approach)
-	// Inspired by Apple, Stripe, Vercel - smooth progress that follows scroll position precisely
-	const [smoothTimelineProgress, setSmoothTimelineProgress] = useState(0)
+	// Enhanced section active check: Uses single source of truth
+	// Industry best practice: Single function, single source of truth
+	// FAANG approach: Clear, predictable active state determination
+	const isSectionActiveEnhanced = useCallback(
+		(sectionId: string) => {
+			return finalActiveSection === sectionId
+		},
+		[finalActiveSection]
+	)
 
-	// Calculate smooth timeline progress based on section positions and scroll
+	// Cleanup user intent timeout on unmount
 	useEffect(() => {
-		if (typeof window === 'undefined') return
-
-		const calculateSmoothProgress = () => {
-			const totalSections = SECTIONS.length
-			if (totalSections <= 1) {
-				setSmoothTimelineProgress(0)
-				return
-			}
-
-			const windowHeight = window.innerHeight
-			const scrollTop = window.scrollY || document.documentElement.scrollTop
-			const viewportCenter = scrollTop + windowHeight / 2
-
-			// Get all section elements and their positions
-			const sectionPositions: Array<{ id: string; top: number; bottom: number; index: number }> = []
-			
-			SECTIONS.forEach((section, index) => {
-				const element = document.getElementById(section.id)
-				if (element) {
-					const rect = element.getBoundingClientRect()
-					const top = scrollTop + rect.top
-					const bottom = top + rect.height
-					sectionPositions.push({ id: section.id, top, bottom, index })
-				}
-			})
-
-			if (sectionPositions.length === 0) {
-				// Fallback to simple calculation if sections not found
-				const sectionProgress = (activeSectionIndex / (totalSections - 1)) * 100
-				setSmoothTimelineProgress(sectionProgress)
-				return
-			}
-
-			// Find which section the viewport center is in
-			let currentSectionIndex = 0
-			let progressInSection = 0
-
-			for (let i = 0; i < sectionPositions.length; i++) {
-				const section = sectionPositions[i]
-				const nextSection = sectionPositions[i + 1]
-
-				if (viewportCenter >= section.top && viewportCenter <= section.bottom) {
-					// Viewport center is within this section
-					currentSectionIndex = section.index
-					const sectionHeight = section.bottom - section.top
-					const scrollInSection = viewportCenter - section.top
-					progressInSection = sectionHeight > 0 ? scrollInSection / sectionHeight : 0
-					break
-				} else if (nextSection && viewportCenter > section.bottom && viewportCenter < nextSection.top) {
-					// Viewport center is between sections - interpolate smoothly
-					const gap = nextSection.top - section.bottom
-					const scrollInGap = viewportCenter - section.bottom
-					currentSectionIndex = section.index
-					// Progress from 0 to 1 as we move from current section to next
-					progressInSection = gap > 0 ? Math.min(1, scrollInGap / gap) : 1
-					break
-				} else if (i === sectionPositions.length - 1 && viewportCenter > section.bottom) {
-					// Past last section
-					currentSectionIndex = section.index
-					progressInSection = 1
-					break
-				}
-			}
-
-			// Calculate smooth progress: base progress + interpolation within section
-			const baseProgress = (currentSectionIndex / (totalSections - 1)) * 100
-			const sectionProgress = (1 / (totalSections - 1)) * 100
-			const interpolatedProgress = baseProgress + (sectionProgress * progressInSection)
-
-			setSmoothTimelineProgress(Math.min(100, Math.max(0, interpolatedProgress)))
-		}
-
-		// Industry best practice: Hybrid approach for scrollbar drag detection
-		// Immediate updates for scrollbar drag + RAF for smooth wheel scrolling
-		// This ensures timeline updates during scrollbar drag (which doesn't trigger RAF consistently)
-		let rafId: number | null = null
-		let lastScrollTop = window.scrollY || document.documentElement.scrollTop
-		let lastUpdateTime = 0
-		const THROTTLE_MS = 16 // ~60fps for smooth updates
-
-		const handleScroll = () => {
-			const currentScrollTop = window.scrollY || document.documentElement.scrollTop
-			const now = Date.now()
-			
-			// Always update immediately (handles scrollbar drag)
-			// This ensures timeline updates even when RAF doesn't fire during drag
-			calculateSmoothProgress()
-			setScrollProgress(calculateScrollProgress())
-			
-			// Also use RAF for smooth wheel scrolling (throttled for performance)
-			// Only throttle if scroll position changed significantly
-			if (Math.abs(currentScrollTop - lastScrollTop) >= 1) {
-				lastScrollTop = currentScrollTop
-				
-				// Throttle RAF updates to ~60fps
-				if (now - lastUpdateTime >= THROTTLE_MS) {
-					if (rafId === null) {
-						rafId = requestAnimationFrame(() => {
-							// Double-check scroll position hasn't changed during RAF
-							const latestScrollTop = window.scrollY || document.documentElement.scrollTop
-							if (Math.abs(latestScrollTop - lastScrollTop) >= 1) {
-								calculateSmoothProgress()
-								setScrollProgress(calculateScrollProgress())
-							}
-							rafId = null
-							lastUpdateTime = now
-						})
-					}
-				}
-			}
-		}
-
-		// Initial calculation
-		calculateSmoothProgress()
-
-		// Use both scroll and wheel events for comprehensive coverage
-		window.addEventListener('scroll', handleScroll, { passive: true })
-		window.addEventListener('wheel', handleScroll, { passive: true })
-		window.addEventListener('resize', calculateSmoothProgress, { passive: true })
-
 		return () => {
-			window.removeEventListener('scroll', handleScroll)
-			window.removeEventListener('wheel', handleScroll)
-			window.removeEventListener('resize', calculateSmoothProgress)
-			if (rafId !== null) {
-				cancelAnimationFrame(rafId)
+			if (userIntentTimeoutRef.current) {
+				clearTimeout(userIntentTimeoutRef.current)
 			}
 		}
-	}, [activeSectionIndex])
+	}, [])
+
+	// Legacy scroll progress state (kept for backward compatibility with calculateScrollProgress())
+	// Note: Now using useScrollProgress hook above, but keeping this state for existing references
+	// Sync with useScrollProgress hook
+	useEffect(() => {
+		setScrollProgress(smoothTimelineProgress)
+	}, [smoothTimelineProgress, setScrollProgress])
 
 	// Use keyboard navigation hook
 	const { handleKeyDown: handleKeyboardNavigation } = useKeyboardNavigation({
@@ -617,10 +623,24 @@ export default function ScrollIntoViewComponent() {
 
 	/**
 	 * Handle click with smooth scroll
+	 * FAANG approach: User intent takes priority - clicked section is immediately active
+	 * Industry best practice: Single source of truth with user intent priority
+	 * Ensures clicked section stays active until scroll completes and natural detection takes over
 	 */
 	const handleClick = useCallback(
 		(e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
 			e.preventDefault()
+			
+			// FAANG approach: Set user intent immediately - highest priority
+			// This ensures the clicked section is active immediately, no matter what
+			setUserIntentSection(sectionId)
+			
+			// Clear any existing timeout
+			if (userIntentTimeoutRef.current) {
+				clearTimeout(userIntentTimeoutRef.current)
+			}
+
+			// Scroll to section
 			scrollToSection(sectionId)
 
 			// Update current index for keyboard navigation
@@ -628,21 +648,47 @@ export default function ScrollIntoViewComponent() {
 			if (index !== -1) {
 				currentIndexRef.current = index
 			}
+
+			// Industry best practice: Clear user intent after scroll completes
+			// This allows natural scroll-based detection to take over after animation
+			// Smooth scroll typically takes 300-500ms, so clear after 800ms to be safe
+			const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+			const clearIntentDelay = prefersReducedMotion ? 200 : 800
+
+			userIntentTimeoutRef.current = setTimeout(() => {
+				// Clear user intent - allow natural scroll-based detection to take over
+				setUserIntentSection(null)
+				userIntentTimeoutRef.current = null
+				
+				// Force Intersection Observer to re-check by triggering a scroll event
+				// This ensures the observer updates even if the section is at the exact boundary
+				const element = document.getElementById(sectionId)
+				if (element) {
+					// Small scroll (1px) to trigger observer without visual movement
+					// This is a common pattern for forcing Intersection Observer updates
+					const currentScroll = window.scrollY
+					window.scrollTo({ top: currentScroll + 1, behavior: 'auto' })
+					requestAnimationFrame(() => {
+						window.scrollTo({ top: currentScroll, behavior: 'auto' })
+					})
+				}
+			}, clearIntentDelay)
 		},
 		[scrollToSection]
 	)
 
 	/**
 	 * Sync current index with active section
+	 * Uses single source of truth (finalActiveSection) for consistency
 	 */
 	useEffect(() => {
-		if (activeSection) {
-			const index = SECTIONS.findIndex((s) => s.id === activeSection)
+		if (finalActiveSection) {
+			const index = SECTIONS.findIndex((s) => s.id === finalActiveSection)
 			if (index !== -1) {
 				currentIndexRef.current = index
 			}
 		}
-	}, [activeSection])
+	}, [finalActiveSection])
 
 	return (
 		<>
@@ -669,22 +715,22 @@ export default function ScrollIntoViewComponent() {
 					<PageContainer>
 						<div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
 							<div className="flex items-center gap-6 min-w-max">
-								{SECTIONS.map((section, index) => {
-									const isActive = isSectionActive(section.id)
+					{SECTIONS.map((section, index) => {
+						const isActive = isSectionActiveEnhanced(section.id)
 
-									return (
-										<a
-											key={section.id}
-											ref={getButtonRef(section.id)}
-											href={`#${section.id}`}
-											onClick={(e) => handleClick(e, section.id)}
-											onKeyDown={(e) => handleKeyDown(e, section.id, index)}
-											className={classNames(
+						return (
+							<a
+								key={section.id}
+								ref={getButtonRef(section.id)}
+								href={`#${section.id}`}
+								onClick={(e) => handleClick(e, section.id)}
+								onKeyDown={(e) => handleKeyDown(e, section.id, index)}
+								className={classNames(
 												// Base styles - Elegant text link
 												'relative inline-flex items-center',
 												'px-0 py-2.5', // Vertical padding for touch target (44px min)
 												'text-sm font-medium whitespace-nowrap',
-												'min-h-[44px]', // WCAG touch target minimum
+									'min-h-[44px]', // WCAG touch target minimum
 												'transition-colors duration-200 ease-out',
 												'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-base-100',
 												// Underline animation (elegant, subtle)
@@ -714,7 +760,7 @@ export default function ScrollIntoViewComponent() {
 				<PageContainer className="hidden md:block py-4">
 					<div className="flex items-center justify-center gap-8 lg:gap-10">
 						{SECTIONS.map((section, index) => {
-							const isActive = isSectionActive(section.id)
+							const isActive = isSectionActiveEnhanced(section.id)
 
 							return (
 								<a
@@ -734,8 +780,8 @@ export default function ScrollIntoViewComponent() {
 										'after:absolute after:bottom-2 after:left-0 after:right-0 after:h-[2px] after:bg-primary after:opacity-0 after:transition-all after:duration-200 after:ease-out',
 										// Hover state (matching Navbar: color change + underline)
 										'hover:text-primary hover:after:opacity-100',
-										// Active state
-										{
+									// Active state
+									{
 											// Active: Primary color + visible underline
 											'text-primary after:opacity-100': isActive,
 											// Inactive: Base content color (matching Navbar)
@@ -810,7 +856,7 @@ export default function ScrollIntoViewComponent() {
 					{/* Industry best practice: Typography-first approach - labels are the indicators */}
 					{/* Inspired by Apple's documentation, Stripe's navigation, Vercel's sidebars */}
 					{SECTIONS.map((section, index) => {
-						const isActive = isSectionActive(section.id)
+						const isActive = isSectionActiveEnhanced(section.id)
 						const isPast = activeSectionIndex > index
 						const isFuture = activeSectionIndex < index
 						

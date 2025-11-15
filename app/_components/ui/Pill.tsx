@@ -6,7 +6,7 @@
  * Fully responsive with mobile-first design following FAANG-level best practices.
  *
  * **Features:**
- * - 5 color tones (brand, success, warning, info, neutral)
+ * - 7 color tones (brand, accent, primary, success, warning, info, neutral)
  * - 3 size options (sm, md, lg) with responsive scaling
  * - Shadow support (none, sm, lg)
  * - Icon support (left-positioned, properly aligned on wrap)
@@ -37,13 +37,19 @@
  * <Pill size="md" shadow="sm" tone="neutral">
  *   Medical Supply Specialists
  * </Pill>
+ * 
+ * // Section labels with different tones
+ * <Pill tone="accent">Why MedSource Pro</Pill>
+ * <Pill tone="primary">Featured Inventory</Pill>
+ * <Pill tone="info">Product Catalog</Pill>
+ * <Pill tone="warning">FAQ</Pill>
  * ```
  */
 
 import { ReactNode } from 'react'
 import classNames from 'classnames'
 
-type PillTone = 'brand' | 'success' | 'warning' | 'info' | 'neutral'
+type PillTone = 'brand' | 'accent' | 'primary' | 'success' | 'warning' | 'info' | 'neutral'
 type PillSize = 'sm' | 'md' | 'lg'
 type PillShadow = 'none' | 'sm' | 'lg'
 
@@ -65,11 +71,13 @@ export interface PillProps {
 }
 
 const toneClasses: Record<PillTone, string> = {
-	brand: 'bg-primary/10 text-primary',
-	success: 'bg-success/10 text-success',
-	warning: 'bg-warning/20 text-warning',
-	info: 'bg-info/15 text-info',
-	neutral: 'bg-base-300/40 text-base-content',
+	brand: 'bg-primary/10 text-primary',      // Legacy alias for primary (backward compatible)
+	accent: 'bg-accent/10 text-accent',        // Accent color for highlights
+	primary: 'bg-primary/10 text-primary',     // Primary brand color
+	success: 'bg-success/10 text-success',     // Success states
+	warning: 'bg-warning/20 text-warning',     // Warning/caution states
+	info: 'bg-info/15 text-info',              // Informational states
+	neutral: 'bg-base-300/40 text-base-content', // Neutral/muted states
 }
 
 /**
