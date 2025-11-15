@@ -79,9 +79,22 @@ export default class Home {
 	 * Carousel Product Names
 	 * 
 	 * Featured product names to display in homepage carousel.
-	 * Highlights key product categories and offerings.
+	 * Highlights key product categories and offerings across medical gas systems,
+	 * respiratory care, surgical supplies, diagnostics, PPE, and facility essentials.
 	 */
-	public static CarouselProducts = ['Medical Tent', 'Regulators', 'KN45 Mask', 'Flowmeters', 'Tri-Gas Adaptor']
+	public static CarouselProducts = [
+		'Medical Gas Regulators',
+		'Oxygen Flowmeters',
+		'Tri-Gas Adaptors',
+		'Respiratory Masks',
+		'Infusion Pumps',
+		'Surgical Instruments',
+		'Diagnostic Equipment',
+		'Medical Tents',
+		'PPE Supplies',
+		'Laboratory Consumables',
+		'Monitoring Devices',
+	]
 
 	/**
 	 * Sales Pitch Section

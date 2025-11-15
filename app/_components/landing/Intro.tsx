@@ -5,6 +5,8 @@ import { ArrowUpRight } from 'lucide-react'
 import DoctorsImage from '@/public/LandingImage1.png'
 import PageContainer from '@_components/layouts/PageContainer'
 import Button from '@_components/ui/Button'
+import Pill from '@_components/ui/Pill'
+import StatusDot from '@_components/ui/StatusDot'
 
 /**
  * Intro Section
@@ -22,10 +24,15 @@ export default function Intro() {
 
 			<PageContainer className="relative grid gap-16 py-20 lg:grid-cols-[1fr_1fr] lg:items-start xl:gap-24">
 				<div className="flex flex-col items-start gap-8">
-					<span className="badge badge-neutral gap-2 px-4 py-3 text-xs font-medium uppercase tracking-[0.3em] shadow-sm">
-						<span className="h-2 w-2 animate-pulse rounded-full bg-success" />
+					<Pill
+						tone="neutral"
+						size="md"
+						shadow="sm"
+						fontWeight="medium"
+						icon={<StatusDot variant="success" size="sm" animated />}
+					>
 						Medical supply specialists
-					</span>
+					</Pill>
 
 					<header className="space-y-4 text-left">
 						<h1 className="text-4xl font-extrabold leading-[1.05] text-base-content sm:text-5xl lg:text-6xl">
@@ -103,10 +110,16 @@ export default function Intro() {
 							priority
 						/>
 
-						<div className="badge badge-neutral absolute bottom-6 left-6 gap-3 px-6 py-4 text-xs font-semibold uppercase tracking-[0.35em] shadow-lg">
-							<span className="h-2 w-2 animate-pulse rounded-full bg-success" />
+						<Pill
+							tone="neutral"
+							size="lg"
+							shadow="lg"
+							fontWeight="semibold"
+							icon={<StatusDot variant="success" size="sm" animated />}
+							className="absolute bottom-6 left-6"
+						>
 							On-time inventory
-						</div>
+						</Pill>
 					</div>
 				</div>
 			</PageContainer>

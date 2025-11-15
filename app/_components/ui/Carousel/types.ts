@@ -27,26 +27,34 @@ export interface CarouselSlide {
 	[key: string]: unknown
 }
 
+export type CarouselMode = 'carousel' | 'banner'
+
 export interface CarouselProps {
 	/** Array of slides to display */
 	slides: CarouselSlide[]
-	/** Whether to auto-play the carousel */
+	/** Display mode: 'carousel' for discrete slides, 'banner' for continuous scrolling */
+	mode?: CarouselMode
+	/** Whether to auto-play the carousel (only applies to carousel mode) */
 	autoPlay?: boolean
-	/** Auto-play interval in milliseconds */
+	/** Auto-play interval in milliseconds (only applies to carousel mode) */
 	autoPlayInterval?: number
 	/** Whether to loop infinitely */
 	loop?: boolean
-	/** Whether to show navigation arrows */
+	/** Whether to show navigation arrows (only applies to carousel mode) */
 	showArrows?: boolean
-	/** Whether to show dot indicators */
+	/** Whether to show dot indicators (only applies to carousel mode) */
 	showDots?: boolean
-	/** Whether to show slide numbers (like 06, 07, 08) */
+	/** Whether to show slide numbers (like 06, 07, 08) (only applies to carousel mode) */
 	showSlideNumbers?: boolean
 	/** Whether to show gradient overlay at bottom for better text readability */
 	showGradientOverlay?: boolean
+	/** Animation duration for banner mode in seconds (default: 30s) */
+	bannerSpeed?: number
+	/** Gap between items in banner mode (default: 'gap-8') */
+	bannerGap?: string
 	/** Additional CSS classes */
 	className?: string
-	/** Callback when slide changes */
+	/** Callback when slide changes (only applies to carousel mode) */
 	onSlideChange?: (index: number) => void
 }
 

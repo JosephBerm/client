@@ -45,12 +45,9 @@ export default function ProductCategoriesCarousel() {
 			<PageContainer className="max-w-7xl">
 				<Carousel
 					slides={slides}
-					autoPlay={true}
-					autoPlayInterval={3000}
-					loop={true}
-					showArrows={true}
-					showDots={false}
-					showSlideNumbers={false}
+					mode="banner"
+					bannerSpeed={40}
+					bannerGap="gap-8 sm:gap-12 md:gap-16 lg:gap-20"
 					showGradientOverlay={false}
 					className="rounded-2xl border border-base-300/40 bg-base-100 shadow-sm overflow-hidden w-full"
 				/>

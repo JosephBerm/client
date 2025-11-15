@@ -373,8 +373,8 @@ const CarouselSlideComponent = memo(function CarouselSlide({
 	// Determine slide height based on type - Mobile-first approach
 	const getSlideHeight = () => {
 		if (slide.type === 'text') {
-			// Text slides: full height for elegant presentation - Mobile-first
-			return 'h-[280px] sm:h-[320px] md:h-[360px] lg:h-[400px] xl:h-[440px]'
+			// Text slides: reduced height for more compact presentation - Mobile-first
+			return 'h-[160px] sm:h-[180px] md:h-[200px] lg:h-[220px] xl:h-[240px]'
 		}
 		// Image and video slides use the original aspect-video height - Mobile-first
 		return 'aspect-video min-h-[400px] sm:min-h-[450px] md:min-h-[550px] lg:min-h-[650px] xl:min-h-[750px] 2xl:min-h-[850px]'

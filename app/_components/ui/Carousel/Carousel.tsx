@@ -98,6 +98,7 @@ import CarouselDots from './CarouselDots'
  */
 export default function Carousel({
 	slides,
+	mode = 'carousel',
 	autoPlay = false,
 	autoPlayInterval = 3000,
 	loop = true,
@@ -105,17 +106,22 @@ export default function Carousel({
 	showDots = true,
 	showSlideNumbers = false,
 	showGradientOverlay = false,
+	bannerSpeed = 30,
+	bannerGap = 'gap-6',
 	className = '',
 	onSlideChange,
 }: CarouselProps) {
+	// Only initialize Embla for carousel mode
 	const [emblaRef, emblaApi] = useEmblaCarousel(
-		{
-			loop,
-			align: 'start', // Changed from 'center' to 'start' to prevent width calculation issues
-			dragFree: false,
-			duration: 25,
-			watchDrag: true,
-		},
+		mode === 'carousel'
+			? {
+					loop,
+					align: 'start', // Changed from 'center' to 'start' to prevent width calculation issues
+					dragFree: false,
+					duration: 25,
+					watchDrag: true,
+				}
+			: undefined,
 		[]
 	)
 
@@ -140,9 +146,9 @@ export default function Carousel({
 		[onSlideChange]
 	)
 
-	// Initialize scroll snaps and set up event listeners
+	// Initialize scroll snaps and set up event listeners (carousel mode only)
 	useEffect(() => {
-		if (!emblaApi) return
+		if (mode !== 'carousel' || !emblaApi) return
 
 		// Set initial scroll snaps
 		setScrollSnaps(emblaApi.scrollSnapList())
@@ -163,11 +169,11 @@ export default function Carousel({
 			emblaApi.off('reInit', onSelect)
 			emblaApi.off('reInit', updateScrollSnaps)
 		}
-	}, [emblaApi, onSelect])
+	}, [mode, emblaApi, onSelect])
 
-	// Auto-play functionality
+	// Auto-play functionality (carousel mode only)
 	useEffect(() => {
-		if (!autoPlay || !emblaApi) return
+		if (mode !== 'carousel' || !autoPlay || !emblaApi) return
 
 		const interval = setInterval(() => {
 			if (emblaApi.canScrollNext()) {
@@ -178,11 +184,11 @@ export default function Carousel({
 		}, autoPlayInterval)
 
 		return () => clearInterval(interval)
-	}, [autoPlay, autoPlayInterval, emblaApi, loop])
+	}, [mode, autoPlay, autoPlayInterval, emblaApi, loop])
 
-	// Keyboard navigation
+	// Keyboard navigation (carousel mode only)
 	useEffect(() => {
-		if (!emblaApi) return
+		if (mode !== 'carousel' || !emblaApi) return
 
 		const handleKeyDown = (event: KeyboardEvent) => {
 			switch (event.key) {
@@ -212,7 +218,7 @@ export default function Carousel({
 		return () => {
 			carouselElement.removeEventListener('keydown', handleKeyDown)
 		}
-		}, [emblaApi, scrollSnaps.length])
+		}, [mode, emblaApi, scrollSnaps.length])
 
 	// Memoize slide numbers display
 	const slideNumbers = useMemo(() => {
@@ -228,12 +234,104 @@ export default function Carousel({
 		return { prev, current, next }
 	}, [showSlideNumbers, selectedIndex, slides.length])
 
+	// Banner mode: Create duplicated slides for seamless infinite scroll
+	// Using 2x duplication with 50% animation for more reliable seamless loop
+	// This pattern ensures perfect alignment regardless of content width variations
+	const bannerSlides = useMemo(() => {
+		if (mode !== 'banner' || !slides || slides.length === 0) return []
+		// Duplicate slides array 2 times for seamless infinite scroll
+		// Animating by 50% ensures perfect loop alignment
+		return [...slides, ...slides]
+	}, [mode, slides])
+
 	// Validate slides
 	if (!slides || slides.length === 0) {
 		return (
 			<div className={`flex items-center justify-center p-4 md:p-8 bg-base-200 rounded-lg ${className}`}>
 				<p className='text-sm md:text-base text-base-content/70'>No slides to display</p>
 			</div>
+		)
+	}
+
+	// Banner mode rendering - smooth continuous scrolling
+	if (mode === 'banner') {
+		// Use 50% animation distance for seamless loop with 2x duplicated content
+		// This ensures perfect alignment: when animation completes, second set aligns with first
+		const animationDistance = 50
+		const animationName = `carousel-banner-scroll-${bannerSpeed}`
+		
+		return (
+			<>
+				{/* CSS Animation styles - injected once per unique animation */}
+				{/* Using 50% ensures seamless loop: second duplicate perfectly aligns with first */}
+				<style dangerouslySetInnerHTML={{
+					__html: `
+						@keyframes ${animationName} {
+							0% {
+								transform: translateX(0);
+							}
+							100% {
+								transform: translateX(-${animationDistance}%);
+							}
+						}
+						
+						@media (prefers-reduced-motion: reduce) {
+							.carousel-banner-animated {
+								animation-duration: ${bannerSpeed * 2}s !important;
+							}
+						}
+					`
+				}} />
+				
+				<div
+					className={`relative w-full max-w-full overflow-hidden ${className}`}
+					role='region'
+					aria-label='Product categories banner'
+					aria-live='polite'>
+					{/* Gradient fade overlays for smooth edges - Mobile-first */}
+					<div className='absolute left-0 top-0 bottom-0 w-8 sm:w-12 md:w-16 lg:w-20 z-10 bg-gradient-to-r from-base-100 to-transparent pointer-events-none' />
+					<div className='absolute right-0 top-0 bottom-0 w-8 sm:w-12 md:w-16 lg:w-20 z-10 bg-gradient-to-l from-base-100 to-transparent pointer-events-none' />
+					
+					{/* Infinite scrolling container with elegant vertical spacing */}
+					<div className='overflow-hidden w-full py-4 sm:py-6 md:py-8 lg:py-10'>
+						<div
+							className={`flex ${bannerGap} items-center carousel-banner-animated`}
+							style={{
+								animation: `${animationName} ${bannerSpeed}s linear infinite`,
+								willChange: 'transform',
+							}}>
+							{bannerSlides.map((slide, index) => {
+								// For banner mode, render text slides with elegant typography
+								// Industry best practice: Larger sizes, better spacing, refined styling
+								if (slide.type === 'text') {
+									return (
+										<span
+											key={`${slide.id}-${index}`}
+											className='shrink-0 whitespace-nowrap text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold text-base-content leading-relaxed tracking-wide'>
+											{slide.text || slide.title}
+										</span>
+									)
+								}
+								
+								// For image/video slides, use CarouselSlide component
+								return (
+									<div
+										key={`${slide.id}-${index}`}
+										className='shrink-0'>
+										<CarouselSlide
+											slide={slide}
+											isActive={true}
+											showGradientOverlay={showGradientOverlay}
+											className='h-auto'
+											style={{ width: 'auto', minWidth: '200px' }}
+										/>
+									</div>
+								)
+							})}
+						</div>
+					</div>
+				</div>
+			</>
 		)
 	}
 

@@ -3,5 +3,5 @@
  */
 
 export { default as Carousel } from './Carousel'
-export type { CarouselProps, CarouselSlide, CarouselSlideType } from './types'
+export type { CarouselProps, CarouselSlide, CarouselSlideType, CarouselMode } from './types'
 
