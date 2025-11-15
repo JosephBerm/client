@@ -21,30 +21,43 @@ const SECTIONS = [
 /**
  * ScrollIntoViewComponent
  *
- * Enhanced sticky bottom navigation bar with scroll spy functionality.
+ * Elegant sticky bottom navigation bar with scroll spy functionality.
  * Provides quick anchor links to major landing page sections with active state indication.
+ * Designed with industry best practices for elegant, powerful navigation (inspired by Apple, Stripe, Vercel).
+ *
+ * **Design:**
+ * - Elegant text links (not buttons) matching Navbar pattern
+ * - Subtle underline animation on hover and active states
+ * - Proper spacing that scales with screen size
+ * - Mobile-first approach with horizontal scroll
+ * - Touch-friendly targets (44px minimum)
  *
  * **Features:**
  * - Scroll spy: Automatically highlights current section as user scrolls
- * - Active state indication: Visual feedback for current section
+ * - Active state indication: Primary color + visible underline
  * - Smooth scroll: Smooth scrolling with header offset calculation
  * - Keyboard navigation: Full keyboard support (Arrow keys, Enter, Space)
- * - Mobile-first: Responsive design optimized for all screen sizes
+ * - Mobile-first: Horizontal scroll on mobile, centered navigation on desktop
  * - Accessibility: ARIA labels, screen reader support, focus management
  * - Performance: Uses Intersection Observer API (better than scroll listeners)
  * - Modern design: Elegant styling with smooth animations
  *
- * **Behavior:**
- * - Sticky on desktop (md:sticky md:bottom-0)
- * - Normal positioning on mobile
- * - Auto-updates active state as user scrolls
- * - Smooth scroll to sections with header offset
- * - Keyboard navigation support
+ * **Mobile Behavior (< 768px):**
+ * - Horizontal scroll with edge-to-edge padding
+ * - Touch-friendly tap targets (44px minimum)
+ * - Hidden scrollbar for clean appearance
+ * - Subtle text color (base-content/70) for inactive items
+ *
+ * **Desktop Behavior (>= 768px):**
+ * - Centered navigation with elegant spacing
+ * - Spacing scales with screen size: gap-8 → lg:gap-10 → xl:gap-12 → 2xl:gap-16
+ * - Full text color (base-content) for inactive items
+ * - Sticky positioning (sticky bottom-0)
  *
  * **Accessibility:**
  * - ARIA labels for screen readers
  * - Keyboard navigation (Arrow keys, Enter, Space)
- * - Focus indicators
+ * - Focus indicators with proper offset
  * - Respects reduced motion preferences
  *
  * **Performance:**
@@ -138,8 +151,55 @@ export default function ScrollIntoViewComponent() {
 			className="z-20 bg-base-100/95 backdrop-blur-sm border-t border-base-300/40 md:sticky md:bottom-0 md:shadow-[0_-4px_16px_rgba(0,0,0,0.08)]"
 			role="navigation"
 			aria-label="Page sections navigation">
-			<PageContainer className="py-3 md:py-4">
-				<div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:flex-nowrap md:justify-between md:gap-2 lg:gap-4">
+			{/* Mobile: Horizontal scroll with edge-to-edge padding (similar to ProductsCarousel pattern) */}
+			<div className="md:hidden py-4">
+				<PageContainer>
+					<div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
+						<div className="flex items-center gap-6 min-w-max">
+							{SECTIONS.map((section, index) => {
+								const isActive = isSectionActive(section.id)
+
+								return (
+									<a
+										key={section.id}
+										ref={getButtonRef(section.id)}
+										href={`#${section.id}`}
+										onClick={(e) => handleClick(e, section.id)}
+										onKeyDown={(e) => handleKeyDown(e, section.id, index)}
+										className={classNames(
+											// Base styles - Elegant text link
+											'relative inline-flex items-center',
+											'px-0 py-2.5', // Vertical padding for touch target (44px min)
+											'text-sm font-medium whitespace-nowrap',
+											'min-h-[44px]', // WCAG touch target minimum
+											'transition-colors duration-200 ease-out',
+											'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-base-100',
+											// Underline animation (elegant, subtle)
+											'after:absolute after:bottom-1.5 after:left-0 after:right-0 after:h-[2px] after:bg-primary after:opacity-0 after:transition-all after:duration-200 after:ease-out',
+											// Hover state
+											'hover:text-primary hover:after:opacity-100',
+											// Active state
+											{
+												// Active: Primary color + visible underline
+												'text-primary after:opacity-100': isActive,
+												// Inactive: Base content color (subtle for mobile)
+												'text-base-content/70': !isActive,
+											}
+										)}
+										aria-current={isActive ? 'page' : undefined}
+										aria-label={`Navigate to ${section.label} section`}>
+										{section.label}
+									</a>
+								)
+							})}
+						</div>
+					</div>
+				</PageContainer>
+			</div>
+
+			{/* Desktop: Centered navigation with elegant spacing (matching Navbar pattern) */}
+			<PageContainer className="hidden md:block py-5">
+				<div className="flex items-center justify-center gap-8 lg:gap-10 xl:gap-12 2xl:gap-16">
 					{SECTIONS.map((section, index) => {
 						const isActive = isSectionActive(section.id)
 
@@ -151,29 +211,27 @@ export default function ScrollIntoViewComponent() {
 								onClick={(e) => handleClick(e, section.id)}
 								onKeyDown={(e) => handleKeyDown(e, section.id, index)}
 								className={classNames(
-									// Base styles - Mobile-first
-									'inline-flex items-center justify-center',
-									'px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-2.5',
-									'text-xs sm:text-sm md:text-base',
-									'font-medium',
-									'rounded-lg',
-									'min-h-[44px]', // WCAG touch target minimum
-									'transition-all duration-300 ease-in-out',
-									'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2',
-									// Mobile: Equal width, wraps
-									'flex-1 sm:flex-1 md:flex-initial',
-									'min-w-[calc(50%-0.25rem)] sm:min-w-[calc(33.333%-0.5rem)] md:min-w-0',
+									// Base styles - Elegant text link (matching Navbar pattern)
+									'relative inline-flex items-center',
+									'px-0 py-3', // Vertical padding for comfortable click target
+									'text-base font-medium whitespace-nowrap',
+									'transition-colors duration-200 ease-out',
+									'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-4 focus-visible:ring-offset-base-100',
+									// Underline animation (elegant, subtle)
+									'after:absolute after:bottom-2 after:left-0 after:right-0 after:h-[2px] after:bg-primary after:opacity-0 after:transition-all after:duration-200 after:ease-out',
+									// Hover state (matching Navbar: color change + underline)
+									'hover:text-primary hover:after:opacity-100',
 									// Active state
 									{
-										// Active: Primary background, white text
-										'bg-primary text-primary-content shadow-md scale-105': isActive,
-										// Inactive: Outline style
-										'bg-transparent border border-base-300 text-base-content hover:bg-base-200 hover:border-primary/50 hover:text-primary': !isActive,
+										// Active: Primary color + visible underline
+										'text-primary after:opacity-100': isActive,
+										// Inactive: Base content color (matching Navbar)
+										'text-base-content': !isActive,
 									}
 								)}
 								aria-current={isActive ? 'page' : undefined}
 								aria-label={`Navigate to ${section.label} section`}>
-								<span className="whitespace-nowrap">{section.label}</span>
+								{section.label}
 							</a>
 						)
 					})}

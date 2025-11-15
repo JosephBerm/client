@@ -740,4 +740,14 @@
 			opacity: 0.3 !important;
 		}
 	}
+
+	/* Scrollbar Hide - Hide scrollbar while maintaining scroll functionality */
+	.scrollbar-hide {
+		-ms-overflow-style: none !important;  /* IE and Edge */
+		scrollbar-width: none !important;  /* Firefox */
+	}
+
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none !important;  /* Chrome, Safari, Opera */
+	}
 }

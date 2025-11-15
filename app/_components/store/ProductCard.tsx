@@ -35,6 +35,7 @@ import ProductImage from '@_components/store/ProductImage'
 import { Routes } from '@_features/navigation'
 import { ImagePreloadService } from '@_features/images'
 import { logger } from '@_core'
+import { PRODUCT_CARD_CONSTANTS } from './ProductCard.constants'
 
 export interface ProductCardProps {
 	/** Product data to display */
@@ -156,6 +157,8 @@ export default function ProductCard({
 		}
 	}, [])
 
+	const { DIMENSIONS, STYLES, SPACING } = PRODUCT_CARD_CONSTANTS
+
 	return (
 		<Link
 			href={`${Routes.Store.location}/product/${product.id}`}
@@ -163,10 +166,10 @@ export default function ProductCard({
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
 			prefetch={true}
-			className={`group relative flex flex-col overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-xl ${className}`}
+			className={`group relative ${STYLES.CONTAINER} ${STYLES.CONTAINER_HOVER} ${className}`}
 		>
 			{/* Image Container - Fixed aspect ratio */}
-			<div className="relative aspect-square w-full shrink-0 overflow-hidden bg-base-200">
+			<div className={STYLES.IMAGE_CONTAINER}>
 				{/* Product Image with stock badge overlay */}
 				<ProductImage
 					product={product}
@@ -205,33 +208,33 @@ export default function ProductCard({
 			</div>
 
 			{/* Content Container - Grows to fill space */}
-			<div className="flex flex-1 flex-col p-4 sm:p-5">
+			<div className={STYLES.CONTENT_CONTAINER}>
 				{/* Product Name - Fixed 2 lines */}
-				<h3 className="line-clamp-2 leading-tight transition-colors group-hover:text-primary" style={{ fontSize: '1.125rem', fontWeight: 600, minHeight: '2.25rem', lineHeight: 1.25 }}>
+				<h3 className={STYLES.PRODUCT_NAME} style={DIMENSIONS.PRODUCT_NAME}>
 					{product.name || 'Unnamed product'}
 				</h3>
 
 				{/* Manufacturer - Fixed 1 line */}
-				<p className="mt-2 line-clamp-1 text-base-content/70" style={{ fontSize: '0.875rem', minHeight: '1.25rem', lineHeight: 1.43 }}>
+				<p className={`${SPACING.MANUFACTURER_MARGIN} ${STYLES.MANUFACTURER}`} style={DIMENSIONS.MANUFACTURER}>
 					{product.manufacturer || 'Manufacturer pending'}
 				</p>
 
 				{/* Price - Prominent, fixed height */}
-				<div className="mt-3 flex items-baseline gap-2" style={{ minHeight: '2.25rem' }}>
-					<span className="font-bold text-primary" style={{ fontSize: '1.875rem', lineHeight: 1.2 }}>
+				<div className={`${SPACING.PRICE_MARGIN} ${STYLES.PRICE_CONTAINER}`} style={{ minHeight: DIMENSIONS.PRICE.minHeight }}>
+					<span className={STYLES.PRICE} style={{ fontSize: DIMENSIONS.PRICE.fontSize, lineHeight: DIMENSIONS.PRICE.lineHeight }}>
 						{formatCurrency(product.price)}
 					</span>
 				</div>
 
 				{/* Metadata - Organized with Icons, fixed height */}
-				<div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5 text-base-content/60" style={{ fontSize: '0.875rem', minHeight: '1.25rem' }}>
-					<div className="flex items-center gap-1 whitespace-nowrap">
-						<Package className="h-4 w-4 shrink-0" strokeWidth={2} />
+				<div className={`${SPACING.METADATA_MARGIN} ${STYLES.METADATA_CONTAINER}`} style={{ minHeight: DIMENSIONS.METADATA.minHeight }}>
+					<div className={STYLES.METADATA_ITEM}>
+						<Package className={`${STYLES.ICON} shrink-0`} strokeWidth={2} />
 						<span className="font-medium">SKU:</span>
 						<span className="truncate">{product.sku || 'N/A'}</span>
 					</div>
-					<div className="flex items-center gap-1 whitespace-nowrap">
-						<Warehouse className="h-4 w-4 shrink-0" strokeWidth={2} />
+					<div className={STYLES.METADATA_ITEM}>
+						<Warehouse className={`${STYLES.ICON} shrink-0`} strokeWidth={2} />
 						<span className="font-medium">Stock:</span>
 						<span className={product.stock === 0 ? 'text-error' : product.stock && product.stock < 10 ? 'text-warning' : ''}>
 							{product.stock ?? 0}
@@ -242,40 +245,40 @@ export default function ProductCard({
 				{/* Categories - Elegant hashtag-style tags (single line, no wrap) */}
 				{/* Industry best practice: Tags expand fully without truncation, excess tags go to +1 count */}
 				{/* Container uses overflow-hidden to prevent tags from going outside card bounds */}
-				<div className="mt-3 overflow-hidden" style={{ minHeight: '1.5rem' }}>
+				<div className={`${SPACING.CATEGORY_MARGIN} ${STYLES.CATEGORY_CONTAINER}`} style={DIMENSIONS.CATEGORY}>
 					{product.categories.length > 0 ? (
-						<div className="flex items-center gap-2 min-w-0">
+						<div className={STYLES.CATEGORY_TAGS}>
 							{product.categories.slice(0, 2).map((cat) => (
 								<span
 									key={cat.id}
-									className="badge badge-secondary badge-outline inline-flex items-center gap-1 whitespace-nowrap shrink min-w-0"
+									className={STYLES.CATEGORY_BADGE}
 									title={cat.name}
 								>
-									<span className="text-[0.65rem] opacity-70 shrink-0">#</span>
-									<span className="truncate">{cat.name}</span>
+									<span className={STYLES.CATEGORY_BADGE_ICON}>#</span>
+									<span className={STYLES.CATEGORY_BADGE_TEXT}>{cat.name}</span>
 								</span>
 							))}
 							{product.categories.length > 2 && (
-								<span className="badge badge-neutral badge-sm shrink-0">
+								<span className={STYLES.CATEGORY_COUNT_BADGE}>
 									+{product.categories.length - 2}
 								</span>
 							)}
 						</div>
 					) : (
-						<span style={{ fontSize: '0.75rem' }} className="text-base-content/40">No categories</span>
+						<span style={{ fontSize: '0.75rem' }} className={STYLES.CATEGORY_EMPTY}>No categories</span>
 					)}
 				</div>
 
 				{/* Spacer - Pushes button to bottom */}
-				<div className="flex-1" style={{ minHeight: '0.5rem' }} />
+				<div className={STYLES.SPACER} style={DIMENSIONS.SPACER} />
 
 				{/* Call to Action - Centered, elegant button */}
-				<div className="mt-4 flex justify-center">
+				<div className={`${SPACING.BUTTON_MARGIN} ${STYLES.BUTTON_CONTAINER}`}>
 					<Button
 						variant="primary"
 						size="md"
-						className="w-full transition-transform group-hover:scale-[1.02]"
-						style={{ fontSize: '0.875rem', padding: '0.625rem 1rem', minHeight: '2.5rem' }}
+						className={STYLES.BUTTON}
+						style={DIMENSIONS.BUTTON}
 					>
 						View Details
 					</Button>

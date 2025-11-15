@@ -37,6 +37,8 @@
 
 'use client'
 
+import { PRODUCT_CARD_CONSTANTS } from './ProductCard.constants'
+
 export interface ProductCardSkeletonProps {
 	/** Number of skeleton cards to render */
 	count?: number
@@ -57,107 +59,119 @@ export interface ProductCardSkeletonProps {
  * The combined effect is highly visible and elegant.
  * 
  * **Size Matching Strategy:**
- * - Exact dimensions from ProductCard component for pixel-perfect alignment
- * - Shared style objects for consistency between skeleton and actual card
+ * - Uses shared constants from ProductCard.constants.ts for pixel-perfect alignment
+ * - Single source of truth ensures skeleton always matches ProductCard layout
  * - Color variations to indicate different content types (heading vs text)
  */
 function SingleProductCardSkeleton({ className = '' }: { className?: string }) {
-	// Shared style constants - matches ProductCard exactly (FAANG: DRY principle)
-	const PRODUCT_NAME_HEIGHT = '2.25rem'      // fontSize: 1.125rem, 2 lines
-	const MANUFACTURER_HEIGHT = '1.25rem'      // fontSize: 0.875rem, 1 line
-	const PRICE_HEIGHT = '2.25rem'             // fontSize: 1.875rem
-	const METADATA_HEIGHT = '1.25rem'          // fontSize: 0.875rem
-	const CATEGORY_HEIGHT = '1.5rem'           // Badge height
-	const BUTTON_HEIGHT = '2.5rem'             // Button minHeight
+	const { DIMENSIONS, STYLES, SPACING, SKELETON } = PRODUCT_CARD_CONSTANTS
 	
 	return (
 		<div 
-			className={`flex flex-col overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm ${className}`}
+			className={`${STYLES.CONTAINER} ${className}`}
 			role="status"
 			aria-label="Loading product"
 		>
 			{/* Image Skeleton - Fixed aspect ratio, matches ProductCard image */}
-			<div className="relative aspect-square w-full shrink-0 bg-base-200 skeleton-shimmer" />
+			<div className={`${STYLES.IMAGE_CONTAINER} skeleton-shimmer`} />
 			
 			{/* Content Container - Matches ProductCard padding exactly */}
-			<div className="flex flex-1 flex-col p-4 sm:p-5">
+			<div className={STYLES.CONTENT_CONTAINER}>
 				{/* Product Name Skeleton - 2 lines, matches fontSize: 1.125rem (18px) */}
-				<div className="space-y-1.5" style={{ minHeight: PRODUCT_NAME_HEIGHT }}>
+				<div className={SPACING.PRODUCT_NAME_LINES} style={{ minHeight: DIMENSIONS.PRODUCT_NAME.minHeight }}>
 					<div 
 						className="rounded skeleton-shimmer" 
-						style={{ height: '1.125rem', width: '100%' }}
+						style={{ height: SKELETON.PRODUCT_NAME.height, width: SKELETON.PRODUCT_NAME.width.first }}
 					/>
 					<div 
 						className="rounded skeleton-shimmer" 
-						style={{ height: '1.125rem', width: '70%' }}
+						style={{ height: SKELETON.PRODUCT_NAME.height, width: SKELETON.PRODUCT_NAME.width.second }}
 					/>
 				</div>
 				
 				{/* Manufacturer Skeleton - 1 line, matches fontSize: 0.875rem (14px) */}
 				<div 
-					className="mt-2 rounded skeleton-shimmer" 
-					style={{ height: '0.875rem', width: '45%', minHeight: MANUFACTURER_HEIGHT }}
+					className={`${SPACING.MANUFACTURER_MARGIN} rounded skeleton-shimmer`}
+					style={{ 
+						height: SKELETON.MANUFACTURER.height, 
+						width: SKELETON.MANUFACTURER.width, 
+						minHeight: DIMENSIONS.MANUFACTURER.minHeight 
+					}}
 				/>
 				
 				{/* Price Skeleton - Prominent, matches fontSize: 1.875rem (30px) */}
 				<div 
-					className="mt-3 rounded-lg skeleton-shimmer" 
-					style={{ height: '1.875rem', width: '40%', minHeight: PRICE_HEIGHT }}
+					className={`${SPACING.PRICE_MARGIN} rounded-lg skeleton-shimmer`}
+					style={{ 
+						height: SKELETON.PRICE.height, 
+						width: SKELETON.PRICE.width, 
+						minHeight: DIMENSIONS.PRICE.minHeight 
+					}}
 				/>
 				
 				{/* Metadata Skeleton - Icons + Text, matches fontSize: 0.875rem (14px) */}
-				<div className="mt-3 flex gap-3" style={{ minHeight: METADATA_HEIGHT }}>
+				<div className={`${SPACING.METADATA_MARGIN} ${STYLES.METADATA_CONTAINER}`} style={{ minHeight: DIMENSIONS.METADATA.minHeight }}>
 					{/* SKU metadata */}
-					<div className="flex items-center gap-1">
+					<div className={STYLES.METADATA_ITEM}>
 						{/* Icon skeleton */}
 						<div 
 							className="shrink-0 rounded skeleton-shimmer" 
-							style={{ height: '1rem', width: '1rem' }}
+							style={{ height: SKELETON.METADATA_ICON.height, width: SKELETON.METADATA_ICON.width }}
 						/>
 						{/* Text skeleton: "SKU: XXXX" */}
 						<div 
 							className="rounded skeleton-shimmer" 
-							style={{ height: '0.875rem', width: '4rem' }}
+							style={{ height: SKELETON.METADATA_TEXT.height, width: SKELETON.METADATA_TEXT.width.sku }}
 						/>
 					</div>
 					
 					{/* Stock metadata */}
-					<div className="flex items-center gap-1">
+					<div className={STYLES.METADATA_ITEM}>
 						{/* Icon skeleton */}
 						<div 
 							className="shrink-0 rounded skeleton-shimmer" 
-							style={{ height: '1rem', width: '1rem' }}
+							style={{ height: SKELETON.METADATA_ICON.height, width: SKELETON.METADATA_ICON.width }}
 						/>
 						{/* Text skeleton: "Stock: XX" */}
 						<div 
 							className="rounded skeleton-shimmer" 
-							style={{ height: '0.875rem', width: '3.5rem' }}
+							style={{ height: SKELETON.METADATA_TEXT.height, width: SKELETON.METADATA_TEXT.width.stock }}
 						/>
 					</div>
 				</div>
 				
 				{/* Categories Skeleton - Badge-style tags, matches badge height */}
-				<div className="mt-3 flex gap-2" style={{ minHeight: CATEGORY_HEIGHT }}>
+				<div className={`${SPACING.CATEGORY_MARGIN} ${STYLES.CATEGORY_CONTAINER}`} style={{ minHeight: DIMENSIONS.CATEGORY.minHeight }}>
+					<div className={STYLES.CATEGORY_TAGS}>
 					{/* First category badge */}
 					<div 
 						className="rounded-md skeleton-shimmer" 
-						style={{ height: '1.5rem', width: '6rem', maxWidth: '8rem' }}
+						style={{ 
+							height: SKELETON.CATEGORY_BADGE.height, 
+							width: SKELETON.CATEGORY_BADGE.width.first, 
+							maxWidth: SKELETON.CATEGORY_BADGE.maxWidth 
+						}}
 					/>
 					{/* Second category badge */}
 					<div 
 						className="rounded-md skeleton-shimmer" 
-						style={{ height: '1.5rem', width: '7rem', maxWidth: '8rem' }}
+						style={{ 
+							height: SKELETON.CATEGORY_BADGE.height, 
+							width: SKELETON.CATEGORY_BADGE.width.second, 
+							maxWidth: SKELETON.CATEGORY_BADGE.maxWidth 
+						}}
 					/>
+					</div>
 				</div>
 				
 				{/* Spacer - Pushes button to bottom (matches ProductCard) */}
-				<div className="flex-1" style={{ minHeight: '0.5rem' }} />
+				<div className={STYLES.SPACER} style={DIMENSIONS.SPACER} />
 				
 				{/* Button Skeleton - Matches exact button dimensions */}
-				<div className="mt-4 flex justify-center">
+				<div className={`${SPACING.BUTTON_MARGIN} ${STYLES.BUTTON_CONTAINER}`}>
 					<div 
-						className="w-full rounded-lg skeleton-shimmer" 
-						style={{ height: BUTTON_HEIGHT }}
+						className={`${STYLES.BUTTON} rounded-lg skeleton-shimmer`}
+						style={{ height: SKELETON.BUTTON.height, width: SKELETON.BUTTON.width }}
 					/>
 				</div>
 			</div>
