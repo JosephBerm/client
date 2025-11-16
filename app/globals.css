@@ -1,10 +1,16 @@
 @import 'tailwindcss';
 
 @plugin 'daisyui' {
-	themes: winter --default, luxury --prefersdark;
+	themes: light --default, dark --prefersdark, corporate, sunset, winter, luxury;
 }
 
-@custom-variant dark (&:where([data-theme=luxury], [data-theme=luxury] *));
+/* Custom theme overrides - Apply after DaisyUI loads */
+[data-theme='light'] {
+	--color-primary: #416706;
+}
+
+/* Treat both 'dark' and 'luxury' themes as dark variant */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, [data-theme=luxury], [data-theme=luxury] *));
 
 @layer base {
 	/* ========================================

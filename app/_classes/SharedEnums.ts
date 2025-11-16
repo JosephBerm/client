@@ -18,7 +18,7 @@
  * Theme enum for DaisyUI themes.
  * 
  * Defines available themes for the application. These correspond to
- * DaisyUI theme names configured in tailwind.config.ts.
+ * DaisyUI theme names configured in app/globals.css via @plugin directive.
  * 
  * **Available Themes:**
  * - **Winter**: Light, clean DaisyUI theme (default)
@@ -45,5 +45,26 @@ export enum Theme {
 	 * Dark, elegant theme with high contrast.
 	 */
 	Luxury = 'luxury',
+
+	/**
+	 * DaisyUI Light theme.
+	 * Standard light theme aligned with DaisyUI defaults.
+	 */
+	Light = 'light',
+	/**
+	 * DaisyUI Dark theme.
+	 * Standard dark theme aligned with DaisyUI defaults.
+	 */
+	Dark = 'dark',
+	/**
+	 * DaisyUI Corporate theme.
+	 * Professional business-oriented theme.
+	 */
+	Corporate = 'corporate',
+	/**
+	 * DaisyUI Sunset theme.
+	 * Warm, vibrant theme with sunset palette.
+	 */
+	Sunset = 'sunset',
 }
 

@@ -130,28 +130,25 @@ export default function ImageLightbox({
 		setPosition({ x: 0, y: 0 })
 	}, [currentIndex])
 
-	// Validate images array
-	if (!images || images.length === 0) {
-		return null
-	}
-
 	// Clamp current index to valid range
-	const validIndex = Math.max(0, Math.min(currentIndex, images.length - 1))
-	const currentImage = images[validIndex]
+	const validIndex = images?.length ? Math.max(0, Math.min(currentIndex, images.length - 1)) : 0
+	const currentImage = images?.[validIndex]
 
 	// Navigate to previous image
 	const goToPrevious = useCallback(() => {
+		if (!images?.length) return
 		const newIndex = validIndex === 0 ? images.length - 1 : validIndex - 1
 		setCurrentIndex(newIndex)
 		onImageChange?.(newIndex)
-	}, [validIndex, images.length, onImageChange])
+	}, [validIndex, images, onImageChange])
 
 	// Navigate to next image
 	const goToNext = useCallback(() => {
+		if (!images?.length) return
 		const newIndex = validIndex === images.length - 1 ? 0 : validIndex + 1
 		setCurrentIndex(newIndex)
 		onImageChange?.(newIndex)
-	}, [validIndex, images.length, onImageChange])
+	}, [validIndex, images, onImageChange])
 
 	// Zoom controls
 	const handleZoomIn = useCallback(() => {
@@ -230,6 +227,11 @@ export default function ImageLightbox({
 		window.addEventListener('keydown', handleKeyDown)
 		return () => window.removeEventListener('keydown', handleKeyDown)
 	}, [isOpen, goToPrevious, goToNext, handleZoomIn, handleZoomOut, handleResetZoom])
+
+	// Validate images array (after all hooks)
+	if (!images || images.length === 0) {
+		return null
+	}
 
 	const hasMultipleImages = images.length > 1
 

@@ -33,11 +33,7 @@ import { logger } from '@_core'
  * - Type-safe with TypeScript interfaces
  * - Error handling with fallbacks
  * - SSR-safe (returns defaults on server)
- * - Backward compatible migration from old storage format
- * 
- * **Migration Strategy:**
- * On first load, migrates old Zustand persist format to unified format.
- * This ensures backward compatibility and smooth transition.
+ * - Versioned structure (future-proof)
  * 
  * @module UserSettingsService
  * @see {@link ThemeService} - Uses this service internally
@@ -55,7 +51,7 @@ export interface UserSettings {
 	/**
 	 * User's preferred theme.
 	 * 
-	 * @default Theme.MedsourceClassic
+ * @default Theme.Light
 	 */
 	theme?: Theme
 	/**
@@ -109,7 +105,7 @@ interface StoredSettings {
  * @type {UserSettings}
  */
 const DEFAULT_SETTINGS: UserSettings = {
-	theme: Theme.Winter,
+	theme: Theme.Light,
 	tablePageSize: 10,
 	sidebarCollapsed: false,
 }
@@ -135,14 +131,7 @@ const CURRENT_VERSION = 1
  */
 const STORAGE_KEY = 'user-settings'
 
-/**
- * Legacy storage key from Zustand persist middleware.
- * Used for migration purposes.
- * 
- * @constant
- * @type {string}
- */
-const LEGACY_STORAGE_KEY = 'user-settings'
+// No legacy storage keys required in this branch
 
 /**
  * User Settings Service
@@ -154,11 +143,7 @@ export class UserSettingsService {
 	 * Retrieves all user settings from localStorage.
 	 * 
 	 * Returns the complete settings object, with defaults applied for any missing values.
-	 * Performs migration from legacy storage format if needed.
-	 * 
-	 * **Migration:**
-	 * On first access, checks for legacy Zustand persist format and migrates
-	 * to the unified format. This ensures backward compatibility.
+	 * No legacy migration in this branch.
 	 * 
 	 * **SSR Safety:**
 	 * Returns default settings on the server.
@@ -202,9 +187,6 @@ export class UserSettingsService {
 						...DEFAULT_SETTINGS,
 						...parsed.settings,
 					}
-				} else if (parsed.state) {
-					// Old Zustand persist format: { state: {...}, version: 1 }
-					return this.migrateLegacySettings(parsed)
 				}
 			}
 			
@@ -389,100 +371,7 @@ export class UserSettingsService {
 	}
 
 	/**
-	 * Migrates legacy Zustand persist format to unified format.
-	 * 
-	 * Checks for old storage format from Zustand persist middleware and migrates
-	 * to the unified format. This ensures backward compatibility.
-	 * 
-	 * **Old Format (Zustand persist):**
-	 * ```json
-	 * {
-	 *   "state": {
-	 *     "theme": "medsource-classic",
-	 *     "preferences": {
-	 *       "tablePageSize": 10,
-	 *       "sidebarCollapsed": false
-	 *     },
-	 *     "cart": [ ... ],
-	 *     "version": 1
-	 *   },
-	 *   "version": 1
-	 * }
-	 * ```
-	 * 
-	 * **New Format (UserSettingsService):**
-	 * ```json
-	 * {
-	 *   "version": 1,
-	 *   "settings": {
-	 *     "theme": "medsource-classic",
-	 *     "tablePageSize": 10,
-	 *     "sidebarCollapsed": false
-	 *   }
-	 * }
-	 * ```
-	 * 
-	 * **Migration Process:**
-	 * 1. Check for legacy format
-	 * 2. Extract settings (theme, preferences)
-	 * 3. Flatten preferences object
-	 * 4. Create unified settings object
-	 * 5. Save to new format
-	 * 6. Note: Cart is NOT migrated (moved to separate store)
-	 * 
-	 * @param {any} legacyData - The legacy data from localStorage
-	 * @returns {UserSettings} Migrated settings with defaults
-	 * 
-	 * @private
-	 */
-	private static migrateLegacySettings(legacyData: any): UserSettings {
-		const migrated: UserSettings = { ...DEFAULT_SETTINGS }
-
-		try {
-			const state = legacyData.state || {}
-			
-			// Migrate theme
-			if (state.theme && Object.values(Theme).includes(state.theme as Theme)) {
-				migrated.theme = state.theme as Theme
-			}
-
-			// Migrate preferences (flatten the preferences object)
-			if (state.preferences) {
-				const prefs = state.preferences
-				if (typeof prefs.tablePageSize === 'number' && prefs.tablePageSize > 0) {
-					migrated.tablePageSize = prefs.tablePageSize
-				}
-				if (typeof prefs.sidebarCollapsed === 'boolean') {
-					migrated.sidebarCollapsed = prefs.sidebarCollapsed
-				}
-				// Migrate any custom preferences
-				for (const [key, value] of Object.entries(prefs)) {
-					if (!['tablePageSize', 'sidebarCollapsed'].includes(key)) {
-						migrated[key] = value
-					}
-				}
-			}
-
-			// Save migrated settings to unified storage
-			const stored: StoredSettings = {
-				version: CURRENT_VERSION,
-				settings: migrated,
-			}
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(stored))
-			
-			logger.info('Legacy settings migrated successfully', {
-				component: 'UserSettingsService',
-				migratedSettings: migrated,
-			})
-		} catch (error) {
-			logger.warn('Failed to migrate legacy settings', {
-				error,
-				component: 'UserSettingsService',
-			})
-		}
-
-		return migrated
-	}
+	// No legacy migration helpers in this branch
 
 	/**
 	 * Clears all user settings.

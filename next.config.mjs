@@ -42,10 +42,8 @@ const nextConfig = {
 		// Cache TTL in seconds (60s = 1 minute)
 		minimumCacheTTL: 60,
 	},
-	experimental: {
-		turbo: {
-			resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
-		},
+	turbopack: {
+		resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
 	},
 }
 

@@ -9,7 +9,6 @@
  * - Single initialization point via `initialize()` method
  * - Called once on mount with empty dependency array
  * - Initializes theme, preferences, and applies them to DOM
- * - Handles migration from legacy storage format
  * - MutationObserver in store handles reactive updates
  *
  * **Changes from Old Implementation:**
@@ -77,10 +76,9 @@ import { logger } from '@_core'
  *
  * **Initialization Process:**
  * 1. Retrieve stored settings from localStorage (via UserSettingsService)
- * 2. Migrate from legacy format if needed
- * 3. Apply theme to document (via ThemeService)
- * 4. Load preferences into store
- * 5. Set up MutationObserver for theme sync (handled by store)
+ * 2. Apply theme to document (via ThemeService)
+ * 3. Load preferences into store
+ * 4. Set up MutationObserver for theme sync (handled by store)
  *
  * **Performance:**
  * - Single initialization call (not reactive)

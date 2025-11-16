@@ -40,8 +40,13 @@ import Select from '@_components/ui/Select'
  * @constant
  */
 const themeDisplayNames: Record<Theme, string> = {
-	[Theme.Winter]: 'Light (Winter)',
-	[Theme.Luxury]: 'Dark (Luxury)',
+	// New requested themes
+	[Theme.Light]: 'Light (default)',
+	[Theme.Dark]: 'Dark (default)',
+	[Theme.Corporate]: 'Corporate',
+	[Theme.Sunset]: 'Sunset',
+	[Theme.Winter]: 'Winter',
+	[Theme.Luxury]: 'Luxury',
 }
 
 /**
@@ -95,7 +100,7 @@ export default function AppearanceSetting() {
 					width="full"
 					size="sm"
 					aria-label="Select theme"
-					className="sm:!w-44"
+					className="sm:w-44!"
 				/>
 			</div>
 		</div>

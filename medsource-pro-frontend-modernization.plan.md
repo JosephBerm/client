@@ -141,7 +141,7 @@ The MedSource Pro frontend has been successfully modernized from a legacy Next.j
   - Success: `#4d7a07` (lighter green)
   - Accent: `#06614a` (teal)
   - Secondary: `#2a4204` (dark green)
-- ✅ Configured theme in `tailwind.config.ts`
+- ✅ Configured theme in `app/globals.css` (Tailwind v4 CSS-first config)
 - ✅ Implemented theme switching functionality
 
 **Color Palette:**
@@ -980,7 +980,7 @@ client/
 │   └── globals.css         # Global styles + theme
 ├── public/                 # Static assets
 ├── next.config.mjs         # Next.js config
-├── tailwind.config.ts      # Tailwind config
+├── postcss.config.mjs      # PostCSS config (Tailwind v4)
 ├── tsconfig.json          # TypeScript config
 └── package.json           # Dependencies
 ```

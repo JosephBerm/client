@@ -26,6 +26,8 @@
  * @module shared/hooks/useSectionMetrics
  */
 
+'use client'
+
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 
 export interface SectionMetric {

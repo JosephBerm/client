@@ -26,6 +26,8 @@
  * @module shared/hooks/useScrollProgress
  */
 
+'use client'
+
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 
 export interface UseScrollProgressOptions {

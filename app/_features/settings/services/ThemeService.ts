@@ -14,13 +14,12 @@ import { UserSettingsService } from './UserSettingsService'
  * - Providing theme initialization on app load
  * 
  * **Theme Mapping:**
- * - **Dark system preference** → Luxury theme
- * - **Light system preference** → Winter theme
+ * - **Dark system preference** → Dark theme
+ * - **Light system preference** → Light theme
  * - **Default** → MedSource Classic theme
  * 
  * **Storage:**
- * Uses UserSettingsService for unified settings storage. Maintains backward
- * compatibility by reading from legacy storage if unified storage doesn't exist.
+ * Uses UserSettingsService for unified settings storage.
  * 
  * **SSR Safety:**
  * All methods are SSR-safe and return defaults or no-op on the server.
@@ -47,15 +46,15 @@ export class ThemeService {
 	 * @example
 	 * ```tsx
 	 * const systemTheme = ThemeService.getSystemTheme()
-	 * // If user has dark mode enabled: Theme.Luxury
-	 * // If user has light mode enabled: Theme.Winter
+	 * // If user has dark mode enabled: Theme.Dark
+	 * // If user has light mode enabled: Theme.Light
 	 * ```
 	 */
 	static getSystemTheme(): Theme {
-		if (typeof window === 'undefined') return Theme.Winter
+		if (typeof window === 'undefined') return Theme.Light
 		
 		const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-		return prefersDark ? Theme.Luxury : Theme.Winter
+		return prefersDark ? Theme.Dark : Theme.Light
 	}
 
 	/**
@@ -68,10 +67,10 @@ export class ThemeService {
 	 * **Fallback Chain:**
 	 * 1. Stored theme in localStorage (if valid)
 	 * 2. System preference (dark/light mode)
-	 * 3. Default (Winter theme)
+	 * 3. Default (Light theme)
 	 * 
 	 * **SSR Safety:**
-	 * Returns Winter theme on the server.
+	 * Returns Light theme on the server.
 	 * 
 	 * @returns {Theme} The stored theme or system preference
 	 * 

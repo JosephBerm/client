@@ -296,7 +296,7 @@ export default function LiveChatBubble({
 							<p className="font-semibold text-base-content">Live Chat</p>
 						</div>
 						<p className="mt-1 text-sm text-base-content/70">
-							Coming Soon! We're building something amazing.
+							Coming Soon! We&apos;re building something amazing.
 						</p>
 					</div>
 
