@@ -185,11 +185,13 @@ export default function ScrollIntoViewComponent() {
 	const timelineRef = useRef<HTMLDivElement>(null)
 	const labelRefs = useRef<Map<string, HTMLAnchorElement>>(new Map())
 	const currentIndexRef = useRef<number>(0)
+		const scrollWrapperRef = useRef<HTMLDivElement>(null)
 	const [scrollProgress, setScrollProgress] = useState(0)
 	const [hasWhitespace, setHasWhitespace] = useState(false)
 	const [shouldShowLabels, setShouldShowLabels] = useState(false)
 	const [isTimelineVisible, setIsTimelineVisible] = useState(false)
 	const [shouldAnimate, setShouldAnimate] = useState(false)
+		const [isOverflowing, setIsOverflowing] = useState(false)
 
 	// Detect if viewport is large enough for timeline (xl: 1280px+)
 	// Industry best practice: Progressive enhancement - show timeline when space allows
@@ -198,6 +200,8 @@ export default function ScrollIntoViewComponent() {
 	
 	// Detect reduced motion preference (for accessibility)
 	const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
+		// Treat sub-700px as "narrow" where horizontal scrolling is preferred
+		const isNarrowMobile = useMediaQuery('(max-width: 700px)')
 
 	// Get navbar height for scroll offset (from CSS variable)
 	const navbarHeight = getCSSVariable('--nav-height', 96)
@@ -690,6 +694,51 @@ export default function ScrollIntoViewComponent() {
 		}
 	}, [finalActiveSection])
 
+	// Detect horizontal overflow for mobile wrapper to decide between centering and scrolling
+	useEffect(() => {
+		const el = scrollWrapperRef.current
+		if (!el) return
+
+		const checkOverflow = () => {
+			// If wrapper is narrower than content, enable scroll behavior
+			setIsOverflowing(el.scrollWidth > el.clientWidth + 1)
+		}
+
+		checkOverflow()
+		// Re-check shortly after mount for late layout shifts (e.g., fonts, images)
+		const postMountId = window.setTimeout(checkOverflow, 250)
+
+		// Resize-based re-check
+		let rafId: number | null = null
+		const onResize = () => {
+			if (rafId === null) {
+				rafId = requestAnimationFrame(() => {
+					checkOverflow()
+					rafId = null
+				})
+			}
+		}
+
+		window.addEventListener('resize', onResize, { passive: true })
+		// Also observe size changes of the wrapper itself, if supported
+		let ro: ResizeObserver | null = null
+		try {
+			if (typeof ResizeObserver !== 'undefined') {
+				ro = new ResizeObserver(onResize)
+				ro.observe(el)
+			}
+		} catch {
+			// No-op: gracefully degrade without ResizeObserver
+		}
+
+		return () => {
+			window.clearTimeout(postMountId)
+			window.removeEventListener('resize', onResize)
+			if (rafId !== null) cancelAnimationFrame(rafId)
+			if (ro) ro.disconnect()
+		}
+	}, [])
+
 	return (
 		<>
 			{/* Mobile & Medium & Large (when timeline unavailable): Sticky Bottom Navigation */}
@@ -713,8 +762,24 @@ export default function ScrollIntoViewComponent() {
 				{/* Mobile: Horizontal scroll with edge-to-edge padding */}
 				<div className="md:hidden py-3">
 					<PageContainer>
-						<div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
-							<div className="flex items-center gap-6 min-w-max">
+						<div
+							ref={scrollWrapperRef}
+							className={classNames(
+								'-mx-4 px-4',
+								// Enable horizontal scrolling on narrow screens or when content overflows
+								{ 'overflow-x-auto scrollbar-hide touch-pan-x': isNarrowMobile || isOverflowing }
+							)}
+						>
+							<div
+								className={classNames(
+									'mx-auto flex items-center gap-6',
+									// When scrolling, keep items left-aligned and force content width
+									{ 'min-w-max justify-start': isNarrowMobile || isOverflowing,
+										// When it fits, center the options
+										'justify-center': !(isNarrowMobile || isOverflowing)
+									}
+								)}
+							>
 					{SECTIONS.map((section, index) => {
 						const isActive = isSectionActiveEnhanced(section.id)
 
@@ -758,7 +823,8 @@ export default function ScrollIntoViewComponent() {
 
 				{/* Medium & Large (fallback): Centered navigation with elegant spacing */}
 				<PageContainer className="hidden md:block py-4">
-					<div className="flex items-center justify-center gap-8 lg:gap-10">
+					<div className="w-full text-center">
+						<div className="mx-auto flex w-full items-center justify-center gap-8 lg:gap-10">
 						{SECTIONS.map((section, index) => {
 							const isActive = isSectionActiveEnhanced(section.id)
 
@@ -794,6 +860,7 @@ export default function ScrollIntoViewComponent() {
 								</a>
 							)
 						})}
+						</div>
 					</div>
 				</PageContainer>
 			</nav>
