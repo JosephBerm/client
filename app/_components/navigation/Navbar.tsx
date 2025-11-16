@@ -132,7 +132,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 	return (
 		<>
 		<header className="sticky top-0 z-50 border-b border-base-300 bg-base-100/95 shadow-md backdrop-blur-lg">
-			<nav className="mx-auto flex h-24 max-w-screen-2xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+			<nav className="mx-auto flex h-24 max-w-screen-2xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8 max-[275px]:overflow-x-auto">
 			{/* Left Section: Mobile Menu Button + Logo */}
 			<div className="flex shrink-0 items-center gap-4">
 				{/* Mobile Menu Button (for public navigation) - Moved to left */}
@@ -182,7 +182,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 								/>
 							</svg>
 						</div>
-					<span className="text-2xl font-bold uppercase tracking-wide text-primary">
+					<span className="text-2xl font-bold uppercase tracking-wide text-primary max-[480px]:hidden">
 						MedSource
 					</span>
 					</Link>

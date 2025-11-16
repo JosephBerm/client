@@ -37,6 +37,7 @@
 import { useState, useEffect } from 'react'
 import { MessageCircle, X } from 'lucide-react'
 import classNames from 'classnames'
+import { logger } from '@_core/logger'
 
 export interface LiveChatBubbleProps {
 	/** Show/hide the chat bubble */
@@ -53,6 +54,15 @@ export interface LiveChatBubbleProps {
 	isOpen?: boolean
 	/** Callback when chat is opened/closed */
 	onOpenChange?: (isOpen: boolean) => void
+	/**
+	 * CSS selectors for bottom-fixed elements to avoid overlapping with.
+	 * The bubble will measure these elements and raise itself accordingly.
+	 */
+	avoidOverlapSelectors?: string[]
+	/** Extra breathing room above avoided elements (in px). */
+	additionalBottomPadding?: number
+	/** Use a more compact button footprint on small screens. */
+	compact?: boolean
 }
 
 /**
@@ -79,9 +89,13 @@ export default function LiveChatBubble({
 	className,
 	isOpen: externalIsOpen,
 	onOpenChange,
+	avoidOverlapSelectors = ['nav[aria-label="Page sections navigation"]', '[data-bottom-bar="true"]'],
+	additionalBottomPadding = 8,
+	compact = true,
 }: LiveChatBubbleProps) {
 	const [internalIsOpen, setInternalIsOpen] = useState(false)
 	const [isHovered, setIsHovered] = useState(false)
+	const [computedBottomOffset, setComputedBottomOffset] = useState<number>(0)
 
 	// Use external state if provided, otherwise use internal state
 	const isTooltipVisible = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen
@@ -97,6 +111,83 @@ export default function LiveChatBubble({
 		}
 	}, [isTooltipVisible, setIsTooltipVisible])
 
+	/**
+	 * Compute safe bottom offset so the bubble does not overlap bottom-fixed UI
+	 * like the section navigation. Mobile-first; recalculates on resize/scroll.
+	 */
+	useEffect(() => {
+		if (typeof window === 'undefined') return
+
+		let rafId: number | null = null
+		let lastOffset = -1
+
+		const measure = () => {
+			try {
+				// Tailwind base spacing used by classes (bottom-4 vs sm:bottom-6)
+				const baseBottom = window.matchMedia('(min-width: 640px)').matches ? 24 : 16
+
+				let maxAvoidHeight = 0
+				for (const selector of avoidOverlapSelectors) {
+					const elements = Array.from(document.querySelectorAll(selector)) as HTMLElement[]
+					for (const el of elements) {
+						const style = window.getComputedStyle(el)
+						const isFixed = style.position === 'fixed'
+						const isVisible = style.display !== 'none' && style.visibility !== 'hidden'
+						if (!isFixed || !isVisible) continue
+						const rect = el.getBoundingClientRect()
+						const atBottom = Math.abs(window.innerHeight - rect.bottom) <= 2 || style.bottom !== 'auto'
+						if (atBottom) {
+							maxAvoidHeight = Math.max(maxAvoidHeight, rect.height)
+						}
+					}
+				}
+
+				const extra = maxAvoidHeight > 0 ? maxAvoidHeight + additionalBottomPadding : 0
+				const next = baseBottom + extra
+				if (next !== lastOffset) {
+					lastOffset = next
+					setComputedBottomOffset(next)
+					logger.debug('LiveChatBubble: bottom offset updated', {
+						component: 'LiveChatBubble',
+						offset: next,
+						maxAvoidHeight,
+					})
+				}
+			} catch (error) {
+				logger.warn('LiveChatBubble: bottom offset measurement failed', {
+					component: 'LiveChatBubble',
+					error,
+				})
+			} finally {
+				rafId = null
+			}
+		}
+
+		const schedule = () => {
+			if (rafId === null) rafId = requestAnimationFrame(measure)
+		}
+
+		const init = setTimeout(schedule, 50)
+		window.addEventListener('resize', schedule, { passive: true })
+		window.addEventListener('scroll', schedule, { passive: true })
+
+		const ResizeObserverImpl = (window as any).ResizeObserver as typeof ResizeObserver | undefined
+		const ro = ResizeObserverImpl ? new ResizeObserverImpl(() => schedule()) : undefined
+		if (ro) {
+			for (const selector of avoidOverlapSelectors) {
+				document.querySelectorAll(selector).forEach((el) => ro.observe(el))
+			}
+		}
+
+		return () => {
+			clearTimeout(init)
+			window.removeEventListener('resize', schedule)
+			window.removeEventListener('scroll', schedule)
+			if (rafId !== null) cancelAnimationFrame(rafId)
+			if (ro) ro.disconnect()
+		}
+	}, [avoidOverlapSelectors, additionalBottomPadding])
+
 	// Don't render if not visible
 	if (!visible) return null
 
@@ -107,9 +198,13 @@ export default function LiveChatBubble({
 	}
 
 	const positionClasses = {
-		'bottom-right': 'right-4 bottom-4 sm:right-6 sm:bottom-6',
-		'bottom-left': 'left-4 bottom-4 sm:left-6 sm:bottom-6',
-	}
+		'bottom-right': 'right-4 sm:right-6',
+		'bottom-left': 'left-4 sm:left-6',
+	} as const
+
+	const sizeClasses = compact
+		? 'h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16'
+		: 'h-14 w-14 sm:h-16 sm:w-16'
 
 	return (
 		<>
@@ -124,7 +219,7 @@ export default function LiveChatBubble({
 					'rounded-full shadow-lg',
 					'transition-all duration-300 ease-out',
 					// Size (mobile-first)
-					'h-14 w-14 sm:h-16 sm:w-16',
+					sizeClasses,
 					// Colors and hover states
 					'bg-primary text-primary-content',
 					'hover:scale-110 hover:shadow-xl',
@@ -136,7 +231,11 @@ export default function LiveChatBubble({
 					// Custom z-index
 					className
 				)}
-				style={{ zIndex }}
+				style={{
+					zIndex,
+					// Respect iOS/Android safe areas and measured bottom bars
+					bottom: `calc(env(safe-area-inset-bottom, 0px) + ${computedBottomOffset}px)`,
+				}}
 				aria-label="Open live chat"
 				aria-haspopup="dialog"
 				aria-expanded={isTooltipVisible}
@@ -144,7 +243,9 @@ export default function LiveChatBubble({
 				{/* Icon with rotation animation */}
 				<MessageCircle
 					className={classNames(
-						'h-6 w-6 sm:h-7 sm:w-7 transition-transform duration-300',
+						compact
+							? 'h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 transition-transform duration-300'
+							: 'h-6 w-6 sm:h-7 sm:w-7 transition-transform duration-300',
 						isHovered && 'rotate-12'
 					)}
 					strokeWidth={2}
@@ -175,15 +276,17 @@ export default function LiveChatBubble({
 						'rounded-2xl border border-base-300 bg-base-100 p-4 shadow-xl',
 						'transition-all duration-300 ease-out',
 						// Position relative to button
-						position === 'bottom-right'
-							? 'right-4 bottom-20 sm:right-6 sm:bottom-24'
-							: 'left-4 bottom-20 sm:left-6 sm:bottom-24',
+						position === 'bottom-right' ? 'right-4 sm:right-6' : 'left-4 sm:left-6',
 						// Animation
 						'animate-in fade-in slide-in-from-bottom-2',
 						// Mobile-first responsive width
 						'w-[calc(100vw-2rem)] max-w-xs sm:w-auto'
 					)}
-					style={{ zIndex: zIndex + 1 }}
+					style={{
+						zIndex: zIndex + 1,
+						// Tooltip sits above the bubble; add button size + small gap
+						bottom: `calc(env(safe-area-inset-bottom, 0px) + ${computedBottomOffset + (compact ? 48 : 56) + 12}px)`,
+					}}
 					role="tooltip"
 					aria-live="polite"
 				>

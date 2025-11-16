@@ -29,10 +29,81 @@
 
 'use client'
 
-import { useCallback, type ReactNode } from 'react'
+import { useCallback, useMemo, type ReactNode } from 'react'
 import classNames from 'classnames'
 import { PhoneIcon, MailIcon, MessageIcon, iconSizes } from '@_components/ui/ContactIcons'
 import { trackPhoneClick, trackEmailClick, trackContactCTA } from '@_shared/utils/analytics'
+
+/**
+ * Soft hyphen character (invisible unless word breaks)
+ * Unicode: U+00AD
+ */
+const SOFT_HYPHEN = '\u00AD'
+
+/**
+ * Adds soft hyphens to an email address for elegant line breaking.
+ * Inserts soft hyphens at strategic points: before @, before dots, and in longer segments.
+ * Soft hyphens are invisible unless the word breaks, showing a hyphen when wrapping occurs.
+ * 
+ * @param email - The email address to hyphenate
+ * @returns The email address with soft hyphens inserted
+ * 
+ * @example
+ * ```typescript
+ * hyphenateEmail('support@medsourcepro.com')
+ * // Returns: 'support\u00AD@medsource\u00ADpro.com'
+ * ```
+ */
+function hyphenateEmail(email: string): string {
+	// Don't modify if empty or invalid
+	if (!email || !email.includes('@')) {
+		return email
+	}
+
+	const [localPart, domain] = email.split('@')
+	if (!localPart || !domain) {
+		return email
+	}
+
+	// Helper function to add soft hyphens to long segments
+	const addSoftHyphensToSegment = (segment: string, minLength = 8): string => {
+		if (segment.length <= minLength) {
+			return segment
+		}
+		// Add soft hyphens every 6-8 characters for better break points
+		const parts: string[] = []
+		for (let i = 0; i < segment.length; i += 7) {
+			const part = segment.slice(i, i + 7)
+			if (part) {
+				parts.push(part)
+			}
+		}
+		return parts.join(SOFT_HYPHEN)
+	}
+
+	// Hyphenate local part (before dots and in longer segments)
+	const hyphenatedLocal = localPart
+		.split('.')
+		.map((segment, index) => {
+			const hyphenated = addSoftHyphensToSegment(segment, 8)
+			// Add soft hyphen before dots (except first segment)
+			return index > 0 ? `${SOFT_HYPHEN}${hyphenated}` : hyphenated
+		})
+		.join('.')
+
+	// Hyphenate domain (before dots and in longer segments)
+	const hyphenatedDomain = domain
+		.split('.')
+		.map((segment, index) => {
+			const hyphenated = addSoftHyphensToSegment(segment, 10)
+			// Add soft hyphen before dots (except first segment)
+			return index > 0 ? `${SOFT_HYPHEN}${hyphenated}` : hyphenated
+		})
+		.join('.')
+
+	// Combine with soft hyphen before @ for optimal breaking
+	return `${hyphenatedLocal}${SOFT_HYPHEN}@${hyphenatedDomain}`
+}
 
 /**
  * Contact method types
@@ -141,6 +212,14 @@ export default function ContactMethodCard({
 	const Icon = config.icon
 	const location = trackingLocation || config.defaultTrackingLocation
 
+	// Hyphenate email addresses for elegant line breaking
+	const displayText = useMemo(() => {
+		if (type === 'email') {
+			return hyphenateEmail(mainText)
+		}
+		return mainText
+	}, [type, mainText])
+
 	// Analytics tracking handlers
 	const handleClick = useCallback(() => {
 		if (onClick) {
@@ -210,11 +289,13 @@ export default function ContactMethodCard({
 				<p
 					className={classNames(
 						'text-lg font-semibold text-base-content md:text-xl',
-						// Break words for email, break-words for phone
-						type === 'email' ? 'break-all' : 'break-words'
+						// Use break-words for email to allow soft hyphens to work properly
+						// Soft hyphens will automatically show when line breaks occur
+						type === 'email' ? 'break-words' : 'break-words'
 					)}
+					style={type === 'email' ? { wordBreak: 'break-word', overflowWrap: 'break-word' } : undefined}
 				>
-					{mainText}
+					{displayText}
 				</p>
 				<p className="text-sm text-base-content/60">{description}</p>
 			</div>
