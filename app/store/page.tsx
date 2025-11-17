@@ -728,7 +728,8 @@ const StorePageContent = () => {
 				{/* Product Grid - Main Content */}
 				<main className="flex-1">
 					{/* Products Grid - Responsive breakpoints optimized for card size */}
-					<div className="grid gap-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+					{/* Key prop ensures animation state resets when products change (filtering, pagination, search) */}
+					<div key={`products-grid-${products.length}-${searchCriteria.page}`} className="grid gap-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
 						{isLoading && !hasLoaded ? (
 							<ProductCardSkeleton count={currentPageSize} />
 						) : products.length === 0 ? (
@@ -750,7 +751,7 @@ const StorePageContent = () => {
 									<ScrollRevealCard
 										key={product.id}
 										index={index}
-										staggerDelay={100}
+										staggerDelay={60}
 										enabled={true}
 									>
 										<ProductCard

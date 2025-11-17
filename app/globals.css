@@ -181,26 +181,39 @@
 		animation: slide-up 0.3s var(--easing-smooth);
 	}
 
-	/* Fall In - Beautiful card reveal animation */
-	@keyframes fall-in {
+	/* Elegant Reveal - Industry-leading scroll animation (Apple/Stripe/Linear inspired)
+	 * Combines fade, slide-up, subtle scale, and blur for premium feel
+	 * Multi-stage animation creates sophisticated, polished appearance
+	 */
+	@keyframes elegant-reveal {
 		from {
-			transform: translateY(40px) scale(0.95);
+			transform: translateY(24px) scale(0.96);
 			opacity: 0;
+			filter: blur(4px);
+		}
+		60% {
+			opacity: 0.8;
+			filter: blur(2px);
 		}
 		to {
 			transform: translateY(0) scale(1);
 			opacity: 1;
+			filter: blur(0);
 		}
 	}
 
-	.animate-fall-in {
-		animation: fall-in 0.6s var(--easing-smooth) forwards;
+	.animate-elegant-reveal {
+		animation: elegant-reveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		/* Premium easing: Custom cubic-bezier for natural, refined motion */
+		/* Similar to Apple's and Stripe's animation curves */
+		/* Duration: 0.75s for slightly slower, more elegant feel */
 	}
 
 	/* Reduced motion: instant fade for accessibility */
 	@media (prefers-reduced-motion: reduce) {
-		.animate-fall-in {
+		.animate-elegant-reveal {
 			animation: fade-in 0.2s var(--easing-smooth) forwards;
+			filter: none;
 		}
 	}
 

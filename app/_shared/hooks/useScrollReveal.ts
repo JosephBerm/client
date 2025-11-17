@@ -30,13 +30,14 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useSharedIntersectionObserver } from './useSharedIntersectionObserver'
 
 export interface UseScrollRevealOptions {
 	/** Intersection threshold (0-1, default: 0.1 = 10% visible) */
 	threshold?: number
 	/** Root margin for early triggering (default: '0px 0px -100px 0px') */
 	rootMargin?: string
-	/** Delay between staggered animations in milliseconds (default: 100ms) */
+	/** Delay between staggered animations in milliseconds (default: 60ms for tighter, more cohesive feel) */
 	staggerDelay?: number
 	/** Index for staggered animation (0-based, default: 0) */
 	index?: number
@@ -82,7 +83,7 @@ export interface UseScrollRevealReturn {
 export function useScrollReveal({
 	threshold = 0.1,
 	rootMargin = '0px 0px -100px 0px',
-	staggerDelay = 100,
+	staggerDelay = 60,
 	index = 0,
 	enabled = true,
 	onReveal,
@@ -90,9 +91,15 @@ export function useScrollReveal({
 	const [isVisible, setIsVisible] = useState(false)
 	const [hasAnimated, setHasAnimated] = useState(false)
 	const elementRef = useRef<HTMLElement | null>(null)
-	const observerRef = useRef<IntersectionObserver | null>(null)
 	const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 	const indexRef = useRef(index)
+	const callbackRef = useRef<((entry: IntersectionObserverEntry) => void) | null>(null)
+	
+	// Use shared observer for efficiency (industry best practice)
+	const { observe, unobserve } = useSharedIntersectionObserver({
+		threshold,
+		rootMargin,
+	})
 
 	// Check for reduced motion preference
 	const prefersReducedMotion = useRef(false)
@@ -114,10 +121,10 @@ export function useScrollReveal({
 	/**
 	 * Handle intersection observer callback
 	 * Triggers animation when element enters viewport
+	 * Uses shared observer pattern for efficiency
 	 */
 	const handleIntersection = useCallback(
-		(entries: IntersectionObserverEntry[]) => {
-			const entry = entries[0]
+		(entry: IntersectionObserverEntry) => {
 			if (!entry) return
 
 			const isIntersecting = entry.isIntersecting
@@ -142,6 +149,11 @@ export function useScrollReveal({
 						if (onReveal) {
 							onReveal(indexRef.current)
 						}
+						// OPTIMIZATION: Unobserve after animation completes
+						// Prevents unnecessary callbacks for already-animated elements
+						if (elementRef.current) {
+							unobserve(elementRef.current)
+						}
 					}, delay)
 				} else {
 					// For reduced motion or disabled, show immediately
@@ -149,11 +161,20 @@ export function useScrollReveal({
 					if (onReveal) {
 						onReveal(indexRef.current)
 					}
+					// Unobserve immediately for reduced motion
+					if (elementRef.current) {
+						unobserve(elementRef.current)
+					}
 				}
 			}
 		},
-		[hasAnimated, enabled, staggerDelay, onReveal]
+		[hasAnimated, enabled, staggerDelay, onReveal, unobserve]
 	)
+	
+	// Store callback ref for shared observer
+	useEffect(() => {
+		callbackRef.current = handleIntersection
+	}, [handleIntersection])
 
 	// Update index ref when index prop changes
 	useEffect(() => {
@@ -161,15 +182,15 @@ export function useScrollReveal({
 	}, [index])
 
 	/**
-	 * Ref callback to attach element to observer
-	 * FAANG pattern: Single observer instance, efficient element tracking
+	 * Ref callback to attach element to shared observer
+	 * INDUSTRY BEST PRACTICE: Uses shared observer pattern for efficiency
+	 * Single observer handles all elements (scales to 100+ efficiently)
 	 */
 	const setRef = useCallback(
 		(node: HTMLElement | null) => {
-			// Cleanup previous observer
-			if (observerRef.current && elementRef.current) {
-				observerRef.current.unobserve(elementRef.current)
-				observerRef.current.disconnect()
+			// Unobserve previous element
+			if (elementRef.current) {
+				unobserve(elementRef.current)
 			}
 
 			// Clear animation timeout
@@ -178,43 +199,45 @@ export function useScrollReveal({
 				animationTimeoutRef.current = null
 			}
 
+			// Store previous element to detect changes
+			const previousElement = elementRef.current
 			elementRef.current = node
 
-			// Create new observer if element exists
-			if (node && typeof window !== 'undefined' && 'IntersectionObserver' in window) {
-				try {
-					observerRef.current = new IntersectionObserver(handleIntersection, {
-						threshold,
-						rootMargin,
-					})
+			// Reset animation state when element changes (handles product list updates)
+			// This ensures cards re-animate when products change (filtering, pagination)
+			// Note: The key prop on the grid container also helps reset state via React remounting
+			if (node && previousElement !== node) {
+				// Only reset if this is a new element (not just re-render of same element)
+				// The key prop on parent grid ensures proper remounting
+				setHasAnimated(false)
+				setIsVisible(false)
+			}
 
-					observerRef.current.observe(node)
-				} catch (error) {
-					// Fallback: if Intersection Observer fails, show immediately
-					console.warn('IntersectionObserver not supported or failed:', error)
-					setIsVisible(true)
-					setHasAnimated(true)
-				}
+			// Observe new element with shared observer
+			if (node && callbackRef.current) {
+				observe(node, callbackRef.current)
 			} else if (node) {
 				// Fallback: if Intersection Observer not available, show immediately
 				setIsVisible(true)
 				setHasAnimated(true)
 			}
 		},
-		[threshold, rootMargin, handleIntersection]
+		[observe, unobserve]
 	)
 
 	// Cleanup on unmount
 	useEffect(() => {
 		return () => {
-			if (observerRef.current) {
-				observerRef.current.disconnect()
+			// Unobserve element
+			if (elementRef.current) {
+				unobserve(elementRef.current)
 			}
+			// Clear timeout
 			if (animationTimeoutRef.current) {
 				clearTimeout(animationTimeoutRef.current)
 			}
 		}
-	}, [])
+	}, [unobserve])
 
 	return {
 		ref: setRef,

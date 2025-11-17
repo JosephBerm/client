@@ -26,4 +26,6 @@ export { useScrollProgress } from './useScrollProgress'
 export type { UseScrollProgressOptions, UseScrollProgressReturn } from './useScrollProgress'
 export { useScrollReveal } from './useScrollReveal'
 export type { UseScrollRevealOptions, UseScrollRevealReturn } from './useScrollReveal'
+export { useSharedIntersectionObserver } from './useSharedIntersectionObserver'
+export type { SharedObserverOptions, IntersectionCallback } from './useSharedIntersectionObserver'
 
