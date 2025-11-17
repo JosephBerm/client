@@ -67,6 +67,7 @@
  */
 
 import { HTMLAttributes, ReactNode } from 'react'
+import Image from 'next/image'
 import classNames from 'classnames'
 
 type CardVariant = 'elevated' | 'soft' | 'outline' | 'ghost'
@@ -124,7 +125,15 @@ export default function Card({
 		>
 			{image && (
 				<figure className="relative h-48 w-full overflow-hidden">
-					<img src={image} alt={imageAlt || ''} className="h-full w-full object-cover" />
+					<Image
+						src={image}
+						alt={imageAlt || ''}
+						fill
+						className="object-cover"
+						sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+						priority={false}
+						loading="lazy"
+					/>
 				</figure>
 			)}
 

@@ -3,6 +3,7 @@ import { ShieldCheck, PackageCheck, Truck, Headset } from 'lucide-react'
 import PageContainer from '@_components/layouts/PageContainer'
 import Pill from '@_components/ui/Pill'
 import StatusDot from '@_components/ui/StatusDot'
+import FeatureCard from '@_components/ui/FeatureCard'
 
 const VALUE_PROPS = [
 	{
@@ -58,22 +59,14 @@ export default function SalesPitch() {
 					</div>
 
 					<div className="grid gap-6 sm:grid-cols-2">
-						{VALUE_PROPS.map(({ title, description, icon: Icon }) => (
-							<div
+						{VALUE_PROPS.map(({ title, description, icon }) => (
+							<FeatureCard
 								key={title}
-								className="card group relative overflow-hidden rounded-2xl border border-base-300 bg-base-200 px-8 py-10 shadow-sm transition-all duration-300 hover:shadow-xl"
-						>
-								<div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-base-content/5 blur-2xl transition duration-300 group-hover:bg-base-content/10" />
-							<div className="relative flex flex-col gap-4">
-								<span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-base-300 bg-base-100 text-base-content shadow-sm transition-all duration-300 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-content group-hover:shadow-md">
-									<Icon className="h-6 w-6" strokeWidth={1.5} />
-								</span>
-								<div className="space-y-3">
-									<h3 className="text-xl font-semibold text-base-content">{title}</h3>
-									<p className="text-base leading-relaxed text-base-content/70">{description}</p>
-									</div>
-								</div>
-							</div>
+								icon={icon}
+								title={title}
+								description={description}
+								blurSize="sm"
+							/>
 						))}
 					</div>
 				</div>

@@ -7,6 +7,7 @@ import PageContainer from '@_components/layouts/PageContainer'
 import Button from '@_components/ui/Button'
 import Pill from '@_components/ui/Pill'
 import StatusDot from '@_components/ui/StatusDot'
+import FeatureCard from '@_components/ui/FeatureCard'
 
 const PRODUCT_CATEGORIES = [
 	{
@@ -68,32 +69,28 @@ export default function Products() {
 					</div>
 
 				<div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-					{PRODUCT_CATEGORIES.map(({ name, description, items, icon: Icon }) => (
-						<div
+					{PRODUCT_CATEGORIES.map(({ name, description, items, icon }) => (
+						<FeatureCard
 							key={name}
-							className="card group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-base-300 bg-base-200 px-8 py-9 shadow-sm transition-all duration-300 hover:shadow-xl"
-					>
-							<div className="absolute -right-7 -top-10 h-28 w-28 rounded-full bg-base-content/5 blur-3xl transition duration-300 group-hover:bg-base-content/10" />
-						<div className="relative space-y-4">
-							<span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-base-300 bg-base-100 text-base-content shadow-sm transition-all duration-300 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-content group-hover:shadow-md">
-								<Icon className="h-6 w-6" strokeWidth={1.5} />
-							</span>
-							<div className="space-y-2">
-								<h3 className="text-xl font-semibold text-base-content">{name}</h3>
-								<p className="text-sm font-semibold uppercase tracking-[0.3em] text-base-content/60">{items}</p>
-							</div>
-							<p className="text-base leading-relaxed text-base-content/70">{description}</p>
-						</div>
-						<Link
-							href="/store"
-							className="link link-primary relative mt-6 inline-flex items-center gap-2 self-start text-sm font-semibold uppercase tracking-[0.25em]"
-						>
-							Explore
-							<span className="h-1 w-16 bg-primary transition-all duration-300" />
-						</Link>
-						</div>
-						))}
-					</div>
+							icon={icon}
+							title={name}
+							subtitle={items}
+							description={description}
+							padding="sm"
+							blurSize="md"
+							className="flex h-full flex-col"
+							footer={
+								<Link
+									href="/store"
+									className="link link-primary relative inline-flex items-center gap-2 self-start text-sm font-semibold uppercase tracking-[0.25em]"
+								>
+									Explore
+									<span className="h-1 w-16 bg-primary transition-all duration-300" />
+								</Link>
+							}
+						/>
+					))}
+				</div>
 
 			<div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-primary/20 bg-base-200 px-6 py-10 text-center lg:flex-row lg:gap-8 lg:px-12">
 				<p className="max-w-3xl text-base text-base-content lg:text-left">

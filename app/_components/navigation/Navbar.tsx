@@ -39,6 +39,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Menu, ShoppingCart, X, User, LogOut, Home, Info, Store, Mail, Settings } from 'lucide-react'
 import { useCartStore } from '@_features/cart'
 import { useAuthStore } from '@_features/auth'
@@ -245,10 +246,14 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 									aria-label="User menu"
 								>
 								{user?.profilePicturePath ? (
-									<img
+									<Image
 										src={user.profilePicturePath}
 										alt={user.username || 'User'}
+										width={36}
+										height={36}
 										className="h-9 w-9 rounded-full border border-base-300 object-cover"
+										priority={false}
+										loading="lazy"
 									/>
 								) : (
 									<div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white">

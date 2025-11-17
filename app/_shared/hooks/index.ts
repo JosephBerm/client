@@ -24,4 +24,6 @@ export { useSectionMetrics } from './useSectionMetrics'
 export type { UseSectionMetricsOptions, UseSectionMetricsReturn, SectionMetric } from './useSectionMetrics'
 export { useScrollProgress } from './useScrollProgress'
 export type { UseScrollProgressOptions, UseScrollProgressReturn } from './useScrollProgress'
+export { useScrollReveal } from './useScrollReveal'
+export type { UseScrollRevealOptions, UseScrollRevealReturn } from './useScrollReveal'
 

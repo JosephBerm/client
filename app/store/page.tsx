@@ -37,6 +37,7 @@ import Button from '@_components/ui/Button'
 import CategoryFilter from '@_components/ui/CategoryFilter'
 import ProductCard from '@_components/store/ProductCard'
 import ProductCardSkeleton from '@_components/store/ProductCardSkeleton'
+import ScrollRevealCard from '@_components/store/ScrollRevealCard'
 import UnifiedStoreToolbar from '@_components/store/UnifiedStoreToolbar'
 import { SORT_OPTIONS } from '@_components/store/ProductsToolbar'
 import PaginationControls from '@_components/store/PaginationControls'
@@ -746,13 +747,19 @@ const StorePageContent = () => {
 								</div>
 							) : (
 								products.map((product, index) => (
-									<ProductCard
+									<ScrollRevealCard
 										key={product.id}
-										product={product}
-										showWishlist={false}
-										showQuickView={false}
-										priority={index < PRIORITY_IMAGE_COUNT} // Priority loading for above-the-fold images
-									/>
+										index={index}
+										staggerDelay={100}
+										enabled={true}
+									>
+										<ProductCard
+											product={product}
+											showWishlist={false}
+											showQuickView={false}
+											priority={index < PRIORITY_IMAGE_COUNT} // Priority loading for above-the-fold images
+										/>
+									</ScrollRevealCard>
 								))
 						)}
 					</div>

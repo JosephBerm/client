@@ -19,14 +19,22 @@
  * 
  * @example
  * ```typescript
+ * import Image from 'next/image';
+ * 
  * // Basic image
  * const image = new HtmlImage({
  *   src: '/images/product-1.jpg',
  *   alt: 'Surgical mask product image'
  * });
  * 
- * // Render image
- * <img src={image.src} alt={image.alt} />
+ * // Render image with Next.js Image (recommended for optimal performance)
+ * <Image 
+ *   src={image.src} 
+ *   alt={image.alt} 
+ *   width={500} 
+ *   height={500}
+ *   loading="lazy"
+ * />
  * 
  * // Product images array
  * const productImages: HtmlImage[] = [
@@ -40,9 +48,16 @@
  *   })
  * ];
  * 
- * // Dynamic image gallery
+ * // Dynamic image gallery with Next.js Image
  * const gallery = productImages.map((img, index) => (
- *   <img key={index} src={img.src} alt={img.alt} />
+ *   <Image 
+ *     key={index} 
+ *     src={img.src} 
+ *     alt={img.alt}
+ *     width={500}
+ *     height={500}
+ *     loading="lazy"
+ *   />
  * ));
  * ```
  * 
@@ -68,36 +83,46 @@ export default class HtmlImage {
 	 * 
 	 * @param {Partial<HtmlImage>} partial - Partial image data to initialize
 	 * 
-	 * @example
-	 * ```typescript
-	 * // Basic usage
-	 * const logo = new HtmlImage({
-	 *   src: '/logo.png',
-	 *   alt: 'MedSource Pro Company Logo'
-	 * });
-	 * 
-	 * // Product image
-	 * const productImg = new HtmlImage({
-	 *   src: 'https://cdn.example.com/products/12345.jpg',
-	 *   alt: 'N95 Respirator Mask - Box of 50'
-	 * });
-	 * 
-	 * // From API response
-	 * const apiImage = {
-	 *   imagePath: '/uploads/product-123.jpg',
-	 *   imageDescription: 'Medical gloves'
-	 * };
-	 * const htmlImage = new HtmlImage({
-	 *   src: apiImage.imagePath,
-	 *   alt: apiImage.imageDescription
-	 * });
-	 * 
-	 * // Decorative image (empty alt for accessibility)
-	 * const decorative = new HtmlImage({
-	 *   src: '/decorations/border.svg',
-	 *   alt: '' // Empty alt indicates decorative image
-	 * });
-	 * ```
+ * @example
+ * ```typescript
+ * import Image from 'next/image';
+ * 
+ * // Basic usage
+ * const logo = new HtmlImage({
+ *   src: '/logo.png',
+ *   alt: 'MedSource Pro Company Logo'
+ * });
+ * // Render with Next.js Image
+ * <Image src={logo.src} alt={logo.alt} width={200} height={200} priority />
+ * 
+ * // Product image (external URL - ensure it's configured in next.config.mjs)
+ * const productImg = new HtmlImage({
+ *   src: 'https://cdn.example.com/products/12345.jpg',
+ *   alt: 'N95 Respirator Mask - Box of 50'
+ * });
+ * // Render with Next.js Image
+ * <Image src={productImg.src} alt={productImg.alt} width={500} height={500} loading="lazy" />
+ * 
+ * // From API response
+ * const apiImage = {
+ *   imagePath: '/uploads/product-123.jpg',
+ *   imageDescription: 'Medical gloves'
+ * };
+ * const htmlImage = new HtmlImage({
+ *   src: apiImage.imagePath,
+ *   alt: apiImage.imageDescription
+ * });
+ * // Render with Next.js Image
+ * <Image src={htmlImage.src} alt={htmlImage.alt} width={500} height={500} loading="lazy" />
+ * 
+ * // Decorative image (empty alt for accessibility)
+ * const decorative = new HtmlImage({
+ *   src: '/decorations/border.svg',
+ *   alt: '' // Empty alt indicates decorative image
+ * });
+ * // Render with Next.js Image
+ * <Image src={decorative.src} alt={decorative.alt} width={100} height={20} role="presentation" />
+ * ```
 	 */
 	constructor(partial?: Partial<HtmlImage>) {
 		if (partial) {
