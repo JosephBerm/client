@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { MessageSquare } from 'lucide-react'
 
 import PageContainer from '@_components/layouts/PageContainer'
 import Button from '@_components/ui/Button'
@@ -13,10 +15,10 @@ import {
 	CheckIcon,
 } from '@_components/ui/ContactIcons'
 import ContactMethodCard from '@_components/ui/ContactMethodCard'
-import MembersOnlyChatCard from '@_components/ui/MembersOnlyChatCard'
 import LiveChatBubble from '@_components/ui/LiveChatBubble'
 import { isBusinessOpen, getGroupedBusinessHours } from '@_shared/utils/businessHours'
 import { trackContactCTA } from '@_shared/utils/analytics'
+import { Routes } from '@_features/navigation'
 import { Stagger, StaggerItem, Reveal, STAGGER_PRESETS, ANIMATION_PRESETS } from '@_components/common/animations'
 
 /**
@@ -109,6 +111,7 @@ const CONTACT_INFO = {
 } as const
 
 export default function ContactUs() {
+	const router = useRouter()
 	// Track chat bubble state
 	const [isChatOpen, setIsChatOpen] = useState(false)
 
@@ -123,6 +126,11 @@ export default function ContactUs() {
 			ctaLocation: 'contact_section_primary',
 		})
 	}, [])
+
+	// Handler for members only chat card click
+	const handleMembersOnlyChatClick = useCallback(() => {
+		router.push(Routes.openLoginModal())
+	}, [router])
 
 	const handleChatClick = useCallback(() => {
 		setIsChatOpen(true)
@@ -168,7 +176,7 @@ export default function ContactUs() {
 			{/* Contact Methods Grid - FAANG-level staggered reveal */}
 			<Stagger 
 				{...STAGGER_PRESETS.contactMethods}
-				className="mx-auto grid max-w-2xl gap-6 lg:max-w-4xl lg:grid-cols-3 lg:gap-8 xl:max-w-7xl xl:gap-10 2xl:max-w-[1400px]"
+				className="mx-auto grid max-w-2xl gap-6 lg:max-w-4xl lg:grid-cols-3 lg:gap-8 xl:max-w-7xl xl:gap-10 2xl:max-w-[1400px] items-stretch"
 			>
 				{/* Call Us */}
 				<StaggerItem {...ANIMATION_PRESETS.cardFadeUp}>
@@ -201,7 +209,17 @@ export default function ContactUs() {
 
 				{/* Members Only Live Chat */}
 				<StaggerItem {...ANIMATION_PRESETS.cardFadeUp}>
-					<MembersOnlyChatCard trackingLocation="contact_section_card" />
+					<ContactMethodCard
+						type="chat"
+						title="LIVE CHAT"
+						mainText="Members Only"
+						description="Create a free account to access our live chat support."
+						variant="dark"
+						clickableCard
+						customIcon={MessageSquare}
+						onClick={handleMembersOnlyChatClick}
+						trackingLocation="contact_section_card"
+					/>
 				</StaggerItem>
 			</Stagger>
 
