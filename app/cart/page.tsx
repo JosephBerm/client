@@ -19,6 +19,7 @@ import { API } from '@_shared'
 import Quote from '@_classes/Quote'
 import { CartProduct } from '@_classes/Product'
 import Name from '@_classes/common/Name'
+import { Routes } from '@_features/navigation'
 
 export default function CartPage() {
 	const router = useRouter()
@@ -259,7 +260,7 @@ export default function CartPage() {
 										<Button
 											variant="primary"
 											fullWidth
-											onClick={() => router.push('/login')}
+											onClick={() => router.push(Routes.openLoginModal())}
 										>
 											Log In
 										</Button>

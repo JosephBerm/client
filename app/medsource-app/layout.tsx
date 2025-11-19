@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { IUser } from '@_classes/User'
 import { logger } from '@_core'
+import { Routes } from '@_features/navigation'
 
 // Old components - now using modernized navigation in root layout
 // import Sidebar from '@/components/Sidebar'
@@ -46,9 +47,15 @@ export default async function RootLayout({
 	const token = cookiesStore.get('at')
 
 	// Load user data into state management library.
-	if (token == null) return redirect('/login')
+	// Note: Middleware handles redirects for unauthenticated users, but this is a fallback
+	if (token == null) {
+		return redirect(Routes.openLoginModal())
+	}
 	const response = await getUserData(token.value)
-	if (response?.payload == null) return redirect('/login') // Ensure the Authorization token is valiud.
+	if (response?.payload == null) {
+		// Ensure the Authorization token is valid.
+		return redirect(Routes.openLoginModal())
+	}
 
 	// Navigation is now handled by root layout with modernized components
 	return <div className="min-h-screen bg-base-200">{children}</div>

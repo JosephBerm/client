@@ -58,11 +58,13 @@ interface ApiResponse<T> {
  * ```typescript
  * import { logger } from '@_core';
  * 
+ * import { Routes } from '@_features/navigation';
+ * 
  * const user = await checkAuthStatus();
  * if (user) {
  *   logger.info('User authenticated', { userId: user.id, userName: user.name });
  * } else {
- *   router.push('/login');
+ *   router.push(Routes.openLoginModal());
  * }
  * ```
  */
@@ -213,9 +215,11 @@ export async function login(credentials: LoginCredentials): Promise<{
  *   dateOfBirth: new Date('1990-01-15')
  * });
  * 
+ * import { Routes } from '@_features/navigation';
+ * 
  * if (result.success) {
  *   toast.success('Account created! Please log in.');
- *   router.push('/login');
+ *   router.push(Routes.openLoginModal());
  * } else {
  *   toast.error(result.message);
  * }
@@ -270,10 +274,12 @@ export async function signup(form: RegisterModel): Promise<{
  * 
  * @example
  * ```typescript
+ * import { Routes } from '@_features/navigation';
+ * 
  * // In a logout button handler
  * const handleLogout = () => {
  *   logout();
- *   router.push('/login');
+ *   router.push(Routes.openLoginModal());
  *   toast.success('Logged out successfully');
  * };
  * ```

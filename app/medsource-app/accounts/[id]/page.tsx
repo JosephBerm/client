@@ -102,7 +102,7 @@ const Page = () => {
 							the user or register on their behalf, then assign the appropriate customer organization.
 						</p>
 						<div className="flex flex-wrap gap-3">
-							<Link href={Routes.Signup.location} className="btn btn-primary">
+							<Link href={Routes.openLoginModal()} className="btn btn-primary">
 								Open Signup
 							</Link>
 							<Link href={Routes.Accounts.location} className="btn btn-ghost">

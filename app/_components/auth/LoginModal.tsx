@@ -31,6 +31,7 @@ import { useZodForm } from '@_shared'
 import { loginSchema, type LoginFormData } from '@_core'
 import { logger } from '@_core'
 import { login, useAuthStore } from '@_features/auth'
+import { Routes } from '@_features/navigation'
 import Modal from '@_components/ui/Modal'
 import FormInput from '@_components/forms/FormInput'
 import Button from '@_components/ui/Button'
@@ -365,12 +366,16 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 				<div className='mt-3 sm:mt-4 md:mt-6 text-center'>
 					<p className='text-xs sm:text-sm text-base-content/70 leading-relaxed'>
 						Don&apos;t have an account?{' '}
-						<Link
-							href='/signup'
-							onClick={handleClose}
+						<button
+							type='button'
+							onClick={() => {
+								handleClose()
+								// Navigate to home with login modal open
+								router.push(Routes.openLoginModal())
+							}}
 							className='link link-primary font-semibold hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'>
 							Sign up
-						</Link>
+						</button>
 					</p>
 				</div>
 			</div>

@@ -13,7 +13,16 @@ const protectedRoutes = [
 	'/quotes',
 ]
 
-// Auth routes - redirect to home if already authenticated
+/**
+ * Auth routes - redirect to home with login modal if accessed directly.
+ * 
+ * These routes are deprecated but kept here for backward compatibility.
+ * All new code should use Routes.openLoginModal() instead of navigating to these routes.
+ * 
+ * Note: We keep hardcoded strings here because middleware runs in Edge runtime
+ * and importing Routes would add unnecessary bundle size. The redirect logic
+ * matches Routes.openLoginModal() behavior.
+ */
 const authRoutes = ['/login', '/signup']
 
 export function middleware(request: NextRequest) {
@@ -35,10 +44,17 @@ export function middleware(request: NextRequest) {
 		return NextResponse.redirect(url)
 	}
 
-	// Redirect to home if accessing auth route with token
-	if (isAuthRoute && token) {
+	// Redirect to home with login modal query param if accessing auth routes
+	// These routes should not exist - everything should use the login modal
+	if (isAuthRoute) {
 		const url = request.nextUrl.clone()
 		url.pathname = '/'
+		url.searchParams.set('login', 'true')
+		// Preserve redirectTo if it exists
+		const redirectTo = request.nextUrl.searchParams.get('redirectTo')
+		if (redirectTo) {
+			url.searchParams.set('redirectTo', redirectTo)
+		}
 		return NextResponse.redirect(url)
 	}
 

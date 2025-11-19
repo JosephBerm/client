@@ -12,8 +12,9 @@
  * - Includes both public and protected routes
  * 
  * **Route Structure:**
- * - Public routes: Accessible without authentication (/, /login, /store, etc.)
+ * - Public routes: Accessible without authentication (/, /store, etc.)
  * - Internal routes: Protected by middleware under /medsource-app/* path
+ * - Authentication: Use `Routes.openLoginModal()` to open login modal
  * 
  * @example
  * ```typescript
@@ -47,18 +48,6 @@ class Routes {
 	public static Orders = {
 		name: 'Orders',
 		location: `${Routes.InternalAppRoute}/orders`,
-	}
-
-	/** User signup/registration route (public) */
-	public static Signup = {
-		name: 'Sign Up',
-		location: '/signup',
-	}
-
-	/** User login route (public) */
-	public static Login = {
-		name: 'LogIn',
-		location: '/login',
 	}
 
 	/** Public product store route (accessible to all) */
@@ -143,6 +132,49 @@ class Routes {
 	public static Cart = {
 		name: 'Cart',
 		location: '/cart',
+	}
+
+	/**
+	 * Generates a URL to open the login modal.
+	 * 
+	 * The login modal is opened by navigating to the home page with the `?login=true` query parameter.
+	 * The Navbar component automatically detects this parameter and opens the login modal.
+	 * 
+	 * **Usage:**
+	 * - Use this method instead of hardcoding `/?login=true` throughout the application
+	 * - Provides a single source of truth for login modal navigation
+	 * - Maintains consistency if the login modal mechanism changes
+	 * - Works in both client and server components
+	 * 
+	 * @param redirectTo - Optional path to redirect to after successful login
+	 * @returns URL string with login modal query parameter
+	 * 
+	 * @example
+	 * ```typescript
+	 * import { Routes } from '@_features/navigation';
+	 * 
+	 * // Basic usage - open login modal
+	 * router.push(Routes.openLoginModal());
+	 * // Result: "/?login=true"
+	 * 
+	 * // With redirect after login
+	 * router.push(Routes.openLoginModal('/cart'));
+	 * // Result: "/?login=true&redirectTo=/cart"
+	 * 
+	 * // In a Link component
+	 * <Link href={Routes.openLoginModal()}>Sign In</Link>
+	 * 
+	 * // In server component
+	 * return redirect(Routes.openLoginModal());
+	 * ```
+	 */
+	public static openLoginModal(redirectTo?: string): string {
+		const params = new URLSearchParams()
+		params.set('login', 'true')
+		if (redirectTo) {
+			params.set('redirectTo', redirectTo)
+		}
+		return `${Routes.Home.location}?${params.toString()}`
 	}
 }
 

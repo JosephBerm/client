@@ -37,6 +37,7 @@ import { MessageSquare, ArrowRight } from 'lucide-react'
 import classNames from 'classnames'
 import Button from '@_components/ui/Button'
 import { trackContactCTA } from '@_shared/utils/analytics'
+import { Routes } from '@_features/navigation'
 
 /**
  * MembersOnlyChatCard component props
@@ -74,7 +75,7 @@ export default function MembersOnlyChatCard({
 			contactMethod: 'chat',
 			ctaLocation: trackingLocation,
 		})
-		router.push('/signup')
+		router.push(Routes.openLoginModal())
 	}, [trackingLocation, router])
 
 	// Generate aria-label if not provided

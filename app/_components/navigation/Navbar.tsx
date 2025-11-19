@@ -21,7 +21,7 @@
  * - Store (/store)
  * - Contact (/contact)
  * - Cart (/cart)
- * - Login (/login)
+ * - Login: Opens modal via login button (no dedicated route)
  *
  * **Mobile Behavior (< 768px):**
  * - Shows hamburger menu button
@@ -140,7 +140,8 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 
 	const handleLogout = () => {
 		useAuthStore.getState().logout()
-		window.location.href = '/login'
+		// Redirect to home with login modal query param
+		router.push(Routes.openLoginModal())
 	}
 
 	return (

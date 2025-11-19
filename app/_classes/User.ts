@@ -310,10 +310,12 @@ export class PasswordForm {
  *   dateOfBirth: new Date('1990-01-15')
  * });
  * 
+ * import { Routes } from '@_features/navigation';
+ * 
  * // Use with AuthService
  * const result = await AuthService.signup(registration);
  * if (result.success) {
- *   router.push('/login');
+ *   router.push(Routes.openLoginModal());
  * }
  * ```
  */
