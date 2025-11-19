@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { MessageSquare } from 'lucide-react'
@@ -15,7 +15,6 @@ import {
 	CheckIcon,
 } from '@_components/ui/ContactIcons'
 import ContactMethodCard from '@_components/ui/ContactMethodCard'
-import LiveChatBubble from '@_components/ui/LiveChatBubble'
 import { isBusinessOpen, getGroupedBusinessHours } from '@_shared/utils/businessHours'
 import { trackContactCTA } from '@_shared/utils/analytics'
 import { Routes } from '@_features/navigation'
@@ -112,8 +111,6 @@ const CONTACT_INFO = {
 
 export default function ContactUs() {
 	const router = useRouter()
-	// Track chat bubble state
-	const [isChatOpen, setIsChatOpen] = useState(false)
 
 	// Calculate business status (memoized for performance)
 	const isOpen = useMemo(() => isBusinessOpen(), [])
@@ -132,9 +129,6 @@ export default function ContactUs() {
 		router.push(Routes.openLoginModal())
 	}, [router])
 
-	const handleChatClick = useCallback(() => {
-		setIsChatOpen(true)
-	}, [])
 	return (
 		<section 
 			id="contact" 
@@ -282,12 +276,6 @@ export default function ContactUs() {
 				</Reveal>
 
 			</PageContainer>
-
-			{/* Live Chat Bubble - Fixed Position */}
-			<LiveChatBubble 
-				isOpen={isChatOpen}
-				onOpenChange={setIsChatOpen}
-			/>
 		</section>
 	)
 }

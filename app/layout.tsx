@@ -5,6 +5,7 @@ import AuthInitializer from '@_components/common/AuthInitializer'
 import UserSettingsInitializer from '@_components/common/UserSettingsInitializer'
 import ImageServiceInitializer from '@_components/common/ImageServiceInitializer'
 import ServiceWorkerRegistration from '@_components/common/ServiceWorkerRegistration'
+import LiveChatBubble from '@_components/ui/LiveChatBubble'
 import { themeInitScript } from '@_scripts/theme-init-inline'
 
 import 'react-toastify/dist/ReactToastify.css'
@@ -40,19 +41,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				{children}
 			</NavigationLayout>
 
-				{/* Toast notifications */}
-				<ToastContainer
-					position="top-right"
-					autoClose={3000}
-					hideProgressBar={false}
-					newestOnTop
-					closeOnClick
-					rtl={false}
-					pauseOnFocusLoss
-					draggable
-					pauseOnHover
-					theme="light"
-				/>
+			{/* Toast notifications */}
+			<ToastContainer
+				position="top-right"
+				autoClose={3000}
+				hideProgressBar={false}
+				newestOnTop
+				closeOnClick
+				rtl={false}
+				pauseOnFocusLoss
+				draggable
+				pauseOnHover
+				theme="light"
+			/>
+
+			{/* Global Live Chat Bubble - Available on all pages */}
+			{/* Placed at root level to avoid interference from page-specific animations */}
+			<LiveChatBubble />
 			</body>
 		</html>
 	)

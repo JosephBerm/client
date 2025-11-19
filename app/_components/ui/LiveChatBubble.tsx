@@ -243,11 +243,10 @@ export default function LiveChatBubble({
 				{/* Icon with rotation animation */}
 				<MessageCircle
 					className={classNames(
-						compact
-							? 'h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 transition-transform duration-300'
-							: 'h-6 w-6 sm:h-7 sm:w-7 transition-transform duration-300',
+						'h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 transition-transform duration-300',
 						isHovered && 'rotate-12'
 					)}
+					style={{ minWidth: 'var(--fz-lg)' }}
 					strokeWidth={2}
 					aria-hidden="true"
 				/>
