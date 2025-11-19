@@ -110,14 +110,7 @@ import { FieldError } from 'react-hook-form'
 import classNames from 'classnames'
 import { ChevronDown } from 'lucide-react'
 
-import {
-	baseFieldClass,
-	errorClass,
-	errorFieldClass,
-	fieldWrapperClass,
-	helperClass,
-	labelClass,
-} from './fieldStyles'
+import { baseFieldClass, errorClass, errorFieldClass, fieldWrapperClass, helperClass, labelClass } from './fieldStyles'
 
 /**
  * FormSelect component props interface.
@@ -191,13 +184,21 @@ const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
 		return (
 			<div className={fieldWrapperClass}>
 				{label && (
-					<label className={labelClass}>
+					<label
+						htmlFor={props.id || props.name}
+						className={labelClass}>
 						{label}
-						{props.required && <span className="text-[var(--error-color)]">*</span>}
+						{props.required && (
+							<span
+								className='text-[var(--error-color)] font-bold transition-colors duration-200 ease-in-out'
+								aria-label='required'>
+								*
+							</span>
+						)}
 					</label>
 				)}
 
-				<div className="relative">
+				<div className='relative'>
 					<select
 						ref={ref}
 						className={classNames(
@@ -206,20 +207,23 @@ const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
 							{ [errorFieldClass]: Boolean(error) },
 							className
 						)}
-						{...props}
-					>
+						{...props}>
 						{placeholder && (
-							<option value="" disabled>
+							<option
+								value=''
+								disabled>
 								{placeholder}
 							</option>
 						)}
 						{options.map((option) => (
-							<option key={option.value} value={option.value}>
+							<option
+								key={option.value}
+								value={option.value}>
 								{option.label}
 							</option>
 						))}
 					</select>
-					<ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
+					<ChevronDown className='pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-primary' />
 				</div>
 
 				{showMessaging && (
@@ -233,6 +237,3 @@ const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
 FormSelect.displayName = 'FormSelect'
 
 export default FormSelect
-
-
-

@@ -96,14 +96,7 @@ import { forwardRef, TextareaHTMLAttributes } from 'react'
 import { FieldError } from 'react-hook-form'
 import classNames from 'classnames'
 
-import {
-	baseFieldClass,
-	errorClass,
-	errorFieldClass,
-	fieldWrapperClass,
-	helperClass,
-	labelClass,
-} from './fieldStyles'
+import { baseFieldClass, errorClass, errorFieldClass, fieldWrapperClass, helperClass, labelClass } from './fieldStyles'
 
 /**
  * FormTextArea component props interface.
@@ -165,9 +158,17 @@ const FormTextArea = forwardRef<HTMLTextAreaElement, FormTextAreaProps>(
 		return (
 			<div className={fieldWrapperClass}>
 				{label && (
-					<label className={labelClass}>
+					<label
+						htmlFor={props.id || props.name}
+						className={labelClass}>
 						{label}
-						{props.required && <span className="text-[var(--error-color)]">*</span>}
+						{props.required && (
+							<span
+								className='text-[var(--error-color)] font-bold transition-colors duration-200 ease-in-out'
+								aria-label='required'>
+								*
+							</span>
+						)}
 					</label>
 				)}
 
@@ -194,6 +195,3 @@ const FormTextArea = forwardRef<HTMLTextAreaElement, FormTextAreaProps>(
 FormTextArea.displayName = 'FormTextArea'
 
 export default FormTextArea
-
-
-
