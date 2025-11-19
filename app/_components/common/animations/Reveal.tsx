@@ -30,16 +30,20 @@
 import { motion, useInView } from 'framer-motion'
 import { useRef, useMemo, useEffect, useState, type ReactNode } from 'react'
 import classNames from 'classnames'
+import { logger } from '@_core'
 import {
 	getAnimationVariants,
 	checkReducedMotion,
 	REDUCED_MOTION_VARIANTS,
+	ANIMATION_EASING,
 	type BaseAnimationProps,
 } from './types'
 
 export interface RevealProps extends BaseAnimationProps {
 	/** Content to animate */
 	children: ReactNode
+	/** Easing curve key */
+	easing?: keyof typeof ANIMATION_EASING
 }
 
 /**
@@ -74,6 +78,7 @@ export default function Reveal({
 	once = true,
 	className,
 	width = '100%',
+	easing = 'smooth',
 }: RevealProps) {
 	const ref = useRef<HTMLDivElement>(null)
 	const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
@@ -116,13 +121,27 @@ export default function Reveal({
 	// Memoize variants to prevent recreation on every render
 	// FAANG optimization: Expensive calculations cached
 	const animationVariants = useMemo(() => {
-		// Use instant reveal for reduced motion users
-		if (prefersReducedMotion) {
+		try {
+			// Use instant reveal for reduced motion users
+			if (prefersReducedMotion) {
+				return REDUCED_MOTION_VARIANTS
+			}
+
+			return getAnimationVariants(variant, direction, distance, easing)
+		} catch (error) {
+			// FAANG best practice: Log animation errors
+			logger.error('Reveal - Failed to create animation variants', {
+				component: 'Reveal',
+				variant,
+				direction,
+				distance,
+				easing,
+				error,
+			})
+			// Fallback to reduced motion variants on error
 			return REDUCED_MOTION_VARIANTS
 		}
-
-		return getAnimationVariants(variant, direction, distance, 'smooth')
-	}, [variant, direction, distance, prefersReducedMotion])
+	}, [variant, direction, distance, easing, prefersReducedMotion])
 
 	// Memoize transition config
 	const transition = useMemo(

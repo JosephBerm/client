@@ -19,7 +19,7 @@ import LiveChatBubble from '@_components/ui/LiveChatBubble'
 import { isBusinessOpen, getGroupedBusinessHours } from '@_shared/utils/businessHours'
 import { trackContactCTA } from '@_shared/utils/analytics'
 import { Routes } from '@_features/navigation'
-import { Stagger, StaggerItem, Reveal, STAGGER_PRESETS, ANIMATION_PRESETS } from '@_components/common/animations'
+import { Stagger, StaggerItem, Reveal, STAGGER_PRESETS, ANIMATION_PRESETS, ANIMATION_DELAY } from '@_components/common/animations'
 
 /**
  * Contact Section
@@ -224,7 +224,7 @@ export default function ContactUs() {
 			</Stagger>
 
 			{/* Business Hours & Response Time - Appears after contact methods */}
-			<Reveal {...ANIMATION_PRESETS.cardFadeUp} delay={0.6}>
+			<Reveal {...ANIMATION_PRESETS.cardFadeUp} delay={ANIMATION_DELAY.long * 3}>
 					<div className="mx-auto max-w-2xl rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl md:p-8">
 					<div className="relative grid gap-8 lg:grid-cols-2 lg:gap-12">
 						{/* Business Hours */}

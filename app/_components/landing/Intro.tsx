@@ -7,7 +7,7 @@ import PageContainer from '@_components/layouts/PageContainer'
 import Button from '@_components/ui/Button'
 import Pill from '@_components/ui/Pill'
 import StatusDot from '@_components/ui/StatusDot'
-import { Reveal, Stagger, StaggerItem, ANIMATION_DURATION, ANIMATION_DELAY, STAGGER_DELAY } from '@_components/common/animations'
+import { Reveal, Stagger, StaggerItem, ANIMATION_DURATION, ANIMATION_DELAY, STAGGER_DELAY, ANIMATION_DISTANCE } from '@_components/common/animations'
 
 /**
  * Intro Section
@@ -158,7 +158,12 @@ export default function Intro() {
 
 							{/* Status pill overlay - appears after image animation completes */}
 							<div className="absolute bottom-6 left-6 z-10">
-								<Reveal variant="fade" delay={1.1} direction="up" distance={10}>
+								<Reveal 
+									variant="fade" 
+									delay={ANIMATION_DELAY.standard + ANIMATION_DURATION.standard + ANIMATION_DELAY.quick} 
+									direction="up" 
+									distance={ANIMATION_DISTANCE.sm / 2}
+								>
 									<Pill
 										tone="neutral"
 										size="lg"

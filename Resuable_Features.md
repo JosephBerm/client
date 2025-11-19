@@ -98,7 +98,7 @@ Below is a categorized list of reusable items. Each item links to a brief descri
     - Base: `Guid.ts`, `PagedResult.ts`, `GenericSearchFilter.ts`, `CustomerSummary.ts`
     - Common: `Address.ts`, `Name.ts`
     - Enums: `Enums.ts`, `SharedEnums.ts`, `EnumsTranslations.ts`, `Enums/OrderStatusEnumsHelper.ts`
-    - Entities: `Company.ts`, `User.ts`, `Product.ts`, `ProductsCategory.ts`, `Provider.ts`, `Order.ts`, `Quote.ts`, `ContactRequest.ts`, `Notification.ts`, `UploadedFile.ts`, `Home.ts`, `HtmlImage.ts`
+    - Entities: `Company.ts`, `User.ts`, `Product.ts`, `ProductsCategory.ts`, `Provider.ts`, `Order.ts`, `Quote.ts`, `ContactRequest.ts`, `Notification.ts`, `UploadedFile.ts`, `Home.ts`, `HtmlImage.ts`, `About.ts`
     - Requests/Filters: `RequestClasses.ts`, `FinanceSearchFilter.ts`, `FinanceNumbers.ts`, `LoginCredentials.ts`, `PagedData.ts`, `CarouselTypes.ts`
 
 - Features: Auth
@@ -215,6 +215,10 @@ Below is a categorized list of reusable items. Each item links to a brief descri
   - [_components/landing/FAQ.tsx](#desc-landing-faq)
   - [_components/landing/ContactUs.tsx](#desc-contact-us)
   - [_components/landing/ScrollIntoViewComponent.tsx](#desc-scroll-into-view) (NPM: `framer-motion` optional; uses IntersectionObserver APIs)
+  - [_components/landing/HeroSection.tsx](#desc-hero-section) (NPM: `framer-motion`)
+  - [_components/landing/StatsBanner.tsx](#desc-stats-banner) (NPM: `framer-motion`)
+  - [_components/landing/FeatureSection.tsx](#desc-feature-section) (NPM: `framer-motion`)
+  - [_components/landing/CTASection.tsx](#desc-cta-section) (NPM: `framer-motion`)
 
 - UI Components (Generic)
   - [_components/ui/Accordion.tsx](#desc-accordion)
@@ -239,6 +243,7 @@ Below is a categorized list of reusable items. Each item links to a brief descri
     - [_components/ui/Carousel/types.ts](#desc-carousel-types)
   - Animations
     - [_components/common/animations/index.ts](#desc-animations-index)
+    - [_components/common/animations/config.ts](#desc-animation-config) (NPM: `framer-motion`)
     - [_components/common/animations/types.ts](#desc-animation-types) (NPM: `framer-motion`)
     - [_components/common/animations/Reveal.tsx](#desc-reveal) (NPM: `framer-motion`)
     - [_components/common/animations/Stagger.tsx](#desc-stagger) (NPM: `framer-motion`)
@@ -355,6 +360,9 @@ User settings, theme, and preference types.
 
 #### app/_classes (root) {#desc-classes-root}
 Domain models and DTOs (entities, enums, filters, requests). Keep these as the canonical shared model contracts.
+
+#### app/_classes/About.ts {#desc-about-class}
+Static content management class for About page. Centralizes hero section, statistics, features, and CTA content. Provides type-safe interfaces for all content sections. Enables easy content updates without touching JSX. Follows same pattern as Home.ts for consistency.
 
 
 ### Features: Auth
@@ -604,6 +612,18 @@ Contact section with methods and form hook-in points.
 #### _components/landing/ScrollIntoViewComponent.tsx {#desc-scroll-into-view}
 Viewport-aware reveal animations and auto-scroll behavior.
 
+#### _components/landing/HeroSection.tsx {#desc-hero-section}
+Reusable hero section with background image, gradient overlay, and animated content. Features: full-viewport background, staggered content animations, optional scroll indicator, mobile-first responsive design, accessibility-first with semantic HTML and ARIA labels, reduced motion support. Uses shared animation system for consistent timing.
+
+#### _components/landing/StatsBanner.tsx {#desc-stats-banner}
+Statistics/trust banner component for displaying key metrics. Features: responsive grid layout (2 columns mobile, 4 columns desktop), staggered entrance animations, mobile-first design, accessibility-first with semantic HTML and ARIA labels, reduced motion support via shared animation system. Supports neutral and base variants.
+
+#### _components/landing/FeatureSection.tsx {#desc-feature-section}
+Feature showcase component with alternating image/text layout. Features: alternating left/right layout for image and text, icon support with color variants, hover effects on images, mobile-first responsive design, accessibility-first with semantic HTML and ARIA labels, reduced motion support via shared animation system. Optimized image loading with priority for first feature.
+
+#### _components/landing/CTASection.tsx {#desc-cta-section}
+Call-to-action section component with multiple variants. Features: pattern, solid, and gradient variants, responsive layout, animated content reveal, mobile-first design, accessibility-first with semantic HTML and ARIA labels, theme-aware text colors. Uses shared animation system for consistent timing.
+
 
 ### UI Components (Generic)
 
@@ -667,14 +687,17 @@ Shared types for carousel props and state.
 #### _components/common/animations/index.ts {#desc-animations-index}
 Barrel export for animation components and utilities.
 
+#### _components/common/animations/config.ts {#desc-animation-config}
+Centralized animation configuration constants. Single source of truth for animation timing, delays, distances, and presets. Includes: ANIMATION_DURATION (quick, standard, slow, long), ANIMATION_DELAY (none, quick, standard, long, veryLong), STAGGER_DELAY (fast, standard, slow, hero), ANIMATION_DISTANCE (sm, md, lg, feature), and ANIMATION_PRESETS for common use cases.
+
 #### _components/common/animations/types.ts {#desc-animation-types}
-Shared types and utilities for animations. FAANG-level DRY implementation with centralized variant logic, easing presets from CSS custom properties, reduced motion detection, and type-safe animation configuration. Eliminates duplication between Reveal and Stagger components.
+Shared types and utilities for animations. FAANG-level DRY implementation with centralized variant logic, easing presets (smooth, easeOut, aboutHero), reduced motion detection, and type-safe animation configuration. Eliminates duplication between Reveal and Stagger components. Includes getAnimationVariants utility function.
 
 #### _components/common/animations/Reveal.tsx {#desc-reveal}
-FAANG-level scroll-triggered reveal animation with full accessibility support. Features: Intersection Observer for performance, multiple variants (fade/slide/scale/blur), respects prefers-reduced-motion (system + user override), useMemo optimization, type-safe with no casting, GPU-accelerated transforms, will-change hints. WCAG 2.1 AAA compliant.
+FAANG-level scroll-triggered reveal animation with full accessibility support. Features: Intersection Observer for performance, multiple variants (fade/slide/scale/blur), respects prefers-reduced-motion (system + user override), useMemo optimization, type-safe with no casting, GPU-accelerated transforms, will-change hints, custom easing support. WCAG 2.1 AAA compliant.
 
 #### _components/common/animations/Stagger.tsx {#desc-stagger}
-FAANG-level staggered entrance animation container following Apple/Stripe patterns. Features: Coordinated child animations with configurable delay, Intersection Observer, respects prefers-reduced-motion, DRY with shared variant logic, instant reveal for accessibility. Works with `StaggerItem` for elegant cascading reveals.
+FAANG-level staggered entrance animation container following Apple/Stripe patterns. Features: Coordinated child animations with configurable delay, Intersection Observer, respects prefers-reduced-motion, DRY with shared variant logic, instant reveal for accessibility. Works with `StaggerItem` for elegant cascading reveals. StaggerItem supports custom duration and easing props for fine-grained control.
 
 #### _components/ui/formFieldStyles.ts {#desc-ui-form-field-styles}
 Style tokens for UI form fields (Tailwind classes).

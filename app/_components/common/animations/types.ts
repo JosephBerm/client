@@ -56,6 +56,10 @@ export const ANIMATION_EASING = {
 	bounce: [0.68, -0.55, 0.265, 1.55] as const,
 	/** Spring easing: cubic-bezier(0.34, 1.56, 0.64, 1) - Apple-inspired natural spring */
 	spring: [0.34, 1.56, 0.64, 1] as const,
+	/** Original About page easing: cubic-bezier(0.25, 0.1, 0.25, 1) - Custom smooth */
+	aboutHero: [0.25, 0.1, 0.25, 1] as const,
+	/** EaseOut: cubic-bezier(0, 0, 0.2, 1) - CSS ease-out equivalent */
+	easeOut: [0, 0, 0.2, 1] as const,
 } as const
 
 /**
@@ -93,7 +97,7 @@ export function getAnimationVariants(
 
 		case 'scale':
 			return {
-				hidden: { opacity: 0, scale: 0.8 },
+				hidden: { opacity: 0, scale: 0.95 },
 				visible: {
 					opacity: 1,
 					scale: 1,

@@ -28,10 +28,12 @@
 import { motion, useInView, type Variants } from 'framer-motion'
 import { useRef, useMemo, useEffect, useState, type ReactNode } from 'react'
 import classNames from 'classnames'
+import { logger } from '@_core'
 import {
 	getAnimationVariants,
 	checkReducedMotion,
 	REDUCED_MOTION_VARIANTS,
+	ANIMATION_EASING,
 	type AnimationVariant,
 	type AnimationDirection,
 } from './types'
@@ -157,6 +159,10 @@ export interface StaggerItemProps {
 	direction?: AnimationDirection
 	/** Distance to travel in pixels */
 	distance?: number
+	/** Animation duration in seconds */
+	duration?: number
+	/** Easing curve key */
+	easing?: keyof typeof ANIMATION_EASING
 	/** Width override */
 	width?: string
 }
@@ -184,6 +190,8 @@ export function StaggerItem({
 	variant = 'fade',
 	direction = 'up',
 	distance = 20,
+	duration,
+	easing = 'smooth',
 	width,
 }: StaggerItemProps) {
 	const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
@@ -215,12 +223,42 @@ export function StaggerItem({
 
 	// Memoize variants (DRY: Uses shared utility)
 	const itemVariants = useMemo(() => {
-		if (prefersReducedMotion) {
+		try {
+			if (prefersReducedMotion) {
+				return REDUCED_MOTION_VARIANTS
+			}
+
+			const variants = getAnimationVariants(variant, direction, distance, easing)
+			
+			// Override duration if provided
+			// Type-safe: Check if visible is an object (not a function) before accessing transition
+			if (duration !== undefined && typeof variants.visible === 'object' && variants.visible !== null) {
+				const visibleVariant = variants.visible as { transition?: { duration?: number; ease?: any } }
+				variants.visible = {
+					...visibleVariant,
+					transition: {
+						...(visibleVariant.transition || {}),
+						duration,
+					},
+				}
+			}
+
+			return variants
+		} catch (error) {
+			// FAANG best practice: Log animation errors
+			logger.error('StaggerItem - Failed to create animation variants', {
+				component: 'StaggerItem',
+				variant,
+				direction,
+				distance,
+				easing,
+				duration,
+				error,
+			})
+			// Fallback to reduced motion variants on error
 			return REDUCED_MOTION_VARIANTS
 		}
-
-		return getAnimationVariants(variant, direction, distance, 'smooth')
-	}, [variant, direction, distance, prefersReducedMotion])
+	}, [variant, direction, distance, easing, duration, prefersReducedMotion])
 
 	const style = useMemo(() => ({ width }), [width])
 

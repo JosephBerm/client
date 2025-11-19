@@ -8,7 +8,7 @@ import Button from '@_components/ui/Button'
 import Pill from '@_components/ui/Pill'
 import StatusDot from '@_components/ui/StatusDot'
 import FeatureCard from '@_components/ui/FeatureCard'
-import { Stagger, StaggerItem, Reveal, STAGGER_PRESETS, ANIMATION_PRESETS } from '@_components/common/animations'
+import { Stagger, StaggerItem, Reveal, STAGGER_PRESETS, ANIMATION_PRESETS, ANIMATION_DELAY } from '@_components/common/animations'
 
 const PRODUCT_CATEGORIES = [
 	{
@@ -112,7 +112,7 @@ export default function Products() {
 			</Stagger>
 
 		{/* CTA Banner - Appears after cards for guided flow */}
-		<Reveal {...ANIMATION_PRESETS.cardFadeUp} delay={0.5}>
+		<Reveal {...ANIMATION_PRESETS.cardFadeUp} delay={ANIMATION_DELAY.long * 2.5}>
 				<div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-primary/20 bg-base-200 px-6 py-10 text-center lg:flex-row lg:gap-8 lg:px-12">
 					<p className="max-w-3xl text-base text-base-content lg:text-left">
 						Need a tailored formulary or bulk purchasing strategy? Our sourcing specialists consolidate vendors,

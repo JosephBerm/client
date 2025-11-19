@@ -26,6 +26,8 @@ export const ANIMATION_DURATION = {
 	standard: 0.6,
 	/** Slow animations (hero sections, emphasis) */
 	slow: 0.7,
+	/** Long animations (scroll indicators, special effects) */
+	long: 1,
 } as const
 
 /**
@@ -41,6 +43,8 @@ export const ANIMATION_DELAY = {
 	standard: 0.15,
 	/** Long delay (final sections) */
 	long: 0.2,
+	/** Very long delay (scroll indicators, delayed reveals) */
+	veryLong: 1.5,
 } as const
 
 /**
@@ -54,6 +58,8 @@ export const STAGGER_DELAY = {
 	standard: 0.1,
 	/** Slow stagger (2-3 items, deliberate) */
 	slow: 0.12,
+	/** Hero stagger (original about page timing) */
+	hero: 0.2,
 } as const
 
 /**
@@ -67,6 +73,8 @@ export const ANIMATION_DISTANCE = {
 	md: 30,
 	/** Prominent movement */
 	lg: 40,
+	/** Feature section movement (original about page timing) */
+	feature: 50,
 } as const
 
 /**
