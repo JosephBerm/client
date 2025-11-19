@@ -7,7 +7,6 @@
  * **Features:**
  * - Social login buttons (Google, Apple, Microsoft, Phone)
  * - Email/password authentication
- * - Sign up option
  * - Accessible and keyboard-friendly
  * - Mobile-responsive
  * - Integrated with existing auth system
@@ -31,11 +30,9 @@ import { useZodForm } from '@_shared'
 import { loginSchema, type LoginFormData } from '@_core'
 import { logger } from '@_core'
 import { login, useAuthStore } from '@_features/auth'
-import { Routes } from '@_features/navigation'
 import Modal from '@_components/ui/Modal'
 import FormInput from '@_components/forms/FormInput'
 import Button from '@_components/ui/Button'
-import Link from 'next/link'
 
 /**
  * LoginModal component props interface.
@@ -183,7 +180,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 				{/* Header with close button */}
 				<div className='flex items-center justify-between mb-3 sm:mb-4 md:mb-6'>
 					<h2 className='text-lg sm:text-xl md:text-2xl font-semibold text-base-content'>
-						Log in or sign up
+						Log in
 					</h2>
 					<button
 						onClick={handleClose}
@@ -361,23 +358,6 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 						</Button>
 					</div>
 				</form>
-
-				{/* Sign up link - centered, mobile-first typography */}
-				<div className='mt-3 sm:mt-4 md:mt-6 text-center'>
-					<p className='text-xs sm:text-sm text-base-content/70 leading-relaxed'>
-						Don&apos;t have an account?{' '}
-						<button
-							type='button'
-							onClick={() => {
-								handleClose()
-								// Navigate to home with login modal open
-								router.push(Routes.openLoginModal())
-							}}
-							className='link link-primary font-semibold hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'>
-							Sign up
-						</button>
-					</p>
-				</div>
 			</div>
 		</Modal>
 	)
