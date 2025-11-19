@@ -29,9 +29,10 @@
 
 'use client'
 
-import { useCallback, useMemo, type ReactNode } from 'react'
+import { useCallback, useMemo, type ReactNode, type ComponentType, KeyboardEvent } from 'react'
 import classNames from 'classnames'
 import { PhoneIcon, MailIcon, MessageIcon, iconSizes } from '@_components/ui/ContactIcons'
+import { MessageSquare } from 'lucide-react'
 import { trackPhoneClick, trackEmailClick, trackContactCTA } from '@_shared/utils/analytics'
 
 /**
@@ -111,6 +112,11 @@ function hyphenateEmail(email: string): string {
 export type ContactMethodType = 'chat' | 'email' | 'phone'
 
 /**
+ * Card variant types
+ */
+export type CardVariant = 'default' | 'dark'
+
+/**
  * ContactMethodCard component props
  */
 export interface ContactMethodCardProps {
@@ -134,6 +140,12 @@ export interface ContactMethodCardProps {
 	itemProp?: 'telephone' | 'email'
 	/** Custom aria-label (auto-generated if not provided) */
 	ariaLabel?: string
+	/** Card variant - 'default' for light background, 'dark' for darker background */
+	variant?: CardVariant
+	/** Custom icon component (overrides default icon for the type) */
+	customIcon?: ComponentType<{ className?: string; strokeWidth?: number }>
+	/** If true, renders as clickable div instead of link/button (for entire card clickability) */
+	clickableCard?: boolean
 }
 
 /**
@@ -207,10 +219,14 @@ export default function ContactMethodCard({
 	className,
 	itemProp,
 	ariaLabel,
+	variant = 'default',
+	customIcon,
+	clickableCard = false,
 }: ContactMethodCardProps) {
 	const config = CONTACT_METHOD_CONFIG[type]
-	const Icon = config.icon
+	const Icon = customIcon || config.icon
 	const location = trackingLocation || config.defaultTrackingLocation
+	const isDark = variant === 'dark'
 
 	// Hyphenate email addresses for elegant line breaking
 	const displayText = useMemo(() => {
@@ -235,13 +251,24 @@ export default function ContactMethodCard({
 				trackEmailClick(mainText, location)
 				break
 			case 'chat':
-				trackContactCTA('Live Chat', {
+				trackContactCTA('Sign Up Free - Live Chat', {
 					contactMethod: 'chat',
 					ctaLocation: location,
 				})
 				break
 		}
 	}, [type, mainText, location, onClick])
+
+	// Handle keyboard interaction for clickable card
+	const handleKeyDown = useCallback(
+		(event: KeyboardEvent<HTMLDivElement>) => {
+			if (clickableCard && (event.key === 'Enter' || event.key === ' ')) {
+				event.preventDefault()
+				handleClick()
+			}
+		},
+		[clickableCard, handleClick]
+	)
 
 	// Generate aria-label if not provided
 	const generatedAriaLabel =
@@ -255,43 +282,49 @@ export default function ContactMethodCard({
 	// Base styles - mobile-first responsive
 	const baseStyles = classNames(
 		// Base card styles
-		'group relative overflow-hidden rounded-2xl border border-base-300 bg-base-100',
+		'group relative overflow-hidden rounded-2xl border border-base-300',
+		isDark ? 'bg-base-200' : 'bg-base-100',
 		'p-6 shadow-sm transition-all duration-300',
 		'hover:border-primary/30 hover:shadow-md',
 		'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+		// Ensure full height for grid uniformity
+		'h-full',
+		// Clickable card styles
+		clickableCard && 'cursor-pointer',
 		// Mobile-first padding (increased on desktop)
 		'md:p-8',
 		// Text alignment and display - ensure consistent layout
 		'text-left w-full',
-		// Reset button defaults to match anchor tag behavior
-		'block',
+		// Use flex layout for all cards to ensure consistent height
+		'flex flex-col',
 		// Custom className
 		className
 	)
 
-	// Icon container styles
+	// Icon container styles - different for dark variant
 	const iconContainerStyles = classNames(
-		'flex h-12 w-12 shrink-0 items-center justify-center rounded-full',
-		'bg-primary/10 text-primary transition-all duration-300',
-		'group-hover:bg-primary group-hover:text-primary-content'
+		'flex h-12 w-12 shrink-0 items-center justify-center transition-all duration-300',
+		isDark
+			? 'rounded-lg bg-primary text-primary-content group-hover:bg-primary/90'
+			: 'rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-content'
 	)
 
 	// Render as link (email, phone) or button (chat)
 	const content = (
-		<div className="flex items-start gap-4">
+		<div className="flex items-start gap-4 flex-1">
 			<div className={iconContainerStyles} aria-hidden="true">
-				<Icon className={iconSizes.md} />
+				<Icon className={iconSizes.md} strokeWidth={customIcon ? 1.5 : undefined} />
 			</div>
-			<div className="flex-1 min-w-0 space-y-1">
+			<div className={classNames('flex-1 min-w-0 flex flex-col', isDark ? 'gap-2' : 'gap-1')}>
 				<p className="text-xs font-semibold uppercase tracking-wider text-base-content/60">
 					{title}
 				</p>
 				<p
 					className={classNames(
 						'text-lg font-semibold text-base-content md:text-xl',
-						// Use break-words for email to allow soft hyphens to work properly
+						// Use wrap-break-word for email to allow soft hyphens to work properly
 						// Soft hyphens will automatically show when line breaks occur
-						type === 'email' ? 'break-words' : 'break-words'
+						'wrap-break-word'
 					)}
 					style={type === 'email' ? { wordBreak: 'break-word', overflowWrap: 'break-word' } : undefined}
 				>
@@ -301,6 +334,22 @@ export default function ContactMethodCard({
 			</div>
 		</div>
 	)
+
+	// Render as clickable div if clickableCard is true
+	if (clickableCard) {
+		return (
+			<div
+				className={baseStyles}
+				aria-label={generatedAriaLabel}
+				role="button"
+				tabIndex={0}
+				onClick={handleClick}
+				onKeyDown={handleKeyDown}
+			>
+				{content}
+			</div>
+		)
+	}
 
 	// Render as link or button based on type
 	if (href) {

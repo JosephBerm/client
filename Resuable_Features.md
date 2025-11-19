@@ -237,6 +237,11 @@ Below is a categorized list of reusable items. Each item links to a brief descri
     - [_components/ui/Carousel/CarouselControls.tsx](#desc-carousel-controls)
     - [_components/ui/Carousel/CarouselDots.tsx](#desc-carousel-dots)
     - [_components/ui/Carousel/types.ts](#desc-carousel-types)
+  - Animations
+    - [_components/common/animations/index.ts](#desc-animations-index)
+    - [_components/common/animations/types.ts](#desc-animation-types) (NPM: `framer-motion`)
+    - [_components/common/animations/Reveal.tsx](#desc-reveal) (NPM: `framer-motion`)
+    - [_components/common/animations/Stagger.tsx](#desc-stagger) (NPM: `framer-motion`)
   - Form Field Styles
     - [_components/ui/formFieldStyles.ts](#desc-ui-form-field-styles)
 
@@ -658,6 +663,18 @@ Pagination dots, clickable and ARIA-labeled.
 
 #### _components/ui/Carousel/types.ts {#desc-carousel-types}
 Shared types for carousel props and state.
+
+#### _components/common/animations/index.ts {#desc-animations-index}
+Barrel export for animation components and utilities.
+
+#### _components/common/animations/types.ts {#desc-animation-types}
+Shared types and utilities for animations. FAANG-level DRY implementation with centralized variant logic, easing presets from CSS custom properties, reduced motion detection, and type-safe animation configuration. Eliminates duplication between Reveal and Stagger components.
+
+#### _components/common/animations/Reveal.tsx {#desc-reveal}
+FAANG-level scroll-triggered reveal animation with full accessibility support. Features: Intersection Observer for performance, multiple variants (fade/slide/scale/blur), respects prefers-reduced-motion (system + user override), useMemo optimization, type-safe with no casting, GPU-accelerated transforms, will-change hints. WCAG 2.1 AAA compliant.
+
+#### _components/common/animations/Stagger.tsx {#desc-stagger}
+FAANG-level staggered entrance animation container following Apple/Stripe patterns. Features: Coordinated child animations with configurable delay, Intersection Observer, respects prefers-reduced-motion, DRY with shared variant logic, instant reveal for accessibility. Works with `StaggerItem` for elegant cascading reveals.
 
 #### _components/ui/formFieldStyles.ts {#desc-ui-form-field-styles}
 Style tokens for UI form fields (Tailwind classes).

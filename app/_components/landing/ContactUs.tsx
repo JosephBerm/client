@@ -17,6 +17,7 @@ import MembersOnlyChatCard from '@_components/ui/MembersOnlyChatCard'
 import LiveChatBubble from '@_components/ui/LiveChatBubble'
 import { isBusinessOpen, getGroupedBusinessHours } from '@_shared/utils/businessHours'
 import { trackContactCTA } from '@_shared/utils/analytics'
+import { Stagger, StaggerItem, Reveal, STAGGER_PRESETS, ANIMATION_PRESETS } from '@_components/common/animations'
 
 /**
  * Contact Section
@@ -24,6 +25,14 @@ import { trackContactCTA } from '@_shared/utils/analytics'
  * Elegant, comprehensive contact section following industry best practices and FAANG-level design standards.
  * Provides multiple contact methods, trust signals, and clear calls-to-action.
  *
+ * **Version 3.0 Enhancements (FAANG-level):**
+ * - ✅ Staggered card animations for professional reveal
+ * - ✅ Contact methods reveal in sequence (120ms stagger)
+ * - ✅ Business hours section follows with fade-up
+ * - ✅ GPU-accelerated animations (60fps)
+ * - ✅ Respects reduced motion preferences
+ * - ✅ Previous v2.0 features maintained
+ * 
  * **Version 2.0 Enhancements:**
  * - ✅ Analytics tracking on all CTAs
  * - ✅ Semantic HTML5 elements (<address>, proper ARIA)
@@ -156,9 +165,13 @@ export default function ContactUs() {
 					</p>
 				</header>
 
-				{/* Contact Methods Grid - Mobile-first responsive */}
-				<div className="mx-auto grid max-w-2xl gap-6 lg:max-w-4xl lg:grid-cols-3 lg:gap-8 xl:max-w-7xl xl:gap-10 2xl:max-w-[1400px]">
-					{/* Call Us */}
+			{/* Contact Methods Grid - FAANG-level staggered reveal */}
+			<Stagger 
+				{...STAGGER_PRESETS.contactMethods}
+				className="mx-auto grid max-w-2xl gap-6 lg:max-w-4xl lg:grid-cols-3 lg:gap-8 xl:max-w-7xl xl:gap-10 2xl:max-w-[1400px]"
+			>
+				{/* Call Us */}
+				<StaggerItem {...ANIMATION_PRESETS.cardFadeUp}>
 					<ContactMethodCard
 						type="phone"
 						title="Call Us"
@@ -172,8 +185,10 @@ export default function ContactUs() {
 						href={CONTACT_INFO.phone.href}
 						itemProp="telephone"
 					/>
+				</StaggerItem>
 
-					{/* Email Support */}
+				{/* Email Support */}
+				<StaggerItem {...ANIMATION_PRESETS.cardFadeUp}>
 					<ContactMethodCard
 						type="email"
 						title="Email Support"
@@ -182,13 +197,17 @@ export default function ContactUs() {
 						href={CONTACT_INFO.email.href}
 						itemProp="email"
 					/>
+				</StaggerItem>
 
-					{/* Members Only Live Chat */}
+				{/* Members Only Live Chat */}
+				<StaggerItem {...ANIMATION_PRESETS.cardFadeUp}>
 					<MembersOnlyChatCard trackingLocation="contact_section_card" />
-				</div>
+				</StaggerItem>
+			</Stagger>
 
-				{/* Business Hours & Response Time - Compact Footer */}
-				<div className="mx-auto max-w-2xl rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl md:p-8">
+			{/* Business Hours & Response Time - Appears after contact methods */}
+			<Reveal {...ANIMATION_PRESETS.cardFadeUp} delay={0.6}>
+					<div className="mx-auto max-w-2xl rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl md:p-8">
 					<div className="relative grid gap-8 lg:grid-cols-2 lg:gap-12">
 						{/* Business Hours */}
 						<div className="space-y-4">
@@ -241,7 +260,9 @@ export default function ContactUs() {
 							</ul>
 						</div>
 					</div>
-				</div>
+					</div>
+				</Reveal>
+
 			</PageContainer>
 
 			{/* Live Chat Bubble - Fixed Position */}
