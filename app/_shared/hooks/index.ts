@@ -8,6 +8,7 @@
 
 export { useDebounce } from './useDebounce'
 export { useMediaQuery } from './useMediaQuery'
+export { useGridColumns } from './useGridColumns'
 export { useModal } from './useModal'
 export { useFocusTrap } from './useFocusTrap'
 export { useAccordion } from './useAccordion'

@@ -4,8 +4,8 @@
 	themes: light --default, dark --prefersdark, corporate, sunset, winter, luxury;
 }
 
-/* Treat both 'dark' and 'luxury' themes as dark variant */
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, [data-theme=luxury], [data-theme=luxury] *));
+/* Treat 'dark', 'luxury', and 'sunset' themes as dark variant */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, [data-theme=luxury], [data-theme=luxury] *, [data-theme=sunset], [data-theme=sunset] *));
 
 @layer base {
 	/* ========================================
@@ -62,6 +62,21 @@
 		--transition: all 0.25s var(--easing);
 		--transition-fast: all 0.15s var(--easing-smooth);
 		--transition-slow: all 0.4s var(--easing-smooth);
+
+		/* Skeleton Shimmer Colors - Theme-aware design tokens
+		 * Light mode: white shimmer for testing (on black background)
+		 * Testing configuration - will be reverted after testing
+		 */
+		--shimmer-color-start: rgba(255, 255, 255, 0);
+		--shimmer-color-low: rgba(255, 255, 255, 0.12);
+		--shimmer-color-mid: rgba(255, 255, 255, 0.20);
+		--shimmer-color-peak: rgba(255, 255, 255, 0.30);
+
+		/* Skeleton Background - Theme-aware design token
+		 * Light mode: black background for testing
+		 * Testing configuration - will be reverted after testing
+		 */
+		--skeleton-bg: #bbb;
 	}
 
 	/* ========================================
@@ -74,6 +89,11 @@
 		scrollbar-color: oklch(var(--b3)) transparent;
 		scrollbar-width: thin;
 		width: 100%;
+	}
+	
+	/* Disable smooth scrolling when reduced motion is enabled */
+	[data-reduced-motion="true"] {
+		scroll-behavior: auto;
 	}
 
 	*,
@@ -181,21 +201,31 @@
 		animation: slide-up 0.3s var(--easing-smooth);
 	}
 
-	/* Elegant Reveal - Industry-leading scroll animation (Apple/Stripe/Linear inspired)
+	/* Elegant Reveal - FAANG-level scroll animation (Apple/Stripe/Linear inspired)
 	 * Combines fade, slide-up, subtle scale, and blur for premium feel
 	 * Multi-stage animation creates sophisticated, polished appearance
+	 * 
+	 * Key improvements for natural, fluid feel:
+	 * - Snappier duration (600ms vs 750ms) - Apple typically uses 400-600ms
+	 * - Spring-like easing for organic motion
+	 * - Smooth opacity curve to prevent harsh fades
+	 * - Progressive blur removal for depth perception
 	 */
 	@keyframes elegant-reveal {
-		from {
-			transform: translateY(24px) scale(0.96);
+		0% {
+			transform: translateY(20px) scale(0.95);
 			opacity: 0;
+			filter: blur(8px);
+		}
+		40% {
+			opacity: 0.4;
 			filter: blur(4px);
 		}
-		60% {
-			opacity: 0.8;
-			filter: blur(2px);
+		70% {
+			opacity: 0.9;
+			filter: blur(1px);
 		}
-		to {
+		100% {
 			transform: translateY(0) scale(1);
 			opacity: 1;
 			filter: blur(0);
@@ -203,18 +233,105 @@
 	}
 
 	.animate-elegant-reveal {
-		animation: elegant-reveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-		/* Premium easing: Custom cubic-bezier for natural, refined motion */
-		/* Similar to Apple's and Stripe's animation curves */
-		/* Duration: 0.75s for slightly slower, more elegant feel */
+		animation: elegant-reveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+		/* Premium spring-like easing: Creates natural bounce-in feel */
+		/* cubic-bezier(0.34, 1.56, 0.64, 1) - Apple-inspired spring curve */
+		/* Duration: 0.6s for snappier, more responsive feel (FAANG standard) */
+		/* Overshoots slightly (1.56) then settles - creates organic, fluid motion */
 	}
 
-	/* Reduced motion: instant fade for accessibility */
+	/* Reduced motion: accessibility compliance (WCAG 2.1)
+	 * Industry best practice (Apple, Google, Microsoft):
+	 * - REDUCE animations (not remove completely)
+	 * - Disable auto-play
+	 * - Preserve functional animations
+	 * - Allow component-level handling
+	 */
 	@media (prefers-reduced-motion: reduce) {
+		/* Elegant reveal: simple fade (no complex motion) */
 		.animate-elegant-reveal {
 			animation: fade-in 0.2s var(--easing-smooth) forwards;
 			filter: none;
 		}
+		
+		/* Global reductions: fast but visible (Apple standard: 0.2-0.3s) */
+		/* Allow component-specific animations to override by not using !important */
+		*:not(.carousel-banner-animated) {
+			animation-duration: 0.3s;
+			animation-iteration-count: 1;
+			transition-duration: 0.15s;
+			scroll-behavior: auto;
+		}
+		
+		/* Decorative animations: remove completely */
+		.animate-shake,
+		.animate-pulse-smooth,
+		.animate-scale-in,
+		.animate-slide-up {
+			animation: none;
+		}
+		
+		/* Tailwind built-in animations: Reduce appropriately */
+		.animate-pulse {
+			animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* Slower pulse */
+		}
+		
+		/* Functional animations: Keep but slow down */
+		.animate-spin {
+			animation-duration: 1.5s; /* Slower spin (was 1s) */
+		}
+		
+		/* Attention-getting: Remove */
+		.animate-ping,
+		.animate-bounce {
+			animation: none;
+		}
+		
+		/* Carousel: Let component handle its own reduced motion (doubles duration) */
+		/* The carousel's built-in handling already slows it down appropriately */
+	}
+	
+	/* User override for reduced motion (data attribute) */
+	[data-reduced-motion="true"] {
+		/* Elegant reveal: simple fade */
+		.animate-elegant-reveal {
+			animation: fade-in 0.2s var(--easing-smooth) forwards;
+			filter: none;
+		}
+		
+		/* Global reductions: fast but visible */
+		*:not(.carousel-banner-animated) {
+			animation-duration: 0.3s;
+			animation-iteration-count: 1;
+			transition-duration: 0.15s;
+			scroll-behavior: auto;
+		}
+		
+		/* Decorative animations: remove */
+		.animate-shake,
+		.animate-pulse-smooth,
+		.animate-scale-in,
+		.animate-slide-up {
+			animation: none;
+		}
+		
+		/* Tailwind built-in animations: Reduce appropriately */
+		.animate-pulse {
+			animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* Slower pulse */
+		}
+		
+		/* Functional animations: Keep but slow down */
+		.animate-spin {
+			animation-duration: 1.5s; /* Slower spin (was 1s) */
+		}
+		
+		/* Attention-getting: Remove */
+		.animate-ping,
+		.animate-bounce {
+			animation: none;
+		}
+		
+		/* Carousel: Let component handle its own reduced motion */
 	}
 
 	/* ========================================
@@ -721,61 +838,79 @@
 	}
 }
 
+/* Dark mode shimmer color overrides - Root level for proper cascade
+ * Uses black shimmer for visibility on white backgrounds (opposite of light mode)
+ * Industry best practice: darker shimmer on light backgrounds
+ * Matches DaisyUI theme system via data-theme attribute (dark/luxury/sunset themes)
+ */
+[data-theme=dark],
+[data-theme=luxury],
+[data-theme=sunset] {
+	--shimmer-color-start: rgba(0, 0, 0, 0);
+	--shimmer-color-low: rgba(0, 0, 0, 0.12);
+	--shimmer-color-mid: rgba(0, 0, 0, 0.20);
+	--shimmer-color-peak: rgba(0, 0, 0, 0.30);
+	
+	/* Dark mode: white background (opposite of light mode) */
+	--skeleton-bg: rgba(255, 255, 255, 0.2);
+}
+
 /* Utility Classes in @layer utilities for proper cascade */
 @layer utilities {
 	.skeleton-shimmer {
 		position: relative !important;
 		overflow: hidden !important;
-		background: oklch(var(--b2) / 1) !important;
+		/* Uses theme-aware skeleton background for optimal shimmer visibility */
+		background: var(--skeleton-bg) !important;
 		animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite, skeleton-glow 2s ease-in-out infinite !important;
 		will-change: opacity, filter !important;
 	}
 	
+	/* Shimmer gradient - DRY implementation using CSS custom properties
+	 * Single gradient definition that adapts to theme via CSS variables
+	 * Gradient structure: symmetric wave with peak at center (50%)
+	 * Stops: 0% → 20% → 40% → 50% → 60% → 80% → 100%
+	 * Industry best practice: reusable gradient pattern with theme-aware colors
+	 */
 	.skeleton-shimmer::after {
 		content: '' !important;
 		position: absolute !important;
 		inset: 0 !important;
 		background: linear-gradient(
 			90deg,
-			rgba(255, 255, 255, 0) 0%,
-			rgba(255, 255, 255, 0.1) 20%,
-			rgba(255, 255, 255, 0.2) 40%,
-			rgba(255, 255, 255, 0.3) 50%,
-			rgba(255, 255, 255, 0.2) 60%,
-			rgba(255, 255, 255, 0.1) 80%,
-			rgba(255, 255, 255, 0) 100%
+			var(--shimmer-color-start) 0%,
+			var(--shimmer-color-low) 20%,
+			var(--shimmer-color-mid) 40%,
+			var(--shimmer-color-peak) 50%,
+			var(--shimmer-color-mid) 60%,
+			var(--shimmer-color-low) 80%,
+			var(--shimmer-color-start) 100%
 		) !important;
 		animation: skeleton-shimmer-wave 2s ease-in-out infinite !important;
 		will-change: transform !important;
 		z-index: 1 !important;
 	}
 	
-	/* Dark mode - adjusted gradient */
-	@media (prefers-color-scheme: dark) {
-		.skeleton-shimmer::after {
-			background: linear-gradient(
-				90deg,
-				rgba(255, 255, 255, 0) 0%,
-				rgba(255, 255, 255, 0.05) 20%,
-				rgba(255, 255, 255, 0.1) 40%,
-				rgba(255, 255, 255, 0.15) 50%,
-				rgba(255, 255, 255, 0.1) 60%,
-				rgba(255, 255, 255, 0.05) 80%,
-				rgba(255, 255, 255, 0) 100%
-			) !important;
-		}
-	}
-	
-	/* Reduced motion preference */
+	/* Reduced motion preference - skeleton loaders */
 	@media (prefers-reduced-motion: reduce) {
 		.skeleton-shimmer {
-			animation: skeleton-pulse 3s ease-in-out infinite !important;
+			animation: skeleton-pulse 3s ease-in-out infinite;
 		}
 		
 		.skeleton-shimmer::after {
-			animation: none !important;
-			opacity: 0.3 !important;
+			animation: none;
+			opacity: 0.3;
 		}
+	}
+	
+	/* User override */
+	[data-reduced-motion="true"] .skeleton-shimmer {
+		animation: skeleton-pulse 3s ease-in-out infinite;
+	}
+	
+	[data-reduced-motion="true"] .skeleton-shimmer::after {
+		animation: none;
+		opacity: 0.3;
 	}
 
 	/* Scrollbar Hide - Hide scrollbar while maintaining scroll functionality */

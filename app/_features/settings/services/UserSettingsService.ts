@@ -69,6 +69,14 @@ export interface UserSettings {
 	 */
 	sidebarCollapsed?: boolean
 	/**
+	 * Reduced motion preference.
+	 * Controls whether animations and transitions should be reduced.
+	 * Respects system preference by default.
+	 * 
+	 * @default false (or system preference if available)
+	 */
+	prefersReducedMotion?: boolean
+	/**
 	 * Custom settings can be added dynamically.
 	 * Allows for extensibility without schema changes.
 	 */
@@ -108,6 +116,7 @@ const DEFAULT_SETTINGS: UserSettings = {
 	theme: Theme.Light,
 	tablePageSize: 10,
 	sidebarCollapsed: false,
+	prefersReducedMotion: false,
 }
 
 /**
@@ -363,6 +372,8 @@ export class UserSettingsService {
 			case 'tablePageSize':
 				return typeof value === 'number' && value > 0
 			case 'sidebarCollapsed':
+				return typeof value === 'boolean'
+			case 'prefersReducedMotion':
 				return typeof value === 'boolean'
 			default:
 				// For custom settings, accept any value

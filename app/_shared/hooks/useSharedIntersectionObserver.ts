@@ -25,7 +25,7 @@ import { useEffect, useRef, useCallback } from 'react'
 export interface SharedObserverOptions {
 	/** Intersection threshold (0-1, default: 0.1) */
 	threshold?: number
-	/** Root margin for early triggering (default: '0px 0px -100px 0px') */
+	/** Root margin for anticipatory triggering (default: '0px 0px 200px 0px' = 200px before viewport) */
 	rootMargin?: string
 }
 
@@ -45,7 +45,7 @@ class SharedObserverManager {
 	constructor(options: SharedObserverOptions = {}) {
 		this.options = {
 			threshold: options.threshold ?? 0.1,
-			rootMargin: options.rootMargin ?? '0px 0px -100px 0px',
+			rootMargin: options.rootMargin ?? '0px 0px 200px 0px', // Anticipatory default
 		}
 	}
 

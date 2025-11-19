@@ -5,6 +5,8 @@
  */
 
 export * from './SettingsService'
-export * from './ThemeService'
 export * from './UserSettingsService'
+export { ThemeService } from './ThemeService'
+export { ReducedMotionService } from './ReducedMotionService'
+export { BasePreferenceService } from './BasePreferenceService'
 

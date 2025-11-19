@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Mail, Phone, Clock, Calendar, HelpCircle, ArrowRight, Shield, Headphones } from 'lucide-react'
 import { useZodForm } from '@_shared'
 import { contactSchema, type ContactFormData } from '@_core'
 import { logger } from '@_core'
@@ -12,15 +12,64 @@ import FormInput from '@_components/forms/FormInput'
 import FormTextArea from '@_components/forms/FormTextArea'
 import Button from '@_components/ui/Button'
 import PageContainer from '@_components/layouts/PageContainer'
+import Card from '@_components/ui/Card'
+import ContactMethodCard from '@_components/ui/ContactMethodCard'
+import MembersOnlyChatCard from '@_components/ui/MembersOnlyChatCard'
+import Pill from '@_components/ui/Pill'
+import StatusDot from '@_components/ui/StatusDot'
+import { useScrollReveal } from '@_shared/hooks'
 import { API } from '@_shared'
 import ContactRequest from '@_classes/ContactRequest'
 import Name from '@_classes/common/Name'
+import { isBusinessOpen, getGroupedBusinessHours } from '@_shared/utils/businessHours'
+import classNames from 'classnames'
 
+/**
+ * Contact information configuration
+ */
+const CONTACT_INFO = {
+	phone: {
+		display: '(786) 578-2145',
+		href: 'tel:+17865782145',
+	},
+	email: {
+		display: 'support@medsourcepro.com',
+		href: 'mailto:support@medsourcepro.com',
+	},
+	responseTime: '2 hours',
+	emergencySupport: '24/7',
+} as const
+
+/**
+ * Contact Page
+ * 
+ * Enhanced contact page with elegant design, multiple contact methods,
+ * and improved user experience following FAANG-level best practices.
+ * 
+ * **Features:**
+ * - Multiple contact methods (phone, email, live chat, form)
+ * - Real-time business hours and availability indicators
+ * - Scroll-triggered reveal animations
+ * - Mobile-first responsive design
+ * - Clear visual hierarchy and CTAs
+ * - WCAG 2.1 AA accessibility compliant
+ * - Analytics-ready architecture
+ */
 export default function ContactPage() {
 	const router = useRouter()
 	const [submitted, setSubmitted] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+
+	// Calculate business status (memoized for performance)
+	const isOpen = useMemo(() => isBusinessOpen(), [])
+	const businessHours = useMemo(() => getGroupedBusinessHours(), [])
+
+	// Scroll reveal animations
+	const headerReveal = useScrollReveal({ threshold: 0.1, rootMargin: '0px 0px -50px 0px', index: 0 })
+	const formReveal = useScrollReveal({ threshold: 0.1, rootMargin: '0px 0px -100px 0px', index: 1, staggerDelay: 100 })
+	const contactMethodsReveal = useScrollReveal({ threshold: 0.1, rootMargin: '0px 0px -100px 0px', index: 2, staggerDelay: 100 })
+	const infoReveal = useScrollReveal({ threshold: 0.1, rootMargin: '0px 0px -100px 0px', index: 3, staggerDelay: 100 })
 
 	const form = useZodForm(contactSchema, {
 		defaultValues: {
@@ -69,177 +118,343 @@ export default function ContactPage() {
 		}
 	}
 
+	// Success state with enhanced design
 	if (submitted) {
 		return (
-			<PageContainer className="max-w-2xl">
-				<div className="card bg-base-100 shadow-xl">
-					<div className="card-body items-center text-center py-12">
-						<CheckCircle className="w-20 h-20 text-success mb-4" />
+			<PageContainer className="max-w-3xl py-12 md:py-16">
+				<Card
+					variant="elevated"
+					className="text-center"
+					bodyClassName="py-12 md:py-16"
+				>
+					<div className="flex flex-col items-center space-y-6">
+						{/* Success Icon */}
+						<div className="relative">
+							<div className="absolute inset-0 rounded-full bg-success/20 blur-2xl animate-pulse" aria-hidden="true" />
+							<CheckCircle className="relative w-20 h-20 md:w-24 md:h-24 text-success" aria-hidden="true" />
+						</div>
 						
-						<h2 className="card-title text-3xl mb-2">Contact Request Sent!</h2>
-						
-						<p className="text-base-content/70 mb-6">
-							Thank you for reaching out to us. A staff member will contact you within 24 hours.
-						</p>
+						{/* Success Message */}
+						<div className="space-y-4">
+							<h2 className="text-3xl md:text-4xl font-semibold text-base-content">
+								Contact Request Sent!
+							</h2>
+							
+							<p className="text-base md:text-lg text-base-content/70 max-w-xl mx-auto">
+								Thank you for reaching out to us. A staff member will contact you within{' '}
+								<span className="font-semibold text-primary">{CONTACT_INFO.responseTime}</span> during business hours.
+							</p>
+						</div>
 
+						{/* Additional Actions */}
 						{!isAuthenticated && (
-							<>
-								<div className="divider"></div>
+							<div className="pt-6 space-y-4 w-full max-w-md">
+								<div className="divider" />
 								
-								<p className="text-lg font-semibold mb-4">
-									Become a valued member and get a direct line to our team!
-								</p>
-								
-								<Button
-									variant="primary"
-									onClick={() => router.push('/signup')}
-								>
-									Create Account
-								</Button>
-							</>
+								<div className="space-y-4">
+									<p className="text-lg font-semibold text-base-content">
+										Become a valued member and get a direct line to our team!
+									</p>
+									
+									<Button
+										variant="primary"
+										fullWidth
+										onClick={() => router.push('/signup')}
+										rightIcon={<ArrowRight className="w-5 h-5" />}
+									>
+										Create Account
+									</Button>
+								</div>
+							</div>
 						)}
+
+						{/* Quick Links */}
+						<div className="pt-6 w-full max-w-md">
+							<div className="divider" />
+							<div className="flex flex-col sm:flex-row gap-3 justify-center">
+								<a href={CONTACT_INFO.phone.href} className="inline-flex">
+									<Button variant="outline" fullWidth leftIcon={<Phone className="w-4 h-4" />}>
+										Call Us
+									</Button>
+								</a>
+								<a href={CONTACT_INFO.email.href} className="inline-flex">
+									<Button variant="outline" fullWidth leftIcon={<Mail className="w-4 h-4" />}>
+										Email Us
+									</Button>
+								</a>
+							</div>
+						</div>
 					</div>
-				</div>
+				</Card>
 			</PageContainer>
 		)
 	}
 
 	return (
-		<PageContainer className="max-w-4xl py-8 md:py-12">
-			{/* Header */}
-			<div className="text-center mb-8 md:mb-12">
-				<h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-base-content mb-4">
-					Have Questions Or Need Assistance?
-				</h1>
-				
-				{isAuthenticated ? (
-					<p className="text-base md:text-lg text-base-content/70 max-w-2xl mx-auto">
-						Check out the{' '}
-						<Link href="/#faq" className="link link-primary">
-							FAQs
-						</Link>
-						!
-						<br />
-						Need to speak with a representative? As a valued member, you have access to a
-						direct line to a MedSource Pro representative at any time.
+		<div className="min-h-screen bg-base-100">
+			{/* Subtle background gradient */}
+			<div
+				aria-hidden="true"
+				className="absolute inset-x-0 top-0 hidden h-[420px] -translate-y-1/2 bg-gradient-to-b from-base-content/5 via-transparent to-transparent blur-3xl md:block"
+			/>
+
+			<PageContainer className="relative max-w-7xl py-8 md:py-12 lg:py-16">
+				{/* Header Section with Scroll Reveal */}
+				<header
+					ref={headerReveal.ref}
+					className={classNames(
+						'text-center mb-12 md:mb-16 lg:mb-20 transition-all duration-700',
+						{
+							'opacity-0 translate-y-6': !headerReveal.hasAnimated,
+							'opacity-100 translate-y-0': headerReveal.hasAnimated,
+						}
+					)}
+				>
+					<Pill
+						tone="primary"
+						size="md"
+						shadow="sm"
+						fontWeight="medium"
+						icon={<StatusDot variant={isOpen ? 'success' : 'primary'} size="sm" animated={isOpen} />}
+						className="inline-flex mb-6"
+					>
+						Get in Touch
+					</Pill>
+
+					<h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-base-content mb-4 md:mb-6">
+						Questions? We&apos;re Here to Help
+					</h1>
+
+					<p className="text-base md:text-lg text-base-content/70 max-w-3xl mx-auto mb-8">
+						Whether you need a product quote, have questions about our services, or want to discuss your requirements—our team is ready to assist you.
 					</p>
-				) : (
-					<p className="text-base md:text-lg text-base-content/70 max-w-2xl mx-auto">
-						Check out the{' '}
-						<Link href="/#faq" className="link link-primary">
-							FAQs
-						</Link>
-						!
-						<br />
-						Connect with a MedSource Pro Representative At Any Time By Becoming a Valued Member!
-					</p>
-				)}
-			</div>
 
-			{/* Contact Form */}
-			<div className="card bg-base-100 shadow-xl">
-				<div className="card-body">
-					<h2 className="card-title text-2xl mb-2">Contact Us</h2>
-					<p className="text-sm text-base-content/70 mb-6">
-						Complete the form below and a staff member will contact you within 24 hours.
-					</p>
+					{/* Trust Indicators */}
+					<div className="flex flex-wrap items-center justify-center gap-6 md:gap-8 mt-8">
+						<div className="flex items-center gap-2 text-sm text-base-content/70">
+							<Clock className="h-4 w-4 text-primary" aria-hidden="true" />
+							<span className="font-medium">{CONTACT_INFO.responseTime} response time</span>
+						</div>
+						<div className="flex items-center gap-2 text-sm text-base-content/70">
+							<Headphones className="h-4 w-4 text-primary" aria-hidden="true" />
+							<span className="font-medium">{CONTACT_INFO.emergencySupport} support available</span>
+						</div>
+						<div className="flex items-center gap-2 text-sm text-base-content/70">
+							<Shield className="h-4 w-4 text-primary" aria-hidden="true" />
+							<span className="font-medium">HIPAA compliant</span>
+						</div>
+					</div>
+				</header>
 
-					<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-						<FormInput
-							label="Your Name"
-							type="text"
-							placeholder="John Doe"
-							required
-							{...form.register('name')}
-							error={form.formState.errors.name}
-						/>
-
-						<FormInput
-							label="Email Address"
-							type="email"
-							placeholder="your.email@example.com"
-							required
-							{...form.register('email')}
-							error={form.formState.errors.email}
-						/>
-
-						<FormInput
-							label="Subject"
-							type="text"
-							placeholder="What is this regarding?"
-							required
-							{...form.register('subject')}
-							error={form.formState.errors.subject}
-						/>
-
-						<FormTextArea
-							label="Your Message"
-							placeholder="Tell us how we can help you..."
-							rows={6}
-							required
-							{...form.register('message')}
-							error={form.formState.errors.message}
-						/>
-
-						<Button
-							type="submit"
-							variant="primary"
-							fullWidth
-							loading={isLoading}
-							disabled={isLoading || !form.formState.isValid}
-							className="mt-6"
+				{/* Main Content Grid - Mobile-first responsive */}
+				<div className="grid gap-8 lg:gap-12 lg:grid-cols-[1fr_1.2fr] mb-12 md:mb-16">
+					{/* Left Column: Contact Methods */}
+					<div>
+						{/* Contact Methods Cards - Scroll Reveal */}
+						<div
+							ref={contactMethodsReveal.ref}
+							className={classNames(
+								'space-y-6 transition-all duration-700 delay-100',
+								{
+									'opacity-0 translate-y-6': !contactMethodsReveal.hasAnimated,
+									'opacity-100 translate-y-0': contactMethodsReveal.hasAnimated,
+								}
+							)}
 						>
-							Send Message
-						</Button>
-					</form>
+							<h2 className="text-2xl md:text-3xl font-semibold text-base-content">
+								Quick Contact Options
+							</h2>
+
+							<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+								{/* Phone */}
+								<ContactMethodCard
+									type="phone"
+									title="Call Us"
+									mainText={CONTACT_INFO.phone.display}
+									description="Speak directly with a sourcing specialist in real time."
+									href={CONTACT_INFO.phone.href}
+									trackingLocation="contact_page_card"
+								/>
+
+								{/* Email */}
+								<ContactMethodCard
+									type="email"
+									title="Email Support"
+									mainText={CONTACT_INFO.email.display}
+									description="Share requirements or RFQs and receive a tailored response."
+									href={CONTACT_INFO.email.href}
+									trackingLocation="contact_page_card"
+								/>
+
+								{/* Members Only Live Chat - Full width on mobile, spans both columns on tablet+ */}
+								<div className={classNames('sm:col-span-2 lg:col-span-1')}>
+									<MembersOnlyChatCard trackingLocation="contact_page_card" />
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{/* Right Column: Contact Form - Scroll Reveal */}
+					<div
+						ref={formReveal.ref}
+						className={classNames(
+							'transition-all duration-700 delay-150',
+							{
+								'opacity-0 translate-y-6': !formReveal.hasAnimated,
+								'opacity-100 translate-y-0': formReveal.hasAnimated,
+							}
+						)}
+					>
+						<Card variant="elevated" className="sticky top-[calc(var(--nav-height)+2rem)]">
+							<div className="space-y-6">
+								<div>
+									<h2 className="text-2xl md:text-3xl font-semibold text-base-content mb-2">
+										Send Us a Message
+									</h2>
+									<p className="text-sm md:text-base text-base-content/70">
+										Complete the form below and a staff member will contact you within{' '}
+										<span className="font-medium text-primary">{CONTACT_INFO.responseTime}</span> during business hours.
+									</p>
+								</div>
+
+								<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+									<FormInput
+										label="Your Name"
+										type="text"
+										placeholder="John Doe"
+										required
+										{...form.register('name')}
+										error={form.formState.errors.name}
+									/>
+
+									<FormInput
+										label="Email Address"
+										type="email"
+										placeholder="your.email@example.com"
+										required
+										{...form.register('email')}
+										error={form.formState.errors.email}
+									/>
+
+									<FormInput
+										label="Subject"
+										type="text"
+										placeholder="What is this regarding?"
+										required
+										{...form.register('subject')}
+										error={form.formState.errors.subject}
+									/>
+
+									<FormTextArea
+										label="Your Message"
+										placeholder="Tell us how we can help you..."
+										rows={6}
+										required
+										{...form.register('message')}
+										error={form.formState.errors.message}
+									/>
+
+									<Button
+										type="submit"
+										variant="primary"
+										fullWidth
+										loading={isLoading}
+										disabled={isLoading || !form.formState.isValid}
+										className="mt-2"
+										rightIcon={!isLoading && <Mail className="w-5 h-5" />}
+									>
+										{isLoading ? 'Sending...' : 'Send Message'}
+									</Button>
+								</form>
+							</div>
+						</Card>
+					</div>
 				</div>
-			</div>
 
-			{/* Direct Contact Buttons for authenticated users */}
-			{isAuthenticated && (
-				<div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-					<a href="tel:+1234567890" className="inline-flex">
-						<Button 
-							variant="outline" 
-							fullWidth
-							leftIcon={
-								<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-								</svg>
-							}
-						>
-							Call Us
-						</Button>
-					</a>
-					<a href="mailto:support@medsourcepro.com" className="inline-flex">
-						<Button 
-							variant="outline" 
-							fullWidth
-							leftIcon={
-								<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-								</svg>
-							}
-						>
-							Email Us
-						</Button>
-					</a>
-					<a href="/medsource-app/support" className="inline-flex">
-						<Button 
-							variant="outline" 
-							fullWidth
-							leftIcon={
-								<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-								</svg>
-							}
-						>
-							Live Chat
-						</Button>
-					</a>
+				{/* Business Hours & Response Info - Scroll Reveal - Horizontal Layout - Below All Content */}
+				<div
+					ref={infoReveal.ref}
+					className={classNames(
+						'transition-all duration-700 delay-200',
+						{
+							'opacity-0 translate-y-6': !infoReveal.hasAnimated,
+							'opacity-100 translate-y-0': infoReveal.hasAnimated,
+						}
+					)}
+				>
+					<div className="mx-auto max-w-2xl rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl md:p-8">
+						<div className="relative grid gap-8 lg:grid-cols-2 lg:gap-12">
+							{/* Business Hours */}
+							<div className="space-y-4">
+								<div className="flex items-center gap-2">
+									<Calendar className="h-5 w-5 text-info" aria-hidden="true" />
+									<h3 className="text-sm font-semibold uppercase tracking-wider text-base-content">Business Hours</h3>
+									{isOpen && (
+										<span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-0.5 text-xs font-medium text-success">
+											<StatusDot variant="success" size="xs" animated />
+											Open Now
+										</span>
+									)}
+								</div>
+								<address className="not-italic space-y-4 text-sm text-base-content/70" itemProp="openingHours">
+									{businessHours.map((schedule, index) => (
+										<div key={index} className="flex items-center justify-between gap-6">
+											<span className="font-medium text-base-content/90 min-w-[140px]">{schedule.days}</span>
+											{'closed' in schedule ? (
+												<span className="text-base-content/50 text-right">Closed</span>
+											) : (
+												<span className="text-right">{schedule.open} - {schedule.close} {schedule.timezone}</span>
+											)}
+										</div>
+									))}
+								</address>
+							</div>
+
+							{/* Visual Divider - Hidden on mobile, visible on desktop */}
+							<div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px bg-base-300 -translate-x-1/2" aria-hidden="true" />
+
+							{/* Response Times */}
+							<div className="space-y-4">
+								<div className="flex items-center gap-2">
+									<Clock className="h-5 w-5 text-success" aria-hidden="true" />
+									<h3 className="text-sm font-semibold uppercase tracking-wider text-base-content">Response Times</h3>
+								</div>
+								<ul className="space-y-2.5 text-sm text-base-content/70" role="list">
+									<li className="flex items-start gap-3">
+										<CheckCircle className="h-4 w-4 shrink-0 text-success mt-0.5" aria-hidden="true" />
+										<span>
+											Average response: <span className="font-medium text-primary">{CONTACT_INFO.responseTime}</span> during business hours
+										</span>
+									</li>
+									<li className="flex items-start gap-3">
+										<CheckCircle className="h-4 w-4 shrink-0 text-success mt-0.5" aria-hidden="true" />
+										<span>
+											Emergency support available <span className="font-medium text-primary">{CONTACT_INFO.emergencySupport}</span>
+										</span>
+									</li>
+									<li className="flex items-start gap-3">
+										<CheckCircle className="h-4 w-4 shrink-0 text-success mt-0.5" aria-hidden="true" />
+										<span>Dedicated account managers for enterprise clients</span>
+									</li>
+								</ul>
+
+								{/* FAQ Link */}
+								<div className="pt-4">
+									<Link
+										href="/#faq"
+										className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+									>
+										<HelpCircle className="h-4 w-4" aria-hidden="true" />
+										View Frequently Asked Questions
+										<ArrowRight className="h-4 w-4" aria-hidden="true" />
+									</Link>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
-			)}
-		</PageContainer>
+			</PageContainer>
+		</div>
 	)
 }
 

@@ -24,6 +24,7 @@ import { Settings as SettingsIcon } from 'lucide-react'
 import type { SettingsSection } from '@_types/settings'
 import { createElement } from 'react'
 import AppearanceSetting from '@_components/settings/AppearanceSetting'
+import ReducedMotionSetting from '@_components/settings/ReducedMotionSetting'
 
 /**
  * Creates and returns all settings sections with their configuration.
@@ -60,6 +61,13 @@ export function getSettingsSections(): SettingsSection[] {
 					label: 'Appearance',
 					description: 'Choose your preferred theme',
 					component: createElement(AppearanceSetting),
+				},
+				{
+					id: 'reduced-motion',
+					type: 'custom',
+					label: 'Reduce Motion',
+					description: 'Reduce animations and transitions',
+					component: createElement(ReducedMotionSetting),
 				},
 			],
 		},

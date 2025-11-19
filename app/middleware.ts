@@ -26,10 +26,11 @@ export function middleware(request: NextRequest) {
 	// Check if current route is an auth route
 	const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route))
 
-	// Redirect to login if accessing protected route without token
+	// Redirect to home with login modal query param if accessing protected route without token
 	if (isProtectedRoute && !token) {
 		const url = request.nextUrl.clone()
-		url.pathname = '/login'
+		url.pathname = '/'
+		url.searchParams.set('login', 'true')
 		url.searchParams.set('redirectTo', pathname)
 		return NextResponse.redirect(url)
 	}

@@ -53,6 +53,7 @@
 import { create } from 'zustand'
 import { Theme } from '@_classes/SharedEnums'
 import { ThemeService } from '../services/ThemeService'
+import { ReducedMotionService } from '../services/ReducedMotionService'
 import { UserSettingsService } from '../services/UserSettingsService'
 import { logger } from '@_core'
 
@@ -77,6 +78,14 @@ interface ThemeState {
 	currentTheme: Theme
 	/** Theme loading state (for async operations) */
 	themeLoading: boolean
+}
+
+/**
+ * Reduced motion state slice interface.
+ */
+interface ReducedMotionState {
+	/** Whether user prefers reduced motion */
+	prefersReducedMotion: boolean
 }
 
 /**
@@ -129,6 +138,14 @@ interface UserSettingsActions {
 	setSidebarCollapsed: (collapsed: boolean) => void
 	
 	/**
+	 * Sets the reduced motion preference and updates DOM and persistence.
+	 * 
+	 * @param {boolean} prefersReduced - Whether to enable reduced motion
+	 * @returns {void}
+	 */
+	setPrefersReducedMotion: (prefersReduced: boolean) => void
+	
+	/**
 	 * Initializes all user settings from storage.
 	 * Should be called once when the application loads.
 	 * 
@@ -140,7 +157,7 @@ interface UserSettingsActions {
 /**
  * Combined user settings store type.
  */
-type UserSettingsStore = ThemeState & PreferencesState & UserSettingsActions
+type UserSettingsStore = ThemeState & ReducedMotionState & PreferencesState & UserSettingsActions
 
 /**
  * Default preferences values.
@@ -228,6 +245,9 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 		// Initial state - Theme
 		currentTheme: Theme.Winter,
 		themeLoading: false,
+
+		// Initial state - Reduced Motion
+		prefersReducedMotion: false,
 
 		// Initial state - Preferences
 		preferences: DEFAULT_PREFERENCES,
@@ -334,6 +354,27 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 		},
 
 		/**
+		 * Set reduced motion preference and update DOM and persistence.
+		 */
+		setPrefersReducedMotion: (prefersReduced) => {
+			set({ prefersReducedMotion: prefersReduced })
+
+			try {
+				// Update DOM
+				ReducedMotionService.applyPreference(prefersReduced)
+
+				// Persist via ReducedMotionService (uses UserSettingsService internally)
+				ReducedMotionService.setStoredPreference(prefersReduced)
+			} catch (error) {
+				logger.error('Failed to set reduced motion preference', {
+					error,
+					prefersReduced,
+					component: 'useUserSettingsStore',
+				})
+			}
+		},
+
+		/**
 		 * Initialize all user settings from storage.
 		 * Called once on app startup by UserSettingsInitializer.
 		 * 
@@ -358,6 +399,17 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 					ThemeService.setStoredTheme(theme)
 				}
 
+				// Initialize reduced motion preference
+				const storedReducedMotion = ReducedMotionService.getStoredPreference() // Gets system preference if no stored preference
+				const prefersReducedMotion = storedReducedMotion
+				ReducedMotionService.applyPreference(prefersReducedMotion)
+				
+				// Persist the preference to localStorage if it came from system preference
+				// This ensures the preference persists across page reloads
+				if (UserSettingsService.getSetting('prefersReducedMotion') === undefined) {
+					ReducedMotionService.setStoredPreference(prefersReducedMotion)
+				}
+
 				// Initialize preferences from UserSettingsService
 				const settings = UserSettingsService.getSettings()
 				const preferences: UserPreferences = {
@@ -369,7 +421,7 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 
 				// Copy any custom preferences
 				for (const [key, value] of Object.entries(settings)) {
-					if (!['theme', 'tablePageSize', 'sidebarCollapsed'].includes(key)) {
+					if (!['theme', 'prefersReducedMotion', 'tablePageSize', 'sidebarCollapsed'].includes(key)) {
 						preferences[key] = value
 					}
 				}
@@ -377,6 +429,7 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 				// Update state
 				set({
 					currentTheme: theme,
+					prefersReducedMotion,
 					preferences,
 					themeLoading: false,
 				})

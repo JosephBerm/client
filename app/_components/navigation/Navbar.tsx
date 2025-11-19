@@ -44,8 +44,10 @@ import { Menu, ShoppingCart, X, User, LogOut, Home, Info, Store, Mail, Settings 
 import { useCartStore } from '@_features/cart'
 import { useAuthStore } from '@_features/auth'
 import { useState, useEffect, useRef } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Routes } from '@_features/navigation'
 import SettingsModal from '@_components/settings/SettingsModal'
+import LoginModal from '@_components/auth/LoginModal'
 import { useMediaQuery } from '@_shared'
 
 /**
@@ -68,12 +70,23 @@ interface NavbarProps {
  * @returns Navbar component
  */
 export default function Navbar({ onMenuClick }: NavbarProps) {
+	const router = useRouter()
+	const searchParams = useSearchParams()
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 	const [userMenuOpen, setUserMenuOpen] = useState(false)
 	const [settingsModalOpen, setSettingsModalOpen] = useState(false)
+	const [loginModalOpen, setLoginModalOpen] = useState(false)
 	const cart = useCartStore((state) => state.cart)
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 	const user = useAuthStore((state) => state.user)
+
+	// Check for login query param and open modal automatically
+	useEffect(() => {
+		const shouldOpenLogin = searchParams.get('login') === 'true'
+		if (shouldOpenLogin && !isAuthenticated) {
+			setLoginModalOpen(true)
+		}
+	}, [searchParams, isAuthenticated])
 
 	// Detect when screen size changes to desktop (md breakpoint: 768px)
 	// The mobile menu is only rendered on screens smaller than md (md:hidden)
@@ -310,13 +323,13 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 								)}
 							</div>
 				) : (
-				<Link
-					href={Routes.Login.location}
+				<button
+					onClick={() => setLoginModalOpen(true)}
 					className="flex items-center justify-center rounded-lg p-2.5 text-base-content transition-all hover:scale-105 hover:bg-base-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 					aria-label="Login to your account"
 				>
 						<User className="h-7 w-7" />
-					</Link>
+					</button>
 					)}
 				</div>
 				</nav>
@@ -383,6 +396,29 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 				isOpen={settingsModalOpen}
 				onClose={() => setSettingsModalOpen(false)}
 				defaultSectionId="general"
+			/>
+
+			{/* Login Modal */}
+			<LoginModal
+				isOpen={loginModalOpen}
+				onClose={() => {
+					setLoginModalOpen(false)
+					// Remove login query param when closing
+					if (searchParams.get('login') === 'true') {
+						const url = new URL(window.location.href)
+						url.searchParams.delete('login')
+						router.replace(url.pathname + url.search)
+					}
+				}}
+				onLoginSuccess={() => {
+					setLoginModalOpen(false)
+					// Remove login query param on successful login
+					if (searchParams.get('login') === 'true') {
+						const url = new URL(window.location.href)
+						url.searchParams.delete('login')
+						router.replace(url.pathname + url.search)
+					}
+				}}
 			/>
 		</>
 	)

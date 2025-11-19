@@ -35,9 +35,9 @@ import { useSharedIntersectionObserver } from './useSharedIntersectionObserver'
 export interface UseScrollRevealOptions {
 	/** Intersection threshold (0-1, default: 0.1 = 10% visible) */
 	threshold?: number
-	/** Root margin for early triggering (default: '0px 0px -100px 0px') */
+	/** Root margin for anticipatory triggering (default: '0px 0px 200px 0px' = 200px before viewport) */
 	rootMargin?: string
-	/** Delay between staggered animations in milliseconds (default: 60ms for tighter, more cohesive feel) */
+	/** Delay between staggered animations in milliseconds (default: 50ms for smooth cascade) */
 	staggerDelay?: number
 	/** Index for staggered animation (0-based, default: 0) */
 	index?: number
@@ -82,8 +82,8 @@ export interface UseScrollRevealReturn {
  */
 export function useScrollReveal({
 	threshold = 0.1,
-	rootMargin = '0px 0px -100px 0px',
-	staggerDelay = 60,
+	rootMargin = '0px 0px 200px 0px', // Anticipatory: trigger 200px BEFORE viewport
+	staggerDelay = 50, // Optimized for FAANG-level smooth cascade
 	index = 0,
 	enabled = true,
 	onReveal,
@@ -94,6 +94,7 @@ export function useScrollReveal({
 	const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 	const indexRef = useRef(index)
 	const callbackRef = useRef<((entry: IntersectionObserverEntry) => void) | null>(null)
+	const hasAnimatedRef = useRef(false) // Ref to avoid callback recreation
 	
 	// Use shared observer for efficiency (industry best practice)
 	const { observe, unobserve } = useSharedIntersectionObserver({
@@ -101,27 +102,55 @@ export function useScrollReveal({
 		rootMargin,
 	})
 
-	// Check for reduced motion preference
+	// Check for reduced motion preference (system + user override)
 	const prefersReducedMotion = useRef(false)
+	
+	const checkReducedMotion = useCallback(() => {
+		if (typeof window === 'undefined') return false
+		
+		// Check user override first (data-reduced-motion attribute)
+		const userOverride = document.documentElement.getAttribute('data-reduced-motion')
+		if (userOverride === 'true') return true
+		
+		// Fall back to system preference
+		return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+	}, [])
 	
 	useEffect(() => {
 		if (typeof window === 'undefined') return
 		
-		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-		prefersReducedMotion.current = mediaQuery.matches
+		// Initial check
+		prefersReducedMotion.current = checkReducedMotion()
 		
-		const handleChange = (e: MediaQueryListEvent) => {
-			prefersReducedMotion.current = e.matches
+		// Listen to system preference changes
+		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+		const handleMediaChange = (e: MediaQueryListEvent) => {
+			prefersReducedMotion.current = checkReducedMotion()
 		}
 		
-		mediaQuery.addEventListener('change', handleChange)
-		return () => mediaQuery.removeEventListener('change', handleChange)
-	}, [])
+		// Listen to data attribute changes (user override)
+		const observer = new MutationObserver(() => {
+			prefersReducedMotion.current = checkReducedMotion()
+		})
+		
+		observer.observe(document.documentElement, {
+			attributes: true,
+			attributeFilter: ['data-reduced-motion'],
+		})
+		
+		mediaQuery.addEventListener('change', handleMediaChange)
+		
+		return () => {
+			mediaQuery.removeEventListener('change', handleMediaChange)
+			observer.disconnect()
+		}
+	}, [checkReducedMotion])
 
 	/**
 	 * Handle intersection observer callback
 	 * Triggers animation when element enters viewport
 	 * Uses shared observer pattern for efficiency
+	 * FAANG optimization: Uses refs to avoid callback recreation on every state change
 	 */
 	const handleIntersection = useCallback(
 		(entry: IntersectionObserverEntry) => {
@@ -133,10 +162,14 @@ export function useScrollReveal({
 			setIsVisible(isIntersecting)
 
 			// Trigger animation if element is visible and hasn't animated yet
-			if (isIntersecting && !hasAnimated) {
+			// FAANG optimization: Use ref to check state without causing callback recreation
+			if (isIntersecting && !hasAnimatedRef.current) {
+				hasAnimatedRef.current = true // Mark as animated immediately to prevent duplicate triggers
+				
 				if (enabled && !prefersReducedMotion.current) {
-					// Staggered animation: delay based on index
-					// This creates a cascading effect where cards animate one after another
+					// FAANG best practice: Staggered animation using row-aware index
+					// The index passed to hook is already row-aware (calculated in ScrollRevealCard)
+					// This creates elegant row-by-row cascading effect
 					const delay = indexRef.current * staggerDelay
 
 					// Clear any existing timeout
@@ -144,17 +177,21 @@ export function useScrollReveal({
 						clearTimeout(animationTimeoutRef.current)
 					}
 
-					animationTimeoutRef.current = setTimeout(() => {
-						setHasAnimated(true)
-						if (onReveal) {
-							onReveal(indexRef.current)
-						}
-						// OPTIMIZATION: Unobserve after animation completes
-						// Prevents unnecessary callbacks for already-animated elements
-						if (elementRef.current) {
-							unobserve(elementRef.current)
-						}
-					}, delay)
+					// FAANG optimization: Use requestAnimationFrame for smoother timing
+					// This ensures animation starts at optimal frame timing
+					requestAnimationFrame(() => {
+						animationTimeoutRef.current = setTimeout(() => {
+							setHasAnimated(true)
+							if (onReveal) {
+								onReveal(indexRef.current)
+							}
+							// OPTIMIZATION: Unobserve after animation completes
+							// Prevents unnecessary callbacks for already-animated elements
+							if (elementRef.current) {
+								unobserve(elementRef.current)
+							}
+						}, delay)
+					})
 				} else {
 					// For reduced motion or disabled, show immediately
 					setHasAnimated(true)
@@ -168,8 +205,13 @@ export function useScrollReveal({
 				}
 			}
 		},
-		[hasAnimated, enabled, staggerDelay, onReveal, unobserve]
+		[enabled, staggerDelay, onReveal, unobserve] // Removed hasAnimated to prevent callback recreation
 	)
+	
+	// Sync ref with state for cleanup
+	useEffect(() => {
+		hasAnimatedRef.current = hasAnimated
+	}, [hasAnimated])
 	
 	// Store callback ref for shared observer
 	useEffect(() => {
@@ -211,6 +253,7 @@ export function useScrollReveal({
 				// The key prop on parent grid ensures proper remounting
 				setHasAnimated(false)
 				setIsVisible(false)
+				hasAnimatedRef.current = false // Sync ref with state
 			}
 
 			// Observe new element with shared observer

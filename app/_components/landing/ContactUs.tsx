@@ -13,6 +13,7 @@ import {
 	CheckIcon,
 } from '@_components/ui/ContactIcons'
 import ContactMethodCard from '@_components/ui/ContactMethodCard'
+import MembersOnlyChatCard from '@_components/ui/MembersOnlyChatCard'
 import LiveChatBubble from '@_components/ui/LiveChatBubble'
 import { isBusinessOpen, getGroupedBusinessHours } from '@_shared/utils/businessHours'
 import { trackContactCTA } from '@_shared/utils/analytics'
@@ -182,19 +183,8 @@ export default function ContactUs() {
 						itemProp="email"
 					/>
 
-					{/* Live Chat - Opens floating bubble */}
-					<ContactMethodCard
-						type="chat"
-						title="Live Chat"
-						mainText="Message us now"
-						description={
-							<>
-								Get instant answers from our team in{' '}
-								<span className="font-medium text-primary">real time</span>.
-							</>
-						}
-						onClick={handleChatClick}
-					/>
+					{/* Members Only Live Chat */}
+					<MembersOnlyChatCard trackingLocation="contact_section_card" />
 				</div>
 
 				{/* Business Hours & Response Time - Compact Footer */}

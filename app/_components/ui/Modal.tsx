@@ -126,6 +126,7 @@ export default function Modal({
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
 
 	// Map size prop to Tailwind max-width classes
+	// Mobile-first: smaller on mobile, scales up on larger screens
 	const sizeClasses = {
 		sm: 'max-w-sm',     // ~384px
 		md: 'max-w-md',     // ~448px

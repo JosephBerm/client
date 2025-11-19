@@ -36,6 +36,34 @@ export const themeInitScript = `
     }
     
     document.documentElement.setAttribute('data-theme', theme);
+    
+    // Initialize reduced motion preference (prevents animation FOUC)
+    try {
+      let prefersReducedMotion = null; // null indicates not set yet
+      
+      if (unifiedSettings) {
+        try {
+          const parsed = JSON.parse(unifiedSettings);
+          if (parsed.settings && typeof parsed.settings.prefersReducedMotion === 'boolean') {
+            prefersReducedMotion = parsed.settings.prefersReducedMotion;
+          }
+        } catch (e) {
+          // Invalid JSON, fall through to system preference silently
+        }
+      }
+      
+      // If no stored preference, use system preference
+      if (prefersReducedMotion === null) {
+        prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      }
+      
+      document.documentElement.setAttribute('data-reduced-motion', String(prefersReducedMotion));
+    } catch (e) {
+      // Fallback to system preference if anything fails
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.documentElement.setAttribute('data-reduced-motion', String(prefersReducedMotion));
+    }
+    
     // Theme applied successfully - no logging needed (handled by logger system after React loads)
   } catch (e) {
     // Fallback to default if anything fails
@@ -45,6 +73,14 @@ export const themeInitScript = `
       console.error('[Theme Init] Fatal error, falling back to light:', e);
     }
     document.documentElement.setAttribute('data-theme', 'light');
+    // Also set reduced motion to system preference as fallback
+    try {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.documentElement.setAttribute('data-reduced-motion', String(prefersReducedMotion));
+    } catch (e) {
+      // If even this fails, default to false (full motion)
+      document.documentElement.setAttribute('data-reduced-motion', 'false');
+    }
   }
 })();
 `.trim()
