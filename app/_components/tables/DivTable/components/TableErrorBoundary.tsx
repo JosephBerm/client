@@ -67,7 +67,7 @@ export class TableErrorBoundary extends Component<Props, State> {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(),
     })
 
     // Call custom error handler if provided

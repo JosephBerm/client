@@ -60,7 +60,7 @@ export function usePerformanceBudget(
             duration: Math.round(entry.duration),
             budget: budgets.renderTime,
             overage: Math.round(entry.duration - budgets.renderTime),
-            timestamp: Date.now(),
+            timestamp: new Date(),
           })
         } else {
           logger.debug('Performance metric', {
@@ -68,7 +68,7 @@ export function usePerformanceBudget(
             metric: entry.name,
             duration: Math.round(entry.duration),
             budget: budgets.renderTime,
-            timestamp: Date.now(),
+            timestamp: new Date(),
           })
         }
       }

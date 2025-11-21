@@ -1,28 +1,28 @@
 /**
- * DivTableBody Component
+ * DataGridBody Component
  * 
  * Renders table body with virtualization support for large datasets.
  * Integrates @tanstack/react-virtual for efficient rendering.
  * Supports drag-drop row reordering with @dnd-kit.
  * 
- * @module DivTableBody
+ * @module DataGridBody
  */
 
 'use client'
 
 import { useRef } from 'react'
-import { useVirtualizer } from '@tanstack/react-virtual'
+import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual'
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import type { DivTableBodyProps } from '../types/divTableTypes'
+import type { DataGridBodyProps } from '../types/divTableTypes'
 import {
   ARIA_ROLE_ROWGROUP,
   COMPONENT_NAMES,
   TABLE_THEME_CLASSES,
   SCREEN_READER_ANNOUNCEMENTS,
 } from '../types/divTableConstants'
-import { announceToScreenReader, arrayMove, classNames } from '../utils/divTableUtils'
-import { DivTableRow } from './DivTableRow'
+import { announceToScreenReader, arrayMove, classNames, getGridColumnCount } from '../utils/divTableUtils'
+import { DataGridRow } from './DivTableRow' // Component renamed internally
 import { logger } from '@_core'
 
 /**
@@ -30,7 +30,7 @@ import { logger } from '@_core'
  * 
  * @example
  * ```tsx
- * <DivTableBody
+ * <DataGridBody
  *   table={table}
  *   enableVirtualization={true}
  *   enableDragDrop={false}
@@ -39,7 +39,7 @@ import { logger } from '@_core'
  * />
  * ```
  */
-export function DivTableBody<TData>({
+export function DataGridBody<TData>({
   table,
   enableVirtualization = false,
   enableDragDrop = false,
@@ -48,7 +48,7 @@ export function DivTableBody<TData>({
   onRowReorder,
   dragHandlePosition = 'left',
   enableComplexCells = false,
-}: DivTableBodyProps<TData>) {
+}: DataGridBodyProps<TData>) {
   const parentRef = useRef<HTMLDivElement>(null)
   const rows = table.getRowModel().rows
 
@@ -74,6 +74,9 @@ export function DivTableBody<TData>({
         key: index,
       }))
 
+  // Get consistent column count for grid layout
+  const gridColumnCount = getGridColumnCount(table)
+
   // ============================================================================
   // Drag & Drop Handlers
   // ============================================================================
@@ -98,7 +101,7 @@ export function DivTableBody<TData>({
 
     // Log action
     logger.debug('Row reordered', {
-      component: COMPONENT_NAMES.DIV_TABLE_BODY,
+      component: COMPONENT_NAMES.DATA_GRID_BODY,
       from: oldIndex,
       to: newIndex,
     })
@@ -114,11 +117,17 @@ export function DivTableBody<TData>({
         <div
           ref={parentRef}
           role={ARIA_ROLE_ROWGROUP}
-          className={classNames('div-table-body', TABLE_THEME_CLASSES.body)}
+          className={classNames('data-grid-body', TABLE_THEME_CLASSES.body)}
           style={{
-            height: enableVirtualization ? `${rowVirtualizer.getTotalSize()}px` : 'auto',
+            display: 'grid',
+            gridTemplateColumns: `repeat(${gridColumnCount}, minmax(0, 1fr))`,
+            gridColumn: '1 / -1',
+            height: enableVirtualization && rowVirtualizer 
+              ? `${rowVirtualizer.getTotalSize()}px` 
+              : 'auto',
             overflow: enableVirtualization ? 'auto' : 'visible',
             position: 'relative',
+            gap: 0,
           }}
         >
           <SortableContext
@@ -130,10 +139,10 @@ export function DivTableBody<TData>({
               if (!row) return null
 
               return (
-                <DivTableRow
+                <DataGridRow
                   key={row.id}
                   row={row}
-                  virtualRow={virtualItem}
+                  virtualRow={virtualItem as VirtualItem}
                   enableDragDrop={true}
                   dragHandlePosition={dragHandlePosition}
                   enableComplexCells={enableComplexCells}
@@ -154,11 +163,17 @@ export function DivTableBody<TData>({
     <div
       ref={parentRef}
       role={ARIA_ROLE_ROWGROUP}
-      className={classNames('div-table-body', TABLE_THEME_CLASSES.body)}
+      className={classNames('data-grid-body', TABLE_THEME_CLASSES.body)}
       style={{
-        height: enableVirtualization ? `${rowVirtualizer.getTotalSize()}px` : 'auto',
+        display: 'grid',
+        gridTemplateColumns: `repeat(${gridColumnCount}, minmax(0, 1fr))`,
+        gridColumn: '1 / -1',
+        height: enableVirtualization && rowVirtualizer 
+          ? `${rowVirtualizer.getTotalSize()}px` 
+          : 'auto',
         overflow: enableVirtualization ? 'auto' : 'visible',
         position: 'relative',
+        gap: 0,
       }}
     >
       {virtualItems.map((virtualItem) => {
@@ -166,10 +181,10 @@ export function DivTableBody<TData>({
         if (!row) return null
 
         return (
-          <DivTableRow
+          <DataGridRow
             key={row.id}
             row={row}
-            virtualRow={virtualItem}
+            virtualRow={virtualItem as VirtualItem}
             enableDragDrop={false}
             enableComplexCells={enableComplexCells}
           />

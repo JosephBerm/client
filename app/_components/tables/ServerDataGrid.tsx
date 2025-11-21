@@ -1,14 +1,8 @@
 /**
- * @deprecated This component is deprecated. Use `ServerDataGrid` instead for enhanced features
- * including virtualization, mobile card views, and improved accessibility.
- * 
- * Migration: Replace `ServerDataTable` with `ServerDataGrid` and add the required `ariaLabel` prop.
- * 
- * Server-Side Data Table Component
+ * Server-Side Data Grid Component
  * 
  * High-level wrapper around DataGrid that automatically handles server-side pagination,
- * sorting, and filtering. Simplifies implementation by managing useServerTable hook
- * internally and forwarding all table state to the DataGrid component.
+ * sorting, and filtering. Drop-in replacement for ServerDataTable with enhanced features.
  * 
  * **Features:**
  * - Automatic server-side data fetching
@@ -22,9 +16,12 @@
  * - Initial sort and page size configuration
  * - Custom filters support
  * - Feature toggles: enableSorting, enableFiltering, enablePagination, enablePageSize
+ * - **NEW**: Virtualization for large datasets (>100 rows)
+ * - **NEW**: Mobile card views
+ * - **NEW**: Enhanced accessibility (WCAG AA)
  * 
  * **Use Cases:**
- * - Large datasets (1000+ records)
+ * - Large datasets (100+ records) - benefits from virtualization
  * - Backend-paginated APIs
  * - Search and filter operations on server
  * - Real-time data tables
@@ -35,7 +32,7 @@
  * 
  * @example
  * ```tsx
- * import ServerDataTable from '@_components/tables/ServerDataTable';
+ * import ServerDataGrid from '@_components/tables/ServerDataGrid';
  * import { ColumnDef } from '@tanstack/react-table';
  * import { Product } from '@_classes/Product';
  * 
@@ -50,71 +47,45 @@
  *     header: 'Price',
  *     cell: ({ getValue }) => `$${getValue()}`,
  *   },
- *   {
- *     accessorKey: 'stock',
- *     header: 'Stock',
- *   },
  * ];
  * 
- * // Basic usage with endpoint
- * <ServerDataTable
+ * // Basic usage with endpoint (drop-in replacement for ServerDataTable)
+ * <ServerDataGrid
  *   endpoint="/api/products/search"
  *   columns={columns}
  *   initialPageSize={20}
+ *   ariaLabel="Products grid"
  * />
  * 
  * // With filters
- * <ServerDataTable
+ * <ServerDataGrid
  *   endpoint="/api/products/search"
  *   columns={columns}
  *   filters={{ category: 'medical', inStock: true }}
  *   initialSortBy="name"
  *   initialSortOrder="asc"
- * />
- * 
- * // With custom fetch function
- * <ServerDataTable
- *   fetchData={async ({ page, pageSize, sorting, filters }) => {
- *     const response = await API.Products.search({
- *       page,
- *       pageSize,
- *       sortBy: sorting?.[0]?.id,
- *       sortOrder: sorting?.[0]?.desc ? 'desc' : 'asc',
- *       filters,
- *     });
- *     return response.data.payload;
- *   }}
- *   columns={columns}
- *   emptyMessage="No products found"
- * />
- * 
- * // Orders table with status filter
- * <ServerDataTable
- *   endpoint="/api/orders/search"
- *   columns={orderColumns}
- *   filters={{ status: selectedStatus }}
- *   initialPageSize={10}
- *   initialSortBy="createdAt"
- *   initialSortOrder="desc"
+ *   ariaLabel="Filtered products"
  * />
  * ```
  * 
- * @module ServerDataTable
+ * @module ServerDataGrid
  */
 
 'use client'
 
 import { ReactNode, useMemo } from 'react'
 import { ColumnDef, SortingState, ColumnFiltersState } from '@tanstack/react-table'
-import { DataGrid } from './DataGrid'
+import { DataGrid } from './DataGrid/DataGrid'
 import { createServerTableFetcher, useServerTable } from '@_shared'
 
 /**
- * ServerDataTable component props interface.
+ * ServerDataGrid component props interface.
+ * 
+ * Identical API to ServerDataTable for easy migration.
  * 
  * @template TData - The type of data items in the table rows
  */
-interface ServerDataTableProps<TData> {
+interface ServerDataGridProps<TData> {
 	/** 
 	 * TanStack Table column definitions.
 	 * Defines table structure, headers, cells, and sorting configuration.
@@ -215,26 +186,26 @@ interface ServerDataTableProps<TData> {
 	 * @default true
 	 */
 	enablePageSize?: boolean
-	
-	/** 
-	 * ARIA label for accessibility.
-	 * Required for DataGrid component.
+
+	/**
+	 * ARIA label for the table (required for accessibility).
+	 * Should be descriptive of the table's content.
 	 */
-	ariaLabel?: string
+	ariaLabel: string
 }
 
 /**
- * ServerDataTable Component
+ * ServerDataGrid Component
  * 
  * Wrapper component that combines useServerTable hook with DataGrid component
- * to provide a complete server-side data table solution. Handles all server
- * communication and state management internally.
+ * to provide a complete server-side data grid solution with enhanced features.
  * 
  * **How It Works:**
  * 1. Uses useServerTable hook to manage server-side state
  * 2. Automatically fetches data when pagination/sorting changes
  * 3. Forwards all state to DataGrid for rendering
  * 4. Converts between endpoint string and fetch function
+ * 5. Auto-enables virtualization for large datasets
  * 
  * **Endpoint Mode:**
  * - Provide `endpoint` string (e.g., "/api/products/search")
@@ -250,11 +221,24 @@ interface ServerDataTableProps<TData> {
  * - Throws error if neither `endpoint` nor `fetchData` is provided
  * - Loading states handled by DataGrid
  * 
+ * **Migration from ServerDataTable:**
+ * Simply change the import and add `ariaLabel` prop:
+ * 
+ * ```tsx
+ * // Before
+ * import ServerDataTable from '@_components/tables/ServerDataTable'
+ * <ServerDataTable endpoint="/api/orders" columns={columns} />
+ * 
+ * // After
+ * import ServerDataGrid from '@_components/tables/ServerDataGrid'
+ * <ServerDataGrid endpoint="/api/orders" columns={columns} ariaLabel="Orders grid" />
+ * ```
+ * 
  * @template TData - Type of data items in the table
  * @param props - Component props including columns, fetchData/endpoint, and options
- * @returns ServerDataTable component
+ * @returns ServerDataGrid component
  */
-export default function ServerDataTable<TData>({
+export default function ServerDataGrid<TData>({
 	columns,
 	fetchData: propFetchData,
 	endpoint,
@@ -268,7 +252,7 @@ export default function ServerDataTable<TData>({
 	enablePagination = true,
 	enablePageSize = true,
 	ariaLabel,
-}: ServerDataTableProps<TData>) {
+}: ServerDataGridProps<TData>) {
 	/**
 	 * Create fetch function from endpoint if provided, otherwise use propFetchData.
 	 * Memoized to prevent unnecessary recreations on re-renders.
@@ -282,9 +266,9 @@ export default function ServerDataTable<TData>({
 		if (endpoint) return createServerTableFetcher<TData>(endpoint, filters)
 		
 		// Error: must provide either fetchData or endpoint
-		throw new Error('ServerDataTable requires either fetchData or endpoint prop')
+		throw new Error('ServerDataGrid requires either fetchData or endpoint prop')
 	}, [propFetchData, endpoint, filters])
-	
+
 	/**
 	 * Use server table hook to manage pagination, sorting, filtering, and data fetching.
 	 * Hook handles all server communication and state management.
@@ -294,6 +278,7 @@ export default function ServerDataTable<TData>({
 		pageCount,       // Total pages available
 		totalItems,      // Total items across all pages
 		isLoading,       // Loading indicator
+		error,           // Error state
 		pagination,      // Current pagination state (pageIndex, pageSize)
 		setPagination,   // Update pagination function
 		sorting,         // Current sorting state
@@ -310,12 +295,13 @@ export default function ServerDataTable<TData>({
 	 * Render DataGrid with server-side data and state.
 	 * DataGrid handles UI rendering, table structure, and user interactions.
 	 * All features are enabled by default but can be toggled with boolean props.
+	 * Virtualization is auto-enabled for datasets > 100 rows.
 	 */
 	return (
 		<DataGrid
 			columns={columns}
 			data={data}
-			ariaLabel={ariaLabel || 'Server data table'}
+			ariaLabel={ariaLabel}
 			pageCount={pageCount}
 			totalItems={totalItems}
 			pagination={pagination}
@@ -325,6 +311,7 @@ export default function ServerDataTable<TData>({
 			columnFilters={columnFilters}
 			onColumnFiltersChange={setColumnFilters}
 			isLoading={isLoading}
+			error={error}
 			manualPagination // Server handles pagination
 			manualSorting    // Server handles sorting
 			manualFiltering  // Server handles filtering
@@ -332,9 +319,9 @@ export default function ServerDataTable<TData>({
 			enableFiltering={enableFiltering}
 			enablePagination={enablePagination}
 			enablePageSize={enablePageSize}
+			enableVirtualization={true} // Auto-enabled for server-side tables
 			emptyMessage={emptyMessage}
 		/>
 	)
 }
-
 

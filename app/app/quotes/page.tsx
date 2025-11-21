@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import Link from 'next/link'
 import { ColumnDef } from '@tanstack/react-table'
 import { Eye } from 'lucide-react'
-import ServerDataTable from '@_components/tables/ServerDataTable'
+import ServerDataGrid from '@_components/tables/ServerDataGrid'
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../_components'
 import Badge from '@_components/ui/Badge'
@@ -83,13 +83,14 @@ export default function QuotesPage() {
 
       <div className="card bg-base-100 shadow-xl">
         <div className="card-body">
-          <ServerDataTable<Quote>
+          <ServerDataGrid<Quote>
             columns={columns}
             endpoint="/quotes/search"
             initialPageSize={10}
             initialSortBy="createdAt"
             initialSortOrder="desc"
             emptyMessage="No quotes found"
+            ariaLabel="Quotes table"
           />
         </div>
       </div>

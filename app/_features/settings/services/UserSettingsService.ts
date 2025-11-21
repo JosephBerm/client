@@ -56,7 +56,7 @@ export interface UserSettings {
 	theme?: Theme
 	/**
 	 * Default table page size for pagination.
-	 * Used by DataTable and ServerDataTable components.
+	 * Used by DataGrid and ServerDataTable components.
 	 * 
 	 * @default 10
 	 */

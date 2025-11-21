@@ -1,11 +1,11 @@
 /**
- * DivTablePagination Component
+ * DataGridPagination Component
  * 
  * Renders pagination controls with page size selector.
  * Supports both client-side and server-side pagination.
  * Full WCAG AA accessibility compliance.
  * 
- * @module DivTablePagination
+ * @module DataGridPagination
  */
 
 'use client'
@@ -27,7 +27,7 @@ import {
 } from '../utils/divTableUtils'
 import { logger } from '@_core'
 
-interface DivTablePaginationProps<TData> {
+interface DataGridPaginationProps<TData> {
   table: Table<TData>
   totalItems: number
   enablePageSize?: boolean
@@ -38,18 +38,18 @@ interface DivTablePaginationProps<TData> {
  * 
  * @example
  * ```tsx
- * <DivTablePagination
+ * <DataGridPagination
  *   table={table}
  *   totalItems={100}
  *   enablePageSize={true}
  * />
  * ```
  */
-export function DivTablePagination<TData>({
+export function DataGridPagination<TData>({
   table,
   totalItems,
   enablePageSize = false,
-}: DivTablePaginationProps<TData>) {
+}: DataGridPaginationProps<TData>) {
   const { pageIndex, pageSize } = table.getState().pagination
   const pageCount = table.getPageCount()
   const lastPageIndex = calculateLastPageIndex(totalItems, pageSize)
@@ -64,35 +64,15 @@ export function DivTablePagination<TData>({
   )
 
   // ============================================================================
-  // Navigation Handlers
+  // Helpers
   // ============================================================================
-
-  const goToFirstPage = () => {
-    table.setPageIndex(0)
-    announcePageChange(1, pageCount)
-  }
-
-  const goToPreviousPage = () => {
-    table.previousPage()
-    announcePageChange(pageIndex, pageCount)
-  }
-
-  const goToNextPage = () => {
-    table.nextPage()
-    announcePageChange(pageIndex + 2, pageCount)
-  }
-
-  const goToLastPage = () => {
-    table.setPageIndex(lastPageIndex)
-    announcePageChange(pageCount, pageCount)
-  }
 
   const handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newSize = Number(event.target.value)
     table.setPageSize(newSize)
 
     logger.debug('Page size changed', {
-      component: COMPONENT_NAMES.DIV_TABLE,
+      component: COMPONENT_NAMES.DATA_GRID_PAGINATION,
       pageSize: newSize,
     })
 
@@ -100,55 +80,73 @@ export function DivTablePagination<TData>({
   }
 
   // ============================================================================
-  // Helpers
-  // ============================================================================
-
-  function announcePageChange(page: number, total: number) {
-    announceToScreenReader(SCREEN_READER_ANNOUNCEMENTS.PAGE_CHANGED(page, total))
-    
-    logger.debug('Page changed', {
-      component: COMPONENT_NAMES.DIV_TABLE,
-      page,
-      pageSize,
-    })
-  }
-
-  // ============================================================================
   // Pagination Buttons Configuration
   // ============================================================================
 
   const navigationButtons = useMemo(
-    () => [
-      {
-        label: 'First',
-        ariaLabel: 'Go to first page',
-        icon: <ChevronsLeft className="w-4 h-4" />,
-        onClick: goToFirstPage,
-        disabled: !table.getCanPreviousPage(),
-      },
-      {
-        label: 'Previous',
-        ariaLabel: 'Go to previous page',
-        icon: <ChevronLeft className="w-4 h-4" />,
-        onClick: goToPreviousPage,
-        disabled: !table.getCanPreviousPage(),
-      },
-      {
-        label: 'Next',
-        ariaLabel: 'Go to next page',
-        icon: <ChevronRight className="w-4 h-4" />,
-        onClick: goToNextPage,
-        disabled: !table.getCanNextPage(),
-      },
-      {
-        label: 'Last',
-        ariaLabel: 'Go to last page',
-        icon: <ChevronsRight className="w-4 h-4" />,
-        onClick: goToLastPage,
-        disabled: !table.getCanNextPage(),
-      },
-    ],
-    [table, pageCount]
+    () => {
+      function announcePageChange(page: number, total: number) {
+        announceToScreenReader(SCREEN_READER_ANNOUNCEMENTS.PAGE_CHANGED(page, total))
+        
+        logger.debug('Page changed', {
+          component: COMPONENT_NAMES.DATA_GRID_PAGINATION,
+          page,
+          pageSize,
+        })
+      }
+
+      const goToFirstPage = () => {
+        table.setPageIndex(0)
+        announcePageChange(1, pageCount)
+      }
+
+      const goToPreviousPage = () => {
+        table.previousPage()
+        announcePageChange(pageIndex, pageCount)
+      }
+
+      const goToNextPage = () => {
+        table.nextPage()
+        announcePageChange(pageIndex + 2, pageCount)
+      }
+
+      const goToLastPage = () => {
+        table.setPageIndex(lastPageIndex)
+        announcePageChange(pageCount, pageCount)
+      }
+
+      return [
+        {
+          label: 'First',
+          ariaLabel: 'Go to first page',
+          icon: <ChevronsLeft className="w-4 h-4" />,
+          onClick: goToFirstPage,
+          disabled: !table.getCanPreviousPage(),
+        },
+        {
+          label: 'Previous',
+          ariaLabel: 'Go to previous page',
+          icon: <ChevronLeft className="w-4 h-4" />,
+          onClick: goToPreviousPage,
+          disabled: !table.getCanPreviousPage(),
+        },
+        {
+          label: 'Next',
+          ariaLabel: 'Go to next page',
+          icon: <ChevronRight className="w-4 h-4" />,
+          onClick: goToNextPage,
+          disabled: !table.getCanNextPage(),
+        },
+        {
+          label: 'Last',
+          ariaLabel: 'Go to last page',
+          icon: <ChevronsRight className="w-4 h-4" />,
+          onClick: goToLastPage,
+          disabled: !table.getCanNextPage(),
+        },
+      ]
+    },
+    [table, pageIndex, pageCount, lastPageIndex, pageSize]
   )
 
   // ============================================================================
@@ -158,7 +156,7 @@ export function DivTablePagination<TData>({
   // Hide pagination controls if no data
   if (totalItems === 0) {
     return (
-      <div className="div-table-pagination flex items-center justify-center p-4 border-t border-base-300">
+      <div className="data-grid-pagination flex items-center justify-center p-4 border-t border-base-300">
         <div className="text-sm text-base-content/70" aria-live="polite" aria-atomic="true">
           No results to display
         </div>
@@ -167,7 +165,7 @@ export function DivTablePagination<TData>({
   }
 
   return (
-    <div className="div-table-pagination flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-base-300">
+    <div className="data-grid-pagination flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-base-300">
       {/* Page info */}
       <div className="text-sm text-base-content/70" aria-live="polite" aria-atomic="true">
         Showing <span className="font-semibold">{paginationRange.start}</span> to{' '}

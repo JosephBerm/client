@@ -10,7 +10,7 @@
 'use client'
 
 import { flexRender } from '@tanstack/react-table'
-import type { DivTableCellProps } from '../types/divTableTypes'
+import type { DataGridCellProps } from '../types/divTableTypes'
 import { TABLE_THEME_CLASSES } from '../types/divTableConstants'
 import { generateCellARIA, classNames } from '../utils/divTableUtils'
 
@@ -26,11 +26,11 @@ import { generateCellARIA, classNames } from '../utils/divTableUtils'
  * />
  * ```
  */
-export function DivTableCell<TData>({
+export function DataGridCell<TData>({
   cell,
   columnIndex,
   enableComplexContent = false,
-}: DivTableCellProps<TData> & { columnIndex: number }) {
+}: DataGridCellProps<TData>) {
   // ============================================================================
   // ARIA Attributes
   // ============================================================================
@@ -57,7 +57,7 @@ export function DivTableCell<TData>({
     <div
       {...cellARIA}
       className={classNames(
-        'div-table-cell',
+        'data-grid-cell',
         TABLE_THEME_CLASSES.bodyCell,
         TABLE_THEME_CLASSES.focusVisible
       )}
@@ -65,6 +65,7 @@ export function DivTableCell<TData>({
       data-align={align}
       style={{
         textAlign: align,
+        // gridColumn removed - cells auto-place by default (redundant with default behavior)
       }}
     >
       <div

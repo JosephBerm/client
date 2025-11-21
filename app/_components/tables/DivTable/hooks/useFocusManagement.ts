@@ -47,7 +47,7 @@ interface UseFocusManagementOptions {
   /**
    * Reference to the container element
    */
-  containerRef: RefObject<HTMLElement>
+  containerRef: RefObject<HTMLElement | null>
 
   /**
    * Focus trap configuration

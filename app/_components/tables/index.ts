@@ -23,8 +23,12 @@
  */
 
 // Components
-export { default as DataTable } from './DataTable'
-export { default as ServerDataTable } from './ServerDataTable'
+// DataTable removed - use DataGrid instead
+export { default as ServerDataTable } from './ServerDataTable' // @deprecated - Use ServerDataGrid instead
+export { default as ServerDataGrid } from './ServerDataGrid'
+export { DataGrid } from './DataGrid' // Industry-standard name for div-based tables
+export type { DataGridProps } from './DataGrid'
+// DivTable removed - use DataGrid instead
 
 // Constants
 export * from './tableConstants'

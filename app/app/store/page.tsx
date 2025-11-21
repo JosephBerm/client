@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { ColumnDef } from '@tanstack/react-table'
 import { Eye, Plus, Archive } from 'lucide-react'
 import { toast } from 'react-toastify'
-import ServerDataTable from '@_components/tables/ServerDataTable'
+import ServerDataGrid from '@_components/tables/ServerDataGrid'
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../_components'
 import Badge from '@_components/ui/Badge'
@@ -150,7 +150,7 @@ export default function StorePage() {
 
       <div className="card bg-base-100 shadow-xl">
         <div className="card-body">
-          <ServerDataTable<Product>
+          <ServerDataGrid<Product>
             key={refreshKey}
             columns={columns}
             endpoint="/products/search"
@@ -159,6 +159,7 @@ export default function StorePage() {
             initialSortOrder="desc"
             filters={{ includes: ['Categories'] }}
             emptyMessage="No products found"
+            ariaLabel="Products table"
           />
         </div>
       </div>

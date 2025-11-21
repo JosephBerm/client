@@ -7,7 +7,7 @@ import { Eye, Plus } from 'lucide-react'
 import { useAuthStore } from '@_features/auth'
 import { AccountRole } from '@_classes/Enums'
 import { Routes } from '@_features/navigation'
-import ServerDataTable from '@_components/tables/ServerDataTable'
+import ServerDataGrid from '@_components/tables/ServerDataGrid'
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../_components'
 import OrderStatusBadge from '@_components/common/OrderStatusBadge'
@@ -105,12 +105,13 @@ export default function OrdersPage() {
 
 			<div className="card bg-base-100 shadow-xl">
 				<div className="card-body">
-					<ServerDataTable
-						columns={columns}
-						fetchData={fetchOrders}
-						initialPageSize={10}
-						emptyMessage="No orders found"
-					/>
+				<ServerDataGrid
+					columns={columns}
+					fetchData={fetchOrders}
+					initialPageSize={10}
+					emptyMessage="No orders found"
+					ariaLabel="Orders table"
+				/>
 				</div>
 			</div>
 		</>

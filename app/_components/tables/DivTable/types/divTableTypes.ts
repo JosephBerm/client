@@ -1,10 +1,10 @@
 /**
- * DivTable TypeScript Type Definitions
+ * DataGrid TypeScript Type Definitions
  * 
- * Comprehensive type definitions for the div-based table implementation.
+ * Comprehensive type definitions for the modern data grid implementation.
  * Follows FAANG-level type safety standards with no `any` types.
  * 
- * @module divTableTypes
+ * @module dataGridTypes
  */
 
 import { ReactNode } from 'react'
@@ -56,9 +56,9 @@ export interface TableManualModes {
 }
 
 /**
- * Main props interface for DivTable component
+ * Main props interface for DataGrid component
  */
-export interface DivTableProps<TData> extends TableFeatureToggles, TableManualModes {
+export interface DataGridProps<TData> extends TableFeatureToggles, TableManualModes {
   // Required props
   /** Column definitions */
   columns: ColumnDef<TData>[]
@@ -129,7 +129,7 @@ export interface DivTableProps<TData> extends TableFeatureToggles, TableManualMo
 /**
  * Props for DivTableHeader component
  */
-export interface DivTableHeaderProps<TData> {
+export interface DataGridHeaderProps<TData> {
   table: Table<TData>
   enableSorting?: boolean
   stickyHeader?: boolean
@@ -138,7 +138,7 @@ export interface DivTableHeaderProps<TData> {
 /**
  * Props for DivTableHeaderCell component
  */
-export interface DivTableHeaderCellProps<TData> {
+export interface DataGridHeaderCellProps<TData> {
   header: import('@tanstack/react-table').Header<TData, unknown>
   columnIndex: number
   enableSorting?: boolean
@@ -148,30 +148,34 @@ export interface DivTableHeaderCellProps<TData> {
 /**
  * Props for DivTableBody component
  */
-export interface DivTableBodyProps<TData> {
+export interface DataGridBodyProps<TData> {
   table: Table<TData>
   enableVirtualization?: boolean
   enableDragDrop?: boolean
   estimatedRowHeight?: number
   overscanCount?: number
   onRowReorder?: (fromIndex: number, toIndex: number) => void
+  dragHandlePosition?: 'left' | 'right'
+  enableComplexCells?: boolean
 }
 
 /**
  * Props for DivTableRow component
  */
-export interface DivTableRowProps<TData> {
+export interface DataGridRowProps<TData> {
   row: Row<TData>
   virtualRow?: VirtualItem
   enableDragDrop?: boolean
   dragHandlePosition?: 'left' | 'right'
+  enableComplexCells?: boolean
 }
 
 /**
  * Props for DivTableCell component
  */
-export interface DivTableCellProps<TData> {
+export interface DataGridCellProps<TData> {
   cell: import('@tanstack/react-table').Cell<TData, unknown>
+  columnIndex: number
   enableComplexContent?: boolean
 }
 
@@ -256,7 +260,7 @@ export interface PerformanceMetrics {
 /**
  * Table context value
  */
-export interface DivTableContextValue<TData = any> {
+export interface DataGridContextValue<TData = any> {
   table: Table<TData>
   enableVirtualization: boolean
   enableDragDrop: boolean

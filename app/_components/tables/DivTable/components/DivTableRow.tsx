@@ -13,14 +13,14 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
 import { flexRender } from '@tanstack/react-table'
-import type { DivTableRowProps } from '../types/divTableTypes'
+import type { DataGridRowProps } from '../types/divTableTypes'
 import {
   ARIA_ROLE_ROW,
   TABLE_THEME_CLASSES,
   DRAG_HANDLE_SIZE,
 } from '../types/divTableConstants'
 import { generateRowARIA, classNames } from '../utils/divTableUtils'
-import { DivTableCell } from './DivTableCell'
+import { DataGridCell } from './DivTableCell'
 
 /**
  * Table Row Component
@@ -35,13 +35,13 @@ import { DivTableCell } from './DivTableCell'
  * />
  * ```
  */
-export function DivTableRow<TData>({
+export function DataGridRow<TData>({
   row,
   virtualRow,
   enableDragDrop = false,
   dragHandlePosition = 'left',
   enableComplexCells = false,
-}: DivTableRowProps<TData>) {
+}: DataGridRowProps<TData>) {
   // ============================================================================
   // Drag & Drop Setup
   // ============================================================================
@@ -72,37 +72,66 @@ export function DivTableRow<TData>({
   // Styles
   // ============================================================================
 
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    // Virtualization positioning
-    ...(virtualRow
-      ? {
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: `${virtualRow.size}px`,
-          transform: `translateY(${virtualRow.start}px)`,
-        }
-      : {}),
+  const columnCount = row.getVisibleCells().length
+  
+  // Build style object carefully to avoid transform conflicts
+  const style: React.CSSProperties = {}
+  
+  // Add transition (always present)
+  if (transition) {
+    style.transition = transition
+  }
+  
+  // Virtualization: Absolute positioning with translateY
+  if (virtualRow) {
+    style.position = 'absolute'
+    style.top = 0
+    style.left = 0
+    style.width = '100%'
+    style.height = `${virtualRow.size}px`
+    style.display = 'grid'
+    style.gridTemplateColumns = `repeat(${columnCount}, minmax(0, 1fr))`
+    style.gridColumn = '1 / -1'
+    
+    // Handle transforms properly for virtualized rows
+    // Combine virtualization offset with drag-drop transform
+    if (enableDragDrop && transform) {
+      // Get the drag transform values
+      const dragTransform = CSS.Transform.toString(transform)
+      // Combine with virtualization offset
+      style.transform = `translateY(${virtualRow.start}px) ${dragTransform}`
+    } else {
+      // Only virtualization offset
+      style.transform = `translateY(${virtualRow.start}px)`
+    }
+  } else {
+    // Non-virtualized: Use contents display to participate in parent grid
+    style.display = 'contents'
+    
+    // Apply drag transform if enabled (no virtualization offset needed)
+    if (enableDragDrop && transform) {
+      style.transform = CSS.Transform.toString(transform)
+    }
   }
 
   // ============================================================================
   // Render
   // ============================================================================
 
+  // Use contents display for non-virtualized rows to participate in parent grid
+  const rowClassName = classNames(
+    'data-grid-row',
+    TABLE_THEME_CLASSES.bodyRow,
+    row.index % 2 === 0 && TABLE_THEME_CLASSES.bodyRowEven,
+    row.getIsSelected() && TABLE_THEME_CLASSES.bodyRowSelected,
+    isDragging && TABLE_THEME_CLASSES.dragging
+  )
+
   return (
     <div
       ref={enableDragDrop ? setNodeRef : undefined}
       {...rowARIA}
-      className={classNames(
-        'div-table-row',
-        TABLE_THEME_CLASSES.bodyRow,
-        row.index % 2 === 0 && TABLE_THEME_CLASSES.bodyRowEven,
-        row.getIsSelected() && TABLE_THEME_CLASSES.bodyRowSelected,
-        isDragging && TABLE_THEME_CLASSES.dragging
-      )}
+      className={rowClassName}
       style={style}
       data-row-index={row.index}
       data-is-dragging={isDragging}
@@ -128,7 +157,7 @@ export function DivTableRow<TData>({
 
       {/* Table cells */}
       {row.getVisibleCells().map((cell, columnIndex) => (
-        <DivTableCell
+        <DataGridCell
           key={cell.id}
           cell={cell}
           columnIndex={columnIndex}

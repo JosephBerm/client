@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 import Card from '@_components/ui/Card'
 import { InternalPageHeader } from '../../_components'
 import Badge from '@_components/ui/Badge'
-import { DataTable, type ColumnDef } from '@_components/tables'
+import { DataGrid, type ColumnDef } from '@_components/tables'
 import OrderStatusBadge, { OrderStatus as BadgeOrderStatus } from '@_components/common/OrderStatusBadge'
 import Order from '@_classes/Order'
 import { OrderStatus as DomainOrderStatus } from '@_classes/Enums'
@@ -252,9 +252,10 @@ export default function OrderDetailsPage() {
 					<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
 						<h3 className="text-lg font-semibold text-base-content mb-6">Line Items</h3>
 						
-						<DataTable
+						<DataGrid
 							columns={lineItemColumns}
 							data={order.products || []}
+							ariaLabel="Order line items"
 							enableSorting={true}
 							enableFiltering={false}
 							enablePagination={false}

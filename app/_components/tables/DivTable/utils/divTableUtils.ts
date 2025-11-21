@@ -1,10 +1,10 @@
 /**
- * DivTable Utility Functions
+ * DataGrid Utility Functions
  * 
- * Reusable utility functions for table logic, calculations, and transformations.
+ * Reusable utility functions for data grid logic, calculations, and transformations.
  * Follows functional programming principles with pure functions.
  * 
- * @module divTableUtils
+ * @module dataGridUtils
  */
 
 import { Column, PaginationState } from '@tanstack/react-table'
@@ -231,6 +231,35 @@ export function calculateColumnWidths(
       return `${finalWidth}px`
     })
     .join(' ')
+}
+
+// ============================================================================
+// Grid Layout Utilities
+// ============================================================================
+
+/**
+ * Get the consistent grid column count for a table
+ * Returns the number of visible leaf columns that should be rendered in the grid
+ * 
+ * IMPORTANT: Use this function consistently across all grid layout calculations
+ * to prevent misalignment issues when columns are hidden/shown dynamically
+ * 
+ * @param table - The TanStack Table instance
+ * @returns The number of visible columns to use in CSS Grid template
+ * 
+ * @example
+ * ```ts
+ * const columnCount = getGridColumnCount(table)
+ * gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`
+ * ```
+ */
+export function getGridColumnCount(table: any): number {
+  // Use getVisibleLeafColumns which correctly handles:
+  // - Hidden columns (excluded from count)
+  // - Column groups (only counts leaf columns, not group headers)
+  // - Dynamic column visibility changes
+  const visibleColumns = table.getVisibleLeafColumns()
+  return visibleColumns.length || 0
 }
 
 // ============================================================================

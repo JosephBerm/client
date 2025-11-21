@@ -1,10 +1,10 @@
 /**
- * DivTable Constants
+ * DataGrid Constants
  * 
- * Centralized constants for table configuration, following DRY principles.
+ * Centralized constants for data grid configuration, following DRY principles.
  * All magic numbers and strings are defined here for maintainability.
  * 
- * @module divTableConstants
+ * @module dataGridConstants
  */
 
 import type { ResponsiveBreakpoints, TableThemeClasses } from './divTableTypes'
@@ -166,8 +166,8 @@ export const DEFAULT_LOADING_MESSAGE = 'Loading...'
  * Error messages for table operations
  */
 export const TABLE_ERROR_MESSAGES = {
-  INVALID_COLUMNS: 'DivTable rendered with invalid or empty columns array.',
-  INVALID_DATA: 'DivTable rendered with invalid data array. Defaulting to empty array.',
+  INVALID_COLUMNS: 'DataGrid rendered with invalid or empty columns array.',
+  INVALID_DATA: 'DataGrid rendered with invalid data array. Defaulting to empty array.',
   INVALID_COLUMN_ID: 'Attempted to filter with an invalid column ID.',
   FETCH_ERROR: 'Failed to load table data.',
   DRAG_DROP_ERROR: 'Failed to reorder rows.',
@@ -199,12 +199,12 @@ export const SCREEN_READER_ANNOUNCEMENTS = {
  * Component names for structured logging
  */
 export const COMPONENT_NAMES = {
-  DIV_TABLE: 'DivTable',
-  DIV_TABLE_HEADER: 'DivTableHeader',
-  DIV_TABLE_BODY: 'DivTableBody',
-  DIV_TABLE_ROW: 'DivTableRow',
-  DIV_TABLE_CELL: 'DivTableCell',
-  DIV_TABLE_PAGINATION: 'DivTablePagination',
+  DATA_GRID: 'DataGrid',
+  DATA_GRID_HEADER: 'DataGridHeader',
+  DATA_GRID_BODY: 'DataGridBody',
+  DATA_GRID_ROW: 'DataGridRow',
+  DATA_GRID_CELL: 'DataGridCell',
+  DATA_GRID_PAGINATION: 'DataGridPagination',
   MOBILE_CARD: 'MobileCard',
   TABLE_ERROR_BOUNDARY: 'TableErrorBoundary',
 } as const
@@ -218,27 +218,27 @@ export const COMPONENT_NAMES = {
  * Using DaisyUI semantic tokens for consistency
  */
 export const TABLE_THEME_CLASSES: TableThemeClasses = {
-  // Container
-  container: 'bg-base-100 border border-base-300 rounded-[2rem]',
+  // Container - Subtle rounded corners, no border when inside card
+  container: 'bg-base-100 rounded-lg overflow-hidden',
   
-  // Header
-  header: 'bg-base-200 text-base-content/70',
-  headerCell: 'hover:bg-base-300 focus-visible:outline-primary',
+  // Header - Industry-standard: clear separation, good contrast, elegant styling
+  header: 'bg-base-200 border-b-2 border-base-300',
+  headerCell: 'px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-base-content/80 select-none',
   
   // Body
   body: 'bg-base-100',
-  bodyRow: 'hover:bg-base-200 transition-colors',
-  bodyRowEven: 'bg-base-100/50',
-  bodyRowSelected: 'bg-primary/10 border-l-primary border-l-3',
-  bodyCell: 'text-base-content text-sm',
+  bodyRow: 'border-b border-base-200/50 hover:bg-base-200/40 transition-colors duration-150',
+  bodyRowEven: 'bg-base-100',
+  bodyRowSelected: 'bg-primary/10 border-l-4 border-l-primary',
+  bodyCell: 'px-4 py-3.5 text-sm text-base-content',
   
   // States
   loading: 'opacity-50 pointer-events-none',
   dragging: 'opacity-50 cursor-grabbing',
   
   // Interactive
-  sortable: 'cursor-pointer hover:bg-base-300',
-  focusVisible: 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2',
+  sortable: 'cursor-pointer hover:bg-base-300/60 active:bg-base-300',
+  focusVisible: 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded-sm',
   
   // Mobile
   mobileCard: 'card bg-base-100 shadow-xl border border-base-300',
@@ -351,17 +351,17 @@ export const BUNDLE_SIZE_TARGETS = {
  * Test IDs for integration testing
  */
 export const TEST_IDS = {
-  TABLE: 'div-table',
-  HEADER: 'div-table-header',
-  BODY: 'div-table-body',
-  ROW: 'div-table-row',
-  CELL: 'div-table-cell',
-  PAGINATION: 'div-table-pagination',
-  MOBILE_CARD: 'div-table-mobile-card',
-  DRAG_HANDLE: 'div-table-drag-handle',
-  LOADING_SPINNER: 'div-table-loading',
-  EMPTY_STATE: 'div-table-empty',
-  ERROR_STATE: 'div-table-error',
+  TABLE: 'data-grid',
+  HEADER: 'data-grid-header',
+  BODY: 'data-grid-body',
+  ROW: 'data-grid-row',
+  CELL: 'data-grid-cell',
+  PAGINATION: 'data-grid-pagination',
+  MOBILE_CARD: 'data-grid-mobile-card',
+  DRAG_HANDLE: 'data-grid-drag-handle',
+  LOADING_SPINNER: 'data-grid-loading',
+  EMPTY_STATE: 'data-grid-empty',
+  ERROR_STATE: 'data-grid-error',
 } as const
 
 /**

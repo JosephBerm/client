@@ -31,7 +31,7 @@ interface UseKeyboardNavOptions {
   /**
    * Reference to the table container element
    */
-  tableRef: RefObject<HTMLDivElement>
+  tableRef: RefObject<HTMLDivElement | null>
   
   /**
    * Total number of rows in the grid

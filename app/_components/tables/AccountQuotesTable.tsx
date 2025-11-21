@@ -67,7 +67,7 @@ import { useMemo, useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Eye } from 'lucide-react'
-import { DataTable, type ColumnDef } from '@_components/tables'
+import { DataGrid, type ColumnDef } from '@_components/tables'
 import Button from '@_components/ui/Button'
 import Badge from '@_components/ui/Badge'
 import { formatDate } from '@_shared'
@@ -205,9 +205,10 @@ export default function AccountQuotesTable() {
 		<div className="card bg-base-100 shadow-xl">
 			<div className="card-body">
 				<h2 className="card-title">Recent Quotes</h2>
-				<DataTable
+				<DataGrid
 					columns={columns}
 					data={quotes}
+					ariaLabel="Recent quotes"
 					isLoading={isLoading}
 					emptyMessage="No quotes yet"
 					manualPagination={false}

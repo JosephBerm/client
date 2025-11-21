@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../../_components'
-import { DataTable, type ColumnDef } from '@_components/tables'
+import { DataGrid, type ColumnDef } from '@_components/tables'
 import UpdateCustomerForm from '@_components/forms/UpdateCustomerForm'
 import RoleBadge from '@_components/common/RoleBadge'
 import Company from '@_classes/Company'
@@ -202,9 +202,10 @@ const Page = () => {
 							</Button>
 						</div>
 
-						<DataTable<User>
+						<DataGrid<User>
 							columns={columns}
 							data={accounts}
+							ariaLabel="Customer accounts"
 							isLoading={loadingAccounts}
 							emptyMessage="No accounts are currently linked to this customer."
 						/>

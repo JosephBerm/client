@@ -67,7 +67,7 @@
  *     }}
  *   />
  * ) : (
- *   <DataTable columns={columns} data={data} />
+ *   <DataGrid columns={columns} data={data} ariaLabel="Data table" />
  * )}
  * ```
  *

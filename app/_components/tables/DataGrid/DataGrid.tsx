@@ -1,7 +1,7 @@
 /**
- * DivTable - Div-Based Table Component
+ * DataGrid - Modern Data Grid Component
  * 
- * Modern, high-performance table component using <div> elements instead of <table>.
+ * Industry-standard data grid component using <div> elements with ARIA grid role.
  * Built on TanStack Table v8 with virtualization, drag-drop, and mobile card views.
  * 
  * **Key Features:**
@@ -13,7 +13,7 @@
  * - React 19 concurrent features (useOptimistic, use)
  * - Performance optimized with memoization
  * 
- * @module DivTable
+ * @module DataGrid
  */
 
 'use client'
@@ -34,7 +34,7 @@ import {
 import { logger } from '@_core'
 
 // Internal imports
-import type { DivTableProps, CellPosition } from './types/divTableTypes'
+import type { DataGridProps, CellPosition } from '../DivTable/types/divTableTypes'
 import {
   COMPONENT_NAMES,
   DEFAULT_PAGE_SIZE,
@@ -46,7 +46,7 @@ import {
   VIRTUALIZATION_THRESHOLD,
   MOBILE_BREAKPOINT,
   TABLE_THEME_CLASSES,
-} from './types/divTableConstants'
+} from '../DivTable/types/divTableConstants'
 import {
   validateColumns,
   validateData,
@@ -55,35 +55,36 @@ import {
   generateTableARIA,
   announceToScreenReader,
   classNames,
-} from './utils/divTableUtils'
+  getGridColumnCount,
+} from '../DivTable/utils/divTableUtils'
 
-// Component imports (will be implemented next)
-import { DivTableHeader } from './components/DivTableHeader'
-import { DivTableBody } from './components/DivTableBody'
-import { DivTablePagination } from './components/DivTablePagination'
-import { MobileCardList } from './components/MobileCardList'
+// Component imports
+import { DataGridHeader } from '../DivTable/components/DivTableHeader'
+import { DataGridBody } from '../DivTable/components/DivTableBody'
+import { DataGridPagination } from '../DivTable/components/DivTablePagination'
+import { MobileCardList } from '../DivTable/components/MobileCardList'
 
 // Hook imports
-import { useMobileDetection } from './hooks/useMobileDetection'
-import { usePerformanceBudget } from './hooks/usePerformanceBudget'
-import { useKeyboardNav } from './hooks/useKeyboardNav'
-import { useFocusManagement } from './hooks/useFocusManagement'
+import { useMobileDetection } from '../DivTable/hooks/useMobileDetection'
+import { usePerformanceBudget } from '../DivTable/hooks/usePerformanceBudget'
+import { useKeyboardNav } from '../DivTable/hooks/useKeyboardNav'
+import { useFocusManagement } from '../DivTable/hooks/useFocusManagement'
 
 /**
- * Main DivTable Component
+ * Main DataGrid Component
  * 
  * @example
  * ```tsx
- * // Basic table
- * <DivTable
+ * // Basic grid
+ * <DataGrid
  *   columns={columns}
  *   data={data}
- *   ariaLabel="Users table"
+ *   ariaLabel="Users grid"
  *   enableSorting
  * />
  * 
  * // With virtualization (auto-enabled for > 100 rows)
- * <DivTable
+ * <DataGrid
  *   columns={columns}
  *   data={largeDataset}
  *   ariaLabel="Large dataset"
@@ -91,16 +92,16 @@ import { useFocusManagement } from './hooks/useFocusManagement'
  * />
  * 
  * // With drag-drop
- * <DivTable
+ * <DataGrid
  *   columns={columns}
  *   data={data}
- *   ariaLabel="Sortable table"
+ *   ariaLabel="Sortable grid"
  *   enableDragDrop
  *   onRowReorder={handleReorder}
  * />
  * ```
  */
-export function DivTable<TData>({
+export function DataGrid<TData>({
   // Required
   columns,
   data,
@@ -153,45 +154,16 @@ export function DivTable<TData>({
   // Styling
   className,
   style,
-}: DivTableProps<TData>) {
+}: DataGridProps<TData>) {
   // ============================================================================
-  // Validation & Defensive Programming
-  // ============================================================================
-
-  // Validate columns
-  if (!validateColumns(columns)) {
-    logger.error(TABLE_ERROR_MESSAGES.INVALID_COLUMNS, {
-      component: COMPONENT_NAMES.DIV_TABLE,
-      columns,
-    })
-    return (
-      <div role="alert" className="alert alert-error">
-        <span>{TABLE_ERROR_MESSAGES.INVALID_COLUMNS}</span>
-      </div>
-    )
-  }
-
-  // Normalize data (allow empty arrays)
-  const normalizedData = useMemo(() => {
-    if (!validateData(data)) {
-      logger.warn(TABLE_ERROR_MESSAGES.INVALID_DATA, {
-        component: COMPONENT_NAMES.DIV_TABLE,
-        data,
-      })
-      return []
-    }
-    return normalizeArray(data)
-  }, [data])
-
-  // ============================================================================
-  // Refs
+  // Refs (must be called before any conditional returns)
   // ============================================================================
 
-  const containerRef = useRef<HTMLDivElement>(null)
-  const captionId = `${ariaLabel.replace(/\s+/g, '-')}-caption`
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const captionId = useMemo(() => `${ariaLabel.replace(/\s+/g, '-')}-caption`, [ariaLabel])
 
   // ============================================================================
-  // State Management
+  // State Management (must be called before any conditional returns)
   // ============================================================================
 
   // Local pagination state (client-side or uncontrolled)
@@ -209,22 +181,44 @@ export function DivTable<TData>({
   // UI state
   const [focusedCell, setFocusedCell] = useState<CellPosition | null>(null)
 
-  // Determine actual state (controlled vs uncontrolled)
-  const pagination = controlledPagination ?? localPagination
-  const sorting = controlledSorting ?? localSorting
-  const columnFilters = controlledFilters ?? localFilters
+  // ============================================================================
+  // Validation & Data Normalization
+  // ============================================================================
+
+  // Validate columns (but don't return early - render error conditionally)
+  const isValidColumns = useMemo(() => validateColumns(columns), [columns])
+
+  // Normalize data (allow empty arrays)
+  const normalizedData = useMemo<TData[]>(() => {
+    if (!validateData(data)) {
+      logger.warn(TABLE_ERROR_MESSAGES.INVALID_DATA, {
+        component: COMPONENT_NAMES.DATA_GRID,
+        data,
+      })
+      return []
+    }
+    return normalizeArray<TData>(data)
+  }, [data])
 
   // ============================================================================
-  // Mobile Detection
+  // Mobile Detection (must be called before any conditional returns)
   // ============================================================================
 
   const { isMobile } = useMobileDetection(mobileBreakpoint)
 
   // ============================================================================
+  // Determine actual state (controlled vs uncontrolled)
+  // ============================================================================
+
+  const pagination = controlledPagination ?? localPagination
+  const sorting = controlledSorting ?? localSorting
+  const columnFilters = controlledFilters ?? localFilters
+
+  // ============================================================================
   // TanStack Table Initialization
   // ============================================================================
 
-  const table = useReactTable({
+  const table = useReactTable<TData>({
     data: normalizedData,
     columns,
     
@@ -267,6 +261,9 @@ export function DivTable<TData>({
 
   const rows = useMemo(() => table.getRowModel().rows, [table])
   
+  // Get consistent column count for grid layout
+  const gridColumnCount = useMemo(() => getGridColumnCount(table), [table])
+  
   const totalItemsCount = useMemo(
     () =>
       calculateTotalItems(
@@ -288,7 +285,7 @@ export function DivTable<TData>({
   // Performance Monitoring
   // ============================================================================
 
-  usePerformanceBudget(COMPONENT_NAMES.DIV_TABLE, {
+  usePerformanceBudget(COMPONENT_NAMES.DATA_GRID, {
     renderTime: 100, // ms
   })
 
@@ -306,13 +303,13 @@ export function DivTable<TData>({
     onCellFocus: useCallback((position: CellPosition) => {
       setFocusedCell(position)
       logger.debug('Cell focused', {
-        component: COMPONENT_NAMES.DIV_TABLE,
+        component: COMPONENT_NAMES.DATA_GRID,
         position,
       })
     }, []),
     onBoundaryReached: useCallback((direction: string) => {
       logger.debug('Navigation boundary reached', {
-        component: COMPONENT_NAMES.DIV_TABLE,
+        component: COMPONENT_NAMES.DATA_GRID,
         direction,
       })
     }, []),
@@ -334,8 +331,8 @@ export function DivTable<TData>({
   // ============================================================================
 
   useEffect(() => {
-    logger.debug('DivTable initialized', {
-      component: COMPONENT_NAMES.DIV_TABLE,
+    logger.debug('DataGrid initialized', {
+      component: COMPONENT_NAMES.DATA_GRID,
       columns: columns.length,
       rows: normalizedData.length,
       features: {
@@ -364,13 +361,13 @@ export function DivTable<TData>({
     () => ({
       ...generateTableARIA(
         totalItemsCount,
-        columns.length,
+        gridColumnCount, // Use visible column count for accuracy
         isLoading,
         ariaLabel
       ),
       ...(ariaDescribedBy && { 'aria-describedby': ariaDescribedBy }),
     }),
-    [totalItemsCount, columns.length, isLoading, ariaLabel, ariaDescribedBy]
+    [totalItemsCount, gridColumnCount, isLoading, ariaLabel, ariaDescribedBy]
   )
 
   // ============================================================================
@@ -388,6 +385,22 @@ export function DivTable<TData>({
       announceToScreenReader(`Error: ${error.message}`, 'assertive')
     }
   }, [error])
+
+  // ============================================================================
+  // Render: Validation Error
+  // ============================================================================
+
+  if (!isValidColumns) {
+    logger.error(TABLE_ERROR_MESSAGES.INVALID_COLUMNS, {
+      component: COMPONENT_NAMES.DATA_GRID,
+      columns,
+    })
+    return (
+      <div role="alert" className="alert alert-error">
+        <span>{TABLE_ERROR_MESSAGES.INVALID_COLUMNS}</span>
+      </div>
+    )
+  }
 
   // ============================================================================
   // Render: Error State
@@ -422,7 +435,7 @@ export function DivTable<TData>({
     return (
       <div
         ref={containerRef}
-        className={classNames('div-table-mobile-container', className)}
+        className={classNames('data-grid-mobile-container', className)}
         style={style}
       >
         <MobileCardList
@@ -432,7 +445,7 @@ export function DivTable<TData>({
           customRenderer={mobileCardRenderer}
         />
         {enablePagination && (
-          <DivTablePagination
+          <DataGridPagination
             table={table}
             totalItems={totalItemsCount}
             enablePageSize={enablePageSize}
@@ -450,7 +463,7 @@ export function DivTable<TData>({
     <div
       ref={containerRef}
       className={classNames(
-        'div-table-container',
+        'data-grid-container',
         TABLE_THEME_CLASSES.container,
         isLoading && TABLE_THEME_CLASSES.loading,
         className
@@ -465,12 +478,19 @@ export function DivTable<TData>({
       {/* Main grid table */}
       <div
         {...tableARIA}
-        aria-describedby={ariaDescribedBy || captionId}
-        className="div-table"
-        data-columns={columns.length}
+        aria-describedby={
+          [ariaDescribedBy, captionId].filter(Boolean).join(' ') || undefined
+        }
+        className="data-grid w-full"
+        data-columns={gridColumnCount}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${gridColumnCount}, minmax(0, 1fr))`,
+          gap: 0,
+        }}
       >
         {/* Header */}
-        <DivTableHeader
+        <DataGridHeader
           table={table}
           enableSorting={enableSorting}
           stickyHeader={true}
@@ -479,15 +499,18 @@ export function DivTable<TData>({
         {/* Body */}
         {rows.length === 0 ? (
           // Empty state
-          <div role="status" className="div-table-empty p-8 text-center">
+          <div 
+            role="status" 
+            className="data-grid-empty col-span-full py-12 px-4 text-center"
+          >
             {typeof emptyMessage === 'string' ? (
-              <p className="text-base-content/60">{emptyMessage}</p>
+              <p className="text-base text-base-content/60 font-medium">{emptyMessage}</p>
             ) : (
               emptyMessage
             )}
           </div>
         ) : (
-          <DivTableBody
+          <DataGridBody
             table={table}
             enableVirtualization={shouldVirtualize}
             enableDragDrop={enableDragDrop}
@@ -502,7 +525,7 @@ export function DivTable<TData>({
 
       {/* Pagination */}
       {enablePagination && rows.length > 0 && (
-        <DivTablePagination
+        <DataGridPagination
           table={table}
           totalItems={totalItemsCount}
           enablePageSize={enablePageSize}
@@ -511,7 +534,7 @@ export function DivTable<TData>({
 
       {/* Loading overlay */}
       {isLoading && (
-        <div className="div-table-loading-overlay absolute inset-0 flex items-center justify-center bg-base-100/50">
+        <div className="data-grid-loading-overlay absolute inset-0 flex items-center justify-center bg-base-100/50">
           <span className="loading loading-spinner loading-lg" />
         </div>
       )}
@@ -520,5 +543,5 @@ export function DivTable<TData>({
 }
 
 // Export for convenience
-export type { DivTableProps }
+export type { DataGridProps }
 

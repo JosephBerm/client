@@ -1,21 +1,22 @@
 /**
- * DivTable - Barrel Export
+ * DataGrid - Barrel Export
  * 
- * Centralized exports for the div-based table implementation.
+ * Centralized exports for the modern data grid implementation.
+ * Industry-standard naming convention for div-based tables.
  * 
- * @module DivTable
+ * @module DataGrid
  */
 
-// Main Component
-export { DivTable } from './DivTable'
-export type { DivTableProps } from './types/divTableTypes'
+// Main Component (exported as DataGrid for industry-standard naming)
+// Note: DataGrid is exported from '../DataGrid/index.ts' - this file exports sub-components only
+export type { DataGridProps } from './types/divTableTypes'
 
-// Sub-Components
-export { DivTableHeader } from './components/DivTableHeader'
-export { DivTableBody } from './components/DivTableBody'
-export { DivTableRow } from './components/DivTableRow'
-export { DivTableCell } from './components/DivTableCell'
-export { DivTablePagination } from './components/DivTablePagination'
+// Sub-Components (exported with DataGrid naming)
+export { DataGridHeader } from './components/DivTableHeader'
+export { DataGridBody } from './components/DivTableBody'
+export { DataGridRow } from './components/DivTableRow'
+export { DataGridCell } from './components/DivTableCell'
+export { DataGridPagination } from './components/DivTablePagination'
 export { MobileCardList } from './components/MobileCardList'
 export { TableErrorBoundary } from './components/TableErrorBoundary'
 
@@ -31,12 +32,12 @@ export type {
   ServerPaginationMeta,
   PaginationRange,
   PerformanceMetrics,
-  DivTableContextValue,
+  DataGridContextValue,
   MobileCardProps,
-  DivTableHeaderProps,
-  DivTableBodyProps,
-  DivTableRowProps,
-  DivTableCellProps,
+  DataGridHeaderProps,
+  DataGridBodyProps,
+  DataGridRowProps,
+  DataGridCellProps,
 } from './types/divTableTypes'
 
 // Constants

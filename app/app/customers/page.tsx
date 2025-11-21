@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { ColumnDef } from '@tanstack/react-table'
 import { Eye, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'react-toastify'
-import ServerDataTable from '@_components/tables/ServerDataTable'
+import ServerDataGrid from '@_components/tables/ServerDataGrid'
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../_components'
 import Modal from '@_components/ui/Modal'
@@ -128,12 +128,13 @@ export default function CustomersPage() {
 
       <div className="card bg-base-100 shadow-xl">
         <div className="card-body">
-          <ServerDataTable<Company>
+          <ServerDataGrid<Company>
             key={refreshKey}
             columns={columns}
             endpoint="/customers/search"
             initialPageSize={10}
             emptyMessage="No customers found"
+            ariaLabel="Customers table"
           />
         </div>
       </div>

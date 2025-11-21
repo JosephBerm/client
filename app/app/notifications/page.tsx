@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import Link from 'next/link'
 
-import { DataTable, type ColumnDef } from '@_components/tables'
+import { DataGrid, type ColumnDef } from '@_components/tables'
 import { InternalPageHeader } from '../_components'
 import Badge from '@_components/ui/Badge'
 import Notification from '@_classes/Notification'
@@ -85,9 +85,10 @@ export default function NotificationsPage() {
 				description="Review recent system notifications and follow up on important actions."
 			/>
 
-			<DataTable<Notification>
+			<DataGrid<Notification>
 				columns={columns}
 				data={notifications}
+				ariaLabel="Notifications table"
 				emptyMessage="You have no notifications yet."
 			/>
 		</>

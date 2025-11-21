@@ -10,7 +10,7 @@ import Card from '@_components/ui/Card'
 import { InternalPageHeader } from '../../_components'
 import Badge from '@_components/ui/Badge'
 import Button from '@_components/ui/Button'
-import { DataTable, type ColumnDef } from '@_components/tables'
+import { DataGrid, type ColumnDef } from '@_components/tables'
 import Quote from '@_classes/Quote'
 import { QuoteStatus } from '@_classes/Enums'
 import { logger } from '@_core'
@@ -248,9 +248,10 @@ export default function QuoteDetailsPage() {
 							<h3 className="text-lg font-semibold text-base-content">Requested Products</h3>
 						</div>
 
-						<DataTable
+						<DataGrid
 							columns={productColumns}
 							data={quote.products || []}
+							ariaLabel="Quote requested products"
 							enableSorting={true}
 							enableFiltering={false}
 							enablePagination={false}
