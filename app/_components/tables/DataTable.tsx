@@ -641,7 +641,7 @@ export default function DataTable<TData>({
 			</div>
 
 			{/* Pagination Controls - Mobile-first responsive */}
-			{enablePagination && pagination && onPaginationChange && pagination.pageSize > 0 && (
+			{enablePagination && pagination && onPaginationChange && pagination.pageSize > 0 && totalItems > 0 && (
 				<div className="flex flex-col gap-3 rounded-[28px] border border-base-300 bg-base-200/70 p-4 shadow-lg sm:gap-4 sm:p-6">
 					{/* Results Summary - Mobile-first using centralized calculation */}
 					<div className="text-xs font-semibold uppercase tracking-[0.3em] text-base-content/70 sm:text-sm">
@@ -683,7 +683,7 @@ export default function DataTable<TData>({
 								Page {pagination.pageIndex + 1} of{' '}
 								{pageCount !== undefined 
 									? pageCount 
-									: Math.max(1, Math.ceil(totalItems / pagination.pageSize))}
+									: Math.ceil(totalItems / pagination.pageSize) || 0}
 							</span>
 						</div>
 

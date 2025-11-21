@@ -113,34 +113,34 @@ export default function AccountOrdersTable() {
 	const [isLoading, setIsLoading] = useState(false)
 
 	useEffect(() => {
-		const fetchOrders = async () => {
-			try {
-				setIsLoading(true)
-				if (!user?.customer?.id) return
+	const fetchOrders = async () => {
+		try {
+			setIsLoading(true)
+			if (!user?.customer?.id) return
 
-				const { data } = await API.Orders.getFromCustomer(user.customer.id)
-				if (!data.payload) {
-					toast.error(data.message || 'Failed to load orders')
-					return
-				}
-
-				const sortedOrders = data.payload
-					.map((x: any) => new Order(x))
-					.sort((a: Order, b: Order) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-					.slice(0, 5)
-
-				setOrders(sortedOrders)
-			} catch (error: any) {
-				logger.error('Failed to fetch orders', {
-					error,
-					component: 'AccountOrdersTable',
-					userId: user?.id ?? undefined,
-				})
-				toast.error(error.message || 'Failed to load orders')
-			} finally {
-				setIsLoading(false)
+			const { data } = await API.Orders.getFromCustomer(user.customer.id)
+			if (!data.payload) {
+				toast.error(data.message || 'Failed to load orders')
+				return
 			}
+
+			const sortedOrders = data.payload
+				.map((x: any) => new Order(x))
+				.sort((a: Order, b: Order) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+				.slice(0, 5)
+
+			setOrders(sortedOrders)
+		} catch (error: any) {
+			logger.error('Failed to fetch orders', {
+				error,
+				component: 'AccountOrdersTable',
+				userId: user?.id ?? undefined,
+			})
+			toast.error(error.message || 'Failed to load orders')
+		} finally {
+			setIsLoading(false)
 		}
+	}
 
 		if (user?.customer?.id) {
 			fetchOrders()

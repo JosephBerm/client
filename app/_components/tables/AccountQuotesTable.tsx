@@ -122,35 +122,35 @@ export default function AccountQuotesTable() {
 	const [isLoading, setIsLoading] = useState(false)
 
 	useEffect(() => {
-		const fetchQuotes = async () => {
-			try {
-				setIsLoading(true)
-				if (!user?.customer?.id) return
+	const fetchQuotes = async () => {
+		try {
+			setIsLoading(true)
+			if (!user?.customer?.id) return
 
-				const { data } = await API.Quotes.getAll<Quote[]>()
-				if (!data.payload) {
-					toast.error(data.message || 'Failed to load quotes')
-					return
-				}
-
-				const sortedQuotes = data.payload
-					.map((x: any) => new Quote(x))
-					.filter((q: Quote) => q.companyName === user.customer?.name)
-					.sort((a: Quote, b: Quote) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-					.slice(0, 5)
-
-				setQuotes(sortedQuotes)
-			} catch (error: any) {
-				logger.error('Failed to fetch quotes', {
-					error,
-					component: 'AccountQuotesTable',
-					userId: user?.id ?? undefined,
-				})
-				toast.error(error.message || 'Failed to load quotes')
-			} finally {
-				setIsLoading(false)
+			const { data } = await API.Quotes.getAll<Quote[]>()
+			if (!data.payload) {
+				toast.error(data.message || 'Failed to load quotes')
+				return
 			}
+
+			const sortedQuotes = data.payload
+				.map((x: any) => new Quote(x))
+				.filter((q: Quote) => q.companyName === user.customer?.name)
+				.sort((a: Quote, b: Quote) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+				.slice(0, 5)
+
+			setQuotes(sortedQuotes)
+		} catch (error: any) {
+			logger.error('Failed to fetch quotes', {
+				error,
+				component: 'AccountQuotesTable',
+				userId: user?.id ?? undefined,
+			})
+			toast.error(error.message || 'Failed to load quotes')
+		} finally {
+			setIsLoading(false)
 		}
+	}
 
 		if (user?.customer?.id) {
 			fetchQuotes()
