@@ -41,6 +41,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, ShoppingCart, X, User, LogOut, Home, Info, Store, Mail, Settings } from 'lucide-react'
+import { getCookie } from 'cookies-next'
 import { useCartStore } from '@_features/cart'
 import { useAuthStore } from '@_features/auth'
 import { useState, useEffect, useRef } from 'react'
@@ -80,13 +81,50 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 	const user = useAuthStore((state) => state.user)
 
-	// Check for login query param and open modal automatically
+	/**
+	 * Handle login query parameter with FAANG-level authentication logic.
+	 * 
+	 * **Behavior:**
+	 * - Checks both cookie token AND auth state (handles race conditions)
+	 * - Only opens modal if user is NOT authenticated (no token AND not authenticated)
+	 * - Cleans up URL if user IS authenticated but `?login=true` is present
+	 * - Uses router.replace() to avoid polluting browser history
+	 * 
+	 * **Why check both cookie and state:**
+	 * - Cookie check: Immediate, available before AuthInitializer runs
+	 * - State check: Validated token, user data loaded
+	 * - Both must fail for user to be considered unauthenticated
+	 */
 	useEffect(() => {
-		const shouldOpenLogin = searchParams.get('login') === 'true'
-		if (shouldOpenLogin && !isAuthenticated) {
+		const hasLoginParam = searchParams.get('login') === 'true'
+		
+		if (!hasLoginParam) {
+			return // No login param, nothing to do
+		}
+
+		// Check for token in cookies (immediate check, available before auth state initializes)
+		const token = getCookie('at')
+		const hasToken = !!token
+
+		// User is authenticated if they have a token OR auth state says so
+		// This handles race conditions where token exists but state hasn't updated yet
+		const isUserAuthenticated = hasToken || isAuthenticated
+
+		if (isUserAuthenticated) {
+			// User is already authenticated - clean up URL by removing login param
+			// Also remove redirectTo if present (user is already logged in, no redirect needed)
+			const url = new URL(window.location.href)
+			url.searchParams.delete('login')
+			url.searchParams.delete('redirectTo')
+			
+			// Use replace to avoid adding to history (FAANG best practice)
+			const cleanUrl = url.pathname + (url.search ? url.search : '')
+			router.replace(cleanUrl)
+		} else {
+			// User is not authenticated - open login modal
 			setLoginModalOpen(true)
 		}
-	}, [searchParams, isAuthenticated])
+	}, [searchParams, isAuthenticated, router])
 
 	// Detect when screen size changes to desktop (md breakpoint: 768px)
 	// The mobile menu is only rendered on screens smaller than md (md:hidden)

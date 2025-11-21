@@ -23,9 +23,10 @@ import { logger } from '@_core'
 
 /**
  * API base URL loaded from environment variables.
+ * Uses NEXT_PUBLIC_API_URL for consistency (available on both client and server).
  * Falls back to localhost if not specified.
  */
-const API_URL = process.env.API_URL || 'http://localhost:5254/api'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5254/api'
 
 /**
  * Standard API response format from the backend.
@@ -156,35 +157,79 @@ export async function login(credentials: LoginCredentials): Promise<{
 			body: JSON.stringify(credentials),
 		})
 
-		const data: ApiResponse<{ account: IUser; token: string }> = await response.json()
+		const data: ApiResponse<string> = await response.json()
 
-		if (response.ok && data.payload) {
-			// Login successful, store JWT token in cookie
-			setCookie('at', data.payload.token, {
+		// Check if login was successful (statusCode 200 and payload contains token)
+		if (response.ok && data.statusCode === 200 && data.payload && typeof data.payload === 'string') {
+			const token = data.payload // Token is the payload itself (string)
+
+			// Store JWT token in cookie first
+			setCookie('at', token, {
 				// Set expiration based on "Remember Me" checkbox
 				maxAge: credentials.rememberUser 
 					? 30 * 24 * 60 * 60  // 30 days in seconds
 					: 24 * 60 * 60       // 1 day in seconds
 			})
 
-			return {
-				success: true,
-				user: data.payload.account,
-				token: data.payload.token,
+			// Fetch user account data using the token
+			try {
+				const userResponse = await fetch(`${API_URL}/account`, {
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+					},
+				})
+
+				if (userResponse.ok) {
+					const userData: ApiResponse<IUser> = await userResponse.json()
+					
+					if (userData.payload) {
+						return {
+							success: true,
+							user: userData.payload,
+							token: token,
+						}
+					}
+				}
+
+				// If user fetch fails, still return success with token
+				// User data can be fetched later via checkAuthStatus
+				logger.warn('Login successful but user data fetch failed', {
+					status: userResponse.status,
+					context: 'login_user_fetch',
+				})
+				
+				return {
+					success: true,
+					token: token,
+					// User will be fetched on next checkAuthStatus call
+				}
+			} catch (userFetchError) {
+				// Network error fetching user, but login was successful
+				logger.warn('Login successful but user data fetch error', {
+					error: userFetchError,
+					context: 'login_user_fetch',
+				})
+				
+				return {
+					success: true,
+					token: token,
+					// User will be fetched on next checkAuthStatus call
+				}
 			}
 		}
 
 		// Login failed (invalid credentials, account locked, etc.)
 		return {
 			success: false,
-			message: data.message || 'Login failed',
+			message: data.message || 'Login failed. Please check your credentials.',
 		}
 	} catch (error) {
 		// Network error (server down, no internet, etc.)
 		logger.error('Login failed', { error, context: 'network_error' })
 		return {
 			success: false,
-			message: 'Network error occurred',
+			message: 'Network error occurred. Please check your connection and try again.',
 		}
 	}
 }

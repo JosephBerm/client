@@ -12,7 +12,7 @@ const Environments = {
 }
 
 const nextConfig = {
-	env: { ...Environments['production'] },
+	env: { ...Environments['development'] },
 	images: {
 		remotePatterns: [
 			{

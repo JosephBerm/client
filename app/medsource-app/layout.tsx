@@ -20,7 +20,9 @@ async function getUserData(token: string | null) {
 	if (token == null) return token
 
 	try {
-		const response = await fetch(process.env.API_URL + '/account', {
+		// Use NEXT_PUBLIC_API_URL for consistency with client-side code
+		const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5254/api'
+		const response = await fetch(`${apiUrl}/account`, {
 			cache: 'no-store',
 			headers: {
 				Authorization: `Bearer ${token}`,

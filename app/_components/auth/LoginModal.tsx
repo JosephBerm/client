@@ -100,15 +100,40 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 				rememberUser: values.rememberMe,
 			})
 
-			if (result.success && result.user) {
-				// Update auth store
-				loginUser(result.user)
+			if (result.success) {
+				// If user data is available, use it directly
+				if (result.user) {
+					// Update auth store
+					loginUser(result.user)
 
-				logger.info('User logged in successfully', {
-					userId: result.user.id ?? undefined,
-					username: result.user.username,
-					component: 'LoginModal',
-				})
+					logger.info('User logged in successfully', {
+						userId: result.user.id ?? undefined,
+						username: result.user.username,
+						component: 'LoginModal',
+					})
+				} else if (result.token) {
+					// Token is valid but user data wasn't fetched yet
+					// Fetch user data using checkAuthStatus (same pattern as app initialization)
+					const { checkAuthStatus } = await import('@_features/auth')
+					const user = await checkAuthStatus()
+					
+					if (user) {
+						loginUser(user)
+						logger.info('User logged in successfully', {
+							userId: user.id ?? undefined,
+							username: user.username,
+							component: 'LoginModal',
+						})
+					} else {
+						// This shouldn't happen if token is valid, but handle gracefully
+						logger.warn('Login successful but user data unavailable', {
+							identifier: values.identifier,
+							component: 'LoginModal',
+						})
+						toast.error('Login successful but unable to load user data. Please refresh the page.')
+						return
+					}
+				}
 
 				toast.success('Logged in successfully!')
 

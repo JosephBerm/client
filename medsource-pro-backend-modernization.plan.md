@@ -1805,6 +1805,19 @@ public async Task<IActionResult> Create([FromBody] CreateAccountCommand command)
 
 2. **Token storage**: Frontend should store `token` from LoginResponseDto
 
+3. **⚠️ Frontend Cleanup Required**: 
+   - **Current State**: Frontend has a workaround in `AuthService.login()` to handle the OLD response format where `payload` is a string (JWT token) instead of an object
+   - **Location**: `app/_features/auth/services/AuthService.ts` (lines 143-241)
+   - **Issue**: The code manually fetches user data after login because the old API only returns the token string
+   - **Action Required**: When backend is modernized to return the NEW format (with `token`, `expiresAt`, and `account` in the response), update `AuthService.login()` to:
+     - Remove the workaround logic that handles string payload
+     - Use the `account` object directly from the response (no need for separate `/account` fetch)
+     - Use the `expiresAt` field for token expiration instead of calculating it client-side
+     - Simplify `LoginModal.tsx` to remove the fallback `checkAuthStatus()` call
+   - **Files to Update**: 
+     - `app/_features/auth/services/AuthService.ts` - Simplify login function
+     - `app/_components/auth/LoginModal.tsx` - Remove fallback user fetch logic
+
 ### Pagination Changed
 1. **Request format**:
 ```typescript
