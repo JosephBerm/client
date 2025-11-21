@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
+import { Routes } from '@_features/navigation'
 
 import DoctorsImage from '@/public/LandingImage1.png'
 import PageContainer from '@_components/layouts/PageContainer'
@@ -67,7 +68,7 @@ export default function Intro() {
 
 					<StaggerItem width="100%">
 						<div className="flex w-full flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-6">
-							<Link href="/store" className="inline-flex">
+						<Link href={Routes.Store.location} className="inline-flex">
 								<Button
 									variant="primary"
 									size="lg"
@@ -78,7 +79,7 @@ export default function Intro() {
 									Browse catalog
 								</Button>
 							</Link>
-							<Link href="/contact" className="inline-flex">
+						<Link href={Routes.Contact.location} className="inline-flex">
 								<Button
 									variant="outline"
 									size="lg"

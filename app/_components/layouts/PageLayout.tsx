@@ -47,10 +47,10 @@
  *       description="Manage customer orders and track shipments"
  *       actions={
  *         <>
- *           <Button variant="ghost" href="/medsource-app/orders/export">
+ *           <Button variant="ghost" href={Routes.Orders.export()}>
  *             Export
  *           </Button>
- *           <Button variant="primary" href="/medsource-app/orders/create">
+ *           <Button variant="primary" href={Routes.Orders.create()}>
  *             Create Order
  *           </Button>
  *         </>

@@ -5,6 +5,7 @@ import { Activity, TestTube2, Stethoscope, Building2 } from 'lucide-react'
 
 import PageContainer from '@_components/layouts/PageContainer'
 import Button from '@_components/ui/Button'
+import { Routes } from '@_features/navigation'
 import Pill from '@_components/ui/Pill'
 import StatusDot from '@_components/ui/StatusDot'
 import FeatureCard from '@_components/ui/FeatureCard'
@@ -98,9 +99,9 @@ export default function Products() {
 							blurSize="md"
 							className="flex h-full flex-col"
 							footer={
-								<Link
-									href="/store"
-									className="link link-primary relative inline-flex items-center gap-2 self-start text-sm font-semibold uppercase tracking-[0.25em]"
+							<Link
+								href={Routes.Store.location}
+								className="link link-primary relative inline-flex items-center gap-2 self-start text-sm font-semibold uppercase tracking-[0.25em]"
 								>
 									Explore
 									<span className="h-1 w-16 bg-primary transition-all duration-300" />
@@ -118,8 +119,8 @@ export default function Products() {
 						Need a tailored formulary or bulk purchasing strategy? Our sourcing specialists consolidate vendors,
 						lock in volume pricing, and align logistics to your care settings.
 					</p>
-						<Link href="/contact" className="inline-flex shrink-0">
-							<Button variant="primary" size="lg">
+					<Link href={Routes.Contact.location} className="inline-flex shrink-0">
+						<Button variant="primary" size="lg">
 						Schedule a consultation
 							</Button>
 					</Link>

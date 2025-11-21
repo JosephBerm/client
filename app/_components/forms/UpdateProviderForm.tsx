@@ -37,7 +37,7 @@
  * import UpdateProviderForm from '@_components/forms/UpdateProviderForm';
  * import Provider from '@_classes/Provider';
  *
- * // Create mode (at /medsource-app/providers/create)
+ * // Create mode (at /app/providers/create)
  * function CreateProviderPage() {
  *   const newProvider = new Provider(); // Empty provider
  *
@@ -48,14 +48,14 @@
  *         provider={newProvider}
  *         onUpdate={(created) => {
  *           logger.info('Provider created', { providerId: created.id });
- *           router.push('/medsource-app/providers');
+ *           router.push('/app/providers');
  *         }}
  *       />
  *     </div>
  *   );
  * }
  *
- * // Update mode (at /medsource-app/providers/[id])
+ * // Update mode (at /app/providers/[id])
  * function EditProviderPage() {
  *   const [provider, setProvider] = useState<Provider | null>(null);
  *

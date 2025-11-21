@@ -35,6 +35,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { Routes } from '@_features/navigation'
 
 import PageContainer from '@_components/layouts/PageContainer'
 import Button from '@_components/ui/Button'
@@ -253,8 +254,8 @@ export default function ProductsCarousel() {
 						</div>
 
 						{/* CTA Button - Elegant Placement */}
-						<div className="flex justify-start lg:justify-end">
-							<Link href="/store" className="inline-flex">
+					<div className="flex justify-start lg:justify-end">
+						<Link href={Routes.Store.location} className="inline-flex">
 								<Button
 									variant="primary"
 									size="lg"
@@ -286,8 +287,8 @@ export default function ProductsCarousel() {
 				{/* Empty State */}
 				{!isLoading && !error && products.length === 0 && (
 					<div className="rounded-xl border border-dashed border-base-300 bg-base-100/50 p-8 text-center">
-						<p className="text-base text-base-content/70">No featured products available at this time.</p>
-						<Link href="/store" className="mt-4 inline-block">
+					<p className="text-base text-base-content/70">No featured products available at this time.</p>
+					<Link href={Routes.Store.location} className="mt-4 inline-block">
 							<Button variant="primary" size="sm">
 								Browse All Products
 							</Button>

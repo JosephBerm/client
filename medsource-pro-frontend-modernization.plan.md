@@ -67,7 +67,7 @@ The MedSource Pro frontend has been successfully modernized from a legacy Next.j
 - **Styling**: 29 separate CSS files + Tailwind 3.3.0
 - **Forms**: Formik 2.4.5 + Yup 1.4.0 (manual state management)
 - **Tables**: Custom client/server-side components with manual pagination
-- **Navigation**: Custom navbar + sidebar (separate `/medsource-app` route for auth)
+- **Navigation**: Custom navbar + sidebar (separate `/app` route for auth)
 - **TypeScript**: 29+ type errors from class/schema mismatches
 - **Code Quality**: Significant duplication in form submission logic
 
@@ -235,7 +235,7 @@ The MedSource Pro frontend has been successfully modernized from a legacy Next.j
    - Loads user data into store
 
 4. **`middleware.ts`** - Route protection
-   - Protects `/medsource-app/*` routes
+   - Protects `/app/*` routes
    - Redirects unauthenticated users to `/login`
    - Preserves redirect URL in query params
 
@@ -243,7 +243,7 @@ The MedSource Pro frontend has been successfully modernized from a legacy Next.j
 ```
 User loads app → AuthInitializer checks token → Valid token → Load user data
                                               → Invalid token → Clear state
-User accesses /medsource-app/* → Middleware checks token → Valid → Allow
+User accesses /app/* → Middleware checks token → Valid → Allow
                                                          → Invalid → Redirect to /login
 ```
 
@@ -515,12 +515,12 @@ To achieve **zero TypeScript errors**, all class models were updated to match Zo
 
 | Table | Location | Status | Features |
 |-------|----------|--------|----------|
-| **Orders** | `/medsource-app/orders` | ✅ | Server-side pagination, sorting, status badges |
-| **Quotes** | `/medsource-app/quotes` | ✅ | Server-side pagination, QuoteStatus enum |
-| **Customers** | `/medsource-app/customers` | ✅ | Server-side pagination, edit/delete actions |
-| **Providers** | `/medsource-app/providers` | ✅ | Server-side pagination, CRUD operations |
-| **Products** | `/medsource-app/store` | ✅ | Server-side pagination, stock display |
-| **Accounts** | `/medsource-app/accounts` | ✅ | Server-side pagination, role badges |
+| **Orders** | `/app/orders` | ✅ | Server-side pagination, sorting, status badges |
+| **Quotes** | `/app/quotes` | ✅ | Server-side pagination, QuoteStatus enum |
+| **Customers** | `/app/customers` | ✅ | Server-side pagination, edit/delete actions |
+| **Providers** | `/app/providers` | ✅ | Server-side pagination, CRUD operations |
+| **Products** | `/app/store` | ✅ | Server-side pagination, stock display |
+| **Accounts** | `/app/accounts` | ✅ | Server-side pagination, role badges |
 | **Account Orders** | Dashboard | ✅ | Recent orders display |
 | **Account Quotes** | Dashboard | ✅ | Recent quotes display |
 
@@ -747,7 +747,7 @@ export default function RootLayout({ children }) {
 ### 7.2 Route Structure ✅
 
 **Protected Routes:**
-- All `/medsource-app/*` routes protected by middleware
+- All `/app/*` routes protected by middleware
 - Unauthenticated users redirected to `/login`
 - Redirect URL preserved in query params
 
@@ -761,7 +761,7 @@ export default function RootLayout({ children }) {
 /login                    - Login (redirects if authenticated)
 /signup                   - Signup (redirects if authenticated)
 /cart                     - Shopping cart (public)
-/medsource-app/*          - Protected routes (middleware check)
+/app/*                   - Protected routes (middleware check)
   ├── /                   - Dashboard
   ├── /accounts           - User management (Admin only)
   ├── /analytics          - Analytics dashboard (Admin only)
@@ -772,7 +772,7 @@ export default function RootLayout({ children }) {
   └── /quotes             - Quote requests (Admin only)
 ```
 
-**Note:** User explicitly requested to keep `/medsource-app` path structure (not migrated to route groups).
+**Note:** Path migrated from `/medsource-app` to `/app` for cleaner URLs following industry best practices.
 
 ### 7.3 File Cleanup ✅
 
@@ -966,7 +966,7 @@ client/
 │   ├── (public routes)     # Home, about, contact, store
 │   ├── login/              # Login page
 │   ├── signup/             # Signup page
-│   ├── medsource-app/      # Protected routes (middleware)
+│   ├── app/                # Protected routes (middleware)
 │   │   ├── accounts/       # User management
 │   │   ├── analytics/      # Analytics dashboard
 │   │   ├── customers/      # Customer management

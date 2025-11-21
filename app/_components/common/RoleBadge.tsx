@@ -71,29 +71,23 @@
  */
 
 import Badge from '@_components/ui/Badge'
-
-/**
- * User role enumeration.
- * Maps user roles to numeric values for backend compatibility.
- *
- * @deprecated Consider using AccountRole from @_classes/Enums instead.
- */
-export enum UserRole {
-	/** Regular customer user */
-	Customer = 0,
-	/** Administrator with full access */
-	Admin = 9999999,
-}
+import { AccountRole } from '@_classes/Enums'
 
 /**
  * RoleBadge component props interface.
  */
 interface RoleBadgeProps {
 	/**
-	 * User role value (enum or number).
-	 * Should match one of the UserRole enum values.
+	 * User role value from AccountRole enum or number.
+	 * Should match one of the AccountRole enum values.
+	 * 
+	 * @example
+	 * ```tsx
+	 * <RoleBadge role={AccountRole.Admin} />
+	 * <RoleBadge role={user.role} />
+	 * ```
 	 */
-	role: UserRole | number
+	role: AccountRole | number
 
 	/**
 	 * Additional CSS classes to apply to the badge.
@@ -127,9 +121,9 @@ interface RoleBadgeProps {
 export default function RoleBadge({ role, className }: RoleBadgeProps) {
 	const getRoleConfig = (role: number) => {
 		switch (role) {
-			case UserRole.Admin:
+			case AccountRole.Admin:
 				return { label: 'Admin', variant: 'error' as const }
-			case UserRole.Customer:
+			case AccountRole.Customer:
 				return { label: 'Customer', variant: 'primary' as const }
 			default:
 				return { label: 'User', variant: 'neutral' as const }

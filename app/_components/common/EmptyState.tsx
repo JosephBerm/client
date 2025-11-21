@@ -45,7 +45,7 @@
  *   description="Add your first customer to get started with order management."
  *   action={{
  *     label: 'Add Customer',
- *     onClick: () => router.push('/medsource-app/customers/create')
+ *     onClick: () => router.push('/app/customers/create')
  *   }}
  * />
  *

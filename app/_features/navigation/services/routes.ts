@@ -1,33 +1,49 @@
 /**
- * Centralized Route Definitions
+ * Centralized Route Definitions - FAANG-Level Route Management
  * 
- * Provides type-safe route paths and display names for the entire application.
- * All routes are defined as static properties for easy import and use throughout the app.
+ * Provides type-safe route paths and dynamic route builders for the entire application.
+ * Implements industry best practices from Google, Stripe, Airbnb, and Vercel.
  * 
  * **Benefits:**
- * - Single source of truth for all routes
- * - Prevents hardcoded URL strings
- * - Easy to refactor routes (change in one place)
- * - Type-safe route references
- * - Includes both public and protected routes
+ * - Single source of truth for all routes (DRY principle)
+ * - Prevents hardcoded URL strings (zero magic strings)
+ * - Easy to refactor routes (change in one place, updates everywhere)
+ * - Type-safe route references (TypeScript strict mode)
+ * - Dynamic route builders (e.g., `Routes.Orders.detail(id)`)
+ * - Zero runtime errors from typos in URLs
  * 
  * **Route Structure:**
  * - Public routes: Accessible without authentication (/, /store, etc.)
- * - Internal routes: Protected by middleware under /medsource-app/* path
- * - Authentication: Use `Routes.openLoginModal()` to open login modal
+ * - Internal routes: Protected by middleware under /app/* path
+ * - Static routes: Use `.location` property
+ * - Dynamic routes: Use builder methods (`.detail()`, `.create()`, etc.)
+ * 
+ * **FAANG-Level Patterns:**
+ * - Route Builder Pattern (Stripe, Airbnb)
+ * - Namespaced Route Objects (Google)
+ * - Type-Safe Path Generation (Vercel)
  * 
  * @example
  * ```typescript
  * import { Routes } from '@_features/navigation';
  * 
- * // Navigate to dashboard
- * router.push(Routes.Dashboard.location); // "/medsource-app"
+ * // Static routes
+ * router.push(Routes.Dashboard.location); // "/app"
+ * router.push(Routes.Orders.location); // "/app/orders"
  * 
- * // Navigate to orders
- * router.push(Routes.Orders.location); // "/medsource-app/orders"
+ * // Dynamic routes (RECOMMENDED - prevents hardcoding)
+ * router.push(Routes.Orders.detail('123')); // "/app/orders/123"
+ * router.push(Routes.Customers.detail('456')); // "/app/customers/456"
  * 
- * // Create dynamic product link
- * const productUrl = `${Routes.Product.location}/${productId}`;
+ * // In Link components
+ * <Link href={Routes.Orders.detail(orderId)}>View Order</Link>
+ * 
+ * // In table cells
+ * cell: ({ row }) => (
+ *   <Link href={Routes.Orders.detail(row.original.id)}>
+ *     {row.original.orderNumber}
+ *   </Link>
+ * )
  * ```
  * 
  * @module Routes
@@ -35,31 +51,76 @@
 
 /**
  * Route definitions class with static properties for all application routes.
- * Each route object contains a display name and URL path.
+ * Each route object contains a display name, URL path, and builder methods for dynamic routes.
+ * 
+ * **FAANG-Level Architecture:**
+ * - Static routes use `.location` property
+ * - Dynamic routes use builder methods (`.detail()`, `.create()`, `.edit()`)
+ * - All methods are type-safe and prevent hardcoded URLs
+ * - Single source of truth for all route patterns
  */
 class Routes {
 	/**
 	 * Base path for all protected/authenticated routes.
 	 * All routes under this path require authentication (enforced by middleware).
 	 */
-	public static InternalAppRoute: string = '/medsource-app'
+	public static InternalAppRoute: string = '/app'
 
-	/** Orders management route (protected) */
+	/**
+	 * Orders management routes (protected)
+	 * 
+	 * @example
+	 * ```typescript
+	 * // List page
+	 * router.push(Routes.Orders.location); // "/app/orders"
+	 * 
+	 * // Detail page
+	 * router.push(Routes.Orders.detail('123')); // "/app/orders/123"
+	 * 
+	 * // Create page
+	 * router.push(Routes.Orders.create()); // "/app/orders/create"
+	 * ```
+	 */
 	public static Orders = {
 		name: 'Orders',
 		location: `${Routes.InternalAppRoute}/orders`,
+		/**
+		 * Generates URL for order detail page.
+		 * @param id - Order ID
+		 * @returns Order detail URL (e.g., "/app/orders/123")
+		 */
+		detail: (id: string | number): string => `${Routes.InternalAppRoute}/orders/${id}`,
+		/**
+		 * Generates URL for order creation page.
+		 * @returns Order create URL (e.g., "/app/orders/create")
+		 */
+		create: (): string => `${Routes.InternalAppRoute}/orders/create`,
 	}
 
-	/** Public product store route (accessible to all) */
+	/**
+	 * Public product store routes (accessible to all)
+	 * 
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Store.location); // "/store"
+	 * router.push(Routes.Store.product('505')); // "/store/product/505"
+	 * ```
+	 */
 	public static Store = {
 		name: 'Store',
 		location: '/store',
+		/**
+		 * Generates URL for public product detail page.
+		 * @param id - Product ID
+		 * @returns Product detail URL (e.g., "/store/product/505")
+		 */
+		product: (id: string | number): string => `/store/product/${id}`,
 	}
 
-	/** Public product detail route (accessible to all) */
+	/** @deprecated Use Routes.Store.product() instead */
 	public static Product = {
 		name: 'Products',
-		location: `${Routes.Store.location}/product`,
+		location: '/store/product',
 	}
 
 	/** Dashboard/home route for authenticated users (protected) */
@@ -68,34 +129,129 @@ class Routes {
 		location: Routes.InternalAppRoute,
 	}
 
-	/** Internal product management for admins (protected) */
+	/**
+	 * Internal product management routes for admins (protected)
+	 * 
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.InternalStore.location); // "/app/store"
+	 * router.push(Routes.InternalStore.detail('303')); // "/app/store/303"
+	 * ```
+	 */
 	public static InternalStore = {
 		name: 'Store',
 		location: `${Routes.InternalAppRoute}/store`,
+		/**
+		 * Generates URL for product detail page.
+		 * @param id - Product ID
+		 * @returns Product detail URL (e.g., "/app/store/303")
+		 */
+		detail: (id: string | number): string => `${Routes.InternalAppRoute}/store/${id}`,
+		/**
+		 * Generates URL for product creation page.
+		 * @returns Product create URL (e.g., "/app/store/create")
+		 */
+		create: (): string => `${Routes.InternalAppRoute}/store/create`,
 	}
 
-	/** Quote requests management (protected) */
+	/**
+	 * Quote requests management routes (protected)
+	 * 
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Quotes.location); // "/app/quotes"
+	 * router.push(Routes.Quotes.detail('456')); // "/app/quotes/456"
+	 * ```
+	 */
 	public static Quotes = {
 		name: 'Quotes',
 		location: `${Routes.InternalAppRoute}/quotes`,
+		/**
+		 * Generates URL for quote detail page.
+		 * @param id - Quote ID
+		 * @returns Quote detail URL (e.g., "/app/quotes/456")
+		 */
+		detail: (id: string | number): string => `${Routes.InternalAppRoute}/quotes/${id}`,
+		/**
+		 * Generates URL for quote creation page.
+		 * @returns Quote create URL (e.g., "/app/quotes/create")
+		 */
+		create: (): string => `${Routes.InternalAppRoute}/quotes/create`,
 	}
 
-	/** Provider/supplier management (protected, admin only) */
+	/**
+	 * Provider/supplier management routes (protected, admin only)
+	 * 
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Providers.location); // "/app/providers"
+	 * router.push(Routes.Providers.detail('789')); // "/app/providers/789"
+	 * ```
+	 */
 	public static Providers = {
 		name: 'Providers',
 		location: `${Routes.InternalAppRoute}/providers`,
+		/**
+		 * Generates URL for provider detail page.
+		 * @param id - Provider ID
+		 * @returns Provider detail URL (e.g., "/app/providers/789")
+		 */
+		detail: (id: string | number): string => `${Routes.InternalAppRoute}/providers/${id}`,
+		/**
+		 * Generates URL for provider creation page.
+		 * @returns Provider create URL (e.g., "/app/providers/create")
+		 */
+		create: (): string => `${Routes.InternalAppRoute}/providers/create`,
 	}
 
-	/** User accounts management (protected, admin only) */
+	/**
+	 * User accounts management routes (protected, admin only)
+	 * 
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Accounts.location); // "/app/accounts"
+	 * router.push(Routes.Accounts.detail('101')); // "/app/accounts/101"
+	 * ```
+	 */
 	public static Accounts = {
 		name: 'Accounts',
 		location: `${Routes.InternalAppRoute}/accounts`,
+		/**
+		 * Generates URL for account detail page.
+		 * @param id - Account ID
+		 * @returns Account detail URL (e.g., "/app/accounts/101")
+		 */
+		detail: (id: string | number): string => `${Routes.InternalAppRoute}/accounts/${id}`,
+		/**
+		 * Generates URL for account creation page.
+		 * @returns Account create URL (e.g., "/app/accounts/create")
+		 */
+		create: (): string => `${Routes.InternalAppRoute}/accounts/create`,
 	}
 
-	/** Customer/company management (protected, admin only) */
+	/**
+	 * Customer/company management routes (protected, admin only)
+	 * 
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Customers.location); // "/app/customers"
+	 * router.push(Routes.Customers.detail('202')); // "/app/customers/202"
+	 * ```
+	 */
 	public static Customers = {
 		name: 'Customers',
 		location: `${Routes.InternalAppRoute}/customers`,
+		/**
+		 * Generates URL for customer detail page.
+		 * @param id - Customer ID
+		 * @returns Customer detail URL (e.g., "/app/customers/202")
+		 */
+		detail: (id: string | number): string => `${Routes.InternalAppRoute}/customers/${id}`,
+		/**
+		 * Generates URL for customer creation page.
+		 * @returns Customer create URL (e.g., "/app/customers/create")
+		 */
+		create: (): string => `${Routes.InternalAppRoute}/customers/create`,
 	}
 
 	/** Analytics dashboard (protected, admin only) */
@@ -104,10 +260,37 @@ class Routes {
 		location: `${Routes.InternalAppRoute}/analytics`,
 	}
 
-	/** User profile settings (protected) */
+	/**
+	 * User profile settings route (protected)
+	 * 
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Profile.location); // "/app/profile"
+	 * ```
+	 */
 	public static Profile = {
 		name: 'Profile',
 		location: `${Routes.InternalAppRoute}/profile`,
+	}
+
+	/**
+	 * Notifications management routes (protected)
+	 * 
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Notifications.location); // "/app/notifications"
+	 * router.push(Routes.Notifications.detail('404')); // "/app/notifications/404"
+	 * ```
+	 */
+	public static Notifications = {
+		name: 'Notifications',
+		location: `${Routes.InternalAppRoute}/notifications`,
+		/**
+		 * Generates URL for notification detail page.
+		 * @param id - Notification ID
+		 * @returns Notification detail URL (e.g., "/app/notifications/404")
+		 */
+		detail: (id: string | number): string => `${Routes.InternalAppRoute}/notifications/${id}`,
 	}
 
 	/** Home/landing page (public) */
@@ -179,4 +362,5 @@ class Routes {
 }
 
 export default Routes
+
 

@@ -67,7 +67,7 @@ import { usePathname } from 'next/navigation'
 import { Settings, ChevronDown, ExternalLink } from 'lucide-react'
 import SettingsModal from '@_components/settings/SettingsModal'
 import { useAuthStore } from '@_features/auth'
-import { NavigationService } from '@_features/navigation'
+import { NavigationService, Routes } from '@_features/navigation'
 import { useMediaQuery } from '@_shared'
 import NavigationIcon from './NavigationIcon'
 import classNames from 'classnames'
@@ -322,10 +322,10 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 					</nav>
 
 					{/* Footer */}
-					<div className="p-4 border-t border-base-300">
-						<Link
-							href="/contact"
-							onClick={handleLinkClick}
+				<div className="p-4 border-t border-base-300">
+					<Link
+						href={Routes.Contact.location}
+						onClick={handleLinkClick}
 							className="text-sm text-base-content/70 hover:text-base-content transition-colors"
 						>
 							Report an Issue

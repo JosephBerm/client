@@ -34,7 +34,7 @@
  *   username: 'johndoe',
  *   email: 'john@example.com',
  *   name: new Name({ first: 'John', last: 'Doe' }),
- *   role: UserRoles.Customer,
+ *   role: AccountRole.Customer,
  *   phone: '555-123-4567',
  *   dateOfBirth: new Date('1990-01-15')
  * });

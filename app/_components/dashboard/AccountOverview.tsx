@@ -9,6 +9,7 @@ import Card from '@_components/ui/Card'
 import Badge from '@_components/ui/Badge'
 import RoleBadge from '@_components/common/RoleBadge'
 import { useAuthStore } from '@_features/auth'
+import { Routes } from '@_features/navigation'
 
 const MULTI_LINE_INFO_CLASS = 'text-sm text-base-content/70'
 
@@ -72,12 +73,12 @@ export default function AccountOverview() {
 					</div>
 				</div>
 
-				<div className="mt-6 flex flex-wrap gap-3">
-					<Link href="/medsource-app/profile" className="btn btn-primary">
-						Manage Profile
-					</Link>
-					<Link href="/medsource-app/orders" className="btn btn-ghost">
-						View Orders
+			<div className="mt-6 flex flex-wrap gap-3">
+				<Link href={Routes.Profile.location} className="btn btn-primary">
+					Manage Profile
+				</Link>
+				<Link href={Routes.Orders.location} className="btn btn-ghost">
+					View Orders
 					</Link>
 				</div>
 			</Card>
@@ -100,11 +101,11 @@ export default function AccountOverview() {
 					<StatCard
 						icon={BellRing}
 						label="Notifications"
-						value={notificationsCount}
-						href="/medsource-app/notifications"
-					/>
-					<StatCard icon={ShoppingCart} label="Orders" value={ordersCount} href="/medsource-app/orders" />
-					<StatCard icon={FileText} label="Quotes" value={quotesCount} href="/medsource-app/quotes" />
+					value={notificationsCount}
+					href={Routes.Notifications.location}
+				/>
+				<StatCard icon={ShoppingCart} label="Orders" value={ordersCount} href={Routes.Orders.location} />
+				<StatCard icon={FileText} label="Quotes" value={quotesCount} href={Routes.Quotes.location} />
 				</div>
 			</div>
 		</div>

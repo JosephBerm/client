@@ -42,7 +42,7 @@
  * import ProductForm from '@_components/forms/ProductForm';
  * import { Product } from '@_classes/Product';
  *
- * // Create mode (at /medsource-app/store/create)
+ * // Create mode (at /app/store/create)
  * function CreateProductPage() {
  *   return (
  *     <div className="container mx-auto p-6">
@@ -52,7 +52,7 @@
  *   );
  * }
  *
- * // Update mode (at /medsource-app/store/[id])
+ * // Update mode (at /app/store/[id])
  * function EditProductPage() {
  *   const [product, setProduct] = useState<Product | null>(null);
  *

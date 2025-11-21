@@ -29,7 +29,7 @@
  * const notification = new Notification({
  *   message: 'Your order #12345 has been shipped',
  *   type: NotificationType.Info,
- *   linkUrl: '/medsource-app/orders/12345',
+ *   linkUrl: '/app/orders/12345',
  *   userId: 123,
  *   read: false
  * });
@@ -45,7 +45,7 @@
  * const warningNotif = new Notification({
  *   message: 'Your quote #456 expires in 3 days',
  *   type: NotificationType.Warning,
- *   linkUrl: '/medsource-app/quotes/456',
+ *   linkUrl: '/app/quotes/456',
  *   userId: 123
  * });
  * 
@@ -113,7 +113,7 @@ export default class Notification {
 	 * const notif2 = new Notification({
 	 *   message: 'Order #789 requires your approval',
 	 *   type: NotificationType.Warning,
-	 *   linkUrl: '/medsource-app/orders/789',
+	 *   linkUrl: '/app/orders/789',
 	 *   userId: 123,
 	 *   read: false
 	 * });
@@ -122,7 +122,7 @@ export default class Notification {
 	 * const errorNotif = new Notification({
 	 *   message: 'Payment failed for order #999',
 	 *   type: NotificationType.Error,
-	 *   linkUrl: '/medsource-app/orders/999',
+	 *   linkUrl: '/app/orders/999',
 	 *   userId: 123
 	 * });
 	 * 

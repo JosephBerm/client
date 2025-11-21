@@ -290,7 +290,7 @@ Below is a categorized list of reusable items. Each item links to a brief descri
     - `app/layout.tsx`, `app/globals.css`, `app/middleware.ts`
     - `app/page.tsx` (home), `app/about-us/page.tsx`, `app/contact/page.tsx`, `app/login/page.tsx`, `app/signup/page.tsx` (+ `loading.tsx`), `app/cart/page.tsx`
   - MedSource App (admin/client area templates)
-    - `app/medsource-app/layout.tsx`, `app/medsource-app/page.tsx`
+    - `app/app/layout.tsx`, `app/app/page.tsx`
     - Sections with `[id]` routes for `orders`, `quotes`, `customers`, `providers`, `accounts`, `notifications`, `store`, `profile`, `analytics`
 
 

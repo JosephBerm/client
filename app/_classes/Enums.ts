@@ -187,7 +187,7 @@ export enum PublicRouteType {
  * InternalRouteType Enum
  * 
  * Protected application page types (authentication required).
- * Used for routing and navigation in the /medsource-app/* protected area.
+ * Used for routing and navigation in the /app/* protected area.
  */
 export enum InternalRouteType {
 	/** Dashboard homepage */

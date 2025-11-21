@@ -5,5 +5,6 @@
  */
 
 export * from './NavigationService'
+export * from './breadcrumbService'
 export { default as Routes } from './routes'
 

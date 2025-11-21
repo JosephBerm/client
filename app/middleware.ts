@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 
 // Protected route patterns - these require authentication
 const protectedRoutes = [
-	'/medsource-app',
+	'/app',
 	'/accounts',
 	'/analytics',
 	'/customers',

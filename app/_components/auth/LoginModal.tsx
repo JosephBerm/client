@@ -30,6 +30,7 @@ import { useZodForm } from '@_shared'
 import { loginSchema, type LoginFormData } from '@_core'
 import { logger } from '@_core'
 import { login, useAuthStore } from '@_features/auth'
+import { Routes } from '@_features/navigation'
 import Modal from '@_components/ui/Modal'
 import FormInput from '@_components/forms/FormInput'
 import Button from '@_components/ui/Button'
@@ -146,8 +147,8 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 				}
 
 				// Redirect to dashboard or previous page
-				const redirectTo = new URLSearchParams(window.location.search).get('redirectTo')
-				router.push(redirectTo ?? '/medsource-app')
+			const redirectTo = new URLSearchParams(window.location.search).get('redirectTo')
+			router.push(redirectTo ?? Routes.Dashboard.location)
 			} else {
 				logger.warn('Login failed', {
 					identifier: values.identifier,
@@ -175,6 +176,23 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 		const identifier = form.getValues('identifier')
 		if (identifier && identifier.trim().length > 0) {
 			setShowEmailForm(true)
+		}
+	}
+
+	/**
+	 * Handle form submission for both steps.
+	 * First step: Show password field
+	 * Second step: Submit login
+	 */
+	const handleFormSubmit = (e: React.FormEvent) => {
+		e.preventDefault()
+		
+		if (!showEmailForm) {
+			// First step: Continue to password
+			handleEmailContinue()
+		} else {
+			// Second step: Submit form
+			form.handleSubmit(handleSubmit)(e)
 		}
 	}
 
@@ -345,7 +363,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 
 				{/* Email/Password Form - mobile-first spacing */}
 				<form
-					onSubmit={form.handleSubmit(handleSubmit)}
+					onSubmit={handleFormSubmit}
 					className='space-y-3 sm:space-y-4'>
 					{/* Email/Username Input */}
 					<FormInput
@@ -372,12 +390,11 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 					{/* Continue/Submit Button - centered, touch-friendly */}
 					<div className='flex justify-center mt-3 sm:mt-4'>
 						<Button
-							type={showEmailForm ? 'submit' : 'button'}
+							type='submit'
 							variant='primary'
 							size='md'
 							loading={isLoading}
-							disabled={isLoading || (showEmailForm && !form.formState.isValid)}
-							onClick={!showEmailForm ? handleEmailContinue : undefined}
+							disabled={isLoading}
 							className='min-h-[44px] w-full'>
 							{showEmailForm ? 'Sign In' : 'Continue'}
 						</Button>

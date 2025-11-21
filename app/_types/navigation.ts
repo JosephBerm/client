@@ -11,10 +11,16 @@
  * - Section interface for grouping routes
  * - Role-based access control types
  * 
+ * **Role Management:**
+ * - Imports AccountRole from central enum definition
+ * - Re-exports for navigation convenience
+ * - Single source of truth for role values
+ * 
  * @module NavigationTypes
  */
 
 import type { LucideIcon } from 'lucide-react'
+import { AccountRole } from '@_classes/Enums'
 
 /**
  * Icon identifier type for navigation items.
@@ -84,14 +90,25 @@ export interface NavigationSection {
 }
 
 /**
- * User role definitions matching backend enum values.
+ * Role Type Definitions
+ * 
+ * **SINGLE SOURCE OF TRUTH**: AccountRole from @_classes/Enums
+ * 
+ * This ensures consistency across:
+ * - Navigation system
+ * - API requests
+ * - Role-based access control
+ * - UI components
+ * 
+ * **Usage:**
+ * ```typescript
+ * import { AccountRole } from '@_classes/Enums'
+ * 
+ * // Check if user is admin
+ * if (user.role === AccountRole.Admin) {
+ *   // Admin-only logic
+ * }
+ * ```
  */
-export const UserRoles = {
-	/** Customer role (default users) */
-	Customer: 0,
-	/** Administrator role (full access) */
-	Admin: 9999999,
-} as const
-
-export type UserRole = (typeof UserRoles)[keyof typeof UserRoles]
+export { AccountRole } from '@_classes/Enums'
 

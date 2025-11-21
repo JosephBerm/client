@@ -29,7 +29,7 @@
  * // Recommended approach with AuthService
  * const result = await AuthService.login('johndoe', 'SecurePass123!', true);
  * if (result.success) {
- *   router.push('/medsource-app/dashboard');
+ *   router.push('/app/dashboard');
  * }
  * 
  * // Form submission handler

@@ -60,6 +60,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import classNames from 'classnames'
 import { useAuthStore } from '@_features/auth'
 import { useMediaQuery } from '@_shared'
@@ -110,6 +111,10 @@ interface NavigationLayoutProps {
 export default function NavigationLayout({ children }: NavigationLayoutProps) {
 	const [sidebarOpen, setSidebarOpen] = useState(false)
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+	const pathname = usePathname()
+
+	// Check if we're in the internal app (/app/*) - these routes have their own layout
+	const isInternalApp = pathname.startsWith('/app')
 
 	// Use media query hook for responsive behavior
 	// Breakpoint matches Tailwind's 'lg' breakpoint (1024px) used in Sidebar component
@@ -168,30 +173,37 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
 
 	return (
 		<div className="relative min-h-screen w-full bg-base-100">
-			<Navbar onMenuClick={toggleSidebar} />
+			{/* Only show Navbar on public routes (NOT in /app) */}
+			{!isInternalApp && <Navbar onMenuClick={toggleSidebar} />}
 
-			<div className="relative mx-auto flex w-full max-w-[1600px] gap-0 lg:gap-10 overflow-x-hidden">
-				{isAuthenticated && (
-					<Sidebar
-						isOpen={sidebarOpen}
-						onClose={closeSidebar}
-						ariaLabel="MedSource Pro navigation"
-					/>
-				)}
-
-				<main
-					id="page-content"
-					className={classNames(
-						'relative flex-1 bg-base-100',
-						'min-h-[calc(100vh-var(--nav-height))]',
-						'px-4 pb-16 pt-8 sm:px-6 lg:px-12 xl:px-16',
-						'transition-[padding] duration-300 ease-in-out',
-						'overflow-x-hidden w-full min-w-0'
+			{/* Internal app routes (/app/*) have their own layout - render children directly */}
+			{isInternalApp ? (
+				children
+			) : (
+				<div className="relative mx-auto flex w-full max-w-[1600px] gap-0 lg:gap-10 overflow-x-hidden">
+					{/* Public sidebar - only for authenticated users on public routes */}
+					{isAuthenticated && (
+						<Sidebar
+							isOpen={sidebarOpen}
+							onClose={closeSidebar}
+							ariaLabel="MedSource Pro navigation"
+						/>
 					)}
-				>
-					{children}
-				</main>
-			</div>
+
+					<main
+						id="page-content"
+						className={classNames(
+							'relative flex-1 bg-base-100',
+							'min-h-[calc(100vh-var(--nav-height))]',
+							'px-4 pb-16 pt-8 sm:px-6 lg:px-12 xl:px-16',
+							'transition-[padding] duration-300 ease-in-out',
+							'overflow-x-hidden w-full min-w-0'
+						)}
+					>
+						{children}
+					</main>
+				</div>
+			)}
 		</div>
 	)
 }

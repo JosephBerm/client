@@ -17,6 +17,9 @@ export const metadata: Metadata = {
 	description: 'Professional medical supply marketplace for healthcare providers',
 }
 
+// Force dynamic rendering due to useSearchParams in Navbar (login modal detection)
+export const dynamic = 'force-dynamic'
+
 /**
  * Root layout for the entire application
  * Sets up theme, authentication, and navigation

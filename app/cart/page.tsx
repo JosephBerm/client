@@ -21,6 +21,9 @@ import { CartProduct } from '@_classes/Product'
 import Name from '@_classes/common/Name'
 import { Routes } from '@_features/navigation'
 
+// Force dynamic rendering due to useSearchParams in Navbar
+export const dynamic = 'force-dynamic'
+
 export default function CartPage() {
 	const router = useRouter()
 	const [submitted, setSubmitted] = useState(false)
@@ -93,7 +96,7 @@ export default function CartPage() {
 					description="Add some products to your cart to get started"
 					action={{
 						label: 'Browse Products',
-						onClick: () => router.push('/store'),
+					onClick: () => router.push(Routes.Store.location),
 					}}
 				/>
 			</PageContainer>
@@ -115,11 +118,11 @@ export default function CartPage() {
 						</p>
 
 						<div className="flex gap-4">
-							<Button variant="primary" onClick={() => router.push('/store')}>
+						<Button variant="primary" onClick={() => router.push(Routes.Store.location)}>
 								Continue Shopping
 							</Button>
 							{isAuthenticated && (
-								<Button variant="outline" onClick={() => router.push('/medsource-app/quotes')}>
+								<Button variant="outline" onClick={() => router.push(Routes.Quotes.location)}>
 									View My Quotes
 								</Button>
 							)}

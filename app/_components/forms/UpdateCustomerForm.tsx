@@ -37,7 +37,7 @@
  * import UpdateCustomerForm from '@_components/forms/UpdateCustomerForm';
  * import Company from '@_classes/Company';
  *
- * // Create mode (at /medsource-app/customers/create)
+ * // Create mode (at /app/customers/create)
  * function CreateCustomerPage() {
  *   const newCustomer = new Company(); // Empty customer
  *
@@ -48,14 +48,14 @@
  *         customer={newCustomer}
  *         onUserUpdate={(created) => {
  *           logger.info('Customer created', { customerId: created.id });
- *           router.push('/medsource-app/customers');
+ *           router.push('/app/customers');
  *         }}
  *       />
  *     </div>
  *   );
  * }
  *
- * // Update mode (at /medsource-app/customers/[id])
+ * // Update mode (at /app/customers/[id])
  * function EditCustomerPage() {
  *   const [customer, setCustomer] = useState<Company | null>(null);
  *

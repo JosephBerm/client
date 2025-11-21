@@ -21,7 +21,7 @@
  */
 
 import type { NavigationSection, NavigationRoute } from '@_types/navigation'
-import { UserRoles } from '@_types/navigation'
+import { AccountRole } from '@_types/navigation'
 
 /**
  * NavigationService class providing navigation data and utilities.
@@ -58,27 +58,23 @@ export class NavigationService {
 	 * - Icon identifier for visual representation
 	 * - Optional role restrictions
 	 * 
-	 * @param userRole - User's role number (0 = Customer, 9999999 = Admin, null = not logged in)
+	 * @param userRole - User's role (AccountRole.Customer = 0, AccountRole.Admin = 9999999, null = not logged in)
 	 * @returns Array of navigation sections filtered by role
 	 * 
 	 * @example
 	 * ```tsx
+	 * import { AccountRole } from '@_classes/Enums'
+	 * 
 	 * const user = useAuthStore(state => state.user)
 	 * const sections = NavigationService.getNavigationSections(user?.role)
 	 * 
- * import { logger } from '@_core';
- * 
- * sections.forEach(section => {
- *   logger.debug('Navigation section', { title: section.title }) // "Main", "My Orders", etc.
- *   section.routes.forEach(route => {
- *     logger.debug('Navigation route', { href: route.href }) // "/medsource-app", "/store", etc.
- *   })
- * })
+	 * // Check if admin
+	 * const isAdmin = user?.role === AccountRole.Admin
 	 * ```
 	 */
 	static getNavigationSections(userRole?: number | null): NavigationSection[] {
-	// Check if user is an administrator
-	const isAdmin = userRole === UserRoles.Admin
+	// Check if user is an administrator using AccountRole enum
+	const isAdmin = userRole === AccountRole.Admin
 
 		// Initialize sections array with main section (visible to all)
 		const sections: NavigationSection[] = [
@@ -86,13 +82,13 @@ export class NavigationService {
 				id: 'main',
 				title: 'Main',
 				routes: [
-					{
-						id: 'dashboard',
-						label: 'Dashboard',
-						href: '/medsource-app',
-						icon: 'dashboard',
-						description: 'Overview and insights',
-					},
+				{
+					id: 'dashboard',
+					label: 'Dashboard',
+					href: '/app',
+					icon: 'dashboard',
+					description: 'Overview and insights',
+				},
 					{
 						id: 'store',
 						label: 'Store',
@@ -111,20 +107,20 @@ export class NavigationService {
 				id: 'my-orders',
 				title: 'My Orders',
 				routes: [
-					{
-						id: 'orders',
-						label: 'Orders',
-						href: '/medsource-app/orders',
-						icon: 'shopping-cart',
-						description: 'Track your purchases',
-					},
-					{
-						id: 'quotes',
-						label: 'Quotes',
-						href: '/medsource-app/quotes',
-						icon: 'file-text',
-						description: 'Request price quotes',
-					},
+				{
+					id: 'orders',
+					label: 'Orders',
+					href: '/app/orders',
+					icon: 'shopping-cart',
+					description: 'Track your purchases',
+				},
+				{
+					id: 'quotes',
+					label: 'Quotes',
+					href: '/app/quotes',
+					icon: 'file-text',
+					description: 'Request price quotes',
+				},
 				],
 			})
 		}
@@ -138,73 +134,73 @@ export class NavigationService {
 					id: 'management',
 					title: 'Management',
 					routes: [
-						{
-							id: 'products',
-							label: 'Products',
-							href: '/medsource-app/store',
-							icon: 'package',
-							description: 'Manage inventory',
-						},
-						{
-							id: 'admin-orders',
-							label: 'Orders',
-							href: '/medsource-app/orders',
-							icon: 'shopping-cart',
-							description: 'Process customer orders',
-						},
-						{
-							id: 'admin-quotes',
-							label: 'Quotes',
-							href: '/medsource-app/quotes',
-							icon: 'file-text',
-							description: 'Review quote requests',
-						},
+					{
+						id: 'products',
+						label: 'Products',
+						href: '/app/store',
+						icon: 'package',
+						description: 'Manage inventory',
+					},
+					{
+						id: 'admin-orders',
+						label: 'Orders',
+						href: '/app/orders',
+						icon: 'shopping-cart',
+						description: 'Process customer orders',
+					},
+					{
+						id: 'admin-quotes',
+						label: 'Quotes',
+						href: '/app/quotes',
+						icon: 'file-text',
+						description: 'Review quote requests',
+					},
 					],
-					roles: [UserRoles.Admin],
+					roles: [AccountRole.Admin],
 				},
 				// User and company management
 				{
 					id: 'users',
 					title: 'Users',
 					routes: [
-						{
-							id: 'accounts',
-							label: 'Accounts',
-							href: '/medsource-app/accounts',
-							icon: 'users',
-							description: 'Manage user accounts',
-						},
-						{
-							id: 'customers',
-							label: 'Customers',
-							href: '/medsource-app/customers',
-							icon: 'building',
-							description: 'Customer organizations',
-						},
-						{
-							id: 'providers',
-							label: 'Providers',
-							href: '/medsource-app/providers',
-							icon: 'building',
-							description: 'Supplier management',
-						},
+					{
+						id: 'accounts',
+						label: 'Accounts',
+						href: '/app/accounts',
+						icon: 'users',
+						description: 'Manage user accounts',
+					},
+					{
+						id: 'customers',
+						label: 'Customers',
+						href: '/app/customers',
+						icon: 'building',
+						description: 'Customer organizations',
+					},
+					{
+						id: 'providers',
+						label: 'Providers',
+						href: '/app/providers',
+						icon: 'building',
+						description: 'Supplier management',
+					},
 					],
-					roles: [UserRoles.Admin],
+					roles: [AccountRole.Admin],
 				},
 				// Analytics and reporting
 				{
 					id: 'analytics',
 					title: 'Analytics',
 					routes: [
-						{
-							id: 'analytics-dashboard',
-							label: 'Dashboard',
-							href: '/medsource-app/analytics',
-							icon: 'bar-chart',
-							description: 'View reports and metrics',
-						},
+					{
+						id: 'analytics-dashboard',
+						label: 'Dashboard',
+						href: '/app/analytics',
+						icon: 'bar-chart',
+						description: 'View reports and metrics',
+					},
 					],
-					roles: [UserRoles.Admin],
+					roles: [AccountRole.Admin],
 				}
 			)
 		}
@@ -215,20 +211,20 @@ export class NavigationService {
 			id: 'account',
 			title: 'Account',
 			routes: [
-				{
-					id: 'profile',
-					label: 'Profile',
-					href: '/medsource-app/profile',
-					icon: 'user',
-					description: 'View and edit profile',
-				},
-				{
-					id: 'notifications',
-					label: 'Notifications',
-					href: '/medsource-app/notifications',
-					icon: 'bell',
-					description: 'Manage notifications',
-				},
+			{
+				id: 'profile',
+				label: 'Profile',
+				href: '/app/profile',
+				icon: 'user',
+				description: 'View and edit profile',
+			},
+			{
+				id: 'notifications',
+				label: 'Notifications',
+				href: '/app/notifications',
+				icon: 'bell',
+				description: 'Manage notifications',
+			},
 			],
 		})
 
@@ -248,9 +244,9 @@ export class NavigationService {
 	 * @example
 	 * ```tsx
 	 * const route = NavigationService.getRouteById('dashboard')
-	 * if (route) {
-	 *   router.push(route.href) // Navigate to /medsource-app
-	 * }
+ * if (route) {
+ *   router.push(route.href) // Navigate to /app
+ * }
 	 * ```
 	 */
 	static getRouteById(id: string, userRole?: number | null): NavigationRoute | undefined {
