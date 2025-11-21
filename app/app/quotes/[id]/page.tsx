@@ -10,6 +10,7 @@ import Card from '@_components/ui/Card'
 import { InternalPageHeader } from '../../_components'
 import Badge from '@_components/ui/Badge'
 import Button from '@_components/ui/Button'
+import { DataTable, type ColumnDef } from '@_components/tables'
 import Quote from '@_classes/Quote'
 import { QuoteStatus } from '@_classes/Enums'
 import { logger } from '@_core'
@@ -124,6 +125,36 @@ export default function QuoteDetailsPage() {
 				.join(', ')
 		: 'No address provided'
 
+	// Column definitions for products table
+	const productColumns = useMemo<ColumnDef<any>[]>(
+		() => [
+			{
+				accessorKey: 'product.name',
+				header: 'Product',
+				cell: ({ row }) => {
+					const product = row.original.product as any
+					return product?.name || 'Product pending'
+				},
+			},
+			{
+				accessorKey: 'product.sku',
+				header: 'SKU',
+				cell: ({ row }) => {
+					const product = row.original.product as any
+					return product?.sku || row.original.productId || '—'
+				},
+			},
+			{
+				accessorKey: 'quantity',
+				header: 'Quantity',
+				cell: ({ row }) => (
+					<span className="font-semibold">{row.original.quantity ?? 0}</span>
+				),
+			},
+		],
+		[]
+	)
+
 	return (
 		<>
 			<InternalPageHeader
@@ -212,38 +243,20 @@ export default function QuoteDetailsPage() {
 					</div>
 
 					<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
-						<div className="flex items-center gap-3">
+						<div className="flex items-center gap-3 mb-6">
 							<PackageSearch className="h-5 w-5 text-primary" />
 							<h3 className="text-lg font-semibold text-base-content">Requested Products</h3>
 						</div>
 
-						{quote.products?.length ? (
-							<div className="mt-6 overflow-x-auto">
-								<table className="table table-zebra">
-									<thead>
-										<tr className="text-base-content/70">
-											<th className="font-semibold">Product</th>
-											<th className="font-semibold">SKU</th>
-											<th className="font-semibold text-right">Quantity</th>
-										</tr>
-									</thead>
-									<tbody>
-										{quote.products.map((item, index) => {
-											const product = item.product as any
-											return (
-												<tr key={product?.id ?? item.productId ?? index}>
-													<td>{product?.name || 'Product pending'}</td>
-													<td>{product?.sku || item.productId || '—'}</td>
-													<td className="text-right font-semibold">{item.quantity ?? 0}</td>
-												</tr>
-											)
-										})}
-									</tbody>
-								</table>
-							</div>
-						) : (
-							<p className="mt-6 text-sm text-base-content/70">No products were included in this quote request.</p>
-						)}
+						<DataTable
+							columns={productColumns}
+							data={quote.products || []}
+							enableSorting={true}
+							enableFiltering={false}
+							enablePagination={false}
+							enablePageSize={false}
+							emptyMessage="No products were included in this quote request."
+						/>
 					</Card>
 				</div>
 			)}

@@ -201,6 +201,7 @@ Below is a categorized list of reusable items. Each item links to a brief descri
     - Other supporting hooks as needed
 
 - Tables
+  - [_components/tables/index.ts](#desc-tables-index) (NPM: `@tanstack/react-table`)
   - [_components/tables/DataTable.tsx](#desc-data-table) (NPM: `@tanstack/react-table`)
   - [_components/tables/ServerDataTable.tsx](#desc-server-data-table) (NPM: `@tanstack/react-table`)
   - [_components/tables/AccountOrdersTable.tsx](#desc-account-orders-table)
@@ -573,11 +574,23 @@ Standardized submit handler with loading/error/toast patterns.
 
 ### Tables
 
+#### _components/tables/index.ts {#desc-tables-index}
+Barrel export for table components, utilities, constants, and types. Re-exports DataTable, ServerDataTable, all table utilities (sanitizeString, calculateTotalItems, etc.), constants (DEFAULT_PAGE_SIZE_OPTIONS, TABLE_ERROR_MESSAGES), types (PaginationButtonConfig, TableFeatureToggles), and TanStack Table types. Single import source following FAANG-level code organization.
+
 #### _components/tables/DataTable.tsx {#desc-data-table}
-Client-side data table built on TanStack; sorting/filtering/pagination.
+Modern, powerful, and elegant data table built on TanStack Table v8. Features: client-side and server-side pagination, sorting, and filtering; mobile-first responsive design; WCAG AA accessibility compliance; structured logging; feature toggles (enableSorting, enableFiltering, enablePagination, enablePageSize) for granular control. Supports both client-side and server-side modes with manual control flags. Uses centralized utilities, constants, and types for maximum DRY compliance.
 
 #### _components/tables/ServerDataTable.tsx {#desc-server-data-table}
-Server-driven table adapter with remote pagination/sort/filter.
+Server-driven table adapter with remote pagination, sorting, and filtering. Automatically handles server-side data fetching via endpoint or custom fetch function. Integrates with useServerTable hook for state management. Supports all DataTable feature toggles (enableSorting, enableFiltering, enablePagination, enablePageSize) for flexible UI control.
+
+#### _components/tables/tableConstants.ts {#desc-table-constants}
+Centralized constants for table components following FAANG-level best practices. Single source of truth for page size options (DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 30, 40, 50]), default page size (10), min/max page sizes, default empty messages, error messages, and component names. Eliminates magic values and ensures consistency across all table implementations.
+
+#### _components/tables/tableUtils.ts {#desc-table-utils}
+Reusable utility functions for table operations. Pure functions implementing defensive programming and type safety: sanitizeString (XSS prevention), isPositiveNumber, isValidPageSize (bounds checking), calculateTotalItems (smart total calculation for client/server modes), calculateLastPageIndex (edge case handling), calculatePaginationRange (display range for "Showing X-Y of Z"), isValidArray, normalizeArray. All utilities are fully typed and tested for robustness.
+
+#### _components/tables/tableTypes.ts {#desc-table-types}
+Shared type definitions for table components promoting type safety and reusability. Includes PaginationButtonConfig (button rendering), TableFeatureToggles (feature enable/disable), TableManualModes (server-side control), ServerPaginationMeta (backend pagination metadata), and PaginationRange (display calculations). Centralized types prevent duplication and ensure consistency following FAANG-level DRY principles.
 
 #### _components/tables/AccountOrdersTable.tsx {#desc-account-orders-table}
 Prebuilt table for account orders; column presets and formatting.

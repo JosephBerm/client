@@ -11,10 +11,12 @@
  * - TanStack Table v8 integration
  * - Server-side pagination with page count
  * - Server-side sorting
+ * - Server-side filtering
  * - Loading states
  * - Empty state customization
  * - Initial sort and page size configuration
  * - Custom filters support
+ * - Feature toggles: enableSorting, enableFiltering, enablePagination, enablePageSize
  * 
  * **Use Cases:**
  * - Large datasets (1000+ records)
@@ -98,7 +100,7 @@
 'use client'
 
 import { ReactNode, useMemo } from 'react'
-import { ColumnDef } from '@tanstack/react-table'
+import { ColumnDef, SortingState, ColumnFiltersState } from '@tanstack/react-table'
 import DataTable from './DataTable'
 import { createServerTableFetcher, useServerTable } from '@_shared'
 
@@ -125,9 +127,9 @@ interface ServerDataTableProps<TData> {
 		/** Number of items per page */
 		pageSize: number
 		/** TanStack Table sorting state */
-		sorting?: any
-		/** Custom filters object */
-		filters?: any
+		sorting?: SortingState
+		/** TanStack Table column filters state */
+		filters?: ColumnFiltersState
 	}) => Promise<{
 		/** Array of data items for current page */
 		data: TData[]
@@ -180,6 +182,34 @@ interface ServerDataTableProps<TData> {
 	 * @default 'No data available'
 	 */
 	emptyMessage?: string | ReactNode
+	
+	/** 
+	 * Enable/disable column sorting feature.
+	 * When false, sorting UI and handlers are disabled.
+	 * @default true
+	 */
+	enableSorting?: boolean
+	
+	/** 
+	 * Enable/disable column filtering feature.
+	 * When false, filtering UI and handlers are disabled.
+	 * @default true
+	 */
+	enableFiltering?: boolean
+	
+	/** 
+	 * Enable/disable pagination controls.
+	 * When false, pagination UI is hidden.
+	 * @default true
+	 */
+	enablePagination?: boolean
+	
+	/** 
+	 * Enable/disable page size selector.
+	 * When false, page size selector is hidden.
+	 * @default true
+	 */
+	enablePageSize?: boolean
 }
 
 /**
@@ -222,6 +252,10 @@ export default function ServerDataTable<TData>({
 	initialSortOrder,
 	filters,
 	emptyMessage,
+	enableSorting = true,
+	enableFiltering = true,
+	enablePagination = true,
+	enablePageSize = true,
 }: ServerDataTableProps<TData>) {
 	/**
 	 * Create fetch function from endpoint if provided, otherwise use propFetchData.
@@ -240,35 +274,51 @@ export default function ServerDataTable<TData>({
 	}, [propFetchData, endpoint, filters])
 	
 	/**
-	 * Use server table hook to manage pagination, sorting, and data fetching.
+	 * Use server table hook to manage pagination, sorting, filtering, and data fetching.
 	 * Hook handles all server communication and state management.
 	 */
 	const {
-		data,         // Current page data
-		pageCount,    // Total pages available
-		isLoading,    // Loading indicator
-		pagination,   // Current pagination state (pageIndex, pageSize)
-		setPagination, // Update pagination function
-		sorting,      // Current sorting state
-		setSorting,   // Update sorting function
-	} = useServerTable(fetchData, { initialPageSize })
+		data,            // Current page data
+		pageCount,       // Total pages available
+		totalItems,      // Total items across all pages
+		isLoading,       // Loading indicator
+		pagination,      // Current pagination state (pageIndex, pageSize)
+		setPagination,   // Update pagination function
+		sorting,         // Current sorting state
+		setSorting,      // Update sorting function
+		columnFilters,   // Current filter state
+		setColumnFilters, // Update filter function
+	} = useServerTable(fetchData, { 
+		initialPageSize,
+		initialSortBy,
+		initialSortOrder: initialSortOrder || 'asc',
+	})
 
 	/**
 	 * Render DataTable with server-side data and state.
 	 * DataTable handles UI rendering, table structure, and user interactions.
+	 * All features are enabled by default but can be toggled with boolean props.
 	 */
 	return (
 		<DataTable
 			columns={columns}
 			data={data}
 			pageCount={pageCount}
+			totalItems={totalItems}
 			pagination={pagination}
 			onPaginationChange={setPagination}
 			sorting={sorting}
 			onSortingChange={setSorting}
+			columnFilters={columnFilters}
+			onColumnFiltersChange={setColumnFilters}
 			isLoading={isLoading}
 			manualPagination // Server handles pagination
 			manualSorting    // Server handles sorting
+			manualFiltering  // Server handles filtering
+			enableSorting={enableSorting}
+			enableFiltering={enableFiltering}
+			enablePagination={enablePagination}
+			enablePageSize={enablePageSize}
 			emptyMessage={emptyMessage}
 		/>
 	)

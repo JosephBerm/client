@@ -2,13 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ColumnDef } from '@tanstack/react-table'
 import { format } from 'date-fns'
 import { toast } from 'react-toastify'
 
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../../_components'
-import DataTable from '@_components/tables/DataTable'
+import { DataTable, type ColumnDef } from '@_components/tables'
 import UpdateCustomerForm from '@_components/forms/UpdateCustomerForm'
 import RoleBadge from '@_components/common/RoleBadge'
 import Company from '@_classes/Company'

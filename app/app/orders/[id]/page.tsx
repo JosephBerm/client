@@ -7,6 +7,7 @@ import { toast } from 'react-toastify'
 import Card from '@_components/ui/Card'
 import { InternalPageHeader } from '../../_components'
 import Badge from '@_components/ui/Badge'
+import { DataTable, type ColumnDef } from '@_components/tables'
 import OrderStatusBadge, { OrderStatus as BadgeOrderStatus } from '@_components/common/OrderStatusBadge'
 import Order from '@_classes/Order'
 import { OrderStatus as DomainOrderStatus } from '@_classes/Enums'
@@ -102,6 +103,59 @@ export default function OrderDetailsPage() {
 		}
 	}, [order?.status])
 
+	// Column definitions for line items table
+	const lineItemColumns = useMemo<ColumnDef<any>[]>(
+		() => [
+			{
+				accessorKey: 'product.name',
+				header: 'Product',
+				cell: ({ row }) => (
+					<div className="flex flex-col">
+						<span className="font-semibold text-base-content">
+							{row.original.product?.name || 'Product unavailable'}
+						</span>
+						<span className="text-xs text-base-content/60">
+							SKU: {row.original.product?.sku || row.original.productId || 'N/A'}
+						</span>
+					</div>
+				),
+			},
+			{
+				accessorKey: 'quantity',
+				header: 'Quantity',
+				cell: ({ row }) => (
+					<span className="text-base-content/80">{row.original.quantity ?? 0}</span>
+				),
+			},
+			{
+				accessorKey: 'sellPrice',
+				header: 'Unit Price',
+				cell: ({ row }) => (
+					<span className="text-base-content/80">{formatCurrency(row.original.sellPrice ?? 0)}</span>
+				),
+			},
+			{
+				accessorKey: 'total',
+				header: 'Line Total',
+				cell: ({ row }) => (
+					<span className="font-semibold text-base-content">
+						{formatCurrency(row.original.total ?? 0)}
+					</span>
+				),
+			},
+			{
+				accessorKey: 'trackingNumber',
+				header: 'Tracking',
+				cell: ({ row }) => (
+					<span className="text-sm text-base-content/60">
+						{row.original.trackingNumber || '—'}
+					</span>
+				),
+			},
+		],
+		[]
+	)
+
 	return (
 		<>
 			<InternalPageHeader
@@ -196,46 +250,17 @@ export default function OrderDetailsPage() {
 					</div>
 
 					<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
-						<h3 className="text-lg font-semibold text-base-content">Line Items</h3>
-						{order.products?.length ? (
-							<div className="mt-6 overflow-x-auto">
-								<table className="table table-zebra">
-									<thead>
-										<tr className="text-base-content/70">
-											<th className="font-semibold">Product</th>
-											<th className="font-semibold text-right">Quantity</th>
-											<th className="font-semibold text-right">Unit Price</th>
-											<th className="font-semibold text-right">Line Total</th>
-											<th className="font-semibold text-right">Tracking</th>
-										</tr>
-									</thead>
-									<tbody>
-										{order.products.map((item, index) => (
-											<tr key={item.id ?? item.productId ?? index}>
-												<td>
-													<div className="flex flex-col">
-														<span className="font-semibold text-base-content">
-															{item.product?.name || 'Product unavailable'}
-														</span>
-														<span className="text-xs text-base-content/60">
-															SKU: {item.product?.sku || item.productId || 'N/A'}
-														</span>
-													</div>
-												</td>
-												<td className="text-right text-base-content/80">{item.quantity ?? 0}</td>
-												<td className="text-right text-base-content/80">{formatCurrency(item.sellPrice ?? 0)}</td>
-												<td className="text-right font-semibold text-base-content">
-													{formatCurrency(item.total ?? 0)}
-												</td>
-												<td className="text-right text-sm text-base-content/60">{item.trackingNumber || '—'}</td>
-											</tr>
-										))}
-									</tbody>
-								</table>
-							</div>
-						) : (
-							<p className="mt-6 text-sm text-base-content/70">No products are associated with this order.</p>
-						)}
+						<h3 className="text-lg font-semibold text-base-content mb-6">Line Items</h3>
+						
+						<DataTable
+							columns={lineItemColumns}
+							data={order.products || []}
+							enableSorting={true}
+							enableFiltering={false}
+							enablePagination={false}
+							enablePageSize={false}
+							emptyMessage="No products are associated with this order."
+						/>
 					</Card>
 
 					{order.products?.some((item) => item.transitDetails?.locationDropoff) && (

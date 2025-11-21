@@ -1,10 +1,9 @@
 'use client'
 
 import { useMemo } from 'react'
-import { ColumnDef } from '@tanstack/react-table'
 import Link from 'next/link'
 
-import DataTable from '@_components/tables/DataTable'
+import { DataTable, type ColumnDef } from '@_components/tables'
 import { InternalPageHeader } from '../_components'
 import Badge from '@_components/ui/Badge'
 import Notification from '@_classes/Notification'
