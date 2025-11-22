@@ -1,14 +1,20 @@
 /**
  * Toast Notification Configuration Constants
  * 
+ * **INTERNAL MODULE** - Used by notification.service.ts only.
+ * External consumers should import and use `notificationService` directly.
+ * 
  * Centralized toast configuration following DRY principles.
  * Eliminates duplication of toast options across components.
  * 
  * **FAANG Best Practice:**
+ * - Configuration files are implementation details, not public APIs
+ * - Type-only import of react-toastify (zero runtime cost)
  * - Single source of truth for toast configurations
  * - Type-safe with TypeScript
  * - Consistent UX across application
  * 
+ * @internal
  * @module toastConfig
  */
 

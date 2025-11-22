@@ -322,16 +322,16 @@ class NotificationService {
 			const baseToastConfig = this.getToastConfig(type, persist, duration)
 
 			// Merge with custom options
-			const finalToastOptions: ToastOptions = {
-				...baseToastConfig,
-				...toastOptions,
-				// Wrap callbacks to include tracking
-				onClose: () => {
-					this.trackInteraction('dismiss', correlationId, enrichedMetadata)
-					onDismiss?.()
-					toastOptions.onClose?.()
-				},
-			}
+		const finalToastOptions: ToastOptions = {
+			...baseToastConfig,
+			...toastOptions,
+			// Wrap callbacks to include tracking
+			onClose: (props) => {
+				this.trackInteraction('dismiss', correlationId, enrichedMetadata)
+				onDismiss?.()
+				toastOptions.onClose?.(props)
+			},
+		}
 
 			// Display toast based on type
 			toastId = this.displayToast(type, message, finalToastOptions)
@@ -478,6 +478,7 @@ class NotificationService {
 
 	/**
 	 * Display toast notification to user.
+	 * Respects user's reduced motion preferences for accessibility.
 	 * 
 	 * @private
 	 * @param type - Notification type
@@ -486,16 +487,32 @@ class NotificationService {
 	 * @returns Toast ID
 	 */
 	private displayToast(type: NotificationType, message: string, options: ToastOptions): ToastId {
+		// Respect reduced motion preference (WCAG AA accessibility)
+		const prefersReducedMotion =
+			typeof window !== 'undefined' &&
+			window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+		// Apply reduced motion settings if user prefers
+		const finalOptions: ToastOptions = {
+			...options,
+			// Disable slide animation if reduced motion is preferred
+			transition: prefersReducedMotion ? undefined : options.transition,
+			// Faster display for reduced motion
+			autoClose: prefersReducedMotion && options.autoClose
+				? Math.min(options.autoClose as number, 2000)
+				: options.autoClose,
+		}
+
 		switch (type) {
 			case 'success':
-				return toast.success(message, options)
+				return toast.success(message, finalOptions)
 			case 'error':
-				return toast.error(message, options)
+				return toast.error(message, finalOptions)
 			case 'warning':
-				return toast.warning(message, options)
+				return toast.warning(message, finalOptions)
 			case 'info':
 			default:
-				return toast.info(message, options)
+				return toast.info(message, finalOptions)
 		}
 	}
 
