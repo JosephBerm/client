@@ -75,7 +75,7 @@ import { logger } from '@_core'
 import { useAuthStore } from '@_features/auth'
 import Quote from '@_classes/Quote'
 import { API } from '@_shared'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 import { Routes } from '@_features/navigation'
 
 /**
@@ -127,11 +127,14 @@ export default function AccountQuotesTable() {
 			setIsLoading(true)
 			if (!user?.customer?.id) return
 
-			const { data } = await API.Quotes.getAll<Quote[]>()
-			if (!data.payload) {
-				toast.error(data.message || 'Failed to load quotes')
-				return
-			}
+		const { data } = await API.Quotes.getAll<Quote[]>()
+		if (!data.payload) {
+			notificationService.error(data.message || 'Failed to load quotes', {
+				component: 'AccountQuotesTable',
+				action: 'fetchQuotes',
+			})
+			return
+		}
 
 			const sortedQuotes = data.payload
 				.map((x: any) => new Quote(x))
@@ -141,12 +144,14 @@ export default function AccountQuotesTable() {
 
 			setQuotes(sortedQuotes)
 		} catch (error: any) {
-			logger.error('Failed to fetch quotes', {
-				error,
+			notificationService.error(error.message || 'Failed to load quotes', {
+				metadata: {
+					error,
+					userId: user?.id,
+				},
 				component: 'AccountQuotesTable',
-				userId: user?.id ?? undefined,
+				action: 'fetchQuotes',
 			})
-			toast.error(error.message || 'Failed to load quotes')
 		} finally {
 			setIsLoading(false)
 		}

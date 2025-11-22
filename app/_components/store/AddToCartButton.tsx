@@ -22,12 +22,13 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { ShoppingCart, Plus, Minus } from 'lucide-react'
+import { ShoppingCart } from 'lucide-react'
 import { Product } from '@_classes/Product'
 import { useCartStore } from '@_features/cart'
 import Button from '@_components/ui/Button'
+import QuantitySelector from '@_components/ui/QuantitySelector'
 import { logger } from '@_core'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 
 export interface AddToCartButtonProps {
 	/** Product to add to cart */
@@ -71,40 +72,10 @@ export default function AddToCartButton({
 	const [isAdding, setIsAdding] = useState(false)
 	const addToCart = useCartStore((state) => state.addToCart)
 
-	// Validate and clamp quantity
-	const clampQuantity = useCallback((value: number): number => {
-		return Math.max(minQuantity, Math.min(maxQuantity, Math.floor(value)))
-	}, [minQuantity, maxQuantity])
-
-	// Handle quantity change
+	// Handle quantity change from QuantitySelector
 	const handleQuantityChange = useCallback((newValue: number) => {
-		const clamped = clampQuantity(newValue)
-		setQuantity(clamped)
-	}, [clampQuantity])
-
-	// Increment quantity
-	const handleIncrement = useCallback((e: React.MouseEvent) => {
-		e.preventDefault()
-		e.stopPropagation()
-		setQuantity((prev) => clampQuantity(prev + 1))
-	}, [clampQuantity])
-
-	// Decrement quantity
-	const handleDecrement = useCallback((e: React.MouseEvent) => {
-		e.preventDefault()
-		e.stopPropagation()
-		setQuantity((prev) => clampQuantity(prev - 1))
-	}, [clampQuantity])
-
-	// Handle input change
-	const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-		const value = parseInt(e.target.value, 10)
-		if (isNaN(value)) {
-			setQuantity(minQuantity)
-			return
-		}
-		handleQuantityChange(value)
-	}, [handleQuantityChange, minQuantity])
+		setQuantity(newValue)
+	}, [])
 
 	// Handle add to cart
 	const handleAddToCart = useCallback(async (e: React.MouseEvent) => {
@@ -124,41 +95,30 @@ export default function AddToCartButton({
 				name: product.name || 'Unnamed product',
 			})
 
-			// Log successful add
-			logger.info('Product added to cart', {
+		// Show success notification (automatically logs + shows toast)
+		notificationService.success(`${quantity} ${quantity === 1 ? 'item' : 'items'} added to cart`, {
+			metadata: {
 				productId: product.id,
 				productName: product.name,
 				quantity,
-				component: 'AddToCartButton',
-			})
-
-			// Show success toast
-			toast.success(`${quantity} ${quantity === 1 ? 'item' : 'items'} added to cart`, {
-				position: 'top-right',
-				autoClose: 3000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-			})
+			},
+			component: 'AddToCartButton',
+			action: 'addToCart',
+		})
 
 			// Reset quantity to default after successful add
 			setQuantity(defaultQuantity)
-		} catch (error) {
-			logger.error('Failed to add product to cart', {
-				productId: product.id,
+	} catch (error) {
+		// Show error notification (automatically logs + shows toast)
+		notificationService.error('Failed to add item to cart. Please try again.', {
+			metadata: {
 				error,
-				component: 'AddToCartButton',
-			})
-
-			toast.error('Failed to add item to cart. Please try again.', {
-				position: 'top-right',
-				autoClose: 5000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-			})
+				productId: product.id,
+				productName: product.name,
+			},
+			component: 'AddToCartButton',
+			action: 'addToCart',
+		})
 		} finally {
 			setIsAdding(false)
 		}
@@ -184,41 +144,20 @@ export default function AddToCartButton({
 	return (
 		<div className={`flex flex-col gap-2 ${className}`}>
 			{/* Quantity Controls */}
-			<div className="flex items-center justify-center gap-2">
-				{/* Decrement Button */}
-				<button
-					type="button"
-					onClick={handleDecrement}
-					disabled={quantity <= minQuantity || isAdding}
-					className="btn btn-sm btn-ghost btn-circle shrink-0 disabled:opacity-50"
-					aria-label="Decrease quantity"
-				>
-					<Minus className="h-4 w-4" />
-				</button>
-
-				{/* Quantity Input */}
-				<input
-					type="number"
-					min={minQuantity}
-					max={maxQuantity}
-					value={quantity}
-					onChange={handleInputChange}
-					disabled={isAdding}
-					className="input input-bordered input-sm w-20 text-center font-medium disabled:opacity-50"
-					aria-label="Quantity"
-				/>
-
-				{/* Increment Button */}
-				<button
-					type="button"
-					onClick={handleIncrement}
-					disabled={quantity >= maxQuantity || isAdding}
-					className="btn btn-sm btn-ghost btn-circle shrink-0 disabled:opacity-50"
-					aria-label="Increase quantity"
-				>
-					<Plus className="h-4 w-4" />
-				</button>
-			</div>
+			<QuantitySelector
+				value={quantity}
+				onChange={handleQuantityChange}
+				min={minQuantity}
+				max={maxQuantity}
+				editable={true}
+				size="sm"
+				buttonVariant="ghost"
+				useIcons={true}
+				disabled={isAdding}
+				ariaLabel="Product quantity"
+				align="justify-center"
+				className="w-full"
+			/>
 
 			{/* Add to Cart Button */}
 			<Button

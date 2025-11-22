@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ColumnDef } from '@tanstack/react-table'
 import { Eye, Plus, Trash2 } from 'lucide-react'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 import ServerDataGrid from '@_components/tables/ServerDataGrid'
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../_components'
@@ -92,21 +92,28 @@ export default function CustomersPage() {
       const { data } = await API.Customers.delete(deleteModal.customer.id!)
 
       if (data.statusCode !== 200) {
-        toast.error(data.message || 'Failed to delete customer')
+        notificationService.error(data.message || 'Failed to delete customer', {
+          metadata: { customerId: deleteModal.customer?.id },
+          component: 'CustomersPage',
+          action: 'deleteCustomer',
+        })
         return
       }
 
-      toast.success(data.message || 'Customer deleted successfully')
+      notificationService.success(data.message || 'Customer deleted successfully', {
+        metadata: { customerId: deleteModal.customer?.id },
+        component: 'CustomersPage',
+        action: 'deleteCustomer',
+      })
       setDeleteModal({ isOpen: false, customer: null })
       // Refresh the table
       setRefreshKey((prev) => prev + 1)
     } catch (error) {
-      logger.error('Failed to delete customer', {
-        error,
-        customerId: deleteModal.customer?.id,
+      notificationService.error('An error occurred while deleting the customer', {
+        metadata: { error, customerId: deleteModal.customer?.id },
         component: 'CustomersPage',
+        action: 'deleteCustomer',
       })
-      toast.error('An error occurred while deleting the customer')
     }
   }
 

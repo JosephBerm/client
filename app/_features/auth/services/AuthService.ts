@@ -137,7 +137,7 @@ export async function checkAuthStatus(): Promise<IUser | null> {
  *   logger.info('User logged in successfully', { userId: result.user.id, userName: result.user.name });
  *   router.push('/dashboard');
  * } else {
- *   toast.error(result.message);
+ *   notificationService.error(result.message, { component: 'LoginPage', action: 'login' });
  * }
  * ```
  */
@@ -263,10 +263,10 @@ export async function login(credentials: LoginCredentials): Promise<{
  * import { Routes } from '@_features/navigation';
  * 
  * if (result.success) {
- *   toast.success('Account created! Please log in.');
+ *   notificationService.success('Account created! Please log in.', { component: 'SignupPage', action: 'signup' });
  *   router.push(Routes.openLoginModal());
  * } else {
- *   toast.error(result.message);
+ *   notificationService.error(result.message, { component: 'SignupPage', action: 'signup' });
  * }
  * ```
  */
@@ -325,7 +325,7 @@ export async function signup(form: RegisterModel): Promise<{
  * const handleLogout = () => {
  *   logout();
  *   router.push(Routes.openLoginModal());
- *   toast.success('Logged out successfully');
+ *   notificationService.success('Logged out successfully', { component: 'LogoutButton', action: 'logout' });
  * };
  * ```
  */

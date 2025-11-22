@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ColumnDef } from '@tanstack/react-table'
 import { Eye, Plus, Archive } from 'lucide-react'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 import ServerDataGrid from '@_components/tables/ServerDataGrid'
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../_components'
@@ -114,21 +114,28 @@ export default function StorePage() {
       const { data } = await API.Store.Products.delete(archiveModal.product.id!)
 
       if (data.statusCode !== 200) {
-        toast.error(data.message || 'Failed to archive product')
+        notificationService.error(data.message || 'Failed to archive product', {
+          metadata: { productId: archiveModal.product?.id },
+          component: 'StorePage',
+          action: 'archiveProduct',
+        })
         return
       }
 
-      toast.success(data.message || 'Product archived successfully')
+      notificationService.success(data.message || 'Product archived successfully', {
+        metadata: { productId: archiveModal.product?.id },
+        component: 'StorePage',
+        action: 'archiveProduct',
+      })
       setArchiveModal({ isOpen: false, product: null })
       // Refresh the table
       setRefreshKey((prev) => prev + 1)
     } catch (error) {
-      logger.error('Failed to archive product', {
-        error,
-        productId: archiveModal.product?.id,
+      notificationService.error('An error occurred while archiving the product', {
+        metadata: { error, productId: archiveModal.product?.id },
         component: 'StorePage',
+        action: 'archiveProduct',
       })
-      toast.error('An error occurred while archiving the product')
     }
   }
 

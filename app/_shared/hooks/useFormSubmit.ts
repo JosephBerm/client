@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 import { logger } from '@_core'
 
 /**
@@ -64,6 +64,8 @@ export function useFormSubmit<TData, TResult = any>(
   options?: {
     successMessage?: string
     errorMessage?: string
+    componentName?: string
+    actionName?: string
     onSuccess?: (result: TResult | null) => void | Promise<void>
     onError?: (error: Error) => void | Promise<void>
   }
@@ -90,10 +92,13 @@ export function useFormSubmit<TData, TResult = any>(
 
       // Check if API returned success status code (200 or 201)
       if (response.data.statusCode === 200 || response.data.statusCode === 201) {
-        // Success path: show success toast if message provided
-        if (options?.successMessage) {
-          toast.success(options.successMessage)
-        }
+      // Success path: show success toast if message provided
+      if (options?.successMessage) {
+        notificationService.success(options.successMessage, {
+          component: options?.componentName || 'FormSubmit',
+          action: options?.actionName || 'submit',
+        })
+      }
 
         // Execute success callback (e.g., navigation, data refresh)
         if (options?.onSuccess) {
@@ -102,20 +107,23 @@ export function useFormSubmit<TData, TResult = any>(
 
         return { success: true, data: response.data.payload ?? null }
       } else {
-        // API returned error status code
-        const errorMsg = response.data.message || options?.errorMessage || 'An error occurred'
-        toast.error(errorMsg)
-        return { success: false }
+      // API returned error status code
+      const errorMsg = response.data.message || options?.errorMessage || 'An error occurred'
+      notificationService.error(errorMsg, {
+        metadata: { statusCode: response.data.statusCode },
+        component: options?.componentName || 'FormSubmit',
+        action: options?.actionName || 'submit',
+      })
+      return { success: false }
       }
     } catch (err: any) {
       // Network error or unexpected exception
       const errorMsg = err.message || options?.errorMessage || 'An unexpected error occurred'
-      logger.error('Form submission failed', {
-        error: err,
-        errorMessage: errorMsg,
-        context: 'form_submit',
+      notificationService.error(errorMsg, {
+        metadata: { error: err, context: 'form_submit' },
+        component: options?.componentName || 'FormSubmit',
+        action: options?.actionName || 'submit',
       })
-      toast.error(errorMsg)
       setError(err)
 
       // Execute error callback if provided
@@ -175,7 +183,7 @@ export function useFormSubmit<TData, TResult = any>(
  *     router.push('/users');
  *   },
  *   onDeleteSuccess: () => {
- *     toast.info('User removed from system');
+ *     notificationService.info('User removed from system', { component: 'UserDeleteButton', action: 'delete' });
  *   }
  * });
  * 

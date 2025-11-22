@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import { format } from 'date-fns'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../../_components'
@@ -42,21 +42,24 @@ const Page = () => {
 				setIsLoading(true)
 				const { data } = await API.Accounts.get(accountId)
 
-				if (!data.payload) {
-					toast.error(data.message || 'Unable to load account')
-					router.back()
-					return
+			if (!data.payload) {
+				notificationService.error(data.message || 'Unable to load account', {
+					metadata: { accountId: id },
+					component: 'AccountDetailPage',
+					action: 'fetchAccount',
+				})
+				router.back()
+				return
 				}
 
 				setAccount(new User(data.payload))
-			} catch (error) {
-				logger.error('Failed to load account', {
-					error,
-					accountId,
-					component: 'AccountDetailPage',
-				})
-				toast.error('Unable to load account')
-				router.back()
+		} catch (error) {
+			notificationService.error('Unable to load account', {
+				metadata: { error, accountId },
+				component: 'AccountDetailPage',
+				action: 'fetchAccount',
+			})
+			router.back()
 			} finally {
 				setIsLoading(false)
 			}

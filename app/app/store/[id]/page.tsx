@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 
 import Card from '@_components/ui/Card'
 import { InternalPageHeader } from '../../_components'
@@ -36,21 +36,24 @@ export default function ManageProductPage() {
 				setIsLoading(true)
 				const { data } = await API.Store.Products.get(productId)
 
-				if (!data.payload) {
-					toast.error(data.message || 'Unable to load product')
-					router.push(Routes.InternalStore.location)
-					return
+			if (!data.payload) {
+				notificationService.error(data.message || 'Unable to load product', {
+					metadata: { productId: id },
+					component: 'ProductDetailPage',
+					action: 'fetchProduct',
+				})
+				router.push(Routes.InternalStore.location)
+				return
 				}
 
 				setProduct(new Product(data.payload))
-			} catch (error) {
-				logger.error('Failed to load product', {
-					error,
-					productId,
-					component: 'ProductDetailPage',
-				})
-				toast.error('Unable to load product')
-				router.push(Routes.InternalStore.location)
+		} catch (error) {
+			notificationService.error('Unable to load product', {
+				metadata: { error, productId },
+				component: 'ProductDetailPage',
+				action: 'fetchProduct',
+			})
+			router.push(Routes.InternalStore.location)
 			} finally {
 				setIsLoading(false)
 			}

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { format } from 'date-fns'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 import { Mail, Phone, Building2, MapPin, PackageSearch } from 'lucide-react'
 
 import Card from '@_components/ui/Card'
@@ -57,21 +57,24 @@ export default function QuoteDetailsPage() {
 				setIsLoading(true)
 				const { data } = await API.Quotes.get<Quote>(quoteId)
 
-				if (!data.payload) {
-					toast.error(data.message || 'Unable to load quote')
-					router.back()
-					return
+			if (!data.payload) {
+				notificationService.error(data.message || 'Unable to load quote', {
+					metadata: { quoteId: id },
+					component: 'QuoteDetailPage',
+					action: 'fetchQuote',
+				})
+				router.back()
+				return
 				}
 
 				setQuote(new Quote(data.payload))
-			} catch (error) {
-				logger.error('Failed to load quote', {
-					error,
-					quoteId,
-					component: 'QuoteDetailPage',
-				})
-				toast.error('Unable to load quote')
-				router.back()
+		} catch (error) {
+			notificationService.error('Unable to load quote', {
+				metadata: { error, quoteId },
+				component: 'QuoteDetailPage',
+				action: 'fetchQuote',
+			})
+			router.back()
 			} finally {
 				setIsLoading(false)
 			}
@@ -87,20 +90,27 @@ export default function QuoteDetailsPage() {
 			setIsConverting(true)
 			const { data } = await API.Orders.createFromQuote<{ id: string }>(quoteId)
 
-			if (!data.payload) {
-				toast.error(data.message || 'Failed to create order from quote')
-				return
-			}
-
-			toast.success('Order created successfully')
-			router.push(`${Routes.Orders.location}/${data.payload.id}`)
-		} catch (error) {
-			logger.error('Failed to create order from quote', {
-				error,
-				quoteId,
+		if (!data.payload) {
+			notificationService.error(data.message || 'Failed to create order from quote', {
+				metadata: { quoteId },
 				component: 'QuoteDetailPage',
+				action: 'convertToOrder',
 			})
-			toast.error('Failed to create order from quote')
+			return
+		}
+
+		notificationService.success('Order created successfully', {
+			metadata: { quoteId, orderId: data.payload.id },
+			component: 'QuoteDetailPage',
+			action: 'convertToOrder',
+		})
+		router.push(`${Routes.Orders.location}/${data.payload.id}`)
+	} catch (error) {
+		notificationService.error('Failed to create order from quote', {
+			metadata: { error, quoteId },
+			component: 'QuoteDetailPage',
+			action: 'convertToOrder',
+		})
 		} finally {
 			setIsConverting(false)
 		}

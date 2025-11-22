@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ColumnDef } from '@tanstack/react-table'
 import { Eye, Plus, Trash2 } from 'lucide-react'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 import ServerDataGrid from '@_components/tables/ServerDataGrid'
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../_components'
@@ -92,21 +92,28 @@ export default function ProvidersPage() {
       const { data } = await API.Providers.delete(deleteModal.provider.id!)
 
       if (data.statusCode !== 200) {
-        toast.error(data.message || 'Failed to delete provider')
+        notificationService.error(data.message || 'Failed to delete provider', {
+          metadata: { providerId: deleteModal.provider?.id },
+          component: 'ProvidersPage',
+          action: 'deleteProvider',
+        })
         return
       }
 
-      toast.success(data.message || 'Provider deleted successfully')
+      notificationService.success(data.message || 'Provider deleted successfully', {
+        metadata: { providerId: deleteModal.provider?.id },
+        component: 'ProvidersPage',
+        action: 'deleteProvider',
+      })
       setDeleteModal({ isOpen: false, provider: null })
       // Refresh the table
       setRefreshKey((prev) => prev + 1)
     } catch (error) {
-      logger.error('Failed to delete provider', {
-        error,
-        providerId: deleteModal.provider?.id,
+      notificationService.error('An error occurred while deleting the provider', {
+        metadata: { error, providerId: deleteModal.provider?.id },
         component: 'ProvidersPage',
+        action: 'deleteProvider',
       })
-      toast.error('An error occurred while deleting the provider')
     }
   }
 

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { format } from 'date-fns'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../../_components'
@@ -46,21 +46,24 @@ const Page = () => {
 				setLoadingCustomer(true)
 				const { data } = await API.Customers.get(Number(customerId))
 
-				if (!data.payload) {
-					toast.error(data.message || 'Unable to load customer')
-					router.back()
-					return
+			if (!data.payload) {
+				notificationService.error(data.message || 'Unable to load customer', {
+					metadata: { customerId: id },
+					component: 'CustomerDetailPage',
+					action: 'fetchCustomer',
+				})
+				router.back()
+				return
 				}
 
 				setCustomer(new Company(data.payload))
-			} catch (error) {
-				logger.error('Failed to load customer', {
-					error,
-					customerId,
-					component: 'CustomerDetailPage',
-				})
-				toast.error('Unable to load customer')
-				router.back()
+		} catch (error) {
+			notificationService.error('Unable to load customer', {
+				metadata: { error, customerId },
+				component: 'CustomerDetailPage',
+				action: 'fetchCustomer',
+			})
+			router.back()
 			} finally {
 				setLoadingCustomer(false)
 			}
@@ -88,14 +91,13 @@ const Page = () => {
 				} else {
 					setAccounts([])
 				}
-			} catch (error) {
-				logger.error('Failed to load customer accounts', {
-					error,
-					customerId,
-					component: 'CustomerDetailPage',
-				})
-				toast.error('Unable to load customer accounts')
-				setAccounts([])
+		} catch (error) {
+			notificationService.error('Unable to load customer accounts', {
+				metadata: { error, customerId },
+				component: 'CustomerDetailPage',
+				action: 'fetchAccounts',
+			})
+			setAccounts([])
 			} finally {
 				setLoadingAccounts(false)
 			}

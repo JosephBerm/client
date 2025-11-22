@@ -25,7 +25,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 import { useZodForm } from '@_shared'
 import { loginSchema, type LoginFormData } from '@_core'
 import { logger } from '@_core'
@@ -84,8 +84,12 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 	const handleSocialLogin = async (provider: SocialProvider) => {
 		logger.info('Social login attempted', { provider, component: 'LoginModal' })
 
-		// TODO: Implement OAuth flow for each provider
-		toast.info(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login coming soon!`)
+	// TODO: Implement OAuth flow for each provider
+	notificationService.info(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login coming soon!`, {
+		component: 'LoginModal',
+		action: 'socialLogin',
+		metadata: { provider },
+	})
 	}
 
 	/**
@@ -127,16 +131,19 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 						})
 					} else {
 						// This shouldn't happen if token is valid, but handle gracefully
-						logger.warn('Login successful but user data unavailable', {
-							identifier: values.identifier,
-							component: 'LoginModal',
-						})
-						toast.error('Login successful but unable to load user data. Please refresh the page.')
-						return
-					}
+					notificationService.warning('Login successful but unable to load user data. Please refresh the page.', {
+						metadata: { identifier: values.identifier },
+						component: 'LoginModal',
+						action: 'loadUser',
+					})
+					return
 				}
+			}
 
-				toast.success('Logged in successfully!')
+			notificationService.success('Logged in successfully!', {
+				component: 'LoginModal',
+				action: 'login',
+			})
 
 				// Close modal
 				onClose()
@@ -150,19 +157,21 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 			const redirectTo = new URLSearchParams(window.location.search).get('redirectTo')
 			router.push(redirectTo ?? Routes.Dashboard.location)
 			} else {
-				logger.warn('Login failed', {
+			notificationService.error(result.message || 'Login failed. Please check your credentials.', {
+				metadata: {
 					identifier: values.identifier,
 					message: result.message,
-					component: 'LoginModal',
-				})
-				toast.error(result.message || 'Login failed. Please check your credentials.')
-			}
-		} catch (error) {
-			logger.error('Login modal submission failed', {
-				error,
+				},
 				component: 'LoginModal',
+				action: 'login',
 			})
-			toast.error('An error occurred during login. Please try again.')
+			}
+	} catch (error) {
+		notificationService.error('An error occurred during login. Please try again.', {
+			metadata: { error },
+			component: 'LoginModal',
+			action: 'login',
+		})
 		} finally {
 			setIsLoading(false)
 		}
@@ -221,13 +230,13 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 			{/* Modal content container - mobile-first responsive */}
 			<div className='flex flex-col w-full max-w-sm sm:max-w-md mx-auto'>
 				{/* Header with close button */}
-				<div className='flex items-center justify-between mb-3 sm:mb-4 md:mb-6'>
-					<h2 className='text-lg sm:text-xl md:text-2xl font-semibold text-base-content'>
+				<div className='flex items-center justify-between mb-4 sm:mb-5 md:mb-6'>
+					<h2 className='text-xl sm:text-2xl font-semibold text-base-content tracking-tight'>
 						Log in
 					</h2>
 					<button
 						onClick={handleClose}
-						className='btn btn-ghost btn-sm btn-circle min-h-[44px] min-w-[44px] focus:outline-2 focus:outline-offset-2 focus:outline-primary'
+						className='btn btn-ghost btn-sm btn-circle min-h-[44px] min-w-[44px] transition-all duration-200 hover:bg-base-200 focus:outline-2 focus:outline-offset-2 focus:outline-primary'
 						aria-label='Close modal'>
 						<X
 							size={20}
@@ -237,13 +246,18 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 				</div>
 
 				{/* Subtitle - centered, mobile-first typography */}
-				<p className='text-xs sm:text-sm md:text-base text-base-content/70 mb-3 sm:mb-4 md:mb-6 text-center leading-relaxed'>
+				<p className='text-sm sm:text-base text-base-content/70 mb-5 sm:mb-6 md:mb-7 text-center leading-relaxed'>
 					Access your account to manage orders, quotes, and more.
 				</p>
 
-				{/* Social Login Buttons - mobile-first spacing */}
-				{!showEmailForm && (
-					<div className='space-y-2 sm:space-y-3 mb-3 sm:mb-4 md:mb-6'>
+				{/* Social Login Buttons - mobile-first spacing with smooth transitions */}
+				<div
+					className={`overflow-hidden transition-all duration-300 ease-out ${
+						showEmailForm
+							? 'max-h-0 opacity-0 mb-0 -translate-y-4'
+							: 'max-h-[600px] opacity-100 mb-4 sm:mb-5 md:mb-6 translate-y-0'
+					}`}>
+					<div className='space-y-2.5 sm:space-y-3'>
 						{/* Google */}
 						<button
 							type='button'
@@ -350,53 +364,67 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 							</span>
 						</button>
 					</div>
-				)}
+				</div>
 
-				{/* Divider - centered, mobile-first spacing */}
-				{!showEmailForm && (
-					<div className='flex items-center gap-2 sm:gap-3 md:gap-4 my-3 sm:my-4 md:my-6'>
+				{/* Divider - centered, mobile-first spacing with smooth transitions */}
+				<div
+					className={`overflow-hidden transition-all duration-300 ease-out ${
+						showEmailForm
+							? 'max-h-0 opacity-0 my-0'
+							: 'max-h-20 opacity-100 my-4 sm:my-5 md:my-6'
+					}`}>
+					<div className='flex items-center gap-2.5 sm:gap-3 md:gap-4'>
 						<div className='flex-1 h-px bg-base-300' />
-						<span className='text-xs sm:text-sm text-base-content/60 uppercase font-medium'>OR</span>
+						<span className='text-xs sm:text-sm text-base-content/60 uppercase font-medium tracking-wider'>OR</span>
 						<div className='flex-1 h-px bg-base-300' />
 					</div>
-				)}
+				</div>
 
-				{/* Email/Password Form - mobile-first spacing */}
+				{/* Email/Password Form - mobile-first spacing with smooth transitions */}
 				<form
 					onSubmit={handleFormSubmit}
-					className='space-y-3 sm:space-y-4'>
-					{/* Email/Username Input */}
-					<FormInput
-						label={showEmailForm ? 'Email or Username' : undefined}
-						type='text'
-						placeholder='Email address'
-						autoFocus={!showEmailForm}
-						{...form.register('identifier')}
-						error={form.formState.errors.identifier}
-					/>
+					className='space-y-4 sm:space-y-5'>
+					{/* Email/Username Input with smooth label transition */}
+					<div className='transition-all duration-300 ease-out'>
+						<FormInput
+							label={showEmailForm ? 'Email or Username' : undefined}
+							type='text'
+							placeholder={showEmailForm ? undefined : 'Email address'}
+							autoFocus={!showEmailForm}
+							{...form.register('identifier')}
+							error={form.formState.errors.identifier}
+						/>
+					</div>
 
-					{/* Password Input (shown after email or when form is submitted) */}
-					{showEmailForm && (
+					{/* Password Input with smooth slide-in animation */}
+					<div
+						className={`overflow-hidden transition-all duration-300 ease-out ${
+							showEmailForm
+								? 'max-h-40 opacity-100 translate-y-0'
+								: 'max-h-0 opacity-0 -translate-y-2'
+						}`}>
 						<FormInput
 							label='Password'
 							type='password'
 							placeholder='Enter your password'
-							autoFocus
+							autoFocus={showEmailForm}
 							{...form.register('password')}
 							error={form.formState.errors.password}
 						/>
-					)}
+					</div>
 
-					{/* Continue/Submit Button - centered, touch-friendly */}
-					<div className='flex justify-center mt-3 sm:mt-4'>
+					{/* Continue/Submit Button - centered, touch-friendly with smooth transition */}
+					<div className='flex justify-center mt-5 sm:mt-6'>
 						<Button
 							type='submit'
 							variant='primary'
 							size='md'
 							loading={isLoading}
 							disabled={isLoading}
-							className='min-h-[44px] w-full'>
-							{showEmailForm ? 'Sign In' : 'Continue'}
+							className='min-h-[44px] w-full sm:w-auto sm:px-8 transition-all duration-300'>
+							<span className='transition-opacity duration-300'>
+								{showEmailForm ? 'Sign In' : 'Continue'}
+							</span>
 						</Button>
 					</div>
 				</form>

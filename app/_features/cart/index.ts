@@ -5,7 +5,7 @@
  * 
  * @example
  * ```typescript
- * import { useCartStore } from '@_features/cart'
+ * import { useCartStore, CartItem } from '@_features/cart'
  * ```
  * 
  * @module cart
@@ -13,4 +13,7 @@
 
 // Stores
 export * from './stores'
+
+// Re-export CartItem type for convenience
+export type { CartItem } from './stores/useCartStore'
 

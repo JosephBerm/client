@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 
 import Card from '@_components/ui/Card'
 import { InternalPageHeader } from '../../_components'
@@ -35,21 +35,24 @@ export default function OrderDetailsPage() {
 				setIsLoading(true)
 				const { data } = await API.Orders.get<Order>(Number(orderIdParam))
 
-				if (!data.payload) {
-					toast.error(data.message || 'Unable to load order')
-					router.push(Routes.Orders.location)
-					return
+			if (!data.payload) {
+				notificationService.error(data.message || 'Unable to load order', {
+					metadata: { orderId: id },
+					component: 'OrderDetailPage',
+					action: 'fetchOrder',
+				})
+				router.push(Routes.Orders.location)
+				return
 				}
 
 				setOrder(new Order(data.payload))
-			} catch (error) {
-				logger.error('Failed to load order', {
-					error,
-					orderId: orderIdParam,
-					component: 'OrderDetailPage',
-				})
-				toast.error('Unable to load order')
-				router.push(Routes.Orders.location)
+		} catch (error) {
+			notificationService.error('Unable to load order', {
+				metadata: { error, orderId: orderIdParam },
+				component: 'OrderDetailPage',
+				action: 'fetchOrder',
+			})
+			router.push(Routes.Orders.location)
 			} finally {
 				setIsLoading(false)
 			}

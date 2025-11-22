@@ -5,7 +5,7 @@ import Notification from '@_classes/Notification'
 import { logger } from '@_core'
 import { API } from '@_shared'
 import { useRouter, useParams } from 'next/navigation'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 import { NotificationType } from '@_classes/Enums'
 import { format } from 'date-fns'
 
@@ -20,18 +20,21 @@ function Page() {
 			const { data } = await API.Notifications.get<Notification>(id)
 
 			if (data.statusCode == 200 && data.payload) {
-				setNotification(data.payload)
-			} else {
-				toast.error(data.message)
-			}
-		} catch (err) {
-			logger.error('Failed to load notification', {
-				error: err,
-				notificationId: params?.id,
+			setNotification(data.payload)
+		} else {
+			notificationService.error(data.message, {
+				metadata: { notificationId: id },
 				component: 'NotificationDetailPage',
+				action: 'fetchNotification',
 			})
-			toast.error('Error Retrieving The Notification Info')
-			// route.push('/not-found')
+		}
+	} catch (err) {
+		notificationService.error('Error Retrieving The Notification Info', {
+			metadata: { error: err, notificationId: params?.id },
+			component: 'NotificationDetailPage',
+			action: 'fetchNotification',
+		})
+		// route.push('/not-found')
 		} finally {
 			setIsLoading(false)
 		}

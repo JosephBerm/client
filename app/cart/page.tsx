@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { toast } from 'react-toastify'
 import { Trash2, ShoppingBag, CheckCircle, Info, FileText, Clock } from 'lucide-react'
-import { useZodForm } from '@_shared'
+import { useZodForm, notificationService } from '@_shared'
 import { quoteSchema, type QuoteFormData } from '@_core'
 import { logger } from '@_core'
 import { useAuthStore } from '@_features/auth'
@@ -13,11 +12,12 @@ import FormInput from '@_components/forms/FormInput'
 import FormTextArea from '@_components/forms/FormTextArea'
 import Button from '@_components/ui/Button'
 import Badge from '@_components/ui/Badge'
+import CartItem from '@_components/cart/CartItem'
 import PageContainer from '@_components/layouts/PageContainer'
 import EmptyState from '@_components/common/EmptyState'
 import { API } from '@_shared'
 import Quote from '@_classes/Quote'
-import { CartProduct } from '@_classes/Product'
+import { Product, CartProduct } from '@_classes/Product'
 import { Routes } from '@_features/navigation'
 
 // Force dynamic rendering due to useSearchParams in Navbar
@@ -49,6 +49,8 @@ export default function CartPage() {
 	const router = useRouter()
 	const [submitted, setSubmitted] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
+	const [products, setProducts] = useState<Map<string, Product>>(new Map())
+	const [isFetchingProducts, setIsFetchingProducts] = useState(false)
 	
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 	const user = useAuthStore((state) => state.user)
@@ -79,6 +81,65 @@ export default function CartPage() {
 		() => cart.reduce((sum, item) => sum + item.quantity, 0),
 		[cart]
 	)
+
+	// Fetch product details for cart items to display images (FAANG pattern: parallel fetching)
+	useEffect(() => {
+		const fetchProductDetails = async () => {
+			if (cart.length === 0) {
+				setProducts(new Map())
+				return
+			}
+
+			setIsFetchingProducts(true)
+
+			try {
+				// Fetch all products in parallel for optimal performance
+				const productPromises = cart.map(async (item) => {
+					try {
+						const { data } = await API.Store.Products.get(item.productId)
+						if (data.payload) {
+							return { id: item.productId, product: new Product(data.payload) }
+						}
+						return null
+					} catch (error) {
+						logger.warn('Failed to fetch product details for cart item', {
+							component: 'CartPage',
+							productId: item.productId,
+							error,
+						})
+						return null
+					}
+				})
+
+				const results = await Promise.all(productPromises)
+
+				// Build products map
+				const productsMap = new Map<string, Product>()
+				results.forEach((result) => {
+					if (result) {
+						productsMap.set(result.id, result.product)
+					}
+				})
+
+				setProducts(productsMap)
+
+				logger.debug('Cart products fetched', {
+					component: 'CartPage',
+					fetchedCount: productsMap.size,
+					cartItemCount: cart.length,
+				})
+			} catch (error) {
+				logger.error('Failed to fetch cart product details', {
+					component: 'CartPage',
+					error,
+				})
+			} finally {
+				setIsFetchingProducts(false)
+			}
+		}
+
+		fetchProductDetails()
+	}, [cart])
 
 	// Update form items when cart changes (for validation only - prices are placeholders)
 	// Actual quote submission uses cart directly, not form values
@@ -141,17 +202,15 @@ export default function CartPage() {
 				? error.message 
 				: 'Failed to submit quote request. Please try again.'
 			
-			logger.error('Quote submission failed', {
+		// Use unified notification service (logs + toast automatically)
+		notificationService.error(errorMessage, {
+			metadata: {
 				error,
-				component: 'CartPage',
 				customerId: user?.customerId,
-				errorMessage,
-			})
-			
-			toast.error(errorMessage, {
-				position: 'top-right',
-				autoClose: 5000,
-			})
+			},
+			component: 'CartPage',
+			action: 'submitQuote',
+		})
 		} finally {
 			setIsLoading(false)
 		}
@@ -237,79 +296,20 @@ export default function CartPage() {
 						</div>
 					</div>
 
-					{/* Cart Items */}
-					<div className="space-y-3 sm:space-y-4">
-						{cart.map((item) => (
-							<div key={item.productId} className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
-								<div className="card-body p-4 sm:p-6">
-									<div className="flex flex-col sm:flex-row gap-4">
-										{/* Product Image/Icon */}
-										<div className="w-full sm:w-24 h-24 bg-base-200 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-											<ShoppingBag className="w-10 h-10 sm:w-12 sm:h-12 text-base-content/30" />
-										</div>
-
-										{/* Product Info */}
-										<div className="flex-1 min-w-0">
-											<h3 className="font-semibold text-base sm:text-lg mb-2 wrap-break-word">
-												{item.name}
-											</h3>
-
-											{/* Quantity Controls */}
-											<div className="flex items-center gap-3 mt-3 sm:mt-4">
-												<span className="text-sm text-base-content/70">Quantity:</span>
-												<div className="flex items-center gap-2" role="group" aria-label={`Quantity controls for ${item.name}`}>
-													<button
-														type="button"
-														className="btn btn-sm btn-circle btn-outline"
-														onClick={() =>
-															updateCartQuantity(
-																item.productId,
-																Math.max(1, item.quantity - 1)
-															)
-														}
-														aria-label={`Decrease quantity of ${item.name}`}
-													>
-														-
-													</button>
-													<span 
-														className="w-12 text-center font-medium"
-														aria-live="polite"
-														aria-atomic="true"
-														role="status"
-													>
-														{item.quantity}
-													</span>
-													<button
-														type="button"
-														className="btn btn-sm btn-circle btn-outline"
-														onClick={() =>
-															updateCartQuantity(item.productId, item.quantity + 1)
-														}
-														aria-label={`Increase quantity of ${item.name}`}
-													>
-														+
-													</button>
-												</div>
-											</div>
-										</div>
-
-										{/* Remove Button */}
-										<div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2">
-											<button
-												type="button"
-												className="btn btn-ghost btn-sm text-error hover:bg-error/10"
-												onClick={() => removeFromCart(item.productId)}
-												aria-label={`Remove ${item.name} from cart`}
-											>
-												<Trash2 className="w-4 h-4" aria-hidden="true" />
-												<span className="sm:hidden ml-2">Remove</span>
-											</button>
-										</div>
-									</div>
-								</div>
-							</div>
-						))}
-					</div>
+				{/* Cart Items */}
+				<div className="space-y-3 sm:space-y-4">
+					{cart.map((item) => (
+						<CartItem
+							key={item.productId}
+							item={item}
+							product={products.get(item.productId) || null}
+							onQuantityChange={updateCartQuantity}
+							onRemove={removeFromCart}
+							showProductLink={true}
+							compact={false}
+						/>
+					))}
+				</div>
 				</div>
 
 				{/* Quote Request Section */}

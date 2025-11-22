@@ -74,7 +74,7 @@ import { formatDate, formatCurrency } from '@_shared'
 import { useAuthStore } from '@_features/auth'
 import Order from '@_classes/Order'
 import { API } from '@_shared'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 import { Routes } from '@_features/navigation'
 
 /**
@@ -118,11 +118,15 @@ export default function AccountOrdersTable() {
 			setIsLoading(true)
 			if (!user?.customer?.id) return
 
-			const { data } = await API.Orders.getFromCustomer(user.customer.id)
-			if (!data.payload) {
-				toast.error(data.message || 'Failed to load orders')
-				return
-			}
+		const { data } = await API.Orders.getFromCustomer(user.customer.id)
+		if (!data.payload) {
+			notificationService.error(data.message || 'Failed to load orders', {
+				metadata: { customerId: user.customer.id },
+				component: 'AccountOrdersTable',
+				action: 'fetchOrders',
+			})
+			return
+		}
 
 			const sortedOrders = data.payload
 				.map((x: any) => new Order(x))
@@ -131,12 +135,14 @@ export default function AccountOrdersTable() {
 
 			setOrders(sortedOrders)
 		} catch (error: any) {
-			logger.error('Failed to fetch orders', {
-				error,
+			notificationService.error(error.message || 'Failed to load orders', {
+				metadata: {
+					error,
+					userId: user?.id,
+				},
 				component: 'AccountOrdersTable',
-				userId: user?.id ?? undefined,
+				action: 'fetchOrders',
 			})
-			toast.error(error.message || 'Failed to load orders')
 		} finally {
 			setIsLoading(false)
 		}

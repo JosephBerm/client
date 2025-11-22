@@ -59,7 +59,7 @@ import FormInput from './FormInput'
 import Button from '@_components/ui/Button'
 import type { IUser } from '@_classes/User'
 import { API } from '@_shared'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 
 /**
  * ChangePasswordForm component props interface.
@@ -110,7 +110,10 @@ export default function ChangePasswordForm({ user }: ChangePasswordFormProps) {
   const { submit, isSubmitting } = useFormSubmit(
     async (data: ChangePasswordFormData) => {
       if (!user?.id) {
-        toast.error('User ID is required')
+        notificationService.error('User ID is required', {
+          component: 'ChangePasswordForm',
+          action: 'validateUser',
+        })
         throw new Error('User ID is required')
       }
       return await API.Accounts.changePasswordById(user.id, data.oldPassword, data.newPassword)

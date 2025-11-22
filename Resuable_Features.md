@@ -180,8 +180,19 @@ Below is a categorized list of reusable items. Each item links to a brief descri
     - [_components/store/ProductsToolbar.tsx](#desc-products-toolbar)
     - [_components/store/UnifiedStoreToolbar.tsx](#desc-unified-store-toolbar)
     - [_components/store/ScrollRevealCard.tsx](#desc-scroll-reveal-card)
+    - [_components/store/AddToCartButton.tsx](#desc-add-to-cart-button)
   - Pages
     - `app/store/page.tsx`, `app/store/product/[id]/page.tsx` (template-ready routes)
+
+- Features: Cart
+  - [_features/cart/index.ts](#desc-cart-index)
+  - Stores
+    - [_features/cart/stores/useCartStore.ts](#desc-cart-store) (NPM: `zustand`)
+  - Components
+    - [_components/cart/CartItem.tsx](#desc-cart-item)
+    - [_components/cart/index.ts](#desc-cart-components-index)
+  - Pages
+    - `app/cart/page.tsx` (template-ready cart page)
 
 - Forms
   - Components
@@ -230,6 +241,7 @@ Below is a categorized list of reusable items. Each item links to a brief descri
   - [_components/ui/Input.tsx](#desc-input)
   - [_components/ui/Modal.tsx](#desc-modal)
   - [_components/ui/Pill.tsx](#desc-pill)
+  - [_components/ui/QuantitySelector.tsx](#desc-quantity-selector)
   - [_components/ui/Select.tsx](#desc-select)
   - [_components/ui/StatusDot.tsx](#desc-status-dot)
   - [_components/ui/ContactIcons.tsx](#desc-contact-icons)
@@ -532,6 +544,24 @@ Compact toolbar variant for store-wide controls.
 #### _components/store/ScrollRevealCard.tsx {#desc-scroll-reveal-card}
 FAANG-level wrapper component for scroll-triggered reveal animations. Features overlapping cascade pattern (Apple/Stripe), spring-like easing, optimized stagger timing (80ms base), and shared IntersectionObserver. First 10 items animate on mount with row-aware delays; remaining items trigger on scroll. Includes `useGridColumns` hook integration for responsive column calculation.
 
+#### _components/store/AddToCartButton.tsx {#desc-add-to-cart-button}
+Add to cart button component with integrated quantity selector. Features: editable quantity input with increment/decrement controls, optimistic UI updates, structured logging, mobile-first responsive design, accessibility-first with ARIA labels, loading states. Uses QuantitySelector for consistent UI across the application. Integrates with useCartStore for state management.
+
+
+### Features: Cart
+
+#### _features/cart/index.ts {#desc-cart-index}
+Exports cart feature API (stores, types).
+
+#### _features/cart/stores/useCartStore.ts {#desc-cart-store}
+Zustand store for shopping cart state with localStorage persistence. Separated from user settings store following Single Responsibility Principle. Features: add/remove/update cart items, quantity management, automatic persistence, clear cart functionality, type-safe cart operations. Cart data persists across browser sessions. Used for transient shopping data.
+
+#### _components/cart/CartItem.tsx {#desc-cart-item}
+FAANG-level cart item component inspired by Amazon's elegant cart design. Beautiful, scalable presentation component for individual cart items. Features: clean scannable layout (image left, details center, actions right), product metadata display (SKU, manufacturer), quantity selector (read-only styled as input), remove action, product name link to detail page, mobile-first responsive layout (stacked on mobile, horizontal on tablet+), touch-friendly controls (min 44px tap targets), smooth transitions with reduced motion support, full accessibility (ARIA labels, keyboard navigation), structured logging for all interactions, memoized callbacks for optimal performance, theme-aware (DaisyUI), compact mode option. Pure presentation component with callbacks for actions. Reusable across cart, saved items, order review. Eliminates 45+ lines of inline markup per usage.
+
+#### _components/cart/index.ts {#desc-cart-components-index}
+Barrel export for cart UI components and types.
+
 
 ### Forms
 
@@ -663,6 +693,9 @@ Accessible modal (focus lock, escape, aria).
 
 #### _components/ui/Pill.tsx {#desc-pill}
 Rounded label/tag UI.
+
+#### _components/ui/QuantitySelector.tsx {#desc-quantity-selector}
+FAANG-level reusable quantity selector component with dual modes (editable/read-only). Features: increment/decrement with icons or text, min/max validation and clamping, customizable sizes (xs/sm/md), button variants (ghost/outline), mobile-first responsive design (min 44px tap targets), full accessibility (ARIA labels, keyboard navigation, screen reader support), reduced motion support, theme-aware (DaisyUI), disabled state handling, memoized callbacks for performance. Eliminates duplication between AddToCartButton and cart page. Used in product cards (editable) and cart page (read-only).
 
 #### _components/ui/Select.tsx {#desc-select}
 Select input with consistent styling.

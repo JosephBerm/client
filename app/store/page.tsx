@@ -31,7 +31,7 @@
 import { Suspense, useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { isEmpty } from 'lodash'
-import { toast } from 'react-toastify'
+// Toast functionality now handled by notificationService (unified logging + toast)
 import ClientPageLayout from '@_components/layouts/ClientPageLayout'
 import Button from '@_components/ui/Button'
 import CategoryFilter from '@_components/ui/CategoryFilter'
@@ -47,6 +47,7 @@ import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import { PagedResult } from '@_classes/Base/PagedResult'
 import { API } from '@_shared'
 import { useDebounce } from '@_shared'
+import { notificationService } from '@_shared'
 import { logger } from '@_core'
 import {
 	useProductsState,
@@ -241,13 +242,14 @@ const StorePageContent = () => {
 
 					if (signal?.aborted) return []
 
-					if (!data.payload || data.statusCode !== 200) {
-						toast.error(data.message ?? 'Unable to load categories', {
-							position: 'top-right',
-							autoClose: 4000,
-						})
-						return []
-					}
+				if (!data.payload || data.statusCode !== 200) {
+					notificationService.error(data.message ?? 'Unable to load categories', {
+						metadata: { statusCode: data.statusCode },
+						component: 'StorePage',
+						action: 'fetchCategories',
+					})
+					return []
+				}
 
 					const categoryInstances = data.payload.map(
 						(category: Partial<ProductsCategory>) => new ProductsCategory(category)
@@ -259,14 +261,14 @@ const StorePageContent = () => {
 					return sanitized
 				} catch (err) {
 					if (signal?.aborted) return []
-					
-					const message = err instanceof Error ? err.message : 'An unexpected error occurred while loading categories'
-					logger.error('Store page - Category fetch error', { error: err })
-					toast.error(message, {
-						position: 'top-right',
-						autoClose: 4000,
-					})
-					throw err
+				
+				const message = err instanceof Error ? err.message : 'An unexpected error occurred while loading categories'
+				notificationService.error(message, {
+					metadata: { error: err },
+					component: 'StorePage',
+					action: 'fetchCategories',
+				})
+				throw err
 				}
 			},
 			{
@@ -334,19 +336,16 @@ const StorePageContent = () => {
 
 			const { data } = await API.Store.Products.searchPublic(criteria)
 
-			if (!data.payload || data.statusCode !== 200) {
-				const message = data.message ?? 'Unable to fetch products'
-				toast.error(message, {
-					position: 'top-right',
-					autoClose: 5000,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-				})
-				resetProducts()
-				return []
-			}
+		if (!data.payload || data.statusCode !== 200) {
+			const message = data.message ?? 'Unable to fetch products'
+			notificationService.error(message, {
+				metadata: { statusCode: data.statusCode },
+				component: 'StorePage',
+				action: 'fetchProducts',
+			})
+			resetProducts()
+			return []
+		}
 
 			const payload = data.payload
 			
@@ -354,20 +353,16 @@ const StorePageContent = () => {
 			setProducts(nextProducts, new PagedResult<Product>(payload))
 			
 			return nextProducts
-		} catch (err) {
-			const message = err instanceof Error ? err.message : 'An unexpected error occurred while loading products'
-			logger.error('Store page - Product fetch error', { error: err })
-			toast.error(message, {
-				position: 'top-right',
-				autoClose: 5000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-			})
-			
-			resetProducts()
-			return []
+	} catch (err) {
+		const message = err instanceof Error ? err.message : 'An unexpected error occurred while loading products'
+		notificationService.error(message, {
+			metadata: { error: err },
+			component: 'StorePage',
+			action: 'fetchProducts',
+		})
+		
+		resetProducts()
+		return []
 		} finally {
 			setLoading(false)
 		}

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ColumnDef } from '@tanstack/react-table'
 import { Eye, Plus, Trash2 } from 'lucide-react'
-import { toast } from 'react-toastify'
+import { notificationService } from '@_shared'
 import ServerDataGrid from '@_components/tables/ServerDataGrid'
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../_components'
@@ -98,21 +98,28 @@ export default function AccountsPage() {
 		try {
 			const { data } = await API.Accounts.delete(deleteModal.account.id)
 			
-			if (data.statusCode === 200) {
-				toast.success('Account deleted successfully')
-				setDeleteModal({ isOpen: false, account: null })
-				// Refresh the table
-				setRefreshKey((prev) => prev + 1)
-			} else {
-				toast.error(data.message || 'Failed to delete account')
-			}
-		} catch (error) {
-			logger.error('Failed to delete account', {
-				error,
-				accountId: deleteModal.account?.id,
+		if (data.statusCode === 200) {
+			notificationService.success('Account deleted successfully', {
+				metadata: { accountId: deleteModal.account?.id },
 				component: 'AccountsPage',
+				action: 'deleteAccount',
 			})
-			toast.error('An error occurred while deleting the account')
+			setDeleteModal({ isOpen: false, account: null })
+			// Refresh the table
+			setRefreshKey((prev) => prev + 1)
+		} else {
+			notificationService.error(data.message || 'Failed to delete account', {
+				metadata: { accountId: deleteModal.account?.id },
+				component: 'AccountsPage',
+				action: 'deleteAccount',
+			})
+		}
+	} catch (error) {
+		notificationService.error('An error occurred while deleting the account', {
+			metadata: { error, accountId: deleteModal.account?.id },
+			component: 'AccountsPage',
+			action: 'deleteAccount',
+		})
 		}
 	}
 
