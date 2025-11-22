@@ -13,7 +13,6 @@ const Environments = {
 
 const nextConfig = {
 	env: { ...Environments['development'] },
-	transpilePackages: ['lucide-react'],
 	images: {
 		remotePatterns: [
 			{
