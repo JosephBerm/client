@@ -220,30 +220,24 @@ export default function UnifiedStoreToolbar({
 						<div
 							className="shrink-0 transition-all duration-200 ease-in-out"
 							style={{
-								maxWidth: isFiltered ? '140px' : '0',
+								maxWidth: isFiltered ? '90px' : '0',
 								opacity: isFiltered ? 1 : 0,
 								visibility: isFiltered ? 'visible' : 'hidden',
 								overflow: 'hidden',
 							}}
 							aria-hidden={!isFiltered}
 						>
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={onClearFilters}
-								disabled={isLoading}
-								className="whitespace-nowrap"
-								style={{
-									fontSize: '0.875rem',
-									padding: '0.5rem 0.75rem',
-									minHeight: '2rem',
-								}}
-								aria-label="Reset all filters"
-							>
-								<X className="mr-1.5 h-4 w-4" strokeWidth={2} />
-								<span className="hidden sm:inline">Reset</span>
-								<span className="sm:hidden">×</span>
-							</Button>
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={onClearFilters}
+							disabled={isLoading}
+							className="flex-col items-center justify-center gap-0.5 whitespace-nowrap px-3 py-1.5 text-center"
+							aria-label="Reset all filters"
+						>
+							<X className="h-4 w-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+							<span className="text-xs font-medium leading-tight">Reset</span>
+						</Button>
 						</div>
 					</div>
 				</div>
@@ -354,29 +348,24 @@ export default function UnifiedStoreToolbar({
 					<div
 						className="shrink-0 transition-all duration-200 ease-in-out"
 						style={{
-							maxWidth: isFiltered ? '120px' : '0',
+							maxWidth: isFiltered ? '90px' : '0',
 							opacity: isFiltered ? 1 : 0,
 							visibility: isFiltered ? 'visible' : 'hidden',
 							overflow: 'hidden',
 						}}
 						aria-hidden={!isFiltered}
 					>
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={onClearFilters}
-							disabled={isLoading}
-							className="whitespace-nowrap"
-							style={{
-								fontSize: '0.875rem',
-								padding: '0.5rem 0.75rem',
-								minHeight: '2rem',
-							}}
-							aria-label="Reset all filters"
-						>
-							<X className="mr-1.5 h-4 w-4" strokeWidth={2} />
-							Reset
-						</Button>
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={onClearFilters}
+						disabled={isLoading}
+						className="flex-col items-center justify-center gap-0.5 whitespace-nowrap px-4 py-2 text-center"
+						aria-label="Reset all filters"
+					>
+						<X className="h-5 w-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+						<span className="text-sm font-medium leading-tight">Reset</span>
+					</Button>
 					</div>
 				</div>
 		</div>

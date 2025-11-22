@@ -65,7 +65,9 @@ export default function CategoryFilter({
 	categories,
 	selectedCategories,
 	onSelectionChange,
+	collapsible = true,
 	maxDepth,
+	showCount = false,
 	className = '',
 	emptyMessage = 'Categories load automatically once available.',
 }: CategoryFilterProps) {
@@ -192,51 +194,79 @@ export default function CategoryFilter({
 			const isSelected = isFullySelected(category)
 			const isPartial = isPartiallySelected(category)
 			const hasChildren = category.subCategories && category.subCategories.length > 0
-			const isExpanded = expandedCategories.has(category.id)
+			// If not collapsible, treat all categories as expanded
+			const isExpanded = collapsible ? expandedCategories.has(category.id) : true
 
 			// Calculate indentation (20px per level - industry standard)
 			const indentWidth = depth * 20
 
 			return (
 				<div key={category.id} className="select-none">
-					{/* Category Row - Fixed height, entire row clickable */}
+					{/* Category Row - Responsive height, entire row clickable */}
 					<div
 						role="treeitem"
 						aria-selected={isSelected}
 						onClick={() => handleToggle(category)}
-						className={`group flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg px-3 transition-all duration-150 ease-out ${
-							isSelected
+						className={`
+							group
+							flex min-h-[56px] cursor-pointer items-center gap-3
+							rounded-lg px-3 py-2
+							transition-all duration-200 ease-out
+							sm:min-h-[48px] md:min-h-[44px]
+							${isSelected
 								? 'bg-primary/10 shadow-sm ring-1 ring-primary/20'
 								: isPartial
 									? 'bg-primary/5 ring-1 ring-primary/10'
 									: 'hover:bg-base-200'
-				}`}
+							}
+						`}
 						style={{ paddingLeft: `${indentWidth + 12}px` }}
-			>
-						{/* 1. Expand/Collapse Icon - Fixed 20px square column */}
-						<div className="flex h-5 w-5 shrink-0 grow-0 items-center justify-center">
-							{hasChildren ? (
-								<button
-									type="button"
-									onClick={(e) => {
-										e.stopPropagation()
-										toggleExpand(category.id, e)
-									}}
-									className="flex h-5 w-5 shrink-0 items-center justify-center rounded active:scale-95 transition-transform duration-150"
-									aria-label={isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
-									aria-expanded={isExpanded}
-								>
-									{isExpanded ? (
-										<ChevronDown className="h-4 w-4 text-base-content" strokeWidth={2.5} />
-									) : (
-										<ChevronRight className="h-4 w-4 text-base-content" strokeWidth={2.5} />
-									)}
-								</button>
-							) : null}
-						</div>
+					>
+					{/* 1. Expand/Collapse Button - Industry-standard touch target */}
+					<div className="flex shrink-0 grow-0 items-center justify-center">
+						{hasChildren && collapsible ? (
+							<button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation()
+									toggleExpand(category.id, e)
+								}}
+								className="
+									group/expand
+									relative
+									flex h-11 w-11 shrink-0
+									items-center justify-center
+									rounded-md
+									transition-all duration-200 ease-out
+									hover:bg-base-200
+									focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
+									active:scale-95
+									touch-manipulation
+									sm:h-9 sm:w-9
+									md:h-8 md:w-8
+								"
+								aria-label={isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
+								aria-expanded={isExpanded}
+							>
+								{isExpanded ? (
+									<ChevronDown 
+										className="h-5 w-5 shrink-0 text-base-content transition-transform duration-200 group-hover/expand:scale-110 sm:h-4.5 sm:w-4.5 md:h-4 md:w-4" 
+										strokeWidth={2.5}
+										aria-hidden="true"
+									/>
+								) : (
+									<ChevronRight 
+										className="h-5 w-5 shrink-0 text-base-content transition-transform duration-200 group-hover/expand:scale-110 sm:h-4.5 sm:w-4.5 md:h-4 md:w-4" 
+										strokeWidth={2.5}
+										aria-hidden="true"
+									/>
+								)}
+							</button>
+						) : null}
+					</div>
 
-						{/* 2. Checkbox - Fixed 20px square, no size changes */}
-						<div className="flex h-5 w-5 shrink-0 grow-0 items-center justify-center overflow-hidden">
+						{/* 2. Checkbox - Responsive sizing, properly centered */}
+						<div className="flex h-6 w-6 shrink-0 grow-0 items-center justify-center sm:h-5.5 sm:w-5.5 md:h-5 md:w-5">
 							<input
 								type="checkbox"
 								checked={isSelected}
@@ -247,51 +277,55 @@ export default function CategoryFilter({
 								}}
 								onChange={() => {}} // Controlled by row onClick
 								onClick={(e) => e.stopPropagation()} // Prevent double-toggle
-								className="checkbox checkbox-primary checkbox-sm h-5! w-5! min-h-5! min-w-5! max-h-5! max-w-5! shrink-0 pointer-events-none scale-100!"
+								className="checkbox checkbox-primary h-6 w-6 shrink-0 pointer-events-none cursor-pointer transition-all sm:checkbox-sm sm:h-5.5 sm:w-5.5 md:h-5 md:w-5"
 								aria-label={`${category.name} is ${isSelected ? 'selected' : 'not selected'}`}
 								tabIndex={-1}
 							/>
 						</div>
 
-						{/* 3. Category Label - Left-aligned, flexible width */}
+						{/* 3. Category Label - Responsive sizing, left-aligned */}
 						<span
-							className={`min-w-0 flex-1 text-left text-base leading-tight transition-colors ${
-								isSelected
+							className={`
+								min-w-0 flex-1 text-left
+								text-base leading-snug transition-colors
+								sm:text-[15px] md:text-sm
+								${isSelected
 									? 'font-semibold text-primary'
 									: isPartial
 										? 'font-medium text-base-content'
 										: depth === 0
 											? 'font-medium text-base-content'
 											: 'font-normal text-base-content/80'
-							}`}
+								}
+							`}
 						>
 							{category.name ?? 'Untitled category'}
 						</span>
 
-						{/* 4. Subcategory Count Badge - Powered by Badge component */}
-						{hasChildren && (
-							<Badge
-								variant="primary"
-								tone={isSelected ? 'solid' : isPartial ? 'subtle' : 'default'}
-								size="sm"
-							>
-								{category.subCategories.length}
-							</Badge>
-						)}
+					{/* 4. Subcategory Count Badge - Powered by Badge component */}
+					{hasChildren && showCount && (
+						<Badge
+							variant="primary"
+							tone={isSelected ? 'solid' : isPartial ? 'subtle' : 'default'}
+							size="sm"
+						>
+							{category.subCategories.length}
+						</Badge>
+					)}
 				</div>
 
-			{/* Recursively render subcategories if expanded */}
-					{hasChildren && isExpanded && (
-						<div className="mt-1 space-y-1">
-							{category.subCategories.map((subCategory) => 
-								renderCategoryNode(subCategory, depth + 1)
-							)}
-				</div>
-			)}
+		{/* Recursively render subcategories if expanded or if not collapsible */}
+				{hasChildren && (collapsible ? isExpanded : true) && (
+					<div className="mt-1 space-y-1">
+						{category.subCategories.map((subCategory) => 
+							renderCategoryNode(subCategory, depth + 1)
+						)}
+			</div>
+		)}
 				</div>
 			)
 		},
-		[expandedCategories, handleToggle, toggleExpand, maxDepth, isFullySelected, isPartiallySelected]
+		[expandedCategories, handleToggle, toggleExpand, maxDepth, collapsible, showCount, isFullySelected, isPartiallySelected]
 	)
 
 	// Empty state
