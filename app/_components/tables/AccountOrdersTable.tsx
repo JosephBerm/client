@@ -138,7 +138,7 @@ export default function AccountOrdersTable() {
 			notificationService.error(error.message || 'Failed to load orders', {
 				metadata: {
 					error,
-					userId: user?.id,
+					userId: user?.id || undefined,
 				},
 				component: 'AccountOrdersTable',
 				action: 'fetchOrders',

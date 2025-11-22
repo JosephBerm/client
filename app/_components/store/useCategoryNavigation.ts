@@ -17,7 +17,7 @@
 
 import { useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { ProductsCategory } from '@_classes/ProductsCategory'
+import ProductsCategory from '@_classes/ProductsCategory'
 import { Routes } from '@_features/navigation'
 import { logger } from '@_core'
 

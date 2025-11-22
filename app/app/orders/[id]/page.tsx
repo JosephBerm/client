@@ -8,9 +8,10 @@ import Card from '@_components/ui/Card'
 import { InternalPageHeader } from '../../_components'
 import Badge from '@_components/ui/Badge'
 import { DataGrid, type ColumnDef } from '@_components/tables'
-import OrderStatusBadge, { OrderStatus as BadgeOrderStatus } from '@_components/common/OrderStatusBadge'
+import OrderStatusBadge from '@_components/common/OrderStatusBadge'
 import Order from '@_classes/Order'
-import { OrderStatus as DomainOrderStatus } from '@_classes/Enums'
+import { OrderStatus } from '@_classes/Enums'
+import { OrderStatusHelper } from '@_classes/Helpers'
 import { logger } from '@_core'
 import { API } from '@_shared'
 import { Routes } from '@_features/navigation'
@@ -37,7 +38,7 @@ export default function OrderDetailsPage() {
 
 			if (!data.payload) {
 				notificationService.error(data.message || 'Unable to load order', {
-					metadata: { orderId: id },
+					metadata: { orderId: orderIdParam },
 					component: 'OrderDetailPage',
 					action: 'fetchOrder',
 				})
@@ -74,37 +75,33 @@ export default function OrderDetailsPage() {
 		return subtotal + (order.salesTax ?? 0) + (order.shipping ?? 0) - (order.discount ?? 0)
 	}, [order, subtotal])
 
-	const statusTimeline: { label: string; status: DomainOrderStatus; complete: boolean }[] = [
-		{ label: 'Pending', status: DomainOrderStatus.Pending, complete: (order?.status ?? 0) >= DomainOrderStatus.Pending },
+	// Status timeline for order progress visualization
+	// Uses OrderStatusHelper for DRY compliance - zero magic strings
+	const statusTimeline: { label: string; status: OrderStatus; complete: boolean }[] = [
 		{
-			label: 'Processing',
-			status: DomainOrderStatus.Processing,
-			complete: (order?.status ?? 0) >= DomainOrderStatus.Processing,
+			label: OrderStatusHelper.getDisplay(OrderStatus.Pending),
+			status: OrderStatus.Pending,
+			complete: (order?.status ?? 0) >= OrderStatus.Pending,
 		},
-		{ label: 'Shipped', status: DomainOrderStatus.Shipped, complete: (order?.status ?? 0) >= DomainOrderStatus.Shipped },
 		{
-			label: 'Delivered',
-			status: DomainOrderStatus.Delivered,
-			complete: (order?.status ?? 0) >= DomainOrderStatus.Delivered,
+			label: OrderStatusHelper.getDisplay(OrderStatus.Processing),
+			status: OrderStatus.Processing,
+			complete: (order?.status ?? 0) >= OrderStatus.Processing,
+		},
+		{
+			label: OrderStatusHelper.getDisplay(OrderStatus.Shipped),
+			status: OrderStatus.Shipped,
+			complete: (order?.status ?? 0) >= OrderStatus.Shipped,
+		},
+		{
+			label: OrderStatusHelper.getDisplay(OrderStatus.Delivered),
+			status: OrderStatus.Delivered,
+			complete: (order?.status ?? 0) >= OrderStatus.Delivered,
 		},
 	]
 
-	const badgeStatus = useMemo(() => {
-		switch (order?.status) {
-			case DomainOrderStatus.Pending:
-				return BadgeOrderStatus.Pending
-			case DomainOrderStatus.Processing:
-				return BadgeOrderStatus.Processing
-			case DomainOrderStatus.Shipped:
-				return BadgeOrderStatus.Shipped
-			case DomainOrderStatus.Delivered:
-				return BadgeOrderStatus.Delivered
-			case DomainOrderStatus.Cancelled:
-				return BadgeOrderStatus.Cancelled
-			default:
-				return BadgeOrderStatus.Pending
-		}
-	}, [order?.status])
+	// No status mapping needed - use OrderStatus directly
+	const badgeStatus = order?.status ?? OrderStatus.Pending
 
 	// Column definitions for line items table
 	const lineItemColumns = useMemo<ColumnDef<any>[]>(
@@ -237,7 +234,7 @@ export default function OrderDetailsPage() {
 								))}
 							</div>
 
-							{order.status === DomainOrderStatus.Cancelled && (
+							{order.status === OrderStatus.Cancelled && (
 								<div className="mt-4 rounded-lg border border-error/40 bg-error/5 p-3 text-sm text-error">
 									This order has been cancelled and will not progress further.
 								</div>

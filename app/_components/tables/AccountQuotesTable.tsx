@@ -147,7 +147,7 @@ export default function AccountQuotesTable() {
 			notificationService.error(error.message || 'Failed to load quotes', {
 				metadata: {
 					error,
-					userId: user?.id,
+					userId: user?.id || undefined,
 				},
 				component: 'AccountQuotesTable',
 				action: 'fetchQuotes',

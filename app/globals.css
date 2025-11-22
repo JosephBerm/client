@@ -4,7 +4,11 @@
 	themes: light --default, dark --prefersdark, corporate, sunset, winter, luxury;
 }
 
-/* Treat 'dark', 'luxury', and 'sunset' themes as dark variant */
+/* Treat dark themes as dark variant
+ * IMPORTANT: Keep in sync with ThemeHelper.getDarkThemes()
+ * Dark themes: dark, luxury, sunset
+ * If you add a new dark theme to ThemeHelper, add its selector here too.
+ */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, [data-theme=luxury], [data-theme=luxury] *, [data-theme=sunset], [data-theme=sunset] *));
 
 @layer base {
@@ -15,6 +19,9 @@
 
 		/* Semantic Colors - Use DaisyUI theme tokens */
 		--toastify-color-error: oklch(var(--er));
+		--toastify-color-success: oklch(var(--su));
+		--toastify-color-warning: oklch(var(--wa));
+		--toastify-color-info: oklch(var(--in));
 		--error-color: oklch(var(--er));
 		--error-color-tint: oklch(var(--er) / 0.8);
 
@@ -841,7 +848,11 @@
 /* Dark mode shimmer color overrides - Root level for proper cascade
  * Uses black shimmer for visibility on white backgrounds (opposite of light mode)
  * Industry best practice: darker shimmer on light backgrounds
- * Matches DaisyUI theme system via data-theme attribute (dark/luxury/sunset themes)
+ * Matches DaisyUI theme system via data-theme attribute (dark themes)
+ * 
+ * IMPORTANT: Keep in sync with ThemeHelper.getDarkThemes()
+ * Dark themes: dark, luxury, sunset
+ * If you add a new dark theme to ThemeHelper, add its selector here too.
  */
 [data-theme=dark],
 [data-theme=luxury],

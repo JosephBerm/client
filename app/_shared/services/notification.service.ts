@@ -583,7 +583,7 @@ class NotificationService {
 			...metadata,
 			correlationId,
 			interactionType,
-			timestamp: new Date(),
+			interactionTimestamp: new Date().toISOString(),
 		})
 
 		// Future: Send to analytics service

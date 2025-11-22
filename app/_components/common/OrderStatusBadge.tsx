@@ -2,28 +2,30 @@
  * OrderStatusBadge Component
  *
  * Specialized badge component for displaying order status with appropriate colors.
- * Maps order status numeric values to human-readable labels and color variants.
- * Provides consistent visual representation of order statuses throughout the app.
+ * Uses centralized OrderStatusHelper for display names and variants (FAANG pattern).
+ * 
+ * **REFACTORED:** Now uses central OrderStatus enum and OrderStatusHelper
+ * - ✅ No more duplicate enum definitions
+ * - ✅ Zero magic strings  
+ * - ✅ Type-safe with OrderStatusHelper
+ * - ✅ Consistent with entire codebase
  *
  * **Features:**
- * - Order status enum with numeric values
- * - Automatic color mapping based on status
- * - Human-readable status labels
+ * - Order status enum from central @_classes/Enums
+ * - Automatic color mapping via OrderStatusHelper.getVariant()
+ * - Human-readable labels via OrderStatusHelper.getDisplay()
  * - DaisyUI Badge integration
  * - Custom className support
  * - Type-safe status handling
  *
- * **Status Mapping:**
- * - Pending (0): Warning (yellow) - Awaiting review
- * - Processing (1): Info (blue) - Being prepared
- * - Shipped (2): Primary (brand color) - In transit
- * - Delivered (3): Success (green) - Completed
- * - Cancelled (4): Error (red) - Cancelled
- *
- * **Note:**
- * This component uses a local OrderStatus enum for backward compatibility.
- * Consider migrating to use OrderStatus from @_classes/Enums and
- * OrderStatusName/OrderStatusVariants from @_classes/EnumsTranslations.
+ * **Status Mapping (via OrderStatusHelper):**
+ * - Cancelled (0): Error (red)
+ * - Pending (100): Warning (yellow)
+ * - WaitingCustomerApproval (200): Warning (yellow)
+ * - Placed (300): Info (blue)
+ * - Processing (400): Warning (yellow)
+ * - Shipped (500): Info (blue)
+ * - Delivered (600): Success (green)
  *
  * **Use Cases:**
  * - Order list tables
@@ -33,8 +35,9 @@
  *
  * @example
  * ```tsx
- * import OrderStatusBadge, { OrderStatus } from '@_components/common/OrderStatusBadge';
- *
+ * import OrderStatusBadge from '@_components/common/OrderStatusBadge'
+ * import { OrderStatus } from '@_classes/Enums'
+ * 
  * // Basic usage
  * <OrderStatusBadge status={OrderStatus.Pending} />
  * <OrderStatusBadge status={OrderStatus.Delivered} />
@@ -50,7 +53,7 @@
  *   accessorKey: 'status',
  *   header: 'Status',
  *   cell: ({ getValue }) => (
- *     <OrderStatusBadge status={getValue() as number} />
+ *     <OrderStatusBadge status={getValue() as OrderStatus} />
  *   )
  * }
  *
@@ -58,7 +61,7 @@
  * {order.status === OrderStatus.Delivered && (
  *   <div>
  *     <OrderStatusBadge status={order.status} />
- *     <span className="ml-2">Thank you for your order!</span>
+ *     <span>Thank you for your order!</span>
  *   </div>
  * )}
  * ```
@@ -66,39 +69,23 @@
  * @module OrderStatusBadge
  */
 
-import Badge from '@_components/ui/Badge'
-
-/**
- * Order status enumeration.
- * Maps order statuses to numeric values for backend compatibility.
- *
- * @deprecated Consider using OrderStatus from @_classes/Enums instead.
- */
-export enum OrderStatus {
-	/** Order is pending review */
-	Pending = 0,
-	/** Order is being processed/prepared */
-	Processing = 1,
-	/** Order has been shipped */
-	Shipped = 2,
-	/** Order has been delivered */
-	Delivered = 3,
-	/** Order has been cancelled */
-	Cancelled = 4,
-}
+import classNames from 'classnames'
+import { OrderStatus } from '@_classes/Enums'
+import OrderStatusHelper from '@_classes/Helpers/OrderStatusHelper'
 
 /**
  * OrderStatusBadge component props interface.
  */
 interface OrderStatusBadgeProps {
 	/**
-	 * Order status value (enum or number).
-	 * Should match one of the OrderStatus enum values.
+	 * Order status enum value (from central enum)
+	 * Numeric values: Cancelled=0, Pending=100, WaitingCustomerApproval=200,
+	 * Placed=300, Processing=400, Shipped=500, Delivered=600
 	 */
-	status: OrderStatus | number
+	status: OrderStatus
 
 	/**
-	 * Additional CSS classes to apply to the badge.
+	 * Optional additional CSS classes
 	 */
 	className?: string
 }
@@ -106,48 +93,42 @@ interface OrderStatusBadgeProps {
 /**
  * OrderStatusBadge Component
  *
- * Badge component that displays order status with appropriate color and label.
- * Handles status to color/label mapping internally.
+ * Renders a colored badge with the order status label.
+ * Uses OrderStatusHelper for FAANG-level type-safety and DRY compliance.
  *
- * **Status Configuration:**
- * Each status maps to:
- * - label: Human-readable text
- * - variant: Badge color variant
+ * **Implementation:**
+ * - Display name: OrderStatusHelper.getDisplay(status)
+ * - Badge variant: OrderStatusHelper.getVariant(status)
+ * - Zero hardcoded strings or magic values
  *
- * **Color Meanings:**
- * - Warning (yellow): Needs attention or action
- * - Info (blue): Informational, in progress
- * - Primary (brand): Important active state
- * - Success (green): Completed successfully
- * - Error (red): Failed or cancelled
- * - Neutral (gray): Unknown or default
+ * **DaisyUI Badge Variants:**
+ * - success: Green background (Delivered)
+ * - error: Red background (Cancelled)
+ * - warning: Yellow/orange background (Pending, WaitingCustomerApproval, Processing)
+ * - info: Blue background (Placed, Shipped)
  *
  * @param props - Component props including status and className
  * @returns OrderStatusBadge component
  */
 export default function OrderStatusBadge({ status, className }: OrderStatusBadgeProps) {
-	const getStatusConfig = (status: number) => {
-		switch (status) {
-			case OrderStatus.Pending:
-				return { label: 'Pending', variant: 'warning' as const }
-			case OrderStatus.Processing:
-				return { label: 'Processing', variant: 'info' as const }
-			case OrderStatus.Shipped:
-				return { label: 'Shipped', variant: 'primary' as const }
-			case OrderStatus.Delivered:
-				return { label: 'Delivered', variant: 'success' as const }
-			case OrderStatus.Cancelled:
-				return { label: 'Cancelled', variant: 'error' as const }
-			default:
-				return { label: 'Unknown', variant: 'neutral' as const }
-		}
-	}
-
-	const config = getStatusConfig(status)
+	// Get display name and variant from OrderStatusHelper (zero magic strings!)
+	const displayName = OrderStatusHelper.getDisplay(status)
+	const variant = OrderStatusHelper.getVariant(status)
 
 	return (
-		<Badge variant={config.variant} className={className}>
-			{config.label}
-		</Badge>
+		<span
+			className={classNames(
+				'badge',
+				{
+					'badge-success': variant === 'success',
+					'badge-error': variant === 'error',
+					'badge-warning': variant === 'warning',
+					'badge-info': variant === 'info',
+				},
+				className
+			)}
+		>
+			{displayName}
+		</span>
 	)
 }

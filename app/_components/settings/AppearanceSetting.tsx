@@ -29,25 +29,9 @@
 
 import { useMemo } from 'react'
 import { useUserSettingsStore } from '@_features/settings'
+import { ThemeHelper } from '@_classes/Helpers'
 import { Theme } from '@_classes/SharedEnums'
 import Select from '@_components/ui/Select'
-
-/**
- * Maps theme enum values to display names.
- * 
- * Provides user-friendly labels for theme options in the dropdown.
- * 
- * @constant
- */
-const themeDisplayNames: Record<Theme, string> = {
-	// New requested themes
-	[Theme.Light]: 'Light (default)',
-	[Theme.Dark]: 'Dark (default)',
-	[Theme.Corporate]: 'Corporate',
-	[Theme.Sunset]: 'Sunset',
-	[Theme.Winter]: 'Winter',
-	[Theme.Luxury]: 'Luxury',
-}
 
 /**
  * Appearance Setting Component
@@ -70,11 +54,11 @@ export default function AppearanceSetting() {
 	const currentTheme = useUserSettingsStore((state) => state.currentTheme)
 	const setTheme = useUserSettingsStore((state) => state.setTheme)
 
-	// Convert theme options to select options
+	// Convert theme options to select options (uses ThemeHelper for labels)
 	const themeOptions = useMemo(() => {
-		return Object.entries(themeDisplayNames).map(([value, label]) => ({
-			value,
-			label,
+		return ThemeHelper.toList.map((theme) => ({
+			value: theme.value,
+			label: theme.display,
 		}))
 	}, [])
 
