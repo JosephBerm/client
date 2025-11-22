@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
-import { notificationService } from '@_shared'
+import { notificationService, useRouteParam } from '@_shared'
 import { Mail, Phone, Building2, MapPin, PackageSearch } from 'lucide-react'
 
 import Card from '@_components/ui/Card'
@@ -38,9 +38,8 @@ const STATUS_CONFIG: Record<
 }
 
 export default function QuoteDetailsPage() {
-	const params = useParams<{ id?: string }>()
 	const router = useRouter()
-	const quoteId = params?.id ?? ''
+	const quoteId = useRouteParam('id')
 
 	const [quote, setQuote] = useState<Quote | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
@@ -59,7 +58,7 @@ export default function QuoteDetailsPage() {
 
 			if (!data.payload) {
 				notificationService.error(data.message || 'Unable to load quote', {
-					metadata: { quoteId: id },
+					metadata: { quoteId },
 					component: 'QuoteDetailPage',
 					action: 'fetchQuote',
 				})

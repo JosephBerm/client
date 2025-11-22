@@ -29,4 +29,5 @@ export { useScrollReveal } from './useScrollReveal'
 export type { UseScrollRevealOptions, UseScrollRevealReturn } from './useScrollReveal'
 export { useSharedIntersectionObserver } from './useSharedIntersectionObserver'
 export type { SharedObserverOptions, IntersectionCallback } from './useSharedIntersectionObserver'
+export { useRouteParam, useRouteParams, useRouteParamValidated } from './useRouteParam'
 

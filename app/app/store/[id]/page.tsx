@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { notificationService } from '@_shared'
+import { useRouter } from 'next/navigation'
+import { notificationService, useRouteParam } from '@_shared'
 
 import Card from '@_components/ui/Card'
 import { InternalPageHeader } from '../../_components'
@@ -13,9 +13,8 @@ import { API } from '@_shared'
 import { Routes } from '@_features/navigation'
 
 export default function ManageProductPage() {
-	const params = useParams<{ id?: string }>()
 	const router = useRouter()
-	const productId = useMemo(() => params?.id ?? '', [params])
+	const productId = useRouteParam('id')
 	const isCreateMode = productId === 'create'
 
 	const [product, setProduct] = useState<Product | null>(null)
@@ -38,7 +37,7 @@ export default function ManageProductPage() {
 
 			if (!data.payload) {
 				notificationService.error(data.message || 'Unable to load product', {
-					metadata: { productId: id },
+					metadata: { productId },
 					component: 'ProductDetailPage',
 					action: 'fetchProduct',
 				})

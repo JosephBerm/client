@@ -1,39 +1,48 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { API } from '@_shared'
-import { useRouter, useParams } from 'next/navigation'
+import { API, useRouteParam } from '@_shared'
+import { useRouter } from 'next/navigation'
 import Provider from '@_classes/Provider'
 import UpdateProviderForm from '@_components/forms/UpdateProviderForm'
 // Styles migrated to Tailwind
 
 const Page = () => {
-	const params = useParams()
+	const route = useRouter()
+	const providerId = useRouteParam('id')
 
 	const [provider, setProvider] = useState<Provider>(new Provider({}))
 	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const route = useRouter()
-
-	const userId = params.id
-
-	const fetchProviders = async () => {
-		if (userId == 'create') return
-		const actualProviderId = parseInt(userId as string)
-		setIsLoading(true)
-		try {
-			const { data } = await API.Providers.get(actualProviderId)
-			if (data.payload) {
-				setProvider(data.payload as Provider)
-			}
-		} finally {
-			setIsLoading(false)
-		}
-	}
 
 	useEffect(() => {
-		fetchProviders()
-	}, [])
+		if (!providerId) {
+			route.back()
+			return
+		}
 
-	if (!userId) return route.back()
+		const fetchProviders = async () => {
+			if (providerId === 'create') return
+			
+			const actualProviderId = parseInt(providerId, 10)
+			
+			// Validate parsed number
+			if (isNaN(actualProviderId)) {
+				route.back()
+				return
+			}
+			
+			setIsLoading(true)
+			try {
+				const { data } = await API.Providers.get(actualProviderId)
+				if (data.payload) {
+					setProvider(data.payload as Provider)
+				}
+			} finally {
+				setIsLoading(false)
+			}
+		}
+
+		void fetchProviders()
+	}, [providerId, route])
 
 	return (
 		<div className='page-container'>

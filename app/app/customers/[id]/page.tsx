@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
-import { notificationService } from '@_shared'
+import { notificationService, useRouteParam } from '@_shared'
 
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../../_components'
@@ -18,9 +18,8 @@ import { API } from '@_shared'
 import { Routes } from '@_features/navigation'
 
 const Page = () => {
-	const params = useParams<{ id?: string }>()
 	const router = useRouter()
-	const customerId = params?.id ?? ''
+	const customerId = useRouteParam('id')
 
 	const [customer, setCustomer] = useState<Company>(new Company())
 	const [accounts, setAccounts] = useState<User[]>([])
@@ -44,11 +43,24 @@ const Page = () => {
 
 			try {
 				setLoadingCustomer(true)
-				const { data } = await API.Customers.get(Number(customerId))
+				const customerIdNum = Number(customerId)
+				
+				// Validate parsed number
+				if (!Number.isFinite(customerIdNum) || customerIdNum <= 0) {
+					notificationService.error('Invalid customer ID', {
+						metadata: { customerId },
+						component: 'CustomerDetailPage',
+						action: 'fetchCustomer',
+					})
+					router.back()
+					return
+				}
+				
+				const { data } = await API.Customers.get(customerIdNum)
 
 			if (!data.payload) {
 				notificationService.error(data.message || 'Unable to load customer', {
-					metadata: { customerId: id },
+					metadata: { customerId },
 					component: 'CustomerDetailPage',
 					action: 'fetchCustomer',
 				})

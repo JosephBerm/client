@@ -98,7 +98,8 @@ Below is a categorized list of reusable items. Each item links to a brief descri
   - All under [`app/_classes`](#desc-classes-root):
     - Base: `Guid.ts`, `PagedResult.ts`, `GenericSearchFilter.ts`, `CustomerSummary.ts`
     - Common: `Address.ts`, `Name.ts`
-    - Enums: `Enums.ts`, `SharedEnums.ts`, `EnumsTranslations.ts`, `Enums/OrderStatusEnumsHelper.ts`
+    - Enums: `Enums.ts`, `SharedEnums.ts`
+    - Helpers (FAANG Pattern): [`OrderStatusHelper.ts`](#desc-order-status-helper), [`ThemeHelper.ts`](#desc-theme-helper), [`NotificationTypeHelper.ts`](#desc-notification-type-helper), [`AccountRoleHelper.ts`](#desc-account-role-helper), [`QuoteStatusHelper.ts`](#desc-quote-status-helper), [`TypeOfBusinessHelper.ts`](#desc-type-of-business-helper)
     - Entities: `Company.ts`, `User.ts`, `Product.ts`, `ProductsCategory.ts`, `Provider.ts`, `Order.ts`, `Quote.ts`, `ContactRequest.ts`, `Notification.ts`, `UploadedFile.ts`, `Home.ts`, `HtmlImage.ts`, `About.ts`
     - Requests/Filters: `RequestClasses.ts`, `FinanceSearchFilter.ts`, `FinanceNumbers.ts`, `LoginCredentials.ts`, `PagedData.ts`, `CarouselTypes.ts`
 
@@ -269,6 +270,7 @@ Below is a categorized list of reusable items. Each item links to a brief descri
   - [_components/layouts/PageLayout.tsx](#desc-page-layout)
   - [_components/layouts/ClientPageLayout.tsx](#desc-client-page-layout)
   - [_components/common/ServiceWorkerRegistration.tsx](#desc-sw-registration)
+  - [_components/common/ToastProvider.tsx](#desc-toast-provider) (NPM: `react-toastify`)
   - [_components/common/LoadingSpinner.tsx](#desc-loading-spinner)
   - [_components/common/EmptyState.tsx](#desc-empty-state)
   - [_components/common/OrderStatusBadge.tsx](#desc-order-status-badge)
@@ -380,6 +382,24 @@ Domain models and DTOs (entities, enums, filters, requests). Keep these as the c
 
 #### app/_classes/About.ts {#desc-about-class}
 Static content management class for About page. Centralizes hero section, statistics, features, and CTA content. Provides type-safe interfaces for all content sections. Enables easy content updates without touching JSX. Follows same pattern as Home.ts for consistency.
+
+#### app/_classes/Helpers/OrderStatusHelper.ts {#desc-order-status-helper}
+FAANG-level enum helper for OrderStatus following Google/Netflix/Stripe exhaustive metadata pattern. Features: 550+ lines, complete lifecycle management, display names, badge variants (success/error/warning/info), descriptions, sort orders, categories (pending/active/completed/cancelled), workflow validation (allowed transitions), terminal state checks. Pattern: Record<OrderStatus, OrderStatusMetadata> ensures TypeScript enforces completeness. Methods: getDisplay(), getVariant(), getDescription(), getMetadata(), getCategory(), isTerminal(), getAllowedTransitions(), canTransition(), getStatusesByCategory(), getActiveStatuses(), getPendingStatuses(), getCompletedStatuses(), isValid(), sort(), getNextStatus(). Replaces: EnumsTranslations.OrderStatusName/OrderStatusVariants, scattered hardcoded status logic. Used by: OrderStatusBadge, order tables, order detail pages, status filters, workflow engines. Benefits: zero magic strings, single source of truth, type-safe workflow validation, self-documenting.
+
+#### app/_classes/Helpers/ThemeHelper.ts {#desc-theme-helper}
+FAANG-level theme metadata system following EnumHelper pattern. Centralizes all theme properties in exhaustive metadata map. Features: type-safe theme queries (isDarkTheme, getDarkThemes), display name mapping, toast theme conversion, category filtering. Pattern: Record<Theme, ThemeMetadata> ensures TypeScript enforces completeness - adding new theme to enum requires metadata entry. Benefits: single source of truth for theme properties, eliminates hardcoded theme arrays across codebase, scalable to 100+ themes, self-documenting with descriptions. Methods: toList, isDarkTheme(), getToastTheme(), getDisplayName(), getThemesByCategory(), isValidTheme(). Replaces scattered theme logic in ToastProvider, AppearanceSetting, and globals.css. Used by: ToastProvider (dynamic theme switching), AppearanceSetting (theme selector dropdown). Extensible: easy to add properties like primaryColor, contrast, fontScale.
+
+#### app/_classes/Helpers/NotificationTypeHelper.ts {#desc-notification-type-helper}
+FAANG-level enum helper for NotificationType (Info/Warning/Error). Features: display names, badge variants, descriptions, priority levels (1-3), icon names, ARIA roles for accessibility. Pattern: Record<NotificationType, NotificationTypeMetadata>. Methods: getDisplay(), getVariant(), getDescription(), getMetadata(), getPriority(), getIconName(), getAriaRole(), sortByPriority(), getByPriority(), getHighPriority(), isHighPriority(), isValid(). Used by: notification components, toast service, alert components, priority sorting/filtering. Benefits: zero hardcoded notification strings, type-safe priority checks, accessibility metadata centralized, extensible for future notification types.
+
+#### app/_classes/Helpers/AccountRoleHelper.ts {#desc-account-role-helper}
+FAANG-level enum helper for AccountRole (Customer/Admin) with RBAC utilities. Features: display names, short labels, badge variants, descriptions, permission levels. Pattern: Record<AccountRole, AccountRoleMetadata>. Methods: getDisplay(), getShortLabel(), getVariant(), getDescription(), getMetadata(), getLevel(), isAdmin(), isCustomer(), hasHigherPermissionsThan(), hasPermissionLevel(), sortByLevel(), isValid(). Used by: RoleBadge, navigation filtering, route protection, permission checks, role management UI. Benefits: centralized RBAC logic, type-safe permission comparisons, zero magic role strings, self-documenting permission hierarchy, extensible for future roles.
+
+#### app/_classes/Helpers/QuoteStatusHelper.ts {#desc-quote-status-helper}
+FAANG-level enum helper for QuoteStatus (Unread/Read). Features: display names, badge variants (warning/info), descriptions, icon names, attention flags. Pattern: Record<QuoteStatus, QuoteStatusMetadata>. Methods: getDisplay(), getVariant(), getDescription(), getMetadata(), getIconName(), needsReview(), getStatusesNeedingAttention(), isValid(). Used by: quote tables, quote detail pages, staff notification systems, unread quote filters. Benefits: zero hardcoded quote status strings, type-safe attention checks, consistent UI variants, easy to extend for future statuses (Approved/Rejected/Expired).
+
+#### app/_classes/Helpers/TypeOfBusinessHelper.ts {#desc-type-of-business-helper}
+FAANG-level enum helper for TypeOfBusiness (Dentist/SurgeryCenter/Hospital/Veterinarian/Restaurant/Construction/Other). Features: display names, descriptions, icon names, industry categories (medical/hospitality/construction/other), example businesses. Pattern: Record<TypeOfBusiness, TypeOfBusinessMetadata>. Methods: getDisplay(), getDescription(), getMetadata(), getIconName(), getCategory(), getExamples(), getByCategory(), getMedicalTypes(), isMedical(), isValid(). Used by: customer forms, business type dropdowns, industry filtering, customer segmentation. Benefits: zero hardcoded business type strings, category-based filtering, helpful examples for UI, extensible for new business types, industry-specific logic centralized.
 
 
 ### Features: Auth
@@ -766,6 +786,9 @@ Client-rendering layout with providers and initializers.
 
 #### _components/common/ServiceWorkerRegistration.tsx {#desc-sw-registration}
 Registers the SW and handles updates.
+
+#### _components/common/ToastProvider.tsx {#desc-toast-provider}
+Theme-aware toast container component that automatically adapts react-toastify theme to current app theme. Client component that reads from useUserSettingsStore and uses ThemeHelper.getToastTheme() to determine if toasts should use 'light' or 'dark' theme. Re-renders only when theme changes (optimized selector). Features: automatic theme switching (dark/luxury/sunset → dark toasts, light/winter/corporate → light toasts), structured logging for theme changes (development only), respects reduced motion (delegated to notificationService), zero configuration for consumers. Pattern: Provider component wrapping ToastContainer with dynamic props. Replaces hardcoded theme="light" with reactive theme selection. Used in: app/layout.tsx (root level, single instance). Benefits: toasts feel native to current theme, perfect contrast in all themes, seamless theme transitions, FAANG-level UX.
 
 #### _components/common/LoadingSpinner.tsx {#desc-loading-spinner}
 Spinner component with size/variant props.

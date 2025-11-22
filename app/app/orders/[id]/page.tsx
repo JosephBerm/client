@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { notificationService } from '@_shared'
+import { useRouter } from 'next/navigation'
+import { notificationService, useRouteParam } from '@_shared'
 
 import Card from '@_components/ui/Card'
 import { InternalPageHeader } from '../../_components'
@@ -18,9 +18,8 @@ import { Routes } from '@_features/navigation'
 import { formatCurrency, formatDate } from '@_shared'
 
 export default function OrderDetailsPage() {
-	const params = useParams<{ id?: string }>()
 	const router = useRouter()
-	const orderIdParam = params?.id ?? ''
+	const orderIdParam = useRouteParam('id')
 
 	const [order, setOrder] = useState<Order | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
@@ -34,7 +33,20 @@ export default function OrderDetailsPage() {
 		const fetchOrder = async () => {
 			try {
 				setIsLoading(true)
-				const { data } = await API.Orders.get<Order>(Number(orderIdParam))
+				const orderId = Number(orderIdParam)
+				
+				// Validate parsed number
+				if (!Number.isFinite(orderId) || orderId <= 0) {
+					notificationService.error('Invalid order ID', {
+						metadata: { orderId: orderIdParam },
+						component: 'OrderDetailPage',
+						action: 'fetchOrder',
+					})
+					router.push(Routes.Orders.location)
+					return
+				}
+				
+				const { data } = await API.Orders.get<Order>(orderId)
 
 			if (!data.payload) {
 				notificationService.error(data.message || 'Unable to load order', {

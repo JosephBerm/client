@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
-import { notificationService } from '@_shared'
+import { notificationService, useRouteParam } from '@_shared'
 
 import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../../_components'
@@ -17,9 +17,8 @@ import { API } from '@_shared'
 import { Routes } from '@_features/navigation'
 
 const Page = () => {
-	const params = useParams<{ id?: string }>()
 	const router = useRouter()
-	const accountId = useMemo(() => params?.id ?? '', [params])
+	const accountId = useRouteParam('id')
 
 	const [account, setAccount] = useState<User | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
@@ -44,7 +43,7 @@ const Page = () => {
 
 			if (!data.payload) {
 				notificationService.error(data.message || 'Unable to load account', {
-					metadata: { accountId: id },
+					metadata: { accountId },
 					component: 'AccountDetailPage',
 					action: 'fetchAccount',
 				})
