@@ -48,7 +48,7 @@ export class NavigationService {
 	 * - **My Orders**: Orders, Quotes (customers only)
 	 * - **Management**: Products, Orders, Quotes (admins only)
 	 * - **Users**: Accounts, Customers, Providers (admins only)
-	 * - **Analytics**: Dashboard (admins only)
+	 * - **Analytics**: Reports, metrics, and insights (admins only)
 	 * - **Account**: Profile, Notifications (all users)
 	 * 
 	 * Each section contains routes with:
@@ -194,10 +194,10 @@ export class NavigationService {
 					routes: [
 					{
 						id: 'analytics-dashboard',
-						label: 'Dashboard',
+						label: 'Analytics',
 						href: '/app/analytics',
 						icon: 'bar-chart',
-						description: 'View reports and metrics',
+						description: 'Reports, metrics, and insights',
 					},
 					],
 					roles: [AccountRole.Admin],

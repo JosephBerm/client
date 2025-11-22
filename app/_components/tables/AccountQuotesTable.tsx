@@ -74,6 +74,8 @@ import { formatDate } from '@_shared'
 import { logger } from '@_core'
 import { useAuthStore } from '@_features/auth'
 import Quote from '@_classes/Quote'
+import { QuoteStatus } from '@_classes/Enums'
+import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import { API } from '@_shared'
 import { notificationService } from '@_shared'
 import { Routes } from '@_features/navigation'
@@ -87,7 +89,7 @@ import { Routes } from '@_features/navigation'
  *
  * **Data Fetching:**
  * - Triggered by useEffect when user.customer.id is available
- * - Calls API.Quotes.getAll() to fetch all quotes
+ * - Calls API.Quotes.search() with GenericSearchFilter to fetch quotes
  * - Filters by comparing quote.companyName to user.customer.name
  * - Sorts by createdAt descending
  * - Takes last 5 quotes only
@@ -127,20 +129,26 @@ export default function AccountQuotesTable() {
 			setIsLoading(true)
 			if (!user?.customer?.id) return
 
-		const { data } = await API.Quotes.getAll<Quote[]>()
-		if (!data.payload) {
-			notificationService.error(data.message || 'Failed to load quotes', {
-				component: 'AccountQuotesTable',
-				action: 'fetchQuotes',
-			})
-			return
-		}
+			// Use search endpoint with GenericSearchFilter (FAANG-level API design)
+			const searchFilter = new GenericSearchFilter()
+			searchFilter.pageSize = 100 // Get enough quotes to filter client-side
+			searchFilter.sortBy = 'createdAt'
+			searchFilter.sortOrder = 'desc'
 
-			const sortedQuotes = data.payload
+			const { data } = await API.Quotes.search(searchFilter)
+			if (!data.payload) {
+				notificationService.error(data.message || 'Failed to load quotes', {
+					component: 'AccountQuotesTable',
+					action: 'fetchQuotes',
+				})
+				return
+			}
+
+			// Filter and sort quotes for current user's company
+			const sortedQuotes = data.payload.data
 				.map((x: any) => new Quote(x))
 				.filter((q: Quote) => q.companyName === user.customer?.name)
-				.sort((a: Quote, b: Quote) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-				.slice(0, 5)
+				.slice(0, 5) // Take only last 5
 
 			setQuotes(sortedQuotes)
 		} catch (error: any) {
@@ -182,7 +190,6 @@ export default function AccountQuotesTable() {
 				accessorKey: 'status',
 				header: 'Status',
 				cell: ({ row }) => {
-					const { QuoteStatus } = require('@_classes/Enums')
 					const status = row.original.status
 					const variant = status === QuoteStatus.Read ? 'success' : 'warning'
 					return <Badge variant={variant}>{status}</Badge>

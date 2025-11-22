@@ -42,6 +42,7 @@ import { logger } from '@_core/logger'
  * - Uses Zustand store for theme state
  * - Re-renders only when theme changes (optimized)
  * - Graceful fallback to 'light' if theme loading
+ * - Uses default react-toastify transitions for smooth animations
  * 
  * @example
  * ```tsx
@@ -84,8 +85,6 @@ export default function ToastProvider() {
 			draggable
 			pauseOnHover
 			theme={toastTheme}
-			// Accessibility: Respect reduced motion
-			transition={undefined} // Let notificationService handle reduced motion
 		/>
 	)
 }
