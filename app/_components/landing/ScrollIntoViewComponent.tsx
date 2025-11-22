@@ -19,29 +19,6 @@ const SECTIONS = [
 ] as const
 
 /**
- * Legacy calculateScrollProgress function - DEPRECATED
- * 
- * This function is kept for backward compatibility but is no longer used.
- * The component now uses the useScrollProgress hook for better performance and reusability.
- * 
- * @deprecated Use useScrollProgress hook instead
- */
-function calculateScrollProgress(): number {
-	if (typeof window === 'undefined') return 0
-
-	const windowHeight = window.innerHeight
-	const documentHeight = document.documentElement.scrollHeight
-	const scrollTop = window.scrollY || document.documentElement.scrollTop
-
-	// Calculate progress as percentage
-	const scrollableHeight = documentHeight - windowHeight
-	if (scrollableHeight <= 0) return 0
-
-	const progress = (scrollTop / scrollableHeight) * 100
-	return Math.min(100, Math.max(0, progress))
-}
-
-/**
  * ScrollIntoViewComponent
  *
  * Elegant multi-variant navigation component with scroll spy functionality.
@@ -589,9 +566,8 @@ export default function ScrollIntoViewComponent() {
 		}
 	}, [])
 
-	// Legacy scroll progress state (kept for backward compatibility with calculateScrollProgress())
-	// Note: Now using useScrollProgress hook above, but keeping this state for existing references
-	// Sync with useScrollProgress hook
+	// Sync scroll progress state with useScrollProgress hook
+	// Industry best practice: Single source of truth for scroll progress
 	useEffect(() => {
 		setScrollProgress(smoothTimelineProgress)
 	}, [smoothTimelineProgress, setScrollProgress])
