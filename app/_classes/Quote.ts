@@ -75,6 +75,7 @@ import { CartProduct } from '@_classes/Product'
 import Address from './common/Address'
 import Name from '@_classes/common/Name'
 import Company from '@_classes/Company'
+import { parseDateSafe } from '@_lib/dates'
 // RichConstructor decorator not needed in modern Next.js
 
 /**
@@ -181,7 +182,7 @@ export default class Quote {
 			
 			// Parse creation date from string if needed
 			if (param.createdAt) {
-				this.createdAt = new Date(param.createdAt)
+				this.createdAt = parseDateSafe(param.createdAt) ?? new Date()
 			}
 		}
 	}

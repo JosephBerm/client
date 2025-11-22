@@ -7,7 +7,7 @@ import { API } from '@_shared'
 import { useRouter } from 'next/navigation'
 import { notificationService, useRouteParam } from '@_shared'
 import { NotificationType } from '@_classes/Enums'
-import { format } from 'date-fns'
+import { formatDateTime } from '@_lib/dates'
 
 function Page() {
 	const [notification, setNotification] = useState<Notification>(new Notification())
@@ -52,7 +52,7 @@ function Page() {
 			
 			<h3>{NotificationType[notification.type]}</h3>
 			<p> {notification.message}</p>
-			<p>{format(notification.createdAt, "dd-MM-yyyy")}</p>
+			<p>{formatDateTime(notification.createdAt)}</p>
 		</div>
 	)
 }

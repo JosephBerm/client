@@ -33,7 +33,7 @@ export default function StorePage() {
         header: 'Product Name',
         cell: ({ row }) => (
           <Link
-            href={`${Routes.Product.location}/${row.original.id}`}
+            href={Routes.Store.product(row.original.id)}
             className="link link-primary font-semibold"
           >
             {row.original.name}

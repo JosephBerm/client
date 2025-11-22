@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { format } from 'date-fns'
+import { formatDate } from '@_lib/dates'
 import { notificationService, useRouteParam } from '@_shared'
 
 import Button from '@_components/ui/Button'
@@ -146,14 +146,13 @@ const Page = () => {
 			{
 				accessorKey: 'createdAt',
 				header: 'Created',
-				cell: ({ row }) => {
-					const createdAt = row.original.createdAt ? new Date(row.original.createdAt as any) : null
-					return (
-						<span className="text-sm text-base-content/70">
-							{createdAt && !isNaN(createdAt.getTime()) ? format(createdAt, 'PP') : 'Not available'}
-						</span>
-					)
-				},
+			cell: ({ row }) => {
+				return (
+					<span className="text-sm text-base-content/70">
+						{formatDate(row.original.createdAt, 'short')}
+					</span>
+				)
+			},
 			},
 			{
 				id: 'actions',

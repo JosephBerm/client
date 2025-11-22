@@ -117,12 +117,6 @@ class Routes {
 		product: (id: string | number): string => `/store/product/${id}`,
 	}
 
-	/** @deprecated Use Routes.Store.product() instead */
-	public static Product = {
-		name: 'Products',
-		location: '/store/product',
-	}
-
 	/** Dashboard/home route for authenticated users (protected) */
 	public static Dashboard = {
 		name: 'Dashboard',

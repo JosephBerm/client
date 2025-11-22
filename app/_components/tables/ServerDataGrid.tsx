@@ -2,7 +2,7 @@
  * Server-Side Data Grid Component
  * 
  * High-level wrapper around DataGrid that automatically handles server-side pagination,
- * sorting, and filtering. Drop-in replacement for ServerDataTable with enhanced features.
+ * sorting, and filtering. Built with TanStack Table for maximum flexibility.
  * 
  * **Features:**
  * - Automatic server-side data fetching
@@ -49,7 +49,7 @@
  *   },
  * ];
  * 
- * // Basic usage with endpoint (drop-in replacement for ServerDataTable)
+ * // Basic usage with endpoint
  * <ServerDataGrid
  *   endpoint="/api/products/search"
  *   columns={columns}
@@ -81,7 +81,7 @@ import { createServerTableFetcher, useServerTable } from '@_shared'
 /**
  * ServerDataGrid component props interface.
  * 
- * Identical API to ServerDataTable for easy migration.
+ * Provides a complete server-side data grid experience.
  * 
  * @template TData - The type of data items in the table rows
  */
@@ -221,17 +221,15 @@ interface ServerDataGridProps<TData> {
  * - Throws error if neither `endpoint` nor `fetchData` is provided
  * - Loading states handled by DataGrid
  * 
- * **Migration from ServerDataTable:**
- * Simply change the import and add `ariaLabel` prop:
+ * **Usage Example:**
  * 
  * ```tsx
- * // Before
- * import ServerDataTable from '@_components/tables/ServerDataTable'
- * <ServerDataTable endpoint="/api/orders" columns={columns} />
- * 
- * // After
  * import ServerDataGrid from '@_components/tables/ServerDataGrid'
- * <ServerDataGrid endpoint="/api/orders" columns={columns} ariaLabel="Orders grid" />
+ * <ServerDataGrid 
+ *   endpoint="/api/orders" 
+ *   columns={columns} 
+ *   ariaLabel="Orders grid" 
+ * />
  * ```
  * 
  * @template TData - Type of data items in the table

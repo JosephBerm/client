@@ -868,6 +868,9 @@ Re-exports library helpers (formatters, validators, browser utils).
 #### _lib/formatters/* {#desc-lib-formatters}
 Formatters for currency, dates, enums; built on `date-fns`.
 
+#### _lib/dates/* {#desc-lib-dates}
+Centralized date utilities module built on `date-fns`. Provides type-safe date parsing, formatting, serialization, manipulation, and validation across the application. Replaces manual date operations with consistent, immutable utilities following FAANG-level best practices. All date operations should use these utilities instead of native Date methods.
+
 #### _helpers/icon-mapping.ts {#desc-icon-mapping}
 Map domain/icon names to `lucide-react` icons.
 

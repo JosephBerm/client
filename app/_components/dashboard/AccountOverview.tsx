@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import Link from 'next/link'
-import { format } from 'date-fns'
+import { formatDate } from '@_lib/dates'
 import { Building2, BellRing, ShoppingCart, FileText, Mail, Phone, MapPin, User as UserIcon, Calendar, ArrowRight } from 'lucide-react'
 import type { ComponentType } from 'react'
 
@@ -114,10 +114,7 @@ export default function AccountOverview() {
 	}
 
 	// Defensive date parsing with error handling (FAANG-level robustness)
-	const createdAt = user.createdAt ? new Date(user.createdAt as any) : null
-	const memberSince = createdAt && !isNaN(createdAt.getTime()) 
-		? format(createdAt, 'MMMM dd, yyyy') 
-		: 'Not available'
+	const memberSince = formatDate(user.createdAt, 'long')
 
 	// Safe array counting with fallbacks
 	const notificationsCount = Array.isArray(user.notifications) ? user.notifications.length : 0
@@ -141,10 +138,8 @@ export default function AccountOverview() {
 	// Date of birth parsing with error handling
 	let formattedDateOfBirth: string | undefined
 	try {
-		const dateOfBirth = user.dateOfBirth ? new Date(user.dateOfBirth) : null
-		formattedDateOfBirth = dateOfBirth && !isNaN(dateOfBirth.getTime()) 
-			? format(dateOfBirth, 'MMMM dd, yyyy') 
-			: undefined
+		// dateOfBirth is already parsed in User class constructor
+		formattedDateOfBirth = user.dateOfBirth ? formatDate(user.dateOfBirth, 'long') : undefined
 	} catch (error) {
 		logger.error('Failed to format date of birth', {
 			component: COMPONENT_NAME,

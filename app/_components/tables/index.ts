@@ -7,7 +7,7 @@
  * @example
  * ```tsx
  * // Components
- * import { DataTable, ServerDataTable } from '@_components/tables';
+ * import { DataGrid, ServerDataGrid } from '@_components/tables';
  * 
  * // Utilities
  * import { calculateTotalItems, sanitizeString } from '@_components/tables';
@@ -24,7 +24,6 @@
 
 // Components
 // DataTable removed - use DataGrid instead
-export { default as ServerDataTable } from './ServerDataTable' // @deprecated - Use ServerDataGrid instead
 export { default as ServerDataGrid } from './ServerDataGrid'
 export { DataGrid } from './DataGrid' // Industry-standard name for div-based tables
 export type { DataGridProps } from './DataGrid'

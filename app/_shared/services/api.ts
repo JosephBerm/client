@@ -72,21 +72,11 @@ import FinanceSearchFilter from '@_classes/FinanceSearchFilter'
  * Use AuthService for login/signup/logout operations.
  */
 const API = {
-	/** 
-	 * Legacy login endpoint (prefer AuthService.login instead).
-	 * @deprecated Use AuthService.login for better error handling
-	 */
-	login: async (credentials: LoginCredentials) => await HttpService.post<any>('/account/login', credentials),
-	
-	/** 
-	 * Legacy signup endpoint (prefer AuthService.signup instead).
-	 * @deprecated Use AuthService.signup for better error handling
-	 */
-	signup: async (form: RegisterModel) => await HttpService.post<any>('/account/signup', form),
-	
 	/**
 	 * Account Management API
 	 * Handles user accounts, profiles, passwords, and analytics.
+	 * 
+	 * For authentication operations (login/signup), use AuthService instead.
 	 */
 	Accounts: {
 		/**

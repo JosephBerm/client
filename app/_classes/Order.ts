@@ -94,6 +94,7 @@ import { OrderStatus } from '@_classes/Enums'
 import { Product } from './Product'
 import Quote from './Quote'
 import Address from './common/Address'
+import { parseDateSafe } from '@_lib/dates'
 
 /**
  * Order Entity Class
@@ -211,7 +212,7 @@ export default class Order {
 			
 			// Parse creation date from string if needed
 			if (param.createdAt) {
-				this.createdAt = new Date(param.createdAt)
+				this.createdAt = parseDateSafe(param.createdAt) ?? new Date()
 			}
 			
 			// Deep copy customer object

@@ -23,10 +23,7 @@
  *   rememberUser: true
  * });
  * 
- * // Legacy API usage (prefer AuthService.login)
- * const response = await API.login(credentials);
- * 
- * // Recommended approach with AuthService
+ * // Use with AuthService for authentication
  * const result = await AuthService.login('johndoe', 'SecurePass123!', true);
  * if (result.success) {
  *   router.push('/app/dashboard');

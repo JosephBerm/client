@@ -38,10 +38,11 @@
 
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { Package, Building2, Heart, Eye, CheckCircle2 } from 'lucide-react'
 import { Product } from '@_classes/Product'
+import { serializeProduct, type SerializedProduct } from '@_lib/serializers/productSerializer'
 import ProductImage from '@_components/store/ProductImage'
 import AddToCartButton from '@_components/store/AddToCartButton'
 import { useCategoryNavigation } from '@_components/store/useCategoryNavigation'
@@ -170,6 +171,16 @@ export default function ProductCard({
 			}
 		}
 	}, [])
+	
+	// Serialize product for passing to child components (handles both Product class and plain objects)
+	const serializedProduct = useMemo(() => {
+		// If product is already a plain object (not a class instance), use it directly
+		if (!(product instanceof Product)) {
+			return product as SerializedProduct
+		}
+		// Otherwise serialize the Product class instance
+		return serializeProduct(product)
+	}, [product])
 
 	const { DIMENSIONS, STYLES, SPACING } = PRODUCT_CARD_CONSTANTS
 
@@ -191,7 +202,7 @@ export default function ProductCard({
 			<div className={STYLES.IMAGE_CONTAINER}>
 				{/* Product Image - Stock badge hidden for now (future implementation) */}
 				<ProductImage
-					product={product}
+					product={serializedProduct}
 					priority={priority}
 					showStockBadge={false}
 					size="md"

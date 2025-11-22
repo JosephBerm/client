@@ -73,6 +73,7 @@ import Company from '@_classes/Company'
 import Order from './Order'
 import Address from '@_classes/common/Address'
 import Name from '@_classes/common/Name'
+import { parseDateSafe } from '@_lib/dates'
 // RichConstructor decorator not needed in modern Next.js
 
 /**
@@ -106,7 +107,7 @@ export default class User {
 	public name: Name = new Name()
 	
 	/** Date of birth (optional) */
-	public dateOfBirth: Date | null = null
+	public dateOfBirth: Date | null | undefined = null
 	
 	/** Account creation timestamp */
 	public createdAt: Date = new Date()
@@ -178,7 +179,7 @@ export default class User {
 			
 			// Parse date of birth from string if needed
 			if (partial.dateOfBirth) {
-				this.dateOfBirth = new Date(partial.dateOfBirth)
+				this.dateOfBirth = parseDateSafe(partial.dateOfBirth)
 			}
 			
 			// Deep copy customer/company object
@@ -333,7 +334,7 @@ export class RegisterModel {
 	public name: Name = new Name()
 	
 	/** Optional date of birth */
-	public dateOfBirth?: Date
+	public dateOfBirth?: Date | null
 
 	/**
 	 * Creates a new RegisterModel instance.
@@ -362,7 +363,7 @@ export class RegisterModel {
 			
 			// Parse date of birth from string if needed
 			if (param.dateOfBirth) {
-				this.dateOfBirth = new Date(param.dateOfBirth)
+				this.dateOfBirth = parseDateSafe(param.dateOfBirth)
 			}
 		}
 	}

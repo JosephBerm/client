@@ -6,12 +6,16 @@
  * 
  * @example
  * ```typescript
- * import { formatCurrency, formatDate } from '@_lib'
+ * import { formatCurrency, formatDate, parseDate, addDays } from '@_lib'
  * ```
  * 
  * @module lib
  */
 
-// Formatters
+// Formatters (currency, text)
 export * from './formatters'
+
+// Date utilities (centralized date handling)
+// Clean wildcard export - no conflicts since formatDate is not exported from formatters
+export * from './dates'
 

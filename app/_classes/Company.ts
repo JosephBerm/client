@@ -64,6 +64,7 @@ import Quote from '@_classes/Quote'
 import User from '@_classes/User'
 import Order from '@_classes/Order'
 import Address from '@_classes/common/Address'
+import { parseDateSafe } from '@_lib/dates'
 
 /**
  * Company Entity Class
@@ -210,8 +211,7 @@ export default class Company {
 			
 			// Ensure createdAt is always a Date object
 			// Parse from string if provided, otherwise use current date
-			this.createdAt =
-				partial.createdAt instanceof Date ? partial.createdAt : new Date(partial.createdAt ?? Date.now())
+			this.createdAt = parseDateSafe(partial.createdAt) ?? new Date()
 		}
 	}
 }

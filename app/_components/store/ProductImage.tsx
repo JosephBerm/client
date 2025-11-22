@@ -46,7 +46,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Product } from '@_classes/Product'
+import { SerializedProduct, productHasImage, getProductFileName } from '@_lib/serializers/productSerializer'
 import { OptimizedImage, ImagePlaceholder, getProductImageUrl, useImageError, useImageAnalytics } from '@_features/images'
 import Badge from '@_components/ui/Badge'
 import { getStockStatus } from '@_features/products'
@@ -56,8 +56,8 @@ import { logger } from '@_core'
  * ProductImage component props interface.
  */
 export interface ProductImageProps {
-	/** Product data */
-	product: Product
+	/** Product data (serialized from Server Component) */
+	product: SerializedProduct
 	
 	/** 
 	 * Priority loading for above-the-fold images.
@@ -122,8 +122,8 @@ export default function ProductImage({
 	className,
 	hover = true,
 }: ProductImageProps) {
-	// Check if product has image
-	const hasImage = product.hasImage() && product.files.length > 0
+	// Check if product has image (using serialized product utilities)
+	const hasImage = productHasImage(product) && product.files.length > 0
 
 	// Get initial image URL
 	const initialImageUrl = hasImage && product.files[0]?.name

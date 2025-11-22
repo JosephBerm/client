@@ -59,6 +59,7 @@
 
 import User, { IUser } from '@_classes/User'
 import { NotificationType } from '@_classes/Enums'
+import { parseDateSafe } from '@_lib/dates'
 
 /**
  * Notification Entity Class
@@ -142,17 +143,17 @@ export default class Notification {
 			
 			// Parse read timestamp from string if needed
 			if (param.readAt) {
-				this.readAt = new Date(param.readAt)
+				this.readAt = parseDateSafe(param.readAt) ?? new Date()
 			}
 			
 			// Parse creation timestamp from string if needed
 			if (param.createdAt) {
-				this.createdAt = new Date(param.createdAt)
+				this.createdAt = parseDateSafe(param.createdAt) ?? new Date()
 			}
 			
 			// Parse update timestamp from string if needed
 			if (param.updatedAt) {
-				this.updatedAt = new Date(param.updatedAt)
+				this.updatedAt = parseDateSafe(param.updatedAt) ?? new Date()
 			}
 		}
 	}

@@ -131,7 +131,7 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 				middle: user.name?.middle || '',
 				last: user.name?.last || '',
 			},
-			dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth) : undefined,
+			dateOfBirth: user.dateOfBirth,
 			phone: user.phone || '',
 			mobile: user.mobile || '',
 			shippingDetails: user.shippingDetails || undefined,

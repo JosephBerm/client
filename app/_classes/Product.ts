@@ -62,6 +62,7 @@ import Provider from '@_classes/Provider'
 import Guid from '@_classes/Base/Guid'
 import HtmlImage from '@_classes/HtmlImage'
 import UploadedFile from '@_classes/UploadedFile'
+import { parseDateSafe } from '@_lib/dates'
 // RichConstructor decorator not needed in modern Next.js
 
 /**
@@ -174,8 +175,8 @@ export class Product {
 		this.images = product?.images?.length ? product.images.map((x) => new HtmlImage(x)) : []
 		
 		// Parse dates from strings if needed
-		this.createdAt = product?.createdAt ? new Date(product?.createdAt) : new Date()
-		this.updatedAt = product?.updatedAt ? new Date(product?.updatedAt) : new Date()
+		this.createdAt = parseDateSafe(product?.createdAt) ?? new Date()
+		this.updatedAt = parseDateSafe(product?.updatedAt) ?? new Date()
 	}
 
 	/**

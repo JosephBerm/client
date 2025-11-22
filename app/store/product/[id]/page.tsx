@@ -6,6 +6,7 @@ import Card from '@_components/ui/Card'
 import Badge from '@_components/ui/Badge'
 import ProductImageGallery from '@_components/store/ProductImageGallery'
 import { Product } from '@_classes/Product'
+import { serializeProduct } from '@_lib/serializers/productSerializer'
 import { API } from '@_shared'
 import { Routes } from '@_features/navigation'
 
@@ -38,6 +39,10 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 	}
 
 	const product = new Product(productPayload)
+	
+	// Serialize product for Client Components (Next.js RSC requirement)
+	// Server Components cannot pass class instances to Client Components
+	const serializedProduct = serializeProduct(product)
 
 	return (
 		<PageLayout
@@ -50,7 +55,7 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 					<div className="flex flex-col gap-6 md:flex-row">
 						<div className="flex w-full items-center justify-center md:w-1/2">
 							<ProductImageGallery
-								product={product}
+								product={serializedProduct}
 								priority={true}
 								showThumbnails={true}
 							/>

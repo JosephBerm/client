@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { format } from 'date-fns'
+import { formatDate } from '@_lib/dates'
 import { notificationService, useRouteParam } from '@_shared'
 import { Mail, Phone, Building2, MapPin, PackageSearch } from 'lucide-react'
 
@@ -121,9 +121,8 @@ export default function QuoteDetailsPage() {
 		return [name.first, name.middle, name.last].filter(Boolean).join(' ') || 'Quote contact'
 	}, [quote?.name])
 
-	const createdDate = quote?.createdAt ? new Date(quote.createdAt as any) : null
-	const formattedCreatedDate =
-		createdDate && !isNaN(createdDate.getTime()) ? format(createdDate, 'PPP') : 'Not available'
+	// Created date is already parsed in Quote class constructor
+	const formattedCreatedDate = formatDate(quote?.createdAt, 'long')
 
 	const statusConfig = quote ? STATUS_CONFIG[quote.status] ?? STATUS_CONFIG[QuoteStatus.Unread] : null
 

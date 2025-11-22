@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { format } from 'date-fns'
+import { formatDate } from '@_lib/dates'
 import { notificationService, useRouteParam } from '@_shared'
 
 import Button from '@_components/ui/Button'
@@ -72,10 +72,7 @@ const Page = () => {
 			? [account.name.first, account.name.middle, account.name.last].filter(Boolean).join(' ')
 			: account?.username ?? 'User'
 
-	const memberSince =
-		account?.createdAt && !isNaN(new Date(account.createdAt as any).getTime())
-			? format(new Date(account.createdAt as any), 'PPP')
-			: null
+	const memberSince = formatDate(account?.createdAt, 'long')
 
 	const title = isCreateMode ? 'Create Account' : `${accountName}`
 	const description = isCreateMode

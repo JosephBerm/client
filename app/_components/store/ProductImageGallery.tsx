@@ -34,7 +34,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Product } from '@_classes/Product'
+import { SerializedProduct, productHasImage } from '@_lib/serializers/productSerializer'
 import ProductImage from '@_components/store/ProductImage'
 import ImageGallery, { GalleryImage } from '@_components/store/ImageGallery'
 import { ImageLightbox, getProductImageUrl } from '@_features/images'
@@ -43,8 +43,8 @@ import { ImageLightbox, getProductImageUrl } from '@_features/images'
  * ProductImageGallery component props interface.
  */
 export interface ProductImageGalleryProps {
-	/** Product data */
-	product: Product
+	/** Product data (serialized from Server Component) */
+	product: SerializedProduct
 	
 	/** 
 	 * Priority loading for above-the-fold images.
@@ -93,7 +93,7 @@ export default function ProductImageGallery({
 
 	// Convert product files to gallery images
 	const galleryImages: GalleryImage[] = useMemo(() => {
-		if (!product.hasImage() || product.files.length === 0) {
+		if (!productHasImage(product) || product.files.length === 0) {
 			return []
 		}
 

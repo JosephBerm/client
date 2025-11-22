@@ -7,6 +7,7 @@ import FinanceNumbers from '@_classes/FinanceNumbers'
 import FinanceSearchFilter from '@_classes/FinanceSearchFilter'
 import { logger } from '@_core'
 import { API } from '@_shared'
+import { getDateRange, serializeDateOnly, parseDate, type DateRangePreset } from '@_lib'
 
 const TIME_RANGES = ['7d', '30d', '90d', '1y', 'custom'] as const
 type TimeRange = (typeof TIME_RANGES)[number]
@@ -99,25 +100,8 @@ const Page = () => {
 			return
 		}
 
-		const now = new Date()
-		const fromDate = new Date(now)
-
-		switch (range) {
-			case '7d':
-				fromDate.setDate(now.getDate() - 7)
-				break
-			case '30d':
-				fromDate.setDate(now.getDate() - 30)
-				break
-			case '90d':
-				fromDate.setDate(now.getDate() - 90)
-				break
-			case '1y':
-				fromDate.setFullYear(now.getFullYear() - 1)
-				break
-		}
-
-		const updatedFilter = mergeFilter(filter, { FromDate: fromDate, ToDate: now })
+		const dateRange = getDateRange(range as DateRangePreset)
+		const updatedFilter = mergeFilter(filter, { FromDate: dateRange.from, ToDate: dateRange.to })
 		setFilter(updatedFilter)
 		void applySearch(updatedFilter)
 	}
@@ -125,7 +109,7 @@ const Page = () => {
 	const handleDateChange =
 		(key: 'FromDate' | 'ToDate') =>
 		(event: ChangeEvent<HTMLInputElement>) => {
-			const value = event.target.value ? new Date(event.target.value) : null
+			const value = parseDate(event.target.value)
 			const updatedFilter = mergeFilter(filter, { [key]: value } as Partial<FinanceSearchFilter>)
 			setFilter(updatedFilter)
 		}
@@ -265,8 +249,8 @@ const Page = () => {
 								<input
 									type="date"
 									className="input input-bordered mt-1"
-									value={filter.FromDate ? filter.FromDate.toISOString().split('T')[0] : ''}
-									onChange={handleDateChange('FromDate')}
+							value={serializeDateOnly(filter.FromDate) ?? ''}
+							onChange={handleDateChange('FromDate')}
 								/>
 							</label>
 
@@ -275,8 +259,8 @@ const Page = () => {
 								<input
 									type="date"
 									className="input input-bordered mt-1"
-									value={filter.ToDate ? filter.ToDate.toISOString().split('T')[0] : ''}
-									onChange={handleDateChange('ToDate')}
+							value={serializeDateOnly(filter.ToDate) ?? ''}
+							onChange={handleDateChange('ToDate')}
 								/>
 							</label>
 

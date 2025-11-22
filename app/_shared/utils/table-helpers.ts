@@ -107,8 +107,8 @@ export function convertSortingToApi(sorting: SortingState): {
  *   initialPageSize: 20
  * });
  * 
- * // Or use directly with ServerDataTable
- * <ServerDataTable
+ * // Or use directly with ServerDataGrid
+ * <ServerDataGrid
  *   endpoint="/api/orders/search"
  *   columns={orderColumns}
  * />
@@ -174,8 +174,10 @@ export function createServerTableFetcher<T>(
  * Re-export formatters from @_lib for convenience.
  * These are pure functions moved to the lib layer for better organization.
  * 
- * @see {@link @_lib/formatters} for implementations
+ * formatDate comes from @_lib/dates, formatCurrency and truncate from @_lib/formatters
+ * 
+ * @see {@link @_lib} for all utility implementations
  */
-export { formatDate, formatCurrency, truncate } from '@_lib/formatters'
+export { formatDate, formatCurrency, truncate } from '@_lib'
 
 

@@ -19,6 +19,7 @@ import { API } from '@_shared'
 import Quote from '@_classes/Quote'
 import { Product, CartProduct } from '@_classes/Product'
 import { Routes } from '@_features/navigation'
+import { formatDateForInput, addDays, serializeDate } from '@_lib'
 
 // Force dynamic rendering due to useSearchParams in Navbar
 export const dynamic = 'force-dynamic'
@@ -59,20 +60,12 @@ export default function CartPage() {
 	const removeFromCart = useCartStore((state) => state.removeFromCart)
 	const clearCart = useCartStore((state) => state.clearCart)
 
-	// Format date as YYYY-MM-DD for HTML date input
-	const formatDateForInput = (date: Date): string => {
-		const year = date.getFullYear()
-		const month = String(date.getMonth() + 1).padStart(2, '0')
-		const day = String(date.getDate()).padStart(2, '0')
-		return `${year}-${month}-${day}`
-	}
-
 	const form = useZodForm(quoteSchema, {
 		defaultValues: {
 			customerId: user?.customerId || 0,
 			items: [],
 			notes: '',
-			validUntil: formatDateForInput(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)) as any, // 30 days from now (YYYY-MM-DD format)
+			validUntil: formatDateForInput(addDays(new Date(), 30)) as any, // 30 days from now (YYYY-MM-DD format)
 		},
 	})
 
@@ -183,7 +176,7 @@ export default function CartPage() {
 				description: values.notes || '',
 				// CRITICAL FIX: Include validUntil from form
 				// Convert string date back to Date object if needed
-				...(values.validUntil && { validUntil: new Date(values.validUntil) }),
+				...(values.validUntil && { validUntil: serializeDate(values.validUntil) }),
 			})
 
 			const response = await API.Public.sendQuote(quoteData)

@@ -64,6 +64,7 @@ import Link from 'next/link'
 import { Trash2, ShoppingBag } from 'lucide-react'
 import { CartItem as CartItemType } from '@_features/cart'
 import { Product } from '@_classes/Product'
+import { serializeProduct } from '@_lib/serializers/productSerializer'
 import QuantitySelector from '@_components/ui/QuantitySelector'
 import Button from '@_components/ui/Button'
 import ProductImage from '@_components/store/ProductImage'
@@ -246,7 +247,7 @@ export default function CartItem({
 					{hasProductDetails && product ? (
 						<div className="w-full h-full">
 							<ProductImage
-								product={product}
+								product={product instanceof Product ? serializeProduct(product) : product}
 								size="md"
 								priority={false}
 								className="w-full h-full object-cover"
