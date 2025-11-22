@@ -131,7 +131,8 @@ export default function InternalPageHeader({
 		<header
 			className={classNames(
 				'flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between',
-				'mb-6 md:mb-8',
+				// FAANG-level mobile-first spacing: More generous on mobile, elegant on desktop
+				'mb-6 sm:mb-7 md:mb-8',
 				className
 			)}
 			aria-busy={loading}

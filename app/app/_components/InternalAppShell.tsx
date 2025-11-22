@@ -232,8 +232,9 @@ export default function InternalAppShell({ children, user }: InternalAppShellPro
 					// Desktop: Fixed left margin for permanent sidebar (384px)
 					// Mobile: No margin (sidebar is overlay)
 					'lg:ml-96',
-					// Mobile: Extra top padding for hamburger menu
-					'pt-16 lg:pt-8'
+					// Mobile: Top padding for fixed header + breathing room
+					// FAANG standard: 64px header + 24px spacing = 88px total
+					'pt-24 sm:pt-24 lg:pt-8'
 				)}
 			>
 				{/* Mobile: Hamburger Menu Header */}
@@ -275,8 +276,8 @@ export default function InternalAppShell({ children, user }: InternalAppShellPro
 					</div>
 				)}
 
-				{/* Breadcrumb Navigation */}
-				<Breadcrumb className="mb-6" />
+				{/* Breadcrumb Navigation - FAANG-level spacing (mobile-first) */}
+				<Breadcrumb className="mb-5 sm:mb-6 lg:mb-6" />
 
 				{/* Page Content */}
 				<div className="mx-auto max-w-screen-2xl">

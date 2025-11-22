@@ -202,9 +202,12 @@ export default function AccountQuotesTable() {
 	)
 
 	return (
-		<div className="card bg-base-100 shadow-xl">
-			<div className="card-body">
-				<h2 className="card-title">Recent Quotes</h2>
+		<div className="card bg-base-100 border border-base-300 shadow-xl !rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-2xl motion-safe:transition-all w-full min-w-0">
+			<div className="card-body p-5 sm:p-6 md:p-8 min-w-0 overflow-hidden">
+				<h2 className="card-title text-lg sm:text-xl md:text-2xl font-semibold mb-4 sm:mb-6 text-base-content">
+					Recent Quotes
+				</h2>
+				<div className="min-w-0 overflow-hidden">
 				<DataGrid
 					columns={columns}
 					data={quotes}
@@ -213,6 +216,7 @@ export default function AccountQuotesTable() {
 					emptyMessage="No quotes yet"
 					manualPagination={false}
 				/>
+				</div>
 			</div>
 		</div>
 	)
