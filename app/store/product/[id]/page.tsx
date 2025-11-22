@@ -15,6 +15,10 @@ interface ProductPageParams {
 	}>
 }
 
+/**
+ * Format currency value to USD
+ * NOTE: Not used in quote-based model, but kept for potential future use
+ */
 const formatCurrency = (value: number) =>
 	new Intl.NumberFormat('en-US', {
 		style: 'currency',
@@ -65,7 +69,16 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 									)}
 								</div>
 
-								<p className="text-3xl font-semibold text-primary">{formatCurrency(product.price)}</p>
+								{/* Quote-Based Pricing - No price displayed per business model */}
+								<div className="flex items-center gap-2">
+									<p className="text-2xl font-semibold text-primary">Request Quote</p>
+									<Badge variant="info" size="sm" tone="subtle">
+										Quote-Based Pricing
+									</Badge>
+								</div>
+								<p className="text-sm text-base-content/60 mt-1">
+									Personalized pricing available upon request. Add to cart to receive a custom quote.
+								</p>
 
 								<p className="text-sm text-base-content/70">
 									{product.description || 'Detailed product description will be provided by MedSource Pro.'}

@@ -405,9 +405,9 @@ export default function AccountOverview() {
 				{user.customer && user.customerId && user.customerId > 0 && (
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 						{user.customer.email && (
-							<div className="flex items-center gap-2 min-w-0">
+							<div className="flex items-center gap-2 min-w-0 w-full">
 								<Mail className="h-4 w-4 text-base-content/50 shrink-0" />
-								<p className={VALUE_CLASS} title={user.customer.email}>
+								<p className="text-sm sm:text-sm text-base-content/80 truncate min-w-0 flex-1" title={user.customer.email}>
 									{user.customer.email}
 								</p>
 							</div>

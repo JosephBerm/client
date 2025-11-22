@@ -6,16 +6,16 @@
  *
  * **Features:**
  * - Mobile-first responsive design
- * - Hamburger menu for mobile navigation
+ * - Hamburger menu for mobile navigation (unauthenticated users)
  * - Sticky positioning (always visible)
  * - Brand logo with medical cross icon
- * - Clean navigation links: Home, About Us, Store, Contact
+ * - Clean navigation links: Home, About Us, Store, Contact (always visible)
  * - Shopping cart with item count badge
  * - Login button or user menu based on authentication
  * - Accessible and semantic HTML
  * - Integration with sidebar for authenticated users
  *
- * **Navigation Links:**
+ * **Navigation Links (Always Visible):**
  * - Home (/)
  * - About Us (/about-us)
  * - Store (/store)
@@ -23,14 +23,21 @@
  * - Cart (/cart)
  * - Login: Opens modal via login button (no dedicated route)
  *
+ * **FAANG-Level UX Design:**
+ * - Public navigation links are always visible regardless of authentication state
+ * - Follows industry best practices (Amazon, Google, Netflix) for consistent navigation
+ * - Authenticated users have additional routes via Sidebar, but public routes remain accessible
+ * - Ensures discoverability and maintains consistent user experience
+ *
  * **Mobile Behavior (< 768px):**
- * - Shows hamburger menu button
- * - Navigation links hidden in mobile menu
- * - Compact layout with essential elements
+ * - Unauthenticated: Shows hamburger menu with navigation links
+ * - Authenticated: Shows sidebar menu button (sidebar contains internal routes)
+ * - Navigation links visible in navbar on desktop, accessible via sidebar on mobile
  *
  * **Desktop Behavior (>= 768px):**
- * - Full horizontal navigation
- * - All links visible in navbar
+ * - Full horizontal navigation with all public links always visible
+ * - Authenticated users: Navbar (public routes) + Sidebar (internal routes)
+ * - Unauthenticated users: Navbar (public routes) only
  * - Spacious, clean layout
  *
  * @module Navbar
@@ -241,20 +248,24 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 					</Link>
 					</div>
 
-			{/* Center: Desktop Navigation Links (public routes only when not authenticated) */}
-			{!isAuthenticated && (
+			{/* Center: Desktop Navigation Links (always visible for all users) */}
+			{/* 
+				FAANG-Level UX: Public navigation should always be accessible regardless of auth state.
+				This follows industry best practices (Amazon, Google, Netflix) where navigation remains
+				consistent. Authenticated users have additional routes via Sidebar, but public routes
+				(Home, About, Store, Contact) should always be accessible for discoverability and UX consistency.
+			*/}
 			<div className="hidden flex-1 items-center justify-center gap-6 md:flex lg:gap-8 xl:gap-12 2xl:gap-16">
-					{publicNavigationLinks.map((link) => (
-						<Link
-							key={link.name}
-							href={link.href}
-							className="whitespace-nowrap text-base font-medium text-base-content transition-all hover:scale-105 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-						>
-							{link.name}
-						</Link>
-					))}
-					</div>
-					)}
+				{publicNavigationLinks.map((link) => (
+					<Link
+						key={link.name}
+						href={link.href}
+						className="whitespace-nowrap text-base font-medium text-base-content transition-all hover:scale-105 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+					>
+						{link.name}
+					</Link>
+				))}
+			</div>
 
 			{/* Right Side: Cart, Settings (desktop), Login/User Menu, Mobile Menu */}
 			<div className="flex shrink-0 items-center gap-2">

@@ -6,6 +6,10 @@
  * Optimized for small screens with compact, modern layout.
  * 
  * **Mobile-First Design (FAANG Pattern):**
+ * - Very Narrow (< 200px): Icon-only mode (Slack/Discord/Linear pattern)
+ *   - Icon + Value only (label hidden for space efficiency)
+ *   - Ideal for collapsed sidebars or very narrow containers
+ *   - Maintains full accessibility via aria-label
  * - Mobile (< 640px): Compact horizontal layout
  *   - Icon left (small, subtle container)
  *   - Value + Label right (value prominent, label below)
@@ -151,7 +155,7 @@ export default function ActivityStatCard({ icon: Icon, label, value, href }: Act
 	return (
 		<Link 
 			href={href}
-			className="flex items-center gap-3 sm:flex-col sm:items-center sm:gap-2 p-3.5 sm:p-4 md:p-5 rounded-lg sm:rounded-xl border border-base-300 bg-base-100 transition-all duration-200 hover:bg-base-200 hover:border-primary/30 motion-safe:hover:scale-[1.02] sm:motion-safe:hover:scale-105 group min-w-0 w-full"
+			className="flex items-center gap-3 sm:flex-col sm:items-center sm:gap-2 p-3.5 sm:p-4 md:p-5 rounded-lg sm:rounded-xl border border-base-300 bg-base-100 transition-all duration-200 hover:bg-base-200 hover:border-primary/30 motion-safe:hover:scale-[1.02] sm:motion-safe:hover:scale-105 group min-w-0 sm:min-w-fit w-full"
 			aria-label={`${label}: ${value}`}
 		>
 			{/* Icon Container - Proportional, elegant */}
@@ -169,8 +173,8 @@ export default function ActivityStatCard({ icon: Icon, label, value, href }: Act
 					{value}
 				</p>
 				
-				{/* Label - Subtle, uppercase, right-aligned on mobile for elegance */}
-				<span className="text-xs sm:text-sm font-medium uppercase tracking-wider text-base-content/60 group-hover:text-primary transition-colors whitespace-nowrap">
+				{/* Label - Hidden at very narrow widths (< 200px) for icon-only mode (Slack/Discord/Linear pattern) */}
+				<span className="hidden min-[200px]:inline text-xs sm:text-sm font-medium uppercase tracking-wider text-base-content/60 group-hover:text-primary transition-colors whitespace-nowrap">
 					{label}
 				</span>
 			</div>

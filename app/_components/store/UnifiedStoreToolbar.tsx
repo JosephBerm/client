@@ -90,12 +90,10 @@ export default function UnifiedStoreToolbar({
 
 	return (
 		<div
-			className="sticky z-20 mb-6 rounded-lg border border-base-300 bg-base-100/98 shadow-md backdrop-blur-sm transition-shadow duration-200 hover:shadow-lg md:mb-8 md:rounded-xl"
-			style={{ top: 'var(--sticky-top-offset)' }}
+			className="py-3 sm:py-4 md:py-5"
 			role="search"
 			aria-label="Product search and filtering toolbar"
 		>
-			<div className="p-3 sm:p-4 md:p-5">
 				{/* Mobile/Tablet Layout: Stacked */}
 				<div className="flex flex-col gap-4 lg:hidden">
 					{/* Row 1: Search Input */}
@@ -381,7 +379,6 @@ export default function UnifiedStoreToolbar({
 						</Button>
 					</div>
 				</div>
-			</div>
 		</div>
 	)
 }

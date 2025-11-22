@@ -516,8 +516,12 @@ const StorePageContent = () => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
+	// Handle URL parameters (search and category)
 	useEffect(() => {
 		const querySearchText = searchParams.get('search')
+		const queryCategoryId = searchParams.get('category')
+
+		// Handle search parameter
 		if (querySearchText) {
 			setSearchTextAction(querySearchText)
 
@@ -526,7 +530,24 @@ const StorePageContent = () => {
 			const newQuery = params.toString()
 			router.replace(`/store${newQuery ? `?${newQuery}` : ''}`)
 		}
-	}, [router, searchParams, setSearchTextAction])
+
+		// Handle category parameter
+		if (queryCategoryId && categories.length > 0) {
+			const categoryId = parseInt(queryCategoryId, 10)
+			if (!isNaN(categoryId)) {
+				const category = categories.find((cat) => cat.id === categoryId)
+				if (category) {
+					setSelectedCategoriesAction([category])
+					
+					// Remove category from URL after applying filter
+					const params = new URLSearchParams(searchParams.toString())
+					params.delete('category')
+					const newQuery = params.toString()
+					router.replace(`/store${newQuery ? `?${newQuery}` : ''}`)
+				}
+			}
+		}
+	}, [router, searchParams, setSearchTextAction, setSelectedCategoriesAction, categories])
 
 	/**
 	 * Search products with proper debouncing and minimum character requirement.
@@ -669,119 +690,144 @@ const StorePageContent = () => {
 	}, [products, isLoading]) // Restore focus when products or loading state changes
 
 	return (
-		<ClientPageLayout
-			title="Store Catalog"
-			description="Browse MedSource Pro products and filter by category to find the supplies you need."
-			maxWidth="full"
-		>
-			{/* Unified Store Toolbar - Search, Sort, Filter, Results */}
-			<UnifiedStoreToolbar
-				searchText={searchText}
-				onSearchChange={handleSearchChange}
-				onSearchClear={handleSearchClear}
-				onSearchFocus={handleSearchFocus}
-				onSearchBlur={handleSearchBlur}
-				isSearchTooShort={isSearchTooShort}
-				displayedCount={displayedCount}
-				totalCount={totalResults}
-				isFiltered={isFiltered}
-				onClearFilters={clearFilters}
-				currentSort={currentSort}
-				onSortChange={handleSortChange}
-				currentPageSize={currentPageSize}
-				onPageSizeChange={handlePageSizeChange}
-				isLoading={isLoading}
-				searchInputRef={searchInputRef}
-			/>
+		<div className="min-h-screen w-full">
+			{/* Page Header - Static */}
+			<div className="border-b border-base-300 bg-base-100">
+				<div className="container mx-auto px-4 py-6 md:px-8 md:py-8 max-w-screen-2xl">
+					<h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-primary mb-2">
+						Store Catalog
+					</h1>
+					<p className="text-sm md:text-base text-base-content/70">
+						Browse MedSource Pro products and filter by category to find the supplies you need.
+					</p>
+				</div>
+			</div>
+
+			{/* Unified Store Toolbar - Sticky */}
+			<div className="sticky z-20 border-b border-base-300 bg-base-100/98 shadow-md backdrop-blur-sm" style={{ top: 'var(--sticky-top-offset)' }}>
+				<div className="container mx-auto px-4 md:px-8 max-w-screen-2xl">
+					<UnifiedStoreToolbar
+						searchText={searchText}
+						onSearchChange={handleSearchChange}
+						onSearchClear={handleSearchClear}
+						onSearchFocus={handleSearchFocus}
+						onSearchBlur={handleSearchBlur}
+						isSearchTooShort={isSearchTooShort}
+						displayedCount={displayedCount}
+						totalCount={totalResults}
+						isFiltered={isFiltered}
+						onClearFilters={clearFilters}
+						currentSort={currentSort}
+						onSortChange={handleSortChange}
+						currentPageSize={currentPageSize}
+						onPageSizeChange={handlePageSizeChange}
+						isLoading={isLoading}
+						searchInputRef={searchInputRef}
+					/>
+				</div>
+			</div>
 
 			{/* Main Content: Sidebar + Product Grid */}
-			<div className="flex flex-col gap-6 lg:flex-row">
-				{/* Filters Sidebar */}
-				<aside className="w-full lg:w-80 lg:shrink-0">
-					<div className="sticky rounded-xl border border-base-300 bg-base-100 p-6 shadow-sm" style={{ top: 'calc(var(--sticky-top-offset) + 1.5rem)' }}>
-						<div className="mb-4 flex items-center justify-between">
-							<h2 className="text-xl font-semibold text-base-content">Filters</h2>
-							{selectedCategories.length > 0 && (
-								<span className="rounded-full bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary">
-									{selectedCategories.length} selected
-								</span>
+			<div className="container mx-auto px-4 py-6 md:px-8 md:py-8 max-w-screen-2xl">
+				<div className="flex flex-col gap-6 lg:flex-row">
+					{/* Filters Sidebar */}
+					<aside className="w-full lg:w-80 lg:shrink-0">
+						<div className="sticky rounded-xl border border-base-300 bg-base-100 p-6 shadow-sm" style={{ top: 'calc(var(--sticky-top-offset) + 1.5rem)' }}>
+							<div className="mb-4 flex items-center justify-between">
+								<h2 className="text-xl font-semibold text-base-content">Filters</h2>
+								{selectedCategories.length > 0 && (
+									<span className="rounded-full bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary">
+										{selectedCategories.length} selected
+									</span>
+								)}
+							</div>
+
+							<div className="mb-4">
+								<CategoryFilter
+									categories={categories}
+									selectedCategories={selectedCategories}
+									onSelectionChange={handleCategorySelectionChange}
+									showCount={false}
+									collapsible={true}
+									emptyMessage="Categories load automatically once available."
+								/>
+							</div>
+
+							<div className="rounded-lg border border-dashed border-base-300 bg-base-200/30 p-3 text-sm text-base-content/70">
+								Select categories to refine results. Products update automatically.
+							</div>
+						</div>
+					</aside>
+
+					{/* Product Grid - Main Content */}
+					<main className="flex-1 min-w-0">
+						{/* Products Grid - Responsive breakpoints optimized for card size */}
+						{/* Key prop ensures animation state resets when products change (filtering, pagination, search) */}
+						<div key={`products-grid-${products.length}-${searchCriteria.page}`} className="grid gap-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+							{isLoading && !hasLoaded ? (
+								<ProductCardSkeleton count={currentPageSize} />
+							) : products.length === 0 ? (
+									<div className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-12 text-center">
+										<p className="text-lg font-semibold text-base-content">No products found</p>
+										<p className="mt-2 text-base text-base-content/70">
+											{isFiltered
+												? 'No products match the current filters. Try adjusting your search or filters.'
+												: 'Products will appear here once available.'}
+										</p>
+										{isFiltered && (
+											<Button variant="primary" size="sm" onClick={clearFilters} className="mt-4">
+												Reset Filters
+											</Button>
+										)}
+									</div>
+								) : (
+									products.map((product, index) => (
+										<ScrollRevealCard
+											key={product.id}
+											index={index}
+											staggerDelay={60}
+											enabled={true}
+										>
+											<ProductCard
+												product={product}
+												showWishlist={false}
+												showQuickView={false}
+												priority={index < PRIORITY_IMAGE_COUNT} // Priority loading for above-the-fold images
+												onCategoryFilter={(category) => {
+													// Apply category filter when category tag is clicked
+													// Reset to page 1 and apply filter
+													setSelectedCategoriesAction([category])
+													const updatedCriteria = new GenericSearchFilter({
+														...searchCriteria,
+														page: 1,
+													})
+													setSearchCriteriaAction(updatedCriteria)
+													void retrieveProducts(updatedCriteria, { categories: [category] })
+												}}
+											/>
+										</ScrollRevealCard>
+									))
 							)}
 						</div>
 
-						<div className="mb-4">
-							<CategoryFilter
-								categories={categories}
-								selectedCategories={selectedCategories}
-								onSelectionChange={handleCategorySelectionChange}
-								showCount={false}
-								collapsible={true}
-								emptyMessage="Categories load automatically once available."
+						{/* Pagination Controls - Industry Standard */}
+						{products.length > 0 && (
+							<PaginationControls
+								currentPage={searchCriteria.page}
+								totalPages={productsResult.totalPages || 1}
+								totalItems={totalResults}
+								displayedItems={displayedCount}
+								hasMore={hasMoreProducts}
+								isLoading={isLoading}
+								onPageChange={handlePageChange}
+								onLoadMore={loadMoreProducts}
+								variant="load-more"
 							/>
-						</div>
-
-						<div className="rounded-lg border border-dashed border-base-300 bg-base-200/30 p-3 text-sm text-base-content/70">
-							Select categories to refine results. Products update automatically.
-						</div>
-					</div>
-				</aside>
-
-				{/* Product Grid - Main Content */}
-				<main className="flex-1">
-					{/* Products Grid - Responsive breakpoints optimized for card size */}
-					{/* Key prop ensures animation state resets when products change (filtering, pagination, search) */}
-					<div key={`products-grid-${products.length}-${searchCriteria.page}`} className="grid gap-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-						{isLoading && !hasLoaded ? (
-							<ProductCardSkeleton count={currentPageSize} />
-						) : products.length === 0 ? (
-								<div className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-12 text-center">
-									<p className="text-lg font-semibold text-base-content">No products found</p>
-									<p className="mt-2 text-base text-base-content/70">
-										{isFiltered
-											? 'No products match the current filters. Try adjusting your search or filters.'
-											: 'Products will appear here once available.'}
-									</p>
-									{isFiltered && (
-										<Button variant="primary" size="sm" onClick={clearFilters} className="mt-4">
-											Reset Filters
-										</Button>
-									)}
-								</div>
-							) : (
-								products.map((product, index) => (
-									<ScrollRevealCard
-										key={product.id}
-										index={index}
-										staggerDelay={60}
-										enabled={true}
-									>
-										<ProductCard
-											product={product}
-											showWishlist={false}
-											showQuickView={false}
-											priority={index < PRIORITY_IMAGE_COUNT} // Priority loading for above-the-fold images
-										/>
-									</ScrollRevealCard>
-								))
 						)}
-					</div>
-
-					{/* Pagination Controls - Industry Standard */}
-					{products.length > 0 && (
-						<PaginationControls
-							currentPage={searchCriteria.page}
-							totalPages={productsResult.totalPages || 1}
-							totalItems={totalResults}
-							displayedItems={displayedCount}
-							hasMore={hasMoreProducts}
-							isLoading={isLoading}
-							onPageChange={handlePageChange}
-							onLoadMore={loadMoreProducts}
-							variant="load-more"
-						/>
-					)}
-				</main>
+					</main>
+				</div>
 			</div>
-		</ClientPageLayout>
+		</div>
 	)
 }
 

@@ -1,25 +1,37 @@
 /**
- * ProductCard Component - Enhanced B2B Medical Supply Product Card
+ * ProductCard Component - B2B Medical Supply Product Card (Quote-Based Model)
  * 
- * Industry-leading product card design inspired by Apple, Microsoft, and modern e-commerce best practices.
- * Optimized for B2B medical supply catalogs with professional styling and comprehensive information display.
+ * Industry-leading product card design optimized for quote-based B2B e-commerce.
+ * Follows best practices from Alibaba B2B, Amazon Business, and modern B2B platforms.
  * 
  * **Key Features:**
- * - Product image with placeholder support
- * - Stock status badges (Out of Stock, Low Stock, In Stock)
- * - Prominent price display
- * - Organized metadata with icons
- * - Category chips (limited display)
+ * - Product image with availability indicator
+ * - Quote-based model (no prices displayed)
+ * - Manufacturer/provider information (when available)
+ * - SKU tracking for B2B customers
+ * - Clickable category tags for filtering (navigates to /store if not on store page)
+ * - Add to cart with quantity selection
+ * - Product name links to detail page (only name is clickable, not entire card)
+ * - Clean, professional B2B aesthetic
  * - Smooth hover effects and transitions
  * - Accessible and semantic HTML
  * - Responsive design
  * 
  * **Design Principles:**
- * - Visual hierarchy: Image → Name → Price → Metadata
- * - Clear stock status indication
- * - Professional, clean aesthetics
+ * - Visual hierarchy: Image → Name (clickable) → Manufacturer → Metadata → Add to Cart
+ * - Only product name is clickable (navigates to detail page)
+ * - Category tags are clickable buttons for filtering
+ * - Add to cart button with quantity controls
+ * - Availability status appropriate for dropshipping model
+ * - Professional, clean aesthetics for B2B buyers
  * - Smooth micro-interactions
  * - Mobile-friendly touch targets
+ * 
+ * **Business Model Alignment:**
+ * - Quote-based pricing (no fixed prices)
+ * - Dropshipping model (stock may not be real-time)
+ * - Availability shown as status, not exact counts
+ * - Manufacturer/provider info prioritized
  * 
  * @module ProductCard
  */
@@ -28,14 +40,16 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { Package, Warehouse, Heart, Eye } from 'lucide-react'
+import { Package, Building2, Heart, Eye, CheckCircle2 } from 'lucide-react'
 import { Product } from '@_classes/Product'
-import Button from '@_components/ui/Button'
 import ProductImage from '@_components/store/ProductImage'
+import AddToCartButton from '@_components/store/AddToCartButton'
+import { useCategoryNavigation } from '@_components/store/useCategoryNavigation'
 import { Routes } from '@_features/navigation'
 import { ImagePreloadService } from '@_features/images'
 import { logger } from '@_core'
 import { PRODUCT_CARD_CONSTANTS } from './ProductCard.constants'
+import ProductsCategory from '@_classes/ProductsCategory'
 
 export interface ProductCardProps {
 	/** Product data to display */
@@ -55,23 +69,17 @@ export interface ProductCardProps {
 	
 	/** Optional: Priority loading for above-the-fold images */
 	priority?: boolean
+	
+	/** Optional: Handler for category filter (used when on /store route) */
+	onCategoryFilter?: (category: ProductsCategory) => void
 }
-
-/**
- * Format currency value to USD
- */
-const formatCurrency = (value: number) =>
-	new Intl.NumberFormat('en-US', {
-		style: 'currency',
-		currency: 'USD',
-		maximumFractionDigits: 2,
-	}).format(Number.isFinite(value) ? value : 0)
 
 /**
  * ProductCard Component
  * 
  * Enhanced product card with industry-leading design patterns.
  * Displays product information in a visually appealing, accessible format.
+ * Optimized for quote-based B2B e-commerce model.
  */
 
 export default function ProductCard({
@@ -81,10 +89,16 @@ export default function ProductCard({
 	onClick,
 	className = '',
 	priority = false,
+	onCategoryFilter,
 }: ProductCardProps) {
 	const [isWishlisted, setIsWishlisted] = useState(false)
 	const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 	const hasPreloadedRef = useRef(false)
+
+	// Category navigation hook
+	const handleCategoryClick = useCategoryNavigation({
+		onCategoryFilter,
+	})
 
 	const handleWishlistToggle = (e: React.MouseEvent) => {
 		e.preventDefault()
@@ -159,22 +173,27 @@ export default function ProductCard({
 
 	const { DIMENSIONS, STYLES, SPACING } = PRODUCT_CARD_CONSTANTS
 
+	// Determine manufacturer/provider display (prioritize manufacturer, fallback to provider)
+	const manufacturerOrProvider = product.manufacturer || product.provider?.name || null
+	const hasManufacturerInfo = Boolean(manufacturerOrProvider)
+
+	// Determine availability status for dropshipping model
+	// In dropshipping, stock counts may not be real-time, so we show availability status
+	const isAvailable = product.stock !== undefined && product.stock > 0
+
 	return (
-		<Link
-			href={`${Routes.Store.location}/product/${product.id}`}
-			onClick={handleCardClick}
+		<div
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
-			prefetch={true}
 			className={`group relative ${STYLES.CONTAINER} ${STYLES.CONTAINER_HOVER} ${className}`}
 		>
 			{/* Image Container - Fixed aspect ratio */}
 			<div className={STYLES.IMAGE_CONTAINER}>
-				{/* Product Image with stock badge overlay */}
+				{/* Product Image - Stock badge hidden for now (future implementation) */}
 				<ProductImage
 					product={product}
 					priority={priority}
-					showStockBadge={product.stock !== undefined}
+					showStockBadge={false}
 					size="md"
 					hover={true}
 					className="h-full w-full"
@@ -209,54 +228,74 @@ export default function ProductCard({
 
 			{/* Content Container - Grows to fill space */}
 			<div className={STYLES.CONTENT_CONTAINER}>
-				{/* Product Name - Fixed 2 lines */}
-				<h3 className={STYLES.PRODUCT_NAME} style={DIMENSIONS.PRODUCT_NAME}>
+				{/* Product Name - Fixed 2 lines, clickable link to details */}
+				<Link
+					href={Routes.Store.product(product.id)}
+					onClick={handleCardClick}
+					prefetch={true}
+					className="block"
+				>
+					<h3 className={`${STYLES.PRODUCT_NAME} cursor-pointer`} style={DIMENSIONS.PRODUCT_NAME}>
 					{product.name || 'Unnamed product'}
 				</h3>
+				</Link>
 
-				{/* Manufacturer - Fixed 1 line */}
-				<p className={`${SPACING.MANUFACTURER_MARGIN} ${STYLES.MANUFACTURER}`} style={DIMENSIONS.MANUFACTURER}>
-					{product.manufacturer || 'Manufacturer pending'}
+				{/* Manufacturer/Provider - Only show if available */}
+				{hasManufacturerInfo && (
+					<div className={`${SPACING.MANUFACTURER_MARGIN} flex items-center gap-1.5`} style={DIMENSIONS.MANUFACTURER}>
+						<Building2 className="h-3.5 w-3.5 shrink-0 text-base-content/50" strokeWidth={2} />
+						<p className={`${STYLES.MANUFACTURER} truncate`} title={manufacturerOrProvider || undefined}>
+							{manufacturerOrProvider}
 				</p>
+					</div>
+				)}
 
-				{/* Price - Prominent, fixed height */}
-				<div className={`${SPACING.PRICE_MARGIN} ${STYLES.PRICE_CONTAINER}`} style={{ minHeight: DIMENSIONS.PRICE.minHeight }}>
-					<span className={STYLES.PRICE} style={{ fontSize: DIMENSIONS.PRICE.fontSize, lineHeight: DIMENSIONS.PRICE.lineHeight }}>
-						{formatCurrency(product.price)}
-					</span>
+				{/* Availability Status - For dropshipping model, show status not exact count */}
+				<div className={`${SPACING.METADATA_MARGIN} flex items-center gap-2`}>
+					{isAvailable ? (
+						<div className="flex items-center gap-1.5 text-sm">
+							<CheckCircle2 className="h-4 w-4 text-success shrink-0" strokeWidth={2} />
+							<span className="text-success font-medium">Available</span>
+						</div>
+					) : (
+						<div className="flex items-center gap-1.5 text-sm">
+							<Package className="h-4 w-4 text-base-content/50 shrink-0" strokeWidth={2} />
+							<span className="text-base-content/60">Check Availability</span>
+						</div>
+					)}
 				</div>
 
-				{/* Metadata - Organized with Icons, fixed height */}
+				{/* Metadata - SKU only (essential for B2B) */}
+				{product.sku && (
 				<div className={`${SPACING.METADATA_MARGIN} ${STYLES.METADATA_CONTAINER}`} style={{ minHeight: DIMENSIONS.METADATA.minHeight }}>
 					<div className={STYLES.METADATA_ITEM}>
 						<Package className={`${STYLES.ICON} shrink-0`} strokeWidth={2} />
 						<span className="font-medium">SKU:</span>
-						<span className="truncate">{product.sku || 'N/A'}</span>
+							<span className="truncate font-mono text-xs">{product.sku}</span>
 					</div>
-					<div className={STYLES.METADATA_ITEM}>
-						<Warehouse className={`${STYLES.ICON} shrink-0`} strokeWidth={2} />
-						<span className="font-medium">Stock:</span>
-						<span className={product.stock === 0 ? 'text-error' : product.stock && product.stock < 10 ? 'text-warning' : ''}>
-							{product.stock ?? 0}
-						</span>
 					</div>
-				</div>
+				)}
 
-				{/* Categories - Elegant hashtag-style tags (single line, no wrap) */}
-				{/* Industry best practice: Tags expand fully without truncation, excess tags go to +1 count */}
-				{/* Container uses overflow-hidden to prevent tags from going outside card bounds */}
+				{/* Categories - Elegant hashtag-style tags (single line, no wrap) - Clickable for filtering */}
+				{product.categories.length > 0 && (
 				<div className={`${SPACING.CATEGORY_MARGIN} ${STYLES.CATEGORY_CONTAINER}`} style={DIMENSIONS.CATEGORY}>
-					{product.categories.length > 0 ? (
 						<div className={STYLES.CATEGORY_TAGS}>
 							{product.categories.slice(0, 2).map((cat) => (
-								<span
+								<button
 									key={cat.id}
-									className={STYLES.CATEGORY_BADGE}
-									title={cat.name}
+									type="button"
+									onClick={(e) => {
+										e.preventDefault()
+										e.stopPropagation()
+										handleCategoryClick(cat)
+									}}
+									className={`${STYLES.CATEGORY_BADGE} cursor-pointer hover:badge-primary transition-colors`}
+									title={`Filter by ${cat.name}`}
+									aria-label={`Filter products by ${cat.name} category`}
 								>
 									<span className={STYLES.CATEGORY_BADGE_ICON}>#</span>
 									<span className={STYLES.CATEGORY_BADGE_TEXT}>{cat.name}</span>
-								</span>
+								</button>
 							))}
 							{product.categories.length > 2 && (
 								<span className={STYLES.CATEGORY_COUNT_BADGE}>
@@ -264,27 +303,23 @@ export default function ProductCard({
 								</span>
 							)}
 						</div>
-					) : (
-						<span style={{ fontSize: '0.75rem' }} className={STYLES.CATEGORY_EMPTY}>No categories</span>
+					</div>
 					)}
-				</div>
 
 				{/* Spacer - Pushes button to bottom */}
 				<div className={STYLES.SPACER} style={DIMENSIONS.SPACER} />
 
-				{/* Call to Action - Centered, elegant button */}
+				{/* Call to Action - Add to Cart with quantity selection */}
 				<div className={`${SPACING.BUTTON_MARGIN} ${STYLES.BUTTON_CONTAINER}`}>
-					<Button
-						variant="primary"
+					<AddToCartButton
+						product={product}
+						defaultQuantity={1}
 						size="md"
-						className={STYLES.BUTTON}
-						style={DIMENSIONS.BUTTON}
-					>
-						View Details
-					</Button>
+						className="w-full"
+					/>
 				</div>
 			</div>
-		</Link>
+		</div>
 	)
 }
 
