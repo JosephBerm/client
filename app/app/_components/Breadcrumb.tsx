@@ -1,29 +1,27 @@
 /**
- * Breadcrumb Component
+ * Internal App Breadcrumb Component
  * 
- * Auto-generated breadcrumb navigation for internal application pages.
- * Displays navigation trail with clickable links and current page indicator.
+ * Convenience wrapper around the unified Breadcrumb component.
+ * Auto-generates breadcrumbs for internal application pages.
+ * 
+ * **Purpose:**
+ * - Simplifies breadcrumb usage for internal pages
+ * - Auto-generates from pathname + user role
+ * - Default mobile truncation (last 2 items)
+ * - Structured logging
  * 
  * **Features:**
- * - Auto-generates from current pathname
+ * - Auto-generation via useBreadcrumbs hook
  * - Role-based filtering
  * - Dynamic route handling ([id])
  * - Responsive truncation (mobile vs desktop)
- * - Accessible navigation landmark
- * - Keyboard navigation support
+ * - WCAG AA accessible
  * 
- * **Mobile-First:**
- * - Shows last 2 items on mobile (< 768px)
- * - Full trail on desktop (>= 768px)
- * - Ellipsis indicator when truncated
- * - Touch-friendly tap targets
- * 
- * **Accessibility:**
- * - WCAG AA compliant
- * - `nav` landmark with aria-label
- * - `aria-current="page"` for current item
- * - Keyboard navigable links
- * - Screen reader friendly
+ * **Architecture:**
+ * - Thin wrapper around unified Breadcrumb component
+ * - Uses useBreadcrumbs hook for data
+ * - Adds internal app-specific defaults
+ * - Structured logging for monitoring
  * 
  * @example
  * ```tsx
@@ -42,17 +40,15 @@
 
 'use client'
 
-import { useMemo, useEffect } from 'react'
-import Link from 'next/link'
+import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { ChevronRight } from 'lucide-react'
 import classNames from 'classnames'
-import { useAuthStore } from '@_features/auth'
-import { generateBreadcrumbs, getResponsiveBreadcrumbs, isTruncated } from '../_lib'
+import { useBreadcrumbs } from '@_shared/hooks'
+import UnifiedBreadcrumb from '@_components/ui/Breadcrumb'
 import { logger } from '@_core'
 
 /**
- * Breadcrumb component props interface.
+ * Internal app breadcrumb component props.
  */
 export interface BreadcrumbProps {
 	/**
@@ -65,42 +61,23 @@ export interface BreadcrumbProps {
 	 * @default 2
 	 */
 	mobileLimit?: number
-
-	/**
-	 * Whether to show icons in breadcrumbs.
-	 * @default false
-	 */
-	showIcons?: boolean
 }
 
 /**
- * Breadcrumb Item Type
- * Re-exported from lib for convenience
- */
-export interface BreadcrumbItem {
-	label: string
-	href: string
-	isCurrent?: boolean
-	icon?: string
-}
-
-/**
- * Breadcrumb Component
+ * Internal App Breadcrumb Component
  * 
- * Auto-generates breadcrumb navigation from current pathname.
- * Adapts to mobile/desktop with responsive truncation.
+ * Auto-generates breadcrumbs from pathname and user role.
+ * Uses the unified Breadcrumb component for rendering.
  * 
  * **Implementation:**
- * - Uses `usePathname()` to get current route
- * - Calls `generateBreadcrumbs()` with user role
- * - Memoizes breadcrumbs for performance
- * - Renders with responsive visibility
+ * - Calls useBreadcrumbs() hook for auto-generation
+ * - Passes items to unified Breadcrumb component
+ * - Adds structured logging
+ * - Applies default mobile truncation
  * 
  * **Styling:**
- * - Uses DaisyUI tokens for theming
- * - Mobile-first responsive design
- * - Smooth hover transitions
- * - Clean, modern aesthetics
+ * - Adds margin-bottom for internal app layout
+ * - Inherits all styling from unified component
  * 
  * @param props - Component props
  * @returns Breadcrumb navigation component
@@ -108,142 +85,28 @@ export interface BreadcrumbItem {
 export default function Breadcrumb({
 	className,
 	mobileLimit = 2,
-	showIcons = false,
 }: BreadcrumbProps) {
 	const pathname = usePathname()
-	const user = useAuthStore((state) => state.user)
+	const breadcrumbs = useBreadcrumbs()
 
-	// Generate breadcrumbs based on pathname and user role
-	const desktopBreadcrumbs = useMemo(() => {
-		return generateBreadcrumbs(pathname, user?.role)
-	}, [pathname, user?.role])
-
-	// Generate responsive breadcrumbs for mobile
-	const mobileBreadcrumbs = useMemo(() => {
-		return getResponsiveBreadcrumbs(pathname, user?.role, mobileLimit)
-	}, [pathname, user?.role, mobileLimit])
-
-	// Check if breadcrumbs are truncated on mobile
-	const showEllipsis = useMemo(() => {
-		return isTruncated(pathname, user?.role, mobileLimit)
-	}, [pathname, user?.role, mobileLimit])
-
-	// Log breadcrumb changes (not every render - performance optimization)
+	// Log breadcrumb changes (monitoring)
 	useEffect(() => {
-		logger.debug('Breadcrumb navigation updated', {
+		logger.debug('Internal breadcrumb navigation updated', {
 			pathname,
-			desktopCount: desktopBreadcrumbs.length,
-			mobileCount: mobileBreadcrumbs.length,
-			truncated: showEllipsis,
-			component: 'Breadcrumb',
+			breadcrumbCount: breadcrumbs.length,
+			mobileLimit,
+			component: 'InternalBreadcrumb',
 		})
-	}, [pathname, desktopBreadcrumbs.length, mobileBreadcrumbs.length, showEllipsis])
+	}, [pathname, breadcrumbs.length, mobileLimit])
 
-	// Don't render if no breadcrumbs (shouldn't happen, but defensive)
-	if (desktopBreadcrumbs.length === 0) {
-		return null
-	}
-
+	// Use unified Breadcrumb component with internal app defaults
 	return (
-		<nav
-			aria-label="Breadcrumb navigation"
-			className={classNames(
-				'flex items-center gap-2 text-sm',
-				'mb-4 md:mb-6',
-				className
-			)}
-		>
-			{/* Desktop Breadcrumbs - Full Trail */}
-			<ol className="hidden md:flex items-center gap-2 flex-wrap">
-				{desktopBreadcrumbs.map((item, index) => (
-					<li key={item.href} className="flex items-center gap-2">
-						{/* Separator (except first item) */}
-						{index > 0 && (
-							<ChevronRight
-								className="w-4 h-4 text-base-content/40 shrink-0"
-								aria-hidden="true"
-							/>
-						)}
-
-						{/* Breadcrumb Link or Text */}
-						{item.isCurrent ? (
-							<span
-								className="text-base-content font-medium"
-								aria-current="page"
-							>
-								{item.label}
-							</span>
-						) : (
-							<Link
-								href={item.href}
-								className={classNames(
-									'text-base-content/70 hover:text-primary',
-									'motion-safe:transition-colors motion-safe:duration-200',
-									'hover:underline underline-offset-2',
-									'focus-visible:outline-none focus-visible:ring-2',
-									'focus-visible:ring-primary focus-visible:ring-offset-2',
-									'rounded-sm'
-								)}
-							>
-								{item.label}
-							</Link>
-						)}
-					</li>
-				))}
-			</ol>
-
-			{/* Mobile Breadcrumbs - Last N Items */}
-			<ol className="flex md:hidden items-center gap-2 flex-wrap">
-				{/* Show ellipsis if truncated */}
-				{showEllipsis && (
-					<li className="flex items-center gap-2">
-						<span className="text-base-content/40" aria-hidden="true">
-							...
-						</span>
-						<ChevronRight
-							className="w-4 h-4 text-base-content/40 shrink-0"
-							aria-hidden="true"
-						/>
-					</li>
-				)}
-
-				{mobileBreadcrumbs.map((item, index) => (
-					<li key={item.href} className="flex items-center gap-2">
-						{/* Separator (except first mobile item) */}
-						{index > 0 && (
-							<ChevronRight
-								className="w-4 h-4 text-base-content/40 shrink-0"
-								aria-hidden="true"
-							/>
-						)}
-
-						{/* Breadcrumb Link or Text */}
-						{item.isCurrent ? (
-							<span
-								className="text-base-content font-medium text-sm"
-								aria-current="page"
-							>
-								{item.label}
-							</span>
-						) : (
-							<Link
-								href={item.href}
-								className={classNames(
-									'text-base-content/70 hover:text-primary',
-									'motion-safe:transition-colors motion-safe:duration-200',
-									'hover:underline underline-offset-2',
-									'focus-visible:outline-none focus-visible:ring-2',
-									'focus-visible:ring-primary focus-visible:ring-offset-2',
-									'rounded-sm text-sm'
-								)}
-							>
-								{item.label}
-							</Link>
-						)}
-					</li>
-				))}
-			</ol>
-		</nav>
+		<UnifiedBreadcrumb
+			items={breadcrumbs}
+			mobileLimit={mobileLimit}
+			showEllipsis={true}
+			className={classNames('mb-4 md:mb-6', className)}
+			ariaLabel="Internal navigation breadcrumb"
+		/>
 	)
 }
-

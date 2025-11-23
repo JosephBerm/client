@@ -62,7 +62,7 @@ import Provider from '@_classes/Provider'
 import Guid from '@_classes/Base/Guid'
 import HtmlImage from '@_classes/HtmlImage'
 import UploadedFile from '@_classes/UploadedFile'
-import { parseRequiredTimestamp } from '@_lib/dates'
+import { parseRequiredTimestamp, parseDateSafe } from '@_lib/dates'
 // RichConstructor decorator not needed in modern Next.js
 
 /**
@@ -114,8 +114,8 @@ export class Product {
 	/** Timestamp of creation */
 	createdAt: Date = new Date()
 	
-	/** Timestamp of last update */
-	updatedAt: Date = new Date()
+	/** Timestamp of last update (null if never updated) */
+	updatedAt: Date | null = null
 	
 	/** Array of product images */
 	images: HtmlImage[] = []  // Added for image references
@@ -174,9 +174,11 @@ export class Product {
 		// Deep copy images array
 		this.images = product?.images?.length ? product.images.map((x) => new HtmlImage(x)) : []
 		
-		// Parse dates from strings if needed (required timestamps)
+		// Parse dates from strings if needed
 		this.createdAt = parseRequiredTimestamp(product?.createdAt, 'Product', 'createdAt')
-		this.updatedAt = parseRequiredTimestamp(product?.updatedAt, 'Product', 'updatedAt')
+		
+		// UpdatedAt is nullable (null until first update) - use safe parsing
+		this.updatedAt = parseDateSafe(product?.updatedAt)
 	}
 
 	/**

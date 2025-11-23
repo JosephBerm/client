@@ -130,13 +130,13 @@ export default function ProductImageGallery({
 	// If no images, show placeholder
 	if (!hasImages) {
 		return (
-			<div className={`relative aspect-square w-full max-w-md overflow-hidden rounded-3xl border border-base-200 bg-base-200/60 ${className || ''}`}>
+			<div className={`relative aspect-square w-full overflow-hidden ${className || ''}`}>
 				<ProductImage
 					product={product}
 					priority={priority}
 					size="lg"
 					hover={false}
-					className="h-full w-full"
+					className="h-full w-full object-cover rounded-xl"
 				/>
 			</div>
 		)
@@ -146,14 +146,14 @@ export default function ProductImageGallery({
 	if (!hasMultipleImages) {
 		return (
 			<>
-				<div className={`relative aspect-square w-full max-w-md overflow-hidden rounded-3xl border border-base-200 bg-base-200/60 ${className || ''}`}>
+				<div className={`relative aspect-square w-full overflow-hidden ${className || ''}`}>
 					<ProductImage
 						product={product}
 						priority={priority}
 						size="lg"
 						hover={true}
 						onImageClick={handleImageClick}
-						className="h-full w-full cursor-pointer"
+						className="h-full w-full cursor-pointer object-cover rounded-xl"
 					/>
 				</div>
 

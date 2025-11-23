@@ -30,4 +30,6 @@ export type { UseScrollRevealOptions, UseScrollRevealReturn } from './useScrollR
 export { useSharedIntersectionObserver } from './useSharedIntersectionObserver'
 export type { SharedObserverOptions, IntersectionCallback } from './useSharedIntersectionObserver'
 export { useRouteParam, useRouteParams, useRouteParamValidated } from './useRouteParam'
+export { useCopyToClipboard } from './useCopyToClipboard'
+export { useBreadcrumbs } from './useBreadcrumbs'
 

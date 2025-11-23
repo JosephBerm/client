@@ -23,6 +23,31 @@ import type { LucideIcon } from 'lucide-react'
 import { AccountRole } from '@_classes/Enums'
 
 /**
+ * Breadcrumb item interface.
+ * Represents a single breadcrumb in the navigation trail.
+ * 
+ * **Usage:**
+ * - BreadcrumbService (generates breadcrumbs)
+ * - Breadcrumb UI component (renders breadcrumbs)
+ * - useBreadcrumbs hook (auto-generation)
+ * - Manual breadcrumb definitions
+ * 
+ * **Architecture:**
+ * Lives in types layer (not UI or service layer) to avoid circular dependencies.
+ * Follows Dependency Inversion Principle - lower layers depend on abstractions.
+ */
+export interface BreadcrumbItem {
+	/** Display label for the breadcrumb */
+	label: string
+	/** URL path for navigation */
+	href: string
+	/** Whether this is the current/active page */
+	isCurrent?: boolean
+	/** Icon identifier (optional, matches NavigationIconType) */
+	icon?: string
+}
+
+/**
  * Icon identifier type for navigation items.
  * Maps string identifiers to Lucide React icon components.
  */

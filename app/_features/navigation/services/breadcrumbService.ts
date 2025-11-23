@@ -50,21 +50,10 @@
 import { logger } from '@_core'
 import { AccountRole } from '@_classes/Enums'
 import { NavigationService } from './NavigationService'
+import type { BreadcrumbItem } from '@_types/navigation'
 
-/**
- * Breadcrumb item interface.
- * Represents a single breadcrumb in the navigation trail.
- */
-export interface BreadcrumbItem {
-	/** Display label for the breadcrumb */
-	label: string
-	/** URL path for navigation */
-	href: string
-	/** Whether this is the current/active page */
-	isCurrent?: boolean
-	/** Icon identifier (optional) */
-	icon?: string
-}
+// Re-export BreadcrumbItem for convenience
+export type { BreadcrumbItem }
 
 /**
  * BreadcrumbService class providing FAANG-level breadcrumb generation.

@@ -38,5 +38,5 @@ export type { InternalPageHeaderProps } from './InternalPageHeader'
 // Navigation Components
 export { default as InternalSidebar } from './InternalSidebar'
 export { default as Breadcrumb } from './Breadcrumb'
-export type { BreadcrumbProps, BreadcrumbItem } from './Breadcrumb'
+export type { BreadcrumbProps } from './Breadcrumb'
 

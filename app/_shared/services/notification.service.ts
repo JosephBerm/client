@@ -36,6 +36,9 @@
  * - Easy to enhance (add analytics, change toast library)
  * - Better debugging (correlation between logs and toasts)
  * 
+ * **Note:** This service uses browser APIs (window.matchMedia, toast library) 
+ * and must run in a client context.
+ * 
  * @example
  * ```typescript
  * import { notificationService } from '@_shared/services';
@@ -71,6 +74,8 @@
  * 
  * @module NotificationService
  */
+
+'use client'
 
 import { toast, ToastOptions, Id as ToastId } from 'react-toastify'
 import { logger, LogMetadata, LogLevel } from '@_core/logger'

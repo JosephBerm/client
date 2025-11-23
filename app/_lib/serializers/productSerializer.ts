@@ -52,6 +52,7 @@ export type SerializedProduct = {
 	name: string
 	files: Array<{
 		name: string | null
+		contentType: string | null
 	}>
 	description: string
 	price: number
@@ -71,7 +72,7 @@ export type SerializedProduct = {
 		phone: string | null
 	} | null
 	createdAt: string // ISO string
-	updatedAt: string // ISO string
+	updatedAt: string | null // ISO string or null if never updated
 	images: Array<{
 		src: string
 		alt: string
@@ -113,6 +114,7 @@ export function serializeProduct(product: Product): SerializedProduct {
 		name: product.name,
 		files: product.files.map((file) => ({
 			name: file.name,
+			contentType: file.contentType,
 		})),
 		description: product.description,
 		price: product.price,
@@ -134,7 +136,7 @@ export function serializeProduct(product: Product): SerializedProduct {
 			  }
 			: null,
 		createdAt: product.createdAt.toISOString(),
-		updatedAt: product.updatedAt.toISOString(),
+		updatedAt: product.updatedAt ? product.updatedAt.toISOString() : null,
 		images: product.images.map((img) => ({
 			src: img.src,
 			alt: img.alt,

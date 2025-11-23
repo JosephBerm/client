@@ -18,6 +18,8 @@
  * - HttpService class with static methods (GET, POST, PUT, DELETE)
  * - ApiResponse interface for backend response structure
  * 
+ * **Note:** This service uses browser APIs (cookies) and must run in a client context.
+ * 
  * @example
  * ```typescript
  * import { HttpService } from '@_shared';
@@ -35,6 +37,8 @@
  * 
  * @module httpService
  */
+
+'use client'
 
 import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios'
 import { getCookies } from 'cookies-next'

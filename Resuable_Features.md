@@ -87,10 +87,12 @@ Below is a categorized list of reusable items. Each item links to a brief descri
     - [_shared/hooks/useScrollReveal.ts](#desc-use-scroll-reveal)
     - [_shared/hooks/useSharedIntersectionObserver.ts](#desc-use-shared-intersection-observer)
     - [_shared/hooks/useGridColumns.ts](#desc-use-grid-columns)
+    - [_shared/hooks/useCopyToClipboard.ts](#desc-use-copy-to-clipboard)
   - Utils
     - [_shared/utils](#desc-shared-utils)
 
 - Types
+  - [_types/index.ts](#desc-types-index)
   - [_types/navigation.ts](#desc-types-navigation)
   - [_types/settings.ts](#desc-types-settings)
 
@@ -237,6 +239,7 @@ Below is a categorized list of reusable items. Each item links to a brief descri
 - UI Components (Generic)
   - [_components/ui/Accordion.tsx](#desc-accordion)
   - [_components/ui/Badge.tsx](#desc-badge)
+  - [_components/ui/Breadcrumb.tsx](#desc-breadcrumb) (NPM: `lucide-react`, `classnames`)
   - [_components/ui/Button.tsx](#desc-button)
   - [_components/ui/Card.tsx](#desc-card)
   - [_components/ui/CategoryFilter.tsx](#desc-category-filter)
@@ -293,6 +296,8 @@ Below is a categorized list of reusable items. Each item links to a brief descri
   - [_shared/hooks/useKeyboardNavigation.ts](#desc-use-keyboard-navigation)
   - [_shared/hooks/useAdvancedLazyLoad.ts](#desc-use-advanced-lazy-load)
   - [_shared/hooks/useServerTable.ts](#desc-use-server-table)
+  - [_shared/hooks/useCopyToClipboard.ts](#desc-use-copy-to-clipboard)
+  - [_shared/hooks/useBreadcrumbs.ts](#desc-use-breadcrumbs)
 
 - Lib / Helpers / Scripts
   - [_lib/index.ts](#desc-lib-index)
@@ -368,8 +373,11 @@ General utilities: analytics, business hours, scrolling, indexing utilities. Not
 
 ### Types
 
+#### _types/index.ts {#desc-types-index}
+Barrel export for centralized type definitions. Re-exports navigation types, settings types, and shared contracts. Supports Dependency Inversion Principle by providing abstraction layer for domain and presentation code. Enables clean imports: `import type { BreadcrumbItem } from '@_types/navigation'`.
+
 #### _types/navigation.ts {#desc-types-navigation}
-Route, menu, and navigation-related type definitions.
+Navigation-related type definitions including BreadcrumbItem interface, NavigationRoute, NavigationSection, NavigationIconType, and AccountRole re-export. Primary definition location for BreadcrumbItem (single source of truth). Follows Clean Architecture - types layer separate from implementation. Used by domain layer (BreadcrumbService), application layer (useBreadcrumbs), and presentation layer (Breadcrumb component).
 
 #### _types/settings.ts {#desc-types-settings}
 User settings, theme, and preference types.
@@ -700,6 +708,9 @@ Accessible accordion with keyboard support.
 #### _components/ui/Badge.tsx {#desc-badge}
 Small status/label indicator.
 
+#### _components/ui/Breadcrumb.tsx {#desc-breadcrumb}
+FAANG-level unified breadcrumb navigation component. Pure presentation layer (UI only) that accepts items array from any source. Features: responsive mobile truncation (configurable via mobileLimit prop), desktop full trail, ellipsis indicator when truncated, WCAG AA accessible (semantic nav/ol/li, aria-current="page", keyboard navigation, screen reader support), touch-friendly (min 44px tap targets on mobile), theme-aware (DaisyUI), reduced motion support, memoized for performance (useMemo on mobile truncation). Data source agnostic - works with manual items (public pages) or auto-generated via useBreadcrumbs hook (internal pages). Imports BreadcrumbItem type from @_types/navigation (follows Dependency Inversion Principle). Re-exports type for convenience. Used by: internal app pages (via app/_components/Breadcrumb wrapper using useBreadcrumbs hook), public product pages (manual items array). Pattern: Separation of Concerns - UI component only renders, doesn't generate breadcrumbs. Benefits: single breadcrumb UI across entire app, consistent styling/behavior, easy to maintain, zero duplication.
+
 #### _components/ui/Button.tsx {#desc-button}
 Variant-driven button with disabled/loading states.
 
@@ -832,6 +843,9 @@ Performance-optimized hook that returns responsive grid column count (1/2/3) bas
 #### _shared/hooks/useSharedIntersectionObserver.ts {#desc-use-shared-intersection-observer}
 Shared IntersectionObserver manager for efficient scroll detection across multiple elements. Industry best practice for 50+ elements.
 
+#### _shared/hooks/useCopyToClipboard.ts {#desc-use-copy-to-clipboard}
+Generic copy-to-clipboard hook with feedback. Returns [copied, copy] tuple. Handles clipboard API with automatic fallback for older browsers. Shows success/error toasts with auto-dismiss. Resets copied state after 2s. Used for copying SKUs, IDs, codes, links, etc. Pure utility hook with zero business logic.
+
 #### _shared/utils/scrollUtils.ts {#desc-scroll-utils}
 Helpers for smooth scrolling and element focus.
 
@@ -858,6 +872,9 @@ IntersectionObserver-based lazy loading for any element.
 
 #### _shared/hooks/useServerTable.ts {#desc-use-server-table}
 Server-backed table state helpers (pagination/sort/filter).
+
+#### _shared/hooks/useBreadcrumbs.ts {#desc-use-breadcrumbs}
+Auto-generates breadcrumbs from pathname and user role for internal application pages. Wraps BreadcrumbService.generateBreadcrumbs with memoization via useMemo (only recalculates when pathname or user.role changes). Reads current pathname from Next.js usePathname() hook and user role from useAuthStore. Accepts optional customPathname parameter for edge cases. Returns array of BreadcrumbItem (typed from @_types/navigation). Features: auto-generation from current route, role-based filtering (Admin vs Customer via BreadcrumbService), dynamic route handling ([id] → "Order #123"), performance optimized (memoized), type-safe, SSR-compatible. Used exclusively for internal app pages (/app/*). Public pages define items manually. Pattern: Hook provides data (application layer), Breadcrumb component renders UI (presentation layer) - Separation of Concerns. Benefits: zero breadcrumb generation logic in components, consistent behavior across internal pages, single source of truth (BreadcrumbService), eliminates 150 lines of deprecated breadcrumbGenerator utilities.
 
 
 ### Lib / Helpers / Scripts

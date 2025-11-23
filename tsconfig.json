@@ -36,12 +36,13 @@
 			"@_shared/*": ["app/_shared/*"],
 			// Domain entities - business logic classes
 			"@_classes/*": ["app/_classes/*"],
-			// UI components - reusable presentation components
-			"@_components/*": ["app/_components/*"],
-			// Type definitions - TypeScript interfaces and types
-			"@_types/*": ["app/_types/*"],
-			// Helper utilities - small utility functions
-			"@_helpers/*": ["app/_helpers/*"],
+		// UI components - reusable presentation components
+		"@_components/*": ["app/_components/*"],
+		// Type definitions - TypeScript interfaces and types
+		"@_types": ["app/_types"],
+		"@_types/*": ["app/_types/*"],
+		// Helper utilities - small utility functions
+		"@_helpers/*": ["app/_helpers/*"],
 			// Scripts - build-time and runtime scripts
 			"@_scripts/*": ["app/_scripts/*"]
 		}
