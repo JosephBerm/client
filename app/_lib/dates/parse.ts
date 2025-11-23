@@ -210,3 +210,105 @@ export function parseDates(inputs: DateInput[]): Date[] {
 	return inputs.map(parseDate).filter((date): date is Date => date !== null)
 }
 
+/**
+ * Parses a required timestamp field with environment-aware error handling.
+ * 
+ * **Hybrid Approach (FAANG Best Practice):**
+ * - **Development**: Throws error (fail fast - exposes API bugs immediately)
+ * - **Production**: Returns fallback + logs critical error (defensive - maintains uptime)
+ * 
+ * **Use Cases:**
+ * - Entity `createdAt` fields (server-generated, should never be null)
+ * - Entity `updatedAt` fields (server-generated, should never be null)
+ * - Any timestamp that is required for business logic (sorting, filtering, audit trail)
+ * 
+ * **Benefits:**
+ * - ✅ Data Integrity: Exposes missing data in development
+ * - ✅ Uptime: Prevents crashes in production
+ * - ✅ Observability: All failures logged with full context
+ * - ✅ Audit Compliance: Fallback decisions are logged for compliance
+ * - ✅ Business Continuity: Sorting/filtering continues to work
+ * 
+ * @param {DateInput} input - Date input to parse
+ * @param {string} entity - Entity class name for error context (e.g., 'Order', 'Product')
+ * @param {string} field - Field name for error context (e.g., 'createdAt', 'updatedAt')
+ * @returns {Date} Parsed Date object or current date (with critical error logging)
+ * @throws {Error} In development environment when input is null/invalid
+ * 
+ * @example
+ * ```typescript
+ * import { parseRequiredTimestamp } from '@_lib/dates'
+ * 
+ * // In entity constructors:
+ * class Order {
+ *   public createdAt: Date = new Date()
+ * 
+ *   constructor(param?: Partial<Order>) {
+ *     if (param?.createdAt) {
+ *       // Throws in dev, logs + returns fallback in prod
+ *       this.createdAt = parseRequiredTimestamp(
+ *         param.createdAt,
+ *         'Order',
+ *         'createdAt'
+ *       )
+ *     }
+ *   }
+ * }
+ * 
+ * // Development behavior:
+ * new Order({ createdAt: null })  // ❌ Throws Error
+ * 
+ * // Production behavior:
+ * new Order({ createdAt: null })  // ✅ Returns new Date() + logs critical error
+ * ```
+ */
+export function parseRequiredTimestamp(
+	input: DateInput,
+	entity: string,
+	field: string
+): Date {
+	const parsed = parseDate(input)
+	
+	if (!parsed) {
+		const isDevelopment = process.env.NODE_ENV === 'development'
+		
+		const context = {
+			input,
+			entity,
+			field,
+			location: 'parseRequiredTimestamp',
+		}
+		
+		if (isDevelopment) {
+			// Development: Fail fast - expose API bugs immediately
+			logger.error('date.required_timestamp_missing', {
+				...context,
+				behavior: 'throw',
+				message: 'Required timestamp is null/invalid - throwing error in development',
+			})
+			
+			throw new Error(
+				`[${entity}] Required timestamp field "${field}" is null or invalid. ` +
+				`Input: ${JSON.stringify(input)}. ` +
+				`This indicates an API contract violation. ` +
+				`Fix the backend to always provide ${entity}.${field}.`
+			)
+		} else {
+			// Production: Defensive - prevent crashes, maintain uptime
+			logger.error('date.required_timestamp_missing_fallback', {
+				...context,
+				fallback: 'now',
+				severity: 'critical',
+				behavior: 'fallback',
+				message: 'Required timestamp is null/invalid - using fallback in production',
+				action_required: 'Investigate backend API response',
+			})
+			
+			// Return current timestamp as fallback
+			return new Date()
+		}
+	}
+	
+	return parsed
+}
+

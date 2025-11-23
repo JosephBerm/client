@@ -57,7 +57,7 @@
 
 import { Product } from './Product'
 import Address from '@_classes/common/Address'
-import { parseDateSafe } from '@_lib/dates'
+import { parseDateSafe, parseRequiredTimestamp } from '@_lib/dates'
 
 /**
  * Provider Entity Class
@@ -161,11 +161,13 @@ export default class Provider {
 				this.address = new Address(partial.address)
 			}
 			
-			// Parse creation date from string if needed
-			if (partial.createdAt) this.createdAt = parseDateSafe(partial.createdAt) ?? new Date()
+			// Parse creation date from string if needed (required timestamp - always validate)
+			this.createdAt = parseRequiredTimestamp(partial.createdAt, 'Provider', 'createdAt')
 			
-			// Parse update date from string if needed
-			if (partial.updatedAt) this.updatedAt = parseDateSafe(partial.updatedAt) ?? new Date()
+			// Parse update date from string if needed (optional - null until updated)
+			if (partial.updatedAt !== undefined) {
+				this.updatedAt = parseDateSafe(partial.updatedAt)
+			}
 			
 			// Deep copy products array
 			if (this.products) this.products = this.products.map((p) => new Product(p))

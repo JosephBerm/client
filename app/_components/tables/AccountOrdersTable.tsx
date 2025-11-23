@@ -130,7 +130,7 @@ export default function AccountOrdersTable() {
 
 			const sortedOrders = data.payload
 				.map((x: any) => new Order(x))
-				.sort((a: Order, b: Order) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+				.sort((a: Order, b: Order) => b.createdAt.getTime() - a.createdAt.getTime())
 				.slice(0, 5)
 
 			setOrders(sortedOrders)
@@ -182,7 +182,7 @@ export default function AccountOrdersTable() {
 					<Button
 						variant="ghost"
 						size="sm"
-						onClick={() => router.push(`${Routes.Orders.location}/${row.original.id}`)}
+						onClick={() => router.push(Routes.Orders.detail(row.original.id!))}
 					>
 						<Eye className="w-4 h-4 mr-2" />
 						View

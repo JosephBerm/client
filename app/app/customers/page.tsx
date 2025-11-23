@@ -125,7 +125,7 @@ export default function CustomersPage() {
         actions={
           <Button
             variant="primary"
-            onClick={() => router.push(`${Routes.InternalAppRoute}/customers/create`)}
+            onClick={() => router.push(Routes.Customers.create())}
             leftIcon={<Plus className="w-5 h-5" />}
           >
             Create Customer

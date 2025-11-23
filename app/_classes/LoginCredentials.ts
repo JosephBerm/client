@@ -24,9 +24,10 @@
  * });
  * 
  * // Use with AuthService for authentication
+ * import { Routes } from '@_features/navigation';
  * const result = await AuthService.login('johndoe', 'SecurePass123!', true);
  * if (result.success) {
- *   router.push('/app/dashboard');
+ *   router.push(Routes.Dashboard.location);
  * }
  * 
  * // Form submission handler

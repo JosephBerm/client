@@ -33,7 +33,7 @@ export default function StorePage() {
         header: 'Product Name',
         cell: ({ row }) => (
           <Link
-            href={Routes.Store.product(row.original.id)}
+            href={Routes.InternalStore.detail(row.original.id)}
             className="link link-primary font-semibold"
           >
             {row.original.name}
@@ -85,7 +85,7 @@ export default function StorePage() {
               variant="ghost"
               size="sm"
               onClick={() =>
-                router.push(`${Routes.InternalAppRoute}/${Routes.Store.location}/${row.original.id}`)
+                router.push(Routes.InternalStore.detail(row.original.id))
               }
             >
               <Eye className="w-4 h-4" />
@@ -147,7 +147,7 @@ export default function StorePage() {
         actions={
           <Button
             variant="primary"
-            onClick={() => router.push(`${Routes.InternalAppRoute}/${Routes.Store.location}/create`)}
+            onClick={() => router.push(Routes.InternalStore.create())}
             leftIcon={<Plus className="w-5 h-5" />}
           >
             Add Product

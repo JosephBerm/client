@@ -125,7 +125,7 @@ export default function ProvidersPage() {
         actions={
           <Button
             variant="primary"
-            onClick={() => router.push(`${Routes.InternalAppRoute}/providers/create`)}
+            onClick={() => router.push(Routes.Providers.create())}
             leftIcon={<Plus className="w-5 h-5" />}
           >
             Create Provider

@@ -34,9 +34,10 @@
  * />
  * 
  * // With click handler
+ * import { Routes } from '@_features/navigation';
  * <ProductImage 
  *   product={product}
- *   onImageClick={() => router.push(`/product/${product.id}`)}
+ *   onImageClick={() => router.push(Routes.Store.product(product.id))}
  * />
  * ```
  * 

@@ -103,7 +103,7 @@ export default function QuoteDetailsPage() {
 			component: 'QuoteDetailPage',
 			action: 'convertToOrder',
 		})
-		router.push(`${Routes.Orders.location}/${data.payload.id}`)
+		router.push(Routes.Orders.detail(data.payload.id))
 	} catch (error) {
 		notificationService.error('Failed to create order from quote', {
 			metadata: { error, quoteId },

@@ -106,7 +106,7 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 
 							<div className="mt-6 flex flex-col gap-3 sm:flex-row">
 								<Link
-									href={`${Routes.Contact.location}?product=${product.id}`}
+									href={Routes.Contact.withProduct(product.id)}
 									className="btn btn-primary w-full sm:flex-1"
 								>
 									Request Pricing

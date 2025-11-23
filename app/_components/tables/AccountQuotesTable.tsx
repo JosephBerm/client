@@ -202,7 +202,7 @@ export default function AccountQuotesTable() {
 					<Button
 						variant="ghost"
 						size="sm"
-						onClick={() => router.push(`${Routes.InternalAppRoute}/quotes/${row.original.id}`)}
+						onClick={() => router.push(Routes.Quotes.detail(row.original.id))}
 					>
 						<Eye className="w-4 h-4 mr-2" />
 						View

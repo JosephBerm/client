@@ -326,11 +326,11 @@ export default function CartItem({
 						size="sm"
 						onClick={handleRemove}
 						disabled={disabled}
+						leftIcon={<Trash2 className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />}
 						className="text-error hover:bg-error/10 hover:text-error transition-colors duration-200 motion-reduce:transition-none min-h-[44px]"
 						aria-label={`Remove ${productName} from cart`}
 					>
-						<Trash2 className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
-						<span className="sm:hidden ml-2 font-medium">Remove</span>
+						<span className="sm:hidden">Remove</span>
 					</Button>
 
 					{/* Future: More Actions Menu (Save for later, etc.) */}

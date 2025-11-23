@@ -26,10 +26,11 @@
  * @example
  * ```typescript
  * // Create an info notification
+ * import { Routes } from '@_features/navigation';
  * const notification = new Notification({
  *   message: 'Your order #12345 has been shipped',
  *   type: NotificationType.Info,
- *   linkUrl: '/app/orders/12345',
+ *   linkUrl: Routes.Orders.detail('12345'),
  *   userId: 123,
  *   read: false
  * });
@@ -45,7 +46,7 @@
  * const warningNotif = new Notification({
  *   message: 'Your quote #456 expires in 3 days',
  *   type: NotificationType.Warning,
- *   linkUrl: '/app/quotes/456',
+ *   linkUrl: Routes.Quotes.detail('456'),
  *   userId: 123
  * });
  * 
@@ -59,7 +60,7 @@
 
 import User, { IUser } from '@_classes/User'
 import { NotificationType } from '@_classes/Enums'
-import { parseDateSafe } from '@_lib/dates'
+import { parseDateSafe, parseRequiredTimestamp } from '@_lib/dates'
 
 /**
  * Notification Entity Class
@@ -111,10 +112,11 @@ export default class Notification {
 	 * });
 	 * 
 	 * // Notification with link and read status
+	 * import { Routes } from '@_features/navigation';
 	 * const notif2 = new Notification({
 	 *   message: 'Order #789 requires your approval',
 	 *   type: NotificationType.Warning,
-	 *   linkUrl: '/app/orders/789',
+	 *   linkUrl: Routes.Orders.detail('789'),
 	 *   userId: 123,
 	 *   read: false
 	 * });
@@ -123,7 +125,7 @@ export default class Notification {
 	 * const errorNotif = new Notification({
 	 *   message: 'Payment failed for order #999',
 	 *   type: NotificationType.Error,
-	 *   linkUrl: '/app/orders/999',
+	 *   linkUrl: Routes.Orders.detail('999'),
 	 *   userId: 123
 	 * });
 	 * 
@@ -141,19 +143,17 @@ export default class Notification {
 		if (param) {
 			Object.assign(this, param)
 			
-			// Parse read timestamp from string if needed
+			// Parse read timestamp from string if needed (optional - null until read)
 			if (param.readAt) {
-				this.readAt = parseDateSafe(param.readAt) ?? new Date()
+				this.readAt = parseDateSafe(param.readAt)
 			}
 			
-			// Parse creation timestamp from string if needed
-			if (param.createdAt) {
-				this.createdAt = parseDateSafe(param.createdAt) ?? new Date()
-			}
+			// Parse creation timestamp from string if needed (required timestamp - always validate)
+			this.createdAt = parseRequiredTimestamp(param.createdAt, 'Notification', 'createdAt')
 			
-			// Parse update timestamp from string if needed
-			if (param.updatedAt) {
-				this.updatedAt = parseDateSafe(param.updatedAt) ?? new Date()
+			// Parse update timestamp from string if needed (optional - null until updated)
+			if (param.updatedAt !== undefined) {
+				this.updatedAt = parseDateSafe(param.updatedAt)
 			}
 		}
 	}

@@ -42,11 +42,12 @@ import { logger } from '@_core'
  * );
  * 
  * // With success callback for navigation
+ * import { Routes } from '@_features/navigation';
  * const { submit, isSubmitting } = useFormSubmit(
  *   async (data) => await API.Products.update(data),
  *   {
  *     successMessage: 'Product updated!',
- *     onSuccess: (result) => router.push(`/products/${result.id}`)
+ *     onSuccess: (result) => router.push(Routes.InternalStore.detail(result.id))
  *   }
  * );
  * 
@@ -173,14 +174,15 @@ export function useFormSubmit<TData, TResult = any>(
  * @example
  * ```typescript
  * // Basic usage for user management
+ * import { Routes } from '@_features/navigation';
  * const { create, update, remove, isLoading } = useCRUDSubmit(API.Users, {
  *   entityName: 'User',
  *   onCreateSuccess: (user) => {
  *     logger.info('User created successfully', { userId: user.id });
- *     router.push(`/users/${user.id}`);
+ *     router.push(Routes.Accounts.detail(user.id));
  *   },
  *   onUpdateSuccess: () => {
- *     router.push('/users');
+ *     router.push(Routes.Accounts.location);
  *   },
  *   onDeleteSuccess: () => {
  *     notificationService.info('User removed from system', { component: 'UserDeleteButton', action: 'delete' });

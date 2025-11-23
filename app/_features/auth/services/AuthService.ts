@@ -133,9 +133,10 @@ export async function checkAuthStatus(): Promise<IUser | null> {
  * 
  * import { logger } from '@_core';
  * 
+ * import { Routes } from '@_features/navigation';
  * if (result.success) {
  *   logger.info('User logged in successfully', { userId: result.user.id, userName: result.user.name });
- *   router.push('/dashboard');
+ *   router.push(Routes.Dashboard.location);
  * } else {
  *   notificationService.error(result.message, { component: 'LoginPage', action: 'login' });
  * }

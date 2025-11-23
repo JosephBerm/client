@@ -22,6 +22,7 @@
 
 import type { NavigationSection, NavigationRoute } from '@_types/navigation'
 import { AccountRole } from '@_types/navigation'
+import Routes from './routes'
 
 /**
  * NavigationService class providing navigation data and utilities.
@@ -85,14 +86,14 @@ export class NavigationService {
 				{
 					id: 'dashboard',
 					label: 'Dashboard',
-					href: '/app',
+					href: Routes.Dashboard.location,
 					icon: 'dashboard',
 					description: 'Overview and insights',
 				},
 					{
 						id: 'store',
 						label: 'Store',
-						href: '/store',
+						href: Routes.Store.location,
 						icon: 'shopping-bag',
 						description: 'Browse our catalog',
 					},
@@ -110,14 +111,14 @@ export class NavigationService {
 				{
 					id: 'orders',
 					label: 'Orders',
-					href: '/app/orders',
+					href: Routes.Orders.location,
 					icon: 'shopping-cart',
 					description: 'Track your purchases',
 				},
 				{
 					id: 'quotes',
 					label: 'Quotes',
-					href: '/app/quotes',
+					href: Routes.Quotes.location,
 					icon: 'file-text',
 					description: 'Request price quotes',
 				},
@@ -137,21 +138,21 @@ export class NavigationService {
 					{
 						id: 'products',
 						label: 'Products',
-						href: '/app/store',
+						href: Routes.InternalStore.location,
 						icon: 'package',
 						description: 'Manage inventory',
 					},
 					{
 						id: 'admin-orders',
 						label: 'Orders',
-						href: '/app/orders',
+						href: Routes.Orders.location,
 						icon: 'shopping-cart',
 						description: 'Process customer orders',
 					},
 					{
 						id: 'admin-quotes',
 						label: 'Quotes',
-						href: '/app/quotes',
+						href: Routes.Quotes.location,
 						icon: 'file-text',
 						description: 'Review quote requests',
 					},
@@ -166,21 +167,21 @@ export class NavigationService {
 					{
 						id: 'accounts',
 						label: 'Accounts',
-						href: '/app/accounts',
+						href: Routes.Accounts.location,
 						icon: 'users',
 						description: 'Manage user accounts',
 					},
 					{
 						id: 'customers',
 						label: 'Customers',
-						href: '/app/customers',
+						href: Routes.Customers.location,
 						icon: 'building',
 						description: 'Customer organizations',
 					},
 					{
 						id: 'providers',
 						label: 'Providers',
-						href: '/app/providers',
+						href: Routes.Providers.location,
 						icon: 'building',
 						description: 'Supplier management',
 					},
@@ -195,7 +196,7 @@ export class NavigationService {
 					{
 						id: 'analytics-dashboard',
 						label: 'Analytics',
-						href: '/app/analytics',
+						href: Routes.Analytics.location,
 						icon: 'bar-chart',
 						description: 'Reports, metrics, and insights',
 					},
@@ -214,14 +215,14 @@ export class NavigationService {
 			{
 				id: 'profile',
 				label: 'Profile',
-				href: '/app/profile',
+				href: Routes.Profile.location,
 				icon: 'user',
 				description: 'View and edit profile',
 			},
 			{
 				id: 'notifications',
 				label: 'Notifications',
-				href: '/app/notifications',
+				href: Routes.Notifications.location,
 				icon: 'bell',
 				description: 'Manage notifications',
 			},
@@ -244,9 +245,9 @@ export class NavigationService {
 	 * @example
 	 * ```tsx
 	 * const route = NavigationService.getRouteById('dashboard')
- * if (route) {
- *   router.push(route.href) // Navigate to /app
- * }
+	 * if (route) {
+	 *   router.push(route.href) // Navigate to Routes.Dashboard.location
+	 * }
 	 * ```
 	 */
 	static getRouteById(id: string, userRole?: number | null): NavigationRoute | undefined {

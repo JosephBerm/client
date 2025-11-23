@@ -162,7 +162,7 @@ const Page = () => {
 						<Button
 							size="sm"
 							variant="ghost"
-							onClick={() => router.push(`${Routes.Accounts.location}/${row.original.id}`)}
+							onClick={() => router.push(Routes.Accounts.detail(row.original.id!))}
 						>
 							View Account
 						</Button>
@@ -208,7 +208,7 @@ const Page = () => {
 							<Button
 								variant="primary"
 								onClick={() =>
-									router.push(`${Routes.Accounts.location}/create?customerId=${customer.id ?? ''}`)
+									router.push(Routes.Accounts.create({ customerId: customer.id ?? '' }))
 								}
 							>
 								Add Account

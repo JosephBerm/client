@@ -80,15 +80,13 @@ export function useCategoryNavigation(options?: UseCategoryNavigationOptions) {
 
 			// Navigate to store with category ID in URL
 			// The store page will read this and apply the filter
-			const url = `${Routes.Store.location}?category=${category.id}`
-			router.push(url)
+			router.push(Routes.Store.withCategory(category.id))
 			return
 		}
 
 		// Fallback: if on store page but no handler, navigate with query param
 		// This ensures the filter is applied even without custom handler
-		const url = `${Routes.Store.location}?category=${category.id}`
-		router.push(url)
+		router.push(Routes.Store.withCategory(category.id))
 	}, [router, pathname, isOnStorePage, options])
 }
 

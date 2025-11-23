@@ -152,7 +152,7 @@ const Page = () => {
 									variant="secondary"
 									onClick={() =>
 										hasCustomerAssociation &&
-										router.push(`${Routes.Customers.location}/${account?.customerId ?? ''}`)
+										router.push(Routes.Customers.detail(account?.customerId ?? ''))
 									}
 									disabled={!hasCustomerAssociation}
 								>
@@ -160,7 +160,7 @@ const Page = () => {
 								</Button>
 								<Button
 									variant="error"
-									onClick={() => router.push(`${Routes.Accounts.location}`)}
+									onClick={() => router.push(Routes.Accounts.location)}
 								>
 									Manage Accounts
 								</Button>

@@ -62,7 +62,7 @@ import Provider from '@_classes/Provider'
 import Guid from '@_classes/Base/Guid'
 import HtmlImage from '@_classes/HtmlImage'
 import UploadedFile from '@_classes/UploadedFile'
-import { parseDateSafe } from '@_lib/dates'
+import { parseRequiredTimestamp } from '@_lib/dates'
 // RichConstructor decorator not needed in modern Next.js
 
 /**
@@ -174,9 +174,9 @@ export class Product {
 		// Deep copy images array
 		this.images = product?.images?.length ? product.images.map((x) => new HtmlImage(x)) : []
 		
-		// Parse dates from strings if needed
-		this.createdAt = parseDateSafe(product?.createdAt) ?? new Date()
-		this.updatedAt = parseDateSafe(product?.updatedAt) ?? new Date()
+		// Parse dates from strings if needed (required timestamps)
+		this.createdAt = parseRequiredTimestamp(product?.createdAt, 'Product', 'createdAt')
+		this.updatedAt = parseRequiredTimestamp(product?.updatedAt, 'Product', 'updatedAt')
 	}
 
 	/**

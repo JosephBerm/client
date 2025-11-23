@@ -54,11 +54,12 @@
  * 
  * @example
  * ```tsx
+ * import { Routes } from '@_features/navigation';
  * <ActivityStatCard
  *   icon={BellRing}
  *   label="Notifications"
  *   value={5}
- *   href="/app/notifications"
+ *   href={Routes.Notifications.location}
  * />
  * ```
  * 
@@ -94,7 +95,7 @@ export interface ActivityStatCardProps {
 	
 	/**
 	 * Navigation URL when card is clicked
-	 * @example "/app/notifications", "/app/orders"
+	 * @example Routes.Notifications.location, Routes.Orders.location
 	 */
 	href: string
 }

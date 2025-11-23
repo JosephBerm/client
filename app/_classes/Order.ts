@@ -94,7 +94,7 @@ import { OrderStatus } from '@_classes/Enums'
 import { Product } from './Product'
 import Quote from './Quote'
 import Address from './common/Address'
-import { parseDateSafe } from '@_lib/dates'
+import { parseRequiredTimestamp } from '@_lib/dates'
 
 /**
  * Order Entity Class
@@ -210,10 +210,8 @@ export default class Order {
 				this.products = param.products.map((p) => new OrderItem(p))
 			}
 			
-			// Parse creation date from string if needed
-			if (param.createdAt) {
-				this.createdAt = parseDateSafe(param.createdAt) ?? new Date()
-			}
+			// Parse creation date from string if needed (required timestamp - always validate)
+			this.createdAt = parseRequiredTimestamp(param.createdAt, 'Order', 'createdAt')
 			
 			// Deep copy customer object
 			if (param.customer) {

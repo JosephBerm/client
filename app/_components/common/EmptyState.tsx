@@ -24,6 +24,7 @@
  * ```tsx
  * import EmptyState from '@_components/common/EmptyState';
  * import { Package, Users, ShoppingCart } from 'lucide-react';
+ * import { Routes } from '@_features/navigation';
  *
  * // Basic empty state
  * <EmptyState
@@ -45,7 +46,7 @@
  *   description="Add your first customer to get started with order management."
  *   action={{
  *     label: 'Add Customer',
- *     onClick: () => router.push('/app/customers/create')
+ *     onClick: () => router.push(Routes.Customers.create())
  *   }}
  * />
  *
@@ -63,7 +64,7 @@
  *     description="Orders will appear here once customers start placing them."
  *     action={{
  *       label: 'Browse Products',
- *       onClick: () => router.push('/store')
+ *       onClick: () => router.push(Routes.Store.location)
  *     }}
  *   />
  * ) : (

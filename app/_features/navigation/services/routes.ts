@@ -10,6 +10,7 @@
  * - Easy to refactor routes (change in one place, updates everywhere)
  * - Type-safe route references (TypeScript strict mode)
  * - Dynamic route builders (e.g., `Routes.Orders.detail(id)`)
+ * - Query parameter support (FAANG-level pattern)
  * - Zero runtime errors from typos in URLs
  * 
  * **Route Structure:**
@@ -17,11 +18,13 @@
  * - Internal routes: Protected by middleware under /app/* path
  * - Static routes: Use `.location` property
  * - Dynamic routes: Use builder methods (`.detail()`, `.create()`, etc.)
+ * - Query parameters: Pass object to builder methods (e.g., `Routes.Accounts.create({ customerId: '123' })`)
  * 
  * **FAANG-Level Patterns:**
  * - Route Builder Pattern (Stripe, Airbnb)
  * - Namespaced Route Objects (Google)
  * - Type-Safe Path Generation (Vercel)
+ * - Query Parameter Builder (Next.js, Vercel)
  * 
  * @example
  * ```typescript
@@ -34,6 +37,9 @@
  * // Dynamic routes (RECOMMENDED - prevents hardcoding)
  * router.push(Routes.Orders.detail('123')); // "/app/orders/123"
  * router.push(Routes.Customers.detail('456')); // "/app/customers/456"
+ * 
+ * // With query parameters
+ * router.push(Routes.Accounts.create({ customerId: '123' })); // "/app/accounts/create?customerId=123"
  * 
  * // In Link components
  * <Link href={Routes.Orders.detail(orderId)}>View Order</Link>
@@ -48,6 +54,36 @@
  * 
  * @module Routes
  */
+
+/**
+ * Helper function to append query parameters to a URL.
+ * Follows FAANG-level patterns for URL construction (Next.js, Vercel).
+ * 
+ * @param baseUrl - Base URL without query parameters
+ * @param params - Optional object with query parameters
+ * @returns URL with query parameters appended
+ * 
+ * @example
+ * ```typescript
+ * appendQueryParams('/app/accounts/create', { customerId: '123' })
+ * // Returns: "/app/accounts/create?customerId=123"
+ * ```
+ */
+function appendQueryParams(baseUrl: string, params?: Record<string, string | number | undefined>): string {
+	if (!params || Object.keys(params).length === 0) {
+		return baseUrl
+	}
+
+	const searchParams = new URLSearchParams()
+	for (const [key, value] of Object.entries(params)) {
+		if (value !== undefined && value !== null && value !== '') {
+			searchParams.append(key, String(value))
+		}
+	}
+
+	const queryString = searchParams.toString()
+	return queryString ? `${baseUrl}?${queryString}` : baseUrl
+}
 
 /**
  * Route definitions class with static properties for all application routes.
@@ -92,9 +128,11 @@ class Routes {
 		detail: (id: string | number): string => `${Routes.InternalAppRoute}/orders/${id}`,
 		/**
 		 * Generates URL for order creation page.
+		 * @param params - Optional query parameters
 		 * @returns Order create URL (e.g., "/app/orders/create")
 		 */
-		create: (): string => `${Routes.InternalAppRoute}/orders/create`,
+		create: (params?: Record<string, string | number>): string => 
+			appendQueryParams(`${Routes.InternalAppRoute}/orders/create`, params),
 	}
 
 	/**
@@ -103,12 +141,20 @@ class Routes {
 	 * @example
 	 * ```typescript
 	 * router.push(Routes.Store.location); // "/store"
+	 * router.push(Routes.Store.withCategory('123')); // "/store?category=123"
 	 * router.push(Routes.Store.product('505')); // "/store/product/505"
 	 * ```
 	 */
 	public static Store = {
 		name: 'Store',
 		location: '/store',
+		/**
+		 * Generates URL for store page with category filter.
+		 * @param categoryId - Category ID to filter by
+		 * @returns Store URL with category query parameter (e.g., "/store?category=123")
+		 */
+		withCategory: (categoryId: string | number): string => 
+			appendQueryParams('/store', { category: categoryId }),
 		/**
 		 * Generates URL for public product detail page.
 		 * @param id - Product ID
@@ -143,9 +189,11 @@ class Routes {
 		detail: (id: string | number): string => `${Routes.InternalAppRoute}/store/${id}`,
 		/**
 		 * Generates URL for product creation page.
+		 * @param params - Optional query parameters
 		 * @returns Product create URL (e.g., "/app/store/create")
 		 */
-		create: (): string => `${Routes.InternalAppRoute}/store/create`,
+		create: (params?: Record<string, string | number>): string => 
+			appendQueryParams(`${Routes.InternalAppRoute}/store/create`, params),
 	}
 
 	/**
@@ -168,9 +216,11 @@ class Routes {
 		detail: (id: string | number): string => `${Routes.InternalAppRoute}/quotes/${id}`,
 		/**
 		 * Generates URL for quote creation page.
+		 * @param params - Optional query parameters
 		 * @returns Quote create URL (e.g., "/app/quotes/create")
 		 */
-		create: (): string => `${Routes.InternalAppRoute}/quotes/create`,
+		create: (params?: Record<string, string | number>): string => 
+			appendQueryParams(`${Routes.InternalAppRoute}/quotes/create`, params),
 	}
 
 	/**
@@ -193,9 +243,11 @@ class Routes {
 		detail: (id: string | number): string => `${Routes.InternalAppRoute}/providers/${id}`,
 		/**
 		 * Generates URL for provider creation page.
+		 * @param params - Optional query parameters
 		 * @returns Provider create URL (e.g., "/app/providers/create")
 		 */
-		create: (): string => `${Routes.InternalAppRoute}/providers/create`,
+		create: (params?: Record<string, string | number>): string => 
+			appendQueryParams(`${Routes.InternalAppRoute}/providers/create`, params),
 	}
 
 	/**
@@ -218,9 +270,11 @@ class Routes {
 		detail: (id: string | number): string => `${Routes.InternalAppRoute}/accounts/${id}`,
 		/**
 		 * Generates URL for account creation page.
-		 * @returns Account create URL (e.g., "/app/accounts/create")
+		 * @param params - Optional query parameters (e.g., { customerId: '123' })
+		 * @returns Account create URL (e.g., "/app/accounts/create" or "/app/accounts/create?customerId=123")
 		 */
-		create: (): string => `${Routes.InternalAppRoute}/accounts/create`,
+		create: (params?: { customerId?: string | number }): string => 
+			appendQueryParams(`${Routes.InternalAppRoute}/accounts/create`, params),
 	}
 
 	/**
@@ -243,9 +297,11 @@ class Routes {
 		detail: (id: string | number): string => `${Routes.InternalAppRoute}/customers/${id}`,
 		/**
 		 * Generates URL for customer creation page.
+		 * @param params - Optional query parameters
 		 * @returns Customer create URL (e.g., "/app/customers/create")
 		 */
-		create: (): string => `${Routes.InternalAppRoute}/customers/create`,
+		create: (params?: Record<string, string | number>): string => 
+			appendQueryParams(`${Routes.InternalAppRoute}/customers/create`, params),
 	}
 
 	/** Analytics dashboard (protected, admin only) */
@@ -299,10 +355,25 @@ class Routes {
 		location: '/about-us',
 	}
 
-	/** Contact form page (public) */
+	/**
+	 * Contact form page (public)
+	 * 
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Contact.location); // "/contact"
+	 * router.push(Routes.Contact.withProduct('123')); // "/contact?product=123"
+	 * ```
+	 */
 	public static Contact = {
 		name: 'Contact',
 		location: '/contact',
+		/**
+		 * Generates URL for contact page with product reference.
+		 * @param productId - Product ID to reference in contact form
+		 * @returns Contact URL with product query parameter (e.g., "/contact?product=123")
+		 */
+		withProduct: (productId: string | number): string => 
+			appendQueryParams('/contact', { product: productId }),
 	}
 
 	/** Shopping cart page (public) */

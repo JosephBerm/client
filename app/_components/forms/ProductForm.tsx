@@ -230,7 +230,7 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
         if (!isCreateMode && result) {
           onUpdate?.(new Product(result))
         }
-        router.push(`${Routes.InternalAppRoute}/store`)
+        router.push(Routes.InternalStore.location)
       }
     }
   )
