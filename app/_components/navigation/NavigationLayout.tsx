@@ -59,7 +59,7 @@
 
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 
 import { usePathname } from 'next/navigation'
 
@@ -127,6 +127,11 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
 	const isMobile = useMediaQuery('(max-width: 1023px)')
 	const prevIsMobile = useRef(isMobile)
 
+	// Focus management: Store trigger element for focus restoration
+	// Following WAI-ARIA best practices: restore focus to trigger element when closing
+	// This matches FAANG-level implementations (Google, Facebook, Amazon, Netflix)
+	const previousFocusRef = useRef<HTMLElement | null>(null)
+
 	// Close sidebar when screen size changes to desktop
 	// This prevents the sidebar drawer from remaining open when resizing from mobile to desktop and back
 	// On desktop (>= 1024px), the sidebar should be persistent, not a drawer
@@ -140,17 +145,62 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
 		prevIsMobile.current = isMobile
 	}, [isMobile, sidebarOpen])
 
-	// Close sidebar on escape key
+	// Close sidebar when user logs out (auth state changes)
+	// Defensive: Ensure sidebar state is reset when authentication changes
+	// Prevents stale state if user logs out and back in quickly
 	useEffect(() => {
-		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === 'Escape' && sidebarOpen) {
-				setSidebarOpen(false)
-			}
+		if (!isAuthenticated && sidebarOpen) {
+			setSidebarOpen(false)
 		}
+	}, [isAuthenticated, sidebarOpen])
 
+	// Store trigger element when sidebar opens (for focus restoration)
+	// Following WAI-ARIA 2.1 and industry best practices (FAANG-level)
+	// When a drawer/modal closes, focus should return to the element that opened it
+	// Matches pattern used in useModal and useFocusTrap hooks for consistency
+	useEffect(() => {
+		if (sidebarOpen) {
+			// Store the currently focused element (the trigger button)
+			previousFocusRef.current = document.activeElement as HTMLElement
+		}
+	}, [sidebarOpen])
+
+	// Shared focus restoration utility (DRY principle)
+	// Extracted to avoid duplication between escape handler and closeSidebar
+	// Follows same pattern as useFocusTrap cleanup function for consistency
+	const restoreFocusToTrigger = useCallback(() => {
+		const triggerElement = previousFocusRef.current
+		if (!triggerElement) {return}
+
+		// Use setTimeout to ensure state update completes before focus restoration
+		// Matches pattern used in useFocusTrap and useModal hooks
+		setTimeout(() => {
+			// Defensive: Verify element still exists and is in DOM before focusing
+			// Prevents errors if element was removed during sidebar close animation
+			if (triggerElement && document.contains(triggerElement) && typeof triggerElement.focus === 'function') {
+				triggerElement.focus()
+			}
+			// Clear ref after restoration attempt (prevents stale references)
+			previousFocusRef.current = null
+		}, 0)
+	}, [])
+
+	// Close sidebar on escape key with focus restoration
+	// Industry best practice: Escape closes drawer AND restores focus to trigger element
+	// This matches WAI-ARIA guidelines and FAANG implementations (Google Material, Facebook, Amazon)
+	const handleEscape = useCallback((e: KeyboardEvent) => {
+		// Use both key and code for maximum compatibility (FAANG-level defensive programming)
+		if ((e.key === 'Escape' || e.code === 'Escape') && sidebarOpen) {
+			e.preventDefault() // Prevent default focus behavior (prevents X button from receiving focus)
+			setSidebarOpen(false)
+			restoreFocusToTrigger()
+		}
+	}, [sidebarOpen, restoreFocusToTrigger])
+
+	useEffect(() => {
 		window.addEventListener('keydown', handleEscape)
 		return () => window.removeEventListener('keydown', handleEscape)
-	}, [sidebarOpen])
+	}, [handleEscape])
 
 	// Prevent body scroll when sidebar is open on mobile
 	useEffect(() => {
@@ -168,18 +218,33 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
 		}
 	}, [sidebarOpen, isMobile])
 
-	const toggleSidebar = () => {
+	// Memoized handlers to prevent unnecessary re-renders of child components
+	// Following FAANG-level performance best practices
+	const toggleSidebar = useCallback(() => {
 		setSidebarOpen((prev) => !prev)
-	}
+	}, [])
 
-	const closeSidebar = () => {
+	const closeSidebar = useCallback(() => {
 		setSidebarOpen(false)
-	}
+		// Restore focus to trigger element when closing via other methods (click outside, etc.)
+		// This ensures consistent behavior regardless of how sidebar is closed
+		// Uses shared restoreFocusToTrigger utility for DRY code
+		restoreFocusToTrigger()
+	}, [restoreFocusToTrigger])
+
+	// Memoize the onMenuClick prop to ensure stable reference
+	// Only pass handler when sidebar exists (authenticated users)
+	// This prevents Navbar from re-rendering unnecessarily
+	const navbarMenuClickHandler = useMemo(() => {
+		return isAuthenticated ? toggleSidebar : undefined
+	}, [isAuthenticated, toggleSidebar])
 
 	return (
 		<div className="relative min-h-screen w-full bg-base-100">
 			{/* Only show Navbar on public routes (NOT in /app) */}
-			{!isInternalApp && <Navbar onMenuClick={toggleSidebar} />}
+			{/* Only pass onMenuClick when sidebar exists (authenticated users) */}
+			{/* Memoized handler ensures stable prop reference for optimal performance */}
+			{!isInternalApp && <Navbar onMenuClick={navbarMenuClickHandler} />}
 
 			{/* Internal app routes (/app/*) have their own layout - render children directly */}
 			{isInternalApp ? (

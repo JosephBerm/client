@@ -238,10 +238,11 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 
 				{/* Sidebar Menu Button (only for internal routes /app/* via InternalAppShell) */}
 				{/* This should never appear on public routes since onMenuClick won't be provided */}
+				{/* Only show when center navigation links are hidden (mobile < 768px) */}
 				{onMenuClick && (
 					<button
 						onClick={onMenuClick}
-						className="flex items-center justify-center rounded-lg p-2.5 text-base-content transition-all hover:scale-105 hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
+						className="flex items-center justify-center rounded-lg p-2.5 text-base-content transition-all hover:scale-105 hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:hidden"
 						aria-label="Open sidebar menu"
 					>
 						<Menu className="h-7 w-7" />
