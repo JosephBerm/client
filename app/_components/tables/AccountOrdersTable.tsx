@@ -154,7 +154,7 @@ export default function AccountOrdersTable() {
 	}
 
 		if (user?.customer?.id) {
-			fetchOrders()
+			void fetchOrders()
 		}
 	}, [user?.customer?.id, user?.id])
 

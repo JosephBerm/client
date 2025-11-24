@@ -151,27 +151,27 @@ export class Product {
 	 */
 	constructor(product: Partial<Product>) {
 		// Generate new GUID if not provided
-		this.id = product?.id || Guid.newGuid()
+		this.id = product?.id ?? Guid.newGuid()
 		
 		// Deep copy files array
 		this.files = product?.files?.length ? product.files.map((x) => new UploadedFile(x)) : []
 		
 		// Assign basic properties with defaults
-		this.sku = product?.sku || ''
-		this.name = product?.name || ''
-		this.description = product?.description || ''
-		this.price = product?.price || 0
-		this.stock = product?.stock || 0
-		this.category = product?.category || ''
-		this.manufacturer = product?.manufacturer || ''
+		this.sku = product?.sku ?? ''
+		this.name = product?.name ?? ''
+		this.description = product?.description ?? ''
+		this.price = product?.price ?? 0
+		this.stock = product?.stock ?? 0
+		this.category = product?.category ?? ''
+		this.manufacturer = product?.manufacturer ?? ''
 		
 		// Deep copy categories array
 		this.categories = product?.categories?.length ? product.categories.map((x) => new ProductsCategory(x)) : []
-		this.categoryIds = product?.categoryIds || []
+		this.categoryIds = product?.categoryIds ?? []
 		
 		// Assign provider relationship
-		this.providerId = product?.providerId || null
-		this.provider = product?.provider || null
+		this.providerId = product?.providerId ?? null
+		this.provider = product?.provider ?? null
 		
 		// Deep copy images array
 		this.images = product?.images?.length ? product.images.map((x) => new HtmlImage(x)) : []

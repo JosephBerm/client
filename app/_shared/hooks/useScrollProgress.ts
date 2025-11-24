@@ -118,7 +118,7 @@ export function useScrollProgress({
 					return
 				}
 
-				const element = currentContainer as HTMLElement
+				const element = currentContainer
 				currentScrollTop = element.scrollTop
 				containerHeight = element.clientHeight
 				contentHeight = element.scrollHeight

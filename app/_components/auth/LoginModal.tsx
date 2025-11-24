@@ -98,6 +98,21 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 	}
 
 	/**
+	 * Wrapper for social login to handle promise in onClick handler.
+	 * FAANG Pattern: Non-async wrapper for async event handlers.
+	 */
+	const handleSocialLoginClick = (provider: SocialProvider) => {
+		void handleSocialLogin(provider).catch((error) => {
+			logger.error('Social login error', {
+				error,
+				provider,
+				component: 'LoginModal',
+				action: 'handleSocialLoginClick',
+			})
+		})
+	}
+
+	/**
 	 * Handle email/password form submission.
 	 */
 	const handleSubmit = async (values: LoginFormData) => {
@@ -206,7 +221,19 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 			handleEmailContinue()
 		} else {
 			// Second step: Submit form
-			form.handleSubmit(handleSubmit)(e)
+			// React Hook Form's handleSubmit returns a function that may return a Promise
+			// We handle errors internally in handleSubmit, but catch any unhandled rejections
+			const submitResult = form.handleSubmit(handleSubmit)(e)
+			if (submitResult instanceof Promise) {
+				submitResult.catch((error) => {
+					// Log unhandled form submission errors
+					logger.error('Unhandled form submission error', {
+						error,
+						component: 'LoginModal',
+						action: 'handleFormSubmit',
+					})
+				})
+			}
 		}
 	}
 
@@ -266,7 +293,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 						{/* Google */}
 						<button
 							type='button'
-							onClick={() => handleSocialLogin('google')}
+							onClick={() => handleSocialLoginClick('google')}
 							className={socialButtonClasses}
 							aria-label='Continue with Google'>
 							<svg
@@ -299,7 +326,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 						{/* Apple */}
 						<button
 							type='button'
-							onClick={() => handleSocialLogin('apple')}
+							onClick={() => handleSocialLoginClick('apple')}
 							className={socialButtonClasses}
 							aria-label='Continue with Apple'>
 							<svg
@@ -318,7 +345,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 						{/* Microsoft */}
 						<button
 							type='button'
-							onClick={() => handleSocialLogin('microsoft')}
+							onClick={() => handleSocialLoginClick('microsoft')}
 							className={socialButtonClasses}
 							aria-label='Continue with Microsoft'>
 							<svg
@@ -351,7 +378,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 						{/* Phone */}
 						<button
 							type='button'
-							onClick={() => handleSocialLogin('phone')}
+							onClick={() => handleSocialLoginClick('phone')}
 							className={socialButtonClasses}
 							aria-label='Continue with phone'>
 							<svg
@@ -395,6 +422,9 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 							label={showEmailForm ? 'Email or Username' : undefined}
 							type='text'
 							placeholder={showEmailForm ? undefined : 'Email address'}
+							// ESLint: autoFocus is intentional for login UX - focuses first input when modal opens
+							// This improves accessibility by immediately placing focus in the form
+							// eslint-disable-next-line jsx-a11y/no-autofocus
 							autoFocus={!showEmailForm}
 							{...form.register('identifier')}
 							error={form.formState.errors.identifier}
@@ -412,6 +442,9 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 							label='Password'
 							type='password'
 							placeholder='Enter your password'
+							// ESLint: autoFocus is intentional for login UX - focuses password field after email entry
+							// This improves accessibility by automatically moving focus to the next input
+							// eslint-disable-next-line jsx-a11y/no-autofocus
 							autoFocus={showEmailForm}
 							{...form.register('password')}
 							error={form.formState.errors.password}

@@ -54,7 +54,7 @@ export default function QuotesPage() {
         accessorKey: 'status',
         header: 'Status',
         cell: ({ row }) => {
-          const status = row.original.status
+          const {status} = row.original
           const variant = status === QuoteStatus.Read ? 'success' : 'warning'
           const label = status === QuoteStatus.Read ? 'Read' : 'Unread'
           return <Badge variant={variant}>{label}</Badge>

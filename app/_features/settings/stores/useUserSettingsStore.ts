@@ -226,7 +226,7 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 		if (!document.documentElement.hasAttribute('data-theme-observer-setup')) {
 			const observer = new MutationObserver(() => {
 				const appliedTheme = ThemeService.getCurrentTheme()
-				const currentTheme = get().currentTheme
+				const {currentTheme} = get()
 				// Only update if different to prevent infinite loops
 				if (appliedTheme !== currentTheme) {
 					set({ currentTheme: appliedTheme })

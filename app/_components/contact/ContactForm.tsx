@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 
 import classNames from 'classnames'
 import { Mail } from 'lucide-react'
@@ -62,7 +62,13 @@ export default function ContactForm({ onSubmitSuccess }: ContactFormProps) {
 		},
 	})
 
-	const handleSubmit = async (values: ContactFormData) => {
+	/**
+	 * Async form submission handler.
+	 * Wrapped in useCallback to maintain stable reference for use in other callbacks.
+	 * 
+	 * FAANG Pattern: Memoize async handlers that are used as dependencies.
+	 */
+	const handleSubmitAsync = useCallback(async (values: ContactFormData) => {
 		setIsLoading(true)
 
 		try {
@@ -98,7 +104,47 @@ export default function ContactForm({ onSubmitSuccess }: ContactFormProps) {
 		} finally {
 			setIsLoading(false)
 		}
-	}
+	}, [onSubmitSuccess])
+
+	/**
+	 * Form submission handler for React Hook Form.
+	 * Wraps async handler to satisfy ESLint's no-misused-promises rule.
+	 * React Hook Form supports async handlers, but we need to handle the Promise explicitly.
+	 * 
+	 * FAANG Pattern: Extract event handlers from JSX for separation of concerns.
+	 */
+	const handleSubmit = useCallback((values: ContactFormData): void => {
+		void handleSubmitAsync(values).catch((error) => {
+			// Error already handled in handleSubmitAsync, but catch any unhandled rejections
+			logger.error('Unhandled form submission error', {
+				error,
+				component: 'ContactForm',
+				action: 'handleSubmit',
+			})
+		})
+	}, [handleSubmitAsync])
+
+	/**
+	 * Form onSubmit handler that properly handles React Hook Form's Promise return.
+	 * Extracted from JSX for clean code and separation of concerns.
+	 * 
+	 * FAANG Pattern: Use useCallback for stable event handlers to prevent unnecessary re-renders.
+	 */
+	const onFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+		const submitHandler = form.handleSubmit(handleSubmit)
+		const result = submitHandler(e)
+		// React Hook Form's handleSubmit may return a Promise if handler is async
+		// Handle it explicitly to satisfy ESLint's no-misused-promises rule
+		if (result instanceof Promise) {
+			void result.catch((error) => {
+				logger.error('Unhandled form submission error', {
+					error,
+					component: 'ContactForm',
+					action: 'onFormSubmit',
+				})
+			})
+		}
+	}, [form, handleSubmit])
 
 	return (
 		<div
@@ -123,7 +169,7 @@ export default function ContactForm({ onSubmitSuccess }: ContactFormProps) {
 						</p>
 					</div>
 
-					<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+					<form onSubmit={onFormSubmit} className="space-y-5">
 						<FormInput
 							label="Your Name"
 							type="text"

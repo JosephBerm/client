@@ -85,14 +85,14 @@
 
 'use client'
 
-import React from 'react'
+import React, { useCallback } from 'react'
 
 import { useParams } from 'next/navigation'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
-import { providerSchema, type ProviderFormData } from '@_core'
+import { logger, providerSchema, type ProviderFormData } from '@_core'
 
 import { useFormSubmit , API } from '@_shared'
 
@@ -159,12 +159,12 @@ export default function UpdateProviderForm({ provider, onUpdate }: UpdateProvide
 	const form = useForm<ProviderFormData>({
 		resolver: zodResolver(providerSchema),
 		defaultValues: {
-			name: provider.name || '',
-			email: provider.email || '',
-			phone: provider.phone || '',
-			taxId: provider.taxId || '',
-			website: provider.website || '',
-			address: provider.address || undefined,
+			name: provider.name ?? '',
+			email: provider.email ?? '',
+			phone: provider.phone ?? '',
+			taxId: provider.taxId ?? '',
+			website: provider.website ?? '',
+			address: provider.address ?? undefined,
 		},
 	})
 
@@ -174,12 +174,12 @@ export default function UpdateProviderForm({ provider, onUpdate }: UpdateProvide
 				...provider,
 				name: data.name,
 				email: data.email,
-				phone: data.phone || '',
-				taxId: data.taxId || '',
-				website: data.website || '',
+				phone: data.phone ?? '',
+				taxId: data.taxId ?? '',
+				website: data.website ?? '',
 				address: data.address ? new Address(data.address) : provider.address,
 			})
-			return isCreateMode ? await API.Providers.create(providerData) : await API.Providers.update(providerData)
+			return isCreateMode ? API.Providers.create(providerData) : API.Providers.update(providerData)
 		},
 		{
 			successMessage: `Provider ${isCreateMode ? 'created' : 'updated'} successfully`,
@@ -192,12 +192,48 @@ export default function UpdateProviderForm({ provider, onUpdate }: UpdateProvide
 		}
 	)
 
-	const handleSubmit = async (data: ProviderFormData) => {
-		await submit(data)
-	}
+	/**
+	 * Form submission handler for React Hook Form.
+	 * Wraps async handler to satisfy ESLint's no-misused-promises rule.
+	 * React Hook Form supports async handlers, but we need to handle the Promise explicitly.
+	 * 
+	 * FAANG Pattern: Extract event handlers from JSX for separation of concerns.
+	 */
+	const handleSubmit = useCallback((data: ProviderFormData): void => {
+		void submit(data).catch((error) => {
+			// Error already handled in submit function, but catch any unhandled rejections
+			logger.error('Unhandled form submission error', {
+				error,
+				component: 'UpdateProviderForm',
+				action: 'handleSubmit',
+			})
+		})
+	}, [submit])
+
+	/**
+	 * Form onSubmit handler that properly handles React Hook Form's Promise return.
+	 * Extracted from JSX for clean code and separation of concerns.
+	 * 
+	 * FAANG Pattern: Use useCallback for stable event handlers to prevent unnecessary re-renders.
+	 */
+	const onFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+		const submitHandler = form.handleSubmit(handleSubmit)
+		const result = submitHandler(e)
+		// React Hook Form's handleSubmit may return a Promise if handler is async
+		// Handle it explicitly to satisfy ESLint's no-misused-promises rule
+		if (result instanceof Promise) {
+			void result.catch((error) => {
+				logger.error('Unhandled form submission error', {
+					error,
+					component: 'UpdateProviderForm',
+					action: 'onFormSubmit',
+				})
+			})
+		}
+	}, [form, handleSubmit])
 
 	return (
-		<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+		<form onSubmit={onFormSubmit} className="space-y-6">
 			<FormInput
 				label="Provider Name"
 				{...form.register('name')}

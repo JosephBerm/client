@@ -12,6 +12,8 @@ import { Routes } from '@_features/navigation'
 
 import { notificationService , formatDate , API } from '@_shared'
 
+import { logger } from '@/app/_core'
+
 import type Provider from '@_classes/Provider'
 
 import ServerDataGrid from '@_components/tables/ServerDataGrid'
@@ -19,8 +21,6 @@ import Button from '@_components/ui/Button'
 import Modal from '@_components/ui/Modal'
 
 import { InternalPageHeader } from '../_components'
-
-
 
 import type { ColumnDef } from '@tanstack/react-table'
 
@@ -93,11 +93,12 @@ export default function ProvidersPage() {
     []
   )
 
-  const handleDelete = async () => {
+  // Async delete handler
+  const handleDeleteAsync = async () => {
     if (!deleteModal.provider) {return}
 
     try {
-      const { data } = await API.Providers.delete(deleteModal.provider.id!)
+      const { data } = await API.Providers.delete(deleteModal.provider.id)
 
       if (data.statusCode !== 200) {
         notificationService.error(data.message || 'Failed to delete provider', {
@@ -123,6 +124,21 @@ export default function ProvidersPage() {
         action: 'deleteProvider',
       })
     }
+  }
+
+  /**
+   * Wrapper for delete to handle promise in onClick handler.
+   * FAANG Pattern: Non-async wrapper for async event handlers.
+   */
+  const handleDelete = () => {
+    void handleDeleteAsync().catch((error) => {
+      // Error already handled in handleDeleteAsync, but catch any unhandled rejections
+      logger.error('Unhandled delete error', {
+        error,
+        component: 'ProvidersPage',
+        action: 'handleDelete',
+      })
+    })
   }
 
   return (

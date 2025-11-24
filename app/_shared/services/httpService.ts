@@ -77,7 +77,10 @@ baseInstance.interceptors.request.use((config) => {
 	const token = cookies['at']
 
 	// If token exists, add it to Authorization header
+	// ESLint: Axios interceptors are designed to mutate config (Axios pattern)
+	// Creating a copy would break Axios's internal optimizations
 	if (token) {
+		// eslint-disable-next-line no-param-reassign
 		config.headers.Authorization = `Bearer ${token}`
 	}
 
@@ -91,7 +94,7 @@ baseInstance.interceptors.request.use((config) => {
  */
 baseInstance.interceptors.response.use(
 	(response) => response, // Pass through successful responses
-	(error: AxiosError) => {
+	async (error: AxiosError) => {
 		if (error.response) {
 			// Server responded with error status (4xx, 5xx)
 			// Uncomment below to handle 401 unauthorized globally:
@@ -213,7 +216,7 @@ export class HttpService {
 	 * });
 	 * ```
 	 */
-	public static get<T>(url: string, config: AxiosRequestConfig = {}): Promise<AxiosResponse<ApiResponse<T>>> {
+	public static async get<T>(url: string, config: AxiosRequestConfig = {}): Promise<AxiosResponse<ApiResponse<T>>> {
 		return HttpService.instance.get<ApiResponse<T>>(url, config)
 	}
 
@@ -249,7 +252,7 @@ export class HttpService {
 	 * });
 	 * ```
 	 */
-	public static post<T>(url: string, data: any, config: AxiosRequestConfig = {}): Promise<AxiosResponse<ApiResponse<T>>> {
+	public static async post<T>(url: string, data: any, config: AxiosRequestConfig = {}): Promise<AxiosResponse<ApiResponse<T>>> {
 		return HttpService.instance.post<ApiResponse<T>>(url, data, config)
 	}
 
@@ -276,7 +279,7 @@ export class HttpService {
 	 * });
 	 * ```
 	 */
-	public static put<T>(url: string, data: any): Promise<AxiosResponse<ApiResponse<T>>> {
+	public static async put<T>(url: string, data: any): Promise<AxiosResponse<ApiResponse<T>>> {
 		return HttpService.instance.put<ApiResponse<T>>(url, data)
 	}
 
@@ -302,7 +305,7 @@ export class HttpService {
 	 * });
 	 * ```
 	 */
-	public static delete<T>(url: string, data: any = null): Promise<AxiosResponse<ApiResponse<T>>> {
+	public static async delete<T>(url: string, data: any = null): Promise<AxiosResponse<ApiResponse<T>>> {
 		return HttpService.instance.delete<ApiResponse<T>>(url, data)
 	}
 
@@ -342,7 +345,7 @@ export class HttpService {
 	 * );
 	 * ```
 	 */
-	public static download<T>(url: string, data: any = null, config: AxiosRequestConfig = {}): Promise<AxiosResponse<T>> {
+	public static async download<T>(url: string, data: any = null, config: AxiosRequestConfig = {}): Promise<AxiosResponse<T>> {
 		return HttpService.instance.post<T>(url, data, config)
 	}
 }

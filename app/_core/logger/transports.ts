@@ -316,12 +316,32 @@ export class BufferedTransport implements LogTransport {
 
 		// Send all buffered logs to inner transport
 		for (const entry of logsToFlush) {
-			this.innerTransport.log(entry)
+			try {
+				const result = this.innerTransport.log(entry)
+				// Handle promise rejection if transport.log returns a promise
+				if (result instanceof Promise) {
+					result.catch((error) => {
+						console.error('Inner transport log failed:', this.innerTransport.name, error)
+					})
+				}
+			} catch (error) {
+				console.error('Inner transport log failed:', this.innerTransport.name, error)
+			}
 		}
 
 		// Flush inner transport if it supports it
 		if (this.innerTransport.flush) {
-			this.innerTransport.flush()
+			try {
+				const result = this.innerTransport.flush()
+				// Handle promise rejection if transport.flush returns a promise
+				if (result instanceof Promise) {
+					result.catch((error) => {
+						console.error('Inner transport flush failed:', this.innerTransport.name, error)
+					})
+				}
+			} catch (error) {
+				console.error('Inner transport flush failed:', this.innerTransport.name, error)
+			}
 		}
 	}
 
@@ -341,7 +361,17 @@ export class BufferedTransport implements LogTransport {
 
 		// Close inner transport
 		if (this.innerTransport.close) {
-			this.innerTransport.close()
+			try {
+				const result = this.innerTransport.close()
+				// Handle promise rejection if transport.close returns a promise
+				if (result instanceof Promise) {
+					result.catch((error) => {
+						console.error('Inner transport close failed:', this.innerTransport.name, error)
+					})
+				}
+			} catch (error) {
+				console.error('Inner transport close failed:', this.innerTransport.name, error)
+			}
 		}
 	}
 }
@@ -445,7 +475,10 @@ export class RemoteTransport implements LogTransport {
 
 		// Send batch if full
 		if (this.buffer.length >= this.batchSize) {
-			this.flush()
+			// flush() returns Promise<void>, handle rejection
+			this.flush().catch((error) => {
+				console.error('Remote transport flush failed:', error)
+			})
 		}
 	}
 

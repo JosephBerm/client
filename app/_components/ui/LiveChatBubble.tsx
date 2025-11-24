@@ -130,7 +130,7 @@ export default function LiveChatBubble({
 
 				let maxAvoidHeight = 0
 				for (const selector of avoidOverlapSelectors) {
-					const elements = Array.from(document.querySelectorAll(selector)) as HTMLElement[]
+					const elements = Array.from(document.querySelectorAll(selector))
 					for (const el of elements) {
 						const style = window.getComputedStyle(el)
 						const isFixed = style.position === 'fixed'

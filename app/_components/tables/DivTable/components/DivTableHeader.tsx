@@ -137,8 +137,10 @@ export function DataGridHeader<TData>({
               <div
                 key={header.id}
                 {...headerARIA}
+                role={canSort ? 'button' : 'columnheader'}
                 onClick={canSort ? handleClick : undefined}
-                onKeyDown={handleKeyDown}
+                onKeyDown={canSort ? handleKeyDown : undefined}
+                tabIndex={canSort ? 0 : undefined}
                 aria-label={sortLabel}
                 className={classNames(
                   'data-grid-header-cell',

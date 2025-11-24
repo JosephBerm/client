@@ -9,8 +9,9 @@ import { Eye, Plus, Trash2 } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
 
-
 import { notificationService , formatDate , API } from '@_shared'
+
+import { logger } from '@/app/_core'
 
 import type Company from '@_classes/Company'
 
@@ -93,11 +94,12 @@ export default function CustomersPage() {
     []
   )
 
-  const handleDelete = async () => {
+  // Async delete handler
+  const handleDeleteAsync = async () => {
     if (!deleteModal.customer) {return}
 
     try {
-      const { data } = await API.Customers.delete(deleteModal.customer.id!)
+      const { data } = await API.Customers.delete(deleteModal.customer.id)
 
       if (data.statusCode !== 200) {
         notificationService.error(data.message || 'Failed to delete customer', {
@@ -123,6 +125,21 @@ export default function CustomersPage() {
         action: 'deleteCustomer',
       })
     }
+  }
+
+  /**
+   * Wrapper for delete to handle promise in onClick handler.
+   * FAANG Pattern: Non-async wrapper for async event handlers.
+   */
+  const handleDelete = () => {
+    void handleDeleteAsync().catch((error) => {
+      // Error already handled in handleDeleteAsync, but catch any unhandled rejections
+      logger.error('Unhandled delete error', {
+        error,
+        component: 'CustomersPage',
+        action: 'handleDelete',
+      })
+    })
   }
 
   return (

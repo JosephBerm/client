@@ -148,7 +148,7 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
 			<div className={fieldWrapperClass}>
 				{label && (
 					<label
-						htmlFor={props.id || props.name}
+						htmlFor={props.id ?? props.name}
 						className={labelClass}>
 						{label}
 						{props.required && (

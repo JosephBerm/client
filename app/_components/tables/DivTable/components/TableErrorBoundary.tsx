@@ -95,7 +95,7 @@ export class TableErrorBoundary extends Component<Props, State> {
   /**
    * Render children or fallback
    */
-  render() {
+  async render() {
     if (this.state.hasError) {
       // Use custom fallback if provided
       if (this.props.fallback) {

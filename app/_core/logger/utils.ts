@@ -399,7 +399,7 @@ export function extractContext(): LogContext {
 
 		// Performance timing (page load time)
 		if (performance && performance.timing) {
-			const timing = performance.timing
+			const {timing} = performance
 			if (timing.loadEventEnd && timing.navigationStart) {
 				context.pageLoadTime = timing.loadEventEnd - timing.navigationStart
 			}

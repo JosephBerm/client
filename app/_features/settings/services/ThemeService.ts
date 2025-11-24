@@ -54,7 +54,7 @@ class ThemeServiceClass extends BasePreferenceService<Theme> {
 	 */
 	protected deserializeFromDOM(attributeValue: string | null): Theme | null {
 		if (!attributeValue) {return null}
-		return this.validateValue(attributeValue) ? (attributeValue as Theme) : null
+		return this.validateValue(attributeValue) ? (attributeValue) : null
 	}
 
 	// Public API methods (for backward compatibility and clarity)
@@ -116,7 +116,7 @@ class ThemeServiceClass extends BasePreferenceService<Theme> {
 	 */
 	setStoredTheme(theme: Theme | string): void {
 		if (this.validateValue(theme)) {
-			this.setStoredPreference(theme as Theme)
+			this.setStoredPreference(theme)
 		}
 	}
 
@@ -132,7 +132,7 @@ class ThemeServiceClass extends BasePreferenceService<Theme> {
 	 */
 	applyTheme(theme: Theme | string): void {
 		if (this.validateValue(theme)) {
-			this.applyPreference(theme as Theme)
+			this.applyPreference(theme)
 		}
 	}
 

@@ -157,7 +157,7 @@ export function useScrollReveal({
 		(entry: IntersectionObserverEntry) => {
 			if (!entry) {return}
 
-			const isIntersecting = entry.isIntersecting
+			const {isIntersecting} = entry
 
 			// Update visibility state
 			setIsVisible(isIntersecting)

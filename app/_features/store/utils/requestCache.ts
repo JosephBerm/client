@@ -83,14 +83,13 @@ class RequestCacheManager {
 		const existing = this.cache.get(cacheKey)
 
 		// Case 1: Request is currently in-flight - return existing Promise
-		if (existing && existing.status === 'pending') {
+		if (existing?.status === 'pending') {
 			return existing.promise
 		}
 
 		// Case 2: Recent successful response exists and not forced - return cached
 		if (
-			existing &&
-			existing.status === 'success' &&
+			existing?.status === 'success' &&
 			!forceFetch &&
 			Date.now() - existing.timestamp < ttl &&
 			existing.result !== undefined

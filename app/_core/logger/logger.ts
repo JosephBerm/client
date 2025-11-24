@@ -326,9 +326,16 @@ export class Logger implements ILogger {
 		// Send to all transports
 		for (const transport of this.transports) {
 			try {
-				transport.log(entry)
+				const result = transport.log(entry)
+				// Handle promise rejection if transport.log returns a promise
+				if (result instanceof Promise) {
+					result.catch((error) => {
+						// Fallback: If transport fails, log to console
+						console.error('Transport failed:', transport.name, error)
+					})
+				}
 			} catch (error) {
-				// Fallback: If transport fails, log to console
+				// Fallback: If transport fails synchronously, log to console
 				console.error('Transport failed:', transport.name, error)
 			}
 		}
@@ -404,7 +411,17 @@ export class Logger implements ILogger {
 			
 			// Close transport if it has a close method
 			if (transport.close) {
-				transport.close()
+				try {
+					const result = transport.close()
+					// Handle promise rejection if transport.close returns a promise
+					if (result instanceof Promise) {
+						result.catch((error) => {
+							console.error('Transport close failed:', transport.name, error)
+						})
+					}
+				} catch (error) {
+					console.error('Transport close failed:', transport.name, error)
+				}
 			}
 			
 			this.transports.splice(index, 1)
@@ -446,7 +463,7 @@ export class Logger implements ILogger {
 	public async flush(): Promise<void> {
 		const flushPromises = this.transports
 			.filter((t) => t.flush)
-			.map((t) => t.flush!())
+			.map(async (t) => t.flush!())
 
 		await Promise.all(flushPromises)
 	}
@@ -466,7 +483,7 @@ export class Logger implements ILogger {
 	public async close(): Promise<void> {
 		const closePromises = this.transports
 			.filter((t) => t.close)
-			.map((t) => t.close!())
+			.map(async (t) => t.close!())
 
 		await Promise.all(closePromises)
 		
@@ -641,9 +658,16 @@ export class Logger implements ILogger {
 		// Send to all transports
 		for (const transport of this.transports) {
 			try {
-				transport.log(entry as LogEntry)
+				const result = transport.log(entry as LogEntry)
+				// Handle promise rejection if transport.log returns a promise
+				if (result instanceof Promise) {
+					result.catch((error) => {
+						// Fallback: If transport fails, log to console
+						console.error('Transport failed:', transport.name, error)
+					})
+				}
 			} catch (error) {
-				// Fallback: If transport fails, log to console
+				// Fallback: If transport fails synchronously, log to console
 				console.error('Transport failed:', transport.name, error)
 			}
 		}

@@ -283,6 +283,21 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 		}
 	}, [isLoggingOut, user, clearAuthState, router])
 
+	/**
+	 * Wrapper for logout to handle promise in onClick handler.
+	 * FAANG Pattern: Non-async wrapper for async event handlers.
+	 */
+	const handleLogoutClick = useCallback(() => {
+		void handleLogout().catch((error) => {
+			// Error already handled in handleLogout, but catch any unhandled rejections
+			logger.error('Unhandled logout error', {
+				error,
+				component: 'InternalSidebar',
+				action: 'handleLogoutClick',
+			})
+		})
+	}, [handleLogout])
+
 	// Handle Escape key to close on mobile
 	useEffect(() => {
 		const handleEscape = (e: KeyboardEvent) => {
@@ -530,7 +545,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 					<Button
 						variant={isLoggingOut ? 'error' : 'ghost'}
 						size="sm"
-						onClick={handleLogout}
+						onClick={handleLogoutClick}
 						disabled={isLoggingOut}
 						loading={isLoggingOut}
 						leftIcon={!isLoggingOut ? <LogOut className="w-5 h-5" /> : undefined}

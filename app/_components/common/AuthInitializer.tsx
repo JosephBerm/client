@@ -75,7 +75,7 @@ export default function AuthInitializer() {
 	const checkAuth = useAuthStore((state) => state.checkAuth)
 
 	useEffect(() => {
-		checkAuth()
+		void checkAuth()
 	}, [checkAuth])
 
 	return null

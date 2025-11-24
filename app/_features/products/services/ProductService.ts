@@ -61,7 +61,7 @@ export class ProductService {
 	 */
 	static async get(productId: string): Promise<Product> {
 		const response = await API.Store.Products.get(productId)
-		const payload = response.data.payload
+		const {payload} = response.data
 		if (!payload) {
 			throw new Error(`Product with ID ${productId} not found`)
 		}
@@ -96,7 +96,7 @@ export class ProductService {
 	 */
 	static async create(formData: FormData): Promise<Product> {
 		const response = await API.Store.Products.create(formData)
-		const payload = response.data.payload
+		const {payload} = response.data
 		if (!payload) {
 			throw new Error('Failed to create product')
 		}
@@ -111,7 +111,7 @@ export class ProductService {
 	 */
 	static async update(product: Product): Promise<Product> {
 		const response = await API.Store.Products.update<Product>(product)
-		const payload = response.data.payload
+		const {payload} = response.data
 		if (!payload) {
 			throw new Error('Failed to update product')
 		}

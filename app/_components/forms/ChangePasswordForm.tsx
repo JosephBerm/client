@@ -50,12 +50,12 @@
 
 'use client'
 
-import React from 'react'
+import React, { useCallback } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
-import { changePasswordSchema, type ChangePasswordFormData } from '@_core'
+import { changePasswordSchema, type ChangePasswordFormData, logger } from '@_core'
 
 import { useFormSubmit , API , notificationService } from '@_shared'
 
@@ -122,7 +122,9 @@ export default function ChangePasswordForm({ user }: ChangePasswordFormProps) {
         })
         throw new Error('User ID is required')
       }
-      return await API.Accounts.changePasswordById(user.id, data.oldPassword, data.newPassword)
+      // ESLint rule: return-await only in try-catch, but we're in async function
+      // Return the promise directly (no await needed here)
+      return API.Accounts.changePasswordById(user.id, data.oldPassword, data.newPassword)
     },
     {
       successMessage: 'Password changed successfully',
@@ -133,12 +135,48 @@ export default function ChangePasswordForm({ user }: ChangePasswordFormProps) {
     }
   )
 
-  const handleSubmit = async (data: ChangePasswordFormData) => {
-    await submit(data)
-  }
+  /**
+   * Form submission handler for React Hook Form.
+   * Wraps async handler to satisfy ESLint's no-misused-promises rule.
+   * React Hook Form supports async handlers, but we need to handle the Promise explicitly.
+   * 
+   * FAANG Pattern: Extract event handlers from JSX for separation of concerns.
+   */
+  const handleSubmit = useCallback((data: ChangePasswordFormData): void => {
+    void submit(data).catch((error) => {
+      // Error already handled in submit function, but catch any unhandled rejections
+      logger.error('Unhandled form submission error', {
+        error,
+        component: 'ChangePasswordForm',
+        action: 'handleSubmit',
+      })
+    })
+  }, [submit])
+
+  /**
+   * Form onSubmit handler that properly handles React Hook Form's Promise return.
+   * Extracted from JSX for clean code and separation of concerns.
+   * 
+   * FAANG Pattern: Use useCallback for stable event handlers to prevent unnecessary re-renders.
+   */
+  const onFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+    const submitHandler = form.handleSubmit(handleSubmit)
+    const result = submitHandler(e)
+    // React Hook Form's handleSubmit may return a Promise if handler is async
+    // Handle it explicitly to satisfy ESLint's no-misused-promises rule
+    if (result instanceof Promise) {
+      void result.catch((error) => {
+        logger.error('Unhandled form submission error', {
+          error,
+          component: 'ChangePasswordForm',
+          action: 'onFormSubmit',
+        })
+      })
+    }
+  }, [form, handleSubmit])
 
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 max-w-md">
+    <form onSubmit={onFormSubmit} className="space-y-6 max-w-md">
       <FormInput
         label="Current Password"
         type="password"

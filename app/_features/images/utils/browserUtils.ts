@@ -201,8 +201,8 @@ export function getNetworkSpeed(): NetworkSpeed {
 		return 'unknown'
 	}
 
-	const connection = (navigator as any).connection
-	if (!connection || !connection.effectiveType) {
+	const {connection} = (navigator as any)
+	if (!connection?.effectiveType) {
 		return 'unknown'
 	}
 
@@ -236,7 +236,7 @@ export function isDataSaverEnabled(): boolean {
 		return false
 	}
 
-	const connection = (navigator as any).connection
+	const {connection} = (navigator as any)
 	return connection?.saveData === true
 }
 

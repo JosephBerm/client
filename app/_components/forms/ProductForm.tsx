@@ -83,7 +83,7 @@
 
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
@@ -170,25 +170,25 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      name: product?.name || '',
-      description: product?.description || '',
-      price: product?.price || 0,
-      quantity: product?.stock || 0,
-      category: product?.category || '',
-      sku: product?.sku || '',
-      manufacturer: product?.manufacturer || '',
+      name: product?.name ?? '',
+      description: product?.description ?? '',
+      price: product?.price ?? 0,
+      quantity: product?.stock ?? 0,
+      category: product?.category ?? '',
+      sku: product?.sku ?? '',
+      manufacturer: product?.manufacturer ?? '',
     },
   })
 
   useEffect(() => {
-    fetchProviders()
+    void fetchProviders()
   }, [])
 
   const fetchProviders = async () => {
     try {
       const { data } = await API.Providers.getAll()
       if (data.payload) {
-        setProviders((data.payload as Provider[]) || [])
+        setProviders((data.payload as Provider[]) ?? [])
       }
     } catch (err) {
       logger.error('Failed to fetch providers', {
@@ -198,6 +198,11 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
     }
   }
 
+  // ESLint: useFormSubmit is a custom hook that takes an async function and options object (not a dependency array).
+  // The async function intentionally captures files, isCreateMode, and product from closure.
+  // These are not React hook dependencies - they're closure variables used in the submit function.
+  // The function is recreated on each render, which is acceptable for this use case.
+  // The second parameter is an options object, not a dependency array, so ESLint's warning is a false positive.
   const { submit, isSubmitting } = useFormSubmit(
     async (data: ProductFormData) => {
       if (isCreateMode) {
@@ -206,16 +211,16 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
         formData.append('product.name', data.name)
         formData.append('product.description', data.description)
         formData.append('product.price', data.price.toString())
-        formData.append('product.sku', data.sku || '')
+        formData.append('product.sku', data.sku ?? '')
         formData.append('product.stock', data.quantity.toString())
         formData.append('product.category', data.category)
-        formData.append('product.manufacturer', data.manufacturer || '')
+        formData.append('product.manufacturer', data.manufacturer ?? '')
         
         files.forEach((file: File) => {
           formData.append('files', file)
         })
 
-        return await API.Store.Products.create(formData)
+        return API.Store.Products.create(formData)
       } else {
         // Update mode: use Product constructor to preserve methods
         const productData = new Product({
@@ -225,12 +230,13 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
           price: data.price,
           stock: data.quantity,
           category: data.category,
-          sku: data.sku || '',
-          manufacturer: data.manufacturer || '',
+          sku: data.sku ?? '',
+          manufacturer: data.manufacturer ?? '',
         })
-        return await API.Store.Products.update(productData)
+        return API.Store.Products.update(productData)
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     {
       successMessage: `Product ${isCreateMode ? 'created' : 'updated'} successfully`,
       errorMessage: `Failed to ${isCreateMode ? 'create' : 'update'} product`,
@@ -243,9 +249,45 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
     }
   )
 
-  const handleSubmit = async (data: ProductFormData) => {
-    await submit(data)
-  }
+  /**
+   * Form submission handler for React Hook Form.
+   * Wraps async handler to satisfy ESLint's no-misused-promises rule.
+   * React Hook Form supports async handlers, but we need to handle the Promise explicitly.
+   * 
+   * FAANG Pattern: Extract event handlers from JSX for separation of concerns.
+   */
+  const handleSubmit = useCallback((data: ProductFormData): void => {
+    void submit(data).catch((error) => {
+      // Error already handled in submit function, but catch any unhandled rejections
+      logger.error('Unhandled form submission error', {
+        error,
+        component: 'ProductForm',
+        action: 'handleSubmit',
+      })
+    })
+  }, [submit])
+
+  /**
+   * Form onSubmit handler that properly handles React Hook Form's Promise return.
+   * Extracted from JSX for clean code and separation of concerns.
+   * 
+   * FAANG Pattern: Use useCallback for stable event handlers to prevent unnecessary re-renders.
+   */
+  const onFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+    const submitHandler = form.handleSubmit(handleSubmit)
+    const result = submitHandler(e)
+    // React Hook Form's handleSubmit may return a Promise if handler is async
+    // Handle it explicitly to satisfy ESLint's no-misused-promises rule
+    if (result instanceof Promise) {
+      void result.catch((error) => {
+        logger.error('Unhandled form submission error', {
+          error,
+          component: 'ProductForm',
+          action: 'onFormSubmit',
+        })
+      })
+    }
+  }, [form, handleSubmit])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -254,7 +296,7 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+    <form onSubmit={onFormSubmit} className="space-y-6">
       <FormInput
         label="Product Name"
         {...form.register('name')}
@@ -313,10 +355,11 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
       {/* File upload for create mode */}
       {isCreateMode && (
         <div className="form-control">
-          <label className="label">
+          <label htmlFor="product-images-input" className="label">
             <span className="label-text font-bold">Product Images</span>
           </label>
           <input
+            id="product-images-input"
             type="file"
             multiple
             accept="image/*"

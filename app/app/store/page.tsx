@@ -9,6 +9,7 @@ import { Eye, Plus, Archive } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
 
+import { logger } from '@_core'
 
 import { notificationService, formatCurrency, API } from '@_shared'
 
@@ -114,11 +115,12 @@ export default function StorePage() {
     [router]
   )
 
-  const handleArchive = async () => {
+  // Async archive handler
+  const handleArchiveAsync = async () => {
     if (!archiveModal.product) {return}
 
     try {
-      const { data } = await API.Store.Products.delete(archiveModal.product.id!)
+      const { data } = await API.Store.Products.delete(archiveModal.product.id)
 
       if (data.statusCode !== 200) {
         notificationService.error(data.message || 'Failed to archive product', {
@@ -144,6 +146,21 @@ export default function StorePage() {
         action: 'archiveProduct',
       })
     }
+  }
+
+  /**
+   * Wrapper for archive to handle promise in onClick handler.
+   * FAANG Pattern: Non-async wrapper for async event handlers.
+   */
+  const handleArchive = () => {
+    void handleArchiveAsync().catch((error) => {
+      // Error already handled in handleArchiveAsync, but catch any unhandled rejections
+      logger.error('Unhandled archive error', {
+        error,
+        component: 'StorePage',
+        action: 'handleArchive',
+      })
+    })
   }
 
   return (

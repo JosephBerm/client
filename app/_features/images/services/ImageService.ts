@@ -46,7 +46,7 @@ export class ImageService {
 	 * ```
 	 */
 	static async preload(urls: string[]): Promise<void[]> {
-		const preloadPromises = urls.map((url) => {
+		const preloadPromises = urls.map(async (url) => {
 			return new Promise<void>((resolve) => {
 				if (!url) {
 					resolve()
@@ -158,8 +158,12 @@ export class ImageService {
 	 */
 	static clearCache(): void {
 		// Import dynamically to avoid circular dependencies
+		// Already handling promise with .then(), no need for void
 		import('../utils/imageUtils').then((utils) => {
 			utils.clearImageUrlCache()
+		}).catch((error) => {
+			// Log error but don't throw (fire-and-forget operation)
+			console.error('Failed to clear image URL cache:', error)
 		})
 	}
 

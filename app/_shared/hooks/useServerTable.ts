@@ -213,7 +213,7 @@ export function useServerTable<T>(
 
 	// Automatically fetch data when state changes
 	useEffect(() => {
-		loadData()
+		void loadData()
 	}, [loadData])
 
 	/**
@@ -221,7 +221,7 @@ export function useServerTable<T>(
 	 * Useful after create/update/delete operations.
 	 */
 	const refresh = useCallback(() => {
-		loadData()
+		void loadData()
 	}, [loadData])
 
 	return {

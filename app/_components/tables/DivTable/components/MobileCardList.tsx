@@ -65,8 +65,7 @@ function DefaultMobileCard<TData>({ row, columns }: MobileCardProps<TData>) {
 
   return (
     <div
-      role="listitem"
-      tabIndex={0}
+      role="article"
       className={classNames(
         'mobile-card',
         TABLE_THEME_CLASSES.mobileCard,

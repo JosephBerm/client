@@ -29,6 +29,8 @@ import { useCartStore } from '@_features/cart'
 
 import { notificationService } from '@_shared'
 
+import { logger } from '@/app/_core'
+
 import type { Product } from '@_classes/Product'
 
 import Button from '@_components/ui/Button'
@@ -83,8 +85,8 @@ export default function AddToCartButton({
 		setQuantity(newValue)
 	}, [])
 
-	// Handle add to cart
-	const handleAddToCart = useCallback(async (e: React.MouseEvent) => {
+	// Handle add to cart (async implementation)
+	const handleAddToCartAsync = useCallback(async (e: React.MouseEvent) => {
 		e.preventDefault()
 		e.stopPropagation()
 
@@ -129,6 +131,22 @@ export default function AddToCartButton({
 			setIsAdding(false)
 		}
 	}, [product, quantity, addToCart, defaultQuantity, isAdding])
+
+	/**
+	 * Wrapper for add to cart to handle promise in onClick handler.
+	 * FAANG Pattern: Non-async wrapper for async event handlers.
+	 */
+	const handleAddToCart = useCallback((e: React.MouseEvent) => {
+		void handleAddToCartAsync(e).catch((error) => {
+			// Error already handled in handleAddToCartAsync, but catch any unhandled rejections
+			logger.error('Unhandled add to cart error', {
+				error,
+				productId: product.id,
+				component: 'AddToCartButton',
+				action: 'handleAddToCart',
+			})
+		})
+	}, [handleAddToCartAsync, product.id])
 
 	// If quantity controls are hidden, show simple button
 	if (!showQuantityControls) {

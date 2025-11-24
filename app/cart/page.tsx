@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -144,7 +144,7 @@ export default function CartPage() {
 			}
 		}
 
-		fetchProductDetails()
+		void fetchProductDetails()
 	}, [cart])
 
 	// Update form items when cart changes (for validation only - prices are placeholders)
@@ -163,7 +163,8 @@ export default function CartPage() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [cart]) // Intentionally excluding 'form' to prevent infinite loops (form.setValue is stable)
 
-	const handleSubmit = async (values: QuoteFormData) => {
+	// Async form submission handler
+	const handleSubmitAsync = async (values: QuoteFormData) => {
 		setIsLoading(true)
 
 		try {
@@ -221,6 +222,46 @@ export default function CartPage() {
 			setIsLoading(false)
 		}
 	}
+
+	/**
+	 * Form submission handler for React Hook Form.
+	 * Wraps async handler to satisfy ESLint's no-misused-promises rule.
+	 * React Hook Form supports async handlers, but we need to handle the Promise explicitly.
+	 * 
+	 * FAANG Pattern: Extract event handlers from JSX for separation of concerns.
+	 */
+	const handleSubmit = useCallback((values: QuoteFormData): void => {
+		void handleSubmitAsync(values).catch((error) => {
+			// Error already handled in handleSubmitAsync, but catch any unhandled rejections
+			logger.error('Unhandled form submission error', {
+				error,
+				component: 'CartPage',
+				action: 'handleSubmit',
+			})
+		})
+	}, [handleSubmitAsync])
+
+	/**
+	 * Form onSubmit handler that properly handles React Hook Form's Promise return.
+	 * Extracted from JSX for clean code and separation of concerns.
+	 * 
+	 * FAANG Pattern: Use useCallback for stable event handlers to prevent unnecessary re-renders.
+	 */
+	const onFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+		const submitHandler = form.handleSubmit(handleSubmit)
+		const result = submitHandler(e)
+		// React Hook Form's handleSubmit may return a Promise if handler is async
+		// Handle it explicitly to satisfy ESLint's no-misused-promises rule
+		if (result instanceof Promise) {
+			void result.catch((error) => {
+				logger.error('Unhandled form submission error', {
+					error,
+					component: 'CartPage',
+					action: 'onFormSubmit',
+				})
+			})
+		}
+	}, [form, handleSubmit])
 
 	// Empty cart state
 	if (cart.length === 0 && !submitted) {
@@ -358,7 +399,7 @@ export default function CartPage() {
 						<div className="card-body p-4 sm:p-6">
 							<h2 className="card-title text-lg sm:text-xl mb-4">Submit Quote Request</h2>
 							
-							<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+							<form onSubmit={onFormSubmit} className="space-y-4">
 								<FormInput
 									label="Valid Until"
 									type="date"

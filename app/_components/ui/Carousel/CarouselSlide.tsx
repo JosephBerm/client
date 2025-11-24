@@ -112,7 +112,7 @@ const CarouselSlideComponent = memo(function CarouselSlide({
 			if (isPlaying) {
 				videoRef.current.pause()
 			} else {
-				videoRef.current.play()
+				void videoRef.current.play()
 			}
 			// State will be updated by event listeners
 		}
@@ -128,7 +128,7 @@ const CarouselSlideComponent = memo(function CarouselSlide({
 		
 		if (videoRef.current) {
 			if (videoRef.current.paused) {
-				videoRef.current.play()
+				void videoRef.current.play()
 			} else {
 				videoRef.current.pause()
 			}
@@ -348,6 +348,8 @@ const CarouselSlideComponent = memo(function CarouselSlide({
 					poster={slide.thumbnail}
 					onClick={handleVideoClick}
 					aria-label={slide.title || 'Video slide'}>
+					{/* Caption track for accessibility - empty track as placeholder */}
+					<track kind="captions" srcLang="en" label="English" />
 					Your browser does not support the video tag.
 				</video>
 

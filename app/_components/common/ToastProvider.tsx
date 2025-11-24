@@ -74,7 +74,8 @@ export default function ToastProvider() {
 				component: 'ToastProvider',
 			})
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+		// Dependencies are complete - currentTheme and toastTheme are both in the array
+		// toastTheme is derived from currentTheme, so both are needed for accurate logging
 	}, [currentTheme, toastTheme])
 
 	return (

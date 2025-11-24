@@ -26,6 +26,7 @@ import ProductImageGallery from '@_components/store/ProductImageGallery'
 import RelatedProducts from '@_components/store/RelatedProducts'
 import Badge from '@_components/ui/Badge'
 import Breadcrumb, { type BreadcrumbItem } from '@_components/ui/Breadcrumb'
+import SafeHtmlContent from '@_components/ui/SafeHtmlContent'
 
 
 
@@ -48,18 +49,28 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 	const product = new Product(productPayload)
 	const serializedProduct = serializeProduct(product)
 
-	// Build breadcrumb trail (simple array for public pages)
+	// Build breadcrumb trail (DRY: uses Routes constants, no magic strings)
 	const breadcrumbItems: BreadcrumbItem[] = [
 		{ label: 'Store', href: Routes.Store.location },
-		...(product.category ? [{ label: product.category, href: Routes.Store.location }] : []),
-		{ label: product.name, href: `/store/product/${product.id}`, isCurrent: true },
+		// Use first category if available, with proper route builder
+		...(product.categories.length > 0 
+			? [{ 
+				label: product.categories[0].name ?? product.category ?? 'Category', 
+				href: Routes.Store.withCategory(product.categories[0].id) 
+			}] 
+			: product.category 
+				? [{ label: product.category, href: Routes.Store.location }] 
+				: []),
+		{ label: product.name, href: Routes.Store.product(product.id), isCurrent: true },
 	]
 
 	// Filter for non-image documents (PDFs, Specs, etc.)
 	const documents = serializedProduct.files.filter(file => {
 		if (!file.name) {return false}
-		const isImage = file.name.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) || 
-						file.contentType?.startsWith('image/')
+		// Check if file is an image by extension or content type
+		const hasImageExtension = file.name.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) !== null
+		const hasImageContentType = file.contentType?.startsWith('image/') ?? false
+		const isImage = hasImageExtension || hasImageContentType
 		return !isImage
 	})
 
@@ -94,11 +105,11 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 									About this item
 								</h2>
 							</div>
-							<div 
+							<SafeHtmlContent
+								content={product.description}
+								fallback="No detailed description available for this product."
+								renderAsHtml={true}
 								className="prose prose-lg prose-zinc max-w-none text-base-content/80 prose-headings:font-semibold prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline pl-1"
-								dangerouslySetInnerHTML={{ 
-									__html: product.description || '<p class="italic text-base-content/60">No detailed description available for this product.</p>' 
-								}} 
 							/>
 						</div>
 
@@ -158,7 +169,7 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 
 								<div className="flex flex-wrap items-center gap-6 text-sm">
 									<span className="font-mono tracking-wide text-base-content/60">
-										SKU: {product.sku || 'N/A'}
+										SKU: {product.sku ?? 'N/A'}
 									</span>
 									
 									{product.stock > 0 ? (

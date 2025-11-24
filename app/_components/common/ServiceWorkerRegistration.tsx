@@ -231,7 +231,7 @@ export default function ServiceWorkerRegistration() {
 	 * Call this when user clicks "Update" button.
 	 */
 	const _triggerUpdate = () => {
-		if (!registration || !registration.waiting) {
+		if (!registration?.waiting) {
 			return
 		}
 
@@ -276,17 +276,17 @@ export default function ServiceWorkerRegistration() {
 				},
 				clearAllCaches: async () => {
 					const cacheNames = await caches.keys()
-					await Promise.all(cacheNames.map((name) => caches.delete(name)))
+					await Promise.all(cacheNames.map(async (name) => caches.delete(name)))
 					logger.info('All service worker caches cleared', { clearedCount: cacheNames.length })
 				},
 				unregisterAll: async () => {
 					const regs = await navigator.serviceWorker.getRegistrations()
-					await Promise.all(regs.map((r) => r.unregister()))
+					await Promise.all(regs.map(async (r) => r.unregister()))
 					logger.info('All service workers unregistered', { unregisteredCount: regs.length })
 				},
 				forceUpdate: async () => {
 					const regs = await navigator.serviceWorker.getRegistrations()
-					await Promise.all(regs.map((r) => r.update()))
+					await Promise.all(regs.map(async (r) => r.update()))
 					logger.info('Service worker update check complete', { checkedCount: regs.length })
 				},
 				help: () => {

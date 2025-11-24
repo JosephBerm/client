@@ -204,6 +204,27 @@ export default function ImageLightbox({
 		setIsDragging(false)
 	}
 
+	// Keyboard handler for panning when zoomed
+	const handleImageKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+		// Keyboard support for drag/pan (arrow keys when zoomed)
+		if (zoom > 1) {
+			const step = 10
+			if (e.key === 'ArrowLeft') {
+				e.preventDefault()
+				setPosition((prev) => ({ ...prev, x: prev.x + step }))
+			} else if (e.key === 'ArrowRight') {
+				e.preventDefault()
+				setPosition((prev) => ({ ...prev, x: prev.x - step }))
+			} else if (e.key === 'ArrowUp') {
+				e.preventDefault()
+				setPosition((prev) => ({ ...prev, y: prev.y + step }))
+			} else if (e.key === 'ArrowDown') {
+				e.preventDefault()
+				setPosition((prev) => ({ ...prev, y: prev.y - step }))
+			}
+		}
+	}, [zoom])
+
 	// Keyboard navigation
 	useEffect(() => {
 		if (!isOpen) {return}
@@ -304,6 +325,10 @@ export default function ImageLightbox({
 						onMouseMove={handleMouseMove}
 						onMouseUp={handleMouseUp}
 						onMouseLeave={handleMouseUp}
+						onKeyDown={handleImageKeyDown}
+						role="img"
+						tabIndex={zoom > 1 ? 0 : -1}
+						aria-label="Zoomed image - use arrow keys to pan"
 						style={{
 							cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
 						}}

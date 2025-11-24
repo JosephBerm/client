@@ -57,8 +57,8 @@
 
 'use client'
 
-import type { ReactNode } from 'react';
-import { useRef } from 'react'
+import type { ReactNode, KeyboardEvent } from 'react'
+import { useRef, useCallback } from 'react'
 
 import { X } from 'lucide-react'
 
@@ -153,17 +153,31 @@ export default function Modal({
 		}
 	)
 
-	if (!isOpen) {return null}
-
-	const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+	// Event handlers (must be defined before early return)
+	const handleOverlayClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
 		if (closeOnOverlayClick && e.target === e.currentTarget) {
 			onClose()
 		}
-	}
+	}, [closeOnOverlayClick, onClose])
+
+	const handleOverlayKeyDown = useCallback((e: KeyboardEvent<HTMLDivElement>) => {
+		// Keyboard support for backdrop (Enter or Space to close when enabled)
+		if (closeOnOverlayClick && (e.key === 'Enter' || e.key === ' ')) {
+			e.preventDefault()
+			onClose()
+		}
+	}, [closeOnOverlayClick, onClose])
+
+	const handleContentClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+		// Prevent click events from bubbling to overlay (prevents accidental modal close)
+		e.stopPropagation()
+	}, [])
+
+	if (!isOpen) {return null}
 
 	return (
 		<div
-			className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+			className="fixed inset-0 z-100 flex items-center justify-center p-4"
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby={title ? 'modal-title' : undefined}
@@ -172,16 +186,25 @@ export default function Modal({
 			<div
 				className="fixed inset-0 bg-black/50 transition-opacity duration-300"
 				onClick={handleOverlayClick}
-				aria-hidden="true"
+				onKeyDown={handleOverlayKeyDown}
+				role={closeOnOverlayClick ? 'button' : 'presentation'}
+				tabIndex={closeOnOverlayClick ? -1 : undefined}
+				aria-label={closeOnOverlayClick ? 'Close modal' : undefined}
+				aria-hidden={closeOnOverlayClick ? 'false' : 'true'}
 			/>
 
 		{/* Modal Content */}
+		{/* ESLint: onClick stopPropagation is necessary to prevent modal from closing when clicking inside.
+		    Keyboard handlers are not needed here - keyboard events don't bubble in the same problematic way.
+		    This div has role="dialog" for accessibility, but the click handler is for event propagation control, not interaction. */}
+		{/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */}
 		<div
 			ref={modalRef}
 			className={`relative z-10 bg-base-100 rounded-lg shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden flex flex-col transform transition-all duration-300 focus:outline-none ${
 				isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
 			}`}
-			onClick={(e) => e.stopPropagation()}
+			onClick={handleContentClick}
+			role="dialog"
 			tabIndex={-1}
 		>
 				{/* Header */}

@@ -335,7 +335,9 @@ export function configureRemoteLogging(options: {
  */
 export function resetDefaultLogger(): void {
 	if (defaultLoggerInstance) {
-		defaultLoggerInstance.close()
+		defaultLoggerInstance.close().catch((error) => {
+			console.error('Failed to close default logger:', error)
+		})
 		defaultLoggerInstance = null
 	}
 }

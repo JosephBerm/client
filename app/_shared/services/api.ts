@@ -84,13 +84,13 @@ const API = {
 		 * API.Accounts.get(); // Current user
 		 * API.Accounts.get('123'); // User by ID
 		 */
-		get: async <_T>(id: string | null | undefined) => await HttpService.get<User>(`/account${id ? '/' + id : ''}`),
+		get: async <_T>(id: string | null | undefined) => HttpService.get<User>(`/account${id ? '/' + id : ''}`),
 		
 		/**
 		 * Updates user account information.
 		 * @param account - User object with updated data
 		 */
-		update: async <T>(account: User) => await HttpService.put<T>('/account', account),
+		update: async <T>(account: User) => HttpService.put<T>('/account', account),
 		
 		/**
 		 * Changes password for current user.
@@ -98,7 +98,7 @@ const API = {
 		 * @param newPassword - New password
 		 */
 		changePassword: async <T>(oldPassword: string, newPassword: string) =>
-			await HttpService.put<T>('/account/changepassword', { oldPassword, newPassword }),
+			HttpService.put<T>('/account/changepassword', { oldPassword, newPassword }),
 		
 		/**
 		 * Changes password for specific user (admin only).
@@ -107,13 +107,13 @@ const API = {
 		 * @param newPassword - New password
 		 */
 		changePasswordById: async <T>(id: string, oldPassword: string, newPassword: string) =>
-			await HttpService.put<T>(`/account/changepasswordById`, { id, oldPassword, newPassword }),
+			HttpService.put<T>(`/account/changepasswordById`, { id, oldPassword, newPassword }),
 		
 		/**
 		 * Gets all user accounts (admin only).
 		 * @returns Array of all users
 		 */
-		getAll: () => HttpService.get<User[]>('/account/all'),
+		getAll: async () => HttpService.get<User[]>('/account/all'),
 		
 		/**
 		 * Searches users with pagination and filtering.
@@ -121,20 +121,20 @@ const API = {
 		 * @returns Paginated user results
 		 */
 		search: async (search: GenericSearchFilter) =>
-			await HttpService.post<PagedResult<User>>(`/account/search`, search),
+			HttpService.post<PagedResult<User>>(`/account/search`, search),
 		
 		/**
 		 * Gets dashboard analytics summary for current user.
 		 * @returns Customer summary with orders, quotes, etc.
 		 */
-		getDashboardSummary: async () => await HttpService.get<CustomerSummary>('/account/analytics'),
+		getDashboardSummary: async () => HttpService.get<CustomerSummary>('/account/analytics'),
 		
 		/**
 		 * Deletes a user account (admin only).
 		 * @param id - User ID to delete
 		 * @returns Success status
 		 */
-		delete: async (id: string) => await HttpService.delete<boolean>(`/account/${id}`),
+		delete: async (id: string) => HttpService.delete<boolean>(`/account/${id}`),
 	},
 	
 	/**
@@ -151,19 +151,19 @@ const API = {
 			 * Gets all products (no pagination).
 			 * Use search() for paginated results.
 			 */
-			getAllProducts: async () => await HttpService.get<Product[]>('/products'),
+			getAllProducts: async () => HttpService.get<Product[]>('/products'),
 			
 			/**
 			 * Gets paginated product list.
 			 * @param pagedData - Pagination parameters
 			 */
-			getList: async (pagedData: PagedData) => await HttpService.post<Product[]>('/products/paged', pagedData),
+			getList: async (pagedData: PagedData) => HttpService.post<Product[]>('/products/paged', pagedData),
 			
 			/**
 			 * Gets a single product by ID.
 			 * @param productId - Product ID
 			 */
-			get: async (productId: string) => await HttpService.get<Product>(`/products/${productId}`),
+			get: async (productId: string) => HttpService.get<Product>(`/products/${productId}`),
 			
 			/**
 			 * Creates a new product with image upload.
@@ -176,7 +176,7 @@ const API = {
 			 * await API.Store.Products.create(formData);
 			 */
 			create: async (product: FormData) =>
-				await HttpService.post<Product>(`/products`, product, {
+				HttpService.post<Product>(`/products`, product, {
 					headers: {
 						'Content-Type': 'multipart/form-data',
 					},
@@ -186,20 +186,20 @@ const API = {
 			 * Updates an existing product.
 			 * @param product - Product object with updated data
 			 */
-			update: async <T>(product: T) => await HttpService.put<T>(`/products`, product),
+			update: async <T>(product: T) => HttpService.put<T>(`/products`, product),
 			
 			/**
 			 * Deletes a product.
 			 * @param productId - Product ID to delete
 			 */
-			delete: async <T>(productId: string) => await HttpService.delete<T>(`/products/${productId}`),
+			delete: async <T>(productId: string) => HttpService.delete<T>(`/products/${productId}`),
 			
 			/**
 			 * Gets latest products for home page display.
 			 * @param quantity - Number of products to return (default: 6)
 			 */
 			getLatest: async (quantity: number = 6) =>
-				await HttpService.get<Product[]>(`/products/latest?quantity=${quantity}`),
+				HttpService.get<Product[]>(`/products/latest?quantity=${quantity}`),
 			
 			/**
 			 * Gets a product image by ID and filename.
@@ -207,7 +207,7 @@ const API = {
 			 * @param name - Image filename
 			 */
 			image: async (id: string, name: string) =>
-				await HttpService.get(`/products/image?productId=${id}&image=${name}`),
+				HttpService.get(`/products/image?productId=${id}&image=${name}`),
 			
 			/**
 			 * Uploads additional images to an existing product.
@@ -215,7 +215,7 @@ const API = {
 			 * @param formData - FormData containing image files
 			 */
 			uploadImage: async (productId: string, formData: FormData) =>
-				await HttpService.post<UploadedFile[]>(`/products/${productId}/images`, formData, {
+				HttpService.post<UploadedFile[]>(`/products/${productId}/images`, formData, {
 					headers: {
 						'Content-Type': 'multipart/form-data',
 					},
@@ -227,20 +227,20 @@ const API = {
 			 * @param name - Image filename to delete
 			 */
 			deleteImage: async (id: string, name: string) =>
-				await HttpService.delete<boolean>(`/products/${id}/image/${name}`),
+				HttpService.delete<boolean>(`/products/${id}/image/${name}`),
 			
 			/**
 			 * Gets all images for a product.
 			 * @param id - Product ID
 			 */
-			images: async (id: string) => await HttpService.get<File[]>(`/products/images?productId=${id}`),
+			images: async (id: string) => HttpService.get<File[]>(`/products/images?productId=${id}`),
 			
 			/**
 			 * Searches products with pagination and filtering (admin).
 			 * @param search - Search filter with page, pageSize, filters, etc.
 			 */
 			search: async (search: GenericSearchFilter) =>
-				await HttpService.post<PagedResult<Product>>(`/Products/search`, search),
+				HttpService.post<PagedResult<Product>>(`/Products/search`, search),
 			
 			/**
 			 * Searches products with pagination and filtering (public).
@@ -248,13 +248,13 @@ const API = {
 			 * @param search - Search filter
 			 */
 			searchPublic: async (search: GenericSearchFilter) =>
-				await HttpService.post<PagedResult<Product>>(`/Products/search/public`, search),
+				HttpService.post<PagedResult<Product>>(`/Products/search/public`, search),
 			
 			/**
 			 * Gets all product categories.
 			 * @returns Array of product categories
 			 */
-			getAllCategories: async () => await HttpService.get<ProductsCategory[]>('/Products/categories/clean'),
+			getAllCategories: async () => HttpService.get<ProductsCategory[]>('/Products/categories/clean'),
 		},
 	},
 	
@@ -268,14 +268,14 @@ const API = {
 		 * @param id - Quote ID
 		 */
 		get: async <T>(id: string) => {
-			return await HttpService.get<T>(`/quote/${id}`)
+			return HttpService.get<T>(`/quote/${id}`)
 		},
 		
 		/**
 		 * Gets all quotes.
 		 */
 		getAll: async <T>() => {
-			return await HttpService.get<T>('/quote')
+			return HttpService.get<T>('/quote')
 		},
 		
 		/**
@@ -283,7 +283,7 @@ const API = {
 		 * @param quantity - Number of quotes to return (default: 6)
 		 */
 		getLatest: async (quantity: number = 6) => {
-			return await HttpService.get<Quote[]>(`/quote/latest?quantity=${quantity}`)
+			return HttpService.get<Quote[]>(`/quote/latest?quantity=${quantity}`)
 		},
 		
 		/**
@@ -291,26 +291,26 @@ const API = {
 		 * @param search - Search filter
 		 */
 		search: async (search: GenericSearchFilter) => {
-			return await HttpService.post<PagedResult<Quote>>('/quote/search', search)
+			return HttpService.post<PagedResult<Quote>>('/quote/search', search)
 		},
 		
 		/**
 		 * Creates a new quote request.
 		 * @param quote - Quote data
 		 */
-		create: async <T>(quote: T) => await HttpService.post<T>('/quote', quote),
+		create: async <T>(quote: T) => HttpService.post<T>('/quote', quote),
 		
 		/**
 		 * Updates an existing quote.
 		 * @param quote - Quote with updated data
 		 */
-		update: async <T>(quote: T) => await HttpService.put<T>('/quote', quote),
+		update: async <T>(quote: T) => HttpService.put<T>('/quote', quote),
 		
 		/**
 		 * Deletes a quote.
 		 * @param quoteId - Quote ID to delete
 		 */
-		delete: async <T>(quoteId: string) => await HttpService.delete<T>(`/quote/${quoteId}`),
+		delete: async <T>(quoteId: string) => HttpService.delete<T>(`/quote/${quoteId}`),
 	},
 	
 	/**
@@ -323,7 +323,7 @@ const API = {
 		 * @param orderId - Order ID (omit for current user's orders)
 		 */
 		get: async <Order>(orderId?: number | null) => {
-			return await HttpService.get<Order>(`/orders${orderId ? `/${orderId}` : ''}`)
+			return HttpService.get<Order>(`/orders${orderId ? `/${orderId}` : ''}`)
 		},
 		
 		/**
@@ -331,7 +331,7 @@ const API = {
 		 * @param customerId - Customer ID
 		 */
 		getFromCustomer: async (customerId: number) => {
-			return await HttpService.get<Order[]>(`/orders/fromcustomer/${customerId}`)
+			return HttpService.get<Order[]>(`/orders/fromcustomer/${customerId}`)
 		},
 		
 		/**
@@ -339,53 +339,53 @@ const API = {
 		 * @param search - Search filter
 		 */
 		search: async (search: GenericSearchFilter) => {
-			return await HttpService.post<PagedResult<Order>>('/orders/search', search)
+			return HttpService.post<PagedResult<Order>>('/orders/search', search)
 		},
 		
 		/**
 		 * Creates a new order.
 		 * @param quote - Order data
 		 */
-		create: async <Order>(quote: Order) => await HttpService.post<Order>('/orders', quote),
+		create: async <Order>(quote: Order) => HttpService.post<Order>('/orders', quote),
 		
 		/**
 		 * Creates an order from an existing quote.
 		 * @param quoteId - Quote ID to convert to order
 		 */
 		createFromQuote: async <Order>(quoteId: string) =>
-			await HttpService.post<Order>(`/orders/fromquote/${quoteId}`, null),
+			HttpService.post<Order>(`/orders/fromquote/${quoteId}`, null),
 		
 		/**
 		 * Updates an existing order.
 		 * @param quote - Order with updated data
 		 */
-		update: async <Order>(quote: Order) => await HttpService.put<Order>('/orders', quote),
+		update: async <Order>(quote: Order) => HttpService.put<Order>('/orders', quote),
 		
 		/**
 		 * Deletes an order.
 		 * @param quoteId - Order ID to delete
 		 */
-		delete: async <Boolean>(quoteId: number) => await HttpService.delete<Boolean>(`/orders/${quoteId}`),
+		delete: async <Boolean>(quoteId: number) => HttpService.delete<Boolean>(`/orders/${quoteId}`),
 		
 		/**
 		 * Submits a quote to customer.
 		 * @param req - Submit request data
 		 */
 		submitQuote: async <Boolean>(req: SubmitOrderRequest) =>
-			await HttpService.post<Boolean>(`/orders/submit/quote`, req),
+			HttpService.post<Boolean>(`/orders/submit/quote`, req),
 		
 		/**
 		 * Submits an invoice to customer.
 		 * @param req - Submit request data
 		 */
 		submitInvoice: async <Boolean>(req: SubmitOrderRequest) =>
-			await HttpService.post<Boolean>(`/orders/submit/invoice`, req),
+			HttpService.post<Boolean>(`/orders/submit/invoice`, req),
 		
 		/**
 		 * Approves an order (moves to processing).
 		 * @param orderId - Order ID to approve
 		 */
-		approveOrder: async (orderId: string) => await HttpService.post<boolean>(`/orders/approve/${orderId}`, null),
+		approveOrder: async (orderId: string) => HttpService.post<boolean>(`/orders/approve/${orderId}`, null),
 		
 		/**
 		 * Removes a product from an order.
@@ -393,7 +393,7 @@ const API = {
 		 * @param productId - Product ID to remove
 		 */
 		deleteProduct: async (orderId: string, productId: number) =>
-			await HttpService.delete<boolean>(`/orders/${orderId}/product/${productId}`),
+			HttpService.delete<boolean>(`/orders/${orderId}/product/${productId}`),
 	},
 	
 	/**
@@ -407,9 +407,9 @@ const API = {
 		 */
 		get: async <T>(id: string) => {
 			if (id !== null) {
-				return await HttpService.get<T>(`/notifications/${id}`)
+				return HttpService.get<T>(`/notifications/${id}`)
 			} else {
-				return await HttpService.get<T>('/notifications')
+				return HttpService.get<T>('/notifications')
 			}
 		},
 		
@@ -417,19 +417,19 @@ const API = {
 		 * Creates a new notification.
 		 * @param quote - Notification data
 		 */
-		create: async <T>(quote: T) => await HttpService.post<T>('/notifications', quote),
+		create: async <T>(quote: T) => HttpService.post<T>('/notifications', quote),
 		
 		/**
 		 * Updates a notification.
 		 * @param quote - Notification with updated data
 		 */
-		update: async <T>(quote: T) => await HttpService.put<T>('/notifications', quote),
+		update: async <T>(quote: T) => HttpService.put<T>('/notifications', quote),
 		
 		/**
 		 * Deletes a notification.
 		 * @param quoteId - Notification ID to delete
 		 */
-		delete: async <T>(quoteId: string) => await HttpService.delete<T>(`/notifications/${quoteId}`),
+		delete: async <T>(quoteId: string) => HttpService.delete<T>(`/notifications/${quoteId}`),
 	},
 	
 	/**
@@ -441,30 +441,30 @@ const API = {
 		 * Gets a single provider by ID.
 		 * @param id - Provider ID
 		 */
-		get: async <Provider>(id: number) => await HttpService.get<Provider>(`/provider/${id}`),
+		get: async <Provider>(id: number) => HttpService.get<Provider>(`/provider/${id}`),
 		
 		/**
 		 * Gets all providers.
 		 */
-		getAll: async <Provider>() => await HttpService.get<Provider[]>('/providers'),
+		getAll: async <Provider>() => HttpService.get<Provider[]>('/providers'),
 		
 		/**
 		 * Creates a new provider.
 		 * @param provider - Provider data
 		 */
-		create: async <Provider>(provider: Provider) => await HttpService.post<Provider>('/provider', provider),
+		create: async <Provider>(provider: Provider) => HttpService.post<Provider>('/provider', provider),
 		
 		/**
 		 * Updates an existing provider.
 		 * @param quote - Provider with updated data
 		 */
-		update: async <Provider>(quote: Provider) => await HttpService.put<Provider>('/provider', quote),
+		update: async <Provider>(quote: Provider) => HttpService.put<Provider>('/provider', quote),
 		
 		/**
 		 * Deletes a provider.
 		 * @param providerId - Provider ID to delete
 		 */
-		delete: async (providerId: number) => await HttpService.delete<number>(`/provider/${providerId}`),
+		delete: async (providerId: number) => HttpService.delete<number>(`/provider/${providerId}`),
 	},
 	
 	/**
@@ -476,14 +476,14 @@ const API = {
 		 * Submits a quote request from public website.
 		 * @param quote - Quote request data
 		 */
-		sendQuote: async (quote: Quote) => await HttpService.post<Quote>('/quote', quote),
+		sendQuote: async (quote: Quote) => HttpService.post<Quote>('/quote', quote),
 		
 		/**
 		 * Submits a contact form request from public website.
 		 * @param contactRequest - Contact form data
 		 */
 		sendContactRequest: async (contactRequest: ContactRequest) =>
-			await HttpService.post<any>('/contact', contactRequest),
+			HttpService.post<any>('/contact', contactRequest),
 	},
 	
 	/**
@@ -495,37 +495,37 @@ const API = {
 		 * Gets a single customer by ID.
 		 * @param id - Customer ID
 		 */
-		get: async <Customer>(id: number) => await HttpService.get<Customer>(`/customer/${id}`),
+		get: async <Customer>(id: number) => HttpService.get<Customer>(`/customer/${id}`),
 		
 		/**
 		 * Gets all customers.
 		 */
-		getAll: async <Customer>() => await HttpService.get<Customer[]>('/customers'),
+		getAll: async <Customer>() => HttpService.get<Customer[]>('/customers'),
 		
 		/**
 		 * Creates a new customer.
 		 * @param customer - Customer data
 		 */
-		create: async <Customer>(customer: Customer) => await HttpService.post<Customer>('/customer', customer),
+		create: async <Customer>(customer: Customer) => HttpService.post<Customer>('/customer', customer),
 		
 		/**
 		 * Updates an existing customer.
 		 * @param quote - Customer with updated data
 		 */
-		update: async <Customer>(quote: Customer) => await HttpService.put<Customer>('/customer', quote),
+		update: async <Customer>(quote: Customer) => HttpService.put<Customer>('/customer', quote),
 		
 		/**
 		 * Deletes a customer.
 		 * @param customerId - Customer ID to delete
 		 */
-		delete: async (customerId: number) => await HttpService.delete<number>(`/customer/${customerId}`),
+		delete: async (customerId: number) => HttpService.delete<number>(`/customer/${customerId}`),
 		
 		/**
 		 * Searches customers with pagination and filtering.
 		 * @param search - Search filter
 		 */
 		search: async (search: GenericSearchFilter) =>
-			await HttpService.post<PagedResult<Company>>(`/customers/search`, { data: { ...search } }),
+			HttpService.post<PagedResult<Company>>(`/customers/search`, { data: { ...search } }),
 	},
 	
 	/**
@@ -537,14 +537,14 @@ const API = {
 		 * Gets current finance analytics numbers.
 		 * @returns Financial summary data
 		 */
-		getFinanceNumbers: async () => await HttpService.get<FinanceNumbers>('/finance/analytics'),
+		getFinanceNumbers: async () => HttpService.get<FinanceNumbers>('/finance/analytics'),
 		
 		/**
 		 * Searches finance numbers with date range filtering.
 		 * @param search - Finance search filter with date range
 		 */
 		searchFinnanceNumbers: async (search: FinanceSearchFilter) =>
-			await HttpService.post<FinanceNumbers>('/finance/analytics/search', search),
+			HttpService.post<FinanceNumbers>('/finance/analytics/search', search),
 		
 		/**
 		 * Downloads finance data as Excel/CSV file.
@@ -559,7 +559,7 @@ const API = {
 		 * link.click();
 		 */
 		downloadFinanceNumbers: async (search: FinanceSearchFilter) =>
-			await HttpService.download<Blob>('/finance/orders/download', search, { responseType: 'blob' }),
+			HttpService.download<Blob>('/finance/orders/download', search, { responseType: 'blob' }),
 	},
 }
 

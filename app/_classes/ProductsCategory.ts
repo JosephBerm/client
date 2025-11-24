@@ -205,6 +205,9 @@ export function sanitizeCategoriesList(categories: ProductsCategory[]): Products
 				// Add this category to parent's sub-categories array
 				parentCategory.subCategories.push(category)
 				// Set parent reference on child
+				// ESLint: Intentional mutation for tree structure building
+				// This is necessary to establish bidirectional parent-child relationships
+				// eslint-disable-next-line no-param-reassign
 				category.parentCategory = parentCategory
 			}
 		}

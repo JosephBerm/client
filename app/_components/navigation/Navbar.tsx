@@ -13,7 +13,7 @@
  * - Shopping cart with item count badge
  * - Login button or user menu based on authentication
  * - Accessible and semantic HTML
- * - Integration with sidebar for authenticated users
+ * - No sidebar on public routes (sidebar only in /app/* routes via InternalAppShell)
  *
  * **Navigation Links (Always Visible):**
  * - Home (/)
@@ -30,14 +30,14 @@
  * - Ensures discoverability and maintains consistent user experience
  *
  * **Mobile Behavior (< 768px):**
- * - Unauthenticated: Shows hamburger menu with navigation links
- * - Authenticated: Shows sidebar menu button (sidebar contains internal routes)
- * - Navigation links visible in navbar on desktop, accessible via sidebar on mobile
+ * - Public routes: Shows hamburger menu with navigation links (all users)
+ * - Internal routes (/app/*): Shows sidebar menu button (handled by InternalAppShell)
+ * - Navigation links visible in navbar on desktop, accessible via mobile menu on public routes
  *
  * **Desktop Behavior (>= 768px):**
  * - Full horizontal navigation with all public links always visible
- * - Authenticated users: Navbar (public routes) + Sidebar (internal routes)
- * - Unauthenticated users: Navbar (public routes) only
+ * - Public routes: Navbar only (no sidebar)
+ * - Internal routes (/app/*): InternalAppShell with InternalSidebar (no public Navbar)
  * - Spacious, clean layout
  *
  * @module Navbar
@@ -45,7 +45,7 @@
 
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -68,7 +68,9 @@ import SettingsModal from '@_components/settings/SettingsModal'
  */
 interface NavbarProps {
 	/**
-	 * Optional callback for menu click (opens sidebar for authenticated users).
+	 * Optional callback for menu click (opens sidebar for internal routes /app/*).
+	 * Only provided by InternalAppShell for internal routes.
+	 * Public routes don't have a sidebar, so this will be undefined.
 	 */
 	onMenuClick?: () => void
 }
@@ -142,6 +144,23 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 	// The mobile menu is only rendered on screens smaller than md (md:hidden)
 	// This matches Tailwind's 'md' breakpoint used in className="md:hidden"
 	const isDesktop = useMediaQuery('(min-width: 768px)')
+
+	// Keyboard handlers for backdrop overlays
+	const handleMobileMenuBackdropKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+		// Keyboard support for backdrop (Enter or Space to close)
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault()
+			setMobileMenuOpen(false)
+		}
+	}, [])
+
+	const handleUserMenuBackdropKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+		// Keyboard support for backdrop (Enter or Space to close)
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault()
+			setUserMenuOpen(false)
+		}
+	}, [])
 	const prevIsDesktop = useRef(isDesktop)
 
 	// Close mobile menu when screen size changes to desktop
@@ -200,8 +219,10 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 			<nav className="mx-auto flex h-24 max-w-screen-2xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8 max-[275px]:overflow-x-auto">
 			{/* Left Section: Mobile Menu Button + Logo */}
 			<div className="flex shrink-0 items-center gap-4">
-				{/* Mobile Menu Button (for public navigation) - Moved to left */}
-				{!isAuthenticated && (
+				{/* Mobile Menu Button (for public navigation) - All users on public routes */}
+				{/* Note: Sidebar only exists in /app/* routes (InternalAppShell), not on public routes */}
+				{/* So authenticated users on public routes get the same mobile menu as unauthenticated users */}
+				{!onMenuClick && (
 					<button
 						onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
 						className="flex items-center justify-center rounded-lg p-2.5 text-base-content transition-all hover:scale-105 hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:hidden"
@@ -215,8 +236,9 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 					</button>
 				)}
 
-				{/* Sidebar Menu Button (authenticated users on mobile) */}
-				{isAuthenticated && onMenuClick && (
+				{/* Sidebar Menu Button (only for internal routes /app/* via InternalAppShell) */}
+				{/* This should never appear on public routes since onMenuClick won't be provided */}
+				{onMenuClick && (
 					<button
 						onClick={onMenuClick}
 						className="flex items-center justify-center rounded-lg p-2.5 text-base-content transition-all hover:scale-105 hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
@@ -397,6 +419,10 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 					<div
 						className="fixed inset-0 bg-black/30 transition-opacity"
 						onClick={() => setMobileMenuOpen(false)}
+						onKeyDown={handleMobileMenuBackdropKeyDown}
+						role="button"
+						tabIndex={-1}
+						aria-label="Close menu"
 					/>
 
 				{/* Menu Panel - Slides from left */}
@@ -443,6 +469,10 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 				<div
 					className="fixed inset-0 z-30"
 					onClick={() => setUserMenuOpen(false)}
+					onKeyDown={handleUserMenuBackdropKeyDown}
+					role="button"
+					tabIndex={-1}
+					aria-label="Close user menu"
 				/>
 			)}
 

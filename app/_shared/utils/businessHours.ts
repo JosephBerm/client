@@ -361,12 +361,12 @@ export function getGroupedBusinessHours(
 		if (index === allHours.length - 1) {
 			if ('closed' in currentGroup) {
 				grouped.push({
-					days: startDay === endDay ? startDay! : `${startDay} - ${endDay}`,
+					days: startDay === endDay ? startDay : `${startDay} - ${endDay}`,
 					closed: true,
 				})
 			} else {
 				grouped.push({
-					days: startDay === endDay ? startDay! : `${startDay} - ${endDay}`,
+					days: startDay === endDay ? startDay : `${startDay} - ${endDay}`,
 					open: currentGroup.open,
 					close: currentGroup.close,
 					timezone: currentGroup.timezone,

@@ -113,7 +113,7 @@ export function useKeyboardNav({
   const getCurrentCellPosition = useCallback((): CellPosition | null => {
     if (!tableRef.current) {return null}
 
-    const activeElement = document.activeElement
+    const {activeElement} = document
     if (!activeElement || !tableRef.current.contains(activeElement)) {
       return null
     }

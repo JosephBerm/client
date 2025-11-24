@@ -230,7 +230,7 @@ export function useImageError(
 			setRetryAttempt(0)
 			setHasError(false)
 			setError(null)
-			handleError(currentUrl)
+			void handleError(currentUrl)
 		}
 	}, [currentUrl, handleError])
 

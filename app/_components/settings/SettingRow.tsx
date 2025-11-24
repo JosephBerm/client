@@ -54,7 +54,7 @@ export default function SettingRow({ setting }: SettingRowProps) {
 	const renderSetting = () => {
 		switch (setting.type) {
 			case 'select': {
-				const selectSetting = setting as Extract<SettingItem, { type: 'select' }>
+				const selectSetting = setting
 				return (
 					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 py-4 px-4 sm:px-6">
 						<div className="flex-1 min-w-0">
@@ -81,7 +81,7 @@ export default function SettingRow({ setting }: SettingRowProps) {
 			}
 
 			case 'toggle': {
-				const toggleSetting = setting as Extract<SettingItem, { type: 'toggle' }>
+				const toggleSetting = setting
 				return (
 					<div className="flex items-center justify-between gap-4 py-4 px-4 sm:px-6">
 						<div className="flex-1 min-w-0">
@@ -106,7 +106,7 @@ export default function SettingRow({ setting }: SettingRowProps) {
 			}
 
 			case 'button': {
-				const buttonSetting = setting as Extract<SettingItem, { type: 'button' }>
+				const buttonSetting = setting
 				return (
 					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 py-4 px-4 sm:px-6">
 						<div className="flex-1 min-w-0">
@@ -132,7 +132,7 @@ export default function SettingRow({ setting }: SettingRowProps) {
 			}
 
 		case 'custom': {
-			const customSetting = setting as Extract<SettingItem, { type: 'custom' }>
+			const customSetting = setting
 			const CustomComponent = customSetting.component
 			// For custom components, the label and description are handled by the component itself
 			// This allows for more flexible layouts

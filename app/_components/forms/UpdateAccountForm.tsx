@@ -61,12 +61,12 @@
 
 'use client'
 
-import React from 'react'
+import React, { useCallback } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
-import { profileUpdateSchema, type ProfileUpdateFormData } from '@_core'
+import { logger, profileUpdateSchema, type ProfileUpdateFormData } from '@_core'
 
 import { useFormSubmit , API } from '@_shared'
 
@@ -133,14 +133,14 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 			username: user.username || '',
 			email: user.email || '',
 			name: {
-				first: user.name?.first || '',
-				middle: user.name?.middle || '',
-				last: user.name?.last || '',
+				first: user.name?.first ?? '',
+				middle: user.name?.middle ?? '',
+				last: user.name?.last ?? '',
 			},
 			dateOfBirth: user.dateOfBirth,
-			phone: user.phone || '',
-			mobile: user.mobile || '',
-			shippingDetails: user.shippingDetails || undefined,
+			phone: user.phone ?? '',
+			mobile: user.mobile ?? '',
+			shippingDetails: user.shippingDetails ?? undefined,
 		},
 	})
 
@@ -156,7 +156,7 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 				mobile: data.mobile,
 				shippingDetails: data.shippingDetails ? new Address(data.shippingDetails) : user.shippingDetails,
 			})
-			return await API.Accounts.update(updatedUser)
+			return API.Accounts.update(updatedUser)
 		},
 		{
 			successMessage: 'Account updated successfully',
@@ -169,12 +169,48 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 		}
 	)
 
-	const handleSubmit = async (data: ProfileUpdateFormData) => {
-		await submit(data)
-	}
+	/**
+	 * Form submission handler for React Hook Form.
+	 * Wraps async handler to satisfy ESLint's no-misused-promises rule.
+	 * React Hook Form supports async handlers, but we need to handle the Promise explicitly.
+	 * 
+	 * FAANG Pattern: Extract event handlers from JSX for separation of concerns.
+	 */
+	const handleSubmit = useCallback((data: ProfileUpdateFormData): void => {
+		void submit(data).catch((error) => {
+			// Error already handled in submit function, but catch any unhandled rejections
+			logger.error('Unhandled form submission error', {
+				error,
+				component: 'UpdateAccountForm',
+				action: 'handleSubmit',
+			})
+		})
+	}, [submit])
+
+	/**
+	 * Form onSubmit handler that properly handles React Hook Form's Promise return.
+	 * Extracted from JSX for clean code and separation of concerns.
+	 * 
+	 * FAANG Pattern: Use useCallback for stable event handlers to prevent unnecessary re-renders.
+	 */
+	const onFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+		const submitHandler = form.handleSubmit(handleSubmit)
+		const result = submitHandler(e)
+		// React Hook Form's handleSubmit may return a Promise if handler is async
+		// Handle it explicitly to satisfy ESLint's no-misused-promises rule
+		if (result instanceof Promise) {
+			void result.catch((error) => {
+				logger.error('Unhandled form submission error', {
+					error,
+					component: 'UpdateAccountForm',
+					action: 'onFormSubmit',
+				})
+			})
+		}
+	}, [form, handleSubmit])
 
 	return (
-		<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+		<form onSubmit={onFormSubmit} className="space-y-6">
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<FormInput
 					label="First Name"

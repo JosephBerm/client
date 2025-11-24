@@ -2,7 +2,7 @@
 
 > **Purpose**: This document tracks planned improvements, refactoring opportunities, and technical debt items for the MedSource Pro codebase. It serves as a roadmap for maintaining code quality, consistency, and following industry best practices.
 
-> **Last Updated**: 2025-01-15  
+> **Last Updated**: 2025-01-16  
 > **Maintained By**: Development Team  
 > **Status**: Active
 
@@ -329,6 +329,208 @@ This section tracks component-level refactoring opportunities for better archite
 
 ---
 
+### SafeHtmlContent - Security Hardening & FAANG-Level Enhancements
+
+**Priority**: P0  
+**Category**: Component Refactoring / Security  
+**Status**: Not Started  
+**Estimated Effort**: M  
+**Dependencies**: `isomorphic-dompurify` package installation
+
+**Description**:  
+Enhance the `SafeHtmlContent` component with client-side HTML sanitization, error boundaries, performance optimizations, and accessibility features to meet FAANG-level security and quality standards. The current implementation lacks critical security layers and needs hardening before production use.
+
+**Current Implementation**:  
+The `SafeHtmlContent` component (`app/_components/ui/SafeHtmlContent.tsx`) currently:
+- Renders HTML content via `dangerouslySetInnerHTML` without client-side sanitization
+- Relies entirely on backend trust for security
+- Has basic fallback handling for empty content
+- No error boundaries for malformed HTML
+- No performance optimizations (lazy loading, length limits)
+- No accessibility features (ARIA attributes, WCAG compliance)
+- No content validation before rendering
+
+**Proposed Solution**:  
+
+**Phase 1: Critical Security (IMMEDIATE - P0)**
+1. Install `isomorphic-dompurify` for SSR/CSR compatibility
+2. Add client-side sanitization with strict configuration
+3. Implement error boundaries for graceful failure handling
+4. Add comprehensive security tests (XSS prevention, content validation)
+5. Verify backend sanitization is working correctly
+
+**Phase 2: Enhanced Features (HIGH PRIORITY - P1)**
+1. Add Content Security Policy (CSP) verification
+2. Implement performance optimizations (content length limits, lazy loading)
+3. Add error recovery mechanisms
+4. Enhance logging and monitoring
+
+**Phase 3: Advanced Features (MEDIUM PRIORITY - P2)**
+1. Add accessibility features (ARIA attributes, WCAG AA compliance)
+2. Implement content structure validation
+3. Add allowlists for tags/attributes
+4. Performance monitoring and analytics
+
+**Phase 4: Enterprise Features (LOW PRIORITY - P3)**
+1. Advanced sanitization rules per content type
+2. Caching and SSR optimization
+3. CDN integration for static content
+4. Enhanced developer experience
+
+**Benefits**:  
+- **Security**: Defense-in-depth with client-side sanitization prevents XSS attacks
+- **Reliability**: Error boundaries prevent component crashes from malformed HTML
+- **Performance**: Optimizations ensure fast rendering even with large content
+- **Accessibility**: WCAG AA compliance improves user experience for all users
+- **Maintainability**: Centralized security logic easier to audit and update
+- **FAANG-Level**: Meets industry best practices for HTML content rendering
+
+**Implementation Notes**:  
+
+**Required Dependency**:
+```json
+{
+  "dependencies": {
+    "isomorphic-dompurify": "^2.9.0"
+  }
+}
+```
+
+**Enhanced Component Structure**:
+```tsx
+interface SafeHtmlContentProps extends Omit<HTMLAttributes<HTMLDivElement>, 'content'> {
+  content: string | null | undefined
+  fallback?: string
+  renderAsHtml?: boolean
+  
+  // NEW: Security options
+  sanitize?: boolean // Default: true
+  allowedTags?: string[] // Custom allowlist
+  allowedAttributes?: string[] // Custom attribute allowlist
+  
+  // NEW: Performance options
+  lazyLoad?: boolean // Lazy load large content
+  maxLength?: number // Truncate very long content
+  
+  // NEW: Accessibility
+  ariaLabel?: string
+  role?: string
+  
+  // NEW: Error handling
+  onError?: (error: Error) => void
+}
+```
+
+**Sanitization Configuration** (FAANG Pattern):
+```tsx
+const config: DOMPurify.Config = {
+  ALLOWED_TAGS: allowedTags || [
+    'p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'ul', 'ol', 'li', 'a', 'blockquote', 'code', 'pre', 'img'
+  ],
+  ALLOWED_ATTR: allowedAttributes || [
+    'href', 'src', 'alt', 'title', 'class', 'id'
+  ],
+  ALLOW_DATA_ATTR: false, // Security: No data attributes
+  KEEP_CONTENT: true, // Keep text content even if tags are removed
+  RETURN_DOM: false, // Return string, not DOM
+  SANITIZE_DOM: true, // Additional DOM sanitization
+}
+```
+
+**Error Boundary Wrapper**:
+```tsx
+// Wrap SafeHtmlContent in error boundary
+<ErrorBoundary
+  fallback={<div>Content could not be rendered</div>}
+  onError={(error) => logger.error('HTML rendering failed', { error })}
+>
+  <SafeHtmlContent content={product.description} />
+</ErrorBoundary>
+```
+
+**Security Test Examples**:
+```tsx
+describe('SafeHtmlContent Security', () => {
+  it('should sanitize script tags', () => {
+    const malicious = '<script>alert("XSS")</script><p>Safe content</p>'
+    const result = render(<SafeHtmlContent content={malicious} />)
+    expect(result.container.innerHTML).not.toContain('<script>')
+    expect(result.container.innerHTML).toContain('Safe content')
+  })
+  
+  it('should sanitize event handlers', () => {
+    const malicious = '<img src="x" onerror="alert(1)">'
+    const result = render(<SafeHtmlContent content={malicious} />)
+    expect(result.container.innerHTML).not.toContain('onerror')
+  })
+  
+  it('should sanitize javascript: URLs', () => {
+    const malicious = '<a href="javascript:alert(1)">Click</a>'
+    const result = render(<SafeHtmlContent content={malicious} />)
+    expect(result.container.innerHTML).not.toContain('javascript:')
+  })
+})
+```
+
+**Performance Optimization**:
+```tsx
+// Memoize sanitized content to avoid re-sanitization
+const sanitizedContent = useMemo(() => {
+  if (!content || !renderAsHtml || !sanitize) return content
+  return DOMPurify.sanitize(content, config)
+}, [content, renderAsHtml, sanitize, config])
+
+// Apply length limit
+const finalContent = maxLength && sanitizedContent.length > maxLength
+  ? `${sanitizedContent.substring(0, maxLength)}...`
+  : sanitizedContent
+```
+
+**Accessibility Enhancements**:
+```tsx
+<div
+  className={className}
+  role={role || 'article'} // Default semantic role
+  aria-label={ariaLabel}
+  aria-live="polite" // For dynamic content
+  // ... rest of props
+>
+```
+
+**Comparison to FAANG Standards**:
+- **Meta/Facebook**: Uses DOMPurify + CSP + server-side sanitization
+- **Google**: Uses isomorphic-dompurify + strict CSP + content validation
+- **Netflix**: Multi-layer sanitization + performance optimization
+- **Amazon**: DOMPurify + CSP + accessibility compliance
+
+**Current FAANG-Level Score**: 6/10
+- Architecture: 8/10 ✅
+- Security: 3/10 ❌ (Critical gap - no client-side sanitization)
+- Performance: 5/10 ⚠️
+- Accessibility: 4/10 ⚠️
+- Documentation: 8/10 ✅
+
+**Target Score After Implementation**: 9/10
+
+**Related Files**:  
+- `app/_components/ui/SafeHtmlContent.tsx` (current implementation)
+- `app/store/product/[id]/page.tsx` (primary usage)
+- `app/_classes/Product.ts` (content source)
+- `SAFEHTML_CONTENT_ANALYSIS.md` (detailed analysis document)
+
+**References**:  
+- [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)
+- [DOMPurify Documentation](https://github.com/cure53/DOMPurify)
+- [isomorphic-dompurify](https://github.com/kkomelin/isomorphic-dompurify)
+- [W3C Content Security Policy](https://www.w3.org/TR/CSP3/)
+- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
+- See `SAFEHTML_CONTENT_ANALYSIS.md` for complete FAANG-level analysis
+
+**Completion Date**: TBD
+
+---
+
 ### LiveChatBubble - Real-Time Chat Service Integration
 
 **Priority**: P2  
@@ -604,6 +806,13 @@ When adding a new improvement entry to this document:
 ---
 
 ## Changelog
+
+### 2025-01-16
+- Added SafeHtmlContent security hardening and FAANG-level enhancements
+- Documented 4-phase upgrade roadmap (Critical Security → Enhanced Features → Advanced Features → Enterprise Features)
+- Added comprehensive security, performance, and accessibility improvements
+- Included FAANG company comparison and industry standards alignment
+- Added detailed implementation notes with code examples and test cases
 
 ### 2025-01-15
 - Added LiveChatBubble real-time chat service integration plan

@@ -33,6 +33,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			<head>
 				{/* CRITICAL: Inline script to prevent FOUC - MUST run synchronously before any rendering */}
 				{/* This CANNOT use next/script as it needs to run immediately, not async */}
+				{/* ESLint: This is safe because:
+				    1. themeInitScript is a static string generated at build time (not user input)
+				    2. It's our own trusted code for theme initialization
+				    3. Must be inline to prevent FOUC (Flash of Unstyled Content)
+				    4. Next.js Script component is async and would cause FOUC */}
+				{/* eslint-disable-next-line react/no-danger */}
 				<script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
 			</head>
 		<body>

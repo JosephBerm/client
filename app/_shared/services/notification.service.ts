@@ -509,7 +509,7 @@ class NotificationService {
 			transition: prefersReducedMotion ? undefined : options.transition,
 			// Faster display for reduced motion
 			autoClose: prefersReducedMotion && options.autoClose
-				? Math.min(options.autoClose as number, 2000)
+				? Math.min(options.autoClose, 2000)
 				: options.autoClose,
 		}
 

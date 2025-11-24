@@ -59,7 +59,7 @@ const SOFT_HYPHEN = '\u00AD'
  */
 function hyphenateEmail(email: string): string {
 	// Don't modify if empty or invalid
-	if (!email || !email.includes('@')) {
+	if (!email?.includes('@')) {
 		return email
 	}
 

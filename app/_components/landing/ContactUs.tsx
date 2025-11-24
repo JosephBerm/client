@@ -252,7 +252,7 @@ export default function ContactUs() {
 								<ClockIcon className="h-5 w-5 text-success" aria-hidden="true" />
 								<h3 className="text-sm font-semibold uppercase tracking-wider text-base-content">Response Times</h3>
 							</div>
-							<ul className="space-y-2.5 text-sm text-base-content/70" role="list">
+							<ul className="space-y-2.5 text-sm text-base-content/70">
 								<li className="flex items-start gap-3">
 									<CheckIcon className="h-4 w-4 shrink-0 text-success mt-0.5" aria-hidden="true" />
 									<span>Average response: {CONTACT_INFO.hours.response} during business hours</span>

@@ -160,6 +160,8 @@ export function useFocusTrap(
 
 		// Store the previously focused element
 		if (previousFocusRef) {
+			// ESLint: Refs are intentionally mutable (React pattern)
+			// eslint-disable-next-line no-param-reassign
 			previousFocusRef.current = document.activeElement as HTMLElement
 		} else {
 			previousActiveElement = document.activeElement as HTMLElement

@@ -9,6 +9,7 @@ import { Eye, Plus, Trash2 } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
 
+import { logger } from '@_core'
 
 import { notificationService , createServerTableFetcher, formatDate , API } from '@_shared'
 
@@ -96,7 +97,8 @@ export default function AccountsPage() {
 	// Fetch function for server-side table
 	const fetchAccounts = createServerTableFetcher<Account>('/account/search')
 
-	const handleDelete = async () => {
+	// Async delete handler
+	const handleDeleteAsync = async () => {
 		if (!deleteModal.account) {return}
 
 		try {
@@ -125,6 +127,21 @@ export default function AccountsPage() {
 			action: 'deleteAccount',
 		})
 		}
+	}
+
+	/**
+	 * Wrapper for delete to handle promise in onClick handler.
+	 * FAANG Pattern: Non-async wrapper for async event handlers.
+	 */
+	const handleDelete = () => {
+		void handleDeleteAsync().catch((error) => {
+			// Error already handled in handleDeleteAsync, but catch any unhandled rejections
+			logger.error('Unhandled delete error', {
+				error,
+				component: 'AccountsPage',
+				action: 'handleDelete',
+			})
+		})
 	}
 
 	return (

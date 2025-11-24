@@ -160,7 +160,7 @@ export function useImage(
 			retryCountRef.current = 0
 			setIsError(false)
 			setIsLoaded(false)
-			loadImage(src)
+			void loadImage(src)
 		}
 	}, [src, loadImage])
 
@@ -200,7 +200,7 @@ export function useImage(
 	// Load image when src changes or shouldLoad becomes true
 	useEffect(() => {
 		if (shouldLoad && src) {
-			loadImage(src)
+			void loadImage(src)
 		} else if (!src) {
 			setIsLoading(false)
 			setIsError(false)

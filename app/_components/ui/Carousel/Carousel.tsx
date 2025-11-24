@@ -267,6 +267,12 @@ export default function Carousel({
 			<>
 				{/* CSS Animation styles - injected once per unique animation */}
 				{/* Using 50% ensures seamless loop: second duplicate perfectly aligns with first */}
+				{/* ESLint: This is safe because:
+				    1. animationName, animationDistance, and bannerSpeed are all controlled values from props
+				    2. No user input is involved - these are numeric values for CSS animations
+				    3. The template literal only contains CSS keyframes and media queries
+				    4. This is necessary for dynamic CSS animations in carousel banner mode */}
+				{/* eslint-disable-next-line react/no-danger */}
 				<style dangerouslySetInnerHTML={{
 					__html: `
 						@keyframes ${animationName} {
@@ -342,8 +348,7 @@ export default function Carousel({
 		<div
 			className={`relative w-full max-w-full overflow-hidden ${className} *:rounded-none`}
 			role='region'
-			aria-label='Carousel'
-			tabIndex={0}>
+			aria-label='Carousel'>
 			{/* Slide Numbers Display (optional) */}
 			{showSlideNumbers && slideNumbers && (
 				<>

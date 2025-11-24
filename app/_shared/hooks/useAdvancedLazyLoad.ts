@@ -177,11 +177,11 @@ export function useAdvancedLazyLoad(
 			setHasBandwidthInfo(true)
 
 			// Connection type
-			const type = (connection.type || 'unknown') as ConnectionType
+			const type = (connection.type || 'unknown')
 			setConnectionType(type)
 
 			// Effective connection type
-			const effectiveType = (connection.effectiveType || '4g') as EffectiveConnectionType
+			const effectiveType = (connection.effectiveType || '4g')
 			setEffectiveConnectionType(effectiveType)
 
 			// Estimated bandwidth (downlink in Mbps)

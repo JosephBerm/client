@@ -56,7 +56,7 @@ export default function ReducedMotionSetting() {
 	return (
 		<div className="flex items-center justify-between gap-4 py-4 px-4 sm:px-6">
 			<div className="flex-1 min-w-0">
-				<label className="block text-sm md:text-base font-semibold text-base-content mb-1 md:mb-1.5">
+				<label htmlFor="reduced-motion-toggle" className="block text-sm md:text-base font-semibold text-base-content mb-1 md:mb-1.5">
 					Reduce Motion
 				</label>
 				<p className="text-xs sm:text-sm text-base-content/70 leading-relaxed">
@@ -65,6 +65,7 @@ export default function ReducedMotionSetting() {
 			</div>
 			<div className="shrink-0">
 				<input
+					id="reduced-motion-toggle"
 					type="checkbox"
 					className="toggle toggle-primary toggle-sm sm:toggle-md"
 					checked={prefersReducedMotion}

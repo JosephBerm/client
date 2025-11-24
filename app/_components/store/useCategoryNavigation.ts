@@ -54,7 +54,7 @@ export function useCategoryNavigation(options?: UseCategoryNavigationOptions) {
 	const isOnStorePage = pathname === Routes.Store.location
 
 	return useCallback((category: ProductsCategory) => {
-		if (!category || !category.id) {
+		if (!category?.id) {
 			logger.warn('Invalid category provided to useCategoryNavigation', {
 				category,
 				component: 'useCategoryNavigation',

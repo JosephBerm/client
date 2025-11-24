@@ -131,7 +131,7 @@ export default function ImageServiceInitializer() {
 			}
 		}
 
-		initializeServices()
+		void initializeServices()
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []) // Empty array - only run once on mount
 

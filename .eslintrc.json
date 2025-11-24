@@ -3,15 +3,25 @@
 		"next/core-web-vitals",
 		"plugin:@typescript-eslint/recommended",
 		"plugin:import/recommended",
-		"plugin:import/typescript"
+		"plugin:import/typescript",
+		"plugin:jsx-a11y/recommended",
+		"plugin:react/recommended",
+		"plugin:react-hooks/recommended"
 	],
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {
 		"ecmaVersion": 2022,
-		"sourceType": "module"
+		"sourceType": "module",
+		"ecmaFeatures": {
+			"jsx": true
+		},
+		"project": "./tsconfig.json"
 	},
-	"plugins": ["@typescript-eslint", "import"],
+	"plugins": ["@typescript-eslint", "import", "jsx-a11y", "react", "react-hooks"],
 	"settings": {
+		"react": {
+			"version": "detect"
+		},
 		"import/resolver": {
 			"typescript": {
 				"alwaysTryTypes": true,
@@ -277,7 +287,316 @@
 		"no-var": "error",
 		"eqeqeq": ["error", "always", { "null": "ignore" }],
 		"curly": ["error", "all"],
-		"no-debugger": "warn"
+		"no-debugger": "warn",
+		"no-unreachable": "error",
+
+		// ==========================================
+		// PHASE 8: ASYNC/PROMISE SAFETY (CRITICAL)
+		// ==========================================
+		
+		// Prevent floating promises (unhandled async operations)
+		"@typescript-eslint/no-floating-promises": [
+			"error",
+			{
+				"ignoreVoid": true,
+				"ignoreIIFE": false
+			}
+		],
+		
+		// Prevent misuse of promises (e.g., in if statements)
+		"@typescript-eslint/no-misused-promises": [
+			"error",
+			{
+				"checksConditionals": true,
+				"checksVoidReturn": {
+					"arguments": true,
+					"attributes": true,
+					"properties": true,
+					"returns": true,
+					"variables": true
+				}
+			}
+		],
+		
+		// Require await in async functions
+		"require-await": "off",
+		"@typescript-eslint/require-await": "warn",
+		
+		// Prevent async functions in places that don't handle promises
+		"@typescript-eslint/promise-function-async": [
+			"warn",
+			{
+				"allowedPromiseNames": ["Thenable"],
+				"checkArrowFunctions": true,
+				"checkFunctionDeclarations": true,
+				"checkFunctionExpressions": true,
+				"checkMethodDeclarations": true
+			}
+		],
+		
+		// Ensure proper handling of returned promises
+		"@typescript-eslint/no-misused-new": "error",
+		
+		// Return await only in try-catch blocks
+		"no-return-await": "off",
+		"@typescript-eslint/return-await": ["error", "in-try-catch"],
+
+		// ==========================================
+		// PHASE 8: NAMING CONVENTIONS (FAANG)
+		// ==========================================
+		
+		"@typescript-eslint/naming-convention": [
+			"warn",
+			// Default: camelCase for variables, functions
+			{
+				"selector": "default",
+				"format": ["camelCase"],
+				"leadingUnderscore": "allow",
+				"trailingUnderscore": "forbid"
+			},
+			
+			// Imports: Allow PascalCase for class/type imports, camelCase for functions
+			{
+				"selector": "import",
+				"format": ["camelCase", "PascalCase", "UPPER_CASE"]
+			},
+			
+			// Variables: camelCase or UPPER_CASE for constants or PascalCase for classes
+			{
+				"selector": "variable",
+				"format": ["camelCase", "UPPER_CASE", "PascalCase"],
+				"leadingUnderscore": "allow"
+			},
+			
+			// Functions: camelCase (including React hooks) or PascalCase for components
+			{
+				"selector": "function",
+				"format": ["camelCase", "PascalCase"]
+			},
+			
+			// Parameters: camelCase, allow leading underscore for unused
+			{
+				"selector": "parameter",
+				"format": ["camelCase"],
+				"leadingUnderscore": "allow"
+			},
+			
+			// Class members: camelCase or PascalCase for nested classes/constants
+			{
+				"selector": "memberLike",
+				"format": ["camelCase", "PascalCase"],
+				"leadingUnderscore": "allow"
+			},
+			
+			// Types/Interfaces: PascalCase
+			{
+				"selector": "typeLike",
+				"format": ["PascalCase"]
+			},
+			
+			// Enums: PascalCase
+			{
+				"selector": "enum",
+				"format": ["PascalCase"]
+			},
+			
+			// Enum members: PascalCase or UPPER_CASE
+			{
+				"selector": "enumMember",
+				"format": ["PascalCase", "UPPER_CASE"]
+			},
+			
+			// Classes: PascalCase
+			{
+				"selector": "class",
+				"format": ["PascalCase"]
+			},
+			
+			// Interfaces: PascalCase (no 'I' prefix allowed except ILogger)
+			{
+				"selector": "interface",
+				"format": ["PascalCase"],
+				"custom": {
+					"regex": "^I[A-Z]",
+					"match": false
+				}
+			},
+			
+			// Type aliases: PascalCase
+			{
+				"selector": "typeAlias",
+				"format": ["PascalCase"]
+			}
+		],
+
+		// ==========================================
+		// PHASE 8: TYPESCRIPT STRICTNESS
+		// ==========================================
+		
+		// Prefer nullish coalescing (??) over logical OR (||)
+		"@typescript-eslint/prefer-nullish-coalescing": [
+			"warn",
+			{
+				"ignoreConditionalTests": false,
+				"ignoreTernaryTests": false,
+				"ignoreMixedLogicalExpressions": true
+			}
+		],
+		
+		// Prefer optional chaining (?.) over manual checks
+		"@typescript-eslint/prefer-optional-chain": "error",
+		
+		// Disallow unnecessary type assertions
+		"@typescript-eslint/no-unnecessary-type-assertion": "warn",
+		
+		// Prevent unsafe operations (warn, not error, as we have legitimate uses)
+		"@typescript-eslint/no-unsafe-member-access": "off",
+		"@typescript-eslint/no-unsafe-assignment": "off",
+		"@typescript-eslint/no-unsafe-call": "off",
+		"@typescript-eslint/no-unsafe-return": "off",
+		
+		// Ban specific types (already handled by @typescript-eslint/recommended)
+		"@typescript-eslint/ban-types": "off",
+
+		// ==========================================
+		// PHASE 8: IMMUTABILITY & CODE QUALITY
+		// ==========================================
+		
+		// Prevent parameter reassignment (common source of bugs)
+		"no-param-reassign": [
+			"error",
+			{
+				"props": true,
+				"ignorePropertyModificationsFor": [
+					"acc",
+					"accumulator",
+					"e",
+					"ctx",
+					"context",
+					"req",
+					"request",
+					"res",
+					"response",
+					"$scope",
+					"staticContext",
+					"state"
+				]
+			}
+		],
+		
+		// Prefer object spread over Object.assign
+		"prefer-object-spread": "error",
+		
+		// Prefer destructuring from arrays/objects
+		"prefer-destructuring": [
+			"warn",
+			{
+				"VariableDeclarator": {
+					"array": false,
+					"object": true
+				},
+				"AssignmentExpression": {
+					"array": false,
+					"object": false
+				}
+			},
+			{
+				"enforceForRenamedProperties": false
+			}
+		],
+		
+		// Prevent duplicate imports
+		"import/no-duplicates": [
+			"error",
+			{
+				"considerQueryString": true,
+				"prefer-inline": false
+			}
+		],
+
+		// ==========================================
+		// PHASE 8: REACT PERFORMANCE & BEST PRACTICES
+		// ==========================================
+		
+		// React settings
+		"react/react-in-jsx-scope": "off",
+		"react/prop-types": "off",
+		
+		// Require keys in list rendering
+		"react/jsx-key": [
+			"error",
+			{
+				"checkFragmentShorthand": true,
+				"checkKeyMustBeforeSpread": true,
+				"warnOnDuplicates": true
+			}
+		],
+		
+		// Prevent usage of dangerous properties
+		"react/no-danger": "warn",
+		
+		// Prevent unused prop types
+		"react/no-unused-prop-types": [
+			"warn",
+			{
+				"customValidators": [],
+				"skipShapeProps": true
+			}
+		],
+		
+		// Enforce React Hooks rules
+		"react-hooks/rules-of-hooks": "error",
+		"react-hooks/exhaustive-deps": [
+			"warn",
+			{
+				"additionalHooks": "(useFormSubmit|useCRUDSubmit|useServerTable)"
+			}
+		],
+		
+		// Prevent direct mutation of state
+		"react/no-direct-mutation-state": "error",
+		
+		// Prevent using deprecated React methods
+		"react/no-deprecated": "error",
+		
+		// Prevent using findDOMNode
+		"react/no-find-dom-node": "error",
+		
+		// Prevent using string refs
+		"react/no-string-refs": "error",
+
+		// ==========================================
+		// PHASE 8: ACCESSIBILITY (WCAG 2.1 AA)
+		// ==========================================
+		
+		"jsx-a11y/alt-text": "error",
+		"jsx-a11y/anchor-has-content": "error",
+		"jsx-a11y/anchor-is-valid": "error",
+		"jsx-a11y/aria-props": "error",
+		"jsx-a11y/aria-proptypes": "error",
+		"jsx-a11y/aria-unsupported-elements": "error",
+		"jsx-a11y/click-events-have-key-events": "warn",
+		"jsx-a11y/heading-has-content": "error",
+		"jsx-a11y/iframe-has-title": "error",
+		"jsx-a11y/img-redundant-alt": "warn",
+		"jsx-a11y/interactive-supports-focus": "warn",
+		"jsx-a11y/label-has-associated-control": [
+			"error",
+			{
+				"required": {
+					"some": ["nesting", "id"]
+				}
+			}
+		],
+		"jsx-a11y/mouse-events-have-key-events": "warn",
+		"jsx-a11y/no-access-key": "error",
+		"jsx-a11y/no-autofocus": "warn",
+		"jsx-a11y/no-noninteractive-element-interactions": "warn",
+		"jsx-a11y/no-redundant-roles": "error",
+		"jsx-a11y/role-has-required-aria-props": "error",
+		"jsx-a11y/role-supports-aria-props": "error",
+		"jsx-a11y/scope": "error",
+		"jsx-a11y/tabindex-no-positive": "warn"
 	},
 	"overrides": [
 		{
@@ -340,6 +659,20 @@
 			],
 			"rules": {
 				"import/no-cycle": "warn"
+			}
+		},
+		{
+			// Logger types: Allow ILogger interface (legacy naming)
+			"files": ["app/_core/logger/types.ts"],
+			"rules": {
+				"@typescript-eslint/naming-convention": "off"
+			}
+		},
+		{
+			// Service Worker: Allow special patterns
+			"files": ["app/_components/common/ServiceWorkerRegistration.tsx"],
+			"rules": {
+				"@typescript-eslint/no-floating-promises": "off"
 			}
 		}
 	]

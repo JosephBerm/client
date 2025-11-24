@@ -204,7 +204,7 @@ export class ImagePreloadService {
 						if (entry.isIntersecting) {
 							const url = entry.target.getAttribute('data-preload-url')
 							if (url && !this.preloadedCache.has(url)) {
-								this.preloadImmediate([url], 'low')
+								void this.preloadImmediate([url], 'low')
 							}
 						}
 					})
@@ -214,7 +214,7 @@ export class ImagePreloadService {
 		}
 
 		// Create dummy elements for observation
-		const promises = urls.map((url) => {
+		const promises = urls.map(async (url) => {
 			return new Promise<void>((resolve) => {
 				const dummy = document.createElement('div')
 				dummy.setAttribute('data-preload-url', url)

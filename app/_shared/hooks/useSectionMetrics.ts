@@ -152,7 +152,7 @@ export function useSectionMetrics({
 					if (rect.height > 0 && rect.width > 0) {
 						const top = scrollTop + rect.top
 						const bottom = top + rect.height
-						const height = rect.height
+						const {height} = rect
 						const center = top + height / 2
 
 						// Calculate viewport state (for animations)

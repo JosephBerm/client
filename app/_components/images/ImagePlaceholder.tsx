@@ -129,7 +129,7 @@ export default function ImagePlaceholder({
 	label,
 }: ImagePlaceholderProps) {
 	// Select icon based on variant
-	const getIcon = () => {
+	const getIcon = async () => {
 		if (variant === 'icon' && icon) {
 			return icon
 		}

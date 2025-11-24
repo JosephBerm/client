@@ -301,7 +301,7 @@ export class ImageCacheService {
 				await Promise.all(
 					cacheNames
 						.filter((name) => name.startsWith('image-cache-'))
-						.map((name) => caches.delete(name))
+						.map(async (name) => caches.delete(name))
 				)
 			} catch (error) {
 				logger.error('ImageCacheService: Failed to clear Service Worker cache', { error })
@@ -384,11 +384,12 @@ export class ImageCacheService {
 	 * @returns {Promise<void[]>} Promise that resolves when all images are cached
 	 */
 	static async preloadAndCache(urls: string[]): Promise<void[]> {
-		const promises = urls.map((url) => {
+		const promises = urls.map(async (url) => {
 			return new Promise<void>((resolve) => {
 				const img = new Image()
 				img.onload = () => {
-					this.cache(url).then(() => resolve())
+					// Already handling promise with .then() and .catch(), no need for void
+					this.cache(url).then(() => resolve()).catch(() => resolve())
 				}
 				img.onerror = () => resolve() // Resolve even on error
 				img.src = url

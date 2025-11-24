@@ -172,7 +172,7 @@ export default function AccountQuotesTable() {
 	}
 
 		if (user?.customer?.id) {
-			fetchQuotes()
+			void fetchQuotes()
 		}
 	}, [user?.customer?.id, user?.id, user?.customer?.name])
 
@@ -196,7 +196,7 @@ export default function AccountQuotesTable() {
 				accessorKey: 'status',
 				header: 'Status',
 				cell: ({ row }) => {
-					const status = row.original.status
+					const {status} = row.original
 					const variant = status === QuoteStatus.Read ? 'success' : 'warning'
 					return <Badge variant={variant}>{status}</Badge>
 				},

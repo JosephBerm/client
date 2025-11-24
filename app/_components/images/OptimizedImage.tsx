@@ -54,9 +54,9 @@ import Image from 'next/image'
 import classNames from 'classnames'
 import { Package } from 'lucide-react'
 
-import { useImageAnalytics } from '@_features/images'
-import { useImageError } from '@_features/images'
-import { getBlurDataUrl } from '@_features/images'
+import { useImageAnalytics, useImageError, getBlurDataUrl } from '@_features/images'
+
+
 
 import { logger } from '@_core'
 
@@ -232,11 +232,11 @@ const OptimizedImage = forwardRef<HTMLImageElement, OptimizedImageProps>(
 		const [isLoading, setIsLoading] = useState(true)
 
 		// Determine loading strategy
-		const loadingStrategy = loading || (priority ? 'eager' : 'lazy')
+		const loadingStrategy = loading ?? (priority ? 'eager' : 'lazy')
 
 		// Get variant configuration
 		const config = variantConfig[variant]
-		const aspectRatio = config.aspectRatio
+		const {aspectRatio} = config
 		const sizes = config.sizes[size]
 
 		// Extract width/height from props to prevent conflicts with Next.js Image fill prop
@@ -304,10 +304,10 @@ const OptimizedImage = forwardRef<HTMLImageElement, OptimizedImageProps>(
 					role="img"
 					aria-label={alt}
 				>
-					{fallback || (
+					{fallback ?? (
 						<>
 							<Package className="h-12 w-12 text-base-content/20" strokeWidth={1.5} aria-hidden="true" />
-							<span className="sr-only">{alt || 'Image placeholder'}</span>
+							<span className="sr-only">{alt ?? 'Image placeholder'}</span>
 						</>
 					)}
 				</div>

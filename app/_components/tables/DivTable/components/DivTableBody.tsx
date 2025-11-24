@@ -57,7 +57,7 @@ export function DataGridBody<TData>({
   enableComplexCells = false,
 }: DataGridBodyProps<TData>) {
   const parentRef = useRef<HTMLDivElement>(null)
-  const rows = table.getRowModel().rows
+  const {rows} = table.getRowModel()
 
   // ============================================================================
   // Virtualization Setup

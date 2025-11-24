@@ -72,7 +72,7 @@ export default function AppearanceSetting() {
 	return (
 		<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 md:gap-6 py-4 md:py-5 px-4 sm:px-6">
 			<div className="flex-1 min-w-0">
-				<label className="block text-sm md:text-base font-semibold text-base-content mb-1 md:mb-1.5">
+				<label htmlFor="theme-select" className="block text-sm md:text-base font-semibold text-base-content mb-1 md:mb-1.5">
 					Theme
 				</label>
 				<p className="text-xs sm:text-sm text-base-content/70 leading-relaxed">
@@ -81,6 +81,7 @@ export default function AppearanceSetting() {
 			</div>
 			<div className="shrink-0 w-full sm:w-auto">
 				<Select
+					id="theme-select"
 					value={currentTheme}
 					onChange={(e) => handleThemeChange(e.target.value)}
 					options={themeOptions}

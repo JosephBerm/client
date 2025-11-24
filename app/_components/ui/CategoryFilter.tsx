@@ -183,6 +183,24 @@ export default function CategoryFilter({
 	)
 
 	/**
+	 * Keyboard handler for treeitem accessibility
+	 * Follows ARIA tree pattern: Enter/Space toggles selection
+	 * 
+	 * FAANG Pattern: Extracted handler using useCallback for performance
+	 */
+	const handleCategoryKeyDown = useCallback(
+		(e: React.KeyboardEvent<HTMLDivElement>, category: ProductsCategory) => {
+			// Enter or Space: Toggle selection (standard treeitem behavior)
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault()
+				handleToggle(category)
+			}
+			// Arrow keys could be added for navigation, but selection toggle is primary action
+		},
+		[handleToggle]
+	)
+
+	/**
 	 * Recursive category node renderer
 	 * 
 	 * Layout structure (industry standard):
@@ -209,7 +227,9 @@ export default function CategoryFilter({
 					<div
 						role="treeitem"
 						aria-selected={isSelected}
+						tabIndex={0}
 						onClick={() => handleToggle(category)}
+						onKeyDown={(e) => handleCategoryKeyDown(e, category)}
 						className={`
 							group
 							flex min-h-[56px] cursor-pointer items-center gap-3
@@ -275,6 +295,8 @@ export default function CategoryFilter({
 								checked={isSelected}
 								ref={(el) => {
 									if (el) {
+										// ESLint: Refs are intentionally mutable (React pattern)
+										// eslint-disable-next-line no-param-reassign
 										el.indeterminate = isPartial && !isSelected
 									}
 								}}
@@ -328,7 +350,7 @@ export default function CategoryFilter({
 				</div>
 			)
 		},
-		[expandedCategories, handleToggle, toggleExpand, maxDepth, collapsible, showCount, isFullySelected, isPartiallySelected]
+		[expandedCategories, handleToggle, handleCategoryKeyDown, toggleExpand, maxDepth, collapsible, showCount, isFullySelected, isPartiallySelected]
 	)
 
 	// Empty state

@@ -318,31 +318,42 @@ const StorePageContent = () => {
 		setLoading(true)
 
 		try {
+			// Create a copy of criteria to avoid mutating the parameter
+			// FAANG Pattern: Immutability prevents side effects and bugs
+			// Deep copy filters object to prevent shared reference mutations
+			const workingCriteria = new GenericSearchFilter({
+				...criteria,
+				sortBy: criteria.sortBy,
+				sortOrder: criteria.sortOrder,
+				filters: { ...criteria.filters }, // Deep copy filters object
+				includes: [...(criteria.includes || [])], // Deep copy includes array
+			})
+
 			if (!isEmpty(searchValue) && searchValue.length > 2) {
-				criteria.add('Name', searchValue)
+				workingCriteria.add('Name', searchValue)
 			} else {
-				criteria.clear('Name')
+				workingCriteria.clear('Name')
 			}
 
 			if (categoriesValue.length > 0) {
 				const categoryIds = categoriesValue.map((cat) => String(cat.id)).join('|')
-				criteria.add('CategorieIds', categoryIds)
+				workingCriteria.add('CategorieIds', categoryIds)
 			} else {
-				criteria.clear('CategorieIds')
+				workingCriteria.clear('CategorieIds')
 			}
 
 			// Apply sorting from current sort option
 			const sortOption = SORT_OPTIONS.find((opt) => opt.value === currentSort)
-			if (sortOption && sortOption.field) {
-				criteria.sortBy = sortOption.field
-				criteria.sortOrder = sortOption.order
+			if (sortOption?.field) {
+				workingCriteria.sortBy = sortOption.field
+				workingCriteria.sortOrder = sortOption.order
 			} else {
 				// Relevance (default) - no sorting
-				criteria.sortBy = null
-				criteria.sortOrder = 'asc'
+				workingCriteria.sortBy = null
+				workingCriteria.sortOrder = 'asc'
 			}
 
-			const { data } = await API.Store.Products.searchPublic(criteria)
+			const { data } = await API.Store.Products.searchPublic(workingCriteria)
 
 		if (!data.payload || data.statusCode !== 200) {
 			const message = data.message ?? 'Unable to fetch products'
@@ -355,7 +366,7 @@ const StorePageContent = () => {
 			return []
 		}
 
-			const payload = data.payload
+			const {payload} = data
 			
 			const nextProducts = payload.data.map((product) => new Product(product))
 			setProducts(nextProducts, new PagedResult<Product>(payload))
@@ -683,7 +694,7 @@ const StorePageContent = () => {
 							searchInputRef.current.focus()
 							
 							// Restore cursor position to end of input
-							const length = searchInputRef.current.value.length
+							const {length} = searchInputRef.current.value
 							searchInputRef.current.setSelectionRange(length, length)
 						}
 					}, 0)

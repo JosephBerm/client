@@ -8,6 +8,7 @@ import { Mail, Phone, Building2, MapPin, PackageSearch } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
 
+import { logger } from '@_core'
 
 import { formatDate } from '@_lib/dates'
 
@@ -92,7 +93,8 @@ export default function QuoteDetailsPage() {
 		void fetchQuote()
 	}, [quoteId, router])
 
-	const handleCreateOrder = async () => {
+	// Async create order handler
+	const handleCreateOrderAsync = async () => {
 		if (!quoteId) {return}
 
 		try {
@@ -125,6 +127,22 @@ export default function QuoteDetailsPage() {
 		}
 	}
 
+	/**
+	 * Wrapper for create order to handle promise in onClick handler.
+	 * FAANG Pattern: Non-async wrapper for async event handlers.
+	 */
+	const handleCreateOrder = () => {
+		void handleCreateOrderAsync().catch((error) => {
+			// Error already handled in handleCreateOrderAsync, but catch any unhandled rejections
+			logger.error('Unhandled create order error', {
+				error,
+				quoteId,
+				component: 'QuoteDetailPage',
+				action: 'handleCreateOrder',
+			})
+		})
+	}
+
 	const contactName = useMemo(() => {
 		if (!quote?.name) {return 'Quote contact'}
 		const name = quote.name as any
@@ -150,7 +168,7 @@ export default function QuoteDetailsPage() {
 				accessorKey: 'product.name',
 				header: 'Product',
 				cell: ({ row }) => {
-					const product = row.original.product as any
+					const {product} = row.original
 					return product?.name || 'Product pending'
 				},
 			},
@@ -158,7 +176,7 @@ export default function QuoteDetailsPage() {
 				accessorKey: 'product.sku',
 				header: 'SKU',
 				cell: ({ row }) => {
-					const product = row.original.product as any
+					const {product} = row.original
 					return product?.sku || row.original.productId || '—'
 				},
 			},
