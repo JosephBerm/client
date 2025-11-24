@@ -26,8 +26,6 @@
  * @module RequestCache
  */
 
-import { logger } from '@_core'
-
 interface CacheEntry<T> {
 	/** The promise of the in-flight request */
 	promise: Promise<T>
@@ -77,7 +75,7 @@ class RequestCacheManager {
 			component?: string
 		} = {}
 	): Promise<T> {
-		const { forceFetch = false, ttl = this.CACHE_TTL, component = 'Unknown' } = options
+		const { forceFetch = false, ttl = this.CACHE_TTL, component: _component = 'Unknown' } = options
 
 		// Clean up old entries periodically
 		this.cleanup()
@@ -238,7 +236,7 @@ export function createCacheKey(endpoint: string, params: Record<string, any> = {
 
 // Export debug helper for browser console
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-	// @ts-ignore
+	// @ts-expect-error - Intentionally adding to window for debugging in development
 	window.requestCache = {
 		getStats: () => requestCache.getStats(),
 		clear: () => requestCache.clear(),

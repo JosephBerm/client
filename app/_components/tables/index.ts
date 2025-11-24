@@ -30,13 +30,36 @@ export type { DataGridProps } from './DataGrid'
 // DivTable removed - use DataGrid instead
 
 // Constants
-export * from './tableConstants'
+export {
+	DEFAULT_PAGE_SIZE_OPTIONS,
+	DEFAULT_PAGE_SIZE,
+	MIN_PAGE_SIZE,
+	MAX_PAGE_SIZE,
+	DEFAULT_EMPTY_MESSAGE,
+	TABLE_ERROR_MESSAGES,
+	COMPONENT_NAME,
+} from './tableConstants'
 
 // Utilities
-export * from './tableUtils'
+export {
+	sanitizeString,
+	isPositiveNumber,
+	isValidPageSize,
+	calculateTotalItems,
+	calculateLastPageIndex,
+	calculatePaginationRange,
+	isValidArray,
+	normalizeArray,
+} from './tableUtils'
 
 // Types
-export type * from './tableTypes'
+export type {
+	PaginationButtonConfig,
+	TableFeatureToggles,
+	TableManualModes,
+	ServerPaginationMeta,
+	PaginationRange,
+} from './tableTypes'
 
 // Re-export TanStack Table types for convenience
 export type { ColumnDef, PaginationState, SortingState, ColumnFiltersState } from '@tanstack/react-table'

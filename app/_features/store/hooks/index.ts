@@ -1,12 +1,27 @@
 /**
- * @fileoverview Store Feature Hooks - Barrel Export
+ * Store Feature Hooks - Barrel Export (Optimized for Tree-Shaking)
  * 
  * Custom hooks for the store/catalog feature.
- * Encapsulates state management and business logic.
+ * Client-only (all have 'use client' directive).
  * 
  * @module features/store/hooks
  */
 
-export * from './useProductsState'
-export * from './useSearchFilterState'
+export {
+	useProductsState,
+	productsReducer,
+	initialProductsState,
+	type ProductsState,
+	type ProductsAction,
+	type UseProductsStateReturn,
+} from './useProductsState'
+
+export {
+	useSearchFilterState,
+	createInitialSearchFilterState,
+	searchFilterReducer,
+	type SearchFilterState,
+	type SearchFilterAction,
+	type UseSearchFilterStateReturn,
+} from './useSearchFilterState'
 

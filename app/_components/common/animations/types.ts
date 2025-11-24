@@ -7,7 +7,7 @@
  * @module components/common/animations/types
  */
 
-import { Variants } from 'framer-motion'
+import type { Variants } from 'framer-motion'
 
 /**
  * Animation variant types
@@ -137,11 +137,11 @@ export function getAnimationVariants(
  * @returns true if reduced motion is preferred
  */
 export function checkReducedMotion(): boolean {
-	if (typeof window === 'undefined') return false
+	if (typeof window === 'undefined') {return false}
 
 	// Check user override first (data-reduced-motion attribute)
 	const userOverride = document.documentElement.getAttribute('data-reduced-motion')
-	if (userOverride === 'true') return true
+	if (userOverride === 'true') {return true}
 
 	// Fall back to system preference
 	return window.matchMedia('(prefers-reduced-motion: reduce)').matches

@@ -19,8 +19,9 @@
  * @module ImageService
  */
 
-import { getProductImageUrl } from '../utils/imageUtils'
 import { logger } from '@_core'
+
+import { getProductImageUrl } from '../utils/imageUtils'
 
 /**
  * Image Service Class

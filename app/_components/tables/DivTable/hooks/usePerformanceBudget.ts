@@ -10,7 +10,9 @@
 'use client'
 
 import { useEffect, useCallback } from 'react'
+
 import { logger } from '@_core'
+
 import type { UsePerformanceBudgetReturn } from '../types/divTableTypes'
 
 interface PerformanceBudgets {
@@ -47,7 +49,7 @@ export function usePerformanceBudget(
   enabled: boolean = true
 ): UsePerformanceBudgetReturn {
   useEffect(() => {
-    if (!enabled || typeof window === 'undefined') return
+    if (!enabled || typeof window === 'undefined') {return}
 
     // Performance observer for measuring render time
     const observer = new PerformanceObserver((list) => {
@@ -91,7 +93,7 @@ export function usePerformanceBudget(
   // Measure function for manual measurements
   const measure = useCallback(
     (name: string, startMark: string, endMark: string) => {
-      if (!enabled || typeof window === 'undefined') return
+      if (!enabled || typeof window === 'undefined') {return}
 
       try {
         performance.measure(name, startMark, endMark)

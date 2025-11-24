@@ -55,9 +55,11 @@
  * @module Provider
  */
 
-import { Product } from './Product'
-import Address from '@_classes/common/Address'
 import { parseDateSafe, parseRequiredTimestamp } from '@_lib/dates'
+
+import Address from '@_classes/common/Address'
+
+import { Product } from './Product'
 
 /**
  * Provider Entity Class
@@ -170,7 +172,7 @@ export default class Provider {
 			}
 			
 			// Deep copy products array
-			if (this.products) this.products = this.products.map((p) => new Product(p))
+			if (this.products) {this.products = this.products.map((p) => new Product(p))}
 		}
 	}
 }

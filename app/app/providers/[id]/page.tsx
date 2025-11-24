@@ -1,8 +1,12 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { API, useRouteParam } from '@_shared'
+
 import { useRouter } from 'next/navigation'
+
+import { API, useRouteParam } from '@_shared'
+
 import Provider from '@_classes/Provider'
+
 import UpdateProviderForm from '@_components/forms/UpdateProviderForm'
 // Styles migrated to Tailwind
 
@@ -20,7 +24,7 @@ const Page = () => {
 		}
 
 		const fetchProviders = async () => {
-			if (providerId === 'create') return
+			if (providerId === 'create') {return}
 			
 			const actualProviderId = parseInt(providerId, 10)
 			

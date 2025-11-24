@@ -44,8 +44,10 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { ImageService } from '../services/ImageService'
+
 import { logger } from '@_core'
+
+import { ImageService } from '../services/ImageService'
 
 /**
  * Error recovery strategy.

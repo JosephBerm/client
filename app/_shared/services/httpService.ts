@@ -40,9 +40,12 @@
 
 'use client'
 
-import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios'
+import axios from 'axios'
 import { getCookies } from 'cookies-next'
+
 import { logger } from '@_core'
+
+import type { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios';
 
 /**
  * Base Axios instance configured with interceptors.

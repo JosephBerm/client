@@ -51,15 +51,21 @@
 'use client'
 
 import React from 'react'
-import { useForm } from 'react-hook-form'
+
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+
 import { changePasswordSchema, type ChangePasswordFormData } from '@_core'
-import { useFormSubmit } from '@_shared'
-import FormInput from './FormInput'
-import Button from '@_components/ui/Button'
+
+import { useFormSubmit , API , notificationService } from '@_shared'
+
 import type { IUser } from '@_classes/User'
-import { API } from '@_shared'
-import { notificationService } from '@_shared'
+
+import Button from '@_components/ui/Button'
+
+import FormInput from './FormInput'
+
+
 
 /**
  * ChangePasswordForm component props interface.

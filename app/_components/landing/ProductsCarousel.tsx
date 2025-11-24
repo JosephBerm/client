@@ -33,21 +33,30 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
+
 import Link from 'next/link'
+
 import { ArrowRight } from 'lucide-react'
+
 import { Routes } from '@_features/navigation'
+import { PRODUCT_API_INCLUDES } from '@_features/store'
+
+import { logger } from '@_core'
+
+import { API } from '@_shared'
+
+import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
+import { Product } from '@_classes/Product'
 
 import PageContainer from '@_components/layouts/PageContainer'
+import ProductCard from '@_components/store/ProductCard'
+import ProductCardSkeleton from '@_components/store/ProductCardSkeleton'
 import Button from '@_components/ui/Button'
 import Pill from '@_components/ui/Pill'
 import StatusDot from '@_components/ui/StatusDot'
-import ProductCard from '@_components/store/ProductCard'
-import ProductCardSkeleton from '@_components/store/ProductCardSkeleton'
-import { Product } from '@_classes/Product'
-import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
-import { API } from '@_shared'
-import { logger } from '@_core'
-import { PRODUCT_API_INCLUDES } from '@_features/store'
+
+
+
 
 /**
  * Number of featured products to display
@@ -75,7 +84,7 @@ const FEATURED_PRODUCTS_COUNT = 4
  */
 const getOptimalGridClasses = (itemCount: number): { grid: string; maxWidth: string } => {
 	// Mobile: always 1 column (mobile-first)
-	let mobileCols = 'grid-cols-1'
+	const mobileCols = 'grid-cols-1'
 	let tabletCols = 'md:grid-cols-2'
 	let desktopCols = 'xl:grid-cols-3'
 	let maxWidth = 'max-w-7xl' // Default max-width for larger grids

@@ -1,19 +1,20 @@
 /**
- * Cart Feature - Main Barrel Export
+ * Cart Feature - Main Barrel Export (Optimized for Tree-Shaking)
  * 
  * Shopping cart management and persistence.
+ * Client-only (Zustand store with 'use client' directive).
  * 
  * @example
  * ```typescript
- * import { useCartStore, CartItem } from '@_features/cart'
+ * import { useCartStore, type CartItem } from '@_features/cart'
  * ```
  * 
  * @module cart
  */
 
-// Stores
-export * from './stores'
+// ============================================================================
+// STORE (Client-Only - has 'use client')
+// ============================================================================
 
-// Re-export CartItem type for convenience
-export type { CartItem } from './stores/useCartStore'
+export { useCartStore, type CartItem } from './stores/useCartStore'
 

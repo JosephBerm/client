@@ -39,18 +39,29 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
+
 import Link from 'next/link'
+
 import { Package, Building2, Heart, Eye, CheckCircle2 } from 'lucide-react'
-import { Product } from '@_classes/Product'
-import { serializeProduct, type SerializedProduct } from '@_lib/serializers/productSerializer'
-import ProductImage from '@_components/store/ProductImage'
-import AddToCartButton from '@_components/store/AddToCartButton'
-import { useCategoryNavigation } from '@_components/store/useCategoryNavigation'
-import { Routes } from '@_features/navigation'
+
 import { ImagePreloadService } from '@_features/images'
+import { Routes } from '@_features/navigation'
+
 import { logger } from '@_core'
+
+import { serializeProduct, type SerializedProduct } from '@_lib/serializers/productSerializer'
+
+import { Product } from '@_classes/Product'
+import type ProductsCategory from '@_classes/ProductsCategory'
+
+import AddToCartButton from '@_components/store/AddToCartButton'
+import ProductImage from '@_components/store/ProductImage'
+import { useCategoryNavigation } from '@_components/store/useCategoryNavigation'
+
+
+
 import { PRODUCT_CARD_CONSTANTS } from './ProductCard.constants'
-import ProductsCategory from '@_classes/ProductsCategory'
+
 
 export interface ProductCardProps {
 	/** Product data to display */

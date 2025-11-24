@@ -15,9 +15,10 @@
 
 'use client'
 
-import type { SettingItem } from '@_types/settings'
-import Select from '@_components/ui/Select'
 import Button from '@_components/ui/Button'
+import Select from '@_components/ui/Select'
+
+import type { SettingItem } from '@_types/settings'
 
 /**
  * Setting row component props interface.
@@ -130,12 +131,13 @@ export default function SettingRow({ setting }: SettingRowProps) {
 				)
 			}
 
-			case 'custom': {
-				const customSetting = setting as Extract<SettingItem, { type: 'custom' }>
-				// For custom components, the label and description are handled by the component itself
-				// This allows for more flexible layouts
-				return <div>{customSetting.component}</div>
-			}
+		case 'custom': {
+			const customSetting = setting as Extract<SettingItem, { type: 'custom' }>
+			const CustomComponent = customSetting.component
+			// For custom components, the label and description are handled by the component itself
+			// This allows for more flexible layouts
+			return <div><CustomComponent /></div>
+		}
 
 			default:
 				return null

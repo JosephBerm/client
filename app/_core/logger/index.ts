@@ -190,10 +190,13 @@ export const logger = getDefaultLogger()
 // ============================================================================
 
 /**
- * Default export for convenience.
- * Allows `import logger from '@_core/logger'`
+ * Named export for logger instance.
+ * Use `import { logger } from '@_core/logger'` instead of default import.
+ * 
+ * @deprecated Default export removed for consistency. Use named export: `import { logger } from '@_core/logger'`
  */
-export default logger
+// Note: Default export removed per ESLint rule `import/no-default-export`
+// Use named export: `import { logger } from '@_core/logger'`
 
 /**
  * Type guard to check if a value is a valid log level.

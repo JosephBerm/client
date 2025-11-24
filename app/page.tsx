@@ -1,12 +1,12 @@
+import { Reveal, ANIMATION_PRESETS, ANIMATION_DELAY } from '@_components/common/animations'
 import ContactUs from '@_components/landing/ContactUs'
 import FAQ from '@_components/landing/FAQ'
 import Intro from '@_components/landing/Intro'
-import Products from '@_components/landing/Products'
 import ProductCategoriesCarousel from '@_components/landing/ProductCategoriesCarousel'
+import Products from '@_components/landing/Products'
 import ProductsCarousel from '@_components/landing/ProductsCarousel'
 import SalesPitch from '@_components/landing/SalesPitch'
 import ScrollIntoViewComponent from '@_components/landing/ScrollIntoViewComponent'
-import { Reveal, ANIMATION_PRESETS, ANIMATION_DURATION, ANIMATION_DELAY, ANIMATION_DISTANCE } from '@_components/common/animations'
 
 /**
  * Home Page

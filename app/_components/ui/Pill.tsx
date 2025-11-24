@@ -46,7 +46,8 @@
  * ```
  */
 
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
+
 import classNames from 'classnames'
 
 type PillTone = 'brand' | 'accent' | 'primary' | 'success' | 'warning' | 'info' | 'neutral'

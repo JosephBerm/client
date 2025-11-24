@@ -42,18 +42,24 @@
 'use client'
 
 import { useEffect, useMemo, useCallback, useState, useRef } from 'react'
+
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Settings, ChevronDown, LogOut, X } from 'lucide-react'
+
 import classNames from 'classnames'
+import { Settings, ChevronDown, LogOut, X } from 'lucide-react'
+
 import { useAuthStore } from '@_features/auth'
 import { logout as logoutService } from '@_features/auth/services/AuthService'
 import { NavigationService, Routes } from '@_features/navigation'
-import { useMediaQuery } from '@_shared'
+
 import { logger } from '@_core'
-import Button from '@_components/ui/Button'
+
+import { useMediaQuery } from '@_shared'
+
 import NavigationIcon from '@_components/navigation/NavigationIcon'
 import SettingsModal from '@_components/settings/SettingsModal'
+import Button from '@_components/ui/Button'
 
 /**
  * Internal Sidebar component props interface.
@@ -455,7 +461,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 											 */
 											const isActive = (() => {
 												// Exact match always wins
-												if (pathname === route.href) return true
+												if (pathname === route.href) {return true}
 												
 												// Dashboard (/app) is a special case - EXACT MATCH ONLY
 												// This prevents /app from matching /app/profile, /app/orders, etc.

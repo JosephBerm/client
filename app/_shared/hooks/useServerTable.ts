@@ -16,12 +16,15 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import {
+
+import { logger } from '@_core'
+
+import type {
 	PaginationState,
 	SortingState,
 	ColumnFiltersState,
 } from '@tanstack/react-table'
-import { logger } from '@_core'
+
 
 /**
  * Configuration options for the server table hook.

@@ -1,19 +1,26 @@
 'use client'
 
 import { useEffect } from 'react'
-import Link from 'next/link'
-import { formatDate } from '@_lib/dates'
-import { Building2, BellRing, ShoppingCart, FileText, Mail, Phone, MapPin, User as UserIcon, Calendar, ArrowRight } from 'lucide-react'
-import type { ComponentType } from 'react'
 
-import Card from '@_components/ui/Card'
-import Badge from '@_components/ui/Badge'
-import Button from '@_components/ui/Button'
-import RoleBadge from '@_components/common/RoleBadge'
-import ActivityStatCard from './ActivityStatCard'
+import Link from 'next/link'
+
+import { Building2, BellRing, ShoppingCart, FileText, Mail, Phone, MapPin, User as UserIcon, Calendar, ArrowRight } from 'lucide-react'
+
 import { useAuthStore } from '@_features/auth'
 import { Routes } from '@_features/navigation'
+
 import { logger } from '@_core'
+
+import { formatDate } from '@_lib/dates'
+
+import RoleBadge from '@_components/common/RoleBadge'
+import Badge from '@_components/ui/Badge'
+import Button from '@_components/ui/Button'
+import Card from '@_components/ui/Card'
+
+import ActivityStatCard from './ActivityStatCard'
+
+
 
 // Typography classes for consistent styling - mobile-first with DaisyUI tokens
 const LABEL_CLASS = 'text-xs sm:text-xs font-semibold uppercase tracking-wide text-base-content/60 flex items-center gap-1.5'

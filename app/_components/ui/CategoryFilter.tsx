@@ -25,8 +25,11 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
+
 import { ChevronRight, ChevronDown } from 'lucide-react'
-import ProductsCategory from '@_classes/ProductsCategory'
+
+import type ProductsCategory from '@_classes/ProductsCategory'
+
 import Badge from '@_components/ui/Badge'
 
 export interface CategoryFilterProps {

@@ -60,11 +60,13 @@
  * @module Company
  */
 
+import { parseRequiredTimestamp } from '@_lib/dates'
+
+import Address from '@_classes/common/Address'
+import Order from '@_classes/Order'
 import Quote from '@_classes/Quote'
 import User from '@_classes/User'
-import Order from '@_classes/Order'
-import Address from '@_classes/common/Address'
-import { parseRequiredTimestamp } from '@_lib/dates'
+
 
 /**
  * Company Entity Class

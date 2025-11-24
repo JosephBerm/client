@@ -28,9 +28,12 @@
 'use client'
 
 import { useMemo } from 'react'
+
 import { useUserSettingsStore } from '@_features/settings'
+
 import { ThemeHelper } from '@_classes/Helpers'
-import { Theme } from '@_classes/SharedEnums'
+import type { Theme } from '@_classes/SharedEnums'
+
 import Select from '@_components/ui/Select'
 
 /**

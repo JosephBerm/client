@@ -1,20 +1,28 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ColumnDef } from '@tanstack/react-table'
+
 import { Eye, Plus, Trash2 } from 'lucide-react'
-import { notificationService } from '@_shared'
+
+import { Routes } from '@_features/navigation'
+
+
+import { notificationService , formatDate , API } from '@_shared'
+
+import type Company from '@_classes/Company'
+
 import ServerDataGrid from '@_components/tables/ServerDataGrid'
 import Button from '@_components/ui/Button'
-import { InternalPageHeader } from '../_components'
 import Modal from '@_components/ui/Modal'
-import { formatDate } from '@_shared'
-import { logger } from '@_core'
-import { API } from '@_shared'
-import { Routes } from '@_features/navigation'
-import type Company from '@_classes/Company'
+
+import { InternalPageHeader } from '../_components'
+
+
+
+import type { ColumnDef } from '@tanstack/react-table'
 
 export default function CustomersPage() {
   const router = useRouter()
@@ -86,7 +94,7 @@ export default function CustomersPage() {
   )
 
   const handleDelete = async () => {
-    if (!deleteModal.customer) return
+    if (!deleteModal.customer) {return}
 
     try {
       const { data } = await API.Customers.delete(deleteModal.customer.id!)

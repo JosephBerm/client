@@ -88,7 +88,7 @@ export abstract class BasePreferenceService<T> {
 	 * @returns The system preference or default value
 	 */
 	getSystemPreference(): T {
-		if (typeof window === 'undefined') return this.defaultValue
+		if (typeof window === 'undefined') {return this.defaultValue}
 		return this.detectSystemPreference()
 	}
 
@@ -106,7 +106,7 @@ export abstract class BasePreferenceService<T> {
 	 * @returns The stored preference, system preference, or default
 	 */
 	getStoredPreference(): T {
-		if (typeof window === 'undefined') return this.defaultValue
+		if (typeof window === 'undefined') {return this.defaultValue}
 
 		const storedValue = UserSettingsService.getSetting(this.settingKey)
 		
@@ -133,7 +133,7 @@ export abstract class BasePreferenceService<T> {
 	 * @returns The currently applied preference
 	 */
 	getCurrentPreference(): T {
-		if (typeof window === 'undefined') return this.defaultValue
+		if (typeof window === 'undefined') {return this.defaultValue}
 
 		const attributeValue = document.documentElement.getAttribute(this.domAttribute)
 		const deserializedValue = this.deserializeFromDOM(attributeValue)
@@ -155,7 +155,7 @@ export abstract class BasePreferenceService<T> {
 	 * @param value - The preference value to store
 	 */
 	setStoredPreference(value: T): void {
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 
 		if (!this.validateValue(value)) {
 			console.warn(`Invalid preference value for ${this.settingKey}:`, value)
@@ -177,7 +177,7 @@ export abstract class BasePreferenceService<T> {
 	 * @param value - The preference value to apply
 	 */
 	applyPreference(value: T): void {
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 
 		if (!this.validateValue(value)) {
 			console.warn(`Invalid preference value for ${this.domAttribute}:`, value)

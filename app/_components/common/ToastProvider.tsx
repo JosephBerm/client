@@ -27,10 +27,14 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import { ToastContainer } from 'react-toastify'
+
 import { useUserSettingsStore } from '@_features/settings'
-import { ThemeHelper } from '@_classes/Helpers'
+
 import { logger } from '@_core/logger'
+
+import { ThemeHelper } from '@_classes/Helpers'
 
 /**
  * ToastProvider Component

@@ -9,8 +9,11 @@
 
 'use client'
 
-import { Component, ReactNode } from 'react'
+import type { ReactNode } from 'react';
+import { Component } from 'react'
+
 import { logger } from '@_core'
+
 import { COMPONENT_NAMES } from '../types/divTableConstants'
 
 // ============================================================================
@@ -78,10 +81,10 @@ export class TableErrorBoundary extends Component<Props, State> {
    * Reset error state when resetKeys change
    */
   componentDidUpdate(prevProps: Props) {
-    if (!this.state.hasError) return
+    if (!this.state.hasError) {return}
 
     const { resetKeys } = this.props
-    if (!resetKeys || !prevProps.resetKeys) return
+    if (!resetKeys || !prevProps.resetKeys) {return}
 
     // Reset if any reset key changed
     if (resetKeys.some((key, index) => key !== prevProps.resetKeys![index])) {

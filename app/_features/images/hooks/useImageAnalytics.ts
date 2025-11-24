@@ -46,6 +46,7 @@
 'use client'
 
 import { useCallback, useRef } from 'react'
+
 import { logger } from '@_core'
 
 /**
@@ -175,7 +176,7 @@ export function useImageAnalytics(
 	 * Check if tracking should occur (sample rate).
 	 */
 	const shouldTrack = useCallback((): boolean => {
-		if (!enabled) return false
+		if (!enabled) {return false}
 		return Math.random() < sampleRate
 	}, [enabled, sampleRate])
 
@@ -184,7 +185,7 @@ export function useImageAnalytics(
 	 */
 	const trackLoadStart = useCallback(
 		(url: string) => {
-			if (!shouldTrack() || !url) return
+			if (!shouldTrack() || !url) {return}
 
 			const startTime = performance.now()
 			loadStartTimesRef.current.set(url, startTime)
@@ -209,7 +210,7 @@ export function useImageAnalytics(
 	 */
 	const trackLoad = useCallback(
 		(url: string, success: boolean, error?: Error) => {
-			if (!shouldTrack() || !url) return
+			if (!shouldTrack() || !url) {return}
 
 			const startTime = loadStartTimesRef.current.get(url) || performance.now()
 			const endTime = performance.now()
@@ -249,7 +250,7 @@ export function useImageAnalytics(
 	 */
 	const trackError = useCallback(
 		(url: string, error: Error, retryCount?: number) => {
-			if (!shouldTrack() || !url) return
+			if (!shouldTrack() || !url) {return}
 
 			const startTime = loadStartTimesRef.current.get(url) || performance.now()
 			const endTime = performance.now()
@@ -289,7 +290,7 @@ export function useImageAnalytics(
 	 */
 	const trackInteraction = useCallback(
 		(type: InteractionType, url: string, metadata?: Record<string, any>) => {
-			if (!shouldTrack() || !url) return
+			if (!shouldTrack() || !url) {return}
 
 			const interaction: ImageInteraction = {
 				type,

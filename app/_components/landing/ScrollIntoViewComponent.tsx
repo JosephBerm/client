@@ -1,10 +1,14 @@
 'use client'
 
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
-import PageContainer from '@_components/layouts/PageContainer'
+
+import classNames from 'classnames'
+
 import { useScrollSpy, useKeyboardNavigation, useElementRefs, useMediaQuery, useSectionMetrics, useScrollProgress } from '@_shared/hooks'
 import { getCSSVariable, calculateScrollOffset } from '@_shared/utils/scrollUtils'
-import classNames from 'classnames'
+
+import PageContainer from '@_components/layouts/PageContainer'
+
 
 /**
  * Section configuration for navigation
@@ -163,7 +167,7 @@ export default function ScrollIntoViewComponent() {
 	const labelRefs = useRef<Map<string, HTMLAnchorElement>>(new Map())
 	const currentIndexRef = useRef<number>(0)
 		const scrollWrapperRef = useRef<HTMLDivElement>(null)
-	const [scrollProgress, setScrollProgress] = useState(0)
+	const [_scrollProgress, setScrollProgress] = useState(0)
 	const [hasWhitespace, setHasWhitespace] = useState(false)
 	const [shouldShowLabels, setShouldShowLabels] = useState(false)
 	const [isTimelineVisible, setIsTimelineVisible] = useState(false)
@@ -193,7 +197,7 @@ export default function ScrollIntoViewComponent() {
 	// rootMargin: top margin accounts for offset, bottom margin keeps section active longer
 	// Calculation: offset (112px) + small buffer (16px) = ~128px = ~12% of typical viewport (1080px)
 	// More lenient bottom margin (-60%) allows section to stay active longer
-	const { activeSection, scrollToSection, isSectionActive } = useScrollSpy({
+	const { activeSection, scrollToSection, isSectionActive: _isSectionActive } = useScrollSpy({
 		sectionIds: SECTIONS.map((s) => s.id),
 		rootMargin: `-${scrollOffset + 16}px 0px -60% 0px`, // Account for offset + buffer, lenient bottom
 		threshold: 0,
@@ -215,7 +219,7 @@ export default function ScrollIntoViewComponent() {
 		}
 
 		const checkWhitespaceAndOverlap = () => {
-			if (typeof window === 'undefined') return
+			if (typeof window === 'undefined') {return}
 
 			const viewportWidth = window.innerWidth
 			
@@ -264,7 +268,7 @@ export default function ScrollIntoViewComponent() {
 							// Check all labels - early exit if any would overlap
 							for (const section of SECTIONS) {
 								const labelElement = labelRefs.current.get(section.id)
-								if (!labelElement) continue
+								if (!labelElement) {continue}
 								
 								const labelRect = labelElement.getBoundingClientRect()
 								const labelRightEdge = labelRect.right
@@ -377,7 +381,7 @@ export default function ScrollIntoViewComponent() {
 	// Industry best practice: Two-phase verification - estimate first, verify with actual DOM
 	// This ensures accuracy after initial render
 	useEffect(() => {
-		if (!isLargeScreen || !hasWhitespace || !timelineRef.current) return
+		if (!isLargeScreen || !hasWhitespace || !timelineRef.current) {return}
 
 		// Small delay to ensure labels are rendered and measured
 		const verifyTimeout = setTimeout(() => {
@@ -385,7 +389,7 @@ export default function ScrollIntoViewComponent() {
 				document.querySelector('main') as HTMLElement ||
 				document.querySelector('[id="page-content"]') as HTMLElement
 
-			if (!mainContent) return
+			if (!mainContent) {return}
 
 			const containerRect = mainContent.getBoundingClientRect()
 			const contentLeftEdge = containerRect.left
@@ -395,7 +399,7 @@ export default function ScrollIntoViewComponent() {
 			// Verify with actual measurements
 			for (const section of SECTIONS) {
 				const labelElement = labelRefs.current.get(section.id)
-				if (!labelElement) continue
+				if (!labelElement) {continue}
 
 				const labelRect = labelElement.getBoundingClientRect()
 				const labelRightEdge = labelRect.right
@@ -436,7 +440,7 @@ export default function ScrollIntoViewComponent() {
 	// Industry best practice: Single source of truth for section positions
 	// FAANG approach: Reusable hook for scroll-triggered animations
 	// Future-ready: Can be used for beautiful scroll animations
-	const { metrics: sectionMetrics, isReady: metricsReady, getMetric } = useSectionMetrics({
+	const { metrics: sectionMetrics, isReady: metricsReady, getMetric: _getMetric } = useSectionMetrics({
 		sectionIds: SECTIONS.map((s) => s.id),
 		scrollOffset,
 		enableViewportProgress: false, // Enable in future for animations
@@ -542,7 +546,7 @@ export default function ScrollIntoViewComponent() {
 
 	// Calculate active section index for timeline progress
 	const activeSectionIndex = useMemo(() => {
-		if (!finalActiveSection) return 0
+		if (!finalActiveSection) {return 0}
 		const index = SECTIONS.findIndex((s) => s.id === finalActiveSection)
 		return index >= 0 ? index : 0
 	}, [finalActiveSection])
@@ -673,7 +677,7 @@ export default function ScrollIntoViewComponent() {
 	// Detect horizontal overflow for mobile wrapper to decide between centering and scrolling
 	useEffect(() => {
 		const el = scrollWrapperRef.current
-		if (!el) return
+		if (!el) {return}
 
 		const checkOverflow = () => {
 			// If wrapper is narrower than content, enable scroll behavior
@@ -710,8 +714,8 @@ export default function ScrollIntoViewComponent() {
 		return () => {
 			window.clearTimeout(postMountId)
 			window.removeEventListener('resize', onResize)
-			if (rafId !== null) cancelAnimationFrame(rafId)
-			if (ro) ro.disconnect()
+			if (rafId !== null) {cancelAnimationFrame(rafId)}
+			if (ro) {ro.disconnect()}
 		}
 	}, [])
 

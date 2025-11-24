@@ -1,7 +1,8 @@
 'use client'
 
 import PageContainer from '@_components/layouts/PageContainer'
-import Accordion, { AccordionItemData } from '@_components/ui/Accordion'
+import type { AccordionItemData } from '@_components/ui/Accordion';
+import Accordion from '@_components/ui/Accordion'
 import Pill from '@_components/ui/Pill'
 import StatusDot from '@_components/ui/StatusDot'
 

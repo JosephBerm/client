@@ -13,8 +13,10 @@
  * @module tableUtils
  */
 
-import { PaginationState } from '@tanstack/react-table'
 import { MIN_PAGE_SIZE, MAX_PAGE_SIZE } from './tableConstants'
+
+import type { PaginationState } from '@tanstack/react-table'
+
 
 /**
  * Sanitizes a string input by trimming whitespace and converting to string.

@@ -73,10 +73,15 @@
 
 'use client'
 
-import { ReactNode, useMemo } from 'react'
-import { ColumnDef, SortingState, ColumnFiltersState } from '@tanstack/react-table'
-import { DataGrid } from './DataGrid/DataGrid'
+import type { ReactNode} from 'react';
+import { useMemo } from 'react'
+
+
 import { createServerTableFetcher, useServerTable } from '@_shared'
+
+import { DataGrid } from './DataGrid/DataGrid'
+
+import type { ColumnDef, SortingState, ColumnFiltersState } from '@tanstack/react-table'
 
 /**
  * ServerDataGrid component props interface.
@@ -258,10 +263,10 @@ export default function ServerDataGrid<TData>({
 	 */
 	const fetchData = useMemo(() => {
 		// Use custom fetch function if provided
-		if (propFetchData) return propFetchData
+		if (propFetchData) {return propFetchData}
 		
 		// Create fetch function from endpoint if provided
-		if (endpoint) return createServerTableFetcher<TData>(endpoint, filters)
+		if (endpoint) {return createServerTableFetcher<TData>(endpoint, filters)}
 		
 		// Error: must provide either fetchData or endpoint
 		throw new Error('ServerDataGrid requires either fetchData or endpoint prop')

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { notificationService } from '@_shared'
-import { logger } from '@_core'
+
+import { notificationService } from '../services/notification.service'
 
 /**
  * Generic form submission hook following DRY (Don't Repeat Yourself) principles.

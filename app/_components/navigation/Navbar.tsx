@@ -45,18 +45,23 @@
 
 'use client'
 
-import Link from 'next/link'
-import Image from 'next/image'
-import { Menu, ShoppingCart, X, User, LogOut, Home, Info, Store, Mail, Settings } from 'lucide-react'
-import { getCookie } from 'cookies-next'
-import { useCartStore } from '@_features/cart'
-import { useAuthStore } from '@_features/auth'
 import { useState, useEffect, useRef } from 'react'
+
+import Image from 'next/image'
+import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
+
+import { getCookie } from 'cookies-next'
+import { Menu, ShoppingCart, X, User, LogOut, Home, Info, Store, Mail, Settings } from 'lucide-react'
+
+import { useAuthStore } from '@_features/auth'
+import { useCartStore } from '@_features/cart'
 import { Routes } from '@_features/navigation'
-import SettingsModal from '@_components/settings/SettingsModal'
-import LoginModal from '@_components/auth/LoginModal'
+
 import { useMediaQuery } from '@_shared'
+
+import LoginModal from '@_components/auth/LoginModal'
+import SettingsModal from '@_components/settings/SettingsModal'
 
 /**
  * Navbar component props interface.

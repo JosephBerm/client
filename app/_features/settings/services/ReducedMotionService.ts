@@ -50,9 +50,9 @@ class ReducedMotionServiceClass extends BasePreferenceService<boolean> {
 	 * Deserializes a DOM attribute value to a boolean.
 	 */
 	protected deserializeFromDOM(attributeValue: string | null): boolean | null {
-		if (attributeValue === null) return null
-		if (attributeValue === 'true') return true
-		if (attributeValue === 'false') return false
+		if (attributeValue === null) {return null}
+		if (attributeValue === 'true') {return true}
+		if (attributeValue === 'false') {return false}
 		return null
 	}
 }

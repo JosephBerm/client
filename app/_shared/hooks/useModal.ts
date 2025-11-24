@@ -26,7 +26,9 @@
 
 'use client'
 
-import { useEffect, useRef, RefObject } from 'react'
+import type { RefObject } from 'react';
+import { useEffect, useRef } from 'react'
+
 import { useFocusTrap } from './useFocusTrap'
 
 /**
@@ -120,7 +122,7 @@ export function useModal(
 
 	// Handle escape key
 	useEffect(() => {
-		if (!isOpen || !closeOnEscape) return
+		if (!isOpen || !closeOnEscape) {return}
 
 		const handleEscape = (e: KeyboardEvent) => {
 			if (e.key === 'Escape') {
@@ -134,7 +136,7 @@ export function useModal(
 
 	// Prevent body scroll when modal is open
 	useEffect(() => {
-		if (!lockBodyScroll) return
+		if (!lockBodyScroll) {return}
 
 		if (isOpen) {
 			document.body.style.overflow = 'hidden'

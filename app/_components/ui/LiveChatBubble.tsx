@@ -35,8 +35,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { MessageCircle, X } from 'lucide-react'
+
 import classNames from 'classnames'
+import { MessageCircle, X } from 'lucide-react'
+
 import { logger } from '@_core/logger'
 
 export interface LiveChatBubbleProps {
@@ -116,7 +118,7 @@ export default function LiveChatBubble({
 	 * like the section navigation. Mobile-first; recalculates on resize/scroll.
 	 */
 	useEffect(() => {
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 
 		let rafId: number | null = null
 		let lastOffset = -1
@@ -133,7 +135,7 @@ export default function LiveChatBubble({
 						const style = window.getComputedStyle(el)
 						const isFixed = style.position === 'fixed'
 						const isVisible = style.display !== 'none' && style.visibility !== 'hidden'
-						if (!isFixed || !isVisible) continue
+						if (!isFixed || !isVisible) {continue}
 						const rect = el.getBoundingClientRect()
 						const atBottom = Math.abs(window.innerHeight - rect.bottom) <= 2 || style.bottom !== 'auto'
 						if (atBottom) {
@@ -164,7 +166,7 @@ export default function LiveChatBubble({
 		}
 
 		const schedule = () => {
-			if (rafId === null) rafId = requestAnimationFrame(measure)
+			if (rafId === null) {rafId = requestAnimationFrame(measure)}
 		}
 
 		const init = setTimeout(schedule, 50)
@@ -183,13 +185,13 @@ export default function LiveChatBubble({
 			clearTimeout(init)
 			window.removeEventListener('resize', schedule)
 			window.removeEventListener('scroll', schedule)
-			if (rafId !== null) cancelAnimationFrame(rafId)
-			if (ro) ro.disconnect()
+			if (rafId !== null) {cancelAnimationFrame(rafId)}
+			if (ro) {ro.disconnect()}
 		}
 	}, [avoidOverlapSelectors, additionalBottomPadding])
 
 	// Don't render if not visible
-	if (!visible) return null
+	if (!visible) {return null}
 
 	const handleClick = () => {
 		setIsTooltipVisible(true)

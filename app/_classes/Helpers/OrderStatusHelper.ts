@@ -453,7 +453,7 @@ export default class OrderStatusHelper {
 	 * ```
 	 */
 	static isValid(value: unknown): value is OrderStatus {
-		if (typeof value !== 'number') return false
+		if (typeof value !== 'number') {return false}
 		return Object.values(OrderStatus).includes(value as OrderStatus)
 	}
 

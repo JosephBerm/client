@@ -28,7 +28,7 @@
 
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef } from 'react'
 
 /**
  * Configuration options for useAccordion hook.
@@ -246,7 +246,7 @@ export function useAccordion(options: UseAccordionOptions = {}): UseAccordionRet
 
 	// Open item
 	const openItem = useCallback((itemId: string) => {
-		if (openItems.includes(itemId)) return
+		if (openItems.includes(itemId)) {return}
 		
 		const newValue = allowMultiple 
 			? [...openItems, itemId]
@@ -264,7 +264,7 @@ export function useAccordion(options: UseAccordionOptions = {}): UseAccordionRet
 
 	// Close item
 	const closeItem = useCallback((itemId: string) => {
-		if (!openItems.includes(itemId)) return
+		if (!openItems.includes(itemId)) {return}
 		
 		const newValue = openItems.filter((id) => id !== itemId)
 		
@@ -303,14 +303,14 @@ export function useAccordion(options: UseAccordionOptions = {}): UseAccordionRet
 
 	// Focus management functions
 	const focusNext = useCallback((currentItemId: string) => {
-		if (!keyboardNavigation) return
+		if (!keyboardNavigation) {return}
 		
 		const ids = itemIdsRef.current
 		const currentIndex = ids.indexOf(currentItemId)
-		if (currentIndex === -1) return
+		if (currentIndex === -1) {return}
 		
 		const nextIndex = currentIndex + 1
-		if (nextIndex >= ids.length) return
+		if (nextIndex >= ids.length) {return}
 		
 		const nextId = ids[nextIndex]
 		const nextElement = itemRefsRef.current.get(nextId)
@@ -318,14 +318,14 @@ export function useAccordion(options: UseAccordionOptions = {}): UseAccordionRet
 	}, [keyboardNavigation])
 
 	const focusPrevious = useCallback((currentItemId: string) => {
-		if (!keyboardNavigation) return
+		if (!keyboardNavigation) {return}
 		
 		const ids = itemIdsRef.current
 		const currentIndex = ids.indexOf(currentItemId)
-		if (currentIndex === -1) return
+		if (currentIndex === -1) {return}
 		
 		const prevIndex = currentIndex - 1
-		if (prevIndex < 0) return
+		if (prevIndex < 0) {return}
 		
 		const prevId = ids[prevIndex]
 		const prevElement = itemRefsRef.current.get(prevId)
@@ -333,21 +333,21 @@ export function useAccordion(options: UseAccordionOptions = {}): UseAccordionRet
 	}, [keyboardNavigation])
 
 	const focusFirst = useCallback(() => {
-		if (!keyboardNavigation) return
+		if (!keyboardNavigation) {return}
 		
 		const firstId = itemIdsRef.current[0]
-		if (!firstId) return
+		if (!firstId) {return}
 		
 		const firstElement = itemRefsRef.current.get(firstId)
 		firstElement?.focus()
 	}, [keyboardNavigation])
 
 	const focusLast = useCallback(() => {
-		if (!keyboardNavigation) return
+		if (!keyboardNavigation) {return}
 		
 		const ids = itemIdsRef.current
 		const lastId = ids[ids.length - 1]
-		if (!lastId) return
+		if (!lastId) {return}
 		
 		const lastElement = itemRefsRef.current.get(lastId)
 		lastElement?.focus()

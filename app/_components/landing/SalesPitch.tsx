@@ -1,10 +1,10 @@
 import { ShieldCheck, PackageCheck, Truck, Headset } from 'lucide-react'
 
+import { Stagger, StaggerItem, STAGGER_PRESETS, ANIMATION_PRESETS } from '@_components/common/animations'
 import PageContainer from '@_components/layouts/PageContainer'
+import FeatureCard from '@_components/ui/FeatureCard'
 import Pill from '@_components/ui/Pill'
 import StatusDot from '@_components/ui/StatusDot'
-import FeatureCard from '@_components/ui/FeatureCard'
-import { Stagger, StaggerItem, STAGGER_PRESETS, ANIMATION_PRESETS } from '@_components/common/animations'
 
 const VALUE_PROPS = [
 	{

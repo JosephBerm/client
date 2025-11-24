@@ -1,16 +1,21 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { notificationService, useRouteParam } from '@_shared'
+import { useEffect, useState } from 'react'
 
-import Card from '@_components/ui/Card'
-import { InternalPageHeader } from '../../_components'
-import ProductForm from '@_components/forms/ProductForm'
-import { Product } from '@_classes/Product'
-import { logger } from '@_core'
-import { API } from '@_shared'
+import { useRouter } from 'next/navigation'
+
 import { Routes } from '@_features/navigation'
+
+
+import { notificationService, useRouteParam , API } from '@_shared'
+
+import { Product } from '@_classes/Product'
+
+import ProductForm from '@_components/forms/ProductForm'
+import Card from '@_components/ui/Card'
+
+import { InternalPageHeader } from '../../_components'
+
 
 export default function ManageProductPage() {
 	const router = useRouter()

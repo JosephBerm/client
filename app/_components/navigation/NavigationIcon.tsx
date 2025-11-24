@@ -15,9 +15,12 @@
  */
 
 import { memo } from 'react'
-import type { NavigationIconType } from '@_types/navigation'
-import { getIconComponent } from '@_helpers/icon-mapping'
+
 import { logger } from '@_core'
+
+import type { NavigationIconType } from '@_types/navigation'
+
+import { getIconComponent } from '@_helpers/icon-mapping'
 
 interface NavigationIconProps {
 	/** Icon identifier from NavigationIconType */

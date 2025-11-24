@@ -1,8 +1,11 @@
 'use client'
 
 import React from 'react'
+
 import { useAuthStore } from '@_features/auth'
+
 import UpdateAccountForm from '@_components/forms/UpdateAccountForm'
+
 import { InternalPageHeader } from '../_components'
 
 const Page = () => {

@@ -318,7 +318,7 @@ export default class AccountRoleHelper {
 	 * ```
 	 */
 	static isValid(value: unknown): value is AccountRole {
-		if (typeof value !== 'number') return false
+		if (typeof value !== 'number') {return false}
 		return Object.values(AccountRole).includes(value as AccountRole)
 	}
 }

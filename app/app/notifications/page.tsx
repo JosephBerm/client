@@ -1,15 +1,22 @@
 'use client'
 
 import { useMemo } from 'react'
+
 import Link from 'next/link'
 
-import { DataGrid, type ColumnDef } from '@_components/tables'
-import { InternalPageHeader } from '../_components'
-import Badge from '@_components/ui/Badge'
-import Notification from '@_classes/Notification'
-import { NotificationType } from '@_classes/Enums'
 import { useAuthStore } from '@_features/auth'
+
 import { formatDate } from '@_shared'
+
+import { NotificationType } from '@_classes/Enums'
+import Notification from '@_classes/Notification'
+
+import { DataGrid, type ColumnDef } from '@_components/tables'
+import Badge from '@_components/ui/Badge'
+
+import { InternalPageHeader } from '../_components'
+
+
 
 const TYPE_VARIANT: Record<NotificationType, { label: string; variant: 'info' | 'warning' | 'error' }> = {
 	[NotificationType.Info]: { label: 'Info', variant: 'info' },
@@ -21,7 +28,7 @@ export default function NotificationsPage() {
 	const user = useAuthStore((state) => state.user)
 
 	const notifications = useMemo(() => {
-		if (!user?.notifications) return []
+		if (!user?.notifications) {return []}
 		return user.notifications.map((notification: any) => new Notification(notification))
 	}, [user?.notifications])
 

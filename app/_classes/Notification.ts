@@ -58,9 +58,9 @@
  * @module Notification
  */
 
-import User, { IUser } from '@_classes/User'
-import { NotificationType } from '@_classes/Enums'
 import { parseDateSafe, parseRequiredTimestamp } from '@_lib/dates'
+
+import { NotificationType } from '@_classes/Enums'
 
 /**
  * Notification Entity Class

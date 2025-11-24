@@ -92,11 +92,15 @@
 
 'use client'
 
-import { forwardRef, TextareaHTMLAttributes } from 'react'
-import { FieldError } from 'react-hook-form'
+import type { TextareaHTMLAttributes } from 'react';
+import { forwardRef } from 'react'
+
 import classNames from 'classnames'
 
 import { baseFieldClass, errorClass, errorFieldClass, fieldWrapperClass, helperClass, labelClass } from './fieldStyles'
+
+import type { FieldError } from 'react-hook-form'
+
 
 /**
  * FormTextArea component props interface.

@@ -21,7 +21,7 @@
  * 
  * @example
  * ```tsx
- * import ImageLightbox from '@_components/ui/ImageLightbox';
+ * import { ImageLightbox } from '@_components/images';
  * 
  * <ImageLightbox
  *   isOpen={isOpen}
@@ -41,11 +41,14 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+
 import { X, ZoomIn, ZoomOut, RotateCw, ChevronLeft, ChevronRight } from 'lucide-react'
-import Modal from '@_components/ui/Modal'
-import OptimizedImage from '@_components/ui/OptimizedImage'
+
+import type { GalleryImage } from '@_components/store/ImageGallery'
 import Button from '@_components/ui/Button'
-import { GalleryImage } from '@_components/store/ImageGallery'
+import Modal from '@_components/ui/Modal'
+
+import OptimizedImage from './OptimizedImage'
 
 /**
  * ImageLightbox component props interface.
@@ -136,7 +139,7 @@ export default function ImageLightbox({
 
 	// Navigate to previous image
 	const goToPrevious = useCallback(() => {
-		if (!images?.length) return
+		if (!images?.length) {return}
 		const newIndex = validIndex === 0 ? images.length - 1 : validIndex - 1
 		setCurrentIndex(newIndex)
 		onImageChange?.(newIndex)
@@ -144,7 +147,7 @@ export default function ImageLightbox({
 
 	// Navigate to next image
 	const goToNext = useCallback(() => {
-		if (!images?.length) return
+		if (!images?.length) {return}
 		const newIndex = validIndex === images.length - 1 ? 0 : validIndex + 1
 		setCurrentIndex(newIndex)
 		onImageChange?.(newIndex)
@@ -166,7 +169,7 @@ export default function ImageLightbox({
 
 	// Mouse wheel zoom
 	useEffect(() => {
-		if (!isOpen || !enableZoom) return
+		if (!isOpen || !enableZoom) {return}
 
 		const handleWheel = (e: WheelEvent) => {
 			if (e.ctrlKey || e.metaKey) {
@@ -203,7 +206,7 @@ export default function ImageLightbox({
 
 	// Keyboard navigation
 	useEffect(() => {
-		if (!isOpen) return
+		if (!isOpen) {return}
 
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.key === 'ArrowLeft') {

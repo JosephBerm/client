@@ -16,10 +16,12 @@
 'use client'
 
 import { getCookie, deleteCookie, setCookie } from 'cookies-next'
-import type { IUser } from '@_classes/User'
-import type LoginCredentials from '@_classes/LoginCredentials'
-import type { RegisterModel } from '@_classes/User'
+
 import { logger } from '@_core'
+
+import type LoginCredentials from '@_classes/LoginCredentials'
+import type { IUser , RegisterModel } from '@_classes/User'
+
 
 /**
  * API base URL loaded from environment variables.

@@ -34,10 +34,11 @@
  */
 
 import { API } from '@_shared'
+
+import type { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
+import { PagedResult } from '@_classes/Base/PagedResult'
 import { Product } from '@_classes/Product'
 import ProductsCategory from '@_classes/ProductsCategory'
-import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
-import { PagedResult } from '@_classes/Base/PagedResult'
 import UploadedFile from '@_classes/UploadedFile'
 
 /**

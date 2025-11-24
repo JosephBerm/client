@@ -242,7 +242,7 @@ export default class QuoteStatusHelper {
 	 * ```
 	 */
 	static isValid(value: unknown): value is QuoteStatus {
-		if (typeof value !== 'number') return false
+		if (typeof value !== 'number') {return false}
 		return Object.values(QuoteStatus).includes(value as QuoteStatus)
 	}
 }

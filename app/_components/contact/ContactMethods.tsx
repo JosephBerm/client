@@ -1,13 +1,19 @@
 'use client'
 
 import { useCallback } from 'react'
+
 import { useRouter } from 'next/navigation'
-import { MessageSquare } from 'lucide-react'
-import ContactMethodCard from '@_components/ui/ContactMethodCard'
-import { useScrollReveal } from '@_shared/hooks'
-import { Routes } from '@_features/navigation'
-import { CONTACT_INFO } from './contact.constants'
+
 import classNames from 'classnames'
+import { MessageSquare } from 'lucide-react'
+
+import { Routes } from '@_features/navigation'
+
+import { useScrollReveal } from '@_shared/hooks'
+
+import ContactMethodCard from '@_components/ui/ContactMethodCard'
+
+import { CONTACT_INFO } from './contact.constants'
 
 /**
  * ContactMethods Component

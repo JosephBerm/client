@@ -1,13 +1,17 @@
 'use client'
 
 import { useMemo } from 'react'
+
+import classNames from 'classnames'
 import { Clock, Shield, Headphones } from 'lucide-react'
-import Pill from '@_components/ui/Pill'
-import StatusDot from '@_components/ui/StatusDot'
+
 import { useScrollReveal } from '@_shared/hooks'
 import { isBusinessOpen } from '@_shared/utils/businessHours'
+
+import Pill from '@_components/ui/Pill'
+import StatusDot from '@_components/ui/StatusDot'
+
 import { CONTACT_INFO } from './contact.constants'
-import classNames from 'classnames'
 
 /**
  * ContactHeader Component

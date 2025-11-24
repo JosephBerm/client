@@ -23,17 +23,22 @@
 'use client'
 
 import { useState } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { X } from 'lucide-react'
-import { notificationService } from '@_shared'
-import { useZodForm } from '@_shared'
-import { loginSchema, type LoginFormData } from '@_core'
-import { logger } from '@_core'
+
 import { login, useAuthStore } from '@_features/auth'
 import { Routes } from '@_features/navigation'
-import Modal from '@_components/ui/Modal'
+
+import { loginSchema, type LoginFormData } from '@_core'
+import { logger } from '@_core'
+
+import { useZodForm , notificationService } from '@_shared'
+
 import FormInput from '@_components/forms/FormInput'
 import Button from '@_components/ui/Button'
+import Modal from '@_components/ui/Modal'
 
 /**
  * LoginModal component props interface.

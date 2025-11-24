@@ -34,10 +34,16 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { SerializedProduct, productHasImage } from '@_lib/serializers/productSerializer'
+
+import { getProductImageUrl } from '@_features/images'
+
+import type { SerializedProduct } from '@_lib/serializers/productSerializer'
+import { productHasImage } from '@_lib/serializers/productSerializer'
+
+import { ImageLightbox } from '@_components/images'
+import type { GalleryImage } from '@_components/store/ImageGallery';
+import ImageGallery from '@_components/store/ImageGallery'
 import ProductImage from '@_components/store/ProductImage'
-import ImageGallery, { GalleryImage } from '@_components/store/ImageGallery'
-import { ImageLightbox, getProductImageUrl } from '@_features/images'
 
 /**
  * ProductImageGallery component props interface.

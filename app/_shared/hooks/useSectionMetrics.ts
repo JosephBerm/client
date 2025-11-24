@@ -128,7 +128,7 @@ export function useSectionMetrics({
 	 * Optimized: useCallback with refs to prevent stale closures
 	 */
 	const measureSections = useCallback(() => {
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 
 		try {
 			const scrollTop = window.scrollY || document.documentElement.scrollTop
@@ -143,7 +143,7 @@ export function useSectionMetrics({
 			// Use refs to avoid stale closures
 			currentSectionIds.forEach((sectionId, index) => {
 				const element = document.getElementById(sectionId)
-				if (!element) return
+				if (!element) {return}
 
 				try {
 					const rect = element.getBoundingClientRect()
@@ -212,7 +212,7 @@ export function useSectionMetrics({
 				// For larger arrays, consider using a more sophisticated comparison
 				const hasChanged = prevMetrics.some((prev, i) => {
 					const next = newMetrics[i]
-					if (!next) return true
+					if (!next) {return true}
 					// Use epsilon comparison for floating point numbers
 					return (
 						prev.id !== next.id ||
@@ -272,7 +272,6 @@ export function useSectionMetrics({
 		// Initial measurement - optimized strategy for robustness
 		// Industry best practice: Ensure DOM is fully loaded before measuring
 		// FAANG approach: Smart measurement strategy (immediate + delayed fallback)
-		let cleanupTimeouts: (() => void) | undefined
 
 		// Try immediate measurement
 		measureSections()
@@ -316,7 +315,7 @@ export function useSectionMetrics({
 			measureSections()
 		}, 100)
 
-		cleanupTimeouts = () => {
+		const cleanupTimeouts = () => {
 			clearTimeout(fallbackTimeout)
 		}
 

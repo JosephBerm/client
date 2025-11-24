@@ -59,7 +59,9 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import { useUserSettingsStore } from '@_features/settings'
+
 import { logger } from '@_core'
 
 /**

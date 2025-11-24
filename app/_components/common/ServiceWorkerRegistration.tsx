@@ -52,6 +52,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+
 import { logger } from '@_core'
 
 /**
@@ -88,7 +89,7 @@ const ENABLE_SERVICE_WORKER_IN_DEV = false
  * @returns null - Component does not render any UI
  */
 export default function ServiceWorkerRegistration() {
-	const [updateAvailable, setUpdateAvailable] = useState(false)
+	const [_updateAvailable, setUpdateAvailable] = useState(false)
 	const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null)
 
 	/**
@@ -229,7 +230,7 @@ export default function ServiceWorkerRegistration() {
 	 * Triggers Service Worker update.
 	 * Call this when user clicks "Update" button.
 	 */
-	const triggerUpdate = () => {
+	const _triggerUpdate = () => {
 		if (!registration || !registration.waiting) {
 			return
 		}
@@ -246,11 +247,11 @@ export default function ServiceWorkerRegistration() {
 	// Add debug helper to window object (for manual debugging)
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
-			// @ts-ignore - Adding debug helper
+			//@ts-expect-error - Adding debug helper
 			window.swDebug = {
 				getRegistration: async () => {
 					const regs = await navigator.serviceWorker.getRegistrations()
-					const registrationData = regs.map(r => ({
+					const registrationData = regs.map((r) => ({
 						scope: r.scope,
 						installing: r.installing?.state,
 						waiting: r.waiting?.state,
@@ -275,17 +276,17 @@ export default function ServiceWorkerRegistration() {
 				},
 				clearAllCaches: async () => {
 					const cacheNames = await caches.keys()
-					await Promise.all(cacheNames.map(name => caches.delete(name)))
+					await Promise.all(cacheNames.map((name) => caches.delete(name)))
 					logger.info('All service worker caches cleared', { clearedCount: cacheNames.length })
 				},
 				unregisterAll: async () => {
 					const regs = await navigator.serviceWorker.getRegistrations()
-					await Promise.all(regs.map(r => r.unregister()))
+					await Promise.all(regs.map((r) => r.unregister()))
 					logger.info('All service workers unregistered', { unregisteredCount: regs.length })
 				},
 				forceUpdate: async () => {
 					const regs = await navigator.serviceWorker.getRegistrations()
-					await Promise.all(regs.map(r => r.update()))
+					await Promise.all(regs.map((r) => r.update()))
 					logger.info('Service worker update check complete', { checkedCount: regs.length })
 				},
 				help: () => {
@@ -296,10 +297,10 @@ export default function ServiceWorkerRegistration() {
 							'swDebug.clearAllCaches()   - Clear all caches',
 							'swDebug.unregisterAll()    - Unregister all service workers',
 							'swDebug.forceUpdate()      - Force SW update check',
-							'swDebug.help()             - Show this help'
-						]
+							'swDebug.help()             - Show this help',
+						],
 					})
-				}
+				},
 			}
 		}
 	}, [])

@@ -68,12 +68,16 @@
  * @module User
  */
 
-import Notification from '@_classes/Notification'
-import Company from '@_classes/Company'
-import Order from './Order'
+import { parseDateSafe } from '@_lib/dates'
+
 import Address from '@_classes/common/Address'
 import Name from '@_classes/common/Name'
-import { parseDateSafe } from '@_lib/dates'
+import Company from '@_classes/Company'
+import Notification from '@_classes/Notification'
+
+import Order from './Order'
+
+
 // RichConstructor decorator not needed in modern Next.js
 
 /**
@@ -370,7 +374,7 @@ export class RegisterModel {
 }
 
 /**
- * User interface for type safety.
- * Extends User class to ensure type compatibility.
+ * User type alias for type safety.
+ * Provides type compatibility with User class.
  */
-export interface IUser extends User {}
+export type IUser = User

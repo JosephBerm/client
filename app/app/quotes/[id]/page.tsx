@@ -1,21 +1,31 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+
 import { useRouter } from 'next/navigation'
-import { formatDate } from '@_lib/dates'
-import { notificationService, useRouteParam } from '@_shared'
+
 import { Mail, Phone, Building2, MapPin, PackageSearch } from 'lucide-react'
 
-import Card from '@_components/ui/Card'
-import { InternalPageHeader } from '../../_components'
+import { Routes } from '@_features/navigation'
+
+
+import { formatDate } from '@_lib/dates'
+
+import { notificationService, useRouteParam , API } from '@_shared'
+
+import { QuoteStatus } from '@_classes/Enums'
+import Quote from '@_classes/Quote'
+
+import { DataGrid, type ColumnDef } from '@_components/tables'
 import Badge from '@_components/ui/Badge'
 import Button from '@_components/ui/Button'
-import { DataGrid, type ColumnDef } from '@_components/tables'
-import Quote from '@_classes/Quote'
-import { QuoteStatus } from '@_classes/Enums'
-import { logger } from '@_core'
-import { API } from '@_shared'
-import { Routes } from '@_features/navigation'
+import Card from '@_components/ui/Card'
+
+import { InternalPageHeader } from '../../_components'
+
+
+
+
 
 const STATUS_CONFIG: Record<
 	QuoteStatus,
@@ -83,7 +93,7 @@ export default function QuoteDetailsPage() {
 	}, [quoteId, router])
 
 	const handleCreateOrder = async () => {
-		if (!quoteId) return
+		if (!quoteId) {return}
 
 		try {
 			setIsConverting(true)
@@ -116,7 +126,7 @@ export default function QuoteDetailsPage() {
 	}
 
 	const contactName = useMemo(() => {
-		if (!quote?.name) return 'Quote contact'
+		if (!quote?.name) {return 'Quote contact'}
 		const name = quote.name as any
 		return [name.first, name.middle, name.last].filter(Boolean).join(' ') || 'Quote contact'
 	}, [quote?.name])

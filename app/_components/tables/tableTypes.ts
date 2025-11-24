@@ -10,7 +10,7 @@
  * @module tableTypes
  */
 
-import { PaginationState } from '@tanstack/react-table'
+import type { PaginationState } from '@tanstack/react-table'
 
 /**
  * Configuration for a pagination button.

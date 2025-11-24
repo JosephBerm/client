@@ -70,7 +70,8 @@
  */
 
 import classNames from 'classnames'
-import { OrderStatus } from '@_classes/Enums'
+
+import type { OrderStatus } from '@_classes/Enums'
 import OrderStatusHelper from '@_classes/Helpers/OrderStatusHelper'
 
 /**

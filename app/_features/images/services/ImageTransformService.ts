@@ -24,8 +24,6 @@
  * @module ImageTransformService
  */
 
-import { logger } from '@_core'
-
 /**
  * Image transformation options.
  */
@@ -250,9 +248,9 @@ export class ImageTransformService {
 		} else {
 			// Detect from File type
 			const mimeType = source.type
-			if (mimeType.includes('webp')) return 'webp'
-			if (mimeType.includes('jpeg') || mimeType.includes('jpg')) return 'jpeg'
-			if (mimeType.includes('png')) return 'png'
+			if (mimeType.includes('webp')) {return 'webp'}
+			if (mimeType.includes('jpeg') || mimeType.includes('jpg')) {return 'jpeg'}
+			if (mimeType.includes('png')) {return 'png'}
 			return 'jpeg'
 		}
 	}

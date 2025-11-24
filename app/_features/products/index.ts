@@ -1,48 +1,32 @@
 /**
- * Products Feature - Main Barrel Export
+ * Products Feature - Main Barrel Export (Optimized for Tree-Shaking)
  * 
- * Complete product management infrastructure.
- * Provides services, utilities, and business logic for product operations.
+ * Product management infrastructure.
+ * Services and utilities for product operations.
  * 
- * **Architecture:**
- * ```
- * products/
- * ├── services/    → Business logic layer (ProductService)
- * └── utils/       → Utility functions (getStockStatus, etc.)
- * ```
- * 
- * **Usage:**
+ * @example
  * ```typescript
- * // Import everything from one place
- * import {
- *   // Services
- *   ProductService,
- *   
- *   // Utils
- *   getStockStatus,
- *   type StockStatusConfig
- * } from '@_features/products'
+ * import { ProductService, getStockStatus } from '@_features/products'
  * 
- * // Get a product
- * const product = await ProductService.get(productId);
- * 
- * // Get stock status
- * const status = getStockStatus(product.stock);
+ * const product = await ProductService.get(productId)
+ * const status = getStockStatus(product.stock)
  * ```
- * 
- * **Benefits:**
- * - ✅ Single import path
- * - ✅ Clear module boundaries
- * - ✅ Better tree-shaking
- * - ✅ Easier maintenance
- * - ✅ Feature isolation
  * 
  * @module products
  */
 
-// Services
-export * from './services'
+// ============================================================================
+// SERVICES
+// ============================================================================
 
-// Utils
-export * from './utils'
+export { ProductService } from './services/ProductService'
+
+// ============================================================================
+// UTILITIES (Server + Client Safe)
+// ============================================================================
+
+export {
+	getStockStatus,
+	type StockStatusConfig,
+} from './utils/productUtils'
 

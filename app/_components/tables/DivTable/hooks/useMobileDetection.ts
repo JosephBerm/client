@@ -10,8 +10,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { UseMobileDetectionReturn } from '../types/divTableTypes'
+
 import { BREAKPOINTS } from '../types/divTableConstants'
+
+import type { UseMobileDetectionReturn } from '../types/divTableTypes'
 
 /**
  * Hook to detect mobile/tablet/desktop viewport
@@ -33,13 +35,13 @@ export function useMobileDetection(
 ): UseMobileDetectionReturn {
   const [windowWidth, setWindowWidth] = useState<number>(() => {
     // SSR-safe initialization
-    if (typeof window === 'undefined') return BREAKPOINTS.lg
+    if (typeof window === 'undefined') {return BREAKPOINTS.lg}
     return window.innerWidth
   })
 
   useEffect(() => {
     // Skip on server
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') {return}
 
     // Handler for window resize
     function handleResize() {

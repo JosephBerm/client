@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import PageContainer from '@_components/layouts/PageContainer'
+
 import { ContactHeader, ContactForm, ContactMethods, ContactInfo, ContactSuccess } from '@_components/contact'
+import PageContainer from '@_components/layouts/PageContainer'
 
 /**
  * Contact Page

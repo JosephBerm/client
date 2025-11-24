@@ -62,15 +62,21 @@
 'use client'
 
 import { useEffect, useMemo, useCallback, useState } from 'react'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+
+import classNames from 'classnames'
 import { Settings, ChevronDown, ExternalLink } from 'lucide-react'
-import SettingsModal from '@_components/settings/SettingsModal'
+
 import { useAuthStore } from '@_features/auth'
 import { NavigationService, Routes } from '@_features/navigation'
+
 import { useMediaQuery } from '@_shared'
+
+import SettingsModal from '@_components/settings/SettingsModal'
+
 import NavigationIcon from './NavigationIcon'
-import classNames from 'classnames'
 
 /**
  * Sidebar component props interface.
@@ -270,7 +276,7 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 								{!collapsedSections.has(section.id) && (
 									<ul className="space-y-2">
 										{section.routes.map((route) => {
-											const isActive = pathname === route.href
+											const _isActive = pathname === route.href
 
 											return (
 												<li key={route.id}>

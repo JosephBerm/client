@@ -1,24 +1,24 @@
 /**
- * Internal App Utilities - Barrel Export
+ * Internal App Utilities - Barrel Export (Optimized for Tree-Shaking)
  * 
  * Utility functions and helpers for the /app internal application.
- * Includes route configuration and page metadata.
+ * Route metadata, page configuration, and access control.
  * 
- * **Contents:**
- * - Route metadata and page configuration
- * - Helper functions for internal app
- * 
- * **Usage:**
+ * @example
  * ```typescript
- * import { 
- *   getPageMetadata,
- *   INTERNAL_ROUTE_METADATA 
- * } from '@/app/app/_lib'
+ * import { getPageMetadata, canAccessRoute } from '@/app/app/_lib'
  * ```
  * 
  * @module app/lib
  */
 
-// Route configuration and metadata
-export * from './internalRoutes'
+// Internal Routes
+export {
+	INTERNAL_ROUTE_METADATA,
+	getPageMetadata,
+	getPageTitle,
+	getPageDescription,
+	canAccessRoute,
+	type InternalPageMetadata,
+} from './internalRoutes'
 

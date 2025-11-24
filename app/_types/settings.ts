@@ -18,8 +18,9 @@
  * @module settings
  */
 
-import { ReactElement } from 'react'
-import { LucideIcon } from 'lucide-react'
+import type { ComponentType } from 'react'
+
+import type { LucideIcon } from 'lucide-react'
 
 /**
  * Select option interface for dropdown settings.
@@ -90,8 +91,8 @@ export interface ButtonSettingItem extends BaseSettingItem {
  */
 export interface CustomSettingItem extends BaseSettingItem {
 	type: 'custom'
-	/** Custom React component to render */
-	component: ReactElement
+	/** Custom React component type (not instance) */
+	component: ComponentType
 }
 
 /**

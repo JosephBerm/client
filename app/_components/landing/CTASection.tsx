@@ -37,12 +37,14 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+
 import Link from 'next/link'
 
+import { logger } from '@_core'
+
+import { Reveal, ANIMATION_PRESETS } from '@_components/common/animations'
 import PageContainer from '@_components/layouts/PageContainer'
 import Button from '@_components/ui/Button'
-import { Reveal, ANIMATION_PRESETS } from '@_components/common/animations'
-import { logger } from '@_core'
 
 export interface CTASectionCTA {
 	label: string

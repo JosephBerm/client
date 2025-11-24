@@ -23,8 +23,10 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { ImageService } from '../services/ImageService'
+
 import { logger } from '@_core'
+
+import { ImageService } from '../services/ImageService'
 
 /**
  * Options for the useImage hook.
@@ -111,7 +113,7 @@ export function useImage(
 	const [shouldLoad, setShouldLoad] = useState<boolean>(priority || !lazy)
 
 	const retryCountRef = useRef<number>(0)
-	const imgRef = useRef<HTMLImageElement | null>(null)
+	const _imgRef = useRef<HTMLImageElement | null>(null)
 	const observerRef = useRef<IntersectionObserver | null>(null)
 
 	// Load image function

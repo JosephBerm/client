@@ -41,16 +41,16 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+
 import Image, { type StaticImageData } from 'next/image'
 import Link from 'next/link'
+
 import { ArrowRight } from 'lucide-react'
 
-import PageContainer from '@_components/layouts/PageContainer'
-import Button from '@_components/ui/Button'
-import Pill from '@_components/ui/Pill'
-import StatusDot from '@_components/ui/StatusDot'
 import { getBlurDataUrl } from '@_features/images'
+
 import { logger } from '@_core'
+
 import {
 	Reveal,
 	Stagger,
@@ -60,6 +60,11 @@ import {
 	STAGGER_DELAY,
 	ANIMATION_DISTANCE,
 } from '@_components/common/animations'
+import PageContainer from '@_components/layouts/PageContainer'
+import Button from '@_components/ui/Button'
+import Pill from '@_components/ui/Pill'
+import StatusDot from '@_components/ui/StatusDot'
+
 
 export interface HeroSectionCTA {
 	label: string

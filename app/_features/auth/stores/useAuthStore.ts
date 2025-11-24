@@ -44,8 +44,10 @@
 
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import type { IUser } from '@_classes/User'
+
 import { logger } from '@_core'
+
+import type { IUser } from '@_classes/User'
 
 /**
  * Authentication state interface.
@@ -115,7 +117,7 @@ type AuthStore = AuthState & AuthActions
  */
 export const useAuthStore = create<AuthStore>()(
 	persist(
-		(set, get) => ({
+		(set, _get) => ({
 			// Initial state
 			user: null,
 			isAuthenticated: false,

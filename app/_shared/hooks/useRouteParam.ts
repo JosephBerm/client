@@ -79,8 +79,9 @@
 
 'use client'
 
-import { useParams } from 'next/navigation'
 import { useMemo } from 'react'
+
+import { useParams } from 'next/navigation'
 
 /**
  * Extract route parameter from Next.js dynamic route

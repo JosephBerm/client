@@ -1,17 +1,25 @@
 'use client'
 
 import { useMemo } from 'react'
+
 import Link from 'next/link'
-import { ColumnDef } from '@tanstack/react-table'
+
 import { Eye } from 'lucide-react'
-import ServerDataGrid from '@_components/tables/ServerDataGrid'
-import Button from '@_components/ui/Button'
-import { InternalPageHeader } from '../_components'
-import Badge from '@_components/ui/Badge'
-import { formatDate, formatCurrency } from '@_shared'
-import type Quote from '@_classes/Quote'
-import { QuoteStatus } from '@_classes/Enums'
+
 import { Routes } from '@_features/navigation'
+
+import { formatDate } from '@_shared'
+
+import { QuoteStatus } from '@_classes/Enums'
+import type Quote from '@_classes/Quote'
+
+import ServerDataGrid from '@_components/tables/ServerDataGrid'
+import Badge from '@_components/ui/Badge'
+import Button from '@_components/ui/Button'
+
+import { InternalPageHeader } from '../_components'
+
+import type { ColumnDef } from '@tanstack/react-table'
 
 export default function QuotesPage() {
   // Column definitions

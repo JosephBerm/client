@@ -22,6 +22,7 @@
 
 import type { NavigationSection, NavigationRoute } from '@_types/navigation'
 import { AccountRole } from '@_types/navigation'
+
 import Routes from './routes'
 
 /**
@@ -254,7 +255,7 @@ export class NavigationService {
 		const sections = this.getNavigationSections(userRole)
 		for (const section of sections) {
 			const route = section.routes.find((r) => r.id === id)
-			if (route) return route
+			if (route) {return route}
 		}
 		return undefined
 	}

@@ -20,7 +20,14 @@ export { useElementRefs } from './useElementRefs'
 export { useZodForm } from './useZodForm'
 export { useFormSubmit } from './useFormSubmit'
 export { useServerTable } from './useServerTable'
-export * from './useAdvancedLazyLoad'
+export {
+	useAdvancedLazyLoad,
+	type ConnectionType,
+	type EffectiveConnectionType,
+	type LoadingStrategy,
+	type UseAdvancedLazyLoadOptions,
+	type UseAdvancedLazyLoadReturn,
+} from './useAdvancedLazyLoad'
 export { useSectionMetrics } from './useSectionMetrics'
 export type { UseSectionMetricsOptions, UseSectionMetricsReturn, SectionMetric } from './useSectionMetrics'
 export { useScrollProgress } from './useScrollProgress'

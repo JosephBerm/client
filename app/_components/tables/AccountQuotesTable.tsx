@@ -63,22 +63,28 @@
 
 'use client'
 
-import { useMemo, useEffect, useState, useCallback } from 'react'
-import Link from 'next/link'
+import { useMemo, useEffect, useState } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { Eye } from 'lucide-react'
-import { DataGrid, type ColumnDef } from '@_components/tables'
-import Button from '@_components/ui/Button'
-import Badge from '@_components/ui/Badge'
-import { formatDate } from '@_shared'
-import { logger } from '@_core'
+
 import { useAuthStore } from '@_features/auth'
-import Quote from '@_classes/Quote'
-import { QuoteStatus } from '@_classes/Enums'
-import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
-import { API } from '@_shared'
-import { notificationService } from '@_shared'
 import { Routes } from '@_features/navigation'
+
+import { formatDate, API, notificationService } from '@_shared'
+
+import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
+import { QuoteStatus } from '@_classes/Enums'
+import Quote from '@_classes/Quote'
+
+import { DataGrid, type ColumnDef } from '@_components/tables'
+import Badge from '@_components/ui/Badge'
+import Button from '@_components/ui/Button'
+
+
+
+
 
 /**
  * AccountQuotesTable Component
@@ -127,7 +133,7 @@ export default function AccountQuotesTable() {
 	const fetchQuotes = async () => {
 		try {
 			setIsLoading(true)
-			if (!user?.customer?.id) return
+			if (!user?.customer?.id) {return}
 
 			// Use search endpoint with GenericSearchFilter (FAANG-level API design)
 			const searchFilter = new GenericSearchFilter()

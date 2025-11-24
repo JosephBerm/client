@@ -1,6 +1,7 @@
 'use client'
 
 import { memo, useCallback } from 'react'
+
 import type { EmblaCarouselType } from 'embla-carousel'
 
 interface CarouselDotsProps {
@@ -29,7 +30,7 @@ const CarouselDots = memo(function CarouselDots({
 		[emblaApi]
 	)
 
-	if (!showDots || scrollSnaps.length <= 1) return null
+	if (!showDots || scrollSnaps.length <= 1) {return null}
 
 	return (
 		<div className='flex items-center justify-center gap-2 sm:gap-2.5 md:gap-3 py-2' role='tablist' aria-label='Carousel pagination'>

@@ -25,18 +25,20 @@
 
 'use client'
 
-import { motion, useInView, type Variants } from 'framer-motion'
 import { useRef, useMemo, useEffect, useState, type ReactNode } from 'react'
+
 import classNames from 'classnames'
+import { motion, useInView, type Variants } from 'framer-motion'
+
 import { logger } from '@_core'
+
 import {
 	getAnimationVariants,
 	checkReducedMotion,
 	REDUCED_MOTION_VARIANTS,
-	ANIMATION_EASING,
 	type AnimationVariant,
-	type AnimationDirection,
-} from './types'
+	type ANIMATION_EASING,
+	type AnimationDirection} from './types'
 
 /**
  * Stagger Container Props
@@ -86,7 +88,7 @@ export default function Stagger({
 
 	// Check reduced motion preference
 	useEffect(() => {
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 
 		setPrefersReducedMotion(checkReducedMotion())
 
@@ -198,7 +200,7 @@ export function StaggerItem({
 
 	// Check reduced motion preference
 	useEffect(() => {
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 
 		setPrefersReducedMotion(checkReducedMotion())
 

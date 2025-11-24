@@ -62,17 +62,23 @@
 'use client'
 
 import React from 'react'
-import { useForm } from 'react-hook-form'
+
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+
 import { profileUpdateSchema, type ProfileUpdateFormData } from '@_core'
-import { useFormSubmit } from '@_shared'
-import FormInput from './FormInput'
-import Button from '@_components/ui/Button'
+
+import { useFormSubmit , API } from '@_shared'
+
+import Address from '@_classes/common/Address'
+import Name from '@_classes/common/Name'
 import type { IUser } from '@_classes/User'
 import User from '@_classes/User'
-import Name from '@_classes/common/Name'
-import Address from '@_classes/common/Address'
-import { API } from '@_shared'
+
+import Button from '@_components/ui/Button'
+
+import FormInput from './FormInput'
+
 
 /**
  * UpdateAccountForm component props interface.

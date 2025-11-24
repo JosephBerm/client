@@ -25,15 +25,6 @@
  * @module logger/Logger
  */
 
-import type {
-	LogLevel,
-	LogMetadata,
-	LogEntry,
-	LoggerConfig,
-	LogTransport,
-	ILogger,
-} from './types'
-import { LogLevelValue } from './types'
 import {
 	redactSensitiveFields,
 	sanitizeMetadata,
@@ -44,6 +35,15 @@ import {
 	generateCorrelationId,
 	getCurrentEnvironment,
 } from './utils'
+
+import type {
+	LogLevel,
+	LogMetadata,
+	LogEntry,
+	LoggerConfig,
+	LogTransport,
+	ILogger,
+} from './types'
 
 /**
  * Default logger configuration.

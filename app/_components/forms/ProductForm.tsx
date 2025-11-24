@@ -84,20 +84,28 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+
+import { useParams, useRouter } from 'next/navigation'
+
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+
+import { Routes } from '@_features/navigation'
+
 import { productSchema, type ProductFormData } from '@_core'
 import { logger } from '@_core'
-import { useFormSubmit } from '@_shared'
-import FormInput from './FormInput'
-import FormTextArea from './FormTextArea'
-import FormSelect from './FormSelect'
-import Button from '@_components/ui/Button'
+
+import { useFormSubmit , API } from '@_shared'
+
 import { Product } from '@_classes/Product'
 import type Provider from '@_classes/Provider'
-import { API } from '@_shared'
-import { useParams, useRouter } from 'next/navigation'
-import { Routes } from '@_features/navigation'
+
+import Button from '@_components/ui/Button'
+
+import FormInput from './FormInput'
+import FormTextArea from './FormTextArea'
+
+
 
 /**
  * ProductForm component props interface.
@@ -153,7 +161,7 @@ interface ProductFormProps {
  * @returns ProductForm component
  */
 export default function ProductForm({ product, onUpdate }: ProductFormProps) {
-  const [providers, setProviders] = useState<Provider[]>([])
+  const [_providers, setProviders] = useState<Provider[]>([])
   const [files, setFiles] = useState<File[]>([])
   const params = useParams()
   const router = useRouter()

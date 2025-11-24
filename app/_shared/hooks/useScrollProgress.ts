@@ -216,7 +216,7 @@ export function useScrollProgress({
 	}, [enableImmediateUpdates, throttleMs, calculateProgress])
 
 	useEffect(() => {
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 
 		// Initial calculation
 		calculateProgress()

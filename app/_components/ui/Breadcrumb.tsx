@@ -57,9 +57,12 @@
 'use client'
 
 import { useMemo } from 'react'
+
 import Link from 'next/link'
-import { ChevronRight } from 'lucide-react'
+
 import classNames from 'classnames'
+import { ChevronRight } from 'lucide-react'
+
 import type { BreadcrumbItem } from '@_types/navigation'
 
 // Re-export for convenience (consumers can import from here or from @_types/navigation)

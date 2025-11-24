@@ -1,9 +1,14 @@
 /**
- * Auth Services - Barrel Export
+ * Auth Services - Barrel Export (Optimized for Tree-Shaking)
  * 
  * @module auth/services
  */
 
-// Re-export all authentication functions
-export * from './AuthService'
+export {
+	checkAuthStatus,
+	login,
+	signup,
+	logout,
+	getAuthToken,
+} from './AuthService'
 

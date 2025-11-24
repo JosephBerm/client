@@ -41,11 +41,16 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import { usePathname } from 'next/navigation'
+
 import classNames from 'classnames'
-import { useBreadcrumbs } from '@_shared/hooks'
-import UnifiedBreadcrumb from '@_components/ui/Breadcrumb'
+
 import { logger } from '@_core'
+
+import { useBreadcrumbs } from '@_shared/hooks'
+
+import UnifiedBreadcrumb from '@_components/ui/Breadcrumb'
 
 /**
  * Internal app breadcrumb component props.

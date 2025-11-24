@@ -317,7 +317,7 @@ export default class TypeOfBusinessHelper {
 	 * ```
 	 */
 	static isValid(value: unknown): value is TypeOfBusiness {
-		if (typeof value !== 'number') return false
+		if (typeof value !== 'number') {return false}
 		return Object.values(TypeOfBusiness).includes(value as TypeOfBusiness)
 	}
 }

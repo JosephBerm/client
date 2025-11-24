@@ -1,11 +1,15 @@
 'use client'
 
 import { memo, useRef, useState, useEffect } from 'react'
+
 import Image from 'next/image'
 import Link from 'next/link'
-import type { CarouselSlide as CarouselSlideType } from './types'
+
 import { Volume2, VolumeX, Play } from 'lucide-react'
+
 import Button from '@_components/ui/Button'
+
+import type { CarouselSlide as CarouselSlideType } from './types'
 
 interface CarouselSlideProps {
 	slide: CarouselSlideType
@@ -155,7 +159,7 @@ const CarouselSlideComponent = memo(function CarouselSlide({
 
 	// Render overlay content
 	const renderOverlay = () => {
-		if (!slide.overlay) return null
+		if (!slide.overlay) {return null}
 
 		const { title, heading, subheading, ctas, customContent, position = 'bottom-center' } = slide.overlay
 		

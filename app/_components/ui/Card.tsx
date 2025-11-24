@@ -66,8 +66,10 @@
  * @module Card
  */
 
-import { HTMLAttributes, ReactNode } from 'react'
+import type { HTMLAttributes, ReactNode } from 'react'
+
 import Image from 'next/image'
+
 import classNames from 'classnames'
 
 type CardVariant = 'elevated' | 'soft' | 'outline' | 'ghost'

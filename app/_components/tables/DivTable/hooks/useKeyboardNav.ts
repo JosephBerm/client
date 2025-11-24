@@ -8,7 +8,9 @@
 
 'use client'
 
-import { useEffect, useCallback, RefObject } from 'react'
+import type { RefObject } from 'react';
+import { useEffect, useCallback } from 'react'
+
 import { logger } from '@_core'
 
 /**
@@ -109,7 +111,7 @@ export function useKeyboardNav({
    * Get the current focused cell position
    */
   const getCurrentCellPosition = useCallback((): CellPosition | null => {
-    if (!tableRef.current) return null
+    if (!tableRef.current) {return null}
 
     const activeElement = document.activeElement
     if (!activeElement || !tableRef.current.contains(activeElement)) {
@@ -117,12 +119,12 @@ export function useKeyboardNav({
     }
 
     // Find the cell element (might be the active element or a parent)
-    let cellElement = activeElement.closest('[role="gridcell"]') as HTMLElement
-    if (!cellElement) return null
+    const cellElement = activeElement.closest('[role="gridcell"]') as HTMLElement
+    if (!cellElement) {return null}
 
     // Find the row element
     const rowElement = cellElement.closest('[role="row"]') as HTMLElement
-    if (!rowElement) return null
+    if (!rowElement) {return null}
 
     // Get row index from aria-rowindex (1-based, convert to 0-based)
     const rowIndexAttr = rowElement.getAttribute('aria-rowindex')
@@ -156,7 +158,7 @@ export function useKeyboardNav({
    */
   const focusCell = useCallback(
     (position: CellPosition): boolean => {
-      if (!tableRef.current) return false
+      if (!tableRef.current) {return false}
 
       // Validate table dimensions
       if (rowCount <= 0 || columnCount <= 0) {
@@ -185,14 +187,14 @@ export function useKeyboardNav({
           `[role="row"][aria-rowindex="${position.rowIndex + 2}"]`
         )
 
-        if (!targetRow) return false
+        if (!targetRow) {return false}
 
         // aria-colindex is 1-based, so add 1 to colIndex
         const targetCell = targetRow.querySelector(
           `[role="gridcell"][aria-colindex="${position.colIndex + 1}"]`
         ) as HTMLElement
 
-        if (!targetCell) return false
+        if (!targetCell) {return false}
 
         // Focus the cell or first focusable element within
         const focusableElement =
@@ -333,11 +335,11 @@ export function useKeyboardNav({
    */
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (!enabled || !tableRef.current) return
+      if (!enabled || !tableRef.current) {return}
 
       // Check if the event target is within our table
       const target = event.target as HTMLElement
-      if (!tableRef.current.contains(target)) return
+      if (!tableRef.current.contains(target)) {return}
 
       // Check if we're in an input/textarea (allow normal typing)
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
@@ -386,7 +388,7 @@ export function useKeyboardNav({
    * Set up keyboard event listener
    */
   useEffect(() => {
-    if (!enabled || !tableRef.current) return
+    if (!enabled || !tableRef.current) {return}
 
     const tableElement = tableRef.current
 

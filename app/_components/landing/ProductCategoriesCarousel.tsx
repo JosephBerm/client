@@ -1,10 +1,12 @@
 'use client'
 
 import { useMemo } from 'react'
+
+import Home from '@_classes/Home'
+
 import PageContainer from '@_components/layouts/PageContainer'
 import { Carousel } from '@_components/ui/Carousel'
 import type { CarouselSlide } from '@_components/ui/Carousel'
-import Home from '@_classes/Home'
 
 /**
  * Product Categories Carousel

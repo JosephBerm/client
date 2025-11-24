@@ -8,9 +8,12 @@
  */
 
 import { format as formatDateFns } from 'date-fns'
+
 import { logger } from '@_core/logger'
+
+import { DATE_FORMATS, DATE_FALLBACK } from './constants'
 import { parseDate } from './parse'
-import { DATE_FORMATS, DEFAULT_DATE_FORMAT, DATE_FALLBACK } from './constants'
+
 import type { DateInput, DateFormat } from './types'
 
 /**

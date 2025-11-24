@@ -20,6 +20,7 @@
  */
 
 import { memo } from 'react'
+
 import {
 	Phone,
 	Mail,

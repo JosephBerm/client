@@ -19,8 +19,9 @@
  * @module logger/utils
  */
 
-import type { LogLevel, LogMetadata, LogEntry, LogContext } from './types'
 import { LogLevelValue } from './types'
+
+import type { LogLevel, LogMetadata, LogEntry, LogContext } from './types'
 
 /**
  * Fields that should be redacted from logs for security/privacy.

@@ -84,11 +84,15 @@
 
 'use client'
 
-import { forwardRef, InputHTMLAttributes } from 'react'
-import { FieldError } from 'react-hook-form'
+import type { InputHTMLAttributes } from 'react';
+import { forwardRef } from 'react'
+
 import classNames from 'classnames'
 
 import { errorClass, fieldWrapperClass, helperClass } from './fieldStyles'
+
+import type { FieldError } from 'react-hook-form'
+
 
 /**
  * FormCheckbox component props interface.

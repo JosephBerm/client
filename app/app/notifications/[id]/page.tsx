@@ -1,29 +1,32 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Notification from '@_classes/Notification'
-import { logger } from '@_core'
-import { API } from '@_shared'
+
 import { useRouter } from 'next/navigation'
-import { notificationService, useRouteParam } from '@_shared'
-import { NotificationType } from '@_classes/Enums'
+
+
 import { formatDateTime } from '@_lib/dates'
+
+import { API , notificationService, useRouteParam } from '@_shared'
+
+import { NotificationType } from '@_classes/Enums'
+import Notification from '@_classes/Notification'
 
 function Page() {
 	const [notification, setNotification] = useState<Notification>(new Notification())
-	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const route = useRouter()
+	const [_isLoading, setIsLoading] = useState<boolean>(false)
+	const _route = useRouter()
 	const notificationId = useRouteParam('id')
 	
 	useEffect(() => {
-		if (!notificationId) return
+		if (!notificationId) {return}
 
 		const getNotification = async () => {
 			try {
 				setIsLoading(true)
 				const { data } = await API.Notifications.get<Notification>(notificationId)
 
-				if (data.statusCode == 200 && data.payload) {
+				if (data.statusCode === 200 && data.payload) {
 					setNotification(data.payload)
 				} else {
 					notificationService.error(data.message || 'Unable to load notification', {

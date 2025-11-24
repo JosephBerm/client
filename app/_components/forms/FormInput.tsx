@@ -79,11 +79,15 @@
 
 'use client'
 
-import { forwardRef, InputHTMLAttributes } from 'react'
-import { FieldError } from 'react-hook-form'
+import type { InputHTMLAttributes } from 'react';
+import { forwardRef } from 'react'
+
 import classNames from 'classnames'
 
 import { baseFieldClass, errorClass, errorFieldClass, fieldWrapperClass, helperClass, labelClass } from './fieldStyles'
+
+import type { FieldError } from 'react-hook-form'
+
 
 /**
  * FormInput component props interface.

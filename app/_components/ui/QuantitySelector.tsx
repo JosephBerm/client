@@ -57,8 +57,9 @@
 'use client'
 
 import { useCallback, useState, useEffect } from 'react'
-import { Plus, Minus } from 'lucide-react'
+
 import classNames from 'classnames'
+import { Plus, Minus } from 'lucide-react'
 
 export interface QuantitySelectorProps {
 	/** Current quantity value */
@@ -169,7 +170,7 @@ export default function QuantitySelector({
 			e.preventDefault()
 			e.stopPropagation()
 
-			if (disabled) return
+			if (disabled) {return}
 
 			if (editable && onChange) {
 				// Editable mode: update via onChange
@@ -189,7 +190,7 @@ export default function QuantitySelector({
 			e.preventDefault()
 			e.stopPropagation()
 
-			if (disabled) return
+			if (disabled) {return}
 
 			if (editable && onChange) {
 				// Editable mode: update via onChange

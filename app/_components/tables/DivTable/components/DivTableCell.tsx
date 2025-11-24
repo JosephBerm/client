@@ -10,9 +10,11 @@
 'use client'
 
 import { flexRender } from '@tanstack/react-table'
-import type { DataGridCellProps } from '../types/divTableTypes'
+
 import { TABLE_THEME_CLASSES } from '../types/divTableConstants'
 import { generateCellARIA, classNames } from '../utils/divTableUtils'
+
+import type { DataGridCellProps } from '../types/divTableTypes'
 
 /**
  * Table Cell Component

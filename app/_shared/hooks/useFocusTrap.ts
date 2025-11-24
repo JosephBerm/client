@@ -26,7 +26,8 @@
 
 'use client'
 
-import { useEffect, useRef, RefObject } from 'react'
+import type { RefObject } from 'react';
+import { useEffect } from 'react'
 
 /**
  * Configuration options for focus trap.
@@ -107,17 +108,6 @@ function getFirstFocusableElement(container: HTMLElement): HTMLElement | null {
 }
 
 /**
- * Gets the last focusable element in a container.
- * 
- * @param container - Container element to search within
- * @returns Last focusable element or null
- */
-function getLastFocusableElement(container: HTMLElement): HTMLElement | null {
-	const focusableElements = getFocusableElements(container)
-	return focusableElements[focusableElements.length - 1] || null
-}
-
-/**
  * Hook that traps focus within a container element.
  * 
  * **Usage:**
@@ -163,7 +153,7 @@ export function useFocusTrap(
 	} = options
 
 	useEffect(() => {
-		if (!enabled || !containerRef.current) return
+		if (!enabled || !containerRef.current) {return}
 
 		const container = containerRef.current
 		let previousActiveElement: HTMLElement | null = null
@@ -199,7 +189,7 @@ export function useFocusTrap(
 
 		// Handle Tab key to trap focus
 		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key !== 'Tab') return
+			if (e.key !== 'Tab') {return}
 
 			const focusableElements = getFocusableElements(container)
 			

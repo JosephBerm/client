@@ -11,8 +11,11 @@
 'use client'
 
 import { useMemo } from 'react'
-import type { Table } from '@tanstack/react-table'
+
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+
+import { logger } from '@_core'
+
 import {
   DEFAULT_PAGE_SIZE_OPTIONS,
   COMPONENT_NAMES,
@@ -25,7 +28,8 @@ import {
   announceToScreenReader,
   classNames,
 } from '../utils/divTableUtils'
-import { logger } from '@_core'
+
+import type { Table } from '@tanstack/react-table'
 
 interface DataGridPaginationProps<TData> {
   table: Table<TData>

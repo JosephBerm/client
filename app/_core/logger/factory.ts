@@ -16,9 +16,10 @@
  */
 
 import { Logger } from './logger'
-import { ConsoleTransport, BufferedTransport, RemoteTransport, createConsoleTransport } from './transports'
-import type { LoggerConfig, ILogger, LogLevel } from './types'
+import { BufferedTransport, RemoteTransport, createConsoleTransport } from './transports'
 import { getCurrentEnvironment } from './utils'
+
+import type { LoggerConfig, ILogger, LogLevel } from './types'
 
 /**
  * Singleton logger instance for application-wide use.

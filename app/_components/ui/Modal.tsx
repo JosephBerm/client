@@ -57,8 +57,11 @@
 
 'use client'
 
-import { useRef, ReactNode } from 'react'
+import type { ReactNode } from 'react';
+import { useRef } from 'react'
+
 import { X } from 'lucide-react'
+
 import { useModal } from '@_shared'
 
 /**
@@ -150,7 +153,7 @@ export default function Modal({
 		}
 	)
 
-	if (!isOpen) return null
+	if (!isOpen) {return null}
 
 	const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
 		if (closeOnOverlayClick && e.target === e.currentTarget) {

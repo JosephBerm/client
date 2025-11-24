@@ -22,13 +22,19 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+
 import { ShoppingCart } from 'lucide-react'
-import { Product } from '@_classes/Product'
+
 import { useCartStore } from '@_features/cart'
+
+import { notificationService } from '@_shared'
+
+import type { Product } from '@_classes/Product'
+
 import Button from '@_components/ui/Button'
 import QuantitySelector from '@_components/ui/QuantitySelector'
-import { logger } from '@_core'
-import { notificationService } from '@_shared'
+
+
 
 export interface AddToCartButtonProps {
 	/** Product to add to cart */
@@ -82,7 +88,7 @@ export default function AddToCartButton({
 		e.preventDefault()
 		e.stopPropagation()
 
-		if (isAdding) return
+		if (isAdding) {return}
 
 		setIsAdding(true)
 

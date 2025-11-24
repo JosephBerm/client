@@ -1,12 +1,12 @@
 'use client'
 
 import { Search, X } from 'lucide-react'
+
+import { SORT_OPTIONS, PAGE_SIZE_OPTIONS } from '@_components/store/ProductsToolbar'
 import Button from '@_components/ui/Button'
 import Input from '@_components/ui/Input'
 import ResultsCount from '@_components/ui/ResultsCount'
 import Select, { createSelectOptions } from '@_components/ui/Select'
-import type { SelectOption } from '@_components/ui/Select'
-import { SORT_OPTIONS, PAGE_SIZE_OPTIONS } from '@_components/store/ProductsToolbar'
 
 /**
  * UnifiedStoreToolbar Component Props
@@ -86,7 +86,7 @@ export default function UnifiedStoreToolbar({
 	onPageSizeChange,
 	isLoading = false,
 }: UnifiedStoreToolbarProps) {
-	const currentSortOption = SORT_OPTIONS.find((opt) => opt.value === currentSort) || SORT_OPTIONS[0]
+	const _currentSortOption = SORT_OPTIONS.find((opt) => opt.value === currentSort) || SORT_OPTIONS[0]
 
 	return (
 		<div

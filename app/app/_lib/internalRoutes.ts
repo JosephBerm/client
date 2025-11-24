@@ -24,6 +24,7 @@
  */
 
 import { logger } from '@_core'
+
 import { AccountRole } from '@_classes/Enums'
 
 /**
@@ -190,7 +191,7 @@ export function getPageMetadata(pathname: string): InternalPageMetadata {
 		}
 
 		// Get last non-dynamic segment
-		let routeSegment = relevantSegments[0] // Start with first segment
+		const routeSegment = relevantSegments[0] // Start with first segment
 
 		// If this is a detail page (has numeric ID), use parent segment
 		if (relevantSegments.length > 1 && isDynamicSegment(relevantSegments[1])) {

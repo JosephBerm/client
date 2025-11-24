@@ -23,9 +23,11 @@
 'use client'
 
 import { useMemo, useEffect, useState } from 'react'
-import { useScrollReveal } from '@_shared/hooks/useScrollReveal'
-import { useGridColumns } from '@_shared/hooks/useGridColumns'
+
 import classNames from 'classnames'
+
+import { useGridColumns } from '@_shared/hooks/useGridColumns'
+import { useScrollReveal } from '@_shared/hooks/useScrollReveal'
 
 export interface ScrollRevealCardProps {
 	/** Child component to wrap (typically ProductCard) */
@@ -74,14 +76,14 @@ export interface ScrollRevealCardProps {
  */
 function calculateRowAwareIndex(index: number, columnsPerRow: number, staggerDelay: number): number {
 	const row = Math.floor(index / columnsPerRow)
-	const positionInRow = index % columnsPerRow
+	const _positionInRow = index % columnsPerRow
 	
 	// FAANG pattern: Simple linear stagger with slight row emphasis
 	// Each card delays by base amount (50ms), with subtle row multiplier
 	// This creates natural flow without rigid row boundaries
 	// Row multiplier (1.2x) adds gentle visual grouping without breaking flow
 	const BASE_STAGGER = 50 // ms - Apple/Stripe standard for smooth cascade
-	const ROW_MULTIPLIER = 1.2 // Subtle emphasis on row grouping
+	const _ROW_MULTIPLIER = 1.2 // Subtle emphasis on row grouping
 	
 	// Calculate continuous delay with subtle row emphasis
 	const linearDelay = index * BASE_STAGGER
@@ -107,7 +109,7 @@ export default function ScrollRevealCard({
 	// Calculate isDesktop for rootMargin calculation
 	// Note: This could be further optimized by passing rootMargin as prop
 	// For now, this is acceptable as it's only used for rootMargin calculation
-	const isDesktop = useMemo(() => columnsPerRow === 3, [columnsPerRow])
+	const _isDesktop = useMemo(() => columnsPerRow === 3, [columnsPerRow])
 	
 	// Calculate row-aware animation index for elegant staggering
 	const animationIndex = useMemo(
@@ -124,7 +126,7 @@ export default function ScrollRevealCard({
 	// Mobile/Tablet: 150px anticipation (smaller viewport, compensates for touch scrolling)
 	const rootMargin = useMemo(() => {
 		// During SSR, default to mobile (more conservative)
-		if (typeof window === 'undefined') return '0px 0px 150px 0px'
+		if (typeof window === 'undefined') {return '0px 0px 150px 0px'}
 		
 		// Desktop (3 columns): Earlier trigger (200px BEFORE viewport entry)
 		// Animations start as user scrolls toward content, not after it's visible
@@ -161,7 +163,7 @@ export default function ScrollRevealCard({
 	// Apple/Netflix approach: Complete one row before starting the next for elegant flow
 	// Animation duration: 750ms (from elegant-reveal animation)
 	useEffect(() => {
-		if (!shouldAnimateOnMount || !enabled) return
+		if (!shouldAnimateOnMount || !enabled) {return}
 		
 		// Check for reduced motion preference (accessibility)
 		const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -173,7 +175,7 @@ export default function ScrollRevealCard({
 		
 		// Calculate row and position for this card
 		const row = Math.floor(index / columnsPerRow)
-		const positionInRow = index % columnsPerRow
+		const _positionInRow = index % columnsPerRow
 		
 		// FAANG best practice: Overlapping cascade with natural flow
 		// Apple/Stripe pattern: Each card starts before previous finishes
@@ -186,7 +188,7 @@ export default function ScrollRevealCard({
 		// Card 3: 280ms  → animates 280-880ms (slight row pause: 40ms)
 		// 
 		// Result: Smooth cascade with subtle row emphasis, not mechanical steps
-		const ANIMATION_DURATION = 600 // ms - matches elegant-reveal (snappier, Apple standard)
+		const _ANIMATION_DURATION = 600 // ms - matches elegant-reveal (snappier, Apple standard)
 		const BASE_STAGGER = 80 // ms - smooth cascade (Apple: 60-100ms for fluidity)
 		const ROW_EMPHASIS = 40 // ms - subtle extra delay per row (creates gentle grouping)
 		

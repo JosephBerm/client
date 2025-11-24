@@ -22,6 +22,7 @@
 'use client'
 
 import { useMemo } from 'react'
+
 import { useMediaQuery } from './useMediaQuery'
 
 /**
@@ -43,10 +44,10 @@ export function useGridColumns(): number {
 	
 	return useMemo(() => {
 		// During SSR, default to mobile (1 column)
-		if (typeof window === 'undefined') return 1
+		if (typeof window === 'undefined') {return 1}
 		
-		if (isDesktop) return 3 // xl:grid-cols-3
-		if (isTablet) return 2  // md:grid-cols-2
+		if (isDesktop) {return 3} // xl:grid-cols-3
+		if (isTablet) {return 2}  // md:grid-cols-2
 		return 1 // grid-cols-1 (mobile)
 	}, [isDesktop, isTablet])
 }

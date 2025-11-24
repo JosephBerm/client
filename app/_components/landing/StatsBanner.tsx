@@ -38,9 +38,11 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import PageContainer from '@_components/layouts/PageContainer'
-import { Reveal, ANIMATION_DELAY, ANIMATION_DISTANCE } from '@_components/common/animations'
+
 import { logger } from '@_core'
+
+import { Reveal, ANIMATION_DELAY, ANIMATION_DISTANCE } from '@_components/common/animations'
+import PageContainer from '@_components/layouts/PageContainer'
 
 export interface Stat {
 	label: string

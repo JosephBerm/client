@@ -44,9 +44,12 @@
 'use client'
 
 import { useMemo } from 'react'
+
 import { usePathname } from 'next/navigation'
+
 import { useAuthStore } from '@_features/auth'
 import { BreadcrumbService } from '@_features/navigation'
+
 import type { BreadcrumbItem } from '@_types/navigation'
 
 /**

@@ -11,19 +11,26 @@
 'use client'
 
 import { useRef } from 'react'
-import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual'
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core'
+
+import { DndContext, closestCenter } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import type { DataGridBodyProps } from '../types/divTableTypes'
+import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual'
+
+
+import { logger } from '@_core'
+
 import {
   ARIA_ROLE_ROWGROUP,
   COMPONENT_NAMES,
   TABLE_THEME_CLASSES,
   SCREEN_READER_ANNOUNCEMENTS,
 } from '../types/divTableConstants'
-import { announceToScreenReader, arrayMove, classNames, getGridColumnCount } from '../utils/divTableUtils'
+import { announceToScreenReader, classNames, getGridColumnCount } from '../utils/divTableUtils'
+
 import { DataGridRow } from './DivTableRow' // Component renamed internally
-import { logger } from '@_core'
+
+import type { DataGridBodyProps } from '../types/divTableTypes'
+import type { DragEndEvent } from '@dnd-kit/core';
 
 /**
  * Table Body Component with Virtualization
@@ -84,12 +91,12 @@ export function DataGridBody<TData>({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
 
-    if (!over || active.id === over.id) return
+    if (!over || active.id === over.id) {return}
 
     const oldIndex = rows.findIndex((row) => row.id === active.id)
     const newIndex = rows.findIndex((row) => row.id === over.id)
 
-    if (oldIndex === -1 || newIndex === -1) return
+    if (oldIndex === -1 || newIndex === -1) {return}
 
     // Call parent callback
     onRowReorder?.(oldIndex, newIndex)
@@ -136,7 +143,7 @@ export function DataGridBody<TData>({
           >
             {virtualItems.map((virtualItem) => {
               const row = rows[virtualItem.index]
-              if (!row) return null
+              if (!row) {return null}
 
               return (
                 <DataGridRow
@@ -178,7 +185,7 @@ export function DataGridBody<TData>({
     >
       {virtualItems.map((virtualItem) => {
         const row = rows[virtualItem.index]
-        if (!row) return null
+        if (!row) {return null}
 
         return (
           <DataGridRow

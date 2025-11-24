@@ -17,8 +17,9 @@
  * @module logger/transports
  */
 
-import type { LogEntry, LogTransport, LogLevel } from './types'
 import { LogLevelValue } from './types'
+
+import type { LogEntry, LogTransport, LogLevel } from './types'
 
 /**
  * Console colors for different log levels.
@@ -157,7 +158,7 @@ export class ConsoleTransport implements LogTransport {
 
 			// Output additional metadata (excluding tableData which is already displayed)
 			if (entry.metadata) {
-				const { tableData, tableType, tableSize, ...additionalMetadata } = entry.metadata
+				const { tableData: _tableData, tableType: _tableType, tableSize: _tableSize, ...additionalMetadata } = entry.metadata
 				if (Object.keys(additionalMetadata).length > 0) {
 					const consoleFunc = (console as any)[consoleMethod]
 					if (typeof consoleFunc === 'function') {

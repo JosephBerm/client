@@ -60,17 +60,26 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
+
 import Link from 'next/link'
-import { Trash2, ShoppingBag } from 'lucide-react'
-import { CartItem as CartItemType } from '@_features/cart'
-import { Product } from '@_classes/Product'
-import { serializeProduct } from '@_lib/serializers/productSerializer'
-import QuantitySelector from '@_components/ui/QuantitySelector'
-import Button from '@_components/ui/Button'
-import ProductImage from '@_components/store/ProductImage'
-import { Routes } from '@_features/navigation'
-import { logger } from '@_core'
+
 import classNames from 'classnames'
+import { Trash2, ShoppingBag } from 'lucide-react'
+
+import type { CartItem as CartItemType } from '@_features/cart'
+import { Routes } from '@_features/navigation'
+
+import { logger } from '@_core'
+
+import { serializeProduct } from '@_lib/serializers/productSerializer'
+
+import { Product } from '@_classes/Product'
+
+import ProductImage from '@_components/store/ProductImage'
+import Button from '@_components/ui/Button'
+import QuantitySelector from '@_components/ui/QuantitySelector'
+
+
 
 /**
  * CartItem component props interface.
@@ -187,7 +196,7 @@ export default function CartItem({
 
 	// Memoized callbacks (Phase 5 optimization - prevent unnecessary re-renders)
 	const handleIncrement = useCallback(() => {
-		if (disabled) return
+		if (disabled) {return}
 
 		const newQuantity = item.quantity + 1
 
@@ -203,7 +212,7 @@ export default function CartItem({
 	}, [disabled, item.productId, item.quantity, productName, onQuantityChange])
 
 	const handleDecrement = useCallback(() => {
-		if (disabled) return
+		if (disabled) {return}
 
 		const newQuantity = Math.max(1, item.quantity - 1)
 
@@ -219,7 +228,7 @@ export default function CartItem({
 	}, [disabled, item.productId, item.quantity, productName, onQuantityChange])
 
 	const handleRemove = useCallback(() => {
-		if (disabled) return
+		if (disabled) {return}
 
 		logger.info('Cart item removed', {
 			component: COMPONENT_NAME,

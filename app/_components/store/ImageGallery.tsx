@@ -43,8 +43,10 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import OptimizedImage from '@_components/ui/OptimizedImage'
+
+import { OptimizedImage } from '@_components/images'
 import Button from '@_components/ui/Button'
 
 /**
@@ -161,7 +163,7 @@ export default function ImageGallery({
 
 	// Navigate to previous image
 	const goToPrevious = useCallback(() => {
-		if (!images || images.length === 0) return
+		if (!images || images.length === 0) {return}
 		const newIndex = validIndex === 0 ? images.length - 1 : validIndex - 1
 		setCurrentIndex(newIndex)
 		onImageChange?.(newIndex)
@@ -169,7 +171,7 @@ export default function ImageGallery({
 
 	// Navigate to next image
 	const goToNext = useCallback(() => {
-		if (!images || images.length === 0) return
+		if (!images || images.length === 0) {return}
 		const newIndex = validIndex === images.length - 1 ? 0 : validIndex + 1
 		setCurrentIndex(newIndex)
 		onImageChange?.(newIndex)
@@ -178,7 +180,7 @@ export default function ImageGallery({
 	// Navigate to specific image
 	const goToImage = useCallback(
 		(index: number) => {
-			if (!images || images.length === 0) return
+			if (!images || images.length === 0) {return}
 			if (index >= 0 && index < images.length) {
 				setCurrentIndex(index)
 				onImageChange?.(index)
@@ -189,7 +191,7 @@ export default function ImageGallery({
 
 	// Touch gesture handlers
 	const handleTouchStart = useCallback((e: React.TouchEvent) => {
-		if (!hasMultipleImages) return
+		if (!hasMultipleImages) {return}
 		
 		const touch = e.touches[0]
 		touchStartRef.current = {
@@ -201,7 +203,7 @@ export default function ImageGallery({
 	}, [hasMultipleImages])
 
 	const handleTouchMove = useCallback((e: React.TouchEvent) => {
-		if (!hasMultipleImages || !touchStartRef.current) return
+		if (!hasMultipleImages || !touchStartRef.current) {return}
 		
 		const touch = e.touches[0]
 		touchMoveRef.current = {
@@ -263,7 +265,7 @@ export default function ImageGallery({
 
 	// Keyboard navigation
 	useEffect(() => {
-		if (!images || images.length === 0) return
+		if (!images || images.length === 0) {return}
 
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.key === 'ArrowLeft') {

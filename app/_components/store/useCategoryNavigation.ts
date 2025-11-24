@@ -16,10 +16,14 @@
 'use client'
 
 import { useCallback } from 'react'
+
 import { useRouter, usePathname } from 'next/navigation'
-import ProductsCategory from '@_classes/ProductsCategory'
+
 import { Routes } from '@_features/navigation'
+
 import { logger } from '@_core'
+
+import type ProductsCategory from '@_classes/ProductsCategory'
 
 export interface UseCategoryNavigationOptions {
 	/** Optional: Custom handler for category filter (used when on /store route) */

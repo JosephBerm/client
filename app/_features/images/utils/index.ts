@@ -1,21 +1,40 @@
 /**
- * Image Utilities - Barrel Export
+ * Image Utilities - Barrel Export (Optimized for Tree-Shaking)
  * 
- * Centralized export for all image-related utility functions.
- * Provides a single import path for consuming components.
- * 
- * **Utilities:**
- * - imageUtils: URL construction, blur placeholders
- * - browserUtils: WebP/AVIF detection, network speed
+ * Pure utility functions for image operations.
+ * Server + Client safe (no React dependencies).
  * 
  * @example
  * ```typescript
- * import { getProductImageUrl, supportsWebP } from '@_features/images'
+ * import { getProductImageUrl, supportsWebP, getNetworkSpeed } from '@_features/images'
  * ```
  * 
  * @module images/utils
  */
 
-export * from './imageUtils'
-export * from './browserUtils'
+// Image Utils
+export {
+	getBlurDataUrl,
+	getImageBaseUrl,
+	getProductImageUrl,
+	validateImageUrl,
+	getImageFallbackUrl,
+	clearImageUrlCache,
+	getImageUrlCacheSize,
+	RESPONSIVE_BREAKPOINTS,
+	generateSrcset,
+	generateSizes,
+	generateResponsiveImage,
+	type ImageSize,
+} from './imageUtils'
+
+// Browser Utils
+export {
+	getNetworkSpeed,
+	isDataSaverEnabled,
+	getOptimalImageQuality,
+	clearFormatCache,
+	type NetworkSpeed,
+	type BrowserCapabilities,
+} from './browserUtils'
 

@@ -1,25 +1,38 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+
 import { useRouter } from 'next/navigation'
-import { Trash2, ShoppingBag, CheckCircle, Info, FileText, Clock } from 'lucide-react'
-import { useZodForm, notificationService } from '@_shared'
-import { quoteSchema, type QuoteFormData } from '@_core'
-import { logger } from '@_core'
+
+import { ShoppingBag, CheckCircle, Info, FileText, Clock } from 'lucide-react'
+
 import { useAuthStore } from '@_features/auth'
 import { useCartStore } from '@_features/cart'
+import { Routes } from '@_features/navigation'
+
+import { quoteSchema, type QuoteFormData } from '@_core'
+import { logger } from '@_core'
+
+import { formatDateForInput, addDays, serializeDate } from '@_lib'
+
+import { useZodForm, notificationService , API } from '@_shared'
+
+
+
+import { Product, CartProduct } from '@_classes/Product'
+import Quote from '@_classes/Quote'
+
+import CartItem from '@_components/cart/CartItem'
+import EmptyState from '@_components/common/EmptyState'
 import FormInput from '@_components/forms/FormInput'
 import FormTextArea from '@_components/forms/FormTextArea'
-import Button from '@_components/ui/Button'
-import Badge from '@_components/ui/Badge'
-import CartItem from '@_components/cart/CartItem'
 import PageContainer from '@_components/layouts/PageContainer'
-import EmptyState from '@_components/common/EmptyState'
-import { API } from '@_shared'
-import Quote from '@_classes/Quote'
-import { Product, CartProduct } from '@_classes/Product'
-import { Routes } from '@_features/navigation'
-import { formatDateForInput, addDays, serializeDate } from '@_lib'
+import Badge from '@_components/ui/Badge'
+import Button from '@_components/ui/Button'
+
+
+
+
 
 // Force dynamic rendering due to useSearchParams in Navbar
 export const dynamic = 'force-dynamic'
@@ -51,7 +64,7 @@ export default function CartPage() {
 	const [submitted, setSubmitted] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
 	const [products, setProducts] = useState<Map<string, Product>>(new Map())
-	const [isFetchingProducts, setIsFetchingProducts] = useState(false)
+	const [_isFetchingProducts, setIsFetchingProducts] = useState(false)
 	
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 	const user = useAuthStore((state) => state.user)

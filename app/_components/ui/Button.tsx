@@ -66,7 +66,9 @@
  * @module Button
  */
 
-import { forwardRef, ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { forwardRef } from 'react'
+
 import classNames from 'classnames'
 
 /**

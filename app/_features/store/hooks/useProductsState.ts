@@ -18,8 +18,9 @@
 'use client'
 
 import { useReducer, useCallback } from 'react'
-import { Product } from '@_classes/Product'
+
 import { PagedResult } from '@_classes/Base/PagedResult'
+import type { Product } from '@_classes/Product'
 
 /**
  * Products state interface

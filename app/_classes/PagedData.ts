@@ -102,6 +102,6 @@ export class PagedData {
 	 * ```
 	 */
 	constructor(partial?: Partial<PagedData>) {
-		if (partial) Object.assign(this, partial)
+		if (partial) {Object.assign(this, partial)}
 	}
 }

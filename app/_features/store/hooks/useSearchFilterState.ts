@@ -17,8 +17,9 @@
 'use client'
 
 import { useReducer, useCallback } from 'react'
-import ProductsCategory from '@_classes/ProductsCategory'
-import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
+
+import type { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
+import type ProductsCategory from '@_classes/ProductsCategory'
 
 /**
  * Search and filter state interface

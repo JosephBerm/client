@@ -75,8 +75,10 @@
  * @module EmptyState
  */
 
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
+
 import { FileQuestion } from 'lucide-react'
+
 import Button from '@_components/ui/Button'
 
 /**

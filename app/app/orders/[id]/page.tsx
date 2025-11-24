@@ -1,21 +1,26 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { notificationService, useRouteParam } from '@_shared'
 
-import Card from '@_components/ui/Card'
-import { InternalPageHeader } from '../../_components'
-import Badge from '@_components/ui/Badge'
-import { DataGrid, type ColumnDef } from '@_components/tables'
-import OrderStatusBadge from '@_components/common/OrderStatusBadge'
-import Order from '@_classes/Order'
+import { useRouter } from 'next/navigation'
+
+import { Routes } from '@_features/navigation'
+
+
+import { notificationService, useRouteParam , API , formatCurrency, formatDate } from '@_shared'
+
 import { OrderStatus } from '@_classes/Enums'
 import { OrderStatusHelper } from '@_classes/Helpers'
-import { logger } from '@_core'
-import { API } from '@_shared'
-import { Routes } from '@_features/navigation'
-import { formatCurrency, formatDate } from '@_shared'
+import Order from '@_classes/Order'
+
+import OrderStatusBadge from '@_components/common/OrderStatusBadge'
+import { DataGrid, type ColumnDef } from '@_components/tables'
+import Card from '@_components/ui/Card'
+
+import { InternalPageHeader } from '../../_components'
+
+
+
 
 export default function OrderDetailsPage() {
 	const router = useRouter()
@@ -78,12 +83,12 @@ export default function OrderDetailsPage() {
 	const orderDate = order?.createdAt ? formatDate(order.createdAt) : '-'
 
 	const subtotal = useMemo(() => {
-		if (!order?.products?.length) return 0
+		if (!order?.products?.length) {return 0}
 		return order.products.reduce((sum, item) => sum + (item.total ?? 0), 0)
 	}, [order?.products])
 
 	const outstandingBalance = useMemo(() => {
-		if (!order) return 0
+		if (!order) {return 0}
 		return subtotal + (order.salesTax ?? 0) + (order.shipping ?? 0) - (order.discount ?? 0)
 	}, [order, subtotal])
 
@@ -282,7 +287,7 @@ export default function OrderDetailsPage() {
 							<div className="mt-6 grid gap-4">
 								{order.products.map((item, index) => {
 									const dropoff = item.transitDetails?.locationDropoff
-									if (!dropoff) return null
+									if (!dropoff) {return null}
 
 									return (
 										<div key={item.id ?? index} className="rounded-xl border border-base-200 bg-base-100 p-4">

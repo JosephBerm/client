@@ -70,12 +70,14 @@
  * @module Quote
  */
 
-import { TypeOfBusiness, QuoteStatus } from '@_classes/Enums'
-import { CartProduct } from '@_classes/Product'
-import Address from './common/Address'
-import Name from '@_classes/common/Name'
-import Company from '@_classes/Company'
 import { parseRequiredTimestamp } from '@_lib/dates'
+
+import Name from '@_classes/common/Name'
+import { QuoteStatus } from '@_classes/Enums'
+import { CartProduct } from '@_classes/Product'
+
+import Address from './common/Address'
+
 // RichConstructor decorator not needed in modern Next.js
 
 /**

@@ -1,21 +1,25 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo , useState } from 'react'
+
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ColumnDef } from '@tanstack/react-table'
+
 import { Eye, Plus, Trash2 } from 'lucide-react'
-import { notificationService } from '@_shared'
+
+import { Routes } from '@_features/navigation'
+
+
+import { notificationService , createServerTableFetcher, formatDate , API } from '@_shared'
+
+import RoleBadge from '@_components/common/RoleBadge'
 import ServerDataGrid from '@_components/tables/ServerDataGrid'
 import Button from '@_components/ui/Button'
-import { InternalPageHeader } from '../_components'
 import Modal from '@_components/ui/Modal'
-import RoleBadge from '@_components/common/RoleBadge'
-import { createServerTableFetcher, formatDate } from '@_shared'
-import { logger } from '@_core'
-import { API } from '@_shared'
-import { Routes } from '@_features/navigation'
-import { useState } from 'react'
+
+import { InternalPageHeader } from '../_components'
+
+import type { ColumnDef } from '@tanstack/react-table'
 
 interface Account {
 	id: string
@@ -93,7 +97,7 @@ export default function AccountsPage() {
 	const fetchAccounts = createServerTableFetcher<Account>('/account/search')
 
 	const handleDelete = async () => {
-		if (!deleteModal.account) return
+		if (!deleteModal.account) {return}
 
 		try {
 			const { data } = await API.Accounts.delete(deleteModal.account.id)

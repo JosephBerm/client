@@ -46,26 +46,23 @@
  * @module api
  */
 
+import type CustomerSummary from '@_classes/Base/CustomerSummary'
+import type { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
+import type { PagedResult } from '@_classes/Base/PagedResult'
+import type Company from '@_classes/Company'
+import type ContactRequest from '@_classes/ContactRequest'
+import type FinanceNumbers from '@_classes/FinanceNumbers'
+import type FinanceSearchFilter from '@_classes/FinanceSearchFilter'
+import type Order from '@_classes/Order'
+import type { PagedData } from '@_classes/PagedData'
+import type { Product } from '@_classes/Product'
+import type ProductsCategory from '@_classes/ProductsCategory'
+import type Quote from '@_classes/Quote'
+import type { SubmitOrderRequest } from '@_classes/RequestClasses'
+import type UploadedFile from '@_classes/UploadedFile'
+import type User from '@_classes/User'
+
 import { HttpService } from './httpService'
-import { AxiosRequestConfig } from 'axios'
-
-import User, { RegisterModel } from '@_classes/User'
-import Order from '@_classes/Order'
-import Quote from '@_classes/Quote'
-import Company from '@_classes/Company'
-import UploadedFile from '@_classes/UploadedFile'
-import FinanceNumbers from '@_classes/FinanceNumbers'
-import ContactRequest from '@_classes/ContactRequest'
-import ProductsCategory from '@_classes/ProductsCategory'
-import LoginCredentials from '@_classes/LoginCredentials'
-import CustomerSummary from '@_classes/Base/CustomerSummary'
-
-import { Product } from '@_classes/Product'
-import { PagedResult } from '@_classes/Base/PagedResult'
-import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
-import { PagedData } from '@_classes/PagedData'
-import { SubmitOrderRequest } from '@_classes/RequestClasses'
-import FinanceSearchFilter from '@_classes/FinanceSearchFilter'
 
 /**
  * Main API object with domain-organized endpoints.
@@ -87,7 +84,7 @@ const API = {
 		 * API.Accounts.get(); // Current user
 		 * API.Accounts.get('123'); // User by ID
 		 */
-		get: async <T>(id: string | null | undefined) => await HttpService.get<User>(`/account${id ? '/' + id : ''}`),
+		get: async <_T>(id: string | null | undefined) => await HttpService.get<User>(`/account${id ? '/' + id : ''}`),
 		
 		/**
 		 * Updates user account information.

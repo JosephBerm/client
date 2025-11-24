@@ -29,7 +29,7 @@
  * 
  * @example
  * ```tsx
- * import OptimizedImage from '@_components/ui/OptimizedImage';
+ * import { OptimizedImage } from '@_components/images';
  * 
  * // Product image
  * <OptimizedImage
@@ -39,23 +39,6 @@
  *   size="md"
  *   priority={true}
  * />
- * 
- * // Thumbnail
- * <OptimizedImage
- *   src={thumbnailUrl}
- *   alt="Thumbnail"
- *   variant="thumbnail"
- *   size="sm"
- * />
- * 
- * // Hero image
- * <OptimizedImage
- *   src={heroUrl}
- *   alt="Hero banner"
- *   variant="hero"
- *   size="xl"
- *   priority={true}
- * />
  * ```
  * 
  * @module OptimizedImage
@@ -63,15 +46,22 @@
 
 'use client'
 
-import { useState, forwardRef, ImgHTMLAttributes, useEffect } from 'react'
+import type { ImgHTMLAttributes} from 'react';
+import { useState, forwardRef, useEffect } from 'react'
+
 import Image from 'next/image'
+
 import classNames from 'classnames'
 import { Package } from 'lucide-react'
+
+import { useImageAnalytics } from '@_features/images'
+import { useImageError } from '@_features/images'
+import { getBlurDataUrl } from '@_features/images'
+
 import { logger } from '@_core'
-import { getBlurDataUrl } from '../utils/imageUtils'
-import { useImageError } from '../hooks/useImageError'
+
 import ImageLoadingState from './ImageLoadingState'
-import { useImageAnalytics } from '../hooks/useImageAnalytics'
+
 
 /**
  * OptimizedImage component props interface.
@@ -251,13 +241,13 @@ const OptimizedImage = forwardRef<HTMLImageElement, OptimizedImageProps>(
 
 		// Extract width/height from props to prevent conflicts with Next.js Image fill prop
 		// When using fill={true}, width and height should not be passed
-		const { width, height, ...imageProps } = props
+		const { width: _width, height: _height, ...imageProps } = props
 
 		// Advanced error recovery (FAANG best practice: retry with exponential backoff)
 		const {
 			currentUrl,
 			hasError,
-			retry,
+			retry: _retry,
 		} = useImageError(src, {
 			strategy: 'retry',
 			maxRetries: 3,
@@ -372,5 +362,4 @@ const OptimizedImage = forwardRef<HTMLImageElement, OptimizedImageProps>(
 OptimizedImage.displayName = 'OptimizedImage'
 
 export default OptimizedImage
-
 

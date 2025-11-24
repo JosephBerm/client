@@ -92,10 +92,13 @@
 
 'use client'
 
-import { createContext, useContext, ReactNode, HTMLAttributes, useRef, useEffect } from 'react'
-import { useAccordion } from '@_shared'
-import { ChevronDown } from 'lucide-react'
+import type { ReactNode, HTMLAttributes} from 'react';
+import { createContext, useContext, useRef, useEffect } from 'react'
+
 import classNames from 'classnames'
+import { ChevronDown } from 'lucide-react'
+
+import { useAccordion } from '@_shared'
 
 /**
  * Accordion context type.
@@ -607,7 +610,7 @@ export function AccordionContent({
 	// Handle height animation
 	useEffect(() => {
 		const content = contentRef.current
-		if (!content) return
+		if (!content) {return}
 
 		if (isOpen) {
 			// Measure natural height and set it

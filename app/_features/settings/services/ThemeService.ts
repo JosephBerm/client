@@ -1,4 +1,5 @@
 import { Theme } from '@_classes/SharedEnums'
+
 import { BasePreferenceService } from './BasePreferenceService'
 
 /**
@@ -52,7 +53,7 @@ class ThemeServiceClass extends BasePreferenceService<Theme> {
 	 * Deserializes a DOM attribute value to a Theme.
 	 */
 	protected deserializeFromDOM(attributeValue: string | null): Theme | null {
-		if (!attributeValue) return null
+		if (!attributeValue) {return null}
 		return this.validateValue(attributeValue) ? (attributeValue as Theme) : null
 	}
 

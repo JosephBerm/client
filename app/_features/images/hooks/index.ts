@@ -1,24 +1,39 @@
 /**
- * Image Hooks - Barrel Export
+ * Image Hooks - Barrel Export (Optimized for Tree-Shaking)
  * 
- * Centralized export for all image-related React hooks.
- * Provides a single import path for consuming components.
- * 
- * **Hooks:**
- * - useImage: Image state management
- * - useImageError: Image error recovery with retry
- * - useImageAnalytics: Image performance tracking
+ * React hooks for image state management, error handling, and analytics.
+ * All hooks have 'use client' directive.
  * 
  * @example
  * ```typescript
- * import { useImageError, useImageAnalytics } from '@_features/images'
+ * import { useImage, useImageError, useImageAnalytics } from '@_features/images'
  * ```
  * 
  * @module images/hooks
  */
 
-// Re-export hooks - all use named exports
-export * from './useImage'
-export * from './useImageError'
-export * from './useImageAnalytics'
+// useImage
+export {
+	useImage,
+	type UseImageOptions,
+	type UseImageReturn,
+} from './useImage'
+
+// useImageError
+export {
+	useImageError,
+	type ErrorStrategy,
+	type UseImageErrorOptions,
+	type UseImageErrorReturn,
+} from './useImageError'
+
+// useImageAnalytics
+export {
+	useImageAnalytics,
+	type ImageLoadMetrics,
+	type InteractionType,
+	type ImageInteraction,
+	type UseImageAnalyticsOptions,
+	type UseImageAnalyticsReturn,
+} from './useImageAnalytics'
 

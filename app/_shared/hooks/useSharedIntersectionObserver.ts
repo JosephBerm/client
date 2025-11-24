@@ -89,7 +89,7 @@ class SharedObserverManager {
 	 */
 	observe(element: Element, callback: IntersectionCallback): void {
 		const observer = this.getObserver()
-		if (!observer || !element) return
+		if (!observer || !element) {return}
 
 		this.elements.set(element, callback)
 		observer.observe(element)
@@ -100,7 +100,7 @@ class SharedObserverManager {
 	 */
 	unobserve(element: Element): void {
 		const observer = this.getObserver()
-		if (!observer || !element) return
+		if (!observer || !element) {return}
 
 		this.elements.delete(element)
 		observer.unobserve(element)
@@ -182,13 +182,13 @@ export function useSharedIntersectionObserver(options: SharedObserverOptions = {
 	}, [thresholdValue, rootMarginValue]) // Only re-run when these specific values change
 
 	const observe = useCallback((element: Element | null, callback: IntersectionCallback) => {
-		if (!element || !observerRef.current) return
+		if (!element || !observerRef.current) {return}
 
 		observerRef.current.observe(element, callback)
 	}, [])
 
 	const unobserve = useCallback((element: Element | null) => {
-		if (!element || !observerRef.current) return
+		if (!element || !observerRef.current) {return}
 
 		observerRef.current.unobserve(element)
 	}, [])

@@ -29,26 +29,12 @@
 'use client'
 
 import { Suspense, useEffect, useState, useRef, useMemo, useCallback } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import { isEmpty } from 'lodash'
+
 // Toast functionality now handled by notificationService (unified logging + toast)
-import ClientPageLayout from '@_components/layouts/ClientPageLayout'
-import Button from '@_components/ui/Button'
-import CategoryFilter from '@_components/ui/CategoryFilter'
-import ProductCard from '@_components/store/ProductCard'
-import ProductCardSkeleton from '@_components/store/ProductCardSkeleton'
-import ScrollRevealCard from '@_components/store/ScrollRevealCard'
-import UnifiedStoreToolbar from '@_components/store/UnifiedStoreToolbar'
-import { SORT_OPTIONS } from '@_components/store/ProductsToolbar'
-import PaginationControls from '@_components/store/PaginationControls'
-import ProductsCategory, { sanitizeCategoriesList } from '@_classes/ProductsCategory'
-import { Product } from '@_classes/Product'
-import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
-import { PagedResult } from '@_classes/Base/PagedResult'
-import { API } from '@_shared'
-import { useDebounce } from '@_shared'
-import { notificationService } from '@_shared'
-import { logger } from '@_core'
 import {
 	useProductsState,
 	useSearchFilterState,
@@ -60,6 +46,28 @@ import {
 	PRIORITY_IMAGE_COUNT,
 } from '@_features/store'
 import { requestCache, createCacheKey } from '@_features/store/utils/requestCache'
+
+
+import { API , useDebounce , notificationService } from '@_shared'
+
+import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
+import { PagedResult } from '@_classes/Base/PagedResult'
+import { Product } from '@_classes/Product'
+import ProductsCategory, { sanitizeCategoriesList } from '@_classes/ProductsCategory'
+
+import ClientPageLayout from '@_components/layouts/ClientPageLayout'
+import PaginationControls from '@_components/store/PaginationControls'
+import ProductCard from '@_components/store/ProductCard'
+import ProductCardSkeleton from '@_components/store/ProductCardSkeleton'
+import { SORT_OPTIONS } from '@_components/store/ProductsToolbar'
+import ScrollRevealCard from '@_components/store/ScrollRevealCard'
+import UnifiedStoreToolbar from '@_components/store/UnifiedStoreToolbar'
+import Button from '@_components/ui/Button'
+import CategoryFilter from '@_components/ui/CategoryFilter'
+
+
+
+
 
 /**
  * Optional overrides for retrieveProducts function
@@ -240,7 +248,7 @@ const StorePageContent = () => {
 				try {
 					const { data } = await API.Store.Products.getAllCategories()
 
-					if (signal?.aborted) return []
+					if (signal?.aborted) {return []}
 
 				if (!data.payload || data.statusCode !== 200) {
 					notificationService.error(data.message ?? 'Unable to load categories', {
@@ -260,7 +268,7 @@ const StorePageContent = () => {
 					setCategories(sanitized)
 					return sanitized
 				} catch (err) {
-					if (signal?.aborted) return []
+					if (signal?.aborted) {return []}
 				
 				const message = err instanceof Error ? err.message : 'An unexpected error occurred while loading categories'
 				notificationService.error(message, {
@@ -384,7 +392,7 @@ const StorePageContent = () => {
 	}, [setSelectedCategoriesAction])
 
 	const loadMoreProducts = useCallback(() => {
-		if (isLoading || !hasMoreProducts) return
+		if (isLoading || !hasMoreProducts) {return}
 
 		const updatedCriteria = new GenericSearchFilter({
 			...searchCriteria,
@@ -396,7 +404,7 @@ const StorePageContent = () => {
 	}, [isLoading, hasMoreProducts, searchCriteria, currentPageSize, retrieveProducts, setSearchCriteriaAction])
 
 	const handlePageChange = useCallback((page: number) => {
-		if (isLoading) return
+		if (isLoading) {return}
 
 		const updatedCriteria = new GenericSearchFilter({
 			...searchCriteria,
@@ -438,7 +446,7 @@ const StorePageContent = () => {
 	}, [searchCriteria, retrieveProducts, setCurrentPageSizeAction, setSearchCriteriaAction])
 
 	const clearFilters = useCallback(() => {
-		if (!isFiltered) return
+		if (!isFiltered) {return}
 
 		const resetFilter = createInitialFilter()
 		resetFilters(resetFilter)
@@ -658,7 +666,7 @@ const StorePageContent = () => {
 			!userIntentionallyBlurredRef.current &&
 			searchInputRef.current
 		) {
-			const input = searchInputRef.current
+			const _input = searchInputRef.current
 			
 			// Double RAF + setTimeout ensures DOM is fully updated
 			// This is the most reliable method across all browsers

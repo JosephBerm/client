@@ -32,7 +32,7 @@
  * @module table-helpers
  */
 
-import { SortingState } from '@tanstack/react-table'
+import type { SortingState } from '@tanstack/react-table'
 
 /**
  * Converts TanStack Table sorting state to backend API format.

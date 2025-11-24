@@ -1,6 +1,7 @@
 'use client'
 
-import { useRef, useCallback, RefCallback } from 'react'
+import type { RefCallback } from 'react';
+import { useRef, useCallback } from 'react'
 
 /**
  * useElementRefs Hook

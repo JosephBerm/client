@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { scrollToElement, getCSSVariable, calculateScrollOffset } from '@_shared/utils/scrollUtils'
+
+import { scrollToElement } from '@_shared/utils/scrollUtils'
 
 /**
  * Configuration options for useScrollSpy hook

@@ -330,7 +330,7 @@ export default class NotificationTypeHelper {
 	 * ```
 	 */
 	static isValid(value: unknown): value is NotificationType {
-		if (typeof value !== 'number') return false
+		if (typeof value !== 'number') {return false}
 		return Object.values(NotificationType).includes(value as NotificationType)
 	}
 }

@@ -1,7 +1,9 @@
 'use client'
 
 import { memo, useCallback } from 'react'
+
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+
 import type { EmblaCarouselType } from 'embla-carousel'
 
 interface CarouselControlsProps {
@@ -33,7 +35,7 @@ const CarouselControls = memo(function CarouselControls({
 		}
 	}, [emblaApi])
 
-	if (!showArrows) return null
+	if (!showArrows) {return null}
 
 	return (
 		<>

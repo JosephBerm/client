@@ -61,7 +61,7 @@ export function useMediaQuery(query: string): boolean {
 
 	useEffect(() => {
 		// Skip if window is not defined (SSR)
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 
 		const mediaQuery = window.matchMedia(query)
 		

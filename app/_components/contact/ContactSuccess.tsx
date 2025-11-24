@@ -1,12 +1,16 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+
 import { CheckCircle, Mail, Phone, ArrowRight } from 'lucide-react'
-import Button from '@_components/ui/Button'
-import Card from '@_components/ui/Card'
-import PageContainer from '@_components/layouts/PageContainer'
+
 import { useAuthStore } from '@_features/auth'
 import { Routes } from '@_features/navigation'
+
+import PageContainer from '@_components/layouts/PageContainer'
+import Button from '@_components/ui/Button'
+import Card from '@_components/ui/Card'
+
 import { CONTACT_INFO } from './contact.constants'
 
 export interface ContactSuccessProps {
@@ -27,7 +31,7 @@ export interface ContactSuccessProps {
  * 
  * @module contact/ContactSuccess
  */
-export default function ContactSuccess({ onReset }: ContactSuccessProps) {
+export default function ContactSuccess({ onReset: _onReset }: ContactSuccessProps) {
 	const router = useRouter()
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 

@@ -105,12 +105,16 @@
 
 'use client'
 
-import { forwardRef, SelectHTMLAttributes } from 'react'
-import { FieldError } from 'react-hook-form'
+import type { SelectHTMLAttributes } from 'react';
+import { forwardRef } from 'react'
+
 import classNames from 'classnames'
 import { ChevronDown } from 'lucide-react'
 
 import { baseFieldClass, errorClass, errorFieldClass, fieldWrapperClass, helperClass, labelClass } from './fieldStyles'
+
+import type { FieldError } from 'react-hook-form'
+
 
 /**
  * FormSelect component props interface.

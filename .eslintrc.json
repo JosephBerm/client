@@ -1,3 +1,346 @@
 {
-  "extends": "next/core-web-vitals"
+	"extends": [
+		"next/core-web-vitals",
+		"plugin:@typescript-eslint/recommended",
+		"plugin:import/recommended",
+		"plugin:import/typescript"
+	],
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"ecmaVersion": 2022,
+		"sourceType": "module"
+	},
+	"plugins": ["@typescript-eslint", "import"],
+	"settings": {
+		"import/resolver": {
+			"typescript": {
+				"alwaysTryTypes": true,
+				"project": "./tsconfig.json"
+			},
+			"node": {
+				"extensions": [".js", ".jsx", ".ts", ".tsx"]
+			}
+		},
+		"import/parsers": {
+			"@typescript-eslint/parser": [".ts", ".tsx"]
+		}
+	},
+	"rules": {
+		// ==========================================
+		// BARREL EXPORT ENFORCEMENT (FAANG-Level)
+		// ==========================================
+		
+		// Enforce barrel imports from aliased paths
+		"no-restricted-imports": [
+			"error",
+			{
+				"patterns": [
+					{
+						"group": ["../../../*", "../../../../*", "../../../../../*"],
+						"message": "❌ Deep relative imports (3+ levels) are forbidden.\n✅ Use barrel exports with path aliases:\n  • @_features/feature-name\n  • @_shared\n  • @_lib\n  • @_core\n  • @_components/*\n  • @_classes/*\n  • @_types\n  • @_helpers/*"
+					},
+					{
+						"group": ["**/index"],
+						"message": "❌ Do not import 'index' explicitly.\n✅ Import from the parent directory barrel instead."
+					},
+					{
+						"group": ["app/_features/*/services/*", "!app/_features/*/index*"],
+						"message": "❌ Do not import feature services directly.\n✅ Import from feature barrel: import { ServiceName } from '@_features/feature-name'"
+					},
+					{
+						"group": ["app/_features/*/stores/*", "!app/_features/*/index*"],
+						"message": "❌ Do not import feature stores directly.\n✅ Import from feature barrel: import { useStoreName } from '@_features/feature-name'"
+					},
+					{
+						"group": ["app/_features/*/hooks/*", "!app/_features/*/index*"],
+						"message": "❌ Do not import feature hooks directly.\n✅ Import from feature barrel: import { useHookName } from '@_features/feature-name'"
+					},
+					{
+						"group": ["app/_shared/hooks/*", "!app/_shared/index*"],
+						"message": "❌ Do not import shared hooks directly.\n✅ Import from @_shared barrel: import { useHookName } from '@_shared'"
+					},
+					{
+						"group": ["app/_shared/services/*", "!app/_shared/index*"],
+						"message": "❌ Do not import shared services directly.\n✅ Import from @_shared barrel: import { ServiceName, API } from '@_shared'"
+					},
+					{
+						"group": ["app/_shared/utils/*", "!app/_shared/index*"],
+						"message": "❌ Do not import shared utils directly.\n✅ Import from @_shared barrel: import { utilityName } from '@_shared'"
+					},
+					{
+						"group": ["app/_lib/formatters/*", "app/_lib/dates/*", "app/_lib/validators/*", "!app/_lib/index*"],
+						"message": "❌ Do not import lib utilities directly.\n✅ Import from @_lib barrel: import { formatCurrency, formatDate } from '@_lib'"
+					},
+					{
+						"group": ["app/_core/logger/*", "app/_core/validation/*", "!app/_core/index*"],
+						"message": "❌ Do not import core utilities directly.\n✅ Import from @_core barrel: import { Logger } from '@_core'"
+					}
+				]
+			}
+		],
+
+		// Prevent circular dependencies (CRITICAL for large codebases)
+		// NOTE: Domain classes (Company, User, Order, Quote) have intentional cycles
+		// for bidirectional relationships - this is acceptable for domain models
+		"import/no-cycle": [
+			"error",
+			{
+				"maxDepth": 10,
+				"ignoreExternal": true,
+				"allowUnsafeDynamicCyclicDependency": false
+			}
+		],
+
+		// Enforce consistent import order (Meta/Google/Netflix standard)
+		"import/order": [
+			"error",
+			{
+				"groups": [
+					"builtin",
+					"external",
+					"internal",
+					"parent",
+					"sibling",
+					"index",
+					"type"
+				],
+				"pathGroups": [
+					{
+						"pattern": "react",
+						"group": "external",
+						"position": "before"
+					},
+					{
+						"pattern": "react-dom",
+						"group": "external",
+						"position": "before"
+					},
+					{
+						"pattern": "next",
+						"group": "external",
+						"position": "before"
+					},
+					{
+						"pattern": "next/**",
+						"group": "external",
+						"position": "before"
+					},
+					{
+						"pattern": "@_features/**",
+						"group": "internal",
+						"position": "before"
+					},
+					{
+						"pattern": "@_core",
+						"group": "internal",
+						"position": "before"
+					},
+					{
+						"pattern": "@_core/**",
+						"group": "internal",
+						"position": "before"
+					},
+					{
+						"pattern": "@_lib",
+						"group": "internal",
+						"position": "before"
+					},
+					{
+						"pattern": "@_lib/**",
+						"group": "internal",
+						"position": "before"
+					},
+					{
+						"pattern": "@_shared",
+						"group": "internal",
+						"position": "before"
+					},
+					{
+						"pattern": "@_shared/**",
+						"group": "internal",
+						"position": "before"
+					},
+					{
+						"pattern": "@_classes/**",
+						"group": "internal",
+						"position": "after"
+					},
+					{
+						"pattern": "@_components/**",
+						"group": "internal",
+						"position": "after"
+					},
+					{
+						"pattern": "@_types",
+						"group": "internal",
+						"position": "after"
+					},
+					{
+						"pattern": "@_types/**",
+						"group": "internal",
+						"position": "after"
+					},
+					{
+						"pattern": "@_helpers/**",
+						"group": "internal",
+						"position": "after"
+					}
+				],
+				"pathGroupsExcludedImportTypes": ["react", "react-dom", "next"],
+				"newlines-between": "always",
+				"alphabetize": {
+					"order": "asc",
+					"caseInsensitive": true
+				}
+			}
+		],
+
+		// Ensure all imports can be resolved
+		"import/no-unresolved": "error",
+
+		// Prefer named exports for better tree-shaking (disabled for Next.js pages)
+		"import/prefer-default-export": "off",
+
+		// Prevent namespace imports for better tree-shaking
+		"import/no-namespace": [
+			"warn",
+			{
+				"ignore": ["lucide-react"]
+			}
+		],
+
+		// ==========================================
+		// TYPESCRIPT BEST PRACTICES
+		// ==========================================
+		
+		"@typescript-eslint/no-unused-vars": [
+			"error",
+			{
+				"argsIgnorePattern": "^_",
+				"varsIgnorePattern": "^_",
+				"caughtErrorsIgnorePattern": "^_",
+				"destructuredArrayIgnorePattern": "^_"
+			}
+		],
+		"@typescript-eslint/no-explicit-any": "warn",
+		"@typescript-eslint/explicit-module-boundary-types": "off",
+		"@typescript-eslint/no-non-null-assertion": "warn",
+		
+		// Enforce consistent type imports (Google/Airbnb standard)
+		"@typescript-eslint/consistent-type-imports": [
+			"error",
+			{
+				"prefer": "type-imports",
+				"disallowTypeAnnotations": false,
+				"fixStyle": "separate-type-imports"
+			}
+		],
+
+		// Enforce consistent type exports
+		// NOTE: This is a type-aware rule - disabled for performance
+		// Enable if you add parserOptions.project and need strict type export checking
+		// "@typescript-eslint/consistent-type-exports": [
+		// 	"error",
+		// 	{
+		// 		"fixMixedExportsWithInlineTypeSpecifier": true
+		// 	}
+		// ],
+
+		// Prevent unused imports
+		"@typescript-eslint/no-unused-expressions": [
+			"error",
+			{
+				"allowShortCircuit": true,
+				"allowTernary": true,
+				"allowTaggedTemplates": true
+			}
+		],
+
+		// ==========================================
+		// NEXT.JS SPECIFIC
+		// ==========================================
+		
+		"@next/next/no-html-link-for-pages": "error",
+		"@next/next/no-img-element": "warn",
+
+		// ==========================================
+		// CODE QUALITY
+		// ==========================================
+		
+		"no-console": [
+			"warn",
+			{
+				"allow": ["warn", "error"]
+			}
+		],
+		"prefer-const": "error",
+		"no-var": "error",
+		"eqeqeq": ["error", "always", { "null": "ignore" }],
+		"curly": ["error", "all"],
+		"no-debugger": "warn"
+	},
+	"overrides": [
+		{
+			// Allow default exports in Next.js specific files
+			"files": [
+				"app/**/page.tsx",
+				"app/**/layout.tsx",
+				"app/**/error.tsx",
+				"app/**/loading.tsx",
+				"app/**/not-found.tsx",
+				"app/**/template.tsx",
+				"app/**/default.tsx",
+				"app/middleware.ts",
+				"*.config.*"
+			],
+			"rules": {
+				"import/no-default-export": "off",
+				"import/prefer-default-export": "off"
+			}
+		},
+		{
+			// Barrel export files: enforce named exports only + no wildcards
+			"files": ["**/index.ts", "**/index.tsx"],
+			"rules": {
+				"import/no-default-export": "error",
+				"no-restricted-syntax": [
+					"error",
+					{
+						"selector": "ExportAllDeclaration",
+						"message": "❌ Wildcard exports (export * from) are FORBIDDEN in barrel files.\n\n🎯 Why?\n  • Prevents optimal tree-shaking\n  • Makes dependencies unclear\n  • Harder to track what's exported\n  • Can cause circular dependency issues\n\n✅ Solution:\n  Replace with explicit named exports:\n  export { specificFunction, specificClass } from './module'\n\n📚 FAANG Standard:\n  Google, Meta, Netflix all use explicit exports for enterprise codebases."
+					}
+				]
+			}
+		},
+		{
+			// TypeScript definition files
+			"files": ["*.d.ts"],
+			"rules": {
+				"@typescript-eslint/no-explicit-any": "off",
+				"import/no-default-export": "off"
+			}
+		},
+		{
+			// Test files
+			"files": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+			"rules": {
+				"@typescript-eslint/no-explicit-any": "off",
+				"no-console": "off"
+			}
+		},
+		{
+			// Domain classes: Allow circular dependencies for bidirectional relationships
+			// Company <-> Order, Company <-> User, User <-> Company, Order <-> Company
+			// These are intentional and necessary for domain model deep copy/hydration patterns
+			"files": [
+				"app/_classes/Company.ts",
+				"app/_classes/User.ts",
+				"app/_classes/Order.ts",
+				"app/_classes/Quote.ts"
+			],
+			"rules": {
+				"import/no-cycle": "warn"
+			}
+		}
+	]
 }

@@ -30,20 +30,18 @@
  * 
  * @example
  * ```tsx
- * import ImageLoadingState from '@_components/ui/ImageLoadingState';
+ * import { ImageLoadingState } from '@_components/images';
  * 
  * // Product skeleton
  * <ImageLoadingState variant="product" size="md" />
- * 
- * // Gallery skeleton
- * <ImageLoadingState variant="gallery" size="lg" />
  * ```
  * 
  * @see app/globals.css - Global skeleton animation definitions
  * @module ImageLoadingState
  */
 
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
+
 import classNames from 'classnames'
 
 /**
@@ -127,7 +125,7 @@ const variantConfig = {
  */
 export default function ImageLoadingState({
 	variant = 'product',
-	size = 'md',
+	size: _size = 'md',
 	showShimmer = true,
 	className,
 	children,

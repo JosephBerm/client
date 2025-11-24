@@ -1,14 +1,17 @@
 import Image from 'next/image'
 import Link from 'next/link'
+
 import { ArrowUpRight } from 'lucide-react'
+
 import { Routes } from '@_features/navigation'
 
 import DoctorsImage from '@/public/LandingImage1.png'
+
+import { Reveal, Stagger, StaggerItem, ANIMATION_DURATION, ANIMATION_DELAY, STAGGER_DELAY, ANIMATION_DISTANCE } from '@_components/common/animations'
 import PageContainer from '@_components/layouts/PageContainer'
 import Button from '@_components/ui/Button'
 import Pill from '@_components/ui/Pill'
 import StatusDot from '@_components/ui/StatusDot'
-import { Reveal, Stagger, StaggerItem, ANIMATION_DURATION, ANIMATION_DELAY, STAGGER_DELAY, ANIMATION_DISTANCE } from '@_components/common/animations'
 
 /**
  * Intro Section

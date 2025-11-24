@@ -70,8 +70,9 @@
  * @module RoleBadge
  */
 
-import Badge from '@_components/ui/Badge'
 import { AccountRole } from '@_classes/Enums'
+
+import Badge from '@_components/ui/Badge'
 
 /**
  * RoleBadge component props interface.

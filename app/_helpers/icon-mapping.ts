@@ -27,6 +27,7 @@ import {
 	Bell,
 	type LucideIcon,
 } from 'lucide-react'
+
 import type { NavigationIconType } from '@_types/navigation'
 
 /**

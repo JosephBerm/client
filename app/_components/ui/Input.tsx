@@ -80,8 +80,11 @@
 
 'use client'
 
-import React, { forwardRef, InputHTMLAttributes, ReactNode } from 'react'
+import type { InputHTMLAttributes, ReactNode } from 'react';
+import React, { forwardRef } from 'react'
+
 import classNames from 'classnames'
+
 import {
 	formFieldBaseClasses,
 	formFieldHoverClasses,

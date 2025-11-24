@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+
 import { 
 	ArrowLeft, 
 	ShieldCheck, 
@@ -12,15 +13,21 @@ import {
 	Mail
 } from 'lucide-react'
 
+import { Routes } from '@_features/navigation'
+
+import { serializeProduct } from '@_lib/serializers/productSerializer'
+
+import { API } from '@_shared'
+
+import { Product } from '@_classes/Product'
+
 import PageLayout from '@_components/layouts/PageLayout'
-import Badge from '@_components/ui/Badge'
-import Breadcrumb, { type BreadcrumbItem } from '@_components/ui/Breadcrumb'
 import ProductImageGallery from '@_components/store/ProductImageGallery'
 import RelatedProducts from '@_components/store/RelatedProducts'
-import { Product } from '@_classes/Product'
-import { serializeProduct } from '@_lib/serializers/productSerializer'
-import { API } from '@_shared'
-import { Routes } from '@_features/navigation'
+import Badge from '@_components/ui/Badge'
+import Breadcrumb, { type BreadcrumbItem } from '@_components/ui/Breadcrumb'
+
+
 
 interface ProductPageParams {
 	params: Promise<{
@@ -50,7 +57,7 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 
 	// Filter for non-image documents (PDFs, Specs, etc.)
 	const documents = serializedProduct.files.filter(file => {
-		if (!file.name) return false
+		if (!file.name) {return false}
 		const isImage = file.name.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) || 
 						file.contentType?.startsWith('image/')
 		return !isImage
@@ -165,8 +172,8 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 									) : (
 										<Badge variant="warning" size="sm" tone="subtle">
 											Out of Stock
-										</Badge>
-									)}
+												</Badge>
+										  )}
 								</div>
 							</div>
 
@@ -195,13 +202,13 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 								</div>
 
 								<div className="space-y-4">
-									<Link
-										href={Routes.Contact.withProduct(product.id)}
+								<Link
+									href={Routes.Contact.withProduct(product.id)}
 										className="btn btn-primary btn-lg w-full gap-3 rounded-xl text-lg font-semibold shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/30"
-									>
+								>
 										Request Quote
 										<ArrowLeft className="h-5 w-5 rotate-180" />
-									</Link>
+								</Link>
 									<div className="flex items-center justify-center gap-2 text-xs text-base-content/40">
 										<CheckCircle2 className="h-3.5 w-3.5" />
 										<span>No commitment required</span>

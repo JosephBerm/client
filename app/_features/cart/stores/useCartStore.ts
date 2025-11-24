@@ -128,7 +128,7 @@ const initialState: CartState = {
  */
 export const useCartStore = create<CartStore>()(
 	persist(
-		(set, get) => ({
+		(set, _get) => ({
 			...initialState,
 
 			/**

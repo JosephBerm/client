@@ -8,8 +8,11 @@
 
 'use client'
 
-import { useEffect, useRef, useCallback, RefObject } from 'react'
+import type { RefObject } from 'react';
+import { useEffect, useRef, useCallback } from 'react'
+
 import { logger } from '@_core'
+
 import { FOCUSABLE_ELEMENTS_SELECTOR } from '../types/divTableConstants'
 
 /**
@@ -114,7 +117,7 @@ export function useFocusManagement({
    * Get all focusable elements within container
    */
   const getFocusableElements = useCallback((): HTMLElement[] => {
-    if (!containerRef.current) return []
+    if (!containerRef.current) {return []}
 
     const elements = Array.from(
       containerRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_ELEMENTS_SELECTOR)
@@ -161,7 +164,7 @@ export function useFocusManagement({
    * Save current focus position
    */
   const saveFocus = useCallback(() => {
-    if (!containerRef.current) return
+    if (!containerRef.current) {return}
 
     const activeElement = document.activeElement as HTMLElement
     if (!activeElement || !containerRef.current.contains(activeElement)) {
@@ -196,7 +199,7 @@ export function useFocusManagement({
    * Restore saved focus position
    */
   const restoreFocus = useCallback(() => {
-    if (!containerRef.current || !savedFocusPosition.current) return false
+    if (!containerRef.current || !savedFocusPosition.current) {return false}
 
     const { rowIndex, colIndex } = savedFocusPosition.current
 
@@ -206,13 +209,13 @@ export function useFocusManagement({
         `[role="row"][aria-rowindex="${rowIndex + 2}"]`
       )
 
-      if (!targetRow) return false
+      if (!targetRow) {return false}
 
       const targetCell = targetRow.querySelector(
         `[role="gridcell"][aria-colindex="${colIndex + 1}"]`
       ) as HTMLElement
 
-      if (!targetCell) return false
+      if (!targetCell) {return false}
 
       // Focus the cell or first focusable element within
       const focusableElement =
@@ -244,13 +247,13 @@ export function useFocusManagement({
    */
   const handleFocusTrap = useCallback(
     (event: KeyboardEvent) => {
-      if (!trap?.enabled || !containerRef.current) return
+      if (!trap?.enabled || !containerRef.current) {return}
 
       // Only trap Tab key
-      if (event.key !== 'Tab') return
+      if (event.key !== 'Tab') {return}
 
       const focusableElements = getFocusableElements()
-      if (focusableElements.length === 0) return
+      if (focusableElements.length === 0) {return}
 
       const firstElement = focusableElements[0]
       const lastElement = focusableElements[focusableElements.length - 1]
@@ -278,7 +281,7 @@ export function useFocusManagement({
    */
   const handleEscape = useCallback(
     (event: KeyboardEvent) => {
-      if (!trap?.enabled || event.key !== 'Escape') return
+      if (!trap?.enabled || event.key !== 'Escape') {return}
 
       trap.onEscapeAttempt?.()
     },
@@ -289,7 +292,7 @@ export function useFocusManagement({
    * Auto-focus on mount
    */
   useEffect(() => {
-    if (!autoFocus || !containerRef.current) return
+    if (!autoFocus || !containerRef.current) {return}
 
     // Wait for next tick to ensure elements are rendered
     const timeoutId = setTimeout(() => {
@@ -310,7 +313,7 @@ export function useFocusManagement({
    * Restore focus on mount
    */
   useEffect(() => {
-    if (!restoreFocusOnMount || !containerRef.current) return
+    if (!restoreFocusOnMount || !containerRef.current) {return}
 
     const timeoutId = setTimeout(() => {
       restoreFocus()
@@ -334,7 +337,7 @@ export function useFocusManagement({
    * Set up focus trap
    */
   useEffect(() => {
-    if (!trap?.enabled || !containerRef.current) return
+    if (!trap?.enabled || !containerRef.current) {return}
 
     // Save the element that currently has focus
     previousActiveElement.current = document.activeElement as HTMLElement

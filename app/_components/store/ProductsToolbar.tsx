@@ -117,7 +117,7 @@ export default function ProductsToolbar({
 	totalCount,
 	isLoading = false,
 }: ProductsToolbarProps) {
-	const currentSortOption = SORT_OPTIONS.find((opt) => opt.value === currentSort) || SORT_OPTIONS[0]
+	const _currentSortOption = SORT_OPTIONS.find((opt) => opt.value === currentSort) || SORT_OPTIONS[0]
 
 	return (
 		<div

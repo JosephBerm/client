@@ -286,8 +286,8 @@ export class CDNService {
 	 */
 	private static transformCloudFrontUrl(
 		originalUrl: string,
-		config: CDNConfig,
-		options: CDNTransformOptions
+		_config: CDNConfig,
+		_options: CDNTransformOptions
 	): string {
 		// CloudFront with Lambda@Edge or CloudFront Functions
 		// For now, return original URL (transformations handled server-side)

@@ -1,13 +1,14 @@
 /**
- * Types - Barrel Export
+ * Types - Barrel Export (Optimized for Tree-Shaking)
  * 
  * Centralized type definitions for the application.
- * Provides type-safe interfaces for navigation, settings, and shared contracts.
+ * Pure TypeScript types - zero runtime cost.
  * 
  * **Architecture:**
  * - Single source of truth for shared types
  * - Enables DRY-compliant type usage
  * - Supports Dependency Inversion Principle
+ * - Zero bundle impact (types only)
  * 
  * @example
  * ```typescript
@@ -17,9 +18,30 @@
  * @module types
  */
 
-// Navigation types
-export * from './navigation'
+// ============================================================================
+// NAVIGATION TYPES
+// ============================================================================
 
-// Settings types
-export * from './settings'
+export type {
+	BreadcrumbItem,
+	NavigationIconType,
+	NavigationRoute,
+	NavigationSection,
+} from './navigation'
+
+export { AccountRole } from './navigation'
+
+// ============================================================================
+// SETTINGS TYPES
+// ============================================================================
+
+export type {
+	SelectOption,
+	SelectSettingItem,
+	ToggleSettingItem,
+	ButtonSettingItem,
+	CustomSettingItem,
+	SettingItem,
+	SettingsSection,
+} from './settings'
 

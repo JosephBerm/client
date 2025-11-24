@@ -110,7 +110,7 @@ export default class ProductsCategory {
 	 * ```
 	 */
 	constructor(partial?: Partial<ProductsCategory>) {
-		if (partial) Object.assign(this, partial)
+		if (partial) {Object.assign(this, partial)}
 	}
 }
 

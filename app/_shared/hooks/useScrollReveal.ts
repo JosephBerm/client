@@ -30,6 +30,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
+
 import { useSharedIntersectionObserver } from './useSharedIntersectionObserver'
 
 export interface UseScrollRevealOptions {
@@ -106,25 +107,25 @@ export function useScrollReveal({
 	const prefersReducedMotion = useRef(false)
 	
 	const checkReducedMotion = useCallback(() => {
-		if (typeof window === 'undefined') return false
+		if (typeof window === 'undefined') {return false}
 		
 		// Check user override first (data-reduced-motion attribute)
 		const userOverride = document.documentElement.getAttribute('data-reduced-motion')
-		if (userOverride === 'true') return true
+		if (userOverride === 'true') {return true}
 		
 		// Fall back to system preference
 		return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 	}, [])
 	
 	useEffect(() => {
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 		
 		// Initial check
 		prefersReducedMotion.current = checkReducedMotion()
 		
 		// Listen to system preference changes
 		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-		const handleMediaChange = (e: MediaQueryListEvent) => {
+		const handleMediaChange = (_e: MediaQueryListEvent) => {
 			prefersReducedMotion.current = checkReducedMotion()
 		}
 		
@@ -154,7 +155,7 @@ export function useScrollReveal({
 	 */
 	const handleIntersection = useCallback(
 		(entry: IntersectionObserverEntry) => {
-			if (!entry) return
+			if (!entry) {return}
 
 			const isIntersecting = entry.isIntersecting
 

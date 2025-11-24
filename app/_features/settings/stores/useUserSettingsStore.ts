@@ -51,11 +51,14 @@
 'use client'
 
 import { create } from 'zustand'
-import { Theme } from '@_classes/SharedEnums'
-import { ThemeService } from '../services/ThemeService'
-import { ReducedMotionService } from '../services/ReducedMotionService'
-import { UserSettingsService } from '../services/UserSettingsService'
+
 import { logger } from '@_core'
+
+import { Theme } from '@_classes/SharedEnums'
+
+import { ReducedMotionService } from '../services/ReducedMotionService'
+import { ThemeService } from '../services/ThemeService'
+import { UserSettingsService } from '../services/UserSettingsService'
 
 /**
  * User preferences for UI behavior and display.
@@ -383,7 +386,7 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 		 * the current state with stored values.
 		 */
 		initialize: async () => {
-			if (typeof window === 'undefined') return
+			if (typeof window === 'undefined') {return}
 
 			set({ themeLoading: true })
 

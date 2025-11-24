@@ -1,5 +1,6 @@
-import { Theme } from '@_classes/SharedEnums'
 import { logger } from '@_core'
+
+import { Theme } from '@_classes/SharedEnums'
 
 /**
  * User Settings Service
@@ -171,7 +172,7 @@ export class UserSettingsService {
 	 * ```
 	 */
 	static getSettings(): UserSettings {
-		if (typeof window === 'undefined') return DEFAULT_SETTINGS
+		if (typeof window === 'undefined') {return DEFAULT_SETTINGS}
 
 		try {
 			const stored = localStorage.getItem(STORAGE_KEY)
@@ -255,7 +256,7 @@ export class UserSettingsService {
 	 * ```
 	 */
 	static setSetting<K extends keyof UserSettings>(key: K, value: UserSettings[K]): void {
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 
 		try {
 			// Validate value based on key
@@ -313,7 +314,7 @@ export class UserSettingsService {
 	 * ```
 	 */
 	static setSettings(settings: Partial<UserSettings>): void {
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 
 		try {
 			// Get current settings
@@ -399,7 +400,7 @@ export class UserSettingsService {
 	 * ```
 	 */
 	static clearSettings(): void {
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 
 		try {
 			localStorage.removeItem(STORAGE_KEY)

@@ -114,7 +114,7 @@ export default class Name {
 		let initials = this.first.charAt(0).toUpperCase()
 		
 		// Add middle initial if present
-		if (this.middle) initials += this.middle.charAt(0).toUpperCase()
+		if (this.middle) {initials += this.middle.charAt(0).toUpperCase()}
 		
 		// Add last initial
 		initials += this.last.charAt(0).toUpperCase()
@@ -139,7 +139,7 @@ export default class Name {
 	 */
 	public getFullName = (): string => {
 		let fullName = this.first
-		if (this.middle) fullName += ` ${this.middle}`
+		if (this.middle) {fullName += ` ${this.middle}`}
 		fullName += ` ${this.last}`
 		return fullName
 	}

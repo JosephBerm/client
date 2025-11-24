@@ -214,7 +214,7 @@ export function validateImageUrl(url: string): boolean {
  * @param {string} productId - Product ID
  * @returns {string} Fallback URL (placeholder or default image)
  */
-export function getImageFallbackUrl(productId: string): string {
+export function getImageFallbackUrl(_productId: string): string {
 	// For now, return empty string (placeholder will be handled by component)
 	// Future: Could return a default placeholder image URL
 	return ''

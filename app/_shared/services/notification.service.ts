@@ -77,8 +77,11 @@
 
 'use client'
 
-import { toast, ToastOptions, Id as ToastId } from 'react-toastify'
-import { logger, LogMetadata, LogLevel } from '@_core/logger'
+import { toast } from 'react-toastify'
+
+import type { LogMetadata, LogLevel } from '@_core/logger';
+import { logger } from '@_core/logger'
+
 import {
 	TOAST_SUCCESS_CONFIG,
 	TOAST_ERROR_CONFIG,
@@ -86,6 +89,8 @@ import {
 	TOAST_WARNING_CONFIG,
 	TOAST_PERSISTENT_CONFIG,
 } from '@_shared/utils/toastConfig'
+
+import type { ToastOptions, Id as ToastId } from 'react-toastify';
 
 /**
  * Notification type matching toast variants and log levels.
@@ -292,8 +297,8 @@ class NotificationService {
 			action,
 			persist = false,
 			duration,
-			actionLabel,
-			onAction,
+			actionLabel: _actionLabel,
+			onAction: _onAction,
 			onDismiss,
 			toastOptions = {},
 			skipLogging = false,

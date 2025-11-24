@@ -27,16 +27,19 @@
 
 'use client'
 
-import { motion, useInView } from 'framer-motion'
 import { useRef, useMemo, useEffect, useState, type ReactNode } from 'react'
+
 import classNames from 'classnames'
+import { motion, useInView } from 'framer-motion'
+
 import { logger } from '@_core'
+
 import {
 	getAnimationVariants,
 	checkReducedMotion,
 	REDUCED_MOTION_VARIANTS,
-	ANIMATION_EASING,
 	type BaseAnimationProps,
+	type ANIMATION_EASING,
 } from './types'
 
 export interface RevealProps extends BaseAnimationProps {
@@ -85,7 +88,7 @@ export default function Reveal({
 
 	// Check reduced motion preference (system + user override)
 	useEffect(() => {
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 
 		// Initial check
 		setPrefersReducedMotion(checkReducedMotion())

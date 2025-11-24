@@ -48,9 +48,10 @@
  */
 
 import { logger } from '@_core'
-import { AccountRole } from '@_classes/Enums'
-import { NavigationService } from './NavigationService'
+
 import type { BreadcrumbItem } from '@_types/navigation'
+
+import { NavigationService } from './NavigationService'
 
 // Re-export BreadcrumbItem for convenience
 export type { BreadcrumbItem }
@@ -278,7 +279,7 @@ export class BreadcrumbService {
 		// Check if segment exists in accessible routes
 		// Use exact path segment matching to avoid false positives
 		const accessible = allRoutes.some((r) => {
-			if (r.id === segment) return true
+			if (r.id === segment) {return true}
 			const segments = r.href.split('/').filter(Boolean)
 			return segments.includes(segment)
 		})

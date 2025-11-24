@@ -44,10 +44,10 @@ export function scrollToElement(
 ): boolean {
 	const { offset = 0, behavior = 'smooth', respectReducedMotion = true } = options
 
-	if (typeof window === 'undefined') return false
+	if (typeof window === 'undefined') {return false}
 
 	const element = document.getElementById(elementId)
-	if (!element) return false
+	if (!element) {return false}
 
 	// Check for reduced motion preference
 	const prefersReducedMotion = respectReducedMotion
@@ -124,11 +124,11 @@ export function scrollToElement(
  * ```
  */
 export function getCSSVariable(propertyName: string, fallback: number = 0): number {
-	if (typeof window === 'undefined') return fallback
+	if (typeof window === 'undefined') {return fallback}
 
 	try {
 		const value = getComputedStyle(document.documentElement).getPropertyValue(propertyName).trim()
-		if (!value) return fallback
+		if (!value) {return fallback}
 
 		// Parse the value (handles '96px', '96', etc.)
 		const parsed = parseFloat(value)
@@ -145,7 +145,7 @@ export function getCSSVariable(propertyName: string, fallback: number = 0): numb
  * @returns True if user prefers reduced motion
  */
 export function prefersReducedMotion(): boolean {
-	if (typeof window === 'undefined') return false
+	if (typeof window === 'undefined') {return false}
 	return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
@@ -172,10 +172,10 @@ export function calculateScrollOffset(headerHeight: number, additionalOffset: nu
  * @returns Element's bounding rect, or null if not found
  */
 export function getElementPosition(elementId: string): DOMRect | null {
-	if (typeof window === 'undefined') return null
+	if (typeof window === 'undefined') {return null}
 
 	const element = document.getElementById(elementId)
-	if (!element) return null
+	if (!element) {return null}
 
 	return element.getBoundingClientRect()
 }

@@ -7,14 +7,15 @@
  * @module dataGridUtils
  */
 
-import { Column, PaginationState } from '@tanstack/react-table'
-import type { AriaSort, PaginationRange } from '../types/divTableTypes'
+
 import {
-  DEFAULT_PAGE_SIZE,
   MIN_PAGE_SIZE,
   MAX_PAGE_SIZE,
   FOCUSABLE_ELEMENTS_SELECTOR,
 } from '../types/divTableConstants'
+
+import type { AriaSort, PaginationRange } from '../types/divTableTypes'
+import type { Column, PaginationState } from '@tanstack/react-table'
 
 // ============================================================================
 // String Utilities
@@ -36,7 +37,7 @@ export function sanitizeString(value: unknown): string {
  * @returns Truncated string
  */
 export function truncateString(str: string, maxLength: number): string {
-  if (str.length <= maxLength) return str
+  if (str.length <= maxLength) {return str}
   return `${str.slice(0, maxLength - 3)}...`
 }
 
@@ -178,7 +179,7 @@ export function calculateTotalItems(
  * @returns Last page index (0-based)
  */
 export function calculateLastPageIndex(totalItems: number, pageSize: number): number {
-  if (totalItems === 0 || pageSize === 0) return 0
+  if (totalItems === 0 || pageSize === 0) {return 0}
   return Math.max(Math.ceil(totalItems / pageSize) - 1, 0)
 }
 
@@ -273,8 +274,8 @@ export function getGridColumnCount(table: any): number {
  */
 export function getAriaSortState(column: Column<any>): AriaSort {
   const sort = column.getIsSorted()
-  if (sort === 'asc') return 'ascending'
-  if (sort === 'desc') return 'descending'
+  if (sort === 'asc') {return 'ascending'}
+  if (sort === 'desc') {return 'descending'}
   return 'none'
 }
 
@@ -410,7 +411,7 @@ export function announceToScreenReader(
  * @returns True if input element
  */
 export function isInputElement(target: EventTarget | null): boolean {
-  if (!target || !(target instanceof HTMLElement)) return false
+  if (!target || !(target instanceof HTMLElement)) {return false}
   
   const tagName = target.tagName.toLowerCase()
   return (
@@ -447,7 +448,7 @@ export function debounce<T extends (...args: any[]) => any>(
   let timeout: NodeJS.Timeout | null = null
 
   return (...args: Parameters<T>) => {
-    if (timeout) clearTimeout(timeout)
+    if (timeout) {clearTimeout(timeout)}
     timeout = setTimeout(() => func(...args), wait)
   }
 }

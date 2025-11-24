@@ -1,12 +1,15 @@
 import type { Metadata } from 'next'
-import NavigationLayout from '@_components/navigation/NavigationLayout'
+
+import { themeInitScript } from '@_scripts/theme-init-inline'
+
 import AuthInitializer from '@_components/common/AuthInitializer'
-import UserSettingsInitializer from '@_components/common/UserSettingsInitializer'
 import ImageServiceInitializer from '@_components/common/ImageServiceInitializer'
 import ServiceWorkerRegistration from '@_components/common/ServiceWorkerRegistration'
 import ToastProvider from '@_components/common/ToastProvider'
+import UserSettingsInitializer from '@_components/common/UserSettingsInitializer'
+import NavigationLayout from '@_components/navigation/NavigationLayout'
 import LiveChatBubble from '@_components/ui/LiveChatBubble'
-import { themeInitScript } from '@_scripts/theme-init-inline'
+
 
 import 'react-toastify/dist/ReactToastify.css'
 import './globals.css'

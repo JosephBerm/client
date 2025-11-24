@@ -18,7 +18,7 @@
  * @module toastConfig
  */
 
-import { ToastOptions } from 'react-toastify'
+import type { ToastOptions } from 'react-toastify'
 
 /**
  * Base toast configuration shared across all toast types.

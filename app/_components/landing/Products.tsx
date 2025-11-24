@@ -1,15 +1,17 @@
 'use client'
 
 import Link from 'next/link'
+
 import { Activity, TestTube2, Stethoscope, Building2 } from 'lucide-react'
 
+import { Routes } from '@_features/navigation'
+
+import { Stagger, StaggerItem, Reveal, STAGGER_PRESETS, ANIMATION_PRESETS, ANIMATION_DELAY } from '@_components/common/animations'
 import PageContainer from '@_components/layouts/PageContainer'
 import Button from '@_components/ui/Button'
-import { Routes } from '@_features/navigation'
+import FeatureCard from '@_components/ui/FeatureCard'
 import Pill from '@_components/ui/Pill'
 import StatusDot from '@_components/ui/StatusDot'
-import FeatureCard from '@_components/ui/FeatureCard'
-import { Stagger, StaggerItem, Reveal, STAGGER_PRESETS, ANIMATION_PRESETS, ANIMATION_DELAY } from '@_components/common/animations'
 
 const PRODUCT_CATEGORIES = [
 	{

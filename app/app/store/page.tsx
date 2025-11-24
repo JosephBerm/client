@@ -1,21 +1,28 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ColumnDef } from '@tanstack/react-table'
+
 import { Eye, Plus, Archive } from 'lucide-react'
-import { notificationService } from '@_shared'
-import ServerDataGrid from '@_components/tables/ServerDataGrid'
-import Button from '@_components/ui/Button'
-import { InternalPageHeader } from '../_components'
-import Badge from '@_components/ui/Badge'
-import Modal from '@_components/ui/Modal'
-import { formatDate, formatCurrency } from '@_shared'
-import { logger } from '@_core'
-import type { Product } from '@_classes/Product'
-import { API } from '@_shared'
+
 import { Routes } from '@_features/navigation'
+
+
+import { notificationService, formatCurrency, API } from '@_shared'
+
+import type { Product } from '@_classes/Product'
+
+import ServerDataGrid from '@_components/tables/ServerDataGrid'
+import Badge from '@_components/ui/Badge'
+import Button from '@_components/ui/Button'
+import Modal from '@_components/ui/Modal'
+
+import { InternalPageHeader } from '../_components'
+
+
+import type { ColumnDef } from '@tanstack/react-table'
 
 export default function StorePage() {
   const router = useRouter()
@@ -108,7 +115,7 @@ export default function StorePage() {
   )
 
   const handleArchive = async () => {
-    if (!archiveModal.product) return
+    if (!archiveModal.product) {return}
 
     try {
       const { data } = await API.Store.Products.delete(archiveModal.product.id!)

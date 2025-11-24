@@ -89,12 +89,16 @@
  * @module Order
  */
 
-import Company from './Company'
-import { OrderStatus } from '@_classes/Enums'
-import { Product } from './Product'
-import Quote from './Quote'
-import Address from './common/Address'
 import { parseRequiredTimestamp } from '@_lib/dates'
+
+import { OrderStatus } from '@_classes/Enums'
+
+import Address from './common/Address'
+import Company from './Company'
+import { Product } from './Product'
+
+import type Quote from './Quote'
+
 
 /**
  * Order Entity Class

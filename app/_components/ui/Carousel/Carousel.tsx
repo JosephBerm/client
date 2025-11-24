@@ -1,12 +1,15 @@
 'use client'
 
 import { useCallback, useEffect, useState, useMemo } from 'react'
+
 import useEmblaCarousel from 'embla-carousel-react'
-import type { EmblaCarouselType } from 'embla-carousel'
-import type { CarouselProps } from './types'
-import CarouselSlide from './CarouselSlide'
+
 import CarouselControls from './CarouselControls'
 import CarouselDots from './CarouselDots'
+import CarouselSlide from './CarouselSlide'
+
+import type { CarouselProps } from './types'
+import type { EmblaCarouselType } from 'embla-carousel'
 
 /**
  * Carousel component with drag/swipe, arrow navigation, and dot indicators.
@@ -148,7 +151,7 @@ export default function Carousel({
 
 	// Initialize scroll snaps and set up event listeners (carousel mode only)
 	useEffect(() => {
-		if (mode !== 'carousel' || !emblaApi) return
+		if (mode !== 'carousel' || !emblaApi) {return}
 
 		// Set initial scroll snaps
 		setScrollSnaps(emblaApi.scrollSnapList())
@@ -173,7 +176,7 @@ export default function Carousel({
 
 	// Auto-play functionality (carousel mode only)
 	useEffect(() => {
-		if (mode !== 'carousel' || !autoPlay || !emblaApi) return
+		if (mode !== 'carousel' || !autoPlay || !emblaApi) {return}
 
 		const interval = setInterval(() => {
 			if (emblaApi.canScrollNext()) {
@@ -188,7 +191,7 @@ export default function Carousel({
 
 	// Keyboard navigation (carousel mode only)
 	useEffect(() => {
-		if (mode !== 'carousel' || !emblaApi) return
+		if (mode !== 'carousel' || !emblaApi) {return}
 
 		const handleKeyDown = (event: KeyboardEvent) => {
 			switch (event.key) {
@@ -222,7 +225,7 @@ export default function Carousel({
 
 	// Memoize slide numbers display
 	const slideNumbers = useMemo(() => {
-		if (!showSlideNumbers || slides.length === 0) return null
+		if (!showSlideNumbers || slides.length === 0) {return null}
 
 		const current = selectedIndex + 1
 		const total = slides.length
@@ -238,7 +241,7 @@ export default function Carousel({
 	// Using 2x duplication with 50% animation for more reliable seamless loop
 	// This pattern ensures perfect alignment regardless of content width variations
 	const bannerSlides = useMemo(() => {
-		if (mode !== 'banner' || !slides || slides.length === 0) return []
+		if (mode !== 'banner' || !slides || slides.length === 0) {return []}
 		// Duplicate slides array 2 times for seamless infinite scroll
 		// Animating by 50% ensures perfect loop alignment
 		return [...slides, ...slides]

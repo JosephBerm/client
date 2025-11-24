@@ -19,9 +19,6 @@
  * @module NavigationTypes
  */
 
-import type { LucideIcon } from 'lucide-react'
-import { AccountRole } from '@_classes/Enums'
-
 /**
  * Breadcrumb item interface.
  * Represents a single breadcrumb in the navigation trail.
@@ -135,5 +132,6 @@ export interface NavigationSection {
  * }
  * ```
  */
+// Re-export AccountRole for convenience (imported directly in re-export)
 export { AccountRole } from '@_classes/Enums'
 

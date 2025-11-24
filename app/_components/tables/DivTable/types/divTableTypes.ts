@@ -7,8 +7,9 @@
  * @module dataGridTypes
  */
 
-import { ReactNode } from 'react'
-import {
+import type { ReactNode } from 'react'
+
+import type {
   ColumnDef,
   ColumnFiltersState,
   OnChangeFn,
@@ -17,7 +18,7 @@ import {
   SortingState,
   Table,
 } from '@tanstack/react-table'
-import { VirtualItem, Virtualizer } from '@tanstack/react-virtual'
+import type { VirtualItem} from '@tanstack/react-virtual';
 
 // ============================================================================
 // Core Table Props

@@ -51,9 +51,11 @@
  * @module FeatureCard
  */
 
-import { HTMLAttributes, ReactNode } from 'react'
-import { LucideIcon } from 'lucide-react'
+import type { HTMLAttributes, ReactNode } from 'react'
+
 import classNames from 'classnames'
+
+import type { LucideIcon } from 'lucide-react'
 
 /**
  * FeatureCard component props interface.

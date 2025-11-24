@@ -86,17 +86,24 @@
 'use client'
 
 import React from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { customerSchema, type CustomerFormData } from '@_core'
-import { useFormSubmit } from '@_shared'
-import FormInput from './FormInput'
-import FormCheckbox from './FormCheckbox'
-import Button from '@_components/ui/Button'
-import Company from '@_classes/Company'
-import Address from '@_classes/common/Address'
-import { API } from '@_shared'
+
 import { useParams } from 'next/navigation'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+
+import { customerSchema, type CustomerFormData } from '@_core'
+
+import { useFormSubmit , API } from '@_shared'
+
+import Address from '@_classes/common/Address'
+import Company from '@_classes/Company'
+
+import Button from '@_components/ui/Button'
+
+import FormInput from './FormInput'
+
+
 
 /**
  * UpdateCustomerForm component props interface.

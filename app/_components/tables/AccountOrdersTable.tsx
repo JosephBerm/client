@@ -61,21 +61,26 @@
 
 'use client'
 
-import { useMemo, useEffect, useState, useCallback } from 'react'
-import Link from 'next/link'
+import { useMemo, useEffect, useState } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { Eye } from 'lucide-react'
+
+import { useAuthStore } from '@_features/auth'
+import { Routes } from '@_features/navigation'
+
+import { formatDate, formatCurrency, API, notificationService } from '@_shared'
+
+import Order from '@_classes/Order'
+
+import OrderStatusBadge from '@_components/common/OrderStatusBadge'
 import { DataGrid, type ColumnDef } from '@_components/tables'
 import Button from '@_components/ui/Button'
-import Badge from '@_components/ui/Badge'
-import OrderStatusBadge from '@_components/common/OrderStatusBadge'
-import { logger } from '@_core'
-import { formatDate, formatCurrency } from '@_shared'
-import { useAuthStore } from '@_features/auth'
-import Order from '@_classes/Order'
-import { API } from '@_shared'
-import { notificationService } from '@_shared'
-import { Routes } from '@_features/navigation'
+
+
+
+
 
 /**
  * AccountOrdersTable Component
@@ -116,7 +121,7 @@ export default function AccountOrdersTable() {
 	const fetchOrders = async () => {
 		try {
 			setIsLoading(true)
-			if (!user?.customer?.id) return
+			if (!user?.customer?.id) {return}
 
 		const { data } = await API.Orders.getFromCustomer(user.customer.id)
 		if (!data.payload) {

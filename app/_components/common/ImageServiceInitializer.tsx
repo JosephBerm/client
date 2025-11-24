@@ -53,7 +53,9 @@
 'use client'
 
 import { useEffect } from 'react'
-import { ImagePreloadService, ImageCacheService } from '@_features/images'
+
+import { ImageCacheService } from '@_features/images'
+
 import { logger } from '@_core'
 
 /**

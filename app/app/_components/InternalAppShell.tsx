@@ -67,15 +67,22 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback, type ReactNode } from 'react'
+
 import classNames from 'classnames'
-import { useMediaQuery } from '@_shared'
-import { logger } from '@_core'
 import { Menu } from 'lucide-react'
+
 import { useAuthStore } from '@_features/auth'
+
+import { logger } from '@_core'
+
+import { useMediaQuery } from '@_shared'
+
 import type { IUser } from '@_classes/User'
+
 import Button from '@_components/ui/Button'
-import InternalSidebar from './InternalSidebar'
+
 import Breadcrumb from './Breadcrumb'
+import InternalSidebar from './InternalSidebar'
 
 /**
  * InternalAppShell component props interface.

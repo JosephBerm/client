@@ -12,15 +12,17 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
-import { flexRender } from '@tanstack/react-table'
-import type { DataGridRowProps } from '../types/divTableTypes'
+
+
 import {
-  ARIA_ROLE_ROW,
   TABLE_THEME_CLASSES,
   DRAG_HANDLE_SIZE,
 } from '../types/divTableConstants'
 import { generateRowARIA, classNames } from '../utils/divTableUtils'
+
 import { DataGridCell } from './DivTableCell'
+
+import type { DataGridRowProps } from '../types/divTableTypes'
 
 /**
  * Table Row Component

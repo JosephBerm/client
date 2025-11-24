@@ -1,10 +1,10 @@
 /**
- * Navigation Services - Barrel Export
+ * Navigation Services - Barrel Export (Optimized for Tree-Shaking)
  * 
  * @module navigation/services
  */
 
-export * from './NavigationService'
-export * from './breadcrumbService'
+export { NavigationService } from './NavigationService'
+export { BreadcrumbService, type BreadcrumbItem } from './breadcrumbService'
 export { default as Routes } from './routes'
 

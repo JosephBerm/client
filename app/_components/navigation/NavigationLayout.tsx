@@ -60,10 +60,15 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+
 import { usePathname } from 'next/navigation'
+
 import classNames from 'classnames'
+
 import { useAuthStore } from '@_features/auth'
+
 import { useMediaQuery } from '@_shared'
+
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 
@@ -150,7 +155,7 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
 	// Prevent body scroll when sidebar is open on mobile
 	useEffect(() => {
 		// Only run on client
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined') {return}
 
 		if (sidebarOpen && isMobile) {
 			document.body.style.overflow = 'hidden'

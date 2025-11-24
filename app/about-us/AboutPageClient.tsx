@@ -1,19 +1,23 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+
+import { logger } from '@_core'
+
+import AboutUsMain from '@/public/aboutus-main.png'
 import Aboutus11 from '@/public/aboutus11.png'
 import Aboutus22 from '@/public/aboutus22.png'
 import Aboutus33 from '@/public/aboutus33.png'
 import Aboutus44 from '@/public/aboutus44.png'
 import Aboutus55 from '@/public/aboutus55.png'
-import AboutUsMain from '@/public/aboutus-main.png'
 
 import About from '@_classes/About'
+
+import CTASection from '@_components/landing/CTASection'
+import FeatureSection from '@_components/landing/FeatureSection'
 import HeroSection from '@_components/landing/HeroSection'
 import StatsBanner from '@_components/landing/StatsBanner'
-import FeatureSection from '@_components/landing/FeatureSection'
-import CTASection from '@_components/landing/CTASection'
-import { logger } from '@_core'
+
 
 /**
  * About Page Client Component

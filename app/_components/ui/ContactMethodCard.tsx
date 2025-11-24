@@ -29,11 +29,13 @@
 
 'use client'
 
-import { useCallback, useMemo, type ReactNode, type ComponentType, KeyboardEvent } from 'react'
+import { useCallback, useMemo, type KeyboardEvent, type ReactNode, type ComponentType } from 'react'
+
 import classNames from 'classnames'
-import { PhoneIcon, MailIcon, MessageIcon, iconSizes } from '@_components/ui/ContactIcons'
-import { MessageSquare } from 'lucide-react'
+
 import { trackPhoneClick, trackEmailClick, trackContactCTA } from '@_shared/utils/analytics'
+
+import { PhoneIcon, MailIcon, MessageIcon, iconSizes } from '@_components/ui/ContactIcons'
 
 /**
  * Soft hyphen character (invisible unless word breaks)

@@ -27,9 +27,11 @@
  * @module ImagePreloadService
  */
 
-import { ImageService } from './ImageService'
-import { getProductImageUrl } from '../utils/imageUtils'
 import { logger } from '@_core'
+
+import { getProductImageUrl } from '../utils/imageUtils'
+
+import { ImageService } from './ImageService'
 
 /**
  * Preloading strategy type.
@@ -175,7 +177,7 @@ export class ImagePreloadService {
 	 */
 	private static async preloadOnHover(
 		urls: string[],
-		priority: PreloadPriority
+		_priority: PreloadPriority
 	): Promise<void[]> {
 		// For hover, we'll use a lighter approach
 		// Only preload when actually needed
@@ -187,7 +189,7 @@ export class ImagePreloadService {
 	 */
 	private static async preloadOnViewport(
 		urls: string[],
-		priority: PreloadPriority
+		_priority: PreloadPriority
 	): Promise<void[]> {
 		// Use Intersection Observer for viewport-based preloading
 		if (typeof window === 'undefined') {
@@ -241,7 +243,7 @@ export class ImagePreloadService {
 	 */
 	private static async preloadForNavigation(
 		urls: string[],
-		priority: PreloadPriority
+		_priority: PreloadPriority
 	): Promise<void[]> {
 		// High priority for navigation preloading
 		return this.preloadImmediate(urls, 'high')
@@ -254,7 +256,7 @@ export class ImagePreloadService {
 		const priorityOrder = { high: 0, medium: 1, low: 2 }
 		this.preloadQueue.sort((a, b) => {
 			const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority]
-			if (priorityDiff !== 0) return priorityDiff
+			if (priorityDiff !== 0) {return priorityDiff}
 			return a.timestamp - b.timestamp // FIFO for same priority
 		})
 	}

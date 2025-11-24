@@ -9,11 +9,13 @@
 
 'use client'
 
-import type { Row, ColumnDef } from '@tanstack/react-table'
 import { flexRender } from '@tanstack/react-table'
-import type { MobileCardProps } from '../types/divTableTypes'
+
 import { TABLE_THEME_CLASSES } from '../types/divTableConstants'
 import { classNames } from '../utils/divTableUtils'
+
+import type { MobileCardProps } from '../types/divTableTypes'
+import type { Row, ColumnDef } from '@tanstack/react-table'
 
 interface MobileCardListProps<TData> {
   rows: Row<TData>[]

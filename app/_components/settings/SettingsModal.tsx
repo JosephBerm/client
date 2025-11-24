@@ -35,11 +35,18 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef } from 'react'
+
 import { X } from 'lucide-react'
-import SettingRow from './SettingRow'
-import Button from '@_components/ui/Button'
+
 import { getSettingsSections } from '@_features/settings'
+
 import { useModal } from '@_shared'
+
+import Button from '@_components/ui/Button'
+
+import AppearanceSetting from './AppearanceSetting'
+import ReducedMotionSetting from './ReducedMotionSetting'
+import SettingRow from './SettingRow'
 
 /**
  * Settings Modal component props interface.
@@ -82,7 +89,13 @@ export default function SettingsModal({
 	onClose,
 	defaultSectionId,
 }: SettingsModalProps) {
-	const sections = getSettingsSections()
+	// Component map for settings - injected by UI layer (clean architecture)
+	const componentMap = {
+		'appearance': AppearanceSetting,
+		'reduced-motion': ReducedMotionSetting,
+	}
+	
+	const sections = getSettingsSections(componentMap)
 
 	// Refs for modal and focus management
 	const modalRef = useRef<HTMLDivElement>(null)
@@ -142,7 +155,7 @@ export default function SettingsModal({
 
 	// Handle keyboard navigation for sections
 	useEffect(() => {
-		if (!isOpen) return
+		if (!isOpen) {return}
 
 		const handleKeyDown = (e: KeyboardEvent) => {
 			// Only handle arrow keys when focus is on a section button
@@ -151,7 +164,7 @@ export default function SettingsModal({
 				activeElement as HTMLButtonElement
 			)
 
-			if (!isSectionButton) return
+			if (!isSectionButton) {return}
 
 			const currentIndex = sections.findIndex((s) => s.id === selectedSectionId)
 			let newIndex = currentIndex
@@ -195,7 +208,7 @@ export default function SettingsModal({
 	}, [isOpen, sections, selectedSectionId])
 
 
-	if (!isOpen) return null
+	if (!isOpen) {return null}
 
 	return (
 		<>
@@ -263,7 +276,7 @@ export default function SettingsModal({
 							role="tablist"
 							aria-label="Settings sections"
 						>
-							{sections.map((section, index) => {
+							{sections.map((section, _index) => {
 									const Icon = section.icon
 									const isActive = section.id === selectedSectionId
 

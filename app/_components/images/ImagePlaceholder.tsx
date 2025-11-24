@@ -24,22 +24,17 @@
  * 
  * @example
  * ```tsx
- * import ImagePlaceholder from '@_components/ui/ImagePlaceholder';
+ * import { ImagePlaceholder } from '@_components/images';
  * 
  * // Product placeholder
  * <ImagePlaceholder variant="product" alt="Product image" />
- * 
- * // Generic placeholder
- * <ImagePlaceholder variant="generic" alt="Image" />
- * 
- * // Custom icon
- * <ImagePlaceholder variant="icon" icon={<CustomIcon />} alt="Custom" />
  * ```
  * 
  * @module ImagePlaceholder
  */
 
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
+
 import classNames from 'classnames'
 import { Package, Image as ImageIcon } from 'lucide-react'
 

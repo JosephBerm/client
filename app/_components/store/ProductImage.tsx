@@ -46,12 +46,18 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
-import { SerializedProduct, productHasImage, getProductFileName } from '@_lib/serializers/productSerializer'
-import { OptimizedImage, ImagePlaceholder, getProductImageUrl, useImageError, useImageAnalytics } from '@_features/images'
-import Badge from '@_components/ui/Badge'
+import { useEffect } from 'react'
+
+import { getProductImageUrl, useImageError, useImageAnalytics } from '@_features/images'
 import { getStockStatus } from '@_features/products'
+
 import { logger } from '@_core'
+
+import type { SerializedProduct } from '@_lib/serializers/productSerializer'
+import { productHasImage } from '@_lib/serializers/productSerializer'
+
+import { OptimizedImage, ImagePlaceholder } from '@_components/images'
+import Badge from '@_components/ui/Badge'
 
 /**
  * ProductImage component props interface.

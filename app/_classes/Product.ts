@@ -57,12 +57,14 @@
  * @module Product
  */
 
-import ProductsCategory from '@_classes/ProductsCategory'
-import Provider from '@_classes/Provider'
+import { parseRequiredTimestamp, parseDateSafe } from '@_lib/dates'
+
 import Guid from '@_classes/Base/Guid'
 import HtmlImage from '@_classes/HtmlImage'
+import ProductsCategory from '@_classes/ProductsCategory'
+import type Provider from '@_classes/Provider'
 import UploadedFile from '@_classes/UploadedFile'
-import { parseRequiredTimestamp, parseDateSafe } from '@_lib/dates'
+
 // RichConstructor decorator not needed in modern Next.js
 
 /**
@@ -275,7 +277,7 @@ export class CartProduct {
 }
 
 /**
- * Product interface for type safety.
- * Extends Product class to ensure type compatibility.
+ * Product type alias for type safety.
+ * Provides type compatibility with Product class.
  */
-export interface IProduct extends Product {}
+export type IProduct = Product

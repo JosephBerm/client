@@ -20,10 +20,14 @@
  */
 
 import type { Metadata } from 'next'
+
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { logger } from '@_core'
+
 import { Routes } from '@_features/navigation'
+
+import { logger } from '@_core'
+
 import { InternalAppShell } from './_components'
 
 export const metadata: Metadata = {
@@ -41,7 +45,7 @@ export const metadata: Metadata = {
  * @returns User data or null if invalid
  */
 async function getUserData(token: string | null) {
-	if (token == null) return token
+	if (token == null) {return token}
 
 	try {
 		// Use NEXT_PUBLIC_API_URL for consistency with client-side code

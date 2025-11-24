@@ -97,7 +97,7 @@ export interface UseKeyboardNavigationReturn {
  */
 export function useKeyboardNavigation<T>({
 	items,
-	getItemId,
+	getItemId: _getItemId,
 	onSelect,
 	preventDefault = true,
 	wrapAround = true,
@@ -109,7 +109,7 @@ export function useKeyboardNavigation<T>({
 	 */
 	const getNextIndex = useCallback(
 		(currentIndex: number): number => {
-			if (items.length === 0) return 0
+			if (items.length === 0) {return 0}
 			if (wrapAround) {
 				return (currentIndex + 1) % items.length
 			}
@@ -123,7 +123,7 @@ export function useKeyboardNavigation<T>({
 	 */
 	const getPreviousIndex = useCallback(
 		(currentIndex: number): number => {
-			if (items.length === 0) return 0
+			if (items.length === 0) {return 0}
 			if (wrapAround) {
 				return (currentIndex - 1 + items.length) % items.length
 			}
@@ -142,20 +142,20 @@ export function useKeyboardNavigation<T>({
 			switch (e.key) {
 				case 'ArrowRight':
 				case 'ArrowDown':
-					if (preventDefault) e.preventDefault()
+					if (preventDefault) {e.preventDefault()}
 					targetIndex = getNextIndex(currentIndex)
 					break
 				case 'ArrowLeft':
 				case 'ArrowUp':
-					if (preventDefault) e.preventDefault()
+					if (preventDefault) {e.preventDefault()}
 					targetIndex = getPreviousIndex(currentIndex)
 					break
 				case 'Home':
-					if (preventDefault) e.preventDefault()
+					if (preventDefault) {e.preventDefault()}
 					targetIndex = 0
 					break
 				case 'End':
-					if (preventDefault) e.preventDefault()
+					if (preventDefault) {e.preventDefault()}
 					targetIndex = items.length > 0 ? items.length - 1 : 0
 					break
 				case 'Enter':

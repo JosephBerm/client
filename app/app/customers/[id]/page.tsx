@@ -1,21 +1,28 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { formatDate } from '@_lib/dates'
-import { notificationService, useRouteParam } from '@_shared'
 
-import Button from '@_components/ui/Button'
-import { InternalPageHeader } from '../../_components'
-import { DataGrid, type ColumnDef } from '@_components/tables'
-import UpdateCustomerForm from '@_components/forms/UpdateCustomerForm'
-import RoleBadge from '@_components/common/RoleBadge'
+import { useRouter } from 'next/navigation'
+
+import { Routes } from '@_features/navigation'
+
+
+import { formatDate } from '@_lib/dates'
+
+import { notificationService, useRouteParam , API } from '@_shared'
+
+import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import Company from '@_classes/Company'
 import User from '@_classes/User'
-import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
-import { logger } from '@_core'
-import { API } from '@_shared'
-import { Routes } from '@_features/navigation'
+
+import RoleBadge from '@_components/common/RoleBadge'
+import UpdateCustomerForm from '@_components/forms/UpdateCustomerForm'
+import { DataGrid, type ColumnDef } from '@_components/tables'
+import Button from '@_components/ui/Button'
+
+import { InternalPageHeader } from '../../_components'
+
+
 
 const Page = () => {
 	const router = useRouter()

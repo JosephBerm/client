@@ -19,22 +19,32 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
 import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
-  flexRender,
-  type ColumnDef,
   type PaginationState,
   type SortingState,
   type ColumnFiltersState,
 } from '@tanstack/react-table'
+
 import { logger } from '@_core'
 
 // Internal imports
-import type { DataGridProps, CellPosition } from '../DivTable/types/divTableTypes'
+
+// Component imports
+import { DataGridBody } from '../DivTable/components/DivTableBody'
+import { DataGridHeader } from '../DivTable/components/DivTableHeader'
+import { DataGridPagination } from '../DivTable/components/DivTablePagination'
+import { MobileCardList } from '../DivTable/components/MobileCardList'
+// Hook imports
+import { useFocusManagement } from '../DivTable/hooks/useFocusManagement'
+import { useKeyboardNav } from '../DivTable/hooks/useKeyboardNav'
+import { useMobileDetection } from '../DivTable/hooks/useMobileDetection'
+import { usePerformanceBudget } from '../DivTable/hooks/usePerformanceBudget'
 import {
   COMPONENT_NAMES,
   DEFAULT_PAGE_SIZE,
@@ -58,17 +68,7 @@ import {
   getGridColumnCount,
 } from '../DivTable/utils/divTableUtils'
 
-// Component imports
-import { DataGridHeader } from '../DivTable/components/DivTableHeader'
-import { DataGridBody } from '../DivTable/components/DivTableBody'
-import { DataGridPagination } from '../DivTable/components/DivTablePagination'
-import { MobileCardList } from '../DivTable/components/MobileCardList'
-
-// Hook imports
-import { useMobileDetection } from '../DivTable/hooks/useMobileDetection'
-import { usePerformanceBudget } from '../DivTable/hooks/usePerformanceBudget'
-import { useKeyboardNav } from '../DivTable/hooks/useKeyboardNav'
-import { useFocusManagement } from '../DivTable/hooks/useFocusManagement'
+import type { DataGridProps, CellPosition } from '../DivTable/types/divTableTypes'
 
 /**
  * Main DataGrid Component
@@ -179,7 +179,7 @@ export function DataGrid<TData>({
   const [localFilters, setLocalFilters] = useState<ColumnFiltersState>([])
 
   // UI state
-  const [focusedCell, setFocusedCell] = useState<CellPosition | null>(null)
+  const [_focusedCell, setFocusedCell] = useState<CellPosition | null>(null)
 
   // ============================================================================
   // Validation & Data Normalization
@@ -293,7 +293,7 @@ export function DataGrid<TData>({
   // Keyboard Navigation
   // ============================================================================
 
-  const { focusCell, navigate, getCurrentPosition } = useKeyboardNav({
+  const { focusCell: _focusCell, navigate: _navigate, getCurrentPosition: _getCurrentPosition } = useKeyboardNav({
     tableRef: containerRef,
     rowCount: rows.length,
     columnCount: columns.length,

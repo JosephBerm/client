@@ -11,7 +11,9 @@
 
 import { flexRender } from '@tanstack/react-table'
 import { ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
-import type { DataGridHeaderProps } from '../types/divTableTypes'
+
+import { logger } from '@_core'
+
 import {
   ARIA_ROLE_ROWGROUP,
   ARIA_ROLE_ROW,
@@ -27,7 +29,9 @@ import {
   classNames,
   getGridColumnCount,
 } from '../utils/divTableUtils'
-import { logger } from '@_core'
+
+import type { DataGridHeaderProps } from '../types/divTableTypes'
+
 
 /**
  * Table Header Component
@@ -73,7 +77,7 @@ export function DataGridHeader<TData>({
           {headerGroup.headers.map((header, columnIndex) => {
             const canSort = header.column.getCanSort() && enableSorting
             const isSorted = header.column.getIsSorted()
-            const ariaSort = getAriaSortState(header.column)
+            const _ariaSort = getAriaSortState(header.column)
             const sortLabel = getSortLabel(
               header.column,
               typeof header.column.columnDef.header === 'string'
@@ -86,7 +90,7 @@ export function DataGridHeader<TData>({
 
             // Click handler for sorting
             const handleClick = () => {
-              if (!canSort) return
+              if (!canSort) {return}
 
               const currentSort = header.column.getIsSorted()
               header.column.toggleSorting()
@@ -121,7 +125,7 @@ export function DataGridHeader<TData>({
 
             // Keyboard handler
             const handleKeyDown = (event: React.KeyboardEvent) => {
-              if (!canSort) return
+              if (!canSort) {return}
 
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault()

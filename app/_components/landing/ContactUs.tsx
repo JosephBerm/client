@@ -1,24 +1,27 @@
 'use client'
 
-import { useCallback, useMemo } from 'react'
-import Link from 'next/link'
+import { useMemo, useCallback } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import { MessageSquare } from 'lucide-react'
 
+import { Routes } from '@_features/navigation'
+
+import { isBusinessOpen, getGroupedBusinessHours } from '@_shared/utils/businessHours'
+
+import { Stagger, StaggerItem, Reveal, STAGGER_PRESETS, ANIMATION_PRESETS, ANIMATION_DELAY } from '@_components/common/animations'
 import PageContainer from '@_components/layouts/PageContainer'
-import Button from '@_components/ui/Button'
-import Pill from '@_components/ui/Pill'
-import StatusDot from '@_components/ui/StatusDot'
 import { 
 	CalendarIcon, 
 	ClockIcon, 
 	CheckIcon,
 } from '@_components/ui/ContactIcons'
 import ContactMethodCard from '@_components/ui/ContactMethodCard'
-import { isBusinessOpen, getGroupedBusinessHours } from '@_shared/utils/businessHours'
-import { trackContactCTA } from '@_shared/utils/analytics'
-import { Routes } from '@_features/navigation'
-import { Stagger, StaggerItem, Reveal, STAGGER_PRESETS, ANIMATION_PRESETS, ANIMATION_DELAY } from '@_components/common/animations'
+import Pill from '@_components/ui/Pill'
+import StatusDot from '@_components/ui/StatusDot'
+
+
 
 /**
  * Contact Section
@@ -116,13 +119,6 @@ export default function ContactUs() {
 	const isOpen = useMemo(() => isBusinessOpen(), [])
 	const businessHours = useMemo(() => getGroupedBusinessHours(), [])
 
-	// Analytics tracking handlers
-	const handleConsultationClick = useCallback(() => {
-		trackContactCTA('Schedule Consultation', {
-			contactMethod: 'consultation',
-			ctaLocation: 'contact_section_primary',
-		})
-	}, [])
 
 	// Handler for members only chat card click
 	const handleMembersOnlyChatClick = useCallback(() => {

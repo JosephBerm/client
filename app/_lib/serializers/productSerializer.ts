@@ -37,7 +37,7 @@
  * @module productSerializer
  */
 
-import { Product } from '@_classes/Product'
+import type { Product } from '@_classes/Product'
 
 /**
  * Serialized product type for Client Components.
