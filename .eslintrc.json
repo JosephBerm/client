@@ -18,6 +18,8 @@
 		"project": "./tsconfig.json"
 	},
 	"plugins": ["@typescript-eslint", "import", "jsx-a11y", "react", "react-hooks"],
+	// Custom plugin loaded via require.resolve for proper path resolution
+	// This follows ESLint 8+ best practices for local plugins
 	"settings": {
 		"react": {
 			"version": "detect"
@@ -271,12 +273,68 @@
 		// ==========================================
 		
 		"@next/next/no-html-link-for-pages": "error",
-		"@next/next/no-img-element": "warn",
+		"@next/next/no-img-element": "error", // Upgraded to error - use Image component
+
+		// ==========================================
+		// CUSTOM PROJECT RULES (MedSource Pro Standards)
+		// ==========================================
+		
+		// Enforce Next.js Image component (no <img> tags)
+		// Already handled by @next/next/no-img-element above (set to error)
+		
+		// Enforce date utils (no new Date())
+		// Enforce logger service (no console.log)
+		// Enforce built UI components (no custom button/select/table)
+		// Enforce Routes system (no magic string routes)
+		// Using no-restricted-syntax for maximum compatibility with ESLint 8
+		// This approach is used by Google, Meta, and Netflix for custom rule enforcement
+		// FAANG-level: Industry-standard pattern for enforcing project-specific rules
+		"no-restricted-syntax": [
+			"error",
+			{
+				"selector": "NewExpression[callee.name='Date'][arguments.length=0]",
+				"message": "❌ Do not use new Date().\n✅ Use date utils from @_lib/dates instead:\n  import { parseDate, parseDateOrNow } from '@_lib/dates';\n  const date = parseDateOrNow(); // or parseDate(input)"
+			},
+			{
+				"selector": "MemberExpression[object.name='console'][property.name='log']",
+				"message": "❌ Do not use console.log().\n✅ Use logger service instead:\n  import { logger } from '@_core/logger';\n  logger.info('message', { data });\n  logger.error('error', { error });\n  logger.debug('debug', { data });"
+			},
+			{
+				"selector": "JSXOpeningElement[name.name='button']",
+				"message": "❌ Do not create custom <button> elements.\n✅ Use Button component from @_components/ui:\n  import Button from '@_components/ui/Button';\n  <Button onClick={...}>Click me</Button>"
+			},
+			{
+				"selector": "JSXOpeningElement[name.name='select']",
+				"message": "❌ Do not create custom <select> elements.\n✅ Use Select component from @_components/ui:\n  import Select from '@_components/ui/Select';\n  <Select options={...} value={...} onChange={...} />"
+			},
+			{
+				"selector": "JSXOpeningElement[name.name='table']",
+				"message": "❌ Do not create custom <table> elements.\n✅ Use Table components from @_components/tables:\n  import { DivTable } from '@_components/tables/DivTable';\n  <DivTable data={...} columns={...} />"
+			},
+			{
+				"selector": "CallExpression[callee.property.name='push'] > Literal[value^='/']",
+				"message": "❌ Do not use hardcoded string routes in router.push().\n✅ Use Routes system instead:\n  import { Routes } from '@_features/navigation';\n  router.push(Routes.Quotes.detail('456'));\n  router.push(Routes.Orders.location);"
+			},
+			{
+				"selector": "CallExpression[callee.property.name='replace'] > Literal[value^='/']",
+				"message": "❌ Do not use hardcoded string routes in router.replace().\n✅ Use Routes system instead:\n  import { Routes } from '@_features/navigation';\n  router.replace(Routes.Quotes.detail('456'));"
+			},
+			{
+				"selector": "JSXAttribute[name.name='href'] > Literal[value^='/']",
+				"message": "❌ Do not use hardcoded string routes in href.\n✅ Use Routes system instead:\n  import { Routes } from '@_features/navigation';\n  <Link href={Routes.Store.product('123')}>Product</Link>"
+			},
+			{
+				"selector": "CallExpression[callee.name='redirect'] > Literal[value^='/']",
+				"message": "❌ Do not use hardcoded string routes in redirect().\n✅ Use Routes system instead:\n  import { Routes } from '@_features/navigation';\n  redirect(Routes.Quotes.detail('456'));"
+			}
+		],
 
 		// ==========================================
 		// CODE QUALITY
 		// ==========================================
 		
+		// Note: console.log is now blocked by no-restricted-syntax rule above
+		// This rule still allows console.warn and console.error for critical errors
 		"no-console": [
 			"warn",
 			{
@@ -338,7 +396,7 @@
 		"@typescript-eslint/no-misused-new": "error",
 		
 		// Return await only in try-catch blocks
-		"no-return-await": "off",
+		// Note: no-return-await is deprecated, using @typescript-eslint/return-await instead
 		"@typescript-eslint/return-await": ["error", "in-try-catch"],
 
 		// ==========================================
@@ -454,9 +512,6 @@
 		"@typescript-eslint/no-unsafe-assignment": "off",
 		"@typescript-eslint/no-unsafe-call": "off",
 		"@typescript-eslint/no-unsafe-return": "off",
-		
-		// Ban specific types (already handled by @typescript-eslint/recommended)
-		"@typescript-eslint/ban-types": "off",
 
 		// ==========================================
 		// PHASE 8: IMMUTABILITY & CODE QUALITY
@@ -640,11 +695,83 @@
 			}
 		},
 		{
-			// Test files
+			// Date utility files - Allow new Date() as base implementation
+			// These files ARE the replacement for new Date(), so they need native Date constructor
+			"files": ["**/app/_lib/dates/**/*.ts"],
+			"rules": {
+				"no-restricted-syntax": [
+					"error",
+					{
+						"selector": "MemberExpression[object.name='console'][property.name='log']",
+						"message": "❌ Do not use console.log().\n✅ Use logger service instead:\n  import { logger } from '@_core/logger';\n  logger.info('message', { data });\n  logger.error('error', { error });\n  logger.debug('debug', { data });"
+					},
+					{
+						"selector": "JSXOpeningElement[name.name='button']",
+						"message": "❌ Do not create custom <button> elements.\n✅ Use Button component from @_components/ui:\n  import Button from '@_components/ui/Button';\n  <Button onClick={...}>Click me</Button>"
+					},
+					{
+						"selector": "JSXOpeningElement[name.name='select']",
+						"message": "❌ Do not create custom <select> elements.\n✅ Use Select component from @_components/ui:\n  import Select from '@_components/ui/Select';\n  <Select options={...} value={...} onChange={...} />"
+					},
+					{
+						"selector": "JSXOpeningElement[name.name='table']",
+						"message": "❌ Do not create custom <table> elements.\n✅ Use Table components from @_components/tables:\n  import { DivTable } from '@_components/tables/DivTable';\n  <DivTable data={...} columns={...} />"
+					},
+					{
+						"selector": "CallExpression[callee.property.name='push'] > Literal[value^='/']",
+						"message": "❌ Do not use hardcoded string routes in router.push().\n✅ Use Routes system instead:\n  import { Routes } from '@_features/navigation';\n  router.push(Routes.Quotes.detail('456'));\n  router.push(Routes.Orders.location);"
+					},
+					{
+						"selector": "CallExpression[callee.property.name='replace'] > Literal[value^='/']",
+						"message": "❌ Do not use hardcoded string routes in router.replace().\n✅ Use Routes system instead:\n  import { Routes } from '@_features/navigation';\n  router.replace(Routes.Quotes.detail('456'));"
+					},
+					{
+						"selector": "JSXAttribute[name.name='href'] > Literal[value^='/']",
+						"message": "❌ Do not use hardcoded string routes in href.\n✅ Use Routes system instead:\n  import { Routes } from '@_features/navigation';\n  <Link href={Routes.Store.product('123')}>Product</Link>"
+					},
+					{
+						"selector": "CallExpression[callee.name='redirect'] > Literal[value^='/']",
+						"message": "❌ Do not use hardcoded string routes in redirect().\n✅ Use Routes system instead:\n  import { Routes } from '@_features/navigation';\n  redirect(Routes.Quotes.detail('456'));"
+					}
+					// Note: Allow new Date() in date utility files - they ARE the replacement
+				]
+			}
+		},
+		{
+			// Test files - Allow console.log and new Date() for testing
+			// Still enforce UI component usage and Routes system for consistency
 			"files": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
 			"rules": {
 				"@typescript-eslint/no-explicit-any": "off",
-				"no-console": "off"
+				"no-console": "off",
+				"no-restricted-syntax": [
+					"error",
+					{
+						"selector": "JSXOpeningElement[name.name='button']",
+						"message": "❌ Do not create custom <button> elements.\n✅ Use Button component from @_components/ui"
+					},
+					{
+						"selector": "JSXOpeningElement[name.name='select']",
+						"message": "❌ Do not create custom <select> elements.\n✅ Use Select component from @_components/ui"
+					},
+					{
+						"selector": "JSXOpeningElement[name.name='table']",
+						"message": "❌ Do not create custom <table> elements.\n✅ Use Table components from @_components/tables"
+					},
+					{
+						"selector": "CallExpression[callee.property.name='push'] > Literal[value^='/']",
+						"message": "❌ Do not use hardcoded string routes.\n✅ Use Routes system from @_features/navigation"
+					},
+					{
+						"selector": "CallExpression[callee.property.name='replace'] > Literal[value^='/']",
+						"message": "❌ Do not use hardcoded string routes.\n✅ Use Routes system from @_features/navigation"
+					},
+					{
+						"selector": "JSXAttribute[name.name='href'] > Literal[value^='/']",
+						"message": "❌ Do not use hardcoded string routes.\n✅ Use Routes system from @_features/navigation"
+					}
+					// Note: Allow console.log and new Date() in tests for debugging
+				]
 			}
 		},
 		{

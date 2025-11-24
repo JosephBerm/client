@@ -127,34 +127,54 @@ export function parseDateSafe(input: DateInput): Date | null {
 }
 
 /**
- * Parses a date or returns the current date/time if invalid.
+ * Parses a date or returns the current date/time if invalid or not provided.
  * Useful for fallback scenarios where a date is always required.
  * 
  * **Use Cases**:
  * - Default timestamps when API doesn't provide one
  * - Fallback for missing created_at fields
  * - Ensuring non-null dates in constructors
+ * - Replacing `new Date()` calls (FAANG-level: centralized date creation)
  * 
- * @param {DateInput} input - Date input to parse
- * @returns {Date} Parsed Date object or current date if invalid
+ * **Industry Best Practice:**
+ * Making input optional allows this function to serve dual purposes:
+ * 1. Replace `new Date()` directly: `parseDateOrNow()` → current date
+ * 2. Parse with fallback: `parseDateOrNow(input)` → parsed date or current date
+ * 
+ * This follows TypeScript best practices for optional parameters with default behavior.
+ * 
+ * @param {DateInput} [input] - Optional date input to parse. If omitted, returns current date.
+ * @returns {Date} Parsed Date object or current date if invalid/omitted
  * 
  * @example
  * ```typescript
  * import { parseDateOrNow } from '@_lib/dates'
  * 
+ * // Get current date (replaces new Date())
+ * parseDateOrNow()  // Returns: current Date
+ * 
  * // With valid input
  * parseDateOrNow('2024-01-15')  // Returns: Date for 2024-01-15
  * 
  * // With invalid input
- * parseDateOrNow(null)  // Returns: new Date() (current time)
- * parseDateOrNow('invalid')  // Returns: new Date() (current time)
+ * parseDateOrNow(null)  // Returns: current Date (fallback)
+ * parseDateOrNow('invalid')  // Returns: current Date (fallback)
  * 
  * // In class constructors
  * this.createdAt = parseDateOrNow(data.createdAt)
  * ```
  */
-export function parseDateOrNow(input: DateInput): Date {
+export function parseDateOrNow(input?: DateInput): Date {
+	if (input == null) {
+		// No input provided - return current date (replaces new Date())
+		// Note: We use new Date() here as this is the base implementation
+		// All other code should use parseDateOrNow() instead
+		return new Date()
+	}
+	
 	const parsed = parseDate(input)
+	// Fallback to current date if parsing fails
+	// Note: We use new Date() here as this is the base implementation
 	return parsed ?? new Date()
 }
 
@@ -303,7 +323,7 @@ export function parseRequiredTimestamp(
 				severity: 'critical',
 				behavior: 'fallback',
 				message: 'Required timestamp is null/invalid - using fallback in production',
-				action_required: 'Investigate backend API response',
+				actionRequired: 'Investigate backend API response',
 			})
 			
 			// Return current timestamp as fallback

@@ -150,8 +150,8 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
 	// Prevents stale state if user logs out and back in quickly
 	useEffect(() => {
 		if (!isAuthenticated && sidebarOpen) {
-			setSidebarOpen(false)
-		}
+				setSidebarOpen(false)
+			}
 	}, [isAuthenticated, sidebarOpen])
 
 	// Store trigger element when sidebar opens (for focus restoration)
