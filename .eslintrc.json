@@ -312,6 +312,10 @@
 				"message": "❌ Do not create custom <table> elements.\n✅ Use Table components from @_components/tables:\n  import { DivTable } from '@_components/tables/DivTable';\n  <DivTable data={...} columns={...} />"
 			},
 			{
+				"selector": "JSXOpeningElement[name.name='input']",
+				"message": "❌ Do not create custom <input> elements.\n✅ Use appropriate component from @_components:\n  • Text inputs: import Input from '@_components/ui/Input';\n  • Form inputs: import FormInput from '@_components/forms/FormInput';\n  • Checkboxes: import FormCheckbox from '@_components/forms/FormCheckbox';\n  • Toggles: Create/use a Toggle component (or use FormCheckbox with toggle styling)"
+			},
+			{
 				"selector": "CallExpression[callee.property.name='push'] > Literal[value^='/']",
 				"message": "❌ Do not use hardcoded string routes in router.push().\n✅ Use Routes system instead:\n  import { Routes } from '@_features/navigation';\n  router.push(Routes.Quotes.detail('456'));\n  router.push(Routes.Orders.location);"
 			},
@@ -738,6 +742,57 @@
 			}
 		},
 		{
+			// UI and Form wrapper components - Allow native <input> internally
+			// These components ARE the replacement for native inputs, so they need native input element
+			"files": [
+				"**/app/_components/ui/Input.tsx",
+				"**/app/_components/forms/FormInput.tsx",
+				"**/app/_components/forms/FormCheckbox.tsx"
+			],
+			"rules": {
+				"no-restricted-syntax": [
+					"error",
+					{
+						"selector": "NewExpression[callee.name='Date'][arguments.length=0]",
+						"message": "❌ Do not use new Date().\n✅ Use date utils from @_lib/dates instead:\n  import { parseDate, parseDateOrNow } from '@_lib/dates';\n  const date = parseDateOrNow(); // or parseDate(input)"
+					},
+					{
+						"selector": "MemberExpression[object.name='console'][property.name='log']",
+						"message": "❌ Do not use console.log().\n✅ Use logger service instead:\n  import { logger } from '@_core/logger';\n  logger.info('message', { data });\n  logger.error('error', { error });\n  logger.debug('debug', { data });"
+					},
+					{
+						"selector": "JSXOpeningElement[name.name='button']",
+						"message": "❌ Do not create custom <button> elements.\n✅ Use Button component from @_components/ui:\n  import Button from '@_components/ui/Button';\n  <Button onClick={...}>Click me</Button>"
+					},
+					{
+						"selector": "JSXOpeningElement[name.name='select']",
+						"message": "❌ Do not create custom <select> elements.\n✅ Use Select component from @_components/ui:\n  import Select from '@_components/ui/Select';\n  <Select options={...} value={...} onChange={...} />"
+					},
+					{
+						"selector": "JSXOpeningElement[name.name='table']",
+						"message": "❌ Do not create custom <table> elements.\n✅ Use Table components from @_components/tables:\n  import { DivTable } from '@_components/tables/DivTable';\n  <DivTable data={...} columns={...} />"
+					},
+					{
+						"selector": "CallExpression[callee.property.name='push'] > Literal[value^='/']",
+						"message": "❌ Do not use hardcoded string routes in router.push().\n✅ Use Routes system instead:\n  import { Routes } from '@_features/navigation';\n  router.push(Routes.Quotes.detail('456'));\n  router.push(Routes.Orders.location);"
+					},
+					{
+						"selector": "CallExpression[callee.property.name='replace'] > Literal[value^='/']",
+						"message": "❌ Do not use hardcoded string routes in router.replace().\n✅ Use Routes system instead:\n  import { Routes } from '@_features/navigation';\n  router.replace(Routes.Quotes.detail('456'));"
+					},
+					{
+						"selector": "JSXAttribute[name.name='href'] > Literal[value^='/']",
+						"message": "❌ Do not use hardcoded string routes in href.\n✅ Use Routes system instead:\n  import { Routes } from '@_features/navigation';\n  <Link href={Routes.Store.product('123')}>Product</Link>"
+					},
+					{
+						"selector": "CallExpression[callee.name='redirect'] > Literal[value^='/']",
+						"message": "❌ Do not use hardcoded string routes in redirect().\n✅ Use Routes system instead:\n  import { Routes } from '@_features/navigation';\n  redirect(Routes.Quotes.detail('456'));"
+					}
+					// Note: Allow <input> in wrapper components - they ARE the replacement
+				]
+			}
+		},
+		{
 			// Test files - Allow console.log and new Date() for testing
 			// Still enforce UI component usage and Routes system for consistency
 			"files": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
@@ -757,6 +812,10 @@
 					{
 						"selector": "JSXOpeningElement[name.name='table']",
 						"message": "❌ Do not create custom <table> elements.\n✅ Use Table components from @_components/tables"
+					},
+					{
+						"selector": "JSXOpeningElement[name.name='input']",
+						"message": "❌ Do not create custom <input> elements.\n✅ Use Input, FormInput, or FormCheckbox components from @_components"
 					},
 					{
 						"selector": "CallExpression[callee.property.name='push'] > Literal[value^='/']",
