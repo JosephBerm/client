@@ -38,13 +38,13 @@
 
 'use client'
 
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
+import { useCallback, useRef, useEffect, useMemo } from 'react'
 
 import Link from 'next/link'
 
-import { Package, Building2, Heart, Eye, CheckCircle2 } from 'lucide-react'
+import { Package, Building2, CheckCircle2 } from 'lucide-react'
 
-import { ImagePreloadService } from '@_features/images'
+import { ImagePreloadService, getProductImageUrl } from '@_features/images'
 import { Routes } from '@_features/navigation'
 
 import { logger } from '@_core'
@@ -55,7 +55,7 @@ import { Product } from '@_classes/Product'
 import type ProductsCategory from '@_classes/ProductsCategory'
 
 import AddToCartButton from '@_components/store/AddToCartButton'
-import ProductImage from '@_components/store/ProductImage'
+// import ProductImage from '@_components/store/ProductImage' // TEMP: Commented out due to Next.js 15 async Client Component error
 import { useCategoryNavigation } from '@_components/store/useCategoryNavigation'
 
 
@@ -66,12 +66,6 @@ import { PRODUCT_CARD_CONSTANTS } from './ProductCard.constants'
 export interface ProductCardProps {
 	/** Product data to display */
 	product: Product
-	
-	/** Optional: Show wishlist button */
-	showWishlist?: boolean
-	
-	/** Optional: Show quick view button */
-	showQuickView?: boolean
 	
 	/** Optional: Custom onClick handler */
 	onClick?: (product: Product) => void
@@ -96,14 +90,11 @@ export interface ProductCardProps {
 
 export default function ProductCard({
 	product,
-	showWishlist = false,
-	showQuickView = false,
 	onClick,
 	className = '',
-	priority = false,
+	priority: _priority = false, // TEMP: Not used in workaround, will be used when ProductImage is restored
 	onCategoryFilter,
 }: ProductCardProps) {
-	const [isWishlisted, setIsWishlisted] = useState(false)
 	const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 	const hasPreloadedRef = useRef(false)
 
@@ -111,19 +102,6 @@ export default function ProductCard({
 	const handleCategoryClick = useCategoryNavigation({
 		onCategoryFilter,
 	})
-
-	const handleWishlistToggle = (e: React.MouseEvent) => {
-		e.preventDefault()
-		e.stopPropagation()
-		setIsWishlisted(!isWishlisted)
-		// TODO: Implement wishlist API call
-	}
-
-	const handleQuickView = (e: React.MouseEvent) => {
-		e.preventDefault()
-		e.stopPropagation()
-		// TODO: Implement quick view modal
-	}
 
 	const handleCardClick = () => {
 		if (onClick) {
@@ -196,12 +174,20 @@ export default function ProductCard({
 	const { DIMENSIONS, STYLES, SPACING } = PRODUCT_CARD_CONSTANTS
 
 	// Determine manufacturer/provider display (prioritize manufacturer, fallback to provider)
-	const manufacturerOrProvider = product.manufacturer || product.provider?.name || null
+	const manufacturerOrProvider = product.manufacturer ?? product.provider?.name ?? null
 	const hasManufacturerInfo = Boolean(manufacturerOrProvider)
 
 	// Determine availability status for dropshipping model
 	// In dropshipping, stock counts may not be real-time, so we show availability status
 	const isAvailable = product.stock !== undefined && product.stock > 0
+
+	// TEMP FIX: Use simple img tag instead of ProductImage/OptimizedImage
+	// TODO: Fix Next.js 15 async Client Component error with OptimizedImage
+	// Issue: Next.js Image component with fill prop causes "async Client Component" error in lists
+	// Workaround: Use native img tag until OptimizedImage is fixed for Next.js 15
+	const imageUrl = serializedProduct.files[0]?.name
+		? getProductImageUrl(serializedProduct.id, serializedProduct.files[0].name)
+		: null
 
 	return (
 		<div
@@ -211,7 +197,9 @@ export default function ProductCard({
 		>
 			{/* Image Container - Fixed aspect ratio */}
 			<div className={STYLES.IMAGE_CONTAINER}>
-				{/* Product Image - Stock badge hidden for now (future implementation) */}
+				{/* Product Image - TEMP: Using native img tag due to Next.js 15 async Client Component error */}
+				{/* TODO: Restore ProductImage component once OptimizedImage is fixed for Next.js 15 */}
+				{/* 
 				<ProductImage
 					product={serializedProduct}
 					priority={priority}
@@ -220,32 +208,22 @@ export default function ProductCard({
 					hover={true}
 					className="h-full w-full"
 				/>
-
-				{/* Quick Actions Overlay (appears on hover) */}
-				<div className="absolute inset-x-0 bottom-0 flex gap-2 p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-					{showWishlist && (
-						<button
-							onClick={handleWishlistToggle}
-							className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full backdrop-blur-sm transition-all ${
-								isWishlisted
-									? 'bg-primary text-primary-content'
-									: 'bg-base-100/90 text-base-content hover:bg-primary hover:text-primary-content'
-							}`}
-							aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-						>
-							<Heart className={`h-5 w-5 ${isWishlisted ? 'fill-current' : ''}`} />
-						</button>
-					)}
-					{showQuickView && (
-						<button
-							onClick={handleQuickView}
-							className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-base-100/90 text-base-content backdrop-blur-sm transition-all hover:bg-primary hover:text-primary-content"
-							aria-label="Quick view"
-						>
-							<Eye className="h-5 w-5" />
-						</button>
-					)}
-				</div>
+				*/}
+				
+				{/* TEMP: Native img tag workaround - Next.js Image causes async Client Component error */}
+				{imageUrl ? (
+					// eslint-disable-next-line @next/next/no-img-element
+					<img
+						src={imageUrl}
+						alt={product.name || 'Product image'}
+						className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+					/>
+				) : (
+					<div className="flex h-full w-full items-center justify-center bg-base-200">
+						<Package className="h-12 w-12 text-base-content/20" strokeWidth={1.5} aria-hidden="true" />
+						<span className="sr-only">{product.name || 'Product image placeholder'}</span>
+					</div>
+				)}
 			</div>
 
 			{/* Content Container - Grows to fill space */}
@@ -258,17 +236,17 @@ export default function ProductCard({
 					className="block"
 				>
 					<h3 className={`${STYLES.PRODUCT_NAME} cursor-pointer`} style={DIMENSIONS.PRODUCT_NAME}>
-					{product.name || 'Unnamed product'}
-				</h3>
+						{product.name ?? 'Unnamed product'}
+					</h3>
 				</Link>
 
 				{/* Manufacturer/Provider - Only show if available */}
 				{hasManufacturerInfo && (
 					<div className={`${SPACING.MANUFACTURER_MARGIN} flex items-center gap-1.5`} style={DIMENSIONS.MANUFACTURER}>
 						<Building2 className="h-3.5 w-3.5 shrink-0 text-base-content/50" strokeWidth={2} />
-						<p className={`${STYLES.MANUFACTURER} truncate`} title={manufacturerOrProvider || undefined}>
+						<p className={`${STYLES.MANUFACTURER} truncate`} title={manufacturerOrProvider ?? undefined}>
 							{manufacturerOrProvider}
-				</p>
+						</p>
 					</div>
 				)}
 
@@ -289,20 +267,21 @@ export default function ProductCard({
 
 				{/* Metadata - SKU only (essential for B2B) */}
 				{product.sku && (
-				<div className={`${SPACING.METADATA_MARGIN} ${STYLES.METADATA_CONTAINER}`} style={{ minHeight: DIMENSIONS.METADATA.minHeight }}>
-					<div className={STYLES.METADATA_ITEM}>
-						<Package className={`${STYLES.ICON} shrink-0`} strokeWidth={2} />
-						<span className="font-medium">SKU:</span>
+					<div className={`${SPACING.METADATA_MARGIN} ${STYLES.METADATA_CONTAINER}`} style={{ minHeight: DIMENSIONS.METADATA.minHeight }}>
+						<div className={STYLES.METADATA_ITEM}>
+							<Package className={`${STYLES.ICON} shrink-0`} strokeWidth={2} />
+							<span className="font-medium">SKU:</span>
 							<span className="truncate font-mono text-xs">{product.sku}</span>
-					</div>
+						</div>
 					</div>
 				)}
 
 				{/* Categories - Elegant hashtag-style tags (single line, no wrap) - Clickable for filtering */}
 				{product.categories.length > 0 && (
-				<div className={`${SPACING.CATEGORY_MARGIN} ${STYLES.CATEGORY_CONTAINER}`} style={DIMENSIONS.CATEGORY}>
+					<div className={`${SPACING.CATEGORY_MARGIN} ${STYLES.CATEGORY_CONTAINER}`} style={DIMENSIONS.CATEGORY}>
 						<div className={STYLES.CATEGORY_TAGS}>
 							{product.categories.slice(0, 2).map((cat) => (
+								// eslint-disable-next-line no-restricted-syntax
 								<button
 									key={cat.id}
 									type="button"
@@ -326,7 +305,7 @@ export default function ProductCard({
 							)}
 						</div>
 					</div>
-					)}
+				)}
 
 				{/* Spacer - Pushes button to bottom */}
 				<div className={STYLES.SPACER} style={DIMENSIONS.SPACER} />

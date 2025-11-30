@@ -154,8 +154,6 @@ export default function RelatedProducts({ currentProductId, categoryName }: Rela
 							<ProductCard
 								key={product.id}
 								product={product}
-								showWishlist={false}
-								showQuickView={false}
 							/>
 						))}
 					</div>

@@ -130,7 +130,7 @@ export default function ProductImage({
 	hover = true,
 }: ProductImageProps) {
 	// Check if product has image (using serialized product utilities)
-	const hasImage = productHasImage(product) && product.files.length > 0
+	const hasImage = productHasImage(product)
 
 	// Get initial image URL
 	const initialImageUrl = hasImage && product.files[0]?.name

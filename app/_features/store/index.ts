@@ -47,6 +47,18 @@ export {
 	type UseSearchFilterStateReturn,
 } from './hooks/useSearchFilterState'
 
+export {
+	useStoreData,
+	type UseStoreDataReturn,
+	type RetrievalOverrides,
+	type ProductFetchResult,
+} from './hooks/useStoreData'
+
+export {
+	useStorePageLogic,
+	type UseStorePageLogicReturn,
+} from './hooks/useStorePageLogic'
+
 // ============================================================================
 // UTILITIES (Server + Client Safe)
 // ============================================================================

@@ -16,6 +16,7 @@ export interface UnifiedStoreToolbarProps {
 	searchText: string
 	onSearchChange: (value: string) => void
 	onSearchClear: () => void
+	onSearchSubmit?: () => void // ✅ NEW - Manual search trigger
 	isSearchTooShort?: boolean
 	searchInputRef?: React.RefObject<HTMLInputElement | null>
 	onSearchFocus?: () => void
@@ -72,6 +73,7 @@ export default function UnifiedStoreToolbar({
 	searchText,
 	onSearchChange,
 	onSearchClear,
+	onSearchSubmit, // ✅ NEW - Manual search trigger
 	isSearchTooShort = false,
 	searchInputRef,
 	onSearchFocus,
@@ -87,6 +89,14 @@ export default function UnifiedStoreToolbar({
 	isLoading = false,
 }: UnifiedStoreToolbarProps) {
 	const _currentSortOption = SORT_OPTIONS.find((opt) => opt.value === currentSort) || SORT_OPTIONS[0]
+	
+	// Handle Enter key press for manual search
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === 'Enter' && onSearchSubmit) {
+			e.preventDefault()
+			onSearchSubmit()
+		}
+	}
 
 	return (
 		<div
@@ -112,6 +122,7 @@ export default function UnifiedStoreToolbar({
 							type="text"
 							value={searchText}
 							onChange={(e) => onSearchChange(e.target.value)}
+							onKeyDown={handleKeyDown}
 							onFocus={onSearchFocus}
 							onBlur={onSearchBlur}
 							placeholder="Search products..."
@@ -252,6 +263,7 @@ export default function UnifiedStoreToolbar({
 							type="text"
 							value={searchText}
 							onChange={(e) => onSearchChange(e.target.value)}
+							onKeyDown={handleKeyDown}
 							onFocus={onSearchFocus}
 							onBlur={onSearchBlur}
 							placeholder="Search products..."

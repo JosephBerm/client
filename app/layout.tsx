@@ -20,8 +20,10 @@ export const metadata: Metadata = {
 	description: 'Professional medical supply marketplace for healthcare providers',
 }
 
-// Force dynamic rendering due to useSearchParams in Navbar (login modal detection)
-export const dynamic = 'force-dynamic'
+// No dynamic export needed - Next.js 15.5 automatically handles Client Components correctly.
+// Navbar is a Client Component, so useSearchParams() is handled client-side.
+// Layout can be statically optimized while Client Components handle dynamic behavior.
+// This follows Next.js 15.5 best practices: static layout + Client Component for dynamic behavior.
 
 /**
  * Root layout for the entire application

@@ -25,3 +25,15 @@ export {
 	type UseSearchFilterStateReturn,
 } from './useSearchFilterState'
 
+export {
+	useStoreData,
+	type UseStoreDataReturn,
+	type RetrievalOverrides,
+	type ProductFetchResult,
+} from './useStoreData'
+
+export {
+	useStorePageLogic,
+	type UseStorePageLogicReturn,
+} from './useStorePageLogic'
+

@@ -33,9 +33,8 @@ import Button from '@_components/ui/Button'
 
 
 
-
-// Force dynamic rendering due to useSearchParams in Navbar
-export const dynamic = 'force-dynamic'
+// Removed force-dynamic - Client Components are already fully dynamic by default.
+// (Root layout handles Navbar's useSearchParams, not this page)
 
 /**
  * Cart Page Component

@@ -22,7 +22,7 @@
 
 'use client'
 
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect, useState, useCallback, isValidElement } from 'react'
 
 import classNames from 'classnames'
 
@@ -31,7 +31,7 @@ import { useScrollReveal } from '@_shared/hooks/useScrollReveal'
 
 export interface ScrollRevealCardProps {
 	/** Child component to wrap (typically ProductCard) */
-	children: React.ReactNode
+	children: React.ReactElement
 	/** Index for staggered animation (0-based) */
 	index?: number
 	/** Custom className */
@@ -150,13 +150,21 @@ export default function ScrollRevealCard({
 	const [hasMounted, setHasMounted] = useState(false)
 	
 	// For products after index 10, use intersection observer for scroll-triggered animation
-	const { ref, hasAnimated: hasScrollAnimated } = useScrollReveal({
+	// CRITICAL: Always call hooks unconditionally (React rules)
+	// The hook must be called, but we can disable its functionality via the enabled prop
+	// Next.js 15 Fix: Ensure hook result is properly destructured synchronously
+	const scrollRevealHookResult = useScrollReveal({
 		threshold: 0.1,
 		rootMargin, // Responsive: Larger on mobile for earlier reveal
 		staggerDelay, // Base delay multiplier
 		index: animationIndex, // Row-aware index for elegant staggering
 		enabled: enabled && !shouldAnimateOnMount, // Only use scroll animation for products after index 10
 	})
+	
+	// CRITICAL: Destructure synchronously to ensure ref is not a Promise
+	// Next.js 15 can throw "async Client Component" error if ref is async
+	const scrollRef = scrollRevealHookResult.ref
+	const hasScrollAnimated = scrollRevealHookResult.hasAnimated
 	
 	// FAANG pattern: Trigger elegant row-by-row animation on mount for first 10 products
 	// Industry best practice: True row-by-row cascade with proper timing
@@ -245,6 +253,20 @@ export default function ScrollRevealCard({
 		return {} as React.CSSProperties
 	}, [effectiveHasAnimated])
 
+	// Next.js 15 Fix: Always provide a ref callback, even if it's a no-op
+	// Conditional refs (undefined vs function) can cause "async Client Component" errors
+	// Use a no-op ref when we don't need scroll animation (first 10 products)
+	// Type must match: (node: HTMLElement | null) => void
+	// CRITICAL: Use useCallback to ensure stable ref callback (prevents React from thinking it's async)
+	// Must be defined before early return to satisfy React hooks rules
+	const noOpRef = useCallback((_node: HTMLElement | null) => {
+		// Intentionally empty - no intersection observer needed for mount-triggered animations
+	}, [])
+	
+	const elementRef: (node: HTMLElement | null) => void = shouldAnimateOnMount 
+		? noOpRef // No-op ref for mount-triggered animations
+		: scrollRef // Scroll-triggered ref from hook
+
 	// Wrap children in a div with the animation classes and ref
 	// Note: animationDelay for first 10 is handled by useEffect stagger logic
 	// Note: animationDelay for products after 10 is handled by hook's internal stagger logic
@@ -253,8 +275,20 @@ export default function ScrollRevealCard({
 	// ACCESSIBILITY: The wrapper div doesn't interfere with Link's keyboard navigation or focus
 	// FAANG pattern: First 10 use mount-triggered animation, rest use scroll-triggered
 	// This creates elegant flow: Above-fold animates on load, below-fold animates on scroll
+	// 
+	// Next.js 15 Fix: Ensure children is a valid React element, not a Promise
+	// This prevents "async Client Component" errors when wrapping Next.js Link components
+	if (!isValidElement(children)) {
+		// Fallback: If children is not a valid element, render as-is (shouldn't happen in practice)
+		return <>{children}</>
+	}
+
+	// Next.js 15 Fix: Wrap in div with ref and animation classes
+	// CRITICAL: The wrapper div must be synchronous and not conditional
+	// React 18+ and Next.js 15 are strict about async components
+	// We ensure elementRef is always a function (never undefined) to avoid async detection
 	return (
-		<div ref={shouldAnimateOnMount ? undefined : ref} className={cardClasses} style={style}>
+		<div ref={elementRef} className={cardClasses} style={style}>
 			{children}
 		</div>
 	)

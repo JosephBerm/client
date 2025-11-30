@@ -111,6 +111,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	 * Typically a Lucide icon component.
 	 */
 	rightIcon?: ReactNode
+	
+	/** 
+	 * Allow button height to be determined by content (e.g., large avatars, icons).
+	 * Overrides DaisyUI's fixed height constraint (height: var(--size)).
+	 * Use for icon-only buttons with avatars or large icons that exceed standard button heights.
+	 * @default false
+	 */
+	contentDrivenHeight?: boolean
 }
 
 /**
@@ -151,7 +159,7 @@ const variantClasses: Record<NonNullable<ButtonProps['variant']>, string> = {
 	accent:
 		'btn btn-accent shadow-sm hover:shadow-md focus-visible:shadow-lg focus-visible:ring-accent/30',
 	ghost:
-		'btn btn-ghost hover:bg-base-200 focus-visible:ring-base-content/20',
+		'btn btn-ghost bg-transparent hover:bg-base-200 focus-visible:ring-base-content/20',
 	outline:
 		'btn btn-outline hover:shadow-sm focus-visible:ring-primary/30',
 	error:
@@ -176,6 +184,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 			loading = false,
 			leftIcon,
 			rightIcon,
+			contentDrivenHeight = false,
 			children,
 			className,
 			disabled,
@@ -185,7 +194,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 	) => {
 		const isDisabled = disabled || loading
 
+		const { style, ...restProps } = props
+
 		return (
+			// eslint-disable-next-line no-restricted-syntax
 			<button
 				ref={ref}
 				className={classNames(
@@ -195,11 +207,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 					{
 						'w-full sm:w-auto': fullWidth,
 						'cursor-not-allowed opacity-60 hover:shadow-none': isDisabled,
+						'h-auto min-h-fit': contentDrivenHeight, // Override DaisyUI's height: var(--size)
 					},
 					className
 				)}
+				style={
+					contentDrivenHeight
+						? { height: 'auto', minHeight: 'fit-content', ...style }
+						: style
+				}
 				disabled={isDisabled}
-				{...props}
+				{...restProps}
 			>
 				{loading && (
 					<span 

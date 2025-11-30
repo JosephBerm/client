@@ -319,8 +319,6 @@ export default function ProductsCarousel() {
 							<ProductCard
 								key={product.id}
 								product={product}
-								showWishlist={false}
-								showQuickView={false}
 								priority={index < 3} // Priority loading for above-the-fold images (first 3)
 							/>
 						))}
