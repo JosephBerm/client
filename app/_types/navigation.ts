@@ -51,14 +51,15 @@ export interface BreadcrumbItem {
 export type NavigationIconType =
 	| 'dashboard'
 	| 'package'
-	| 'shopping-cart'
-	| 'file-text'
+	| 'clipboard-list'
+	| 'receipt'
 	| 'users'
-	| 'building'
+	| 'hospital'
+	| 'factory'
 	| 'bar-chart'
 	| 'user'
 	| 'settings'
-	| 'shopping-bag'
+	| 'store'
 	| 'bell'
 
 /**

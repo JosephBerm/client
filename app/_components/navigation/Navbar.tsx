@@ -6,14 +6,15 @@
  *
  * **Features:**
  * - Mobile-first responsive design
- * - Hamburger menu for mobile navigation (unauthenticated users)
+ * - Hamburger menu for mobile navigation (all users on public routes)
  * - Sticky positioning (always visible)
  * - Brand logo with medical cross icon
  * - Clean navigation links: Home, About Us, Store, Contact (always visible)
  * - Shopping cart with item count badge
  * - Login button or user menu based on authentication
  * - Accessible and semantic HTML
- * - No sidebar on public routes (sidebar only in /app/* routes via InternalAppShell)
+ * - No internal sidebar on public routes (public navigation via mobile menu)
+ * - Internal sidebar only in /app/* routes (via InternalAppShell)
  *
  * **Navigation Links (Always Visible):**
  * - Home (/)
@@ -26,11 +27,13 @@
  * **FAANG-Level UX Design:**
  * - Public navigation links are always visible regardless of authentication state
  * - Follows industry best practices (Amazon, Google, Netflix) for consistent navigation
- * - Authenticated users have additional routes via Sidebar, but public routes remain accessible
+ * - Navigation is contextual to route type: public routes show public nav, internal routes show internal nav
+ * - Authenticated users can access dashboard via user menu or dashboard link in mobile menu
  * - Ensures discoverability and maintains consistent user experience
  *
  * **Mobile Behavior (< 768px):**
- * - Public routes: Shows hamburger menu with navigation links (all users)
+ * - Public routes: Shows hamburger menu with public navigation links (all users)
+ * - Authenticated users: Additional "Dashboard" link in public mobile menu
  * - Internal routes (/app/*): Shows sidebar menu button (handled by InternalAppShell)
  * - Navigation links visible in navbar on desktop, accessible via mobile menu on public routes
  *
@@ -52,7 +55,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { getCookie } from 'cookies-next'
-import { Menu, ShoppingCart, X, User, LogOut, Home, Info, Store, Mail, Settings } from 'lucide-react'
+import { Menu, ShoppingCart, X, User, LogOut, Home, Info, Store, Mail, Settings, LayoutDashboard } from 'lucide-react'
 
 import { useAuthStore } from '@_features/auth'
 import { logout as logoutService } from '@_features/auth/services/AuthService'
@@ -394,7 +397,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 								variant="ghost"
 								size="sm"
 								onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-								className="hover:scale-105 text-base-content md:hidden p-2.5! focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary focus-visible:ring-0"
+								className="text-base-content md:hidden p-2.5! focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary focus-visible:ring-0 origin-center transition-transform duration-200 ease-out motion-safe:hover:scale-[1.02] active:scale-95"
 								aria-label='Toggle menu'>
 								{mobileMenuOpen ? <X className='h-7 w-7' /> : <Menu className='h-7 w-7' />}
 							</Button>
@@ -565,8 +568,9 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 				</nav>
 			</header>
 
-			{/* Mobile Menu (public navigation for non-authenticated users) */}
-			{mobileMenuOpen && !isAuthenticated && (
+			{/* Mobile Menu (public navigation for all users on public routes) */}
+			{/* Industry best practice: Public navigation should be accessible to all users regardless of auth state */}
+			{mobileMenuOpen && !onMenuClick && (
 				<div className='fixed inset-0 z-40 md:hidden'>
 					{/* Backdrop */}
 					<div
@@ -596,6 +600,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 
 						{/* Navigation Links */}
 						<nav className='flex flex-col gap-2 overflow-y-auto p-6'>
+							{/* Public Navigation Links - Always visible for all users */}
 							{publicNavigationLinks.map((link) => {
 								const Icon = link.icon
 								return (
@@ -614,6 +619,26 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 									</Link>
 								)
 							})}
+
+							{/* Dashboard Link - Only for authenticated users */}
+							{/* Industry best practice: Provide easy access to dashboard from public navigation */}
+							{isAuthenticated && (
+								<>
+									<div className='my-2 border-t border-base-300' />
+									<Link
+										href={Routes.Dashboard.location}
+										onClick={() => setMobileMenuOpen(false)}
+										className='flex items-start gap-3 rounded-lg px-5 py-4 transition-all hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'>
+										<LayoutDashboard className='mt-0.5 h-6 w-6 shrink-0 text-primary' />
+										<div className='flex flex-1 flex-col gap-1'>
+											<span className='text-base font-semibold text-base-content'>
+												Dashboard
+											</span>
+											<span className='text-sm text-base-content/70'>Access your dashboard and account</span>
+										</div>
+									</Link>
+								</>
+							)}
 						</nav>
 					</div>
 				</div>

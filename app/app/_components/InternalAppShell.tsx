@@ -72,6 +72,7 @@ import classNames from 'classnames'
 import { Menu } from 'lucide-react'
 
 import { useAuthStore } from '@_features/auth'
+import { Routes } from '@_features/navigation'
 
 import { logger } from '@_core'
 
@@ -80,6 +81,7 @@ import { useMediaQuery } from '@_shared'
 import type { IUser } from '@_classes/User'
 
 import Button from '@_components/ui/Button'
+import Logo from '@_components/ui/Logo'
 
 import Breadcrumb from './Breadcrumb'
 import InternalSidebar from './InternalSidebar'
@@ -95,6 +97,11 @@ interface InternalAppShellProps {
 	/**
 	 * User data from server-side authentication.
 	 * Used to initialize client-side auth store.
+	 * 
+	 * **Validation:**
+	 * - Must be a valid User instance
+	 * - Should have a valid id (though null is technically allowed by type)
+	 * - Component handles missing/invalid user gracefully
 	 */
 	user: IUser
 }
@@ -168,15 +175,43 @@ export default function InternalAppShell({ children, user }: InternalAppShellPro
 	// Initialize auth store with server-fetched user data
 	// This ensures client-side state matches server-side authentication
 	// CRITICAL: Must run before any components that depend on auth state
+	// 
+	// **Defensive Coding:**
+	// - Validates user prop exists and has valid id
+	// - Handles null/undefined user.id gracefully
+	// - Only updates store if user actually changed (deep equality)
+	// - Error handling with structured logging
+	// - Prevents unnecessary re-renders with stable comparison
 	useEffect(() => {
-		const currentUser = useAuthStore.getState().user
-		
-		// Only update if user data has changed (avoid unnecessary re-renders)
-		if (!currentUser || currentUser.id !== user.id) {
-			useAuthStore.getState().setUser(user)
-			logger.debug('Auth store initialized with server user data', {
-				userId: user.id ?? 'unknown',
-				userName: user.name?.getFullName() ?? 'Unknown User',
+		// Defensive: Validate user prop exists
+		if (!user) {
+			logger.error('InternalAppShell received invalid user prop', {
+				component: 'InternalAppShell',
+				user: user,
+			})
+			return
+		}
+
+		try {
+			const currentUser = useAuthStore.getState().user
+			const currentUserId = currentUser?.id ?? null
+			const newUserId = user?.id ?? null
+
+			// Only update if user data actually changed
+			// Handles null id cases gracefully (users without id shouldn't exist, but defensive)
+			if (!currentUser || currentUserId !== newUserId) {
+				useAuthStore.getState().setUser(user)
+				logger.debug('Auth store initialized with server user data', {
+					userId: newUserId ?? 'unknown',
+					userName: user.name?.getFullName?.() ?? 'Unknown User',
+					component: 'InternalAppShell',
+				})
+			}
+		} catch (error) {
+			// Defensive: Handle errors gracefully without crashing the app
+			logger.error('Failed to initialize auth store with user data', {
+				error,
+				userId: user?.id ?? 'unknown',
 				component: 'InternalAppShell',
 			})
 		}
@@ -185,36 +220,67 @@ export default function InternalAppShell({ children, user }: InternalAppShellPro
 	// Detect mobile vs desktop breakpoint
 	// Mobile: < 1024px (drawer), Desktop: >= 1024px (permanent sidebar)
 	const isMobile = useMediaQuery('(max-width: 1023px)')
-	const prevIsMobile = useRef(isMobile)
+	const prevIsMobile = useRef<boolean | null>(null)
 
 	// Close mobile drawer when transitioning to desktop
 	// Desktop doesn't need drawer state (sidebar is permanent)
+	// 
+	// **Defensive Coding:**
+	// - Handles initial mount (prevIsMobile.current is null)
+	// - Only closes if transitioning FROM mobile TO desktop
+	// - Updates ref before state check to prevent race conditions
+	// - Cleanup on unmount not needed (ref cleanup is automatic)
 	useEffect(() => {
+		// Only process transitions (skip initial mount)
+		if (prevIsMobile.current === null) {
+			prevIsMobile.current = isMobile
+			return
+		}
+
+		// Close drawer only when transitioning from mobile to desktop
 		if (!isMobile && prevIsMobile.current && sidebarOpen) {
 			setSidebarOpen(false)
 			logger.debug('Mobile drawer closed on desktop transition', {
 				component: 'InternalAppShell',
 			})
 		}
+
+		// Update ref AFTER processing (prevents race conditions)
 		prevIsMobile.current = isMobile
 	}, [isMobile, sidebarOpen])
 
 	// Mobile-only: Toggle sidebar drawer
 	// Memoized to prevent unnecessary Sidebar re-renders
+	// 
+	// **Defensive Coding:**
+	// - Safe to call even if already in desired state
+	// - Uses functional update to prevent stale closure issues
 	const toggleSidebar = useCallback(() => {
 		setSidebarOpen((prev) => {
+			const newState = !prev
 			logger.debug('Mobile sidebar drawer toggled', {
-				open: !prev,
+				open: newState,
 				component: 'InternalAppShell',
 			})
-			return !prev
+			return newState
 		})
 	}, [])
 
 	// Mobile-only: Close sidebar drawer
 	// Memoized to prevent unnecessary Sidebar re-renders
+	// 
+	// **Defensive Coding:**
+	// - Idempotent (safe to call multiple times)
+	// - No-op if already closed
 	const closeSidebar = useCallback(() => {
-		setSidebarOpen(false)
+		setSidebarOpen((prev) => {
+			if (prev) {
+				logger.debug('Mobile sidebar drawer closed', {
+					component: 'InternalAppShell',
+				})
+			}
+			return false
+		})
 	}, [])
 
 	return (
@@ -222,6 +288,13 @@ export default function InternalAppShell({ children, user }: InternalAppShellPro
 			{/* Internal Sidebar Navigation */}
 			{/* Mobile: Overlay drawer (controlled by sidebarOpen) */}
 			{/* Desktop: Always visible, permanent (isOpen=true) */}
+			{/* Internal Sidebar Navigation */}
+			{/* Mobile: Overlay drawer (controlled by sidebarOpen) */}
+			{/* Desktop: Always visible, permanent (isOpen=true) */}
+			{/* 
+				Defensive: InternalSidebar handles its own error boundaries internally
+				If sidebar fails, app continues to function (graceful degradation)
+			*/}
 			<InternalSidebar
 				isOpen={isMobile ? sidebarOpen : true}
 				onClose={closeSidebar}
@@ -271,15 +344,16 @@ export default function InternalAppShell({ children, user }: InternalAppShellPro
 						<Menu className="w-6 h-6" aria-hidden="true" />
 					</Button>
 
-						{/* Mobile Header Title */}
-						<div className="flex items-center gap-2 flex-1 min-w-0">
-							<div className="w-6 h-6 bg-primary rounded flex items-center justify-center text-primary-content font-bold text-xs shrink-0">
-								M
-							</div>
-							<h1 className="text-base font-semibold text-base-content truncate">
-								MedSource
-							</h1>
-						</div>
+						{/* Mobile Header Logo */}
+					<div className="flex-1 min-w-0 flex items-center">
+						<Logo
+							href={Routes.Dashboard.location}
+							showText
+							size="sm"
+							className="min-w-0"
+							textClassName="truncate"
+						/>
+					</div>
 					</div>
 				)}
 

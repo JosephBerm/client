@@ -71,7 +71,7 @@ export const INTERNAL_ROUTE_METADATA: Record<string, InternalPageMetadata> = {
 	orders: {
 		title: 'Orders',
 		description: 'View and manage customer orders',
-		icon: 'shopping-cart',
+		icon: 'clipboard-list',
 		hasSearch: true,
 		hasCreateAction: true,
 		createActionLabel: 'Create Order',
@@ -81,7 +81,7 @@ export const INTERNAL_ROUTE_METADATA: Record<string, InternalPageMetadata> = {
 	quotes: {
 		title: 'Quotes',
 		description: 'Manage quote requests and pricing',
-		icon: 'file-text',
+		icon: 'receipt',
 		hasSearch: true,
 	},
 
@@ -99,7 +99,7 @@ export const INTERNAL_ROUTE_METADATA: Record<string, InternalPageMetadata> = {
 	providers: {
 		title: 'Providers',
 		description: 'Manage supplier relationships',
-		icon: 'building',
+		icon: 'factory',
 		hasSearch: true,
 		hasCreateAction: true,
 		createActionLabel: 'Add Provider',
@@ -120,8 +120,8 @@ export const INTERNAL_ROUTE_METADATA: Record<string, InternalPageMetadata> = {
 	// Customer Management
 	customers: {
 		title: 'Customers',
-		description: 'Manage customer organizations',
-		icon: 'building',
+		description: 'Manage healthcare facilities and professionals',
+		icon: 'hospital',
 		hasSearch: true,
 		hasCreateAction: true,
 		createActionLabel: 'Add Customer',

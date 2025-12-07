@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 
 import Link from 'next/link'
 
-import { Building2, BellRing, ShoppingCart, FileText, Mail, Phone, MapPin, User as UserIcon, Calendar, ArrowRight } from 'lucide-react'
+import { Building2, BellRing, ClipboardList, Receipt, Mail, Phone, MapPin, User as UserIcon, Calendar, ArrowRight } from 'lucide-react'
 
 import { useAuthStore } from '@_features/auth'
 import { Routes } from '@_features/navigation'
@@ -290,12 +290,12 @@ export default function AccountOverview() {
 									<p className={SECONDARY_VALUE_CLASS}>Activity</p>
 										<div className="flex items-center gap-3 text-sm text-base-content/80">
 											<span className="flex items-center gap-1.5">
-												<ShoppingCart className="h-3.5 w-3.5" />
+												<ClipboardList className="h-3.5 w-3.5" />
 												{ordersCount} {ordersCount === 1 ? 'order' : 'orders'}
 											</span>
 											{quotesCount > 0 && (
 												<span className="flex items-center gap-1.5">
-													<FileText className="h-3.5 w-3.5" />
+													<Receipt className="h-3.5 w-3.5" />
 													{quotesCount} {quotesCount === 1 ? 'quote' : 'quotes'}
 												</span>
 											)}
@@ -345,13 +345,13 @@ export default function AccountOverview() {
 						href={Routes.Notifications.location}
 					/>
 					<ActivityStatCard
-						icon={ShoppingCart}
+						icon={ClipboardList}
 						label="Orders"
 						value={ordersCount}
 						href={Routes.Orders.location}
 					/>
 					<ActivityStatCard
-						icon={FileText}
+						icon={Receipt}
 						label="Quotes"
 						value={quotesCount}
 						href={Routes.Quotes.location}
