@@ -16,7 +16,7 @@
  * 2. ⏸️ Category filtering
  * 3. ⏸️ Sorting
  * 4. ⏸️ Pagination
- * 5. ⏸️ Load more
+ * 5. ✅ Pagination (numbered pagination only)
  * 6. ⏸️ Page size changes
  * 7. ⏸️ URL parameter handling
  * 8. ⏸️ Focus management
@@ -33,28 +33,30 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 // import { useRouter, useSearchParams } from 'next/navigation' // ⏸️ DISABLED - URL params
 
-import {
-	useProductsState,
-	useSearchFilterState,
-	createInitialSearchFilterState,
-	useStoreData,
-	type RetrievalOverrides, // ✅ ENABLED - needed for unified fetch
-	INITIAL_PAGE_SIZE,
-	createInitialFilter,
-	// SEARCH_DEBOUNCE_MS, // ⏸️ DISABLED - search auto-fetch (save for last)
-	// MIN_SEARCH_LENGTH, // ⏸️ DISABLED - search auto-fetch (save for last)
-	// PRIORITY_IMAGE_COUNT, // ⏸️ DISABLED - not used in minimal version
-} from '@_features/store'
-
 import { logger } from '@_core'
 
 import { notificationService } from '@_shared'
+
 // import { useDebounce } from '@_shared' // ⏸️ DISABLED - debounce
+import { scrollToTop } from '@_shared/utils/scrollUtils'
 
 import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import type { PagedResult } from '@_classes/Base/PagedResult'
 import type { Product } from '@_classes/Product'
 import type ProductsCategory from '@_classes/ProductsCategory'
+
+// Import directly from individual files to avoid dependency cycle
+// (useStorePageLogic is exported by @_features/store barrel, so importing from barrel creates cycle)
+import { INITIAL_PAGE_SIZE, createInitialFilter } from '../constants'
+
+import { useProductsState } from './useProductsState'
+import { useSearchFilterState, createInitialSearchFilterState } from './useSearchFilterState'
+import { useStoreData } from './useStoreData'
+
+import type { RetrievalOverrides } from './useStoreData'
+// SEARCH_DEBOUNCE_MS, // ⏸️ DISABLED - search auto-fetch (save for last)
+// MIN_SEARCH_LENGTH, // ⏸️ DISABLED - search auto-fetch (save for last)
+// PRIORITY_IMAGE_COUNT, // ⏸️ DISABLED - not used in minimal version
 
 /**
  * Store page logic hook return type
@@ -93,7 +95,6 @@ export interface UseStorePageLogicReturn {
 	handleSortChange: (sortValue: string) => void
 	handlePageSizeChange: (size: number) => void
 	handlePageChange: (page: number) => void
-	handleLoadMore: () => void
 	handleClearFilters: () => void
 	handleCategoryFilter: (category: ProductsCategory) => void
 }
@@ -368,42 +369,24 @@ export function useStorePageLogic(): UseStorePageLogicReturn {
 	}, [setSelectedCategoriesAction, fetchAndUpdateProducts, searchCriteria, searchText])
 
 	/**
-	 * ✅ FEATURE #5 ENABLED - Load more
-	 * 
-	 * Appends the next page of products to the current list.
-	 * This is a user-initiated action (button click), safe from infinite loops.
-	 */
-	const handleLoadMore = useCallback(() => {
-		if (!productsResult.hasNext) {
-			logger.warn('⚠️ No more products to load')
-			return
-		}
-		
-		const nextPage = productsResult.page + 1
-		logger.info('✅ Feature #5: Loading more products', { 
-			currentPage: productsResult.page,
-			nextPage 
-		})
-		
-		// Fetch next page
-		const updatedCriteria = new GenericSearchFilter({
-			...searchCriteria,
-			page: nextPage,
-		})
-		
-		void fetchAndUpdateProducts(
-			updatedCriteria,
-			{ search: searchText, categories: selectedCategories }
-		)
-	}, [productsResult, searchCriteria, fetchAndUpdateProducts, searchText, selectedCategories])
-
-	/**
 	 * ✅ FEATURE #5 ENABLED - Page change
 	 * 
 	 * Goes to a specific page number (for traditional pagination).
 	 * This is a user-initiated action (pagination button click), safe from infinite loops.
 	 */
 	const handlePageChange = useCallback((page: number) => {
+		// Defensive: Validate page number (should never happen due to PaginationControls guards, but safety first)
+		if (typeof page !== 'number' || page < 1 || !Number.isInteger(page)) {
+			logger.warn('⚠️ Invalid page number in handlePageChange', { page, currentPage: productsResult.page })
+			return
+		}
+
+		// Defensive: Prevent action if already on target page (redundant check - PaginationControls already handles this)
+		if (page === productsResult.page) {
+			logger.debug('⏭️ Already on target page, skipping', { page })
+			return
+		}
+
 		logger.info('✅ Feature #5: Changing to page', { 
 			from: productsResult.page,
 			to: page 
@@ -414,6 +397,22 @@ export function useStorePageLogic(): UseStorePageLogicReturn {
 			...searchCriteria,
 			page,
 		})
+		
+		// Scroll to top when page changes (MAANG-level UX pattern)
+		// Industry best practice: Always scroll to top on pagination
+		// This ensures users see new content immediately
+		// Defensive: Scroll happens before fetch to ensure smooth UX
+		// If scroll fails, fetch still proceeds (graceful degradation)
+		const scrollSuccess = scrollToTop({
+			behavior: 'smooth',
+			respectReducedMotion: true,
+			offset: 0,
+		})
+
+		// Log scroll result in development (helps with debugging)
+		if (process.env.NODE_ENV === 'development' && !scrollSuccess) {
+			logger.debug('⚠️ scrollToTop returned false (may indicate edge case)', { page })
+		}
 		
 		void fetchAndUpdateProducts(
 			updatedCriteria,
@@ -737,7 +736,6 @@ export function useStorePageLogic(): UseStorePageLogicReturn {
 		handleSortChange,
 		handlePageSizeChange,
 		handlePageChange,
-		handleLoadMore,
 		handleClearFilters,
 		handleCategoryFilter,
 	}
@@ -752,7 +750,7 @@ export function useStorePageLogic(): UseStorePageLogicReturn {
  * □ 2. Category filtering (handleCategorySelectionChange)
  * □ 3. Sorting (handleSortChange)
  * □ 4. Pagination (handlePageChange)
- * □ 5. Load more (handleLoadMore)
+ * ✅ 5. Pagination (handlePageChange)
  * □ 6. Page size (handlePageSizeChange)
  * □ 7. Clear filters (handleClearFilters)
  * □ 8. URL parameters

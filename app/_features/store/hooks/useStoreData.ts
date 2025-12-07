@@ -17,6 +17,7 @@
 'use client'
 
 import { useCallback, useRef } from 'react'
+
 import { isEmpty } from 'lodash'
 
 import { API, notificationService } from '@_shared'
@@ -26,8 +27,9 @@ import { PagedResult } from '@_classes/Base/PagedResult'
 import { Product } from '@_classes/Product'
 import ProductsCategory, { sanitizeCategoriesList } from '@_classes/ProductsCategory'
 
-import { requestCache, createCacheKey } from '../utils/requestCache'
 import { SORT_OPTIONS } from '@_components/store/ProductsToolbar'
+
+import { requestCache, createCacheKey } from '../utils/requestCache'
 
 /**
  * Optional overrides for product retrieval

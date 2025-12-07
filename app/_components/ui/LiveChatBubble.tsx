@@ -10,7 +10,7 @@
  * - Smooth animations and transitions
  * - Hover and focus states
  * - Accessibility compliant (WCAG 2.1 AA)
- * - "Coming Soon" tooltip for future feature
+ * - Professional chat dialog (MAANG-level implementation)
  * - Badge support for unread messages (future)
  * 
  * **FAANG Principles:**
@@ -19,6 +19,8 @@
  * - Accessible to all users
  * - Performance optimized
  * - Clean, modern aesthetic
+ * - Portal rendering for proper z-index stacking
+ * - Focus trap and keyboard navigation
  * 
  * **Future Enhancements:**
  * - Connect to real chat service (Intercom, Drift, custom)
@@ -37,9 +39,11 @@
 import { useState, useEffect } from 'react'
 
 import classNames from 'classnames'
-import { MessageCircle, X } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 
 import { logger } from '@_core/logger'
+
+import ChatDialog from './ChatDialog'
 
 export interface LiveChatBubbleProps {
 	/** Show/hide the chat bubble */
@@ -100,18 +104,10 @@ export default function LiveChatBubble({
 	const [computedBottomOffset, setComputedBottomOffset] = useState<number>(0)
 
 	// Use external state if provided, otherwise use internal state
-	const isTooltipVisible = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen
-	const setIsTooltipVisible = onOpenChange || setInternalIsOpen
-
-	// Auto-hide tooltip after 3 seconds
-	useEffect(() => {
-		if (isTooltipVisible) {
-			const timer = setTimeout(() => {
-				setIsTooltipVisible(false)
-			}, 3000)
-			return () => clearTimeout(timer)
-		}
-	}, [isTooltipVisible, setIsTooltipVisible])
+	// More defensive: if externalIsOpen is explicitly provided (even if false), use external control
+	const isDialogOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen
+	// Only use internal state setter if external control (onOpenChange) is not provided
+	const setIsDialogOpen = onOpenChange ? onOpenChange : setInternalIsOpen
 
 	/**
 	 * Compute safe bottom offset so the bubble does not overlap bottom-fixed UI
@@ -194,9 +190,17 @@ export default function LiveChatBubble({
 	if (!visible) {return null}
 
 	const handleClick = () => {
-		setIsTooltipVisible(true)
-		// Future: Open chat window
-		// openChatWindow()
+		// Prevent opening if already open (defensive)
+		if (!isDialogOpen) {
+			setIsDialogOpen(true)
+		}
+	}
+
+	const handleClose = () => {
+		// Prevent closing if already closed (defensive)
+		if (isDialogOpen) {
+			setIsDialogOpen(false)
+		}
 	}
 
 	const positionClasses = {
@@ -240,7 +244,7 @@ export default function LiveChatBubble({
 				}}
 				aria-label="Open live chat"
 				aria-haspopup="dialog"
-				aria-expanded={isTooltipVisible}
+				aria-expanded={isDialogOpen}
 			>
 				{/* Icon with rotation animation */}
 				<MessageCircle
@@ -269,48 +273,24 @@ export default function LiveChatBubble({
 				)}
 			</button>
 
-			{/* Coming Soon Tooltip */}
-			{isTooltipVisible && (
-				<div
-					className={classNames(
-						'fixed flex items-center gap-2',
-						'rounded-2xl border border-base-300 bg-base-100 p-4 shadow-xl',
-						'transition-all duration-300 ease-out',
-						// Position relative to button
-						position === 'bottom-right' ? 'right-4 sm:right-6' : 'left-4 sm:left-6',
-						// Animation
-						'animate-in fade-in slide-in-from-bottom-2',
-						// Mobile-first responsive width
-						'w-[calc(100vw-2rem)] max-w-xs sm:w-auto'
-					)}
-					style={{
-						zIndex: zIndex + 1,
-						// Tooltip sits above the bubble; add button size + small gap
-						bottom: `calc(env(safe-area-inset-bottom, 0px) + ${computedBottomOffset + (compact ? 48 : 56) + 12}px)`,
-					}}
-					role="tooltip"
-					aria-live="polite"
-				>
-					<div className="flex-1">
-						<div className="flex items-center gap-2">
-							<MessageCircle className="h-5 w-5 text-primary" strokeWidth={2} aria-hidden="true" />
-							<p className="font-semibold text-base-content">Live Chat</p>
-						</div>
-						<p className="mt-1 text-sm text-base-content/70">
-							Coming Soon! We&apos;re building something amazing.
+			{/* Professional Chat Dialog - MAANG-level implementation */}
+			<ChatDialog
+				isOpen={isDialogOpen}
+				onClose={handleClose}
+				position={position}
+			>
+				<div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
+					<MessageCircle className="h-12 w-12 text-primary" strokeWidth={1.5} aria-hidden="true" />
+					<div className="space-y-2">
+						<h3 className="text-lg font-semibold text-base-content">
+							Coming Soon!
+						</h3>
+						<p className="text-sm text-base-content/70 max-w-md">
+							We&apos;re building something amazing. Our live chat feature will be available soon to help you get instant support.
 						</p>
 					</div>
-
-					{/* Close button */}
-					<button
-						onClick={() => setIsTooltipVisible(false)}
-						className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-base-content/60 transition-colors hover:bg-base-200 hover:text-base-content focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-						aria-label="Close tooltip"
-					>
-						<X className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
-					</button>
 				</div>
-			)}
+			</ChatDialog>
 		</>
 	)
 }

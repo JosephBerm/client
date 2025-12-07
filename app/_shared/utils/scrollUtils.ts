@@ -180,3 +180,127 @@ export function getElementPosition(elementId: string): DOMRect | null {
 	return element.getBoundingClientRect()
 }
 
+/**
+ * Scroll to top of the page
+ * 
+ * MAANG-level implementation following industry best practices:
+ * - Respects reduced motion preferences (WCAG 2.1 AAA)
+ * - Uses smooth scrolling for better UX
+ * - Handles SSR safely (checks for window)
+ * - Uses requestAnimationFrame for optimal performance
+ * 
+ * **Use Cases:**
+ * - Pagination changes
+ * - Filter changes
+ * - Search results updates
+ * - Route navigation
+ * 
+ * **Industry Standards:**
+ * - Amazon: Scrolls to top on pagination
+ * - Google: Instant scroll for reduced motion, smooth otherwise
+ * - Microsoft: Respects user preferences
+ * - Apple: Smooth, elegant animations
+ * 
+ * @param options - Scroll options
+ * @param options.behavior - Scroll behavior ('smooth' | 'auto' | 'instant')
+ * @param options.respectReducedMotion - Whether to respect reduced motion preference (default: true)
+ * @param options.offset - Optional offset from top (default: 0)
+ * @returns Whether the scroll was successful
+ * 
+ * @example
+ * ```ts
+ * // Basic scroll to top
+ * scrollToTop()
+ * 
+ * // With custom behavior
+ * scrollToTop({ behavior: 'instant' })
+ * 
+ * // With offset (e.g., for fixed header)
+ * scrollToTop({ offset: 96 })
+ * ```
+ */
+export function scrollToTop(options: {
+	behavior?: ScrollBehavior
+	respectReducedMotion?: boolean
+	offset?: number
+} = {}): boolean {
+	if (typeof window === 'undefined') {
+		return false
+	}
+
+	const {
+		behavior = 'smooth',
+		respectReducedMotion = true,
+		offset = 0,
+	} = options
+
+	// Check for reduced motion preference
+	const userPrefersReducedMotion = respectReducedMotion
+		? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+		: false
+
+	// Determine final scroll behavior
+	// Industry best practice: Instant scroll for reduced motion users
+	const finalBehavior: ScrollBehavior = userPrefersReducedMotion ? 'auto' : behavior
+
+	// Optional optimization: Skip scroll if already at target position
+	// Prevents unnecessary scroll operations (defensive programming)
+	const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop
+	const isAlreadyAtTarget = Math.abs(currentScrollTop - offset) < 1 // 1px tolerance
+
+	if (isAlreadyAtTarget && finalBehavior === 'auto') {
+		// Already at target and instant scroll - no action needed
+		return true
+	}
+
+	// Use requestAnimationFrame for optimal performance
+	// This ensures scroll happens after current frame render
+	// Defensive: Wrap in try-catch to handle edge cases (e.g., iframe restrictions, browser quirks)
+	try {
+		requestAnimationFrame(() => {
+			try {
+				window.scrollTo({
+					top: offset,
+					behavior: finalBehavior,
+				})
+			} catch (scrollError) {
+				// Defensive: Handle edge cases where scrollTo might fail
+				// (e.g., in restricted iframes, certain browser contexts)
+				// Fallback to instant scroll without behavior option
+				if (process.env.NODE_ENV === 'development') {
+					console.warn('scrollToTop: scrollTo failed, using fallback', scrollError)
+				}
+				try {
+					window.scrollTo(0, offset)
+				} catch (fallbackError) {
+					// Last resort: If even basic scroll fails, silently fail
+					// (This is extremely rare and indicates a restricted environment)
+					if (process.env.NODE_ENV === 'development') {
+						console.warn('scrollToTop: All scroll methods failed', fallbackError)
+					}
+				}
+			}
+		})
+	} catch (rafError) {
+		// Defensive: Handle requestAnimationFrame failure (extremely rare)
+		// Fallback to immediate scroll
+		if (process.env.NODE_ENV === 'development') {
+			console.warn('scrollToTop: requestAnimationFrame failed, using immediate scroll', rafError)
+		}
+		try {
+			window.scrollTo({
+				top: offset,
+				behavior: finalBehavior,
+			})
+		} catch (immediateError) {
+			// Silent failure - this should never happen in normal circumstances
+			if (process.env.NODE_ENV === 'development') {
+				console.warn('scrollToTop: Immediate scroll also failed', immediateError)
+			}
+			return false
+		}
+	}
+
+	return true
+}
+

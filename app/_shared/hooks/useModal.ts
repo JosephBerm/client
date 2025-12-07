@@ -105,7 +105,9 @@ export function useModal(
 	// Store previous focus when modal opens
 	useEffect(() => {
 		if (isOpen) {
-			previousFocusRef.current = document.activeElement as HTMLElement
+			// Store current focus, but handle null case (document.activeElement can be null)
+			const activeElement = document.activeElement as HTMLElement | null
+			previousFocusRef.current = activeElement || null
 		}
 	}, [isOpen])
 

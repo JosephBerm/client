@@ -41,7 +41,7 @@ export { formatDate, formatCurrency } from '@_lib'
 export { createServerTableFetcher } from './utils/table-helpers'
 
 // Scroll Utilities
-export { scrollToElement } from './utils/scrollUtils'
+export { scrollToElement, scrollToTop } from './utils/scrollUtils'
 
 // Business Hours
 export {

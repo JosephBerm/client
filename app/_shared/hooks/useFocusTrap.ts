@@ -248,10 +248,17 @@ export function useFocusTrap(
 			if (restoreFocus) {
 				const elementToRestore = previousFocusRef?.current || previousActiveElement
 				if (elementToRestore && typeof elementToRestore.focus === 'function') {
-					// Small delay to ensure modal is fully closed
-					setTimeout(() => {
-						elementToRestore.focus()
-					}, 0)
+					// Validate element still exists in DOM before focusing
+					const isInDocument = document.body.contains(elementToRestore)
+					if (isInDocument) {
+						// Small delay to ensure modal is fully closed
+						setTimeout(() => {
+							// Double-check element still exists (may have been removed during delay)
+							if (document.body.contains(elementToRestore)) {
+								elementToRestore.focus()
+							}
+						}, 0)
+					}
 				}
 			}
 		}

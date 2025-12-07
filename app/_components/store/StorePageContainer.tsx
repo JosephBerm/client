@@ -73,7 +73,6 @@ export default function StorePageContainer() {
 		handleSortChange,
 		handlePageSizeChange,
 		handlePageChange,
-		handleLoadMore,
 		handleClearFilters,
 		handleCategoryFilter,
 	} = useStorePageLogic()
@@ -105,6 +104,9 @@ export default function StorePageContainer() {
 						onSortChange={handleSortChange}
 						currentPageSize={currentPageSize}
 						onPageSizeChange={handlePageSizeChange}
+						currentPage={searchCriteria.page}
+						totalPages={productsResult.totalPages || 1}
+						onPageChange={handlePageChange}
 						isLoading={isLoading}
 						searchInputRef={searchInputRef}
 					/>
@@ -137,7 +139,6 @@ export default function StorePageContainer() {
 						onClearFilters={handleClearFilters}
 						onCategoryFilter={handleCategoryFilter}
 						onPageChange={handlePageChange}
-						onLoadMore={handleLoadMore}
 					/>
 				</div>
 			</div>

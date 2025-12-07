@@ -49,8 +49,6 @@ export interface StoreProductGridProps {
 	onCategoryFilter: (category: ProductsCategory) => void
 	/** Callback for page change */
 	onPageChange: (page: number) => void
-	/** Callback for load more */
-	onLoadMore: () => void
 }
 
 /**
@@ -78,9 +76,7 @@ export default function StoreProductGrid({
 	onClearFilters,
 	onCategoryFilter,
 	onPageChange,
-	onLoadMore,
 }: StoreProductGridProps) {
-	const hasMoreProducts = productsResult.hasNext
 	const totalResults = productsResult.total || products.length
 	const displayedCount = products.length
 
@@ -145,19 +141,19 @@ export default function StoreProductGrid({
 				)}
 			</div>
 
-			{/* Pagination Controls */}
-			{products.length > 0 && (
-				<PaginationControls
-					currentPage={searchCriteria.page}
-					totalPages={productsResult.totalPages || 1}
-					totalItems={totalResults}
-					displayedItems={displayedCount}
-					hasMore={hasMoreProducts}
-					isLoading={isLoading}
-					onPageChange={onPageChange}
-					onLoadMore={onLoadMore}
-					variant="load-more"
-				/>
+			{/* Pagination Controls - Always centered */}
+			{products.length > 0 && productsResult.totalPages > 1 && (
+				<div className="mt-8 w-full flex justify-center">
+					<PaginationControls
+						currentPage={searchCriteria.page}
+						totalPages={productsResult.totalPages || 1}
+						totalItems={totalResults}
+						displayedItems={displayedCount}
+						isLoading={isLoading}
+						onPageChange={onPageChange}
+						showJumpToPage={productsResult.totalPages >= 50}
+					/>
+				</div>
 			)}
 		</main>
 	)

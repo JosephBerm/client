@@ -36,6 +36,11 @@ export interface UnifiedStoreToolbarProps {
 	currentPageSize: number
 	onPageSizeChange: (size: number) => void
 
+	// Pagination
+	currentPage: number
+	totalPages: number
+	onPageChange: (page: number) => void
+
 	// Loading state
 	isLoading?: boolean
 }
@@ -86,6 +91,9 @@ export default function UnifiedStoreToolbar({
 	onSortChange,
 	currentPageSize,
 	onPageSizeChange,
+	currentPage,
+	totalPages,
+	onPageChange,
 	isLoading = false,
 }: UnifiedStoreToolbarProps) {
 	const _currentSortOption = SORT_OPTIONS.find((opt) => opt.value === currentSort) || SORT_OPTIONS[0]
