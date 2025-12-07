@@ -141,6 +141,9 @@ export default class FinanceNumbers {
 	 * ```
 	 */
 	get profitMargin() {
+		if (!this.sales.totalRevenue || this.sales.totalRevenue === 0) {
+			return 0
+		}
 		return (this.sales.totalProfit / this.sales.totalRevenue) * 100
 	}
 
@@ -163,6 +166,9 @@ export default class FinanceNumbers {
 	 * ```
 	 */
 	get averageOrderValue() {
+		if (!this.orders.totalOrders || this.orders.totalOrders === 0) {
+			return 0
+		}
 		return this.sales.totalRevenue / this.orders.totalOrders
 	}
 }

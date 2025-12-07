@@ -66,6 +66,7 @@ import { useMediaQuery } from '@_shared'
 import LoginModal from '@_components/auth/LoginModal'
 import SettingsModal from '@_components/settings/SettingsModal'
 import Button from '@_components/ui/Button'
+import Logo from '@_components/ui/Logo'
 
 /**
  * Navbar component props interface.
@@ -414,28 +415,12 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 						)}
 
 						{/* Logo */}
-						<Link
+						<Logo
 							href={Routes.Home.location}
-							className='flex items-center gap-3 transition-opacity hover:opacity-80'>
-							<div className='flex h-12 w-12 items-center justify-center rounded-md bg-primary'>
-								<svg
-									className='h-7 w-7 text-white'
-									fill='none'
-									stroke='currentColor'
-									viewBox='0 0 24 24'
-									xmlns='http://www.w3.org/2000/svg'>
-									<path
-										strokeLinecap='round'
-										strokeLinejoin='round'
-										strokeWidth={2.5}
-										d='M12 4v16m8-8H4'
-									/>
-								</svg>
-							</div>
-							<span className='text-2xl font-bold uppercase tracking-wide text-primary max-[480px]:hidden'>
-								MedSource
-							</span>
-						</Link>
+							showText
+							size="lg"
+							hideTextOnMobile
+						/>
 					</div>
 
 					{/* Center: Desktop Navigation Links (always visible for all users) */}

@@ -35,6 +35,14 @@
 // Currency
 export { formatCurrency } from './formatters/currency'
 
+// Finance
+export {
+	formatFinanceCurrency,
+	formatFinanceNumber,
+	isEmptyFinanceData,
+	isValidFinanceData,
+} from './formatters/finance'
+
 // Text
 export { truncate } from './formatters/text'
 

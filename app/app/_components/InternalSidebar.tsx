@@ -60,6 +60,7 @@ import { useMediaQuery } from '@_shared'
 import NavigationIcon from '@_components/navigation/NavigationIcon'
 import SettingsModal from '@_components/settings/SettingsModal'
 import Button from '@_components/ui/Button'
+import Logo from '@_components/ui/Logo'
 
 /**
  * Internal Sidebar component props interface.
@@ -390,18 +391,13 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 				<div className="flex flex-col h-full">
 					{/* Header */}
 					<div className="flex items-center justify-between p-6 border-b border-base-300 shrink-0">
-						<Link
+						<Logo
 							href={Routes.Home.location}
-							className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer group"
+							showText
+							size="sm"
 							onClick={handleLinkClick}
-						>
-							<div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-content font-bold group-hover:scale-105 transition-transform">
-								M
-							</div>
-							<h2 className="text-xl font-semibold text-base-content">
-								MedSource
-							</h2>
-						</Link>
+							className="group"
+						/>
 
 					{/* Mobile: Close button */}
 					{isMobile && (
