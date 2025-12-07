@@ -7,6 +7,7 @@
  * @example
  * ```typescript
  * import { useCartStore, type CartItem } from '@_features/cart'
+ * import { useCartPageLogic } from '@_features/cart'
  * ```
  * 
  * @module cart
@@ -17,4 +18,13 @@
 // ============================================================================
 
 export { useCartStore, type CartItem } from './stores/useCartStore'
+
+// ============================================================================
+// HOOKS (Client-Only - all have 'use client')
+// ============================================================================
+
+export {
+	useCartPageLogic,
+	type UseCartPageLogicReturn,
+} from './hooks/useCartPageLogic'
 

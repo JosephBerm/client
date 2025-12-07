@@ -30,9 +30,9 @@ export const fieldWrapperClass = 'flex w-full flex-col gap-2'
 export const labelClass =
 	'text-sm sm:text-[0.9375rem] md:text-base font-semibold uppercase tracking-[0.05em] text-primary/90 flex items-center gap-1.5 leading-[1.4] transition-colors duration-200 ease-in-out hover:text-primary focus-within:text-primary'
 
-export const helperClass = 'text-xs uppercase tracking-[0.3em] text-primary/70'
+export const helperClass = 'text-xs text-base-content/70 leading-relaxed'
 
-export const errorClass = 'text-xs uppercase tracking-[0.3em] text-error'
+export const errorClass = 'text-xs text-error leading-relaxed'
 
 export const baseFieldClass =
 	'input input-bordered w-full rounded-2xl px-5 py-3 text-base transition disabled:cursor-not-allowed'

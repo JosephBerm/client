@@ -341,9 +341,14 @@ export type OrderFormData = z.infer<typeof orderSchema>
  * Quote/RFQ form validation schema.
  * Supports multiple items with expiration date.
  * 
+ * **Authentication States:**
+ * - Authenticated users: customerId required, name/email optional (uses account data)
+ * - Non-authenticated users: firstName, lastName, email required, customerId optional
+ * 
  * @constant
  * @example
  * ```typescript
+ * // Authenticated user
  * quoteSchema.parse({
  *   customerId: 123,
  *   items: [
@@ -353,22 +358,87 @@ export type OrderFormData = z.infer<typeof orderSchema>
  *   notes: 'Bulk discount requested',
  *   validUntil: new Date('2024-12-31')
  * });
+ * 
+ * // Non-authenticated user
+ * quoteSchema.parse({
+ *   firstName: 'John',
+ *   lastName: 'Doe',
+ *   email: 'john@example.com',
+ *   items: [
+ *     { productId: 'prod-1', quantity: 10, price: 99.99 }
+ *   ],
+ *   notes: 'Urgent order needed',
+ *   validUntil: new Date('2024-12-31')
+ * });
  * ```
  */
-export const quoteSchema = z.object({
-	customerId: z.coerce.number().positive('Customer is required'),
-	items: z
-		.array(
-			z.object({
-				productId: z.string().min(1, 'Product is required'),
-				quantity: z.coerce.number().int().positive('Quantity must be positive'),
-				price: z.coerce.number().positive('Price must be positive'),
+/**
+ * Quote schema with improved validation for authenticated vs guest users.
+ * Uses superRefine for better error messages on specific fields.
+ */
+export const quoteSchema = z
+	.object({
+		// Authenticated user fields
+		customerId: z.coerce.number().nonnegative().optional(),
+		
+		// Non-authenticated user fields
+		firstName: z.string().optional(),
+		lastName: z.string().optional(),
+		email: z.string().optional(),
+		
+		// Common fields
+		items: z
+			.array(
+				z.object({
+					productId: z.string().min(1, 'Product is required'),
+					quantity: z.coerce.number().int().positive('Quantity must be positive'),
+					price: z.coerce.number().positive('Price must be positive'),
+				})
+			)
+			.min(1, 'At least one item is required'),
+		notes: z.string().optional(),
+		validUntil: z.coerce.date(),
+	})
+	.superRefine((data, ctx) => {
+		// Determine if user is authenticated
+		const isAuthenticated = data.customerId && data.customerId > 0
+		
+		if (isAuthenticated) {
+			// Authenticated users don't need guest fields
+			return
+		}
+		
+		// For non-authenticated users, validate guest fields with specific error messages
+		if (!data.firstName || data.firstName.trim().length === 0) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'First name is required',
+				path: ['firstName'],
 			})
-		)
-		.min(1, 'At least one item is required'),
-	notes: z.string().optional(),
-	validUntil: z.coerce.date(),
-})
+		}
+		
+		if (!data.lastName || data.lastName.trim().length === 0) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Last name is required',
+				path: ['lastName'],
+			})
+		}
+		
+		if (!data.email || data.email.trim().length === 0) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Email address is required',
+				path: ['email'],
+			})
+		} else if (!z.string().email().safeParse(data.email).success) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Please enter a valid email address',
+				path: ['email'],
+			})
+		}
+	})
 
 /** Type-safe form data inferred from quoteSchema */
 export type QuoteFormData = z.infer<typeof quoteSchema>
