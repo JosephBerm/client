@@ -86,27 +86,6 @@ export default function CTASection({
 		variant === 'pattern' || variant === 'solid'
 			? 'bg-neutral text-neutral-content'
 			: 'bg-gradient-to-br from-primary to-accent text-primary-content'
-	const hasLoggedMountRef = useRef(false)
-
-	// Component lifecycle logging (FAANG best practice)
-	useEffect(() => {
-		if (!hasLoggedMountRef.current) {
-			logger.debug('CTASection mounted', {
-				component: 'CTASection',
-				id,
-				variant,
-				hasSecondaryCTA: !!secondaryCTA,
-			})
-			hasLoggedMountRef.current = true
-		}
-
-		return () => {
-			logger.debug('CTASection unmounting', {
-				component: 'CTASection',
-				id,
-			})
-		}
-	}, [id, variant, secondaryCTA])
 
 	return (
 		<section

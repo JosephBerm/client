@@ -73,27 +73,6 @@ export default function StatsBanner({
 }: StatsBannerProps) {
 	const bgClass = variant === 'neutral' ? 'bg-neutral text-neutral-content' : 'bg-base-100 text-base-content'
 	const borderClass = variant === 'neutral' ? 'border-base-content/5' : 'border-base-300'
-	const hasLoggedMountRef = useRef(false)
-
-	// Component lifecycle logging (FAANG best practice)
-	useEffect(() => {
-		if (!hasLoggedMountRef.current) {
-			logger.debug('StatsBanner mounted', {
-				component: 'StatsBanner',
-				id,
-				variant,
-				statsCount: stats.length,
-			})
-			hasLoggedMountRef.current = true
-		}
-
-		return () => {
-			logger.debug('StatsBanner unmounting', {
-				component: 'StatsBanner',
-				id,
-			})
-		}
-	}, [id, variant, stats.length])
 
 	return (
 		<section

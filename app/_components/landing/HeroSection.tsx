@@ -115,28 +115,6 @@ export default function HeroSection({
 	id = 'hero',
 	className,
 }: HeroSectionProps) {
-	const hasLoggedMountRef = useRef(false)
-
-	// Component lifecycle logging (FAANG best practice)
-	useEffect(() => {
-		if (!hasLoggedMountRef.current) {
-			logger.debug('HeroSection mounted', {
-				component: 'HeroSection',
-				id,
-				hasBadge: !!badge,
-				hasTitleHighlight: !!titleHighlight,
-				showScrollIndicator,
-			})
-			hasLoggedMountRef.current = true
-		}
-
-		return () => {
-			logger.debug('HeroSection unmounting', {
-				component: 'HeroSection',
-				id,
-			})
-		}
-	}, [id, badge, titleHighlight, showScrollIndicator])
 
 	// Image error handler (FAANG best practice: track image load failures)
 	const handleImageError = () => {

@@ -130,6 +130,43 @@ export enum AccountRole {
 }
 
 /**
+ * AccountStatus Enum
+ * 
+ * Account status levels for user account management.
+ * Determines whether an account can access the system.
+ * 
+ * **Statuses:**
+ * - **Active (0)**: Account is active and can access all features
+ * - **Suspended (1)**: Account temporarily suspended, cannot login
+ * - **Deactivated (2)**: Account permanently deactivated
+ * - **PendingVerification (3)**: Account awaiting email/license verification
+ * 
+ * **Usage:**
+ * - Login validation: Check status before allowing authentication
+ * - Admin management: Suspend/deactivate problematic accounts
+ * - Compliance: Track account status for audit trails
+ * 
+ * @example
+ * ```typescript
+ * import { AccountStatus } from '@_classes/Enums';
+ * 
+ * if (user.status === AccountStatus.Suspended) {
+ *   // Show suspended message, prevent login
+ * }
+ * ```
+ */
+export enum AccountStatus {
+	/** Account is active and operational */
+	Active = 0,
+	/** Account temporarily suspended (can be reactivated) */
+	Suspended = 1,
+	/** Account permanently deactivated */
+	Deactivated = 2,
+	/** Account pending email or license verification */
+	PendingVerification = 3,
+}
+
+/**
  * OrderStatus Enum
  * 
  * Order lifecycle statuses with numeric values for sorting and filtering.

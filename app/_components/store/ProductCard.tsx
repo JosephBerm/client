@@ -18,11 +18,12 @@
  * - Responsive design
  * 
  * **Design Principles:**
- * - Visual hierarchy: Image → Name (clickable) → Manufacturer → Metadata → Add to Cart
+ * - Visual hierarchy: Image → Name (clickable) → Availability → Manufacturer/SKU → Categories → Add to Cart
  * - Only product name is clickable (navigates to detail page)
  * - Category tags are clickable buttons for filtering
  * - Add to cart button with quantity controls
  * - Availability status appropriate for dropshipping model
+ * - Manufacturer displayed above SKU in metadata section
  * - Professional, clean aesthetics for B2B buyers
  * - Smooth micro-interactions
  * - Mobile-friendly touch targets
@@ -42,9 +43,9 @@ import { useCallback, useRef, useEffect, useMemo } from 'react'
 
 import Link from 'next/link'
 
-import { Package, Building2, CheckCircle2 } from 'lucide-react'
+import { Building2, CheckCircle2, Package } from 'lucide-react'
 
-import { ImagePreloadService, getProductImageUrl } from '@_features/images'
+import { ImagePreloadService } from '@_features/images'
 import { Routes } from '@_features/navigation'
 
 import { logger } from '@_core'
@@ -55,7 +56,7 @@ import { Product } from '@_classes/Product'
 import type ProductsCategory from '@_classes/ProductsCategory'
 
 import AddToCartButton from '@_components/store/AddToCartButton'
-// import ProductImage from '@_components/store/ProductImage' // TEMP: Commented out due to Next.js 15 async Client Component error
+import ProductImage from '@_components/store/ProductImage'
 import { useCategoryNavigation } from '@_components/store/useCategoryNavigation'
 
 
@@ -92,7 +93,7 @@ export default function ProductCard({
 	product,
 	onClick,
 	className = '',
-	priority: _priority = false, // TEMP: Not used in workaround, will be used when ProductImage is restored
+	priority = false,
 	onCategoryFilter,
 }: ProductCardProps) {
 	const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -181,14 +182,6 @@ export default function ProductCard({
 	// In dropshipping, stock counts may not be real-time, so we show availability status
 	const isAvailable = product.stock !== undefined && product.stock > 0
 
-	// TEMP FIX: Use simple img tag instead of ProductImage/OptimizedImage
-	// TODO: Fix Next.js 15 async Client Component error with OptimizedImage
-	// Issue: Next.js Image component with fill prop causes "async Client Component" error in lists
-	// Workaround: Use native img tag until OptimizedImage is fixed for Next.js 15
-	const imageUrl = serializedProduct.files[0]?.name
-		? getProductImageUrl(serializedProduct.id, serializedProduct.files[0].name)
-		: null
-
 	return (
 		<div
 			onMouseEnter={handleMouseEnter}
@@ -197,9 +190,15 @@ export default function ProductCard({
 		>
 			{/* Image Container - Fixed aspect ratio */}
 			<div className={STYLES.IMAGE_CONTAINER}>
-				{/* Product Image - TEMP: Using native img tag due to Next.js 15 async Client Component error */}
-				{/* TODO: Restore ProductImage component once OptimizedImage is fixed for Next.js 15 */}
 				{/* 
+				 * ProductImage Component - RESTORED
+				 * 
+				 * FIX APPLIED: The root cause of the Next.js 15 "async Client Component" error
+				 * was in ImagePlaceholder.tsx where getIcon() was incorrectly marked as async.
+				 * This made it return a Promise instead of a ReactNode, triggering the error.
+				 * 
+				 * Now ProductImage → OptimizedImage → ImagePlaceholder all work correctly.
+				 */}
 				<ProductImage
 					product={serializedProduct}
 					priority={priority}
@@ -208,22 +207,6 @@ export default function ProductCard({
 					hover={true}
 					className="h-full w-full"
 				/>
-				*/}
-				
-				{/* TEMP: Native img tag workaround - Next.js Image causes async Client Component error */}
-				{imageUrl ? (
-					// eslint-disable-next-line @next/next/no-img-element
-					<img
-						src={imageUrl}
-						alt={product.name || 'Product image'}
-						className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-					/>
-				) : (
-					<div className="flex h-full w-full items-center justify-center bg-base-200">
-						<Package className="h-12 w-12 text-base-content/20" strokeWidth={1.5} aria-hidden="true" />
-						<span className="sr-only">{product.name || 'Product image placeholder'}</span>
-					</div>
-				)}
 			</div>
 
 			{/* Content Container - Grows to fill space */}
@@ -240,16 +223,6 @@ export default function ProductCard({
 					</h3>
 				</Link>
 
-				{/* Manufacturer/Provider - Only show if available */}
-				{hasManufacturerInfo && (
-					<div className={`${SPACING.MANUFACTURER_MARGIN} flex items-center gap-1.5`} style={DIMENSIONS.MANUFACTURER}>
-						<Building2 className="h-3.5 w-3.5 shrink-0 text-base-content/50" strokeWidth={2} />
-						<p className={`${STYLES.MANUFACTURER} truncate`} title={manufacturerOrProvider ?? undefined}>
-							{manufacturerOrProvider}
-						</p>
-					</div>
-				)}
-
 				{/* Availability Status - For dropshipping model, show status not exact count */}
 				<div className={`${SPACING.METADATA_MARGIN} flex items-center gap-2`}>
 					{isAvailable ? (
@@ -265,14 +238,26 @@ export default function ProductCard({
 					)}
 				</div>
 
-				{/* Metadata - SKU only (essential for B2B) */}
-				{product.sku && (
+				{/* Metadata - Manufacturer and SKU (essential for B2B) */}
+				{(hasManufacturerInfo || product.sku) && (
 					<div className={`${SPACING.METADATA_MARGIN} ${STYLES.METADATA_CONTAINER}`} style={{ minHeight: DIMENSIONS.METADATA.minHeight }}>
-						<div className={STYLES.METADATA_ITEM}>
-							<Package className={`${STYLES.ICON} shrink-0`} strokeWidth={2} />
-							<span className="font-medium">SKU:</span>
-							<span className="truncate font-mono text-xs">{product.sku}</span>
-						</div>
+						{/* Manufacturer - Display above SKU */}
+						{hasManufacturerInfo && (
+							<div className={STYLES.METADATA_ITEM}>
+								<Building2 className={`${STYLES.ICON} shrink-0`} strokeWidth={2} />
+								<span className="font-medium">Manufacturer:</span>
+								<span className="truncate">{manufacturerOrProvider}</span>
+							</div>
+						)}
+						
+						{/* SKU - Display below manufacturer */}
+						{product.sku && (
+							<div className={STYLES.METADATA_ITEM}>
+								<Package className={`${STYLES.ICON} shrink-0`} strokeWidth={2} />
+								<span className="font-medium">SKU:</span>
+								<span className="truncate font-mono text-xs">{product.sku}</span>
+							</div>
+						)}
 					</div>
 				)}
 

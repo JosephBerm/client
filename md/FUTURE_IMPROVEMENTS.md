@@ -333,16 +333,90 @@ This section tracks component-level refactoring opportunities for better archite
 
 **Priority**: P1  
 **Category**: Component Refactoring / Bug Fix  
-**Status**: Not Started  
+**Status**: ✅ COMPLETED  
 **Estimated Effort**: M  
 **Dependencies**: Next.js 15 compatibility research, potential Next.js Image API changes
 
 **Description**:  
 Fix the "An unknown Component is an async Client Component" error that occurs when using `OptimizedImage` (which wraps Next.js `Image` component) within Client Components rendered in lists. This error prevents the use of optimized image loading in product grids and other list-based components.
 
-**Current Implementation**:  
-The `OptimizedImage` component (`app/_components/images/OptimizedImage.tsx`) uses Next.js `Image` component with the `fill` prop for responsive image rendering. When used within `ProductCard` components that are rendered in lists (e.g., `StoreProductGrid`), Next.js 15 throws an error:
+---
 
+## ✅ RESOLUTION (Completed December 7, 2025)
+
+### Root Cause Identified
+
+The error was **NOT** in the Next.js Image component or OptimizedImage. The root cause was in `ImagePlaceholder.tsx`:
+
+```tsx
+// BUG: Line 132 had an erroneous `async` keyword
+const getIcon = async () => {  // ❌ This returned a Promise, not a ReactNode!
+    if (variant === 'icon' && icon) {
+        return icon
+    }
+    // ...
+}
+
+// When used in JSX:
+{getIcon()}  // ❌ React saw a Promise and detected "async" behavior
+```
+
+The `async` keyword made `getIcon()` return a **Promise** instead of a **ReactNode**. When this Promise was rendered in JSX, React/Next.js 15 interpreted it as an async Client Component and threw the error.
+
+### Fix Applied
+
+**File:** `app/_components/images/ImagePlaceholder.tsx`
+
+```tsx
+// BEFORE (Bug)
+const getIcon = async () => { ... }
+
+// AFTER (Fixed)  
+const getIcon = (): React.ReactNode => { ... }
+```
+
+### Full Implementation Restored
+
+With the root cause fixed, the following components now work correctly together:
+
+1. **`ImagePlaceholder`** - Fixed synchronous `getIcon()` function
+2. **`OptimizedImage`** - Uses Next.js `Image` with `fill` prop (no changes needed)
+3. **`ProductImage`** - Wrapper for product images (no changes needed)
+4. **`ProductCard`** - Now uses `ProductImage` instead of native `<img>` workaround
+5. **`StoreProductGrid`** - Now uses `ScrollRevealCard` wrapper for animations
+6. **`ScrollRevealCard`** - Provides elegant scroll-reveal animations
+
+### Benefits Restored
+
+- ✅ Next.js Image optimization (automatic WebP/AVIF, responsive images)
+- ✅ Lazy loading with blur placeholder
+- ✅ Image preloading on hover
+- ✅ Error recovery with retry logic
+- ✅ Performance analytics tracking
+- ✅ Elegant scroll-reveal animations
+- ✅ Improved Core Web Vitals (LCP, CLS)
+
+### Key Learnings
+
+1. **Async functions in JSX**: Never use `async` keyword on functions called directly in JSX
+2. **Next.js 15 strictness**: Next.js 15 has stricter detection of async patterns in Client Components
+3. **Debug methodology**: When facing "async Client Component" errors, search for `async` keywords in all components in the render tree
+
+### Testing Verification
+
+- [x] `Image` component with `fill` prop works in Client Component lists
+- [x] `ProductCard` renders correctly with `ProductImage`
+- [x] `ScrollRevealCard` animations work correctly
+- [x] No console errors or warnings
+- [x] Image optimization (WebP, responsive sizing) is working
+
+**Completion Date**: December 7, 2025
+
+---
+
+## Original Issue Documentation (for reference)
+
+**Original Error**:
 ```
 Uncaught Error: An unknown Component is an async Client Component. 
 Only Server Components can be async at the moment. 
@@ -350,119 +424,16 @@ This error is often caused by accidentally adding `'use client'` to a module
 that was originally written for the server.
 ```
 
-**Current Workaround**:  
-`ProductCard` (`app/_components/store/ProductCard.tsx`) currently uses a native `<img>` tag instead of `ProductImage`/`OptimizedImage` as a temporary workaround. The `ProductImage` usage is commented out with TODO comments explaining the issue.
-
-**Proposed Solution**:  
-
-**Option 1: Investigate Next.js 15 Image API Changes (Recommended)**
-1. Research Next.js 15 breaking changes related to `Image` component in Client Components
-2. Check if `fill` prop behavior has changed in Next.js 15
-3. Verify if there are new props or patterns required for Client Component usage
-4. Update `OptimizedImage` to use Next.js 15-compatible patterns
-5. Test with both Server and Client Components
-
-**Option 2: Refactor to Use Width/Height Instead of Fill**
-1. Modify `OptimizedImage` to accept explicit `width` and `height` props
-2. Remove `fill` prop usage in Client Component contexts
-3. Use `sizes` prop for responsive behavior
-4. Update `ProductImage` to pass explicit dimensions
-5. Ensure aspect ratio is maintained
-
-**Option 3: Conditional Rendering Based on Context**
-1. Detect if component is in a list/Client Component context
-2. Use native `<img>` tag in Client Component lists
-3. Use `OptimizedImage` in Server Components or non-list contexts
-4. Create a wrapper that handles context detection
-
-**Option 4: Move Image Rendering to Server Component**
-1. Extract image rendering to a Server Component wrapper
-2. Pass image data as props to Server Component
-3. Render `OptimizedImage` in Server Component context
-4. Compose Client and Server Components appropriately
-
-**Benefits**:  
-- Restore optimized image loading (lazy loading, automatic optimization, responsive images)
-- Better performance with Next.js Image optimizations
-- Improved Core Web Vitals (LCP, CLS)
-- Proper image preloading and priority loading
-- Bandwidth optimization with automatic format selection (WebP, AVIF)
-- Maintains SEO benefits of optimized images
-
-**Implementation Notes**:  
-
-**Error Context**:
-- Error occurs specifically when `Image` with `fill` prop is used in Client Components within lists
-- The error suggests Next.js 15 has stricter rules about async components
-- `ProductCard` is a Client Component (`'use client'`) that renders in `StoreProductGrid`
-- The issue is isolated to list rendering contexts
-
-**Investigation Steps**:
-1. Review Next.js 15 migration guide for Image component changes
-2. Check Next.js GitHub issues for similar reports
-3. Test `Image` component with different props in Client Component lists
-4. Verify if issue is specific to `fill` prop or affects all `Image` usage
-5. Test with different Next.js 15 versions (if available)
-
-**Potential Root Cause**:
-- Next.js 15 may have changed how `Image` component handles async operations
-- The `fill` prop might trigger async behavior that conflicts with Client Component rules
-- There may be a hydration mismatch between server and client rendering
-
-**Code Locations**:
-```tsx
-// Current workaround in ProductCard.tsx (lines 222-247)
-{/* Product Image - TEMP: Using native img tag due to Next.js 15 async Client Component error */}
-{/* TODO: Restore ProductImage component once OptimizedImage is fixed for Next.js 15 */}
-{/* 
-<ProductImage
-  product={serializedProduct}
-  priority={priority}
-  showStockBadge={false}
-  size="md"
-  hover={true}
-  className="h-full w-full"
-/>
-*/}
-
-{/* TEMP: Native img tag workaround */}
-{/* eslint-disable-next-line @next/next/no-img-element */}
-{imageUrl ? (
-  <img
-    src={imageUrl}
-    alt={product.name || 'Product image'}
-    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-  />
-) : (
-  // placeholder
-)}
-```
-
-**Testing Checklist**:
-- [ ] Verify Next.js 15 Image component documentation
-- [ ] Test `Image` component with `fill` prop in isolation
-- [ ] Test `Image` component with explicit width/height in lists
-- [ ] Test `Image` component in Server Component context
-- [ ] Verify if issue persists with different Next.js 15 patch versions
-- [ ] Test with different image sources (local, external, CDN)
-- [ ] Verify hydration behavior
-- [ ] Check browser console for additional warnings/errors
-- [ ] Test performance impact of workaround vs. fix
+**Original Workaround** (now removed):  
+`ProductCard` used a native `<img>` tag instead of `ProductImage`/`OptimizedImage`. This workaround has been removed and the full implementation restored.
 
 **Related Files**:  
-- `app/_components/images/OptimizedImage.tsx` (component causing issue)
-- `app/_components/store/ProductImage.tsx` (wrapper using OptimizedImage)
-- `app/_components/store/ProductCard.tsx` (current workaround location)
-- `app/_components/store/StoreProductGrid.tsx` (list rendering context)
-- `app/store/page.tsx` (page using ProductCard in lists)
-
-**References**:  
-- [Next.js 15 Migration Guide](https://nextjs.org/docs/app/building-your-application/upgrading/version-15)
-- [Next.js Image Component Documentation](https://nextjs.org/docs/app/api-reference/components/image)
-- Next.js GitHub Issues (search for "async Client Component" + "Image")
-- [Next.js 15 Release Notes](https://nextjs.org/blog/next-15)
-
-**Completion Date**: TBD
+- `app/_components/images/ImagePlaceholder.tsx` ← ROOT CAUSE FIXED HERE
+- `app/_components/images/OptimizedImage.tsx` (no changes needed)
+- `app/_components/store/ProductImage.tsx` (no changes needed)
+- `app/_components/store/ProductCard.tsx` (restored ProductImage usage)
+- `app/_components/store/StoreProductGrid.tsx` (restored ScrollRevealCard)
+- `app/store/page.tsx` (no changes needed)
 
 ---
 

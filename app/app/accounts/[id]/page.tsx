@@ -1,107 +1,134 @@
+/**
+ * Account Detail Page
+ * 
+ * Admin page for viewing and managing individual user accounts.
+ * Provides tabbed interface with Profile, Security, and Activity sections.
+ * 
+ * **Features:**
+ * - Tabbed navigation (Profile, Security, Activity)
+ * - Profile: View and edit account information, role management
+ * - Security: Password change, security status
+ * - Activity: Recent orders and quotes
+ * - Create mode for new accounts (redirects to signup)
+ * 
+ * **Phase 2 Improvements:**
+ * - Tabbed interface for better organization
+ * - Dedicated Security tab with password management
+ * - Activity tab with orders/quotes tables
+ * - Better component separation
+ * 
+ * @module app/accounts/[id]
+ */
+
 'use client'
 
-import { useEffect, useState } from 'react'
-
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
+import { User, Shield, Activity } from 'lucide-react'
+
+import {
+	useAccountDetailLogic,
+	AccountProfileTab,
+	AccountSecurityTab,
+	AccountActivityTab,
+	AccountDetailSkeleton,
+} from '@_features/accounts'
 import { Routes } from '@_features/navigation'
 
-
-import { formatDate } from '@_lib/dates'
-
-import { notificationService, useRouteParam , API } from '@_shared'
-
-import User from '@_classes/User'
-
-import RoleBadge from '@_components/common/RoleBadge'
-import UpdateAccountForm from '@_components/forms/UpdateAccountForm'
 import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
+import { Tabs, TabsList, Tab, TabPanel } from '@_components/ui/Tabs'
 
 import { InternalPageHeader } from '../../_components'
 
-
+// ============================================================================
+// PAGE COMPONENT
+// ============================================================================
 
 const Page = () => {
-	const router = useRouter()
-	const accountId = useRouteParam('id')
+	const {
+		// Core State
+		account,
+		isLoading,
+		isCreateMode,
+		
+		// Tab State
+		activeTab,
+		setActiveTab,
+		
+		// Auth State
+		isCurrentUserAdmin,
+		
+		// Derived State
+		memberSince,
+		hasCustomerAssociation,
+		pageTitle,
+		pageDescription,
+		
+		// Customer/Company Association
+		customerCompany,
+		
+		// Account Status
+		accountStatus,
+		isStatusUpdating,
+		canChangeStatus,
+		handleStatusChange,
+		
+		// Activity Summary (counts)
+		activitySummary,
+		
+		// Activity Data (lists)
+		activityData,
+		
+		// Role Management
+		isRoleUpdating,
+		canChangeRole,
+		handleRoleChange,
+		
+		// Confirmation State
+		pendingRoleChange,
+		pendingStatusChange,
+		setPendingRoleChange,
+		setPendingStatusChange,
+		confirmRoleChange,
+		confirmStatusChange,
+		
+		// Security
+		canChangePassword,
+		handleSendPasswordReset,
+		handleForceLogout,
+		isSendingPasswordReset,
+		
+		// Account Actions
+		handleAccountUpdate,
+		handleRefreshAccount,
+		
+		// Navigation Handlers
+		handleBack,
+		handleViewCustomer,
+		handleViewOrders,
+		handleViewQuotes,
+		handleManageAccounts,
+	} = useAccountDetailLogic()
 
-	const [account, setAccount] = useState<User | null>(null)
-	const [isLoading, setIsLoading] = useState(true)
+	// ============================================================================
+	// RENDER: CREATE MODE
+	// ============================================================================
 
-	const isCreateMode = accountId === 'create'
+	if (isCreateMode) {
+		return (
+			<>
+				<InternalPageHeader
+					title={pageTitle}
+					description={pageDescription}
+					loading={isLoading}
+					actions={
+						<Button variant="ghost" onClick={handleBack}>
+							Back
+						</Button>
+					}
+				/>
 
-	useEffect(() => {
-		if (!accountId) {
-			router.back()
-			return
-		}
-
-		if (isCreateMode) {
-			setIsLoading(false)
-			return
-		}
-
-		const fetchAccount = async () => {
-			try {
-				setIsLoading(true)
-				const { data } = await API.Accounts.get(accountId)
-
-			if (!data.payload) {
-				notificationService.error(data.message || 'Unable to load account', {
-					metadata: { accountId },
-					component: 'AccountDetailPage',
-					action: 'fetchAccount',
-				})
-				router.back()
-				return
-				}
-
-				setAccount(new User(data.payload))
-		} catch (error) {
-			notificationService.error('Unable to load account', {
-				metadata: { error, accountId },
-				component: 'AccountDetailPage',
-				action: 'fetchAccount',
-			})
-			router.back()
-			} finally {
-				setIsLoading(false)
-			}
-		}
-
-		void fetchAccount()
-	}, [accountId, isCreateMode, router])
-
-	const accountName =
-		account && account.name && typeof account.name === 'object'
-			? [account.name.first, account.name.middle, account.name.last].filter(Boolean).join(' ')
-			: account?.username ?? 'User'
-
-	const memberSince = formatDate(account?.createdAt, 'long')
-
-	const title = isCreateMode ? 'Create Account' : `${accountName}`
-	const description = isCreateMode
-		? 'Admin-created accounts are managed via the signup workflow. Invite users or share the signup link below.'
-		: 'Review and update account details, adjust permissions, and manage personal information.'
-
-	const hasCustomerAssociation = typeof account?.customerId === 'number' && account.customerId > 0
-
-	return (
-		<>
-			<InternalPageHeader
-				title={title}
-				description={description}
-				loading={isLoading}
-				actions={
-					<Button variant="ghost" onClick={() => router.back()}>
-						Back
-					</Button>
-				}
-			/>
-
-			{isCreateMode ? (
 				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
 					<div className="space-y-4">
 						<p className="text-base text-base-content/70">
@@ -118,75 +145,161 @@ const Page = () => {
 						</div>
 					</div>
 				</Card>
-			) : account ? (
-				<div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-					<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
-						<div className="mb-6 flex flex-wrap items-center gap-3">
-							<RoleBadge role={account.role ?? 0} />
-							<span className="text-xs uppercase tracking-wide text-base-content/60">
-								Account {account.id ? `#${account.id}` : 'pending'}
-							</span>
-						</div>
-						<UpdateAccountForm user={account} onUserUpdate={(updated) => setAccount(new User(updated))} />
-					</Card>
+			</>
+		)
+	}
 
-					<div className="space-y-4">
-						<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
-							<h2 className="text-lg font-semibold text-base-content">Account Details</h2>
-							<div className="mt-4 space-y-2 text-sm text-base-content/70">
-								<p>
-									<strong className="text-base-content">Email:</strong> {account.email || 'Not provided'}
-								</p>
-								<p>
-									<strong className="text-base-content">Username:</strong> {account.username || 'Not provided'}
-								</p>
-								<p>
-									<strong className="text-base-content">Phone:</strong>{' '}
-									{account.phone || account.mobile || 'Not provided'}
-								</p>
-								{memberSince && (
-									<p>
-										<strong className="text-base-content">Member since:</strong> {memberSince}
-									</p>
-								)}
-							</div>
-						</Card>
+	// ============================================================================
+	// RENDER: LOADING STATE
+	// ============================================================================
 
-						<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
-							<h2 className="text-lg font-semibold text-base-content">Quick Actions</h2>
-							<div className="mt-4 flex flex-col gap-3">
-								<Button
-									variant="secondary"
-									onClick={() =>
-										hasCustomerAssociation &&
-										router.push(Routes.Customers.detail(account?.customerId ?? ''))
-									}
-									disabled={!hasCustomerAssociation}
-								>
-									View Customer
-								</Button>
-								<Button
-									variant="error"
-									onClick={() => router.push(Routes.Accounts.location)}
-								>
-									Manage Accounts
-								</Button>
-							</div>
-						</Card>
-					</div>
-				</div>
-			) : (
+	if (isLoading && !account) {
+		return (
+			<>
+				<InternalPageHeader
+					title="Loading Account..."
+					description="Please wait while we fetch the account details."
+					loading={true}
+					actions={
+						<Button variant="ghost" onClick={handleBack}>
+							Back
+						</Button>
+					}
+				/>
+				<AccountDetailSkeleton />
+			</>
+		)
+	}
+
+	// ============================================================================
+	// RENDER: ACCOUNT NOT FOUND
+	// ============================================================================
+
+	if (!account && !isLoading) {
+		return (
+			<>
+				<InternalPageHeader
+					title="Account Not Found"
+					description="The requested account could not be loaded."
+					actions={
+						<Button variant="ghost" onClick={handleBack}>
+							Back
+						</Button>
+					}
+				/>
+
 				<Card className="border border-error/30 bg-error/5 p-6 shadow-sm">
 					<h3 className="text-lg font-semibold text-error">User not found</h3>
 					<p className="mt-2 text-sm text-base-content/70">
 						The account you are looking for could not be located. Please return to the accounts list and try again.
 					</p>
 					<div className="mt-4">
-						<Button variant="primary" onClick={() => router.push(Routes.Accounts.location)}>
+						<Button variant="primary" onClick={handleManageAccounts}>
 							Go to Accounts
 						</Button>
 					</div>
 				</Card>
+			</>
+		)
+	}
+
+	// ============================================================================
+	// RENDER: ACCOUNT DETAIL WITH TABS
+	// ============================================================================
+
+	return (
+		<>
+			<InternalPageHeader
+				title={pageTitle}
+				description={pageDescription}
+				loading={isLoading}
+				actions={
+					<Button variant="ghost" onClick={handleBack}>
+						Back
+					</Button>
+				}
+			/>
+
+			{account && (
+				<Tabs value={activeTab} onValueChange={(tab) => setActiveTab(tab as typeof activeTab)} variant="bordered">
+					<TabsList className="mb-6">
+						<Tab value="profile" icon={<User className="h-4 w-4" />}>
+							Profile
+						</Tab>
+						<Tab value="security" icon={<Shield className="h-4 w-4" />}>
+							Security
+						</Tab>
+						<Tab 
+							value="activity" 
+							icon={<Activity className="h-4 w-4" />}
+							badge={
+								activitySummary.isLoading 
+									? undefined 
+									: (activitySummary.orderCount + activitySummary.quoteCount) > 0 
+										? activitySummary.orderCount + activitySummary.quoteCount 
+										: undefined
+							}
+						>
+							Activity
+						</Tab>
+					</TabsList>
+
+					{/* Profile Tab */}
+					<TabPanel value="profile">
+						<AccountProfileTab
+							account={account}
+							memberSince={memberSince}
+							isCurrentUserAdmin={isCurrentUserAdmin}
+							canChangeRole={canChangeRole}
+							isRoleUpdating={isRoleUpdating}
+							hasCustomerAssociation={hasCustomerAssociation}
+							activitySummary={activitySummary}
+							customerCompany={customerCompany}
+							accountStatus={accountStatus}
+							isStatusUpdating={isStatusUpdating}
+							canChangeStatus={canChangeStatus}
+							onAccountUpdate={handleAccountUpdate}
+							onRoleChange={handleRoleChange}
+							onStatusChange={handleStatusChange}
+							onViewCustomer={handleViewCustomer}
+							onViewOrders={handleViewOrders}
+							onViewQuotes={handleViewQuotes}
+							onManageAccounts={handleManageAccounts}
+							onRefresh={handleRefreshAccount}
+							isLoading={isLoading}
+							pendingRoleChange={pendingRoleChange}
+							pendingStatusChange={pendingStatusChange}
+							onSetPendingRoleChange={setPendingRoleChange}
+							onSetPendingStatusChange={setPendingStatusChange}
+							onConfirmRoleChange={confirmRoleChange}
+							onConfirmStatusChange={confirmStatusChange}
+						/>
+					</TabPanel>
+
+					{/* Security Tab */}
+					<TabPanel value="security">
+						<AccountSecurityTab
+							account={account}
+							isCurrentUserAdmin={isCurrentUserAdmin}
+							canChangePassword={canChangePassword}
+							accountStatus={accountStatus}
+							onSendPasswordReset={handleSendPasswordReset}
+							onForceLogout={handleForceLogout}
+							isSendingReset={isSendingPasswordReset}
+						/>
+					</TabPanel>
+
+					{/* Activity Tab */}
+					<TabPanel value="activity">
+						<AccountActivityTab
+							orders={activityData.orders}
+							quotes={activityData.quotes}
+							isLoadingOrders={activityData.isLoadingOrders}
+							isLoadingQuotes={activityData.isLoadingQuotes}
+							hasCustomerAssociation={hasCustomerAssociation}
+						/>
+					</TabPanel>
+				</Tabs>
 			)}
 		</>
 	)

@@ -39,26 +39,6 @@ import StatsBanner from '@_components/landing/StatsBanner'
 export default function AboutPageClient() {
 	// Map feature images to features (images are imported locally for Next.js optimization)
 	const featureImages = [Aboutus11, Aboutus22, Aboutus33, Aboutus44, Aboutus55]
-	const hasLoggedMountRef = useRef(false)
-
-	// Component lifecycle logging (FAANG best practice)
-	useEffect(() => {
-		if (!hasLoggedMountRef.current) {
-			logger.info('AboutPageClient mounted', {
-				component: 'AboutPageClient',
-				featuresCount: About.Features.length,
-				statsCount: About.Stats.length,
-				featureImagesCount: featureImages.length,
-			})
-			hasLoggedMountRef.current = true
-		}
-
-		return () => {
-			logger.debug('AboutPageClient unmounting', {
-				component: 'AboutPageClient',
-			})
-		}
-	}, [])
 
 	return (
 		<main className="flex flex-col w-full overflow-x-hidden bg-base-100">

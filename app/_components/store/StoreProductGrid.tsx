@@ -106,38 +106,41 @@ export default function StoreProductGrid({
 					</div>
 				) : (
 					products.map((product, index) => {
-						// CRITICAL: Ensure product.id is a string/number, not a Promise
-						// Next.js 15 can throw "async Client Component" error if id is a Promise
-						const productId = typeof product.id === 'object' && 'then' in product.id 
-							? String(product.id) // Fallback if somehow a Promise
-							: String(product.id) // Ensure it's always a string for key
+						// Ensure product.id is a valid string for the key
+						const productId = String(product.id)
 						
-						// CRITICAL: Ensure product itself is not a Promise
-						// Next.js 15 can throw "async Client Component" error if product is a Promise
-						if (typeof product === 'object' && product !== null && 'then' in product) {
-							console.error('Product is a Promise!', product)
-							return null // Skip this product
-						}
-						
-						// CRITICAL: Ensure all product properties are resolved synchronously
-						// Check if product has required properties
+						// Validate product object
 						if (!product || typeof product !== 'object') {
-							console.error('Invalid product:', product)
-							return null // Skip this product
+							return null
 						}
 						
-						// TEMP: Render ProductCard directly without ScrollRevealCard to isolate the error
-						// If this works, the issue is in ScrollRevealCard
-						// If this fails, the issue is in ProductCard or its children
+						/**
+						 * ScrollRevealCard wrapper for elegant animations
+						 * 
+						 * RESTORED: The root cause of the Next.js 15 "async Client Component" 
+						 * error was fixed in ImagePlaceholder.tsx (removed erroneous async keyword).
+						 * 
+						 * ScrollRevealCard provides:
+						 * - Intersection Observer based reveal animations
+						 * - Row-aware staggered animations (FAANG pattern)
+						 * - Respects prefers-reduced-motion
+						 * - GPU-accelerated smooth transitions
+						 */
 						return (
-							<ProductCard
+							<ScrollRevealCard
 								key={productId}
-								product={product}
-								priority={index < priorityImageCount}
-								onCategoryFilter={onCategoryFilter}
-							/>
+								index={index}
+								staggerDelay={50}
+								enabled={true}
+							>
+								<ProductCard
+									product={product}
+									priority={index < priorityImageCount}
+									onCategoryFilter={onCategoryFilter}
+								/>
+							</ScrollRevealCard>
 						)
-					}).filter(Boolean) // Remove any null entries
+					}).filter(Boolean)
 				)}
 			</div>
 

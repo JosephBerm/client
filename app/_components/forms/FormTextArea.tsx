@@ -182,9 +182,21 @@ const FormTextArea = forwardRef<HTMLTextAreaElement, FormTextAreaProps>(
 					className={classNames(
 						baseFieldClass,
 						'min-h-[120px] resize-y',
+						// MAANG-level best practice: Prevent horizontal scrolling
+						// Text should wrap naturally, long words should break if necessary
+						'overflow-x-hidden overflow-wrap-break-word break-words whitespace-pre-wrap',
 						{ [errorFieldClass]: Boolean(error) },
 						className
 					)}
+					style={{
+						// Ensure proper word wrapping (MAANG standard)
+						wordBreak: 'break-word',
+						overflowWrap: 'break-word',
+						// Prevent horizontal overflow
+						overflowX: 'hidden',
+						// Preserve whitespace while allowing wrapping
+						whiteSpace: 'pre-wrap',
+					}}
 					{...props}
 				/>
 

@@ -243,15 +243,17 @@ Below is a categorized list of reusable items. Each item links to a brief descri
   - [_components/ui/Button.tsx](#desc-button)
   - [_components/ui/Card.tsx](#desc-card)
   - [_components/ui/CategoryFilter.tsx](#desc-category-filter)
+  - [_components/ui/ConfirmationModal.tsx](#desc-confirmation-modal) (NPM: `lucide-react`)
+  - [_components/ui/ContactIcons.tsx](#desc-contact-icons)
+  - [_components/ui/ContactMethodCard.tsx](#desc-contact-method-card)
   - [_components/ui/Input.tsx](#desc-input)
+  - [_components/ui/LiveChatBubble.tsx](#desc-live-chat-bubble)
   - [_components/ui/Modal.tsx](#desc-modal)
   - [_components/ui/Pill.tsx](#desc-pill)
   - [_components/ui/QuantitySelector.tsx](#desc-quantity-selector)
   - [_components/ui/Select.tsx](#desc-select)
   - [_components/ui/StatusDot.tsx](#desc-status-dot)
-  - [_components/ui/ContactIcons.tsx](#desc-contact-icons)
-  - [_components/ui/ContactMethodCard.tsx](#desc-contact-method-card)
-  - [_components/ui/LiveChatBubble.tsx](#desc-live-chat-bubble)
+  - [_components/ui/Tabs.tsx](#desc-tabs) (NPM: `classnames`)
   - Carousel (UI)
     - [_components/ui/Carousel/index.ts](#desc-carousel-index)
     - [_components/ui/Carousel/Carousel.tsx](#desc-carousel)
@@ -726,6 +728,9 @@ Text input with variants and validation states.
 #### _components/ui/Modal.tsx {#desc-modal}
 Accessible modal (focus lock, escape, aria).
 
+#### _components/ui/ConfirmationModal.tsx {#desc-confirmation-modal}
+MAANG-level confirmation dialog for destructive or important actions. Features: multiple variants (danger, warning, info), customizable title/message/button text, loading state support, proper focus management, keyboard accessibility, responsive design. Use cases: delete confirmations, role/status changes, account deactivation, data loss warnings. Automatically focuses cancel button for safety. Built on Modal component.
+
 #### _components/ui/Pill.tsx {#desc-pill}
 Rounded label/tag UI.
 
@@ -737,6 +742,9 @@ Select input with consistent styling.
 
 #### _components/ui/StatusDot.tsx {#desc-status-dot}
 Small colored status indicator dot (online/offline/etc.).
+
+#### _components/ui/Tabs.tsx {#desc-tabs}
+Accessible tabbed interface component following WCAG 2.1 guidelines. Features: multiple visual variants (boxed, bordered, lifted), keyboard navigation (Arrow keys, Home, End), full ARIA support (tablist, tab, tabpanel roles), controlled component pattern, mobile-responsive with horizontal scroll, icon support in tab labels, badge/count support, disabled tabs, theme-aware (DaisyUI). Context-based state management for clean component composition. Used for organizing content into tabbed sections (e.g., Profile/Security/Activity tabs).
 
 #### _components/ui/ContactIcons.tsx {#desc-contact-icons}
 Icon set for contact methods (NPM: `lucide-react`).

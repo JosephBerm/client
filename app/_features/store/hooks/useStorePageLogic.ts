@@ -30,7 +30,7 @@
 
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 // import { useRouter, useSearchParams } from 'next/navigation' // ⏸️ DISABLED - URL params
 
 import { logger } from '@_core'
@@ -47,7 +47,7 @@ import type ProductsCategory from '@_classes/ProductsCategory'
 
 // Import directly from individual files to avoid dependency cycle
 // (useStorePageLogic is exported by @_features/store barrel, so importing from barrel creates cycle)
-import { INITIAL_PAGE_SIZE, createInitialFilter } from '../constants'
+import { INITIAL_PAGE_SIZE, MIN_SEARCH_LENGTH, createInitialFilter } from '../constants'
 
 import { useProductsState } from './useProductsState'
 import { useSearchFilterState, createInitialSearchFilterState } from './useSearchFilterState'
@@ -208,17 +208,30 @@ export function useStorePageLogic(): UseStorePageLogicReturn {
 	
 	const displayedCount = products.length
 	
-	const isFiltered = false // ⏸️ DISABLED - filtering
-	// const isFiltered = useMemo(
-	// 	() => selectedCategories.length > 0 || searchText.trim().length > 0,
-	// 	[selectedCategories.length, searchText]
-	// ) // ⏸️ DISABLED
+	/**
+	 * ✅ RESTORED - isFiltered computed state
+	 * 
+	 * Determines if any filters are currently applied.
+	 * Used for:
+	 * - Showing "Reset Filters" button in empty state
+	 * - Clear filters button visibility in toolbar
+	 * - Empty state messaging
+	 */
+	const isFiltered = useMemo(
+		() => selectedCategories.length > 0 || searchText.trim().length > 0,
+		[selectedCategories.length, searchText]
+	)
 	
-	const isSearchTooShort = false // ⏸️ DISABLED - search
-	// const isSearchTooShort = useMemo(
-	// 	() => searchText.length > 0 && searchText.length < MIN_SEARCH_LENGTH,
-	// 	[searchText.length]
-	// ) // ⏸️ DISABLED
+	/**
+	 * ✅ RESTORED - isSearchTooShort computed state
+	 * 
+	 * Determines if search text is entered but too short to trigger search.
+	 * Used for showing "Enter at least X characters" hint in search box.
+	 */
+	const isSearchTooShort = useMemo(
+		() => searchText.length > 0 && searchText.length < MIN_SEARCH_LENGTH,
+		[searchText.length]
+	)
 
 	// ============================================================================
 	// ✅ UNIFIED FETCH FUNCTION - Feature #5

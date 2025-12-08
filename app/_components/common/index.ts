@@ -16,4 +16,5 @@ export { default as LoadingSpinner } from './LoadingSpinner'
 export { default as EmptyState } from './EmptyState'
 export { default as OrderStatusBadge } from './OrderStatusBadge'
 export { default as RoleBadge } from './RoleBadge'
+export { default as AccountStatusBadge } from './AccountStatusBadge'
 

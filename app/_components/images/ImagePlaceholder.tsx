@@ -33,6 +33,7 @@
  * @module ImagePlaceholder
  */
 
+import type React from 'react'
 import type { ReactNode } from 'react'
 
 import classNames from 'classnames'
@@ -128,8 +129,18 @@ export default function ImagePlaceholder({
 	showLabel = false,
 	label,
 }: ImagePlaceholderProps) {
-	// Select icon based on variant
-	const getIcon = async () => {
+	/**
+	 * Get icon based on variant
+	 * 
+	 * CRITICAL FIX: Removed `async` keyword that was causing Next.js 15 error:
+	 * "An unknown Component is an async Client Component"
+	 * 
+	 * The async keyword made this function return a Promise, which React
+	 * interprets as an async component - not allowed in Client Components.
+	 * 
+	 * @returns ReactNode - The icon component to render
+	 */
+	const getIcon = (): React.ReactNode => {
 		if (variant === 'icon' && icon) {
 			return icon
 		}

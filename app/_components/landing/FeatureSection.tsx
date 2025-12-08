@@ -108,30 +108,6 @@ export default function FeatureSection({
 	const isEven = index % 2 === 0
 	const bgClass = isEven ? 'bg-base-100' : 'bg-base-200/50'
 	const isImageLeft = layout === 'left'
-	const hasLoggedMountRef = useRef(false)
-
-	// Component lifecycle logging (FAANG best practice)
-	useEffect(() => {
-		if (!hasLoggedMountRef.current) {
-			logger.debug('FeatureSection mounted', {
-				component: 'FeatureSection',
-				id: id || `feature-${index}`,
-				index,
-				layout,
-				hasLearnMore: !!learnMoreHref,
-				priority: index === 0,
-			})
-			hasLoggedMountRef.current = true
-		}
-
-		return () => {
-			logger.debug('FeatureSection unmounting', {
-				component: 'FeatureSection',
-				id: id || `feature-${index}`,
-				index,
-			})
-		}
-	}, [id, index, layout, learnMoreHref])
 
 	// Image error handler (FAANG best practice: track image load failures)
 	const handleImageError = () => {
