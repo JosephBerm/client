@@ -114,7 +114,8 @@ Below is a categorized list of reusable items. Each item links to a brief descri
   - Hooks (if present under features/auth/hooks)
     - [_features/auth/hooks](#desc-auth-hooks) (NPM: may use `react-hook-form`, `zod`)
   - Components
-    - [_components/auth/LoginModal.tsx](#desc-login-modal)
+    - [_components/auth/LoginModal/](#desc-login-modal) (folder with subcomponents)
+    - [_components/auth/LoginModal/useAuthModal.ts](#desc-use-auth-modal)
     - [_components/auth/index.ts](#desc-auth-components-index)
 
 - Features: Settings
@@ -426,11 +427,14 @@ Zustand store for auth state (user, tokens, roles), hydration and persistence be
 #### _features/auth/hooks {#desc-auth-hooks}
 Auth-related hooks (guards, role checks, form helpers) if present.
 
-#### _components/auth/LoginModal.tsx {#desc-login-modal}
-ChatGPT-style login modal with social authentication options (Google, Apple, Microsoft, Phone) and email/password login. Mobile-first responsive design.
+#### _components/auth/LoginModal/ {#desc-login-modal}
+FAANG-level modular authentication modal with clean separation of concerns. ChatGPT-style design with social authentication (Google, Apple, Microsoft, Phone), email/password login, and integrated sign-up flow. **Architecture:** LoginModal.tsx (orchestration), useAuthModal.ts (business logic hook), AuthModalHeader.tsx, SocialLoginButtons.tsx, AuthDivider.tsx, LoginForm.tsx, SignupForm.tsx. **Features:** Progressive disclosure login flow, auto-login after signup, redirect handling, form validation (Zod), mobile-first responsive, WCAG 2.1 AA accessible, theme-aware (DaisyUI). **Constants:** LoginModal.constants.ts centralizes all labels, messages, and CSS classes (zero magic values). **Types:** LoginModal.types.ts for all interfaces. **Barrel:** index.ts exports LoginModal (default), types, constants, and useAuthModal hook. Pattern: UI components are pure presentational, all business logic in useAuthModal hook for testability.
+
+#### _components/auth/LoginModal/useAuthModal.ts {#desc-use-auth-modal}
+Custom hook encapsulating all authentication modal business logic. Separates concerns from UI components for testability and reusability. **Features:** Login form state (useZodForm), signup form state, view switching (login ↔ signup), social login handling, auto-login after successful signup, success/error notifications, redirect to dashboard or returnUrl. **Returns:** currentView, isLoading, showEmailForm, loginForm, signupForm, and all handlers (handleSocialLogin, handleLoginFormSubmit, handleSignupFormSubmit, handleSwitchToSignup, handleSwitchToLogin, handleClose). NPM: Uses `react-hook-form`, `zod`, `zustand` (auth store).
 
 #### _components/auth/index.ts {#desc-auth-components-index}
-Barrel export for auth UI components.
+Barrel export for auth UI components. Exports: LoginModal (default), LoginModalProps, AuthModalView types, useAuthModal hook, UseAuthModalReturn type.
 
 
 ### Features: Settings
