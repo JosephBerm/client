@@ -9,9 +9,9 @@
 
 import type { CartItem } from '@_features/cart'
 
-import { Product } from '@_classes/Product'
+import type { Product } from '@_classes/Product'
 
-import CartItem from './CartItem'
+import CartItemComponent from './CartItem'
 
 export interface CartItemsListProps {
 	/** Array of cart items */
@@ -45,10 +45,10 @@ export default function CartItemsList({
 	return (
 		<div className="space-y-3 sm:space-y-4">
 			{items.map((item) => (
-				<CartItem
+				<CartItemComponent
 					key={item.productId}
 					item={item}
-					product={products.get(item.productId) || null}
+					product={products.get(item.productId) ?? null}
 					onQuantityChange={onQuantityChange}
 					onRemove={onRemove}
 					showProductLink={true}

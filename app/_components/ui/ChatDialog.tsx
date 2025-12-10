@@ -29,6 +29,7 @@
 
 import type { ReactNode, KeyboardEvent } from 'react'
 import { useRef, useCallback, useEffect, useState, useMemo } from 'react'
+
 import { createPortal } from 'react-dom'
 
 import classNames from 'classnames'
@@ -36,7 +37,9 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { X, MessageCircle } from 'lucide-react'
 
 import { useModal } from '@_shared'
+
 import { checkReducedMotion, REDUCED_MOTION_VARIANTS } from '@_components/common/animations/types'
+import Button from '@_components/ui/Button'
 
 export interface ChatDialogProps {
 	/** Whether the dialog is currently open */
@@ -151,6 +154,8 @@ export default function ChatDialog({
 	)
 
 	// Animation variants for dialog (desktop: slide up from bottom, mobile: scale)
+	// Note: Using 'as const' for type safety with framer-motion Variants type
+	// This ensures TypeScript infers tuple types for ease arrays and literal types for strings
 	const dialogVariants = useMemo(() => {
 		if (prefersReducedMotion) {
 			return REDUCED_MOTION_VARIANTS
@@ -167,7 +172,7 @@ export default function ChatDialog({
 				scale: 1,
 				y: 0,
 				transition: {
-					type: 'spring',
+					type: 'spring' as const,
 					stiffness: 300,
 					damping: 30,
 					mass: 0.8,
@@ -179,33 +184,34 @@ export default function ChatDialog({
 				y: 20,
 				transition: {
 					duration: 0.2,
-					ease: [0.4, 0, 0.2, 1],
+					ease: [0.4, 0, 0.2, 1] as const,
 				},
 			},
-		}
+		} as const
 	}, [prefersReducedMotion])
 
 	// Backdrop animation variants
+	// Note: Using 'as const' for type safety with framer-motion Variants type
 	const backdropVariants = useMemo(() => {
 		if (prefersReducedMotion) {
 			return {
 				hidden: { opacity: 0 },
 				visible: { opacity: 1, transition: { duration: 0.001 } },
 				exit: { opacity: 0, transition: { duration: 0.001 } },
-			}
+			} as const
 		}
 
 		return {
 			hidden: { opacity: 0 },
 			visible: {
 				opacity: 1,
-				transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] },
+				transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] as const },
 			},
 			exit: {
 				opacity: 0,
-				transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] },
+				transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] as const },
 			},
-		}
+		} as const
 	}, [prefersReducedMotion])
 
 	// Event handlers
@@ -304,14 +310,16 @@ export default function ChatDialog({
 										{title}
 									</h2>
 								</div>
-								<button
+								<Button
 									ref={closeButtonRef}
 									onClick={onClose}
-									className="btn btn-ghost btn-sm btn-circle focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+									variant="ghost"
+									size="sm"
+									className="btn-circle focus:outline-2 focus:outline-offset-2 focus:outline-primary"
 									aria-label="Close chat dialog"
 								>
 									<X size={20} />
-								</button>
+								</Button>
 							</div>
 
 							{/* Content - Scrollable */}

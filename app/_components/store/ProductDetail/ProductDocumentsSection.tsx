@@ -42,10 +42,11 @@ export default function ProductDocumentsSection({
 				</h2>
 			</div>
 			<div className="grid gap-4 sm:grid-cols-2">
-				{documents.map((doc) => {
+				{documents.map((doc, index) => {
 					// Use doc.name as key (stable identifier) or fallback to index if name is missing
 					// FAANG best practice: Use stable, unique identifiers for keys
-					const key = doc.name ?? `doc-${doc.id ?? Math.random()}`
+					// Note: SerializedProduct['files'] only has name and contentType, no id
+					const key = doc.name ?? `doc-${index}`
 					return (
 						<a
 							key={key}
