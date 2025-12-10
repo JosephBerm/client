@@ -41,7 +41,7 @@
 		// ==========================================
 		// BARREL EXPORT ENFORCEMENT (FAANG-Level)
 		// ==========================================
-		
+
 		// Enforce barrel imports from aliased paths
 		"no-restricted-imports": [
 			"error",
@@ -80,7 +80,12 @@
 						"message": "❌ Do not import shared utils directly.\n✅ Import from @_shared barrel: import { utilityName } from '@_shared'"
 					},
 					{
-						"group": ["app/_lib/formatters/*", "app/_lib/dates/*", "app/_lib/validators/*", "!app/_lib/index*"],
+						"group": [
+							"app/_lib/formatters/*",
+							"app/_lib/dates/*",
+							"app/_lib/validators/*",
+							"!app/_lib/index*"
+						],
 						"message": "❌ Do not import lib utilities directly.\n✅ Import from @_lib barrel: import { formatCurrency, formatDate } from '@_lib'"
 					},
 					{
@@ -107,15 +112,7 @@
 		"import/order": [
 			"error",
 			{
-				"groups": [
-					"builtin",
-					"external",
-					"internal",
-					"parent",
-					"sibling",
-					"index",
-					"type"
-				],
+				"groups": ["builtin", "external", "internal", "parent", "sibling", "index", "type"],
 				"pathGroups": [
 					{
 						"pattern": "react",
@@ -224,7 +221,7 @@
 		// ==========================================
 		// TYPESCRIPT BEST PRACTICES
 		// ==========================================
-		
+
 		"@typescript-eslint/no-unused-vars": [
 			"error",
 			{
@@ -237,7 +234,7 @@
 		"@typescript-eslint/no-explicit-any": "warn",
 		"@typescript-eslint/explicit-module-boundary-types": "off",
 		"@typescript-eslint/no-non-null-assertion": "warn",
-		
+
 		// Enforce consistent type imports (Google/Airbnb standard)
 		"@typescript-eslint/consistent-type-imports": [
 			"error",
@@ -271,17 +268,17 @@
 		// ==========================================
 		// NEXT.JS SPECIFIC
 		// ==========================================
-		
+
 		"@next/next/no-html-link-for-pages": "error",
 		"@next/next/no-img-element": "error", // Upgraded to error - use Image component
 
 		// ==========================================
 		// CUSTOM PROJECT RULES (MedSource Pro Standards)
 		// ==========================================
-		
+
 		// Enforce Next.js Image component (no <img> tags)
 		// Already handled by @next/next/no-img-element above (set to error)
-		
+
 		// Enforce date utils (no new Date())
 		// Enforce logger service (no console.log)
 		// Enforce built UI components (no custom button/select/table)
@@ -337,7 +334,7 @@
 		// ==========================================
 		// CODE QUALITY
 		// ==========================================
-		
+
 		// Note: console.log is now blocked by no-restricted-syntax rule above
 		// This rule still allows console.warn and console.error for critical errors
 		"no-console": [
@@ -356,7 +353,7 @@
 		// ==========================================
 		// PHASE 8: ASYNC/PROMISE SAFETY (CRITICAL)
 		// ==========================================
-		
+
 		// Prevent floating promises (unhandled async operations)
 		"@typescript-eslint/no-floating-promises": [
 			"error",
@@ -365,7 +362,7 @@
 				"ignoreIIFE": false
 			}
 		],
-		
+
 		// Prevent misuse of promises (e.g., in if statements)
 		"@typescript-eslint/no-misused-promises": [
 			"error",
@@ -380,11 +377,11 @@
 				}
 			}
 		],
-		
+
 		// Require await in async functions
 		"require-await": "off",
 		"@typescript-eslint/require-await": "warn",
-		
+
 		// Prevent async functions in places that don't handle promises
 		"@typescript-eslint/promise-function-async": [
 			"warn",
@@ -396,10 +393,10 @@
 				"checkMethodDeclarations": true
 			}
 		],
-		
+
 		// Ensure proper handling of returned promises
 		"@typescript-eslint/no-misused-new": "error",
-		
+
 		// Return await only in try-catch blocks
 		// Note: no-return-await is deprecated, using @typescript-eslint/return-await instead
 		"@typescript-eslint/return-await": ["error", "in-try-catch"],
@@ -407,7 +404,7 @@
 		// ==========================================
 		// PHASE 8: NAMING CONVENTIONS (FAANG)
 		// ==========================================
-		
+
 		"@typescript-eslint/naming-convention": [
 			"warn",
 			// Default: camelCase for variables, functions
@@ -417,64 +414,64 @@
 				"leadingUnderscore": "allow",
 				"trailingUnderscore": "forbid"
 			},
-			
+
 			// Imports: Allow PascalCase for class/type imports, camelCase for functions
 			{
 				"selector": "import",
 				"format": ["camelCase", "PascalCase", "UPPER_CASE"]
 			},
-			
+
 			// Variables: camelCase or UPPER_CASE for constants or PascalCase for classes
 			{
 				"selector": "variable",
 				"format": ["camelCase", "UPPER_CASE", "PascalCase"],
 				"leadingUnderscore": "allow"
 			},
-			
+
 			// Functions: camelCase (including React hooks) or PascalCase for components
 			{
 				"selector": "function",
 				"format": ["camelCase", "PascalCase"]
 			},
-			
+
 			// Parameters: camelCase, allow leading underscore for unused
 			{
 				"selector": "parameter",
 				"format": ["camelCase"],
 				"leadingUnderscore": "allow"
 			},
-			
+
 			// Class members: camelCase or PascalCase for nested classes/constants
 			{
 				"selector": "memberLike",
 				"format": ["camelCase", "PascalCase"],
 				"leadingUnderscore": "allow"
 			},
-			
+
 			// Types/Interfaces: PascalCase
 			{
 				"selector": "typeLike",
 				"format": ["PascalCase"]
 			},
-			
+
 			// Enums: PascalCase
 			{
 				"selector": "enum",
 				"format": ["PascalCase"]
 			},
-			
+
 			// Enum members: PascalCase or UPPER_CASE
 			{
 				"selector": "enumMember",
 				"format": ["PascalCase", "UPPER_CASE"]
 			},
-			
+
 			// Classes: PascalCase
 			{
 				"selector": "class",
 				"format": ["PascalCase"]
 			},
-			
+
 			// Interfaces: PascalCase (no 'I' prefix allowed except ILogger)
 			{
 				"selector": "interface",
@@ -484,7 +481,7 @@
 					"match": false
 				}
 			},
-			
+
 			// Type aliases: PascalCase
 			{
 				"selector": "typeAlias",
@@ -495,7 +492,7 @@
 		// ==========================================
 		// PHASE 8: TYPESCRIPT STRICTNESS
 		// ==========================================
-		
+
 		// Prefer nullish coalescing (??) over logical OR (||)
 		"@typescript-eslint/prefer-nullish-coalescing": [
 			"warn",
@@ -505,13 +502,13 @@
 				"ignoreMixedLogicalExpressions": true
 			}
 		],
-		
+
 		// Prefer optional chaining (?.) over manual checks
 		"@typescript-eslint/prefer-optional-chain": "error",
-		
+
 		// Disallow unnecessary type assertions
 		"@typescript-eslint/no-unnecessary-type-assertion": "warn",
-		
+
 		// Prevent unsafe operations (warn, not error, as we have legitimate uses)
 		"@typescript-eslint/no-unsafe-member-access": "off",
 		"@typescript-eslint/no-unsafe-assignment": "off",
@@ -521,7 +518,7 @@
 		// ==========================================
 		// PHASE 8: IMMUTABILITY & CODE QUALITY
 		// ==========================================
-		
+
 		// Prevent parameter reassignment (common source of bugs)
 		"no-param-reassign": [
 			"error",
@@ -543,10 +540,10 @@
 				]
 			}
 		],
-		
+
 		// Prefer object spread over Object.assign
 		"prefer-object-spread": "error",
-		
+
 		// Prefer destructuring from arrays/objects
 		"prefer-destructuring": [
 			"warn",
@@ -564,7 +561,7 @@
 				"enforceForRenamedProperties": false
 			}
 		],
-		
+
 		// Prevent duplicate imports
 		"import/no-duplicates": [
 			"error",
@@ -577,11 +574,11 @@
 		// ==========================================
 		// PHASE 8: REACT PERFORMANCE & BEST PRACTICES
 		// ==========================================
-		
+
 		// React settings
 		"react/react-in-jsx-scope": "off",
 		"react/prop-types": "off",
-		
+
 		// Require keys in list rendering
 		"react/jsx-key": [
 			"error",
@@ -591,10 +588,10 @@
 				"warnOnDuplicates": true
 			}
 		],
-		
+
 		// Prevent usage of dangerous properties
 		"react/no-danger": "warn",
-		
+
 		// Prevent unused prop types
 		"react/no-unused-prop-types": [
 			"warn",
@@ -603,7 +600,7 @@
 				"skipShapeProps": true
 			}
 		],
-		
+
 		// Enforce React Hooks rules
 		"react-hooks/rules-of-hooks": "error",
 		"react-hooks/exhaustive-deps": [
@@ -612,23 +609,23 @@
 				"additionalHooks": "(useFormSubmit|useCRUDSubmit|useServerTable)"
 			}
 		],
-		
+
 		// Prevent direct mutation of state
 		"react/no-direct-mutation-state": "error",
-		
+
 		// Prevent using deprecated React methods
 		"react/no-deprecated": "error",
-		
+
 		// Prevent using findDOMNode
 		"react/no-find-dom-node": "error",
-		
+
 		// Prevent using string refs
 		"react/no-string-refs": "error",
 
 		// ==========================================
 		// PHASE 8: ACCESSIBILITY (WCAG 2.1 AA)
 		// ==========================================
-		
+
 		"jsx-a11y/alt-text": "error",
 		"jsx-a11y/anchor-has-content": "error",
 		"jsx-a11y/anchor-is-valid": "error",
