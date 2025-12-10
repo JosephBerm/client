@@ -140,14 +140,15 @@ export default function UnifiedStoreToolbar({
 							leftIcon={<Search strokeWidth={2} />}
 							rightElement={
 								searchText ? (
-									<button
+									<Button
 										onClick={onSearchClear}
-										className="flex items-center justify-center text-base-content/50 transition-colors hover:text-base-content rounded p-1"
+										variant="ghost"
+										size="sm"
+										className="flex items-center justify-center text-base-content/50 transition-colors hover:text-base-content hover:bg-transparent rounded p-1 min-h-0 h-auto"
 										aria-label="Clear search"
-										type="button"
 									>
 										<X className="h-5 w-5" strokeWidth={2} />
-									</button>
+									</Button>
 								) : undefined
 							}
 						/>
@@ -281,14 +282,15 @@ export default function UnifiedStoreToolbar({
 							leftIcon={<Search strokeWidth={2} />}
 							rightElement={
 								searchText ? (
-									<button
+									<Button
 										onClick={onSearchClear}
-										className="flex items-center justify-center text-base-content/50 transition-colors hover:text-base-content rounded p-1"
+										variant="ghost"
+										size="sm"
+										className="flex items-center justify-center text-base-content/50 transition-colors hover:text-base-content hover:bg-transparent rounded p-1 min-h-0 h-auto"
 										aria-label="Clear search"
-										type="button"
 									>
 										<X className="h-5 w-5" strokeWidth={2} />
-									</button>
+									</Button>
 								) : undefined
 							}
 						/>
