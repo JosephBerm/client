@@ -298,8 +298,12 @@ export class PasswordForm {
  * - Unique username (3-50 characters, alphanumeric + underscore)
  * - Valid email address
  * - Strong password (8+ chars, uppercase, lowercase, number, special char)
+ * - Password confirmation (must match password)
  * - Full name (first and last required)
  * - Optional date of birth (must be 18+ for most features)
+ * 
+ * **Backend Contract:**
+ * The backend expects `confirmPassword` in the request body for validation.
  * 
  * @example
  * ```typescript
@@ -307,6 +311,7 @@ export class PasswordForm {
  *   username: 'johndoe',
  *   email: 'john@example.com',
  *   password: 'SecurePass123!',
+ *   confirmPassword: 'SecurePass123!',
  *   name: new Name({
  *     first: 'John',
  *     middle: 'Q',
@@ -334,6 +339,9 @@ export class RegisterModel {
 	/** Password (will be hashed on backend) */
 	public password: string = ''
 	
+	/** Password confirmation (required by backend for validation) */
+	public confirmPassword: string = ''
+	
 	/** User's full name */
 	public name: Name = new Name()
 	
@@ -352,6 +360,7 @@ export class RegisterModel {
 	 *   username: 'janedoe',
 	 *   email: 'jane@example.com',
 	 *   password: 'SecurePass456!',
+	 *   confirmPassword: 'SecurePass456!',
 	 *   name: new Name({ first: 'Jane', last: 'Doe' })
 	 * });
 	 * ```
