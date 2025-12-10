@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import { Suspense } from 'react'
+
 import { themeInitScript } from '@_scripts/theme-init-inline'
 
 import AuthInitializer from '@_components/common/AuthInitializer'
@@ -50,10 +52,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			<ImageServiceInitializer />
 			<ServiceWorkerRegistration />
 
-			{/* Main navigation wrapper */}
-			<NavigationLayout>
-				{children}
-			</NavigationLayout>
+			{/* Main navigation wrapper - Wrapped in Suspense for useSearchParams() in Navbar */}
+			{/* Next.js 15 requires Suspense boundary for components using useSearchParams during prerender */}
+			<Suspense fallback={null}>
+				<NavigationLayout>
+					{children}
+				</NavigationLayout>
+			</Suspense>
 
 			{/* Theme-aware toast notifications */}
 			<ToastProvider />
