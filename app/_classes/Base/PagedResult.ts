@@ -88,12 +88,15 @@ export class PagedResult<T> {
         this.page = init.page ?? 1;
         
         // Set page size, default to 10 items per page
-        this.pageSize = init.pageSize ?? 10;
+        // Guard against zero/negative: use nullish coalescing first, then ensure positive value
+        const rawPageSize = init.pageSize ?? 10;
+        this.pageSize = rawPageSize > 0 ? rawPageSize : 10;
         
         // Set total number of items
         this.total = init.total ?? 0;
         
         // Calculate total pages by dividing total items by page size (rounded up)
+        // Safe division: pageSize is guaranteed > 0 by guard above
         this.totalPages = Math.ceil(this.total / this.pageSize);
         
         // Check if there are more pages after the current one
@@ -115,7 +118,8 @@ export class PagedResult<T> {
         this.lastPage = `?page=${this.totalPages}&pageSize=${this.pageSize}`;
         
         // Set pageCount (duplicate for legacy compatibility)
-        this.pageCount = Math.ceil(this.total / this.pageSize);
+        // Safe: pageSize guaranteed > 0 by constructor guard
+        this.pageCount = this.totalPages;
         
         // Set data array
         this.data = init.data ?? [];

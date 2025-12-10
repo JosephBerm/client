@@ -119,6 +119,15 @@ export default class UploadedFile {
 	public GetFileType(): string | null {
 		// Split filename on '.' and get last part (extension)
 		// Returns null if name is null or has no extension
-		return this.name?.split('.')[1] ?? null
+		// Uses .at(-1) to correctly handle multi-dot filenames like "document.backup.pdf" → "pdf"
+		const parts = this.name?.split('.')
+		
+		// No name or no extension (single element means no dot in filename)
+		if (!parts || parts.length <= 1) {
+			return null
+		}
+		
+		// Return last element (the actual extension)
+		return parts.at(-1) ?? null
 	}
 }
