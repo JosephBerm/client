@@ -1,169 +1,60 @@
 'use client'
 
-import '@/styles/contact.css'
-import Link from 'next/link'
-import API from '@/services/api'
-import classNames from 'classnames'
-import React, { useState } from 'react'
-import Routes from '@/services/routes'
-import { useRouter } from 'next/navigation'
-import { FormikProvider, useFormik, Form } from 'formik'
+import { useState } from 'react'
 
-import Name from '@/classes/common/Name'
-import { useAccountStore } from '@/src/stores/user'
-import ContactRequest from '@/classes/ContactRequest'
+import { ContactHeader, ContactForm, ContactMethods, ContactInfo, ContactSuccess } from '@_components/contact'
+import PageContainer from '@_components/layouts/PageContainer'
 
-import InputTextBox from '@/components/InputTextBox'
-import FormInputTextBox from '@/components/FormInputTextbox'
-import DirectContactButtons from '@/components/Contact/DirectContactButtons'
+/**
+ * Contact Page
+ *
+ * Enhanced contact page with elegant design, multiple contact methods,
+ * and improved user experience following FAANG-level best practices.
+ *
+ * **Features:**
+ * - Multiple contact methods (phone, email, live chat, form)
+ * - Real-time business hours and availability indicators
+ * - Scroll-triggered reveal animations
+ * - Mobile-first responsive design
+ * - Clear visual hierarchy and CTAs
+ * - WCAG 2.1 AA accessibility compliant
+ * - Analytics-ready architecture
+ *
+ * **Component Structure:**
+ * - ContactHeader: Page header with title and trust indicators
+ * - ContactMethods: Quick contact options (phone, email, chat)
+ * - ContactForm: Contact form for submitting inquiries
+ * - ContactInfo: Business hours and response time information
+ * - ContactSuccess: Success state after form submission
+ *
+ * @module contact/page
+ */
+export default function ContactPage() {
+	const [submitted, setSubmitted] = useState(false)
 
-const Page = () => {
-	const router = useRouter()
-	const formik = useFormik({
-		initialValues: new ContactRequest(),
-		onSubmit: (values) => {
-			submitContactRequest(values)
-		},
-	})
-	const [submitted, setSubmitted] = useState<boolean>(false)
-	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const loggedIn = useAccountStore((state) => state.LoggedIn)
-	const submitContactRequest = async (values: ContactRequest) => {
-		try {
-			setIsLoading(true)
-			const response = await API.Public.sendContactRequest(values)
-			if (response.data.statusCode == 200) {
-				setSubmitted(true)
-			}
-		} catch (err) {
-			console.error(err)
-		} finally {
-			setIsLoading(false)
-		}
+	// Success state with enhanced design
+	if (submitted) {
+		return <ContactSuccess />
 	}
-	const updateName = (key: keyof Name, newValue: string) => {
-		formik.setFieldValue(`name.${key}`, newValue)
-	}
-	const goToDashBoard = () => {
-		router.push(Routes.Signup.location)
-	}
+
 	return (
-		<div className='ContactUs'>
-			<h2 className='page-title'>
-				<strong>Have Questions Or Need Assistance?</strong>
-			</h2>
-			{loggedIn ? (
-				<p className='description'>
-					Check out the
-					<Link className='inline-link ml-2' href={'/#faq'}>
-						FAQ&apos;s
-					</Link>
-					!
-					<br />
-					Need to speak with a representative? As a valued member, you have access to a direct line to a
-					MedSource Pro representative at any time.
-				</p>
-			) : (
-				<p className='description'>
-					Check out the
-					<Link className='inline-link ml-2' href={'/#faq'}>
-						FAQ&apos;s
-					</Link>
-					!
-					<br />
-					Connect with a MedSource Pro Representative At Any Time By Becoming a Valued Member!
-				</p>
-			)}
-			<div className='page-body'>
-				<div className={classNames({ 'contact-request': true, 'logged-in': loggedIn })}>
-					{!submitted && (
-						<FormikProvider value={formik}>
-							<h2>Contact Us</h2>
-							<h3>Who&apos;s Requesting Contact?</h3>
-							<p className='subtitle my-2 text-center'>
-								Complete the form below and a staff member will contact you within 24 hours.
-							</p>
-							<Form onSubmit={formik.handleSubmit} className='FormContainer'>
-								<div className='gapped-fields'>
-									<InputTextBox
-										label='First Name'
-										type='text'
-										handleChange={(e) => updateName('first', e.currentTarget.value)}
-										value={formik.values.name.first}
-										className='faded-bg'
-									/>
-									<InputTextBox
-										label='Last Name'
-										type='text'
-										handleChange={(e) => updateName('last', e.currentTarget.value)}
-										value={formik.values.name.last}
-										className='faded-bg'
-									/>
-								</div>
-								<FormInputTextBox
-									label='Email Address'
-									name='emailAddress'
-									value={formik.values.emailAddress}
-									className='faded-bg'
-								/>
-								<div className='gapped-fields'>
-									<FormInputTextBox
-										label='Phone Number'
-										name='phoneNumber'
-										value={formik.values.phoneNumber}
-										className='faded-bg'
-									/>
-									<FormInputTextBox
-										label='Company Name'
-										name='companyName'
-										value={formik.values.companyName}
-										className='faded-bg'
-									/>
-								</div>
-								<FormInputTextBox
-									type='textarea'
-									rows={6}
-									label='Your Request Message:'
-									name='description'
-									value={formik.values.message}
-									className='faded-bg'
-								/>
-								<button
-									className='submit-btn'
-									onClick={() => formik.submitForm()}
-									title='Email Domain Required To Submit'>
-									Place Request
-								</button>
-							</Form>
-						</FormikProvider>
-					)}
-					{submitted && (
-						<div className='message-container'>
-							<div className='message-icon'>
-								<i className='fa-solid fa-envelope-circle-check' />
-							</div>
-							<h3>Contact Request Sent!</h3>
-							<p className='message'>
-								Thank you for reaching out to us. A staff member will contact you.
-							</p>
-							{!loggedIn && (
-								<>
-									<p className='sign-up'>
-										Become a valued member and get a direct line to our team. Sign up today!
-									</p>
-									<div className='button-container'>
-										<button onClick={() => goToDashBoard()}>Create Account</button>
-									</div>
-								</>
-							)}
-						</div>
-					)}
+		<div className='min-h-screen bg-base-100'>
+			<div
+				aria-hidden='true'
+				className='absolute inset-x-0 top-0 hidden h-[420px] -translate-y-1/2 bg-gradient-to-b from-base-content/5 via-transparent to-transparent blur-3xl md:block'
+			/>
+
+			<PageContainer className='relative max-w-7xl py-8 md:py-12 lg:py-16'>
+				<ContactHeader />
+
+				<div className='grid gap-8 lg:gap-12 lg:grid-cols-[1fr_1.2fr] mb-12 md:mb-16'>
+					<ContactMethods />
+
+					<ContactForm onSubmitSuccess={() => setSubmitted(true)} />
 				</div>
 
-				{loggedIn ? <DirectContactButtons /> : <></>}
-			</div>
+				<ContactInfo />
+			</PageContainer>
 		</div>
 	)
 }
-
-export default Page

@@ -1,691 +1,936 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@import '@/styles/components.css';
-@import '@/styles/normalize.css';
-@import '@/styles/fonts.css';
-@import '@/styles/common.css';
-@import '@/styles/animations.css';
-
-:root {
-	--bg-color: #fcfff7;
-	--section-bg-color: #f8f8f8;
-	--footer-color: #fcfff7;
-	--brand-color-1: #416706;
-	--brand-color-2: #4d7a07;
-	--brand-color-3: #355405;
-	--brand-color-4: #2a4204;
-	--brand-color-5: #1e2f03;
-	--link-color: #00008b;
-	--soft-brand-color: #f2fcef;
-	--soft-brand-color-hovered: FFDB9E;
-	--black-text-color: #393939;
-	--disabled-color: #949494;
-	--black: #000;
-	--highlight: #ffcc00;
-	--white: #fff;
-	--gray: #a1a1a1;
-	--light-gray: #d8d8d8;
-	--blue: rgb(15, 82, 186);
-	--darker-teal: #055541;
-	--teal: #06614a;
-
-	--toastify-color-error: #d22b2b !important;
-	--error-color: var(--toastify-color-error);
-	--error-color-tint: #520606;
-	--row-color: #fff;
-	--alternating-row-color: #f8f8f8;
-
-	--tooltip-background: rgba(0, 0, 0, 0.35);
-	--fz-xxs: 1.2rem;
-	--fz-xs: 1.3rem;
-	--fz-s: 1.4rem;
-	--fz-md: 1.6rem;
-	--fz-lg: 1.8rem;
-	--fz-xl: 2rem;
-	--fz-xxl: 2.2rem;
-	--fz-xxl: 2.5rem;
-	--fz-heading: 27px;
-	--border-radius: 4px;
-	--nav-height: 100px;
-	--nav-scroll-height: 70px;
-	--nav-title-width: 250px;
-	--easing: cubic-bezier(0.645, 0.045, 0.355, 1);
-	--font-mono: 'FiraCode', 'Courier New', Courier, monospace;
-	--font-sans: 'Roboto', 'FiraSans', Arial, Helvetica, -apple-system, system-ui, sans-serif;
-	--transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1);
-}
-
-/*////////////////////////////////////
-				Elements     
-//////////////////////////////////// */
-
-html {
-	box-sizing: border-box;
-	font-size: 62.5%;
-	scroll-behavior: smooth;
-	scrollbar-color: var(--dark-slate) var(--bg-color);
-	scrollbar-width: thin;
-	width: 100%;
-}
-/* .App {
-	overflow: hidden;
-} */
-main:has(> .App) {
-	height: 100vh;
-}
-
-main.page-container {
-	/* padding: 0 25px; */
-	overflow: hidden;
-	width: 100%;
-}
-
-::-webkit-scrollbar {
-	width: 12px;
-}
-::-webkit-scrollbar-track {
-	background: transparent;
-}
-::-webkit-scrollbar-thumb {
-	border-radius: 10px;
-	background-color: var(--light-gray);
-}
-
-*,
-:after,
-:before {
-	box-sizing: inherit;
-}
-
-::selection {
-	background: var(--highlight); /* Highlight background color */
-	color: var(--black); /* Highlight text color */
-}
-
-body {
-	font-size: var(--fz-lg);
-	color: var(--text-color);
-	background-color: var(--bg-color);
-	font-family: var(--font-sans);
-	width: 100%;
-	margin: 0;
-	line-height: 1.3;
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-font-smoothing: antialiased;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-	margin: 0px;
-	font-weight: 600;
-	color: var(--text-color);
-	line-height: 1.1;
-}
-.gradiant-text-brand {
-	background-image: linear-gradient(
-		90deg,
-		var(--darker-teal),
-		var(--teal),
-		var(--teal),
-		var(--brand-color-1),
-		var(--brand-color-1),
-		var(--brand-color-4),
-		var(--brand-color-4),
-		var(--brand-color-4)
-	);
-	background-clip: text;
-	-webkit-text-fill-color: transparent;
-	user-select: none;
-	background-size: 100%;
-	-webkit-background-clip: text;
-	-moz-background-clip: text;
-	-moz-text-fill-color: transparent;
-}
-
-a {
-	display: inline-block;
-	text-decoration: none;
-	text-decoration-skip-ink: auto;
-	color: inherit;
-	position: relative;
-	color: var(--black-text-color);
-	cursor: pointer;
-	transition: var(--transition);
-}
-
-a:hover,
-a:focus {
-	color: var(--link-color) !important;
-}
-
-.inline-link {
-	--inline-link-color: var(--brand-color-1);
-	color: var(--inline-link-color);
-	cursor: pointer;
-}
-.inline-link:hover,
-.inline-link:focus {
-	color: var(--inline-link-color) !important;
-}
-
-.inline-link:after {
-	background-color: var(--inline-link-color);
-	bottom: 0.1em;
-	content: '';
-	display: block;
-	height: 1px;
-	opacity: 0.5;
-	position: relative;
-	width: 0;
-	transition: var(--transition);
-}
-
-.inline-link:focus-visible:after,
-.inline-link:hover:after {
-	width: 100%;
-}
-
-a.button {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-	padding: 1em;
-	border: 1px solid;
-	border-radius: 4px;
-	text-align: center;
-	border-color: var(--gray);
-	color: var(--gray);
-	transition: var(--transition);
-}
-a.button:hover {
-	border-color: var(--brand-color-1) !important;
-	color: var(--brand-color-1) !important;
-}
-
-svg {
-	user-select: none;
-}
-
-button {
-	color: var(--bg-color);
-	background-color: var(--brand-color-1);
-	border-radius: var(--border-radius);
-	font-size: var(--fz-xs);
-	font-family: var(--font-sans);
-	line-height: 1;
-	text-decoration: none;
-	cursor: pointer;
-	transition: var(--transition);
-	padding: 1.25rem 1.75rem;
-}
-button.transparent {
-	background-color: transparent;
-	color: var(--brand-color-1);
-}
-
-button:disabled {
-	opacity: 0.7;
-	cursor: no-drop;
-}
-
-button.responsive-icon span {
-	display: none;
-}
-
-button.delete,
-button.error {
-	background-color: var(--error-color-tint);
-}
-
-button.primary {
-	background-color: var(--blue);
-}
-
-button.disabled {
-	background-color: var(--disabled-color);
-}
-
-button.remove {
-	background-color: var(--error-color-tint);
-}
-
-button.action {
-	color: var(--gray);
-	border: 1px solid var(--gray);
-}
-
-button.action:hover {
-	color: var(--gray);
-	background-color: var(--light-gray);
-	border: 1px solid var(--gray);
-}
-
-p {
-	font-size: clamp(1.4rem, 2vw, 1.6rem);
-	line-height: 1.4;
-}
-
-/*////////////////////////////////////
-				General     
-//////////////////////////////////// */
-
-.page-header {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	width: 100%;
-}
-
-.page-header button {
-	font-family: 'Inter', sans-serif;
-	align-self: flex-start;
-}
-
-.page-title {
-	font-size: 2.5rem;
-	font-family: 'Montserrat', sans-serif;
-	color: var(--brand-color-1);
-}
-
-.clickable {
-	cursor: pointer !important;
-}
-
-.header .navbar .clickable.titled.active i {
-	color: var(--brand-color-1) !important;
-}
-
-.two-line-limit {
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	-webkit-line-clamp: 2; /* Number of lines to show */
-}
-
-.three-line-limit {
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	-webkit-line-clamp: 3; /* Number of lines to show */
-}
-
-.nowrap {
-	text-wrap: nowrap;
-}
-
-.gapped-fields {
-	display: flex;
-	gap: 1.25em;
-}
-
-/*////////////////////////////////////
-				InputTextBox     
-//////////////////////////////////// */
-input:disabled {
-	background-color: var(--light-gray);
-	cursor: not-allowed;
-}
-.InputDropdown,
-.InputTextBox {
-	font-size: 1.6rem;
-	font-family: var(--font-sans);
-	font-weight: normal;
-	--input-color: var(--light-gray);
-	position: relative;
-}
-
-.InputTextBox label,
-.InputDropdown label {
-	font-size: 0.85em;
-	text-wrap: nowrap;
-	align-self: flex-start;
-	font-weight: bold;
-	color: var(--black-text-color);
-}
-
-.InputTextBox,
-.InputDropdown,
-.InputNumber {
-	width: fit-content;
-}
-
-.InputTextBox textarea,
-.InputTextBox input,
-.InputDropdown select {
-	border: 1px solid var(--input-color);
-	border-radius: var(--border-radius);
-	padding: 5px 10px;
-	font-size: 0.95em;
-	font-weight: 100;
-	width: 100%;
-	min-height: 35px;
-	color: var(--black-text-color);
-	transition: var(--transition);
-	height: 100%;
-}
-
-.InputTextBox:not(.disabled) textarea,
-.InputTextBox:not(.disabled) input,
-.InputDropdown select:not(:disabled) {
-	background: transparent !important;
-}
-
-.InputTextBox.disabled label,
-.InputDropdown.disabled label {
-	color: var(--disabled-color);
-}
-
-.InputTextBox.faded-bg input,
-.InputTextBox.faded-bg textarea {
-	background: rgba(200, 200, 200, 0.1) !important;
-}
-
-.InputTextBox:has(.error-message-container:not(:empty)) textarea,
-.InputTextBox:has(.error-message-container:not(:empty)) input,
-.InputDropdown:has(.error-message-container:not(:empty)) select {
-	border-color: var(--error-color);
-}
-
-.InputTextBox.primary,
-.InputTextBox.primary,
-.InputDropdown.primary {
-	--input-color: var(--brand-color-1);
-}
-
-.InputTextBox input:-webkit-autofill,
-.InputTextBox textarea:-webkit-autofill {
-	-webkit-text-fill-color: var(--text-color) !important;
-	transition: var(--transition), background-color 5000s ease-in-out 0s !important;
-}
-
-.InputTextBox textarea:focus,
-.InputTextBox textarea:focus-visible,
-.InputTextBox input:focus,
-.InputTextBox input:focus-visible,
-.InputDropdown select:focus,
-.InputDropdown select:focus-visible {
-	outline: none;
-}
-
-.InputTextBox:has(textarea:focus),
-.InputTextBox:has(textarea:focus-visible),
-.InputTextBox:has(input:focus),
-.InputTextBox:has(input:focus-visible),
-.InputDropdown:has(select:focus),
-.InputDropdown:has(select:focus-visible) {
-	--input-color: var(--brand-color-1);
-}
-
-.InputTextBox .error-message-container {
-	position: absolute;
-	top: 98%;
-	min-width: 99%;
-	max-width: 99%;
-	width: max-content;
-	background: var(--error-color);
-	padding: 5px 10px;
-	z-index: 1;
-	backdrop-filter: blur(1px);
-	animation: flipDown 0.1s ease-out forwards;
-	transition: var(--transition);
-}
-
-.InputTextBox .error-message-container:empty {
-	display: none;
-}
-
-.InputTextBox .error-message-container span.error-message {
-	font-size: 0.85em;
-	font-weight: bold;
-}
-.InputTextBox:has(.icon-container) input {
-	padding-left: 35px;
-}
-.InputTextBox .icon-container {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 30px;
-	height: 100%;
-	max-width: 30px;
-	position: absolute;
-	top: 50%;
-	transform: translateY(-50%);
-	color: var(--input-color);
-}
-.InputTextBox .icon-container::after {
-	content: '';
-	position: absolute;
-	right: 0;
-	height: 60%;
-	width: 1px;
-	background-color: var(--input-color);
-}
-
-/*////////////////////////////////////
-				InputDropdown     
-//////////////////////////////////// */
-.InputDropdown select {
-	cursor: pointer;
-}
-.InputDropdown option {
-	background-color: var(--section-bg-color);
-	padding: 6px 12px;
-}
-
-.InputDropdown option:not(.default-option):checked {
-	color: var(--brand-color-1);
-	background-color: var(--brand-color-1-tint);
-}
-
-/*////////////////////////////////////
-				InputCheckbox     
-//////////////////////////////////// */
-.InputCheckbox {
-	display: flex;
-	align-items: center;
-	gap: 5px;
-	justify-content: space-between;
-	width: max-content;
-	color: var(--black-text-color);
-	transition: var(--transition);
-}
-.InputCheckbox.checked,
-.InputCheckbox:hover {
-	color: var(--black);
-}
-.InputCheckbox input {
-	accent-color: var(--brand-color-3);
-	position: relative;
-	bottom: 1px;
-}
-
-/*////////////////////////////////////
-				TOOL TIPS   
-//////////////////////////////////// */
-.titled {
-	color: var(--black-text-color);
-	padding: 10px;
-	border: none;
-	position: relative;
-	font-family: var(--font-sans);
-}
-.titled:hover,
-.titled:focus {
-	color: var(--main-color);
-}
-.titled,
-.titled::after,
-.titled::after {
-	transition: var(--transition);
-	transition-duration: 0.2s;
-}
-
-.titled::after,
-.titled::after {
-	content: attr(data-title);
-	color: var(--black-text-color);
-	width: fit-content;
-	font-size: 1rem;
-	padding: 0.5em 0.75em;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	position: absolute;
-	top: 110%;
-	left: 50%;
-	transform: translateX(-50%);
-	background-color: var(--tooltip-background);
-	pointer-events: none;
-	user-select: none;
-	opacity: 0;
-	border-radius: var(--border-radius);
-	z-index: 10;
-}
-.titled:hover::after,
-.titled:focus::after {
-	opacity: 1;
-}
-/*////////////////////////////////////
-				FLOATING MENU   
-//////////////////////////////////// */
-
-.FloatingMenu {
-	position: relative;
-	font-size: 0.85em;
-	width: 100%;
-	user-select: none;
-	background: transparent;
-	transition: var(--transition);
-}
-
-.FloatingMenu .icon-container {
-}
-
-.FloatingMenu .icon-container {
-	border: 2px solid;
-	border-color: transparent;
-	border-radius: 50%;
-	aspect-ratio: 1/1;
-	width: 30px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	transition: var(--transition);
-}
-
-.FloatingMenu .icon-container:hover {
-	border-color: var(--brand-color-2);
-}
-.FloatingMenu.isOpen .icon-container {
-	border-radius: unset;
-	border-color: var(--brand-color-2);
-}
-
-.FloatingMenu .childrens-container {
-	border: 1px solid var(--brand-color-1);
-	background: var(--soft-brand-color);
-	box-sizing: border-box;
-	z-index: 1111111;
-	position: absolute;
-	right: 5px;
-	padding: 5px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 5px;
-}
-.FloatingMenu .childrens-container .option {
-	text-wrap: nowrap;
-	padding: 10px;
-	transition: var(--transition);
-	width: 100%;
-	text-align: left;
-	position: relative;
-}
-.FloatingMenu .childrens-container .option:not(:first-of-type)::before {
-	content: '';
-	position: absolute;
-	top: -3px;
-	width: 90%;
-	height: 1px;
-	background-color: var(--brand-color-1);
-}
-
-.FloatingMenu .childrens-container .option:hover {
-	background-color: var(--brand-color-3);
-	color: var(--bg-color);
-}
-
-.nude,
-.transparent-button {
-	display: flex;
-	flex-direction: row;
-	font-family: 'Inter', sans-serif;
-	padding: 10px 20px;
-	border: 2px solid #4167060d;
-	background-color: transparent;
-}
-
-.scroll-horizontal-container {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: flex-start; /* Adjust as needed */
-	gap: 20px;
-	margin-top: 50px;
-	overflow-x: auto;
-	white-space: nowrap; /* Ensures items stay in a single row */
-}
-
-.scroll-horizontal-container > * {
-	/* Optionally set a minimum width for each image container */
-	min-width: 200px; /* Adjust as needed */
-}
-
-.image-delete-button:hover {
-	/* scale */
-	transform: scale(1.1);
-}
-
-/*////////////////////////////////////
-				MEDIA QUERIES     
-//////////////////////////////////// */
-
-@media screen and (min-width: 480px) {
-}
-
-@media screen and (min-width: 600px) {
-}
-
-@media screen and (min-width: 768px) {
-	main.page-container {
-		overflow: auto;
-	}
-	button.responsive-icon {
-		gap: 7px;
-	}
-	button.responsive-icon span {
-		display: unset;
+@import 'tailwindcss';
+
+@plugin 'daisyui' {
+	themes: light --default, dark --prefersdark, corporate, sunset, winter, luxury;
+}
+
+/* Treat dark themes as dark variant
+ * IMPORTANT: Keep in sync with ThemeHelper.getDarkThemes()
+ * Dark themes: dark, luxury, sunset
+ * If you add a new dark theme to ThemeHelper, add its selector here too.
+ */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, [data-theme=luxury], [data-theme=luxury] *, [data-theme=sunset], [data-theme=sunset] *));
+
+@layer base {
+	/* ========================================
+	   CSS Custom Properties (Design Tokens)
+	   ======================================== */
+	:root {
+
+		/* Semantic Colors - Use DaisyUI theme tokens */
+		--toastify-color-error: oklch(var(--er));
+		--toastify-color-success: oklch(var(--su));
+		--toastify-color-warning: oklch(var(--wa));
+		--toastify-color-info: oklch(var(--in));
+		--error-color: oklch(var(--er));
+		--error-color-tint: oklch(var(--er) / 0.8);
+
+		/* UI Element Colors */
+		--tooltip-background: rgba(0, 0, 0, 0.35);
+
+		/* Typography Scale - Industry Best Practice (WCAG 2.1 Compliant)
+		 * Base: 16px (1rem) - WCAG recommended minimum for accessibility
+		 * All sizes use rem for scalability and user preference respect
+		 */
+		--fz-xs: 0.75rem;      /* 12px - Captions, fine print */
+		--fz-sm: 0.875rem;     /* 14px - Small text, labels, helper text */
+		--fz-base: 1rem;       /* 16px - Body text, default (WCAG minimum) */
+		--fz-lg: 1.125rem;     /* 18px - Large body, emphasized text */
+		--fz-xl: 1.25rem;      /* 20px - Small headings, subheadings */
+		--fz-2xl: 1.5rem;      /* 24px - Section headings */
+		--fz-3xl: 1.875rem;    /* 30px - Page subheadings */
+		--fz-4xl: 2.25rem;     /* 36px - Page headings */
+		--fz-5xl: 3rem;        /* 48px - Hero headings */
+		--fz-6xl: 3.75rem;     /* 60px - Display headings */
+		
+		/* Line Heights - Industry Standard */
+		--lh-tight: 1.25;      /* Headings */
+		--lh-normal: 1.5;      /* Body text */
+		--lh-relaxed: 1.75;    /* Long-form content */
+
+		/* Font Families */
+		--font-sans: 'Montserrat', 'Inter', 'Roboto', 'Fira Sans', -apple-system, BlinkMacSystemFont,
+			'Segoe UI', sans-serif;
+		--font-mono: 'Fira Code', 'Courier New', Courier, monospace;
+
+		/* Spacing & Layout */
+		--border-radius: 4px;
+		--nav-height: 96px;
+		--nav-scroll-height: 70px;
+		--nav-title-width: 250px;
+		
+		/* Sticky Positioning - Industry Best Practice */
+		--sticky-top-offset: var(--nav-height); /* Always matches navbar height */
+
+		/* Animation & Transitions */
+		--easing: cubic-bezier(0.645, 0.045, 0.355, 1);
+		--easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+		--easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+		--transition: all 0.25s var(--easing);
+		--transition-fast: all 0.15s var(--easing-smooth);
+		--transition-slow: all 0.4s var(--easing-smooth);
+
+		/* Skeleton Shimmer Colors - Theme-aware design tokens
+		 * Light mode: white shimmer for testing (on black background)
+		 * Testing configuration - will be reverted after testing
+		 */
+		--shimmer-color-start: rgba(255, 255, 255, 0);
+		--shimmer-color-low: rgba(255, 255, 255, 0.12);
+		--shimmer-color-mid: rgba(255, 255, 255, 0.20);
+		--shimmer-color-peak: rgba(255, 255, 255, 0.30);
+
+		/* Skeleton Background - Theme-aware design token
+		 * Light mode: black background for testing
+		 * Testing configuration - will be reverted after testing
+		 */
+		--skeleton-bg: #bbb;
 	}
 
-	/*////////////////////////////////////
-				SECTION PREVIEWER   
-//////////////////////////////////// */
+	/* ========================================
+	   Base HTML & Body Styles
+	   ======================================== */
+	html {
+		box-sizing: border-box;
+		font-size: 100%; /* 1rem = 16px - Industry standard, WCAG compliant */
+		scroll-behavior: smooth;
+		scrollbar-color: oklch(var(--b3)) transparent;
+		scrollbar-width: thin;
+		width: 100%;
+	}
+	
+	/* Disable smooth scrolling when reduced motion is enabled */
+	[data-reduced-motion="true"] {
+		scroll-behavior: auto;
+	}
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: inherit;
+	}
+
+	body {
+		font-family: var(--font-sans);
+		font-size: var(--fz-base); /* 16px - WCAG compliant base size */
+		color: oklch(var(--bc)); /* DaisyUI base-content */
+		background-color: oklch(var(--b1)); /* DaisyUI base-100 */
+		width: 100%;
+		margin: 0;
+		line-height: var(--lh-normal); /* 1.5 - Industry standard */
+		overflow-x: hidden;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	::selection {
+		background: oklch(var(--wa));
+		color: oklch(var(--wac));
+	}
+
+	/* ========================================
+	   Modern Animations - Industry Best Practices
+	   ======================================== */
+	
+	/* Fade In - Smooth entrance */
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	.animate-fade-in {
+		animation: fade-in 0.3s var(--easing-smooth);
+	}
+
+	/* Shake - Error feedback (Apple style) */
+	@keyframes shake {
+		0%, 100% {
+			transform: translateX(0);
+		}
+		10%, 30%, 50%, 70%, 90% {
+			transform: translateX(-4px);
+		}
+		20%, 40%, 60%, 80% {
+			transform: translateX(4px);
+		}
+	}
+
+	.animate-shake {
+		animation: shake 0.5s var(--easing);
+	}
+
+	/* Pulse - Loading/attention */
+	@keyframes pulse-smooth {
+		0%, 100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.6;
+		}
+	}
+
+	.animate-pulse-smooth {
+		animation: pulse-smooth 2s var(--easing-smooth) infinite;
+	}
+
+	/* Scale In - Modern entrance */
+	@keyframes scale-in {
+		from {
+			transform: scale(0.95);
+			opacity: 0;
+		}
+		to {
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+
+	.animate-scale-in {
+		animation: scale-in 0.2s var(--easing-smooth);
+	}
+
+	/* Slide Up - Elegant reveal */
+	@keyframes slide-up {
+		from {
+			transform: translateY(10px);
+			opacity: 0;
+		}
+		to {
+			transform: translateY(0);
+			opacity: 1;
+		}
+	}
+
+	.animate-slide-up {
+		animation: slide-up 0.3s var(--easing-smooth);
+	}
+
+	/* Elegant Reveal - FAANG-level scroll animation (Apple/Stripe/Linear inspired)
+	 * Combines fade, slide-up, subtle scale, and blur for premium feel
+	 * Multi-stage animation creates sophisticated, polished appearance
+	 * 
+	 * Key improvements for natural, fluid feel:
+	 * - Snappier duration (600ms vs 750ms) - Apple typically uses 400-600ms
+	 * - Spring-like easing for organic motion
+	 * - Smooth opacity curve to prevent harsh fades
+	 * - Progressive blur removal for depth perception
+	 */
+	@keyframes elegant-reveal {
+		0% {
+			transform: translateY(20px) scale(0.95);
+			opacity: 0;
+			filter: blur(8px);
+		}
+		40% {
+			opacity: 0.4;
+			filter: blur(4px);
+		}
+		70% {
+			opacity: 0.9;
+			filter: blur(1px);
+		}
+		100% {
+			transform: translateY(0) scale(1);
+			opacity: 1;
+			filter: blur(0);
+		}
+	}
+
+	.animate-elegant-reveal {
+		animation: elegant-reveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+		/* Premium spring-like easing: Creates natural bounce-in feel */
+		/* cubic-bezier(0.34, 1.56, 0.64, 1) - Apple-inspired spring curve */
+		/* Duration: 0.6s for snappier, more responsive feel (FAANG standard) */
+		/* Overshoots slightly (1.56) then settles - creates organic, fluid motion */
+	}
+
+	/* Reduced motion: accessibility compliance (WCAG 2.1)
+	 * Industry best practice (Apple, Google, Microsoft):
+	 * - REDUCE animations (not remove completely)
+	 * - Disable auto-play
+	 * - Preserve functional animations
+	 * - Allow component-level handling
+	 */
+	@media (prefers-reduced-motion: reduce) {
+		/* Elegant reveal: simple fade (no complex motion) */
+		.animate-elegant-reveal {
+			animation: fade-in 0.2s var(--easing-smooth) forwards;
+			filter: none;
+		}
+		
+		/* Global reductions: fast but visible (Apple standard: 0.2-0.3s) */
+		/* Allow component-specific animations to override by not using !important */
+		*:not(.carousel-banner-animated) {
+			animation-duration: 0.3s;
+			animation-iteration-count: 1;
+			transition-duration: 0.15s;
+			scroll-behavior: auto;
+		}
+		
+		/* Decorative animations: remove completely */
+		.animate-shake,
+		.animate-pulse-smooth,
+		.animate-scale-in,
+		.animate-slide-up {
+			animation: none;
+		}
+		
+		/* Tailwind built-in animations: Reduce appropriately */
+		.animate-pulse {
+			animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* Slower pulse */
+		}
+		
+		/* Functional animations: Keep but slow down */
+		.animate-spin {
+			animation-duration: 1.5s; /* Slower spin (was 1s) */
+		}
+		
+		/* Attention-getting: Remove */
+		.animate-ping,
+		.animate-bounce {
+			animation: none;
+		}
+		
+		/* Carousel: Let component handle its own reduced motion (doubles duration) */
+		/* The carousel's built-in handling already slows it down appropriately */
+	}
+	
+	/* User override for reduced motion (data attribute) */
+	[data-reduced-motion="true"] {
+		/* Elegant reveal: simple fade */
+		.animate-elegant-reveal {
+			animation: fade-in 0.2s var(--easing-smooth) forwards;
+			filter: none;
+		}
+		
+		/* Global reductions: fast but visible */
+		*:not(.carousel-banner-animated) {
+			animation-duration: 0.3s;
+			animation-iteration-count: 1;
+			transition-duration: 0.15s;
+			scroll-behavior: auto;
+		}
+		
+		/* Decorative animations: remove */
+		.animate-shake,
+		.animate-pulse-smooth,
+		.animate-scale-in,
+		.animate-slide-up {
+			animation: none;
+		}
+		
+		/* Tailwind built-in animations: Reduce appropriately */
+		.animate-pulse {
+			animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* Slower pulse */
+		}
+		
+		/* Functional animations: Keep but slow down */
+		.animate-spin {
+			animation-duration: 1.5s; /* Slower spin (was 1s) */
+		}
+		
+		/* Attention-getting: Remove */
+		.animate-ping,
+		.animate-bounce {
+			animation: none;
+		}
+		
+		/* Carousel: Let component handle its own reduced motion */
+	}
+
+	/* ========================================
+	   Typography Defaults - Industry Best Practice
+	   ======================================== */
+	h1 {
+		font-size: var(--fz-4xl); /* 36px */
+		font-weight: 700;
+		line-height: var(--lh-tight);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
+		margin: 0;
+	}
+
+	h2 {
+		font-size: var(--fz-3xl); /* 30px */
+		font-weight: 600;
+		line-height: var(--lh-tight);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
+		margin: 0;
+	}
+
+	h3 {
+		font-size: var(--fz-2xl); /* 24px */
+		font-weight: 600;
+		line-height: var(--lh-tight);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
+		margin: 0;
+	}
+
+	h4 {
+		font-size: var(--fz-xl); /* 20px */
+		font-weight: 600;
+		line-height: var(--lh-tight);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
+		margin: 0;
+	}
+
+	h5, h6 {
+		font-size: var(--fz-lg); /* 18px */
+		font-weight: 600;
+		line-height: var(--lh-tight);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
+		margin: 0;
+	}
+
+	p {
+		font-size: var(--fz-base); /* 16px */
+		line-height: var(--lh-normal);
+		margin: 0;
+	}
+
+	/* ========================================
+	   Form Field Focus Styles - Industry Best Practice
+	   ======================================== */
+	
+	/**
+	 * Remove default browser outline from form inputs and selects.
+	 * Our custom components provide elegant focus rings via formFieldStyles.
+	 * 
+	 * **Accessibility Note:**
+	 * - We use :focus-visible for keyboard navigation (WCAG 2.1 best practice)
+	 * - Custom focus rings are provided via Tailwind classes in formFieldStyles
+	 * - This ensures consistent, elegant focus indicators across all form fields
+	 * 
+	 * **Implementation:**
+	 * - Removes default browser outline (often inconsistent across browsers)
+	 * - Our Input and Select components handle focus styling via shared formFieldStyles
+	 * - Maintains accessibility with custom focus rings (ring-2, ring-primary/20)
+	 */
+	select:focus,
+	select:focus-visible,
+	select:focus-within,
+	input:focus,
+	input:focus-visible,
+	input:focus-within {
+		outline: none !important;
+	}
+
+	/* ========================================
+	   Interactive Elements
+	   ======================================== */
+	a {
+		display: inline-block;
+		position: relative;
+		color: inherit;
+		text-decoration: none;
+		text-decoration-skip-ink: auto;
+		transition: var(--transition);
+	}
+
+	/* Links inherit hover behavior from DaisyUI's .link class */
+	a:hover,
+	a:focus {
+		opacity: 0.8;
+	}
+
+	/* ========================================
+	   Modern Button System
+	   ======================================== */
+
+	/* Base Button Reset & Foundation */
+	button {
+		font-family: var(--font-sans);
+		font-size: var(--fz-base); /* 16px - Industry standard */
+		font-weight: 500;
+		line-height: var(--lh-normal);
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.2s ease-in-out;
+		text-align: center;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.875rem 1.5rem;
+		position: relative;
+		overflow: hidden;
+		user-select: none;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	/* Primary Button (Default Brand) - Theme Aware */
+	button:not([class*="btn-"]):not([class*="transparent"]):not([class*="action"]):not([class*="outline"]):not([class*="ghost"]):not([class*="link"]) {
+		background: linear-gradient(135deg, oklch(var(--p)), oklch(var(--s)));
+		color: oklch(var(--pc));
+		box-shadow: 0 2px 8px oklch(var(--p) / 0.2);
+	}
+
+	button:not([class*="btn-"]):not([class*="transparent"]):not([class*="action"]):not([class*="outline"]):not([class*="ghost"]):not([class*="link"]):hover {
+		background: linear-gradient(135deg, oklch(var(--s)), oklch(var(--a)));
+		box-shadow: 0 4px 12px oklch(var(--p) / 0.3);
+		transform: translateY(-1px);
+	}
+
+	button:not([class*="btn-"]):not([class*="transparent"]):not([class*="action"]):not([class*="outline"]):not([class*="ghost"]):not([class*="link"]):active {
+		transform: translateY(0);
+		box-shadow: 0 1px 4px oklch(var(--p) / 0.2);
+	}
+
+	button:focus-visible {
+		outline: 3px solid oklch(var(--p));
+		outline-offset: 2px;
+	}
+
+	button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		transform: none !important;
+		box-shadow: none !important;
+	}
+
+	/* Button Variants */
+	button.outline {
+		background: transparent;
+		color: oklch(var(--p));
+		border: 2px solid oklch(var(--p));
+		box-shadow: none;
+	}
+
+	button.outline:hover {
+		background: oklch(var(--p) / 0.1);
+		border-color: oklch(var(--s));
+		color: oklch(var(--s));
+	}
+
+	button.ghost {
+		background: transparent;
+		color: oklch(var(--bc));
+		box-shadow: none;
+	}
+
+	button.ghost:hover {
+		background: oklch(var(--p) / 0.1);
+		color: oklch(var(--p));
+	}
+
+	button.transparent {
+		background: transparent;
+		color: oklch(var(--bc));
+		box-shadow: none;
+		padding: 0.5rem 1rem;
+	}
+
+	button.transparent:hover {
+		background: oklch(var(--bc) / 0.05);
+	}
+
+	button.link {
+		background: none;
+		color: oklch(var(--p));
+		padding: 0;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		box-shadow: none;
+	}
+
+	button.link:hover {
+		color: oklch(var(--s));
+		text-decoration-thickness: 2px;
+	}
+
+	/* Button Sizes - Industry Standard */
+	button.btn-xs {
+		padding: 0.5rem 0.875rem;
+		font-size: var(--fz-sm); /* 14px */
+	}
+
+	button.btn-sm {
+		padding: 0.625rem 1.125rem;
+		font-size: var(--fz-sm); /* 14px */
+	}
+
+	button.btn-lg {
+		padding: 1rem 1.75rem;
+		font-size: var(--fz-lg); /* 18px */
+	}
+
+	button.btn-xl {
+		padding: 1.25rem 2.25rem;
+		font-size: var(--fz-xl); /* 20px */
+		font-weight: 600;
+	}
+
+	/* Icon Buttons */
+	button.btn-circle,
+	button.btn-square {
+		padding: 0.75rem;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		min-width: 40px;
+		min-height: 40px;
+	}
+
+	button.btn-square {
+		border-radius: 8px;
+	}
+
+	/* Icon Button Color Fix - Ensure proper contrast - Theme Aware */
+	button.btn-circle:not(.ghost):not(.transparent):not(.outline),
+	button.btn-square:not(.ghost):not(.transparent):not(.outline) {
+		background: linear-gradient(135deg, oklch(var(--p)), oklch(var(--s)));
+		color: oklch(var(--pc));
+	}
+
+	button.btn-circle.ghost,
+	button.btn-square.ghost,
+	button.btn-circle.transparent,
+	button.btn-square.transparent {
+		background: transparent;
+		color: oklch(var(--p));
+	}
+
+	button.btn-circle.ghost:hover,
+	button.btn-square.ghost:hover {
+		background: oklch(var(--p) / 0.1);
+		color: oklch(var(--s));
+	}
+
+	/* Button Groups */
+	.btn-group {
+		display: inline-flex;
+		gap: 0;
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.btn-group button {
+		border-radius: 0;
+		margin: 0;
+	}
+
+	.btn-group button:first-child {
+		border-top-left-radius: 8px;
+		border-bottom-left-radius: 8px;
+	}
+
+	.btn-group button:last-child {
+		border-top-right-radius: 8px;
+		border-bottom-right-radius: 8px;
+	}
+
+	.btn-group button:not(:last-child) {
+		border-right: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
+	/* Loading State */
+	button.loading {
+		position: relative;
+		pointer-events: none;
+		opacity: 0.7;
+	}
+
+	/* ========================================
+	   Form Elements - Modern Styling
+	   ======================================== */
+
+	input[type='text'],
+	input[type='email'],
+	input[type='password'],
+	input[type='number'],
+	input[type='tel'],
+	input[type='url'],
+	input[type='search'],
+	textarea {
+		font-family: var(--font-sans);
+		transition: var(--transition-fast);
+	}
+
+	/* Removed transform scale on focus - no animation/transformation on focus */
+	/* Focus styling is handled by formFieldStyles for consistent, elegant appearance */
+
+	/* Modern Select Styling - Enhanced */
+	select {
+		background-image: linear-gradient(45deg, transparent 50%, oklch(var(--bc) / 0.5) 50%),
+			linear-gradient(135deg, oklch(var(--bc) / 0.5) 50%, transparent 50%);
+		background-position: calc(100% - 20px) calc(1em + 2px),
+			calc(100% - 15px) calc(1em + 2px);
+		background-size: 5px 5px, 5px 5px;
+		background-repeat: no-repeat;
+		padding-right: 2.5rem !important;
+		}
+
+	select:hover {
+		background-image: linear-gradient(45deg, transparent 50%, oklch(var(--p) / 0.7) 50%),
+			linear-gradient(135deg, oklch(var(--p) / 0.7) 50%, transparent 50%);
+	}
+
+	/* ========================================
+	   Floating Menu Component (Tooltips, Dropdowns)
+	   ======================================== */
+	.FloatingMenu {
+		position: absolute;
+		border: 1px solid oklch(var(--b3));
+		background: oklch(var(--b1));
+		box-shadow: 0 4px 20px oklch(var(--b3) / 0.3);
+		border-radius: 8px;
+		padding: 0.5rem;
+		z-index: 1000;
+		font-size: var(--fz-sm);
+		backdrop-filter: blur(8px);
+	}
+
+	/* ========================================
+	   Text & Display Utilities
+	   ======================================== */
+	.clickable {
+		cursor: pointer !important;
+	}
+
+	.nowrap {
+		white-space: nowrap;
+	}
+
+	/* Multi-line Text Truncation */
+	.two-line-limit,
+	.three-line-limit {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.two-line-limit {
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+	}
+
+	.three-line-limit {
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+	}
+
+	/* ========================================
+	   Layout Utilities
+	   ======================================== */
+	.gapped-fields {
+		display: flex;
+		gap: 1.25em;
+	}
+
+	/* ========================================
+	   Tooltip Component
+	   ======================================== */
+	.titled {
+		position: relative;
+		padding: 10px;
+		border: none;
+		font-family: var(--font-sans);
+		color: oklch(var(--bc)); /* DaisyUI base-content */
+		transition: var(--transition);
+	}
+
+	.titled::after {
+		content: attr(data-title);
+		position: absolute;
+		top: 110%;
+		left: 50%;
+		transform: translateX(-50%) scale(0.9);
+		padding: 8px 12px;
+		background: var(--tooltip-background);
+		color: white;
+		font-size: var(--fz-sm);
+		border-radius: 6px;
+		white-space: nowrap;
+		opacity: 0;
+		pointer-events: none;
+		transition: var(--transition-fast);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		backdrop-filter: blur(8px);
+	}
+
+	.titled:hover::after,
+	.titled:focus::after {
+		opacity: 1;
+		transform: translateX(-50%) scale(1);
+	}
+
+	/* ========================================
+	   Page Layout Components
+	   ======================================== */
+	.page-header {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+	}
+
+	.page-header button {
+		align-self: flex-start;
+	}
+
+	.page-title {
+		font-family: 'Montserrat', var(--font-sans);
+		font-size: clamp(var(--fz-3xl), 5vw, var(--fz-5xl)); /* 30px - 48px responsive */
+		color: oklch(var(--bc)); /* DaisyUI base-content */
+		line-height: var(--lh-tight);
+	}
+
+	.inline-link {
+		position: relative;
+		display: inline-block;
+		padding: 0;
+		font-weight: 500;
+		background-color: transparent;
+		transition: var(--transition);
+		color: oklch(var(--p)); /* DaisyUI primary */
+	}
+
+	.inline-link::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0.1em;
+		height: 1px;
+		background-color: oklch(var(--p)); /* DaisyUI primary */
+		opacity: 0.5;
+		width: 0;
+		transition: var(--transition);
+	}
+
+	.inline-link:focus-visible::after,
+	.inline-link:hover::after {
+		width: 100%;
+}
 }
 
-@media screen and (min-width: 1024px) {
+/* ============================================================
+ * SKELETON LOADING ANIMATIONS - Tailwind v4 + DaisyUI 5 Compatible
+ * ============================================================
+ * 
+ * Triple-layer animation system for FAANG-standard loading states
+ * Keyframes first, then utilities in @layer utilities
+ */
+
+/* Keyframe Definitions - Must be at root level */
+@keyframes skeleton-pulse {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
 }
 
-@media screen and (min-width: 1080px) {
+@keyframes skeleton-shimmer-wave {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+@keyframes skeleton-glow {
+	0%, 100% {
+		filter: brightness(1);
+	}
+	50% {
+		filter: brightness(1.05);
+	}
+}
+
+/* Dark mode shimmer color overrides - Root level for proper cascade
+ * Uses black shimmer for visibility on white backgrounds (opposite of light mode)
+ * Industry best practice: darker shimmer on light backgrounds
+ * Matches DaisyUI theme system via data-theme attribute (dark themes)
+ * 
+ * IMPORTANT: Keep in sync with ThemeHelper.getDarkThemes()
+ * Dark themes: dark, luxury, sunset
+ * If you add a new dark theme to ThemeHelper, add its selector here too.
+ */
+[data-theme=dark],
+[data-theme=luxury],
+[data-theme=sunset] {
+	--shimmer-color-start: rgba(0, 0, 0, 0);
+	--shimmer-color-low: rgba(0, 0, 0, 0.12);
+	--shimmer-color-mid: rgba(0, 0, 0, 0.20);
+	--shimmer-color-peak: rgba(0, 0, 0, 0.30);
+	
+	/* Dark mode: white background (opposite of light mode) */
+	--skeleton-bg: rgba(255, 255, 255, 0.2);
+}
+
+/* Utility Classes in @layer utilities for proper cascade */
+@layer utilities {
+	.skeleton-shimmer {
+		position: relative !important;
+		overflow: hidden !important;
+		/* Uses theme-aware skeleton background for optimal shimmer visibility */
+		background: var(--skeleton-bg) !important;
+		animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite, skeleton-glow 2s ease-in-out infinite !important;
+		will-change: opacity, filter !important;
+	}
+	
+	/* Shimmer gradient - DRY implementation using CSS custom properties
+	 * Single gradient definition that adapts to theme via CSS variables
+	 * Gradient structure: symmetric wave with peak at center (50%)
+	 * Stops: 0% → 20% → 40% → 50% → 60% → 80% → 100%
+	 * Industry best practice: reusable gradient pattern with theme-aware colors
+	 */
+	.skeleton-shimmer::after {
+		content: '' !important;
+		position: absolute !important;
+		inset: 0 !important;
+		background: linear-gradient(
+			90deg,
+			var(--shimmer-color-start) 0%,
+			var(--shimmer-color-low) 20%,
+			var(--shimmer-color-mid) 40%,
+			var(--shimmer-color-peak) 50%,
+			var(--shimmer-color-mid) 60%,
+			var(--shimmer-color-low) 80%,
+			var(--shimmer-color-start) 100%
+		) !important;
+		animation: skeleton-shimmer-wave 2s ease-in-out infinite !important;
+		will-change: transform !important;
+		z-index: 1 !important;
+	}
+	
+	/* Reduced motion preference - skeleton loaders */
+	@media (prefers-reduced-motion: reduce) {
+		.skeleton-shimmer {
+			animation: skeleton-pulse 3s ease-in-out infinite;
+		}
+		
+		.skeleton-shimmer::after {
+			animation: none;
+			opacity: 0.3;
+		}
+	}
+	
+	/* User override */
+	[data-reduced-motion="true"] .skeleton-shimmer {
+		animation: skeleton-pulse 3s ease-in-out infinite;
+	}
+	
+	[data-reduced-motion="true"] .skeleton-shimmer::after {
+		animation: none;
+		opacity: 0.3;
+	}
+
+	/* Scrollbar Hide - Hide scrollbar while maintaining scroll functionality */
+	.scrollbar-hide {
+		-ms-overflow-style: none !important;  /* IE and Edge */
+		scrollbar-width: none !important;  /* Firefox */
+	}
+
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none !important;  /* Chrome, Safari, Opera */
+	}
 }

@@ -1,0 +1,8 @@
+{
+	"name": "eslint-plugin-custom-rules",
+	"version": "1.0.0",
+	"description": "Custom ESLint rules for MedSource Pro",
+	"main": "index.js",
+	"private": true
+}
+

@@ -1,172 +1,67 @@
+/**
+ * @fileoverview Store Catalog Page
+ * 
+ * Public-facing store catalog with product browsing, search, filtering, and pagination.
+ * Implements FAANG-level best practices for performance, accessibility, and user experience.
+ * 
+ * **Refactored Architecture:**
+ * - Business logic extracted to `useStorePageLogic` hook
+ * - UI components separated into focused, reusable components
+ * - Container/Presentational pattern for clean separation
+ * - Simplified page component (orchestration only)
+ * 
+ * **Key Features:**
+ * - Real-time search with debouncing
+ * - Category filtering with multi-select
+ * - Sort options (relevance, price, name, date)
+ * - Responsive grid layout (1-3 columns)
+ * - Pagination controls with "load more"
+ * - Skeleton loading states
+ * - Focus management for accessibility
+ * - Request cancellation (AbortController)
+ * 
+ * **Performance Optimizations:**
+ * - Memoized computed values
+ * - Memoized event handlers
+ * - Debounced search (400ms)
+ * - Priority image loading
+ * - Request deduplication
+ * 
+ * @module pages/store
+ * @category Pages
+ */
+
 'use client'
 
-import '@/styles/pages/store.css'
-import React, { useEffect, useState, useMemo } from 'react'
+import { StorePageContainer } from '@_components/store'
 
-import ProductsCategory, { sanitizeCategoriesList } from '@/classes/ProductsCategory'
-import { Product } from '@/classes/Product'
-import TreeSelect from '@/components/TreeSelect'
-import ProductsList from '@/components/Store/ProductsList'
-import { GenericSearchFilter } from '@/classes/Base/GenericSearchFilter'
-import { isEmpty } from 'lodash'
-import API from '@/services/api'
-import { toast } from 'react-toastify'
-import debounce from 'lodash/debounce'
-import { PagedResult } from '@/classes/Base/PagedResult'
-import { useRouter, useSearchParams } from 'next/navigation'
+// Removed force-dynamic - Client Components are already fully dynamic by default.
+// Removed Suspense - not needed for Client Components that fetch data with hooks.
+// Loading states are managed by isLoading state in useStorePageLogic hook.
 
-const Page = () => {
-	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const [hasMore, setHasMore] = useState<boolean>(true)
-
-	const [products, setProducts] = useState<Product[]>([])
-	const [searchCriteria, setSearchCriteria] = useState<GenericSearchFilter>(
-		new GenericSearchFilter({ pageSize: 50, includes: ['Files', 'Provider'] })
-	)
-	const [selectedCategories, setSelectedCategories] = useState<ProductsCategory[]>([])
-	const [categories, setCategories] = useState<ProductsCategory[]>([])
-	const [searchText, setSearchText] = useState<string>('')
-	const [ productsResult, setProductsResult ] = useState<PagedResult<Product>>(new PagedResult<Product>())
-	const router = useRouter()
-	const searchParams = useSearchParams()
-
-	const hasMoreProducts = useMemo(() => productsResult.pageSize < productsResult.total, [productsResult])
-
-	const fetchCategories = async (): Promise<ProductsCategory[]> => {
-		try {
-			const { data: response } = await API.Store.Products.getAllCategories()
-
-			if (!response.payload || response.statusCode !== 200) {
-				toast.error(response.message)
-				return []
-			}
-			const sanitizedCategories: ProductsCategory[] = sanitizeCategoriesList(response.payload)
-			setIsLoading(false)
-			setCategories(sanitizedCategories)
-
-			return sanitizedCategories
-		} catch (err: any) {
-			toast.error(err.message)
-			return []
-		}
-	}
-
-	const retrieveProducts = async (criteria: GenericSearchFilter): Promise<Product[]> => {
-		try {
-			setIsLoading(true)
-			if (!isEmpty(searchText) && searchText.length > 2) {
-				criteria.add('Name', searchText)
-			} else {
-				criteria.clear('Name')
-			}
-
-			if (selectedCategories.length > 0) {
-				const categoryIds = selectedCategories.map((cat) => cat.id).join('|')
-				criteria.add('CategorieIds', categoryIds)
-			} else {
-				criteria.clear('CategorieIds')
-			}
-
-			//criteria.add("CategorieIds", "11")
-			const { data: res } = await API.Store.Products.searchPublic(criteria)
-
-			if (!res.payload || res.statusCode !== 200) {
-				setHasMore(false)
-				toast.error(res.message)
-				return []
-			}
-			const newListOfProducts = res.payload.data.map((p) => new Product(p))
-			setHasMore(res.payload.data.length > 0)
-			setProducts(newListOfProducts)
-			setProductsResult(res.payload)
-			setIsLoading(false)
-
-			return newListOfProducts
-		} catch (err: any) {
-			toast.error(err.message)
-			return []
-		}
-	}
-	const handleCategorySelection = (toggledCategory: ProductsCategory) => {
-		setSelectedCategories((prevSelectedItems) => {
-			const alreadySelected = prevSelectedItems.some((item) => item.id === toggledCategory.id)
-
-			if (alreadySelected) {
-				// If unselecting, remove the parent and all its children
-				const filteredItems = prevSelectedItems.filter((item) => {
-					const isChild = item.parentCategoryId === toggledCategory.id
-					const isParent = item.id === toggledCategory.id
-					return !isChild && !isParent
-				})
-				return filteredItems
-			} else {
-				// If selecting, remove the parent's children and add the parent
-				const filteredItems = prevSelectedItems.filter((item) => item.parentCategoryId !== toggledCategory.id)
-				return [...filteredItems, toggledCategory]
-			}
-		})
-	}
-
-	useEffect(() => {
-		fetchCategories()
-	}, [])
-
-	useEffect(() => {
-		const querySearchText = searchParams.get('search') // Retrieve 'search' query parameter
-		if (querySearchText) {
-			setSearchText(querySearchText)
-
-			// Remove 'search' query parameter from the URL
-			const params = new URLSearchParams(searchParams.toString())
-			params.delete('search')
-			const newQueryString = params.toString()
-			const newUrl = newQueryString ? `?${newQueryString}` : ''
-
-			router.replace(`/store${newUrl}`)
-		}
-	}, [searchParams])
-
-	useEffect(() => {
-		const debouncedTime = setTimeout(async () => {
-			retrieveProducts(searchCriteria)
-		}, 300)
-
-		return () => clearTimeout(debouncedTime)
-	}, [searchText, selectedCategories])
-
-	const setSearch = () => {
-		const updatedCriteria = new GenericSearchFilter({
-			...searchCriteria,
-			pageSize: searchCriteria.pageSize + 25,
-		})
-		setSearchCriteria(updatedCriteria)
-		retrieveProducts(updatedCriteria)
-	}
-	const handleSearchQuery = (searchQuery: string) => {
-		setSearchText(searchQuery)
-	}
-	return (
-		<div className='Store'>
-			<h2 className='page-title'>
-				<strong>Store</strong>
-			</h2>
-			<div className='CategoriesMenu'>
-				<TreeSelect<ProductsCategory>
-					list={categories}
-					label='name'
-					childKey='subCategories'
-					onItemSelected={handleCategorySelection}
-				/>
-			</div>
-			<ProductsList
-				list={products}
-				searchText={searchText}
-				onSearch={handleSearchQuery}
-				hasMoreProducts={hasMoreProducts}
-				getMoreProducts={setSearch}
-			/>
-		</div>
-	)
-}
+/**
+ * Store catalog page component
+ * 
+ * **Simplified Implementation:**
+ * All business logic and state management is handled by:
+ * - `useStorePageLogic` hook (in @_features/store)
+ * - `StorePageContainer` component (in @_components/store)
+ * 
+ * This page is a thin wrapper that renders the store container.
+ * Loading states are managed by the `isLoading` state in the hook.
+ * 
+ * **Next.js 15 Note:**
+ * Client Component pages don't receive params/searchParams as props.
+ * All URL state is handled client-side via hooks (useSearchParams, useRouter).
+ * 
+ * **Component Breakdown:**
+ * - `StoreHeader`: Page title and description
+ * - `UnifiedStoreToolbar`: Search, sort, filter controls
+ * - `StoreFilters`: Category filter sidebar
+ * - `StoreProductGrid`: Products display with pagination
+ * 
+ * @component
+ */
+const Page = () => <StorePageContainer />
 
 export default Page
