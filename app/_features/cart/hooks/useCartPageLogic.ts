@@ -42,7 +42,7 @@ import { Product, CartProduct } from '@_classes/Product'
 import Quote from '@_classes/Quote'
 import type { IUser } from '@_classes/User'
 
-import { useCartStore, type CartItem } from '../stores/useCartStore'
+import { useCartStore, useHydratedCart, type CartItem } from '../stores/useCartStore'
 
 import type { UseFormReturn } from 'react-hook-form'
 
@@ -57,6 +57,7 @@ export interface UseCartPageLogicReturn {
 	isFetchingProducts: boolean
 	submitted: boolean
 	form: UseFormReturn<QuoteFormData>
+	isHydrated: boolean // True when cart has loaded from localStorage
 	
 	// Auth state
 	isAuthenticated: boolean
@@ -129,8 +130,9 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 	const user = useAuthStore((state) => state.user)
 	
-	// Cart state
-	const cart = useCartStore((state) => state.cart)
+	// Cart state with hydration awareness
+	// This ensures cart displays correctly after SSR hydration
+	const { cart, isHydrated } = useHydratedCart()
 	const updateCartQuantity = useCartStore((state) => state.updateCartQuantity)
 	const removeFromCart = useCartStore((state) => state.removeFromCart)
 	const clearCart = useCartStore((state) => state.clearCart)
@@ -237,7 +239,9 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 			const formItems = cart.map((item) => ({
 				productId: item.productId,
 				quantity: item.quantity,
-				price: item.price ?? 0.01, // Placeholder price for validation (not used in actual quote)
+				// Use || instead of ?? because price is 0 in quote-based model (not null/undefined)
+				// The schema requires positive price, so we use a placeholder for validation only
+				price: item.price || 0.01, // Placeholder price for validation (not used in actual quote)
 			}))
 			form.setValue('items', formItems)
 		} else {
@@ -317,6 +321,8 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 				: ''
 
 			// Construct a proper Quote object with all form values
+			// Note: createdAt is set to now() as a client-side timestamp for new quotes
+			// The backend will override this with its own server-side timestamp
 			const quoteData = new Quote({
 				name: contactName,
 				companyName,
@@ -324,6 +330,7 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 				phoneNumber: user?.phone ?? '',
 				products: quoteItems,
 				description: values.notes ?? '',
+				createdAt: new Date(), // Required field - backend will set authoritative timestamp
 				// Convert string date back to Date object if needed
 				...(values.validUntil && { validUntil: serializeDate(values.validUntil) }),
 			})
@@ -401,6 +408,7 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 		isFetchingProducts,
 		submitted,
 		form,
+		isHydrated, // Indicates if cart has been loaded from localStorage
 		
 		// Auth state
 		isAuthenticated,

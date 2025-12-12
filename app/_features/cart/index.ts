@@ -17,7 +17,7 @@
 // STORE (Client-Only - has 'use client')
 // ============================================================================
 
-export { useCartStore, type CartItem } from './stores/useCartStore'
+export { useCartStore, useHydratedCart, type CartItem } from './stores/useCartStore'
 
 // ============================================================================
 // HOOKS (Client-Only - all have 'use client')

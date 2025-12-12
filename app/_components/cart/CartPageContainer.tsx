@@ -60,6 +60,7 @@ export default function CartPageContainer() {
 		isFetchingProducts,
 		submitted,
 		form,
+		isHydrated, // Zustand hydration status
 		
 		// Auth state
 		isAuthenticated,
@@ -80,6 +81,19 @@ export default function CartPageContainer() {
 		handleViewQuotes,
 		handleLoginClick,
 	} = useCartPageLogic()
+
+	// Show loading skeleton during hydration to prevent flash of "empty cart"
+	if (!isHydrated) {
+		return (
+			<PageContainer className="max-w-4xl">
+				<div className="flex min-h-[400px] flex-col items-center justify-center gap-6 text-center">
+					<div className="h-24 w-24 animate-pulse rounded-full bg-base-200" />
+					<div className="h-8 w-48 animate-pulse rounded-md bg-base-200" />
+					<div className="h-4 w-64 animate-pulse rounded-md bg-base-200" />
+				</div>
+			</PageContainer>
+		)
+	}
 
 	// Empty cart state
 	if (cart.length === 0 && !submitted) {

@@ -57,9 +57,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { getCookie } from 'cookies-next'
 import { Menu, ShoppingCart, X, User, LogOut, Home, Info, Store, Mail, Settings, LayoutDashboard } from 'lucide-react'
 
-import { useAuthStore } from '@_features/auth'
-import { logout as logoutService } from '@_features/auth/services/AuthService'
-import { useCartStore } from '@_features/cart'
+import { useAuthStore, logout as logoutService } from '@_features/auth'
+import { useHydratedCart } from '@_features/cart'
 import { Routes } from '@_features/navigation'
 
 import { logger } from '@_core'
@@ -100,7 +99,8 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 	const [settingsModalOpen, setSettingsModalOpen] = useState(false)
 	const [loginModalOpen, setLoginModalOpen] = useState(false)
 	const [isLoggingOut, setIsLoggingOut] = useState(false)
-	const cart = useCartStore((state) => state.cart)
+	// Use hydration-aware cart hook to prevent SSR mismatch
+	const { itemCount: cartItemCount } = useHydratedCart()
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 	const user = useAuthStore((state) => state.user)
 	const clearAuthState = useAuthStore((state) => state.logout)
@@ -189,10 +189,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 			setLoginModalOpen(true)
 			loginParamHandledRef.current = true
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [hasLoginParam, isAuthenticated, cleanupLoginParams])
-	// Note: loginModalOpen intentionally excluded - ref guard prevents duplicate opens
-	// Including it would cause unnecessary re-runs when modal state changes
 
 	// Detect when screen size changes to desktop (md breakpoint: 768px)
 	// The mobile menu is only rendered on screens smaller than md (md:hidden)
@@ -228,8 +225,6 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 		// Update ref to track current breakpoint state
 		prevIsDesktop.current = isDesktop
 	}, [isDesktop, mobileMenuOpen])
-
-	const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
 	const publicNavigationLinks = [
 		{

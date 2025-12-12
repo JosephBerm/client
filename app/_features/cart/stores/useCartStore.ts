@@ -42,6 +42,7 @@
 
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import { useEffect, useState } from 'react'
 
 /**
  * Shopping cart item structure.
@@ -63,6 +64,8 @@ export interface CartItem {
 interface CartState {
 	/** Array of cart items */
 	cart: CartItem[]
+	/** Indicates if the store has been hydrated from localStorage */
+	_hasHydrated: boolean
 }
 
 /**
@@ -77,6 +80,8 @@ interface CartActions {
 	updateCartQuantity: (productId: string, quantity: number) => void
 	/** Clears all items from cart */
 	clearCart: () => void
+	/** Sets hydration status (internal use) */
+	setHasHydrated: (state: boolean) => void
 }
 
 /**
@@ -89,6 +94,7 @@ type CartStore = CartState & CartActions
  */
 const initialState: CartState = {
 	cart: [],
+	_hasHydrated: false,
 }
 
 /**
@@ -130,6 +136,14 @@ export const useCartStore = create<CartStore>()(
 	persist(
 		(set, _get) => ({
 			...initialState,
+
+			/**
+			 * Sets the hydration status.
+			 * Called automatically by persist middleware onRehydrateStorage.
+			 */
+			setHasHydrated: (state: boolean) => {
+				set({ _hasHydrated: state })
+			},
 
 			/**
 			 * Adds an item to the cart or updates quantity if already exists.
@@ -199,7 +213,55 @@ export const useCartStore = create<CartStore>()(
 		{
 			name: 'cart-storage', // localStorage key
 			storage: createJSONStorage(() => localStorage),
+			// Don't persist hydration status
+			partialize: (state) => ({ cart: state.cart }),
+			// Track when hydration completes
+			onRehydrateStorage: () => (state) => {
+				state?.setHasHydrated(true)
+			},
 		}
 	)
 )
+
+/**
+ * Custom hook to safely access cart state with hydration awareness.
+ * 
+ * **Why this exists:**
+ * Zustand persist middleware hydrates asynchronously from localStorage.
+ * During SSR and initial client render, the cart appears empty.
+ * This hook provides a clean way to handle this hydration period.
+ * 
+ * @example
+ * ```typescript
+ * const { cart, isHydrated } = useHydratedCart()
+ * 
+ * if (!isHydrated) {
+ *   return <CartSkeleton />
+ * }
+ * 
+ * return <CartItems items={cart} />
+ * ```
+ * 
+ * @returns Object with cart items and hydration status
+ */
+export function useHydratedCart() {
+	const cart = useCartStore((state) => state.cart)
+	const hasHydrated = useCartStore((state) => state._hasHydrated)
+	
+	// Also track client-side mount for SSR safety
+	const [isClient, setIsClient] = useState(false)
+	
+	useEffect(() => {
+		setIsClient(true)
+	}, [])
+	
+	return {
+		cart: isClient && hasHydrated ? cart : [],
+		isHydrated: isClient && hasHydrated,
+		// For cart count display - returns 0 if not hydrated
+		itemCount: isClient && hasHydrated 
+			? cart.reduce((sum, item) => sum + item.quantity, 0) 
+			: 0,
+	}
+}
 

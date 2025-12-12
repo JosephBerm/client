@@ -4,5 +4,5 @@
  * @module cart/stores
  */
 
-export { useCartStore } from './useCartStore'
+export { useCartStore, useHydratedCart } from './useCartStore'
 
