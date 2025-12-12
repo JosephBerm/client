@@ -27,8 +27,6 @@ export interface CartSummaryProps {
 	isLoading: boolean
 	/** Whether user is authenticated */
 	isAuthenticated: boolean
-	/** Callback when user clicks login button */
-	onLoginClick: () => void
 }
 
 /**
@@ -46,7 +44,6 @@ export default function CartSummary({
 	onSubmit,
 	isLoading,
 	isAuthenticated,
-	onLoginClick,
 }: CartSummaryProps) {
 	return (
 		<div className="space-y-4 sm:space-y-6">
@@ -62,7 +59,6 @@ export default function CartSummary({
 				onSubmit={onSubmit}
 				isLoading={isLoading}
 				isAuthenticated={isAuthenticated}
-				onLoginClick={onLoginClick}
 			/>
 		</div>
 	)

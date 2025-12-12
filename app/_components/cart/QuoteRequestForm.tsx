@@ -5,10 +5,16 @@
  * 
  * **Design Features:**
  * - Conditional fields based on authentication status
- * - For authenticated users: Notes and Valid Until (enabled)
- * - For non-authenticated users: First Name, Last Name, Email, Notes (optional), Valid Until (disabled)
+ * - For authenticated users: Notes only (contact info pre-filled from account)
+ * - For non-authenticated users: First Name, Last Name, Email, Notes
+ * - Valid Until is always displayed but disabled (visual indicator of 1-month validity)
  * - Centered "REQUEST" button with professional styling
  * - Industry best practices: Clear labels, proper spacing, accessible form fields
+ * 
+ * **Business Rules:**
+ * - Quote validity is fixed at 1 month from submission date
+ * - Users cannot modify the validity period
+ * - This is a visual indicator showing customers how long they have to close an order
  * 
  * **UX Best Practices Applied:**
  * - Logical field grouping
@@ -22,7 +28,7 @@
 
 import type { UseFormReturn } from 'react-hook-form'
 
-import type { QuoteFormData } from '@_core'
+import { type QuoteFormData, logger } from '@_core'
 
 import FormInput from '@_components/forms/FormInput'
 import FormTextArea from '@_components/forms/FormTextArea'
@@ -37,8 +43,6 @@ export interface QuoteRequestFormProps {
 	isLoading: boolean
 	/** Whether user is authenticated */
 	isAuthenticated: boolean
-	/** Callback when user clicks login button */
-	onLoginClick: () => void
 }
 
 /**
@@ -48,8 +52,9 @@ export interface QuoteRequestFormProps {
  * Follows MAANG-level UX best practices for form design.
  * 
  * **Form States:**
- * - Authenticated: Shows notes and validUntil (enabled)
- * - Non-authenticated: Shows firstName, lastName, email, notes, validUntil (disabled)
+ * - Authenticated: Shows notes only (contact info auto-filled from account)
+ * - Non-authenticated: Shows firstName, lastName, email, notes
+ * - Both: Shows validUntil (always disabled - 1 month visual indicator)
  * 
  * @param props - Component props
  * @returns QuoteRequestForm component
@@ -59,7 +64,6 @@ export default function QuoteRequestForm({
 	onSubmit,
 	isLoading,
 	isAuthenticated,
-	onLoginClick,
 }: QuoteRequestFormProps) {
 	/**
 	 * Form onSubmit handler that properly handles React Hook Form's Promise return.
@@ -74,9 +78,9 @@ export default function QuoteRequestForm({
 		// React Hook Form's handleSubmit may return a Promise if handler is async
 		// Handle it explicitly to satisfy ESLint's no-misused-promises rule
 		if (result instanceof Promise) {
-			await result.catch((error) => {
+			await result.catch((error: unknown) => {
 				// Error already handled in useFormSubmit, but catch any unhandled rejections
-				console.error('Unhandled form submission error', error)
+				logger.error('quote.form.unhandled', { error })
 			})
 		}
 	}
@@ -127,36 +131,24 @@ export default function QuoteRequestForm({
 						</div>
 					)}
 
-					{/* Valid Until Date Field */}
+					{/* Valid Until Date Field - Always disabled, visual indicator only */}
 					<div className="relative">
 						<FormInput
 							label="Valid Until"
 							type="date"
-							disabled={!isAuthenticated}
+							disabled
 							{...form.register('validUntil')}
 							error={form.formState.errors.validUntil}
-							helperText={
-								isAuthenticated
-									? 'Quote will be valid until this date'
-									: 'Quote validity will be set after review'
-							}
-							aria-describedby={
-								!isAuthenticated
-									? 'valid-until-disabled-help'
-									: form.formState.errors.validUntil
-										? undefined
-										: 'valid-until-help'
-							}
+							helperText="Quote will be valid for 1 month from submission"
+							aria-describedby="valid-until-help"
 						/>
-						{!isAuthenticated && (
-							<div
-								id="valid-until-disabled-help"
-								className="sr-only"
-								aria-live="polite"
-							>
-								This field is disabled for guest users. Quote validity will be determined during review.
-							</div>
-						)}
+						<div
+							id="valid-until-help"
+							className="sr-only"
+							aria-live="polite"
+						>
+							This quote will be valid for one month from the submission date. This cannot be changed.
+						</div>
 					</div>
 
 					{/* Additional Notes */}

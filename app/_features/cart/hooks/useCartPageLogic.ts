@@ -77,7 +77,6 @@ export interface UseCartPageLogicReturn {
 	// Navigation
 	handleContinueShopping: () => void
 	handleViewQuotes: () => void
-	handleLoginClick: () => void
 }
 
 /**
@@ -387,15 +386,6 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 		router.push(Routes.Quotes.location)
 	}, [router])
 	
-	/**
-	 * Open login modal.
-	 * 
-	 * FAANG Pattern: Use useCallback for stable event handlers.
-	 */
-	const handleLoginClick = useCallback(() => {
-		router.push(Routes.openLoginModal())
-	}, [router])
-	
 	// ============================================================================
 	// RETURN
 	// ============================================================================
@@ -428,6 +418,5 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 		// Navigation
 		handleContinueShopping,
 		handleViewQuotes,
-		handleLoginClick,
 	}
 }

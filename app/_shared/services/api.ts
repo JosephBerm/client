@@ -245,8 +245,11 @@ const API = {
 			/**
 			 * Searches products with pagination and filtering (public).
 			 * No authentication required.
+			 * 
+			 * **Use this in Client Components** - supports dynamic filtering/pagination.
+			 * For Server Components with caching, use `searchPublicCacheable` instead.
+			 * 
 			 * @param search - Search filter
-			 * @deprecated Use searchPublicCacheable for better performance with "use cache"
 			 */
 			searchPublic: async (search: GenericSearchFilter) =>
 				HttpService.post<PagedResult<Product>>(`/Products/search/public`, search),
@@ -255,7 +258,8 @@ const API = {
 			 * Searches products with pagination and filtering (public).
 			 * NO AUTHENTICATION - Does not access cookies().
 			 * 
-			 * **USE THIS WITH "use cache" for maximum performance.**
+			 * **SERVER COMPONENTS ONLY - Use with "use cache" for maximum performance.**
+			 * For Client Components, use `searchPublic` instead.
 			 * 
 			 * @param search - Search filter
 			 * @returns Paginated product results
@@ -275,8 +279,11 @@ const API = {
 			
 			/**
 			 * Gets all product categories.
+			 * 
+			 * **Use this in Client Components** - supports dynamic behavior.
+			 * For Server Components with caching, use `getCategoriesCacheable` instead.
+			 * 
 			 * @returns Array of product categories
-			 * @deprecated Use getCategoriesCacheable for better performance with "use cache"
 			 */
 			getAllCategories: async () => HttpService.get<ProductsCategory[]>('/Products/categories/clean'),
 			
@@ -284,7 +291,8 @@ const API = {
 			 * Gets all product categories (public).
 			 * NO AUTHENTICATION - Does not access cookies().
 			 * 
-			 * **USE THIS WITH "use cache" for maximum performance.**
+			 * **SERVER COMPONENTS ONLY - Use with "use cache" for maximum performance.**
+			 * For Client Components, use `getAllCategories` instead.
 			 * 
 			 * @returns Array of product categories
 			 * 

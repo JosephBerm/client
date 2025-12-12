@@ -79,7 +79,6 @@ export default function CartPageContainer() {
 		// Navigation
 		handleContinueShopping,
 		handleViewQuotes,
-		handleLoginClick,
 	} = useCartPageLogic()
 
 	// Show loading skeleton during hydration to prevent flash of "empty cart"
@@ -140,7 +139,6 @@ export default function CartPageContainer() {
 					onSubmit={handleSubmit}
 					isLoading={isLoading}
 					isAuthenticated={isAuthenticated}
-					onLoginClick={handleLoginClick}
 				/>
 			</div>
 		</PageContainer>
