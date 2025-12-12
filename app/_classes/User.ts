@@ -68,7 +68,7 @@
  * @module User
  */
 
-import { parseDateSafe } from '@_lib/dates'
+import { parseDateSafe, parseRequiredTimestamp } from '@_lib/dates'
 
 import Address from '@_classes/common/Address'
 import Name from '@_classes/common/Name'
@@ -200,6 +200,9 @@ export default class User {
 			if (partial.shippingDetails) {
 				this.shippingDetails = new Address(partial.shippingDetails)
 			}
+			
+			// Parse createdAt timestamp (consistent with other entities: Company, Order, Product, etc.)
+			this.createdAt = parseRequiredTimestamp(partial.createdAt, 'User', 'createdAt')
 		}
 	}
 	
