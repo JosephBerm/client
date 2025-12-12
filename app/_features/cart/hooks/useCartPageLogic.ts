@@ -33,7 +33,7 @@ import { Routes } from '@_features/navigation'
 
 import { quoteSchema, type QuoteFormData, logger } from '@_core'
 
-import { formatDateForInput, addDays, serializeDate, parseDateOrNow } from '@_lib'
+import { formatDateForInput, addMonths, serializeDate, parseDateOrNow } from '@_lib'
 
 import { useZodForm, useFormSubmit, API } from '@_shared'
 
@@ -152,7 +152,7 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 			// Type assertion needed: z.coerce.date() infers Date type, but HTML date inputs require string format
 			// The coercion will convert the string to Date during validation
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			validUntil: formatDateForInput(addDays(parseDateOrNow(), 30)) as any, // 30 days from now (YYYY-MM-DD format)
+			validUntil: formatDateForInput(addMonths(parseDateOrNow(), 1)) as any, // 1 month from now (YYYY-MM-DD format)
 		},
 	})
 	
