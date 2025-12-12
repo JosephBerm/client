@@ -244,11 +244,13 @@ Below is a categorized list of reusable items. Each item links to a brief descri
   - [_components/ui/Button.tsx](#desc-button)
   - [_components/ui/Card.tsx](#desc-card)
   - [_components/ui/CategoryFilter.tsx](#desc-category-filter)
+  - [_components/ui/ChatDialog.tsx](#desc-chat-dialog) (NPM: `framer-motion`, `lucide-react`)
   - [_components/ui/ConfirmationModal.tsx](#desc-confirmation-modal) (NPM: `lucide-react`)
   - [_components/ui/ContactIcons.tsx](#desc-contact-icons)
   - [_components/ui/ContactMethodCard.tsx](#desc-contact-method-card)
   - [_components/ui/Input.tsx](#desc-input)
   - [_components/ui/LiveChatBubble.tsx](#desc-live-chat-bubble)
+  - [_components/ui/McpChatInterface.tsx](#desc-mcp-chat-interface) (NPM: `lucide-react`) **[DEV-ONLY]**
   - [_components/ui/Modal.tsx](#desc-modal)
   - [_components/ui/Pill.tsx](#desc-pill)
   - [_components/ui/QuantitySelector.tsx](#desc-quantity-selector)
@@ -294,6 +296,7 @@ Below is a categorized list of reusable items. Each item links to a brief descri
 
 - General Hooks (reusable)
   - [_shared/hooks/useDebounce.ts](#desc-use-debounce)
+  - [_shared/hooks/useMcpChat.ts](#desc-use-mcp-chat) **[DEV-ONLY]**
   - [_shared/hooks/useScrollSpy.ts](#desc-use-scroll-spy)
   - [_shared/hooks/useElementRefs.ts](#desc-use-element-refs)
   - [_shared/hooks/useKeyboardNavigation.ts](#desc-use-keyboard-navigation)
@@ -757,7 +760,13 @@ Icon set for contact methods (NPM: `lucide-react`).
 Card rendering a contact method with action.
 
 #### _components/ui/LiveChatBubble.tsx {#desc-live-chat-bubble}
-Floating live chat CTA component with presence indicator.
+Floating live chat CTA component with presence indicator. In development mode, renders McpChatInterface with pulse animation and glassmorphism header; in production, shows "Coming Soon" placeholder.
+
+#### _components/ui/McpChatInterface.tsx {#desc-mcp-chat-interface}
+**[DEV-ONLY]** Advanced terminal chat interface for MCP server. Features: hacker-style theme, command prompt input, auto-connect with pulse indicator, command history (↑↓), rich message bubbles with metadata, quick action chips, accessibility (ARIA live regions). Requires `experimental.mcpServer: true`.
+
+#### _components/ui/ChatDialog.tsx {#desc-chat-dialog}
+Professional modal dialog for chat interfaces. Features: portal rendering, spring animations (framer-motion), focus trap, body scroll lock, backdrop click-to-close, reduced motion support, custom header styling. Used by LiveChatBubble.
 
 #### _components/ui/Carousel/* {#desc-carousel-index}
 Embla or custom carousel primitives (slides, controls, dots, types).
@@ -869,6 +878,9 @@ Business hours calculation helpers for UI state.
 
 #### _shared/hooks/useDebounce.ts {#desc-use-debounce}
 Debounce a changing value with cleanup.
+
+#### _shared/hooks/useMcpChat.ts {#desc-use-mcp-chat}
+**[DEV-ONLY]** Hook for MCP (Model Context Protocol) server communication via JSON-RPC 2.0 over SSE. Provides: connection management, tool/resource discovery, command parsing (/help, /tools, /call), message history with limits, timeout handling. Import from `@_shared/hooks` (NOT from main `@_shared` barrel). Requires `experimental.mcpServer: true` in next.config.mjs.
 
 #### _shared/hooks/useScrollSpy.ts {#desc-use-scroll-spy}
 Observe which section is in view for navigation highlights.

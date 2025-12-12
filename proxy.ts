@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+
 import type { NextRequest } from 'next/server'
 
 // Protected route patterns - these require authentication
@@ -15,17 +16,16 @@ const protectedRoutes = [
 
 /**
  * Auth routes - redirect to home with login modal if accessed directly.
- * 
+ *
  * These routes are deprecated but kept here for backward compatibility.
  * All new code should use Routes.openLoginModal() instead of navigating to these routes.
- * 
- * Note: We keep hardcoded strings here because middleware runs in Edge runtime
- * and importing Routes would add unnecessary bundle size. The redirect logic
- * matches Routes.openLoginModal() behavior.
+ *
+ * Note: proxy.ts runs on Node.js runtime (not Edge).
+ * We keep hardcoded strings here to avoid circular dependencies with Routes.
  */
 const authRoutes = ['/login', '/signup']
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
 	const token = request.cookies.get('at')
 	const { pathname } = request.nextUrl
 
@@ -64,5 +64,4 @@ export function middleware(request: NextRequest) {
 export const config = {
 	matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 }
-
 

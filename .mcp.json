@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "nextjs-mcp-builtin": {
+      "url": "http://localhost:3000/_next/mcp"
+    }
+  }
+}

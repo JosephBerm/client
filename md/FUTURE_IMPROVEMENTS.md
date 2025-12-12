@@ -2,7 +2,7 @@
 
 > **Purpose**: This document tracks planned improvements, refactoring opportunities, and technical debt items for the MedSource Pro codebase. It serves as a roadmap for maintaining code quality, consistency, and following industry best practices.
 
-> **Last Updated**: 2025-11-28  
+> **Last Updated**: 2025-12-12  
 > **Maintained By**: Development Team  
 > **Status**: Active
 
@@ -17,6 +17,7 @@
 - [Performance Optimizations](#performance-optimizations)
 - [Accessibility Enhancements](#accessibility-enhancements)
 - [Architecture Improvements](#architecture-improvements)
+- [MCP DevTools - Backend-Dependent Enhancements](#mcp-devtools---backend-dependent-enhancements)
 - [Update Instructions](#update-instructions)
 
 ---
@@ -826,6 +827,954 @@ This section tracks larger architectural changes and improvements.
 
 ---
 
+## MCP DevTools - Backend-Dependent Enhancements
+
+This section documents powerful MCP DevTools features that require Next.js server-side (backend) changes. These enhancements would transform the DevTools from a debugging interface into a comprehensive Developer Command Center.
+
+> **Note**: These features require modifications to `pages/api/mcp.ts` (or equivalent MCP server route) and potentially new API routes. The frontend components in `McpChatInterface.tsx` are already architected to support these extensions.
+
+---
+
+### MCP DevTools - Custom Tool Registration System
+
+**Priority**: P2  
+**Category**: Architecture Enhancement / Developer Experience  
+**Status**: Not Started  
+**Estimated Effort**: XL  
+**Dependencies**: MCP server route modifications, tool registry storage, validation middleware
+
+**Description**:  
+Enable developers to register custom MCP tools at runtime without modifying server code. This would allow teams to create project-specific debugging tools, custom data fetchers, and workflow automation scripts that integrate seamlessly into the DevTools interface.
+
+**Current Implementation**:  
+The MCP server (`pages/api/mcp.ts`) has a fixed set of tools defined at compile time. Developers cannot add new tools without modifying server code and redeploying.
+
+**Proposed Solution**:  
+
+**Phase 1: Tool Definition API**
+1. Create `POST /api/mcp/tools` endpoint for registering custom tools
+2. Define tool schema specification (name, description, inputSchema, handler)
+3. Store tool definitions in-memory or persist to database/file
+4. Validate tool schemas against JSON Schema draft-07
+
+**Phase 2: Secure Execution Environment**
+1. Implement sandboxed execution for custom tool handlers
+2. Add rate limiting and timeout controls
+3. Create permission system (read-only vs. write access)
+4. Log all custom tool executions for audit
+
+**Phase 3: Frontend Integration**
+1. Add "Register Tool" UI in DevTools preferences
+2. Create tool definition wizard with schema builder
+3. Support importing tools from JSON/YAML files
+4. Enable tool sharing via export/import
+
+**Benefits**:  
+- Project-specific debugging without core code changes
+- Team customization of developer workflows
+- Rapid prototyping of debugging utilities
+- Reduced development friction for specialized tools
+- Plugin ecosystem potential
+
+**Implementation Notes**:  
+
+**Tool Definition Schema**:
+```typescript
+interface CustomToolDefinition {
+  name: string // Unique tool identifier
+  description: string // Human-readable description
+  inputSchema: JSONSchema // JSON Schema for parameters
+  handler: string // JavaScript code (sandboxed execution)
+  permissions: ('read' | 'write' | 'network' | 'fs')[]
+  timeout: number // Max execution time in ms
+  createdBy: string // Developer identifier
+  createdAt: Date
+}
+```
+
+**Example Registration API**:
+```typescript
+// POST /api/mcp/tools
+export async function POST(req: Request) {
+  const tool = await req.json() as CustomToolDefinition
+  
+  // Validate schema
+  if (!validateToolSchema(tool)) {
+    return Response.json({ error: 'Invalid tool schema' }, { status: 400 })
+  }
+  
+  // Sandbox validation (ensure handler is safe)
+  const { safe, issues } = await validateHandler(tool.handler)
+  if (!safe) {
+    return Response.json({ error: 'Handler validation failed', issues }, { status: 400 })
+  }
+  
+  // Register tool
+  await toolRegistry.register(tool)
+  
+  return Response.json({ success: true, toolId: tool.name })
+}
+```
+
+**Sandboxed Execution** (using VM2 or isolated-vm):
+```typescript
+import { VM } from 'vm2'
+
+async function executeCustomTool(tool: CustomToolDefinition, args: unknown) {
+  const vm = new VM({
+    timeout: tool.timeout,
+    sandbox: {
+      args,
+      console: createSafeConsole(),
+      fetch: tool.permissions.includes('network') ? safeFetch : undefined,
+      // Limited API surface
+    }
+  })
+  
+  return vm.run(tool.handler)
+}
+```
+
+**Security Considerations**:
+- Never execute arbitrary code outside sandbox
+- Implement code signing for trusted tools
+- Rate limit tool executions per user/session
+- Audit log all custom tool invocations
+- Implement tool approval workflow for teams
+
+**Related Files**:  
+- `pages/api/mcp.ts` (current MCP server)
+- `app/_components/ui/McpChatInterface.tsx` (frontend)
+- `app/_shared/hooks/useMcpChat.ts` (communication hook)
+
+**References**:  
+- [Model Context Protocol Specification](https://modelcontextprotocol.io/)
+- [VM2 Sandbox Library](https://github.com/patriksimek/vm2)
+- [JSON Schema Specification](https://json-schema.org/)
+
+---
+
+### MCP DevTools - AI-Assisted Debugging Integration
+
+**Priority**: P2  
+**Category**: Feature Enhancement / AI Integration  
+**Status**: Not Started  
+**Estimated Effort**: XL  
+**Dependencies**: AI provider API keys (OpenAI, Anthropic, or local LLM), backend API routes, token budget management
+
+**Description**:  
+Integrate AI language models into the DevTools to provide intelligent error analysis, code suggestions, and automated debugging workflows. The AI would analyze error stacks, component state, and codebase context to suggest fixes.
+
+**Current Implementation**:  
+The DevTools displays errors and logs but requires manual interpretation. Developers must copy error messages to external AI tools for analysis.
+
+**Proposed Solution**:  
+
+**Phase 1: Error Analysis**
+1. Create `/api/mcp/ai/analyze-error` endpoint
+2. Integrate with OpenAI/Anthropic API
+3. Send error context (stack trace, component tree, recent logs)
+4. Return structured analysis with suggested fixes
+
+**Phase 2: Code Suggestions**
+1. Add "Explain" button to error cards
+2. Generate code snippets for common fixes
+3. Provide diff previews for suggested changes
+4. Support one-click apply (with git safety)
+
+**Phase 3: Proactive Debugging**
+1. Analyze patterns across multiple errors
+2. Detect anti-patterns in component structure
+3. Suggest performance optimizations
+4. Identify potential memory leaks
+
+**Benefits**:  
+- Faster debugging with AI-generated insights
+- Learning opportunity for junior developers
+- Consistent error resolution patterns
+- Reduced time-to-fix for complex issues
+- Context-aware suggestions (knows your codebase)
+
+**Implementation Notes**:  
+
+**AI Analysis Endpoint**:
+```typescript
+// POST /api/mcp/ai/analyze-error
+export async function POST(req: Request) {
+  const { error, stackTrace, componentTree, recentLogs } = await req.json()
+  
+  const prompt = buildErrorAnalysisPrompt({
+    error,
+    stackTrace,
+    componentTree,
+    recentLogs,
+    projectContext: await getProjectContext()
+  })
+  
+  const analysis = await openai.chat.completions.create({
+    model: 'gpt-4-turbo',
+    messages: [
+      { role: 'system', content: DEBUGGER_SYSTEM_PROMPT },
+      { role: 'user', content: prompt }
+    ],
+    response_format: { type: 'json_object' }
+  })
+  
+  return Response.json(JSON.parse(analysis.choices[0].message.content))
+}
+```
+
+**Analysis Response Schema**:
+```typescript
+interface AIErrorAnalysis {
+  summary: string // One-line explanation
+  rootCause: string // Likely cause
+  explanation: string // Detailed technical explanation
+  suggestions: {
+    description: string
+    code?: string // Code fix if applicable
+    file?: string // File to modify
+    confidence: 'high' | 'medium' | 'low'
+  }[]
+  relatedDocs: string[] // Links to relevant documentation
+  preventionTips: string[] // How to avoid in future
+}
+```
+
+**Frontend Integration** (McpChatInterface.tsx):
+```tsx
+function ErrorCard({ error }: { error: McpError }) {
+  const [analysis, setAnalysis] = useState<AIErrorAnalysis | null>(null)
+  const [loading, setLoading] = useState(false)
+  
+  const analyzeWithAI = async () => {
+    setLoading(true)
+    const result = await fetch('/api/mcp/ai/analyze-error', {
+      method: 'POST',
+      body: JSON.stringify({ error, stackTrace: error.stack })
+    }).then(r => r.json())
+    setAnalysis(result)
+    setLoading(false)
+  }
+  
+  return (
+    <div className="error-card">
+      {/* Error display */}
+      <Button onClick={analyzeWithAI} disabled={loading}>
+        {loading ? <Spinner /> : <Sparkles />} Analyze with AI
+      </Button>
+      {analysis && <AIAnalysisPanel analysis={analysis} />}
+    </div>
+  )
+}
+```
+
+**Cost Management**:
+- Implement token budget per session/day
+- Cache common error analyses
+- Use smaller models for initial triage
+- Escalate to GPT-4 only for complex issues
+
+**Privacy Considerations**:
+- Strip sensitive data before sending to AI
+- Option to use local LLMs (Ollama, LM Studio)
+- Audit log all AI queries
+- Clear data retention policies
+
+**Related Files**:  
+- `pages/api/mcp.ts` (MCP server)
+- `app/_components/ui/McpChatInterface.tsx` (frontend)
+- New: `pages/api/mcp/ai/analyze-error.ts`
+- New: `app/_lib/ai/debugger-prompts.ts`
+
+**References**:  
+- [OpenAI API Documentation](https://platform.openai.com/docs)
+- [Anthropic Claude API](https://docs.anthropic.com/)
+- [Ollama Local LLM](https://ollama.ai/)
+
+---
+
+### MCP DevTools - Real-Time Log Streaming
+
+**Priority**: P1  
+**Category**: Feature Enhancement / Developer Experience  
+**Status**: Not Started  
+**Estimated Effort**: L  
+**Dependencies**: WebSocket server setup, log aggregation service, backend infrastructure
+
+**Description**:  
+Implement real-time log streaming from the Next.js server directly into the DevTools interface. Instead of showing static log file paths, stream live logs with filtering, search, and highlighting capabilities.
+
+**Current Implementation**:  
+The `get_logs` tool returns the log file path. Developers must manually tail the file in a separate terminal window.
+
+**Proposed Solution**:  
+
+**Phase 1: WebSocket Infrastructure**
+1. Create WebSocket endpoint at `/api/mcp/logs/stream`
+2. Implement log file watching (chokidar/fs.watch)
+3. Parse and structure log entries
+4. Stream to connected clients
+
+**Phase 2: Log Aggregation**
+1. Aggregate logs from multiple sources (server, client errors, API)
+2. Normalize log formats
+3. Add log level classification
+4. Implement log rotation and buffer limits
+
+**Phase 3: Frontend Viewer**
+1. Create `LogStreamViewer` component
+2. Implement virtual scrolling for performance
+3. Add filtering by level, source, time
+4. Support regex search
+5. Syntax highlighting for JSON payloads
+
+**Benefits**:  
+- Single-pane debugging experience
+- Real-time visibility into server behavior
+- No context-switching to terminal
+- Advanced filtering and search
+- Log correlation across requests
+
+**Implementation Notes**:  
+
+**WebSocket Server** (using ws or Socket.io):
+```typescript
+// pages/api/mcp/logs/stream.ts
+import { WebSocketServer } from 'ws'
+import { watch } from 'chokidar'
+
+const wss = new WebSocketServer({ noServer: true })
+const logPath = '.next/dev/logs/next-development.log'
+
+// Watch log file for changes
+const watcher = watch(logPath, { persistent: true })
+
+watcher.on('change', async () => {
+  const newLines = await getNewLogLines(logPath)
+  const parsedLogs = newLines.map(parseLogLine)
+  
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({ type: 'logs', data: parsedLogs }))
+    }
+  })
+})
+
+function parseLogLine(line: string): LogEntry {
+  // Parse timestamp, level, message, metadata
+  const match = line.match(/\[(\d{4}-\d{2}-\d{2}T[\d:.]+Z)\]\s+(\w+):\s+(.+)/)
+  if (match) {
+    return {
+      timestamp: new Date(match[1]),
+      level: match[2] as LogLevel,
+      message: match[3],
+      raw: line
+    }
+  }
+  return { timestamp: new Date(), level: 'info', message: line, raw: line }
+}
+```
+
+**Log Entry Schema**:
+```typescript
+interface LogEntry {
+  id: string // Unique identifier
+  timestamp: Date
+  level: 'debug' | 'info' | 'warn' | 'error' | 'fatal'
+  message: string
+  source: 'server' | 'client' | 'api' | 'middleware'
+  metadata?: Record<string, unknown>
+  requestId?: string // For request correlation
+  raw: string // Original log line
+}
+```
+
+**Frontend Component** (McpChatInterface.tsx):
+```tsx
+function LogStreamViewer() {
+  const [logs, setLogs] = useState<LogEntry[]>([])
+  const [filter, setFilter] = useState<LogFilter>({ levels: ['warn', 'error'] })
+  const wsRef = useRef<WebSocket | null>(null)
+  
+  useEffect(() => {
+    wsRef.current = new WebSocket('ws://localhost:3000/api/mcp/logs/stream')
+    
+    wsRef.current.onmessage = (event) => {
+      const { data } = JSON.parse(event.data)
+      setLogs(prev => [...prev, ...data].slice(-1000)) // Keep last 1000
+    }
+    
+    return () => wsRef.current?.close()
+  }, [])
+  
+  const filteredLogs = useMemo(() => 
+    logs.filter(log => filter.levels.includes(log.level)),
+    [logs, filter]
+  )
+  
+  return (
+    <div className="log-viewer">
+      <LogFilterBar filter={filter} onChange={setFilter} />
+      <VirtualizedLogList logs={filteredLogs} />
+    </div>
+  )
+}
+```
+
+**Performance Considerations**:
+- Use virtual scrolling for large log volumes
+- Implement log buffer limits (configurable)
+- Throttle WebSocket messages during high volume
+- Support pause/resume streaming
+- Efficient log line parsing (avoid regex on hot path)
+
+**Related Files**:  
+- `pages/api/mcp.ts` (existing MCP server)
+- `app/_components/ui/McpChatInterface.tsx` (frontend)
+- New: `pages/api/mcp/logs/stream.ts`
+- New: `app/_components/ui/LogStreamViewer.tsx`
+
+**References**:  
+- [ws WebSocket Library](https://github.com/websockets/ws)
+- [chokidar File Watcher](https://github.com/paulmillr/chokidar)
+- [react-window Virtual Scrolling](https://react-window.vercel.app/)
+
+---
+
+### MCP DevTools - Database Query Explorer
+
+**Priority**: P2  
+**Category**: Feature Enhancement / Data Debugging  
+**Status**: Not Started  
+**Estimated Effort**: XL  
+**Dependencies**: Database connection pooling, query sanitization, access control layer
+
+**Description**:  
+Add direct database exploration and query execution capabilities to the DevTools. Safely query development databases, inspect table schemas, and debug data issues without leaving the DevTools interface.
+
+**Current Implementation**:  
+No database access through MCP. Developers must use external tools (pgAdmin, DBeaver, CLI) to inspect databases.
+
+**Proposed Solution**:  
+
+**Phase 1: Read-Only Explorer**
+1. Create `get_db_schema` tool to list tables/collections
+2. Create `query_db` tool for SELECT queries only
+3. Implement query sanitization and validation
+4. Add result pagination
+
+**Phase 2: Safe Write Operations (Dev Only)**
+1. Enable INSERT/UPDATE/DELETE in development mode
+2. Require confirmation for destructive operations
+3. Implement automatic transaction rollback option
+4. Add query history with undo
+
+**Phase 3: Visual Query Builder**
+1. Schema-aware autocomplete
+2. Visual table relationship explorer
+3. Query result export (CSV, JSON)
+4. Saved queries library
+
+**Benefits**:  
+- Unified debugging environment
+- Faster data issue investigation
+- No context-switching to external tools
+- Query history and reuse
+- Team-shared query library
+
+**Implementation Notes**:  
+
+**Security Architecture** (CRITICAL):
+```typescript
+// NEVER expose in production
+if (process.env.NODE_ENV !== 'development') {
+  throw new Error('Database tools only available in development')
+}
+
+// Query whitelist approach
+const ALLOWED_OPERATIONS = ['SELECT', 'DESCRIBE', 'SHOW', 'EXPLAIN']
+
+function validateQuery(sql: string): { valid: boolean; reason?: string } {
+  const normalized = sql.trim().toUpperCase()
+  const operation = normalized.split(/\s+/)[0]
+  
+  if (!ALLOWED_OPERATIONS.includes(operation)) {
+    return { valid: false, reason: `Operation '${operation}' not allowed` }
+  }
+  
+  // Check for SQL injection patterns
+  if (containsInjectionPatterns(sql)) {
+    return { valid: false, reason: 'Query contains suspicious patterns' }
+  }
+  
+  return { valid: true }
+}
+```
+
+**Query Tool Implementation**:
+```typescript
+// MCP tool handler
+async function handleQueryDb(args: { query: string; limit?: number }) {
+  const validation = validateQuery(args.query)
+  if (!validation.valid) {
+    return { error: validation.reason }
+  }
+  
+  const limit = Math.min(args.limit || 100, 1000) // Max 1000 rows
+  const queryWithLimit = `${args.query} LIMIT ${limit}`
+  
+  try {
+    const result = await db.query(queryWithLimit)
+    return {
+      rows: result.rows,
+      rowCount: result.rowCount,
+      fields: result.fields.map(f => ({ name: f.name, type: f.dataTypeID })),
+      executionTime: result.executionTime
+    }
+  } catch (error) {
+    return { error: error.message }
+  }
+}
+```
+
+**Frontend Query Interface**:
+```tsx
+function DatabaseExplorer() {
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<QueryResult | null>(null)
+  
+  return (
+    <div className="db-explorer">
+      <SchemaTreeView onSelectTable={(t) => setQuery(`SELECT * FROM ${t}`)} />
+      <QueryEditor 
+        value={query} 
+        onChange={setQuery}
+        schema={schema} // For autocomplete
+      />
+      <Button onClick={() => executeQuery(query)}>
+        Run Query (Dev Only)
+      </Button>
+      {results && <ResultTable data={results} />}
+    </div>
+  )
+}
+```
+
+**Access Control Layers**:
+1. Environment check (dev only)
+2. Query validation (whitelist operations)
+3. Result limits (max rows)
+4. Audit logging (all queries logged)
+5. Connection isolation (separate pool)
+
+**Related Files**:  
+- `pages/api/mcp.ts` (MCP server)
+- `app/_components/ui/McpChatInterface.tsx` (frontend)
+- New: `app/_lib/db/query-validator.ts`
+- New: `app/_components/ui/DatabaseExplorer.tsx`
+
+**References**:  
+- [OWASP SQL Injection Prevention](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html)
+- [pg (node-postgres)](https://node-postgres.com/)
+- [Monaco Editor for SQL](https://microsoft.github.io/monaco-editor/)
+
+---
+
+### MCP DevTools - Performance Profiling Tools
+
+**Priority**: P2  
+**Category**: Performance / Developer Experience  
+**Status**: Not Started  
+**Estimated Effort**: L  
+**Dependencies**: Performance monitoring middleware, data collection API, visualization libraries
+
+**Description**:  
+Integrate real-time performance profiling into the DevTools, including request timing breakdowns, component render analysis, memory usage monitoring, and flame graph visualization.
+
+**Current Implementation**:  
+Basic metadata shows execution time for tool calls. No comprehensive performance profiling.
+
+**Proposed Solution**:  
+
+**Phase 1: Request Profiling**
+1. Create middleware to capture request timing
+2. Measure DNS, TCP, TLS, TTFB, download phases
+3. Track server-side render time
+4. Display waterfall charts
+
+**Phase 2: Component Analysis**
+1. Integrate React DevTools Profiler API
+2. Capture component render times
+3. Identify unnecessary re-renders
+4. Suggest optimization opportunities
+
+**Phase 3: Memory & Bundle Analysis**
+1. Monitor heap usage over time
+2. Detect memory leak patterns
+3. Analyze bundle size per route
+4. Visualize code splitting effectiveness
+
+**Benefits**:  
+- Identify performance bottlenecks quickly
+- Data-driven optimization decisions
+- Monitor performance regression
+- Single-pane performance debugging
+
+**Implementation Notes**:  
+
+**Performance Middleware**:
+```typescript
+// middleware/performance.ts
+import { NextResponse } from 'next/server'
+
+export function middleware(request: Request) {
+  const start = performance.now()
+  
+  const response = NextResponse.next()
+  
+  const duration = performance.now() - start
+  response.headers.set('Server-Timing', `total;dur=${duration}`)
+  
+  // Log to performance collector
+  performanceCollector.record({
+    path: request.url,
+    method: request.method,
+    duration,
+    timestamp: Date.now()
+  })
+  
+  return response
+}
+```
+
+**MCP Performance Tool**:
+```typescript
+async function handleGetPerformanceMetrics(args: { 
+  type: 'requests' | 'components' | 'memory'
+  timeRange?: number // Last N minutes
+}) {
+  switch (args.type) {
+    case 'requests':
+      return performanceCollector.getRequestMetrics(args.timeRange)
+    case 'components':
+      return componentProfiler.getMetrics()
+    case 'memory':
+      return {
+        heapUsed: process.memoryUsage().heapUsed,
+        heapTotal: process.memoryUsage().heapTotal,
+        external: process.memoryUsage().external,
+        arrayBuffers: process.memoryUsage().arrayBuffers
+      }
+  }
+}
+```
+
+**Related Files**:  
+- `pages/api/mcp.ts` (MCP server)
+- `app/_components/ui/McpChatInterface.tsx` (frontend)
+- New: `middleware/performance.ts`
+- New: `app/_lib/performance/collector.ts`
+
+**References**:  
+- [Server-Timing Header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Server-Timing)
+- [React Profiler API](https://reactjs.org/docs/profiler.html)
+- [d3-flame-graph](https://github.com/nicedoc/d3-flame-graph)
+
+---
+
+### MCP DevTools - Git Integration Tools
+
+**Priority**: P3  
+**Category**: Developer Experience / Workflow  
+**Status**: Not Started  
+**Estimated Effort**: M  
+**Dependencies**: Git CLI access, safe command execution, file system access
+
+**Description**:  
+Add Git operations directly in the DevTools for common debugging workflows: view recent commits, check file history, create debug branches, and stash changes—all without leaving the interface.
+
+**Current Implementation**:  
+No Git integration. Developers use separate terminal or Git GUI.
+
+**Proposed Solution**:  
+
+1. Create `git_status` tool for working directory status
+2. Create `git_log` tool for commit history
+3. Create `git_diff` tool for viewing changes
+4. Create `git_blame` tool for file history
+5. Add safe branch/stash operations (with confirmation)
+
+**Benefits**:  
+- Correlate bugs with recent commits
+- Quick file history lookup
+- Streamlined debugging workflow
+- No context-switching
+
+**Implementation Notes**:  
+
+```typescript
+async function handleGitStatus() {
+  const { stdout } = await execAsync('git status --porcelain')
+  return parseGitStatus(stdout)
+}
+
+async function handleGitLog(args: { limit?: number; file?: string }) {
+  const limit = args.limit || 10
+  const fileArg = args.file ? `-- ${args.file}` : ''
+  const { stdout } = await execAsync(
+    `git log --oneline -n ${limit} ${fileArg}`
+  )
+  return parseGitLog(stdout)
+}
+
+async function handleGitBlame(args: { file: string; lines?: string }) {
+  const lineArg = args.lines ? `-L ${args.lines}` : ''
+  const { stdout } = await execAsync(
+    `git blame ${lineArg} ${args.file}`
+  )
+  return parseGitBlame(stdout)
+}
+```
+
+**Related Files**:  
+- `pages/api/mcp.ts` (MCP server)
+- `app/_components/ui/McpChatInterface.tsx` (frontend)
+
+**References**:  
+- [Git Porcelain Commands](https://git-scm.com/book/en/v2/Appendix-B:-Embedding-Git-in-your-Applications-Libgit2)
+
+---
+
+### MCP DevTools - Environment Variable Manager
+
+**Priority**: P2  
+**Category**: Developer Experience / Security  
+**Status**: Not Started  
+**Estimated Effort**: M  
+**Dependencies**: Secure env var storage, encryption at rest, access logging
+
+**Description**:  
+Securely view and manage environment variables through the DevTools. Display masked values with reveal-on-demand, compare environments, and validate required variables.
+
+**Current Implementation**:  
+Environment variables can only be viewed via terminal or `.env` files. No visibility in DevTools.
+
+**Proposed Solution**:  
+
+1. Create `get_env_vars` tool (dev mode only, values masked)
+2. Create `validate_env` tool to check required vars
+3. Create `compare_env` tool to diff local vs. example
+4. Add secure reveal mechanism with audit logging
+
+**Benefits**:  
+- Quick debugging of env-related issues
+- Validate env setup without exposing secrets
+- Compare environments safely
+- Audit trail for env access
+
+**Implementation Notes**:  
+
+```typescript
+// SECURITY: Never expose actual values in tool responses
+async function handleGetEnvVars(args: { prefix?: string }) {
+  const vars = Object.keys(process.env)
+    .filter(key => !args.prefix || key.startsWith(args.prefix))
+    .map(key => ({
+      name: key,
+      isSet: !!process.env[key],
+      length: process.env[key]?.length || 0,
+      // Never include actual value!
+    }))
+  
+  return { variables: vars, count: vars.length }
+}
+
+async function handleValidateEnv() {
+  const required = getRequiredEnvVars() // From config
+  const missing = required.filter(key => !process.env[key])
+  const present = required.filter(key => !!process.env[key])
+  
+  return {
+    valid: missing.length === 0,
+    missing,
+    present,
+    totalRequired: required.length
+  }
+}
+```
+
+**Related Files**:  
+- `pages/api/mcp.ts` (MCP server)
+- `app/_components/ui/McpChatInterface.tsx` (frontend)
+
+**References**:  
+- [dotenv-vault](https://www.dotenv.org/docs/security/vault)
+- [OWASP Secrets Management](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html)
+
+---
+
+### MCP DevTools - API Testing Suite
+
+**Priority**: P3  
+**Category**: Feature Enhancement / Testing  
+**Status**: Not Started  
+**Estimated Effort**: L  
+**Dependencies**: HTTP client library, request/response storage, test assertions
+
+**Description**:  
+Built-in API testing capabilities similar to Postman/Insomnia, allowing developers to test API endpoints directly from the DevTools with request history, saved collections, and assertion support.
+
+**Current Implementation**:  
+No API testing. Developers use external tools (Postman, curl, Thunder Client).
+
+**Proposed Solution**:  
+
+1. Create `test_api` tool for making HTTP requests
+2. Add request builder UI with method, headers, body
+3. Implement response viewer with syntax highlighting
+4. Add request history with replay
+5. Support saved request collections
+6. Add basic assertions (status code, response body)
+
+**Benefits**:  
+- Test APIs without leaving editor
+- Request history tied to debugging session
+- Share API collections with team
+- Quick endpoint verification
+
+**Implementation Notes**:  
+
+```typescript
+async function handleTestApi(args: {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+  url: string
+  headers?: Record<string, string>
+  body?: unknown
+  timeout?: number
+}) {
+  const start = performance.now()
+  
+  try {
+    const response = await fetch(args.url, {
+      method: args.method,
+      headers: args.headers,
+      body: args.body ? JSON.stringify(args.body) : undefined,
+      signal: AbortSignal.timeout(args.timeout || 30000)
+    })
+    
+    const duration = performance.now() - start
+    const body = await response.text()
+    
+    return {
+      status: response.status,
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers),
+      body: tryParseJson(body),
+      duration,
+      size: body.length
+    }
+  } catch (error) {
+    return { error: error.message }
+  }
+}
+```
+
+**Related Files**:  
+- `pages/api/mcp.ts` (MCP server)
+- `app/_components/ui/McpChatInterface.tsx` (frontend)
+- New: `app/_components/ui/ApiTestBuilder.tsx`
+
+**References**:  
+- [Postman Collection Format](https://learning.postman.com/collection-format/)
+- [OpenAPI Specification](https://swagger.io/specification/)
+
+---
+
+### MCP DevTools - Team Collaboration Features
+
+**Priority**: P3  
+**Category**: Collaboration / Developer Experience  
+**Status**: Not Started  
+**Estimated Effort**: XL  
+**Dependencies**: Backend storage (database), user authentication, real-time sync (WebSocket)
+
+**Description**:  
+Enable team collaboration features in DevTools: shared configurations, team-wide snippets, debugging session annotations, and real-time shared debugging sessions.
+
+**Current Implementation**:  
+All DevTools state is local (localStorage). No sharing capabilities.
+
+**Proposed Solution**:  
+
+**Phase 1: Shared Configurations**
+1. Backend storage for team configs (workflows, favorites)
+2. Import/export team configurations
+3. Config versioning and history
+
+**Phase 2: Shared Snippets & Queries**
+1. Team snippet library
+2. Categorization and tagging
+3. Usage analytics
+
+**Phase 3: Real-Time Collaboration**
+1. Shared debugging sessions
+2. Live cursor presence
+3. Session chat/annotations
+4. Screen sharing integration
+
+**Benefits**:  
+- Onboarding efficiency (share team workflows)
+- Knowledge sharing (common debug patterns)
+- Pair debugging remotely
+- Consistent team tooling
+
+**Implementation Notes**:  
+
+```typescript
+// Team config sync
+interface TeamConfig {
+  id: string
+  teamId: string
+  name: string
+  type: 'workflow' | 'snippet' | 'query' | 'preset'
+  content: unknown
+  createdBy: string
+  updatedAt: Date
+  tags: string[]
+}
+
+// API endpoints
+// GET /api/mcp/team/configs - List team configs
+// POST /api/mcp/team/configs - Create config
+// PUT /api/mcp/team/configs/:id - Update config
+// DELETE /api/mcp/team/configs/:id - Delete config
+
+// Real-time sync with Y.js or similar
+import * as Y from 'yjs'
+import { WebsocketProvider } from 'y-websocket'
+
+const ydoc = new Y.Doc()
+const provider = new WebsocketProvider(
+  'wss://your-server.com',
+  'debug-session-123',
+  ydoc
+)
+```
+
+**Related Files**:  
+- `pages/api/mcp.ts` (MCP server)
+- `app/_components/ui/McpChatInterface.tsx` (frontend)
+- New: `pages/api/mcp/team/*` (team API routes)
+- New: Database schema for team configs
+
+**References**:  
+- [Y.js CRDT Library](https://yjs.dev/)
+- [Liveblocks Collaboration](https://liveblocks.io/)
+- [Firebase Realtime Database](https://firebase.google.com/docs/database)
+
+---
+
 ## Update Instructions
 
 ### How to Add New Entries
@@ -914,6 +1863,20 @@ When adding a new improvement entry to this document:
 ---
 
 ## Changelog
+
+### 2025-12-12
+- Added comprehensive MCP DevTools - Backend-Dependent Enhancements section
+- Documented 9 major future enhancements requiring server-side changes:
+  - Custom Tool Registration System (plugin ecosystem)
+  - AI-Assisted Debugging Integration (GPT-4/Claude analysis)
+  - Real-Time Log Streaming (WebSocket-based live logs)
+  - Database Query Explorer (safe SQL execution in dev)
+  - Performance Profiling Tools (flame graphs, request timing)
+  - Git Integration Tools (status, log, blame, diff)
+  - Environment Variable Manager (secure env debugging)
+  - API Testing Suite (Postman-like in-DevTools)
+  - Team Collaboration Features (shared configs, real-time pairing)
+- Each enhancement includes implementation notes, security considerations, and code examples
 
 ### 2025-11-28
 - Added OptimizedImage/ProductImage Next.js 15 async Client Component error fix
