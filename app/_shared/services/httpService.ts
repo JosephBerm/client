@@ -592,6 +592,99 @@ export class HttpService {
 			throw error
 		}
 	}
+
+	// ============================================================================
+	// PUBLIC (NO-AUTH) METHODS
+	// ============================================================================
+	// 
+	// These methods do NOT access cookies() or any runtime-only APIs.
+	// They can be used with Next.js 16 "use cache" directive for maximum performance.
+	// 
+	// Use these for:
+	// - Public product catalog browsing
+	// - Category listings
+	// - Product details (non-sensitive)
+	// - Any endpoint that doesn't require authentication
+	//
+	// Benefits:
+	// - Compatible with "use cache" (no cookies() access)
+	// - Shared cache across all users
+	// - Faster TTFB (Time to First Byte)
+	// - Better SEO performance
+	// - Lower server load
+	// ============================================================================
+
+	/**
+	 * Performs a GET request WITHOUT authentication.
+	 * Safe to use with "use cache" directive.
+	 * 
+	 * @template T - Expected type of the payload data
+	 * @param {string} url - Endpoint URL (relative to base URL)
+	 * @param {RequestInit} options - Optional fetch options
+	 * @returns {Promise<AxiosResponse<ApiResponse<T>>>} Promise resolving to the API response
+	 * 
+	 * @example
+	 * ```typescript
+	 * // Inside a "use cache" scope
+	 * async function getCachedCategories() {
+	 *   'use cache'
+	 *   return HttpService.getPublic<Category[]>('/products/categories');
+	 * }
+	 * ```
+	 */
+	public static async getPublic<T>(
+		url: string,
+		options: RequestInit = {}
+	): Promise<AxiosResponse<ApiResponse<T>>> {
+		const fullUrl = `${HttpService.baseURL}${url}`
+		const headers: HeadersInit = {
+			'Content-Type': CONTENT_TYPE.JSON,
+			...(options.headers as Record<string, string>),
+		}
+
+		return handleRequest<T>(fullUrl, 'GET', { ...options, headers })
+	}
+
+	/**
+	 * Performs a POST request WITHOUT authentication.
+	 * Safe to use with "use cache" directive.
+	 * 
+	 * @template T - Expected type of the payload data
+	 * @param {string} url - Endpoint URL (relative to base URL)
+	 * @param {any} data - Data to send in the request body
+	 * @param {RequestInit} options - Optional fetch options
+	 * @returns {Promise<AxiosResponse<ApiResponse<T>>>} Promise resolving to the API response
+	 * 
+	 * @example
+	 * ```typescript
+	 * // Inside a "use cache" scope
+	 * async function searchCachedProducts(filter: SearchFilter) {
+	 *   'use cache'
+	 *   cacheTag('products')
+	 *   cacheLife('minutes')
+	 *   return HttpService.postPublic<Product[]>('/products/search/public', filter);
+	 * }
+	 * ```
+	 */
+	public static async postPublic<T>(
+		url: string,
+		data: unknown,
+		options: RequestInit = {}
+	): Promise<AxiosResponse<ApiResponse<T>>> {
+		const fullUrl = `${HttpService.baseURL}${url}`
+		const customHeaders = (options.headers as Record<string, string>) || {}
+		
+		// Don't set Content-Type for FormData (browser will set it with boundary)
+		const isFormData = data instanceof FormData
+		
+		const headers: HeadersInit = isFormData
+			? { ...customHeaders }
+			: { 'Content-Type': CONTENT_TYPE.JSON, ...customHeaders }
+
+		const body = isFormData ? data : JSON.stringify(data)
+
+		return handleRequest<T>(fullUrl, 'POST', { ...options, headers }, body)
+	}
 }
 
 // Export default for backward compatibility (if needed)

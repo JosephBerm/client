@@ -137,23 +137,43 @@ export interface UseProductsStateReturn {
  * - Optimized with useCallback
  * - Testable in isolation
  * 
+ * **Server-Side Hydration:**
+ * When initial state is provided (from Server Component):
+ * - Products are available immediately (no loading spinner)
+ * - isLoading starts as false, hasLoaded starts as true
+ * - Initial fetch can be skipped
+ * 
+ * @param initialState - Optional initial state for server-side hydration
  * @returns Products state and action dispatchers
  * 
  * @example
  * ```typescript
+ * // Without initial data
  * const { state, setProducts, setLoading } = useProductsState()
  * 
- * // Update products after API call
- * setProducts(products, pagedResult)
- * 
- * // Access current state
- * import { logger } from '@_core';
- * 
- * logger.debug('Products state', { productCount: state.products.length })
+ * // With initial data from server
+ * const { state } = useProductsState({
+ *   products: serverProducts,
+ *   productsResult: serverResult,
+ *   isLoading: false,
+ *   hasLoaded: true,
+ * })
  * ```
  */
-export function useProductsState(): UseProductsStateReturn {
-	const [state, dispatch] = useReducer(productsReducer, initialProductsState)
+export function useProductsState(initialState?: Partial<ProductsState>): UseProductsStateReturn {
+	// Merge initial state with defaults
+	const mergedInitialState: ProductsState = {
+		...initialProductsState,
+		// Override with provided initial state
+		...initialState,
+		// If products are provided, mark as loaded and not loading
+		...(initialState?.products?.length ? {
+			isLoading: false,
+			hasLoaded: true,
+		} : {}),
+	}
+	
+	const [state, dispatch] = useReducer(productsReducer, mergedInitialState)
 
 	const setLoading = useCallback((loading: boolean) => {
 		dispatch({ type: 'SET_LOADING', payload: loading })

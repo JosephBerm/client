@@ -246,15 +246,82 @@ const API = {
 			 * Searches products with pagination and filtering (public).
 			 * No authentication required.
 			 * @param search - Search filter
+			 * @deprecated Use searchPublicCacheable for better performance with "use cache"
 			 */
 			searchPublic: async (search: GenericSearchFilter) =>
 				HttpService.post<PagedResult<Product>>(`/Products/search/public`, search),
 			
 			/**
+			 * Searches products with pagination and filtering (public).
+			 * NO AUTHENTICATION - Does not access cookies().
+			 * 
+			 * **USE THIS WITH "use cache" for maximum performance.**
+			 * 
+			 * @param search - Search filter
+			 * @returns Paginated product results
+			 * 
+			 * @example
+			 * ```typescript
+			 * async function getCachedProducts(filter: GenericSearchFilter) {
+			 *   'use cache'
+			 *   cacheTag('products')
+			 *   cacheLife('minutes')
+			 *   return API.Store.Products.searchPublicCacheable(filter)
+			 * }
+			 * ```
+			 */
+			searchPublicCacheable: async (search: GenericSearchFilter) =>
+				HttpService.postPublic<PagedResult<Product>>(`/Products/search/public`, search),
+			
+			/**
 			 * Gets all product categories.
 			 * @returns Array of product categories
+			 * @deprecated Use getCategoriesCacheable for better performance with "use cache"
 			 */
 			getAllCategories: async () => HttpService.get<ProductsCategory[]>('/Products/categories/clean'),
+			
+			/**
+			 * Gets all product categories (public).
+			 * NO AUTHENTICATION - Does not access cookies().
+			 * 
+			 * **USE THIS WITH "use cache" for maximum performance.**
+			 * 
+			 * @returns Array of product categories
+			 * 
+			 * @example
+			 * ```typescript
+			 * async function getCachedCategories() {
+			 *   'use cache'
+			 *   cacheTag('categories')
+			 *   cacheLife('hours')
+			 *   return API.Store.Products.getCategoriesCacheable()
+			 * }
+			 * ```
+			 */
+			getCategoriesCacheable: async () => 
+				HttpService.getPublic<ProductsCategory[]>('/Products/categories/clean'),
+			
+			/**
+			 * Gets a single product by ID (public).
+			 * NO AUTHENTICATION - Does not access cookies().
+			 * 
+			 * **USE THIS WITH "use cache" for maximum performance.**
+			 * 
+			 * @param productId - Product ID
+			 * @returns Product details
+			 * 
+			 * @example
+			 * ```typescript
+			 * async function getCachedProduct(id: string) {
+			 *   'use cache'
+			 *   cacheTag(`product-${id}`, 'products')
+			 *   cacheLife('hours')
+			 *   return API.Store.Products.getPublicCacheable(id)
+			 * }
+			 * ```
+			 */
+			getPublicCacheable: async (productId: string) => 
+				HttpService.getPublic<Product>(`/products/${productId}`),
 		},
 	},
 	

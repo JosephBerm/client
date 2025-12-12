@@ -28,6 +28,12 @@ import { Routes } from '@_features/navigation'
 
 import { logger } from '@_core'
 
+import { 
+	AUTH_COOKIE_NAME, 
+	AUTH_HEADER_PREFIX, 
+	DEFAULT_API_BASE_URL,
+} from '@_shared'
+
 import { InternalAppShell } from './_components'
 
 export const metadata: Metadata = {
@@ -48,12 +54,12 @@ async function getUserData(token: string | null) {
 	if (token == null) {return token}
 
 	try {
-		// Use NEXT_PUBLIC_API_URL for consistency with client-side code
-		const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5254/api'
+		// Use centralized API URL constant for consistency
+		const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_BASE_URL
 		const response = await fetch(`${apiUrl}/account`, {
 			cache: 'no-store',
 			headers: {
-				Authorization: `Bearer ${token}`,
+				Authorization: `${AUTH_HEADER_PREFIX}${token}`,
 			},
 		})
 
@@ -101,7 +107,7 @@ export default async function InternalAppLayout({
 	children: React.ReactNode
 }>) {
 	const cookiesStore = await cookies()
-	const token = cookiesStore.get('at')
+	const token = cookiesStore.get(AUTH_COOKIE_NAME)
 
 	// Check authentication token
 	// Note: Middleware handles primary redirects, this is a fallback

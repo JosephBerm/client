@@ -84,8 +84,15 @@ export {
 // CLIENT SERVICES (All have 'use client' directive)
 // ============================================================================
 
-// HTTP Service
-export { HttpService } from './services/httpService'
+// HTTP Service and Types
+export { HttpService, type ApiResponse, type AxiosResponse } from './services/httpService'
+
+// HTTP Service Constants (public-facing only)
+export {
+	AUTH_COOKIE_NAME,
+	AUTH_HEADER_PREFIX,
+	DEFAULT_API_BASE_URL,
+} from './services/httpService.constants'
 
 // API Client
 export { default as API } from './services/api'

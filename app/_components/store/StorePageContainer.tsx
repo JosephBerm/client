@@ -10,18 +10,58 @@
  * - No business logic (delegated to hook)
  * - Clean component composition
  * 
+ * **Next.js 16 Hybrid Pattern:**
+ * - Accepts optional initial data from Server Component
+ * - If initial data provided, uses it for first render (SEO + Performance)
+ * - Client-side interactions (search, filter, sort) work as before
+ * 
  * @module components/store/StorePageContainer
  * @category Components
  */
 
 'use client'
 
+import { useMemo } from 'react'
+
 import { useStorePageLogic, PRIORITY_IMAGE_COUNT } from '@_features/store'
+import type {
+	SerializedProduct,
+	SerializedPagedResult,
+	SerializedCategory,
+} from '@_features/store/types'
+
+import { PagedResult } from '@_classes/Base/PagedResult'
+import { Product } from '@_classes/Product'
+import ProductsCategory from '@_classes/ProductsCategory'
 
 import StoreFilters from '@_components/store/StoreFilters'
 import StoreHeader from '@_components/store/StoreHeader'
 import StoreProductGrid from '@_components/store/StoreProductGrid'
 import UnifiedStoreToolbar from '@_components/store/UnifiedStoreToolbar'
+
+/**
+ * Props for StorePageContainer
+ * 
+ * All props are optional for backwards compatibility.
+ * When props are provided, they're used as initial state (server-side hydration).
+ * Data comes serialized from Server Component and is converted to class instances here.
+ */
+export interface StorePageContainerProps {
+	/** Initial products from server-side fetch (serialized) */
+	initialProducts?: SerializedProduct[]
+	/** Initial pagination result from server-side fetch (serialized) */
+	initialProductsResult?: SerializedPagedResult
+	/** Initial categories from server-side fetch (serialized) */
+	initialCategories?: SerializedCategory[]
+	/** Initial search params from URL (server-side parsed) */
+	initialSearchParams?: {
+		search?: string
+		categoryIds?: string[]
+		sort?: string
+		page?: number
+		pageSize?: number
+	}
+}
 
 /**
  * Store page container component
@@ -37,10 +77,62 @@ import UnifiedStoreToolbar from '@_components/store/UnifiedStoreToolbar'
  * - Main Content: Sidebar filters + Product grid
  * - Product Grid: Products display with pagination
  * 
+ * **Server-Side Hydration:**
+ * When initial data props are provided (from Server Component):
+ * - Products render immediately (no loading spinner)
+ * - SEO benefits (content in initial HTML)
+ * - Faster LCP (no waiting for client JS)
+ * 
  * @component
  */
-export default function StorePageContainer() {
+export default function StorePageContainer({
+	initialProducts,
+	initialProductsResult,
+	initialCategories,
+	initialSearchParams,
+}: StorePageContainerProps = {}) {
+	// Convert serialized data from server to class instances
+	// This is only done once on initial render (useMemo)
+	// Type assertions are safe because Product/ProductsCategory constructors
+	// handle plain objects with string dates via parseRequiredTimestamp/parseDateSafe
+	const hydratedProducts = useMemo(() => {
+		if (!initialProducts?.length) return undefined
+		return initialProducts.map((p) => new Product(p as unknown as Partial<Product>))
+	}, [initialProducts])
+	
+	const hydratedProductsResult = useMemo(() => {
+		if (!initialProductsResult) return undefined
+		return new PagedResult<Product>({
+			...initialProductsResult,
+			data: hydratedProducts ?? [],
+		})
+	}, [initialProductsResult, hydratedProducts])
+	
+	const hydratedCategories = useMemo(() => {
+		if (!initialCategories?.length) return undefined
+		
+		// Recursively hydrate categories with their subCategories
+		const hydrateCategory = (serialized: SerializedCategory): ProductsCategory => {
+			const category = new ProductsCategory({
+				id: serialized.id,
+				name: serialized.name,
+				parentCategoryId: serialized.parentCategoryId,
+				subCategories: [], // Will be populated below
+			})
+			
+			// Recursively hydrate subCategories if present
+			if (serialized.subCategories?.length) {
+				category.subCategories = serialized.subCategories.map(hydrateCategory)
+			}
+			
+			return category
+		}
+		
+		return initialCategories.map(hydrateCategory)
+	}, [initialCategories])
+	
 	// Get all state and handlers from business logic hook
+	// Pass initial data for server-side hydration when available
 	const {
 		// State
 		products,
@@ -75,7 +167,12 @@ export default function StorePageContainer() {
 		handlePageChange,
 		handleClearFilters,
 		handleCategoryFilter,
-	} = useStorePageLogic()
+	} = useStorePageLogic({
+		initialProducts: hydratedProducts,
+		initialProductsResult: hydratedProductsResult,
+		initialCategories: hydratedCategories,
+		initialSearchParams,
+	})
 
 	return (
 		<div className="min-h-screen w-full">

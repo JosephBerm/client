@@ -6,7 +6,18 @@
  * @module shared/services
  */
 
-export { HttpService } from './httpService'
+// HTTP Service and Types
+export { HttpService, type ApiResponse, type AxiosResponse } from './httpService'
+
+// HTTP Service Constants (public-facing)
+// Internal constants (HTTP_STATUS, CONTENT_TYPE, etc.) are intentionally not exported
+export {
+	AUTH_COOKIE_NAME,
+	AUTH_HEADER_PREFIX,
+	DEFAULT_API_BASE_URL,
+} from './httpService.constants'
+
+// API Client
 export { default as API } from './api'
 
 // Notification Service - Unified logging + toast system (FAANG-level)

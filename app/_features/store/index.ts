@@ -23,6 +23,7 @@ export {
 	SEARCH_DEBOUNCE_MS,
 	MIN_SEARCH_LENGTH,
 	PRIORITY_IMAGE_COUNT,
+	FEATURED_PRODUCTS_COUNT,
 } from './constants'
 
 // ============================================================================
@@ -67,3 +68,22 @@ export {
 	requestCache,
 	createCacheKey,
 } from './utils/requestCache'
+
+// ============================================================================
+// TYPES (Server + Client Safe)
+// ============================================================================
+
+export type {
+	SerializedProduct,
+	SerializedPagedResult,
+	SerializedCategory,
+	InitialStoreData,
+	StoreSearchParams,
+} from './types'
+
+// ============================================================================
+// SERVER FUNCTIONS
+// ============================================================================
+// NOTE: Server-side fetch functions are NOT exported from this barrel.
+// Import them directly from '@_features/store/server' in Server Components.
+// This prevents accidental import in Client Components.

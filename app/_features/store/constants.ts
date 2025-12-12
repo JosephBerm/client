@@ -54,3 +54,10 @@ export const MIN_SEARCH_LENGTH = 3
  */
 export const PRIORITY_IMAGE_COUNT = 8
 
+/**
+ * Number of featured products to display on the home page
+ * Industry standard: 4-8 products for homepage featured sections
+ * Balances visual appeal with performance and user attention
+ */
+export const FEATURED_PRODUCTS_COUNT = 4
+

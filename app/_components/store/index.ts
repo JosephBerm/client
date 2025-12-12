@@ -64,6 +64,7 @@ export { default as AddToCartButton } from './AddToCartButton'
 export { default as ScrollRevealCard } from './ScrollRevealCard'
 export { default as PaginationControls } from './PaginationControls'
 export { default as UnifiedStoreToolbar } from './UnifiedStoreToolbar'
+export { StoreSkeleton } from './StoreSkeleton'
 
 // ============================================================================
 // TOOLBAR COMPONENTS & CONSTANTS
@@ -85,4 +86,5 @@ export type { StoreHeaderProps } from './StoreHeader'
 export type { StoreFiltersProps } from './StoreFilters'
 export type { StoreProductGridProps } from './StoreProductGrid'
 export type { UnifiedStoreToolbarProps } from './UnifiedStoreToolbar'
+export type { StorePageContainerProps } from './StorePageContainer'
 

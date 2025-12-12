@@ -10,6 +10,11 @@
  * - Automatic token validation
  * - Type-safe user data handling
  * 
+ * **Architecture:**
+ * - Uses HttpService for API calls (DRY principle)
+ * - Uses cookies-next for client-side cookie management
+ * - All token operations happen client-side (marked 'use client')
+ * 
  * @module AuthService
  */
 
@@ -20,30 +25,9 @@ import { getCookie, deleteCookie, setCookie } from 'cookies-next'
 import { logger } from '@_core'
 
 import type LoginCredentials from '@_classes/LoginCredentials'
-import type { IUser , RegisterModel } from '@_classes/User'
+import type { IUser, RegisterModel } from '@_classes/User'
 
-
-/**
- * API base URL loaded from environment variables.
- * Uses NEXT_PUBLIC_API_URL for consistency (available on both client and server).
- * Falls back to localhost if not specified.
- */
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5254/api'
-
-/**
- * Standard API response format from the backend.
- * All API endpoints return this structure for consistency.
- * 
- * @template T - The type of the payload data
- */
-interface ApiResponse<T> {
-	/** The actual data returned from the API, or null if error */
-	payload: T | null
-	/** Error or success message from the server */
-	message: string | null
-	/** HTTP status code (200, 201, 400, 401, etc.) */
-	statusCode: number
-}
+import { HttpService, type ApiResponse, AUTH_COOKIE_NAME } from '@_shared'
 
 /**
  * Verifies if the user is authenticated by checking token validity.
@@ -72,8 +56,8 @@ interface ApiResponse<T> {
  * ```
  */
 export async function checkAuthStatus(): Promise<IUser | null> {
-	// Retrieve auth token from cookie (key: 'at' = auth token)
-	const token = getCookie('at')
+	// Retrieve auth token from cookie
+	const token = getCookie(AUTH_COOKIE_NAME)
 
 	// No token means user is not authenticated
 	if (!token) {
@@ -82,28 +66,28 @@ export async function checkAuthStatus(): Promise<IUser | null> {
 
 	try {
 		// Call backend to validate token and get user data
-		const response = await fetch(`${API_URL}/account`, {
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${token}`, // Include token in Authorization header
-			},
-		})
+		// HttpService automatically includes the auth token from cookies
+		const response = await HttpService.get<IUser>('/account')
 
-		if (!response.ok) {
+		if (response.status !== 200 || !response.data.payload) {
 			// Token is invalid or expired, remove it from cookies
-			deleteCookie('at')
+			deleteCookie(AUTH_COOKIE_NAME)
 			return null
 		}
 
-		// Parse response and return user data
-		const data: ApiResponse<IUser> = await response.json()
-		return data.payload
+		return response.data.payload
 	} catch (error) {
 		// Network error or server unreachable - this is expected when offline
 		logger.debug('Auth status check failed', { error })
 		return null
 	}
 }
+
+/** Token expiration durations */
+const TOKEN_EXPIRY = {
+	REMEMBER_ME: 30 * 24 * 60 * 60, // 30 days in seconds
+	DEFAULT: 24 * 60 * 60,          // 1 day in seconds
+} as const
 
 /**
  * Authenticates a user with email/username and password.
@@ -151,52 +135,34 @@ export async function login(credentials: LoginCredentials): Promise<{
 	message?: string
 }> {
 	try {
-		// Send login request to backend
-		const response = await fetch(`${API_URL}/account/login`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(credentials),
-		})
-
-		const data: ApiResponse<string> = await response.json()
+		// Send login request using HttpService (public endpoint, no auth needed)
+		const response = await HttpService.postPublic<string>('/account/login', credentials)
 
 		// Check if login was successful (statusCode 200 and payload contains token)
-		if (response.ok && data.statusCode === 200 && data.payload && typeof data.payload === 'string') {
-			const token = data.payload // Token is the payload itself (string)
+		if (response.status === 200 && response.data.statusCode === 200 && response.data.payload && typeof response.data.payload === 'string') {
+			const token = response.data.payload // Token is the payload itself (string)
 
-			// Store JWT token in cookie first
-			setCookie('at', token, {
-				// Set expiration based on "Remember Me" checkbox
+			// Store JWT token in cookie
+			setCookie(AUTH_COOKIE_NAME, token, {
 				maxAge: credentials.rememberUser 
-					? 30 * 24 * 60 * 60  // 30 days in seconds
-					: 24 * 60 * 60       // 1 day in seconds
+					? TOKEN_EXPIRY.REMEMBER_ME
+					: TOKEN_EXPIRY.DEFAULT,
 			})
 
-			// Fetch user account data using the token
+			// Fetch user account data using the new token
+			// Now HttpService will automatically include the token we just set
 			try {
-				const userResponse = await fetch(`${API_URL}/account`, {
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${token}`,
-					},
-				})
+				const userResponse = await HttpService.get<IUser>('/account')
 
-				if (userResponse.ok) {
-					const userData: ApiResponse<IUser> = await userResponse.json()
-					
-					if (userData.payload) {
-						return {
-							success: true,
-							user: userData.payload,
-							token: token,
-						}
+				if (userResponse.status === 200 && userResponse.data.payload) {
+					return {
+						success: true,
+						user: userResponse.data.payload,
+						token: token,
 					}
 				}
 
 				// If user fetch fails, still return success with token
-				// User data can be fetched later via checkAuthStatus
 				logger.warn('Login successful but user data fetch failed', {
 					status: userResponse.status,
 					context: 'login_user_fetch',
@@ -205,7 +171,6 @@ export async function login(credentials: LoginCredentials): Promise<{
 				return {
 					success: true,
 					token: token,
-					// User will be fetched on next checkAuthStatus call
 				}
 			} catch (userFetchError) {
 				// Network error fetching user, but login was successful
@@ -217,7 +182,6 @@ export async function login(credentials: LoginCredentials): Promise<{
 				return {
 					success: true,
 					token: token,
-					// User will be fetched on next checkAuthStatus call
 				}
 			}
 		}
@@ -225,7 +189,7 @@ export async function login(credentials: LoginCredentials): Promise<{
 		// Login failed (invalid credentials, account locked, etc.)
 		return {
 			success: false,
-			message: data.message || 'Login failed. Please check your credentials.',
+			message: response.data.message ?? 'Login failed. Please check your credentials.',
 		}
 	} catch (error) {
 		// Network error (server down, no internet, etc.)
@@ -279,29 +243,21 @@ export async function signup(form: RegisterModel): Promise<{
 	message?: string
 }> {
 	try {
-		// Send signup request to backend
-		const response = await fetch(`${API_URL}/account/signup`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(form),
-		})
+		// Send signup request using HttpService (public endpoint, no auth needed)
+		const response = await HttpService.postPublic<IUser>('/account/signup', form)
 
-		const data: ApiResponse<IUser> = await response.json()
-
-		if (response.ok && data.payload) {
+		if (response.status === 200 && response.data.payload) {
 			// Account created successfully
 			return {
 				success: true,
-				user: data.payload,
+				user: response.data.payload,
 			}
 		}
 
 		// Signup failed (username taken, invalid email, validation error, etc.)
 		return {
 			success: false,
-			message: data.message || 'Signup failed',
+			message: response.data.message ?? 'Signup failed',
 		}
 	} catch (error) {
 		// Network error (server down, no internet, etc.)
@@ -333,7 +289,7 @@ export async function signup(form: RegisterModel): Promise<{
  * ```
  */
 export function logout(): void {
-	deleteCookie('at') // Remove auth token cookie
+	deleteCookie(AUTH_COOKIE_NAME)
 }
 
 /**
@@ -352,7 +308,7 @@ export function logout(): void {
  * ```
  */
 export function getAuthToken(): string | undefined {
-	return getCookie('at')?.toString()
+	return getCookie(AUTH_COOKIE_NAME)?.toString()
 }
 
 

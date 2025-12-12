@@ -21,8 +21,11 @@ export const AUTH_HEADER_PREFIX = 'Bearer ' as const
 /**
  * Default API base URL
  * Used as fallback when NEXT_PUBLIC_API_URL is not set
+ * 
+ * NOTE: This must match the backend development server port.
+ * The backend runs on port 5254 by default.
  */
-export const DEFAULT_API_BASE_URL = 'http://localhost:5000/api' as const
+export const DEFAULT_API_BASE_URL = 'http://localhost:5254/api' as const
 
 /**
  * Request timeout in milliseconds

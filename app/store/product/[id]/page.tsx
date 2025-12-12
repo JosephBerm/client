@@ -1,4 +1,6 @@
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
+import { cacheTag, cacheLife } from 'next/cache'
 
 import { Routes } from '@_features/navigation'
 
@@ -32,10 +34,48 @@ interface ProductPageParams {
 	}>
 }
 
+/**
+ * Product Detail Page
+ * 
+ * Server Component with Cache Components optimization (Next.js 16).
+ * 
+ * **Caching Strategy:**
+ * - Uses `use cache` directive for prerendering into static shell
+ * - Tagged with `product-{id}` for granular cache invalidation
+ * - Cache lifetime: 'hours' (products don't change frequently)
+ * - Related products wrapped in Suspense (dynamic content)
+ * 
+ * **Benefits:**
+ * - Faster TTFB for frequently accessed products
+ * - Reduced API calls (cached responses)
+ * - Static HTML shell served instantly
+ * - Product updates trigger revalidation via `revalidateTag('product-{id}')`
+ * 
+ * **Revalidation:**
+ * When product data changes, call from Server Action:
+ * ```ts
+ * import { revalidateTag } from 'next/cache'
+ * revalidateTag(`product-${productId}`)
+ * ```
+ * 
+ * @see https://nextjs.org/docs/app/getting-started/cache-components
+ */
 export default async function ProductDetailPage({ params }: ProductPageParams) {
+	'use cache'
+	
 	const { id } = await params
 	
-	const productResponse = await API.Store.Products.get(id)
+	// Tag for granular cache invalidation
+	// Usage: revalidateTag(`product-${id}`) when product data changes
+	cacheTag(`product-${id}`, 'products')
+	
+	// Products don't change frequently - cache for hours
+	// Profile options: 'seconds', 'minutes', 'hours', 'days', 'weeks', 'max'
+	cacheLife('hours')
+	
+	// Use public cacheable method - does NOT access cookies()
+	// Required for 'use cache' compatibility
+	const productResponse = await API.Store.Products.getPublicCacheable(id)
 	const productPayload = productResponse.data.payload
 
 	if (!productPayload) {
@@ -101,11 +141,24 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 				</div>
 			</div>
 
-			{/* Related Products Section */}
-			<RelatedProducts 
-				currentProductId={product.id} 
-				categoryName={product.categories.length > 0 ? product.categories[0].name : product.category} 
-			/>
+			{/* Related Products Section - Wrapped in Suspense for dynamic loading */}
+			<Suspense fallback={
+				<div className="py-12">
+					<div className="animate-pulse space-y-4">
+						<div className="h-8 w-48 bg-base-300 rounded" />
+						<div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+							{[...Array(4)].map((_, i) => (
+								<div key={i} className="h-64 bg-base-300 rounded-2xl" />
+							))}
+						</div>
+					</div>
+				</div>
+			}>
+				<RelatedProducts 
+					currentProductId={product.id} 
+					categoryName={product.categories.length > 0 ? product.categories[0].name : product.category} 
+				/>
+			</Suspense>
 		</PageLayout>
 	)
 }

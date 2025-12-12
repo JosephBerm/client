@@ -5,7 +5,8 @@
  * Uses the ProductCard component from the store for consistency and proper product display.
  * 
  * **Features:**
- * - Fetches real products from API (configurable count, default: 4)
+ * - Supports server-side pre-fetched products (initialProducts prop) for optimal performance
+ * - Falls back to client-side fetching if no initial products provided
  * - Loading states with skeleton loaders
  * - Error handling with graceful fallback
  * - Dynamic responsive grid layout that ensures even row distribution
@@ -17,7 +18,8 @@
  * - Consistent with Store page design patterns and landing page aesthetics
  * 
  * **Industry Best Practices:**
- * - Server-side data fetching with client-side hydration
+ * - Server-side data fetching with `use cache` for home page
+ * - Client-side hydration with pre-fetched data
  * - Priority image loading for above-the-fold content
  * - Accessible loading states
  * - Error boundaries and fallback UI
@@ -39,7 +41,8 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
-import { PRODUCT_API_INCLUDES } from '@_features/store'
+import { PRODUCT_API_INCLUDES, FEATURED_PRODUCTS_COUNT } from '@_features/store'
+import type { SerializedProduct } from '@_features/store/types'
 
 import { logger } from '@_core'
 
@@ -54,16 +57,6 @@ import ProductCardSkeleton from '@_components/store/ProductCardSkeleton'
 import Button from '@_components/ui/Button'
 import Pill from '@_components/ui/Pill'
 import StatusDot from '@_components/ui/StatusDot'
-
-
-
-
-/**
- * Number of featured products to display
- * Industry standard: 4-8 products for homepage featured sections
- * Balances visual appeal with performance and user attention
- */
-const FEATURED_PRODUCTS_COUNT = 4
 
 /**
  * Calculate optimal grid columns for even row distribution
@@ -139,22 +132,50 @@ const getOptimalGridClasses = (itemCount: number): { grid: string; maxWidth: str
 }
 
 /**
+ * ProductsCarousel Props
+ */
+interface ProductsCarouselProps {
+	/**
+	 * Pre-fetched products from server component (optional).
+	 * When provided, skips client-side fetch for better performance.
+	 * Should be fetched using `fetchFeaturedProducts()` with `use cache`.
+	 */
+	initialProducts?: SerializedProduct[]
+}
+
+/**
  * Products Carousel Component
  *
  * Displays featured product spotlights in a responsive grid layout.
- * Fetches real products from the API and displays them using the ProductCard component.
+ * Supports both server-side pre-fetched products and client-side fallback.
  * Matches the Store page grid layout for visual consistency.
+ * 
+ * @param initialProducts - Pre-fetched products from server (optional)
  */
-export default function ProductsCarousel() {
-	const [products, setProducts] = useState<Product[]>([])
-	const [isLoading, setIsLoading] = useState(true)
+export default function ProductsCarousel({ initialProducts }: ProductsCarouselProps = {}) {
+	// Hydrate initial products into Product instances if provided
+	const hydratedInitialProducts = useMemo(() => {
+		if (!initialProducts?.length) return undefined
+		return initialProducts.map((p) => new Product(p as Partial<Product>))
+	}, [initialProducts])
+
+	const [products, setProducts] = useState<Product[]>(hydratedInitialProducts ?? [])
+	const [isLoading, setIsLoading] = useState(!hydratedInitialProducts)
 	const [error, setError] = useState<string | null>(null)
 
 	/**
-	 * Fetch featured products on component mount
+	 * Fetch featured products on component mount (only if not pre-fetched)
 	 * Uses searchPublic API with minimal filters to get latest products
 	 */
 	useEffect(() => {
+		// Skip fetch if we have pre-fetched products from server
+		if (hydratedInitialProducts?.length) {
+			logger.info('🟢 ProductsCarousel: Using server pre-fetched products', {
+				count: hydratedInitialProducts.length,
+			})
+			return
+		}
+
 		const fetchFeaturedProducts = async () => {
 			setIsLoading(true)
 			setError(null)
@@ -201,7 +222,7 @@ export default function ProductsCarousel() {
 		}
 
 		void fetchFeaturedProducts()
-	}, [])
+	}, [hydratedInitialProducts])
 
 	/**
 	 * Calculate optimal grid classes and max-width based on product count

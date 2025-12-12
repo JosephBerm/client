@@ -41,7 +41,7 @@ import { notificationService } from '@_shared'
 import { scrollToTop } from '@_shared/utils/scrollUtils'
 
 import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
-import type { PagedResult } from '@_classes/Base/PagedResult'
+import { PagedResult } from '@_classes/Base/PagedResult'
 import type { Product } from '@_classes/Product'
 import type ProductsCategory from '@_classes/ProductsCategory'
 
@@ -57,6 +57,29 @@ import type { RetrievalOverrides } from './useStoreData'
 // SEARCH_DEBOUNCE_MS, // ⏸️ DISABLED - search auto-fetch (save for last)
 // MIN_SEARCH_LENGTH, // ⏸️ DISABLED - search auto-fetch (save for last)
 // PRIORITY_IMAGE_COUNT, // ⏸️ DISABLED - not used in minimal version
+
+/**
+ * Initial data props for server-side hydration
+ * 
+ * When these are provided, the hook skips initial data fetching
+ * and uses the server-fetched data instead.
+ */
+export interface UseStorePageLogicProps {
+	/** Initial products from server-side fetch */
+	initialProducts?: Product[]
+	/** Initial pagination result from server-side fetch */
+	initialProductsResult?: PagedResult<Product>
+	/** Initial categories from server-side fetch */
+	initialCategories?: ProductsCategory[]
+	/** Initial search params from URL (server-side parsed) */
+	initialSearchParams?: {
+		search?: string
+		categoryIds?: string[]
+		sort?: string
+		page?: number
+		pageSize?: number
+	}
+}
 
 /**
  * Store page logic hook return type
@@ -113,19 +136,41 @@ export interface UseStorePageLogicReturn {
  * - Handles focus management for search input
  * - DRY principle with unified fetch function
  * 
+ * **Server-Side Hydration:**
+ * When initial data is provided (from Server Component):
+ * - Products are available immediately (no loading spinner)
+ * - Initial fetch is skipped (data already loaded)
+ * - SEO benefits (content in initial HTML)
+ * 
+ * @param props - Optional initial data for server-side hydration
  * @returns Store page state and event handlers
  * 
  * @example
  * ```typescript
- * const {
- *   products,
- *   isLoading,
- *   handleSearchChange,
- *   handleCategorySelectionChange,
- * } = useStorePageLogic()
+ * // Without initial data (client-side fetch)
+ * const { products, isLoading } = useStorePageLogic()
+ * 
+ * // With initial data (server-side hydration)
+ * const { products, isLoading } = useStorePageLogic({
+ *   initialProducts,
+ *   initialProductsResult,
+ *   initialCategories,
+ * })
  * ```
  */
-export function useStorePageLogic(): UseStorePageLogicReturn {
+export function useStorePageLogic(props: UseStorePageLogicProps = {}): UseStorePageLogicReturn {
+	// Extract initial data from props
+	const {
+		initialProducts,
+		initialProductsResult,
+		initialCategories,
+		initialSearchParams,
+	} = props
+	
+	// Determine if we have server-side data to hydrate from
+	const hasServerData = Boolean(
+		initialProducts?.length || initialCategories?.length
+	)
 	// ============================================================================
 	// ROUTING & URL - ⏸️ DISABLED
 	// ============================================================================
@@ -138,11 +183,17 @@ export function useStorePageLogic(): UseStorePageLogicReturn {
 	// ============================================================================
 	
 	// Products state (custom hook)
+	// Initialize with server data if available for server-side hydration
 	const {
 		state: productsState,
 		setProducts,
 		setLoading,
-	} = useProductsState()
+	} = useProductsState(
+		initialProducts?.length ? {
+			products: initialProducts,
+			productsResult: initialProductsResult ?? new PagedResult<Product>(),
+		} : undefined
+	)
 	
 	// Search/filter state (custom hook)
 	const {
@@ -158,7 +209,10 @@ export function useStorePageLogic(): UseStorePageLogicReturn {
 	)
 	
 	// Categories state (independent data)
-	const [categories, setCategories] = useState<ProductsCategory[]>([])
+	// Initialize with server data if available
+	const [categories, setCategories] = useState<ProductsCategory[]>(
+		initialCategories ?? []
+	)
 	
 	// Data fetching hook
 	const { fetchCategories, fetchProducts, cancelPendingRequests } = useStoreData() // ✅ ENABLED - cancellation
@@ -626,15 +680,32 @@ export function useStorePageLogic(): UseStorePageLogicReturn {
 	// ============================================================================
 
 	/**
-	 * ✅ MINIMAL - Initial data fetch ONLY
-	 * Fetches categories and products ONCE on mount
-	 * NO other effects to prevent infinite loops
+	 * ✅ Initial data fetch (skipped if server data provided)
+	 * 
+	 * Fetches categories and products ONCE on mount.
+	 * If initial data was provided from Server Component, this is skipped.
+	 * 
+	 * **Server-Side Hydration:**
+	 * When hasServerData is true:
+	 * - Products already rendered (from server)
+	 * - Categories already set (from server)
+	 * - No client-side fetch needed
+	 * - Better SEO and performance
 	 */
 	useEffect(() => {
 		if (hasInitializedRef.current) {
 			return
 		}
 		hasInitializedRef.current = true
+
+		// If we have server data, skip initial fetch
+		if (hasServerData) {
+			logger.info('🟢 Server-side hydration: Skipping initial fetch (data already loaded)', {
+				productsCount: initialProducts?.length ?? 0,
+				categoriesCount: initialCategories?.length ?? 0,
+			})
+			return
+		}
 
 		const initialize = async () => {
 			try {
@@ -670,7 +741,7 @@ export function useStorePageLogic(): UseStorePageLogicReturn {
 
 		void initialize()
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []) // Only run once on mount - NO other dependencies!
+	}, [hasServerData]) // Only depends on server data flag
 
 	/**
 	 * ⏸️ DISABLED - URL parameter handling

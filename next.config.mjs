@@ -241,6 +241,34 @@ const nextConfig = {
 	reactCompiler: true,
 
 	// ---------------------------------------------------------------------------
+	// Cache Components (Next.js 16 Stable)
+	// ---------------------------------------------------------------------------
+
+	/**
+	 * Cache Components
+	 * Enables the "use cache" directive and Partial Prerendering (PPR).
+	 * 
+	 * @see https://nextjs.org/docs/app/getting-started/cache-components
+	 * @see https://nextjs.org/docs/app/api-reference/directives/use-cache
+	 * 
+	 * Benefits for MedSource Pro:
+	 * - Product Detail pages cached with cacheTag for granular invalidation
+	 * - Static content (FAQ, About) included in static HTML shell
+	 * - Faster Time to First Byte (TTFB) for product catalog
+	 * - Reduced API calls for frequently accessed products
+	 * 
+	 * How it works:
+	 * - Routes prerender into a static HTML shell
+	 * - Dynamic content streams in via Suspense boundaries
+	 * - "use cache" directive caches function/component output
+	 * - cacheTag() enables on-demand revalidation
+	 * - cacheLife() sets cache duration ('hours', 'days', 'max')
+	 * 
+	 * Note: Requires Node.js runtime (not Edge)
+	 */
+	cacheComponents: true,
+
+	// ---------------------------------------------------------------------------
 	// Experimental Features
 	// ---------------------------------------------------------------------------
 

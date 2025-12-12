@@ -1,67 +1,111 @@
 /**
- * @fileoverview Store Catalog Page
+ * @fileoverview Store Catalog Page - Server Component
  * 
- * Public-facing store catalog with product browsing, search, filtering, and pagination.
- * Implements FAANG-level best practices for performance, accessibility, and user experience.
+ * Public-facing store catalog with server-side data fetching for SEO.
+ * Implements the official Next.js 16 hybrid pattern:
  * 
- * **Refactored Architecture:**
- * - Business logic extracted to `useStorePageLogic` hook
- * - UI components separated into focused, reusable components
- * - Container/Presentational pattern for clean separation
- * - Simplified page component (orchestration only)
+ * **Server-Side (this file):**
+ * - Reads URL searchParams on server
+ * - Fetches initial products and categories
+ * - Passes initial data to Client Component
+ * - Content appears in initial HTML (SEO)
  * 
- * **Key Features:**
- * - Real-time search with debouncing
- * - Category filtering with multi-select
- * - Sort options (relevance, price, name, date)
- * - Responsive grid layout (1-3 columns)
- * - Pagination controls with "load more"
- * - Skeleton loading states
- * - Focus management for accessibility
- * - Request cancellation (AbortController)
+ * **Client-Side (StorePageContainer):**
+ * - Receives initial data as props
+ * - Handles user interactions (search, filter, sort, paginate)
+ * - No loading spinner on first render
  * 
- * **Performance Optimizations:**
- * - Memoized computed values
- * - Memoized event handlers
- * - Debounced search (400ms)
- * - Priority image loading
- * - Request deduplication
+ * **Benefits:**
+ * - SEO: Products in initial HTML for search engines
+ * - Performance: Faster LCP (no waiting for client JS)
+ * - URL Shareability: Filtered URLs work on first load
+ * - Caching: Server-side caching with Cache Components
  * 
+ * @see https://nextjs.org/docs/app/getting-started/fetching-data
  * @module pages/store
  * @category Pages
  */
 
-'use client'
+import { Suspense } from 'react'
 
-import { StorePageContainer } from '@_components/store'
+import { fetchInitialStoreData } from '@_features/store/server'
 
-// Removed force-dynamic - Client Components are already fully dynamic by default.
-// Removed Suspense - not needed for Client Components that fetch data with hooks.
-// Loading states are managed by isLoading state in useStorePageLogic hook.
+import { StorePageContainer, StoreSkeleton } from '@_components/store'
 
 /**
- * Store catalog page component
+ * Store page search params (from URL)
+ */
+interface StorePageProps {
+	searchParams: Promise<{
+		search?: string
+		categories?: string
+		sort?: string
+		page?: string
+		pageSize?: string
+	}>
+}
+
+/**
+ * Store catalog page component - Server Component
  * 
- * **Simplified Implementation:**
- * All business logic and state management is handled by:
- * - `useStorePageLogic` hook (in @_features/store)
- * - `StorePageContainer` component (in @_components/store)
+ * Fetches initial data server-side and passes to Client Component.
+ * This enables:
+ * - Products in initial HTML (SEO)
+ * - Faster first paint (no client-side fetch needed)
+ * - URL-based filtering works on server
  * 
- * This page is a thin wrapper that renders the store container.
- * Loading states are managed by the `isLoading` state in the hook.
- * 
- * **Next.js 15 Note:**
- * Client Component pages don't receive params/searchParams as props.
- * All URL state is handled client-side via hooks (useSearchParams, useRouter).
- * 
- * **Component Breakdown:**
- * - `StoreHeader`: Page title and description
- * - `UnifiedStoreToolbar`: Search, sort, filter controls
- * - `StoreFilters`: Category filter sidebar
- * - `StoreProductGrid`: Products display with pagination
+ * **Note:** React RSC automatically serializes class instances when
+ * passing from Server to Client Components. No manual serialization needed.
  * 
  * @component
  */
-const Page = () => <StorePageContainer />
+export default async function StorePage({ searchParams }: StorePageProps) {
+	// Await searchParams per Next.js 16 requirement
+	const params = await searchParams
+	
+	// Fetch initial data server-side
+	const initialData = await fetchInitialStoreData(params)
+	
+	return (
+		<Suspense fallback={<StoreSkeleton />}>
+			<StorePageContainer
+				initialProducts={initialData.products}
+				initialProductsResult={initialData.productsResult}
+				initialCategories={initialData.categories}
+				initialSearchParams={initialData.searchParams}
+			/>
+		</Suspense>
+	)
+}
 
-export default Page
+/**
+ * Generate metadata for SEO
+ * 
+ * Uses searchParams to create dynamic titles/descriptions
+ * based on current filters.
+ */
+export async function generateMetadata({ searchParams }: StorePageProps) {
+	const params = await searchParams
+	
+	// Build dynamic title based on filters
+	let title = 'Medical Supply Store'
+	if (params.search) {
+		title = `Search: "${params.search}" - Medical Supply Store`
+	}
+	
+	// Build dynamic description
+	let description = 'Browse our catalog of quality medical supplies. Filter by category, search by name, and find the products you need.'
+	if (params.categories) {
+		description = `Shop medical supplies in selected categories. ${description}`
+	}
+	
+	return {
+		title,
+		description,
+		openGraph: {
+			title,
+			description,
+			type: 'website',
+		},
+	}
+}

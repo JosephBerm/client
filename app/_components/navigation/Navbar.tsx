@@ -64,7 +64,7 @@ import { Routes } from '@_features/navigation'
 
 import { logger } from '@_core'
 
-import { useMediaQuery } from '@_shared'
+import { useMediaQuery, AUTH_COOKIE_NAME } from '@_shared'
 
 import LoginModal from '@_components/auth/LoginModal'
 import SettingsModal from '@_components/settings/SettingsModal'
@@ -170,7 +170,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 		}
 
 		// Check for token in cookies (immediate check, available before AuthInitializer runs)
-		const token = getCookie('at')
+		const token = getCookie(AUTH_COOKIE_NAME)
 		const hasToken = !!token
 
 		// User is authenticated if they have a token OR auth state says so
