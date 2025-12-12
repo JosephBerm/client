@@ -1,7 +1,5 @@
 'use client'
 
-import { useMemo } from 'react'
-
 import Link from 'next/link'
 
 import classNames from 'classnames'
@@ -33,8 +31,9 @@ import { CONTACT_INFO } from './contact.constants'
  * @module contact/ContactInfo
  */
 export default function ContactInfo() {
-	const isOpen = useMemo(() => isBusinessOpen(), [])
-	const businessHours = useMemo(() => getGroupedBusinessHours(), [])
+	// Note: React Compiler handles memoization automatically (Next.js 16)
+	const isOpen = isBusinessOpen()
+	const businessHours = getGroupedBusinessHours()
 
 	const infoReveal = useScrollReveal({
 		threshold: 0.1,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import classNames from 'classnames'
 
@@ -424,7 +424,8 @@ export default function ScrollIntoViewComponent() {
 
 	// Enhanced ref callback that stores label refs for overlap detection
 	// Industry best practice: Separate refs for different purposes (navigation vs measurement)
-	const getLabelRef = useCallback((sectionId: string) => {
+	// Note: React Compiler handles memoization automatically (Next.js 16)
+	const getLabelRef = (sectionId: string) => {
 		return (element: HTMLAnchorElement | null) => {
 			if (element) {
 				labelRefs.current.set(sectionId, element)
@@ -434,7 +435,7 @@ export default function ScrollIntoViewComponent() {
 			// Also set the navigation ref
 			getButtonRef(sectionId)(element)
 		}
-	}, [getButtonRef])
+	}
 
 	// Reusable section metrics hook - DRY, scalable, future-proof
 	// Industry best practice: Single source of truth for section positions
@@ -529,7 +530,8 @@ export default function ScrollIntoViewComponent() {
 	// Single source of truth: Determine final active section with priority
 	// FAANG approach: User intent > Enhanced detection > Intersection Observer
 	// Industry best practice: Clear priority order ensures consistent behavior
-	const finalActiveSection = useMemo(() => {
+	// Note: React Compiler handles memoization automatically (Next.js 16)
+	const finalActiveSection = (() => {
 		// Priority 1: User intent (clicked section) - highest priority
 		if (userIntentSection) {
 			return userIntentSection
@@ -542,24 +544,23 @@ export default function ScrollIntoViewComponent() {
 		
 		// Priority 3: Intersection Observer (fallback)
 		return activeSection
-	}, [userIntentSection, enhancedActiveSection, activeSection])
+	})()
 
 	// Calculate active section index for timeline progress
-	const activeSectionIndex = useMemo(() => {
+	// Note: React Compiler handles memoization automatically (Next.js 16)
+	const activeSectionIndex = (() => {
 		if (!finalActiveSection) {return 0}
 		const index = SECTIONS.findIndex((s) => s.id === finalActiveSection)
 		return index >= 0 ? index : 0
-	}, [finalActiveSection])
+	})()
 
 	// Enhanced section active check: Uses single source of truth
 	// Industry best practice: Single function, single source of truth
 	// FAANG approach: Clear, predictable active state determination
-	const isSectionActiveEnhanced = useCallback(
-		(sectionId: string) => {
-			return finalActiveSection === sectionId
-		},
-		[finalActiveSection]
-	)
+	// Note: React Compiler handles memoization automatically (Next.js 16)
+	const isSectionActiveEnhanced = (sectionId: string) => {
+		return finalActiveSection === sectionId
+	}
 
 	// Cleanup user intent timeout on unmount
 	useEffect(() => {
@@ -594,72 +595,68 @@ export default function ScrollIntoViewComponent() {
 
 	/**
 	 * Handle keyboard navigation with focus management
+	 * Note: React Compiler handles memoization automatically (Next.js 16)
 	 */
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent<HTMLAnchorElement>, sectionId: string, index: number) => {
-			const newIndex = handleKeyboardNavigation(e, index)
-			if (newIndex !== null) {
-				currentIndexRef.current = newIndex
-			}
-		},
-		[handleKeyboardNavigation]
-	)
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLAnchorElement>, sectionId: string, index: number) => {
+		const newIndex = handleKeyboardNavigation(e, index)
+		if (newIndex !== null) {
+			currentIndexRef.current = newIndex
+		}
+	}
 
 	/**
 	 * Handle click with smooth scroll
 	 * FAANG approach: User intent takes priority - clicked section is immediately active
 	 * Industry best practice: Single source of truth with user intent priority
 	 * Ensures clicked section stays active until scroll completes and natural detection takes over
+	 * Note: React Compiler handles memoization automatically (Next.js 16)
 	 */
-	const handleClick = useCallback(
-		(e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
-			e.preventDefault()
+	const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+		e.preventDefault()
+		
+		// FAANG approach: Set user intent immediately - highest priority
+		// This ensures the clicked section is active immediately, no matter what
+		setUserIntentSection(sectionId)
+		
+		// Clear any existing timeout
+		if (userIntentTimeoutRef.current) {
+			clearTimeout(userIntentTimeoutRef.current)
+		}
+
+		// Scroll to section
+		scrollToSection(sectionId)
+
+		// Update current index for keyboard navigation
+		const index = SECTIONS.findIndex((s) => s.id === sectionId)
+		if (index !== -1) {
+			currentIndexRef.current = index
+		}
+
+		// Industry best practice: Clear user intent after scroll completes
+		// This allows natural scroll-based detection to take over after animation
+		// Smooth scroll typically takes 300-500ms, so clear after 800ms to be safe
+		const prefersReducedMotionLocal = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+		const clearIntentDelay = prefersReducedMotionLocal ? 200 : 800
+
+		userIntentTimeoutRef.current = setTimeout(() => {
+			// Clear user intent - allow natural scroll-based detection to take over
+			setUserIntentSection(null)
+			userIntentTimeoutRef.current = null
 			
-			// FAANG approach: Set user intent immediately - highest priority
-			// This ensures the clicked section is active immediately, no matter what
-			setUserIntentSection(sectionId)
-			
-			// Clear any existing timeout
-			if (userIntentTimeoutRef.current) {
-				clearTimeout(userIntentTimeoutRef.current)
+			// Force Intersection Observer to re-check by triggering a scroll event
+			// This ensures the observer updates even if the section is at the exact boundary
+			const element = document.getElementById(sectionId)
+			if (element) {
+				// Small scroll (1px) to trigger observer without visual movement
+				// This is a common pattern for forcing Intersection Observer updates
+				const currentScroll = window.scrollY
+				window.scrollTo({ top: currentScroll + 1, behavior: 'auto' })
+				requestAnimationFrame(() => {
+					window.scrollTo({ top: currentScroll, behavior: 'auto' })
+				})
 			}
-
-			// Scroll to section
-			scrollToSection(sectionId)
-
-			// Update current index for keyboard navigation
-			const index = SECTIONS.findIndex((s) => s.id === sectionId)
-			if (index !== -1) {
-				currentIndexRef.current = index
-			}
-
-			// Industry best practice: Clear user intent after scroll completes
-			// This allows natural scroll-based detection to take over after animation
-			// Smooth scroll typically takes 300-500ms, so clear after 800ms to be safe
-			const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-			const clearIntentDelay = prefersReducedMotion ? 200 : 800
-
-			userIntentTimeoutRef.current = setTimeout(() => {
-				// Clear user intent - allow natural scroll-based detection to take over
-				setUserIntentSection(null)
-				userIntentTimeoutRef.current = null
-				
-				// Force Intersection Observer to re-check by triggering a scroll event
-				// This ensures the observer updates even if the section is at the exact boundary
-				const element = document.getElementById(sectionId)
-				if (element) {
-					// Small scroll (1px) to trigger observer without visual movement
-					// This is a common pattern for forcing Intersection Observer updates
-					const currentScroll = window.scrollY
-					window.scrollTo({ top: currentScroll + 1, behavior: 'auto' })
-					requestAnimationFrame(() => {
-						window.scrollTo({ top: currentScroll, behavior: 'auto' })
-					})
-				}
-			}, clearIntentDelay)
-		},
-		[scrollToSection]
-	)
+		}, clearIntentDelay)
+	}
 
 	/**
 	 * Sync current index with active section

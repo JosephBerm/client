@@ -1,7 +1,5 @@
 'use client'
 
-import { useMemo, useCallback } from 'react'
-
 import { useRouter } from 'next/navigation'
 
 import { MessageSquare } from 'lucide-react'
@@ -115,15 +113,16 @@ const CONTACT_INFO = {
 export default function ContactUs() {
 	const router = useRouter()
 
-	// Calculate business status (memoized for performance)
-	const isOpen = useMemo(() => isBusinessOpen(), [])
-	const businessHours = useMemo(() => getGroupedBusinessHours(), [])
-
+	// Calculate business status
+	// Note: React Compiler (Next.js 16) automatically memoizes these
+	const isOpen = isBusinessOpen()
+	const businessHours = getGroupedBusinessHours()
 
 	// Handler for members only chat card click
-	const handleMembersOnlyChatClick = useCallback(() => {
+	// Note: React Compiler automatically memoizes callbacks
+	const handleMembersOnlyChatClick = () => {
 		router.push(Routes.openLoginModal())
-	}, [router])
+	}
 
 	return (
 		<section 

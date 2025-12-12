@@ -34,7 +34,7 @@
 
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 
 import Link from 'next/link'
 
@@ -154,10 +154,10 @@ interface ProductsCarouselProps {
  */
 export default function ProductsCarousel({ initialProducts }: ProductsCarouselProps = {}) {
 	// Hydrate initial products into Product instances if provided
-	const hydratedInitialProducts = useMemo(() => {
-		if (!initialProducts?.length) return undefined
-		return initialProducts.map((p) => new Product(p as Partial<Product>))
-	}, [initialProducts])
+	// Note: React Compiler handles memoization automatically (Next.js 16)
+	const hydratedInitialProducts = initialProducts?.length
+		? initialProducts.map((p) => new Product(p as Partial<Product>))
+		: undefined
 
 	const [products, setProducts] = useState<Product[]>(hydratedInitialProducts ?? [])
 	const [isLoading, setIsLoading] = useState(!hydratedInitialProducts)
@@ -233,8 +233,10 @@ export default function ProductsCarousel({ initialProducts }: ProductsCarouselPr
 	 * - Max-width constraints prevent cards from stretching too wide
 	 * - Centered grid when narrower than container
 	 * - Responsive: 2x2 on tablet, 4 columns on large screens (for 4 items)
+	 * 
+	 * Note: React Compiler handles memoization automatically (Next.js 16)
 	 */
-	const gridConfig = useMemo(() => {
+	const gridConfig = (() => {
 		if (isLoading) {
 			// Use default grid for loading state (matches 4-item layout)
 			return {
@@ -247,7 +249,7 @@ export default function ProductsCarousel({ initialProducts }: ProductsCarouselPr
 			gridClasses: `grid gap-6 ${config.grid}`,
 			maxWidth: config.maxWidth,
 		}
-	}, [products.length, isLoading])
+	})()
 
 	return (
 		<section id="featured-products" className="relative overflow-hidden bg-base-200 py-20 lg:py-28">

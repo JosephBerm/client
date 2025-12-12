@@ -1,7 +1,5 @@
 'use client'
 
-import { useCallback } from 'react'
-
 import { useRouter } from 'next/navigation'
 
 import classNames from 'classnames'
@@ -39,9 +37,10 @@ export default function ContactMethods() {
 	})
 
 	// Handler for members only chat card click
-	const handleMembersOnlyChatClick = useCallback(() => {
+	// Note: React Compiler handles memoization automatically (Next.js 16)
+	const handleMembersOnlyChatClick = () => {
 		router.push(Routes.openLoginModal())
-	}, [router])
+	}
 
 	return (
 		<div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 
 import classNames from 'classnames'
 import { Mail } from 'lucide-react'
@@ -64,11 +64,9 @@ export default function ContactForm({ onSubmitSuccess }: ContactFormProps) {
 
 	/**
 	 * Async form submission handler.
-	 * Wrapped in useCallback to maintain stable reference for use in other callbacks.
-	 * 
-	 * FAANG Pattern: Memoize async handlers that are used as dependencies.
+	 * Note: React Compiler handles memoization automatically (Next.js 16)
 	 */
-	const handleSubmitAsync = useCallback(async (values: ContactFormData) => {
+	const handleSubmitAsync = async (values: ContactFormData) => {
 		setIsLoading(true)
 
 		try {
@@ -104,16 +102,15 @@ export default function ContactForm({ onSubmitSuccess }: ContactFormProps) {
 		} finally {
 			setIsLoading(false)
 		}
-	}, [onSubmitSuccess])
+	}
 
 	/**
 	 * Form submission handler for React Hook Form.
 	 * Wraps async handler to satisfy ESLint's no-misused-promises rule.
 	 * React Hook Form supports async handlers, but we need to handle the Promise explicitly.
-	 * 
-	 * FAANG Pattern: Extract event handlers from JSX for separation of concerns.
+	 * Note: React Compiler handles memoization automatically (Next.js 16)
 	 */
-	const handleSubmit = useCallback((values: ContactFormData): void => {
+	const handleSubmit = (values: ContactFormData): void => {
 		void handleSubmitAsync(values).catch((error) => {
 			// Error already handled in handleSubmitAsync, but catch any unhandled rejections
 			logger.error('Unhandled form submission error', {
@@ -122,15 +119,14 @@ export default function ContactForm({ onSubmitSuccess }: ContactFormProps) {
 				action: 'handleSubmit',
 			})
 		})
-	}, [handleSubmitAsync])
+	}
 
 	/**
 	 * Form onSubmit handler that properly handles React Hook Form's Promise return.
 	 * Extracted from JSX for clean code and separation of concerns.
-	 * 
-	 * FAANG Pattern: Use useCallback for stable event handlers to prevent unnecessary re-renders.
+	 * Note: React Compiler handles memoization automatically (Next.js 16)
 	 */
-	const onFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+	const onFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		const submitHandler = form.handleSubmit(handleSubmit)
 		const result = submitHandler(e)
 		// React Hook Form's handleSubmit may return a Promise if handler is async
@@ -144,7 +140,7 @@ export default function ContactForm({ onSubmitSuccess }: ContactFormProps) {
 				})
 			})
 		}
-	}, [form, handleSubmit])
+	}
 
 	return (
 		<div

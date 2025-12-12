@@ -1,7 +1,5 @@
 'use client'
 
-import { useMemo } from 'react'
-
 import classNames from 'classnames'
 import { Clock, Shield, Headphones } from 'lucide-react'
 
@@ -29,7 +27,8 @@ import { CONTACT_INFO } from './contact.constants'
  * @module contact/ContactHeader
  */
 export default function ContactHeader() {
-	const isOpen = useMemo(() => isBusinessOpen(), [])
+	// Note: React Compiler handles memoization automatically (Next.js 16)
+	const isOpen = isBusinessOpen()
 
 	const headerReveal = useScrollReveal({
 		threshold: 0.1,
