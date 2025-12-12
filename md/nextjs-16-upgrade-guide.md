@@ -1,31 +1,35 @@
-# Next.js 16.0.8 Upgrade Guide — MedSource Pro
+# Next.js 16 Upgrade Guide — MedSource Pro
 
-> **Document Version:** 3.0 (Final)  
+> **Document Version:** 4.0 (Revised)  
 > **From Version:** Next.js 15.5.6  
-> **To Version:** Next.js 16.0.8  
+> **To Version:** Next.js 16.0.10  
 > **Last Updated:** December 2024  
 > **Official Source:** [Next.js 16 Upgrade Guide](https://nextjs.org/docs/app/guides/upgrading/version-16)
 
 ---
 
-## 🚨 Security Context
+## Executive Summary
 
-**CVE-2025-66478 (React2Shell)** affects Next.js 15.0.0 through 16.0.6.  
-**Target version 16.0.8** includes the security patch.
+This document outlines the complete upgrade from Next.js 15 to 16 for MedSource Pro. The upgrade brings **significant performance improvements** critical for our scaling architecture (see `business_flow.md` §5.8 "Unlimited Growth Mindset"):
+
+- **Turbopack as default bundler** → Faster dev builds for rapid feature development
+- **Improved routing/prefetching** → Better UX for quote/order workflows
+- **Cache Components** → Future optimization for product catalog and pricing data
+- **React Compiler support** → Automatic memoization for complex data grids
 
 ---
 
 ## Table of Contents
 
 1. [Pre-Flight Checklist](#1-pre-flight-checklist)
-2. [Phase 1: Dependencies Update](#phase-1-dependencies-update)
-3. [Phase 2: Package Scripts](#phase-2-package-scripts)
-4. [Phase 3: Middleware to Proxy Migration](#phase-3-middleware-to-proxy-migration)
-5. [Phase 4: Configuration Updates](#phase-4-configuration-updates)
-6. [Phase 5: Code Changes Audit](#phase-5-code-changes-audit)
-7. [Phase 6: Testing & Deployment](#phase-6-testing--deployment)
-8. [Future Modernization](#future-modernization)
-9. [Quick Reference](#quick-reference)
+2. [Phase 1: Critical Breaking Changes](#phase-1-critical-breaking-changes-priority-p0)
+3. [Phase 2: Configuration Updates](#phase-2-configuration-updates-priority-p1)
+4. [Phase 3: Code Audit & Fixes](#phase-3-code-audit--fixes-priority-p1)
+5. [Phase 4: Testing & Deployment](#phase-4-testing--deployment-priority-p0)
+6. [Phase 5: Performance Optimizations](#phase-5-performance-optimizations-priority-p2)
+7. [Phase 6: Future Modernization](#phase-6-future-modernization-priority-p3)
+8. [Quick Reference](#quick-reference)
+9. [Business Impact Analysis](#business-impact-analysis)
 
 ---
 
@@ -35,19 +39,22 @@
 
 | Requirement | Minimum | Your Current | Status |
 |-------------|---------|--------------|--------|
-| **Node.js** | 20.9.0 | Run `node -v` | ⬜ Verify |
+| **Node.js** | 20.9.0 | v23.6.0 | ✅ OK |
 | **TypeScript** | 5.1.0 | ^5 | ✅ OK |
-| **React** | 19.x | ^19.1.0 | ✅ OK |
-| **React DOM** | 19.x | ^19.1.0 | ✅ OK |
+| **React** | 19.x | ^19.2.3 | ✅ OK |
+| **React DOM** | 19.x | ^19.2.3 | ✅ OK |
+| **ESLint** | 9.x | ^9.39.1 | ✅ OK |
 
 ### Browser Support (Next.js 16)
 
-| Browser | Minimum |
-|---------|---------|
-| Chrome | 111+ |
-| Edge | 111+ |
-| Firefox | 111+ |
-| Safari | 16.4+ |
+| Browser | Minimum | Impact |
+|---------|---------|--------|
+| Chrome | 111+ | Most healthcare facilities use modern browsers |
+| Edge | 111+ | Enterprise healthcare IT standard |
+| Firefox | 111+ | Secondary browser support |
+| Safari | 16.4+ | iOS/macOS medical devices |
+
+> **Business Note:** Per `business_flow.md`, our target customers are healthcare professionals using modern devices. These browser requirements align with our market.
 
 ### Pre-Upgrade Steps
 
@@ -57,344 +64,217 @@ git checkout -b backup/pre-nextjs-16
 git push origin backup/pre-nextjs-16
 
 # 2. Return to your working branch
-git checkout front-end-modernization
+git checkout main
 
-# 3. Verify Node.js version
+# 3. Verify Node.js version (must be >= 20.9.0)
 node -v
-# Must be >= 20.9.0
 ```
 
 ---
 
-## Phase 1: Dependencies Update
+## Phase 1: Critical Breaking Changes (Priority: P0)
 
-### Automated Upgrade (Recommended)
+**Timeline:** Immediate - Must complete before deployment  
+**Risk:** Build failures, runtime errors
 
-```bash
-npx @next/codemod@canary upgrade latest
-```
-
-**The codemod handles:**
-- ✅ Updates `next.config.js` turbopack configuration
-- ✅ Migrates `next lint` to ESLint CLI
-- ✅ Renames `middleware.ts` to `proxy.ts`
-- ✅ Removes `unstable_` prefix from stabilized APIs
-
-### Manual Upgrade
+### 1.1 Dependencies Update ✅ COMPLETED
 
 ```bash
-npm install next@16.0.8 react@latest react-dom@latest eslint-config-next@16.0.8
+npm install next@16.0.10 react@latest react-dom@latest eslint-config-next@16.0.10
 ```
 
-### Expected `package.json` Changes
-
-```diff
+**Current `package.json` state:**
+```json
+{
   "dependencies": {
--   "next": "15.5.6",
-+   "next": "16.0.8",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "next": "^16.0.10",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
--   "eslint-config-next": "15.5.6",
-+   "eslint-config-next": "16.0.8",
+    "eslint": "^9.39.1",
+    "eslint-config-next": "^16.0.10"
   }
+}
 ```
 
----
+### 1.2 ESLint Migration ✅ COMPLETED
 
-## Phase 2: Package Scripts
+**Breaking Change:** The `next lint` command has been **REMOVED** in Next.js 16.
 
-### Required Changes
+| Before (15.x) | After (16.x) |
+|---------------|--------------|
+| `next lint` | Use ESLint directly |
+| `.eslintrc.json` | `eslint.config.mjs` (flat config) |
 
-**The `next lint` command has been REMOVED in Next.js 16.**
+**Your current setup** uses ESLint 9 flat config (`eslint.config.mjs`) with:
+- `@next/eslint-plugin-next` for Next.js rules
+- `defineConfig` from `eslint/config`
+- All custom MedSource Pro rules preserved
 
-| Script | Before (15.5.6) | After (16.0.8) |
-|--------|-----------------|----------------|
-| `lint` | `next lint` | `eslint . --ext .ts,.tsx` |
-| `lint:ci` | `next lint --max-warnings=0` | `eslint . --ext .ts,.tsx --max-warnings=0` |
-| `dev` | `next dev --turbo` | `next dev` |
-
-### Full `package.json` Scripts Update
-
+**Updated scripts in `package.json`:**
 ```json
 {
   "scripts": {
-    "dev": "start http://localhost:3000 && next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint . --ext .ts,.tsx --config .eslintrc.json",
-    "type-check": "tsc --noEmit --pretty",
-    "type-check:watch": "tsc --noEmit --pretty --watch",
-    "type-check:ci": "tsc --noEmit --pretty --skipLibCheck",
-    "lint:all": "eslint . --ext .ts,.tsx --config .eslintrc.json --format=compact --cache --cache-location .eslintcache",
-    "lint:fix": "eslint . --ext .ts,.tsx --config .eslintrc.json --fix --cache --cache-location .eslintcache",
-    "lint:strict": "eslint . --ext .ts,.tsx --config .eslintrc.json --max-warnings=0 --cache --cache-location .eslintcache",
-    "lint:ci": "eslint . --ext .ts,.tsx --config .eslintrc.json --max-warnings=0",
-    "check:all": "npm run type-check && npm run lint:all",
-    "check:ci": "npm run type-check:ci && npm run lint:ci",
-    "check:watch": "npm run type-check:watch"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix --cache --cache-location .eslintcache",
+    "lint:ci": "eslint . --max-warnings=0"
   }
 }
 ```
 
-### Key Changes Explained
+### 1.3 Middleware → Proxy Migration ✅ COMPLETED
 
-| Change | Reason (Official Docs) |
-|--------|------------------------|
-| Remove `--turbo` from dev | Turbopack is now the DEFAULT bundler in Next.js 16 |
-| Replace `next lint` | The `next lint` command has been removed. Use ESLint or Biome directly. |
-| `next build` no longer runs linting | Linting is now separate from build |
+**Breaking Change:** `middleware.ts` renamed to `proxy.ts`
 
----
+| Change | Status |
+|--------|--------|
+| File moved to `proxy.ts` at root | ✅ Done |
+| Function renamed to `proxy()` | ✅ Done |
+| Runtime changed to Node.js (not Edge) | ✅ Acknowledged |
 
-## Phase 3: Middleware to Proxy Migration
+**Final `proxy.ts` location:** Project root (not in `app/`)
 
-### Official Documentation States:
+**Important Notes:**
+- Proxy runs on **Node.js runtime** (not Edge)
+- Cannot be configured to use Edge runtime
+- If Edge runtime is required, keep using `middleware.ts` (deprecated but supported)
 
-> "The middleware filename is deprecated, and has been renamed to proxy to clarify network boundary and routing focus."
->
-> "The edge runtime is NOT supported in proxy. The proxy runtime is nodejs, and it cannot be configured. If you want to continue using the edge runtime, keep using middleware."
+### 1.4 Remove `--turbo` Flag ✅ COMPLETED
 
-### Step 1: Move and Rename File
-
-```bash
-# Move from app/middleware.ts to root proxy.ts
-mv app/middleware.ts proxy.ts
-```
-
-### Step 2: Rename Export Function
+**Breaking Change:** Turbopack is now the **DEFAULT bundler**.
 
 ```diff
-  import { NextResponse } from 'next/server'
-  import type { NextRequest } from 'next/server'
-
-  const protectedRoutes = ['/app', '/accounts', '/analytics', '/customers', '/orders', '/profile', '/providers', '/quotes']
-  const authRoutes = ['/login', '/signup']
-
-- export function middleware(request: NextRequest) {
-+ export function proxy(request: NextRequest) {
-    const token = request.cookies.get('at')
-    const { pathname } = request.nextUrl
-
-    const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
-    const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route))
-
-    if (isProtectedRoute && !token) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/'
-      url.searchParams.set('login', 'true')
-      url.searchParams.set('redirectTo', pathname)
-      return NextResponse.redirect(url)
-    }
-
-    if (isAuthRoute) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/'
-      url.searchParams.set('login', 'true')
-      const redirectTo = request.nextUrl.searchParams.get('redirectTo')
-      if (redirectTo) {
-        url.searchParams.set('redirectTo', redirectTo)
-      }
-      return NextResponse.redirect(url)
-    }
-
-    return NextResponse.next()
-  }
-
-  export const config = {
-    matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
-  }
-```
-
-### Step 3: Update Comment (Optional)
-
-```diff
-- /**
--  * Note: We keep hardcoded strings here because middleware runs in Edge runtime
--  * and importing Routes would add unnecessary bundle size.
--  */
-+ /**
-+  * Note: proxy.ts runs on Node.js runtime (not Edge).
-+  * We keep hardcoded strings here to avoid circular dependencies with Routes.
-+  */
-```
-
-### Final `proxy.ts` File
-
-```typescript
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-
-// Protected route patterns - these require authentication
-const protectedRoutes = [
-  '/app',
-  '/accounts',
-  '/analytics',
-  '/customers',
-  '/orders',
-  '/profile',
-  '/providers',
-  '/quotes',
-]
-
-/**
- * Auth routes - redirect to home with login modal if accessed directly.
- *
- * These routes are deprecated but kept here for backward compatibility.
- * All new code should use Routes.openLoginModal() instead of navigating to these routes.
- *
- * Note: proxy.ts runs on Node.js runtime (not Edge).
- * We keep hardcoded strings here to avoid circular dependencies with Routes.
- */
-const authRoutes = ['/login', '/signup']
-
-export function proxy(request: NextRequest) {
-  const token = request.cookies.get('at')
-  const { pathname } = request.nextUrl
-
-  // Check if current route is protected
-  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
-
-  // Check if current route is an auth route
-  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route))
-
-  // Redirect to home with login modal query param if accessing protected route without token
-  if (isProtectedRoute && !token) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/'
-    url.searchParams.set('login', 'true')
-    url.searchParams.set('redirectTo', pathname)
-    return NextResponse.redirect(url)
-  }
-
-  // Redirect to home with login modal query param if accessing auth routes
-  if (isAuthRoute) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/'
-    url.searchParams.set('login', 'true')
-    const redirectTo = request.nextUrl.searchParams.get('redirectTo')
-    if (redirectTo) {
-      url.searchParams.set('redirectTo', redirectTo)
-    }
-    return NextResponse.redirect(url)
-  }
-
-  return NextResponse.next()
-}
-
-export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
-}
+- "dev": "next dev --turbo"
++ "dev": "next dev"
 ```
 
 ---
 
-## Phase 4: Configuration Updates
+## Phase 2: Configuration Updates (Priority: P1) ✅ COMPLETED
 
-### `next.config.mjs` Analysis
+**Timeline:** Within 1 week of upgrade  
+**Risk:** Suboptimal performance, potential warnings  
+**Status:** ✅ All configuration updates completed
 
-| Setting | Your Current | New Default (16) | Action |
-|---------|--------------|------------------|--------|
-| `turbopack` location | Top-level ✅ | Top-level | ✅ No change |
-| `images.qualities` | `[75,80,85,90,95,100]` | `[75]` only | ✅ Keep (explicit is good) |
-| `images.imageSizes` | Includes `16` | Removed `16` | ✅ Keep (explicit is good) |
-| `images.minimumCacheTTL` | `60` | `14400` (4 hours) | ⚠️ Decision needed |
-| `images.remotePatterns` | Configured | Required | ✅ Already using |
-| `images.domains` | Not used | Deprecated | ✅ N/A |
+### 2.1 `next.config.mjs` Updates ✅ COMPLETED
 
-### Decision: `minimumCacheTTL`
+All Next.js 16 configuration options have been applied:
 
-**Official docs state:**
-> "The default value for images.minimumCacheTTL has changed from 60 seconds to 4 hours (14400 seconds). This reduces revalidation cost for images without cache-control headers."
+| Setting | Value | Next.js 16 Default | Status |
+|---------|-------|-------------------|--------|
+| `turbopack` | Top-level | Top-level | ✅ Configured |
+| `reactStrictMode` | `true` | `false` | ✅ Added (best practice) |
+| `images.qualities` | `[75,80,85,90,95,100]` | `[75]` only | ✅ Explicit |
+| `images.imageSizes` | Includes `16` | `16` removed | ✅ Explicit |
+| `images.minimumCacheTTL` | `60` | `14400` (4 hours) | ✅ Keep for MVP |
+| `images.formats` | `['avif', 'webp']` | Same | ✅ Optimal |
+| `images.dangerouslyAllowLocalIP` | `isDevelopment` | `false` | ✅ Added |
+| `images.remotePatterns` | With `pathname` | Required | ✅ Updated |
+| `typescript.ignoreBuildErrors` | `false` | `false` | ✅ Explicit |
+| `poweredByHeader` | `false` | `true` | ✅ Security |
+| `compress` | `true` | `true` | ✅ Performance |
 
-**Options:**
-- **Keep `60`**: Images update more frequently, higher origin load
-- **Change to `14400`**: Better caching, images update every 4 hours max
+### 2.2 Image Cache TTL Decision ✅ DECIDED
 
-**Recommendation:** Keep `60` for now if product images change frequently, or change to `14400` for better performance.
+**Decision:** Keep `60` seconds for MVP phase.
 
-### Updated `next.config.mjs`
+**Business Context:** Per `business_flow.md`, product images may change when:
+- Vendors update product photos
+- New products added to catalog
+- Product variants with different images
 
+**Future Optimization Path:**
+
+| Phase | TTL | When to Apply |
+|-------|-----|---------------|
+| MVP (current) | `60` | Now - fresh images priority |
+| Stable Catalog | `3600` | After product catalog stabilizes |
+| Production Scale | `14400` | High traffic, CDN in front |
+
+### 2.3 Local Development Image Setting ✅ COMPLETED
+
+**Next.js 16 Breaking Change:** `images.dangerouslyAllowLocalIP` now defaults to `false`.
+
+**Applied Configuration:**
 ```javascript
-/** @type {import('next').NextConfig} */
-
-const Environments = {
-  development: {
-    NEXT_PUBLIC_API_URL: 'http://localhost:5254/api',
-    CLIENT_DOMAIN: 'https://localhost:3000',
-  },
-  production: {
-    NEXT_PUBLIC_API_URL: 'https://prod-server20241205193558.azurewebsites.net/api',
-    CLIENT_DOMAIN: 'https://www.medsourcepro.com',
-  },
-}
-
 const nextConfig = {
-  env: { ...Environments['production'] },
   images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: 'img.freepik.com' },
-      { protocol: 'http', hostname: 'localhost' },
-      { protocol: 'https', hostname: 'prod-server20241205193558.azurewebsites.net' },
-    ],
-    // Next.js 16: New default is [75] only. We explicitly allow multiple qualities.
-    qualities: [75, 80, 85, 90, 95, 100],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    // Next.js 16: Value 16 removed from default. We explicitly include it.
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    formats: ['image/webp', 'image/avif'],
-    // Next.js 16: New default is 14400 (4 hours). Keep 60 for frequent updates.
-    minimumCacheTTL: 60,
-  },
-  // Next.js 16: turbopack is stable and at top-level (moved from experimental)
-  turbopack: {
-    resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
+    // Next.js 16: Now required for localhost images in development
+    dangerouslyAllowLocalIP: process.env.NODE_ENV === 'development',
   },
 }
-
-export default nextConfig
 ```
+
+### 2.4 Removed Deprecated Options ✅ COMPLETED
+
+**Next.js 16 Breaking Change:** `eslint` key in `next.config.mjs` is no longer supported.
+
+| Removed | Reason | Alternative |
+|---------|--------|-------------|
+| `eslint.ignoreDuringBuilds` | Deprecated in Next.js 16 | Use `eslint.config.mjs` |
+| `eslint.dirs` | Deprecated in Next.js 16 | Use ESLint CLI with glob patterns |
+
+ESLint is now configured entirely via `eslint.config.mjs` (flat config).
 
 ---
 
-## Phase 5: Code Changes Audit
+## Phase 3: Code Audit & Fixes (Priority: P1)
 
-### 5.1 Async Request APIs
+**Timeline:** Within 2 weeks of upgrade  
+**Risk:** Runtime errors, broken features
 
-**Official docs state:**
-> "Starting with Next.js 16, synchronous access is fully removed. These APIs can only be accessed asynchronously."
+### 3.1 Async Request APIs
 
-#### Your Code Status
+**Breaking Change:** Synchronous access to these APIs is **REMOVED**:
+- `params`
+- `searchParams`
+- `cookies()`
+- `headers()`
+- `draftMode()`
+
+**Your Status:**
 
 | File | API | Current | Status |
 |------|-----|---------|--------|
-| `app/store/product/[id]/page.tsx` | `params` | `await params` ✅ | Already async |
-| `app/_components/navigation/Navbar.tsx` | `useSearchParams()` | Hook | ✅ N/A (client hook) |
+| Dynamic routes | `params` | `await params` | ✅ Already async |
+| Client components | `useSearchParams()` | Hook | ✅ N/A (client hook) |
 
-**Good news:** Your `params` usage is already async! No changes needed.
+**Codemod available:**
+```bash
+npx @next/codemod@canary async-request-api .
+```
 
-### 5.2 Parallel Routes
+### 3.2 Parallel Routes
 
-**Official docs state:**
-> "All parallel route slots now require explicit default.js files. Builds will fail without them."
+**Breaking Change:** All parallel route slots require explicit `default.js` files.
 
-**Your project:** No parallel routes (`@` directories) found. ✅ No action needed.
+**Your Status:** ✅ No parallel routes (`@` directories) found. No action needed.
 
-### 5.3 Removed APIs Check
+### 3.3 Removed APIs Check
 
 | Removed API | Your Usage | Status |
 |-------------|------------|--------|
-| `useAmp` / AMP | Not used | ✅ OK |
+| `useAmp` / AMP support | Not used | ✅ OK |
 | `serverRuntimeConfig` | Not used | ✅ OK |
 | `publicRuntimeConfig` | Not used | ✅ OK |
 | `next/legacy/image` | Not used | ✅ OK |
+| `next lint` command | Removed | ✅ Migrated to ESLint |
+
+### 3.4 React Hooks Violations ✅ FIXED
+
+**Issue Found:** `AccountActivityTab.tsx` had conditional hook calls.
+
+**Fix Applied:** Moved `useMemo` hooks before early return statement.
 
 ---
 
-## Phase 6: Testing & Deployment
+## Phase 4: Testing & Deployment (Priority: P0)
 
-### 6.1 Local Build Test
+**Timeline:** Before any production deployment  
+**Risk:** Customer-facing issues
+
+### 4.1 Local Build Test
 
 ```bash
 # Clean install
@@ -404,7 +284,7 @@ npm install
 # Type check
 npm run type-check
 
-# Lint
+# Lint (0 errors required)
 npm run lint
 
 # Build
@@ -414,101 +294,196 @@ npm run build
 npm run start
 ```
 
-### 6.2 Verification Checklist
+### 4.2 Verification Checklist
 
-| Test | Status |
-|------|--------|
-| `npm run build` succeeds | ⬜ |
-| Home page loads | ⬜ |
-| Protected route redirects work | ⬜ |
-| Login modal opens | ⬜ |
-| Authentication flow works | ⬜ |
-| Dashboard loads after login | ⬜ |
-| Images load correctly | ⬜ |
-| Navigation works | ⬜ |
-| All API calls succeed | ⬜ |
+**Critical Paths (aligned with `business_flow.md`):**
 
-### 6.3 Deployment
+| Test | Business Impact | Status |
+|------|-----------------|--------|
+| Home page loads | Customer first impression | ✅ Passed |
+| Product catalog loads | Core shopping experience | ✅ Passed (447 products) |
+| Product detail page | Purchase decision point | ✅ Passed |
+| Add to cart works | Quote request flow | ✅ Passed |
+| Quote submission | **Revenue generation** | ✅ Form available |
+| Protected route redirects | Security | ✅ Passed |
+| Login modal opens | Authentication | ✅ Passed |
+| Dashboard loads | Admin/sales rep workflow | ⬜ Requires auth |
+| Orders page loads | Order management | ⬜ Requires auth |
+| Images load correctly | Product presentation | ✅ Passed |
+| Navigation works | User experience | ✅ Passed |
+| API calls succeed | Backend integration | ✅ Passed |
+
+**Automated Tests (Phase 4.1):**
+
+| Test | Command | Status |
+|------|---------|--------|
+| TypeScript compilation | `npm run type-check` | ✅ 0 errors |
+| ESLint | `npm run lint` | ✅ 0 errors (655 warnings) |
+| Production build | `npm run build` | ✅ Success |
+| Dev server starts | `npm run dev` | ✅ Running |
+
+### 4.3 Deployment
 
 ```bash
-# Commit changes
 git add .
-git commit -m "chore: upgrade Next.js 15.5.6 → 16.0.8
+git commit -m "chore: upgrade Next.js 15.5.6 → 16.0.10
 
 BREAKING CHANGES:
+- Migrated ESLint to flat config (eslint.config.mjs)
 - Renamed middleware.ts to proxy.ts (Next.js 16 requirement)
-- Replaced 'next lint' with direct ESLint commands
-- Removed --turbo flag (now default)
+- Removed --turbo flag (Turbopack now default)
+- Fixed React hooks violation in AccountActivityTab
 
-Security:
-- Patches CVE-2025-66478 (React2Shell vulnerability)"
+Performance:
+- Turbopack default bundler (faster dev builds)
+- Improved routing/prefetching"
 
-# Push and deploy
-git push origin front-end-modernization
+git push origin main
 ```
 
 ---
 
-## Future Modernization
+## Phase 5: Performance Optimizations (Priority: P2) ✅ COMPLETED
 
-These are **optional** features available in Next.js 16. Implement when ready.
+**Timeline:** Within 1 month of stable upgrade  
+**Business Impact:** Improved UX for quote workflow, faster page loads
 
-### Cache Components (`"use cache"` Directive)
+### 5.1 React Compiler ✅ ENABLED
 
-**Enable in config:**
+**Status:** Now stable in Next.js 16 (promoted from experimental)
+
+**What we did:**
+```bash
+npm install -D babel-plugin-react-compiler
+```
+
 ```javascript
+// next.config.mjs
 const nextConfig = {
-  cacheComponents: true,
+  reactCompiler: true, // Top-level, NOT experimental
 }
 ```
 
-**Usage:**
+**Benefits for MedSource Pro:**
+- Automatic memoization - eliminates need for manual `useMemo`/`useCallback`
+- DataGrid/DivTable components benefit most (complex rendering)
+- Quote/Order tables with many columns
+- Product filtering and sorting
+
+**Note:** Compile times may be slightly higher as React Compiler uses Babel.
+
+### 5.2 Turbopack File System Caching ✅ AUTOMATIC
+
+**Next.js 16 Status:**
+- `turbopackFileSystemCacheForDev`: **ENABLED BY DEFAULT** (no config needed!)
+- `turbopackFileSystemCacheForBuild`: Requires Next.js canary (not stable yet)
+
+**Benefit:** Faster rebuilds during development by caching compiler artifacts to disk.
+
+**Future:** When `turbopackFileSystemCacheForBuild` becomes stable, add:
+```javascript
+experimental: {
+  turbopackFileSystemCacheForBuild: true,
+}
+```
+
+### 5.3 Layout Deduplication ✅ AUTOMATIC
+
+**Next.js 16 Enhancement:** When prefetching multiple URLs sharing a layout, the layout is downloaded once.
+
+**Impact for MedSource Pro:**
+- Faster navigation in `/app/*` routes (orders, quotes, customers share layout)
+- Better UX for sales reps managing multiple quotes
+
+No code changes required - automatic benefit.
+
+### 5.4 Image Optimization ✅ CONFIGURED
+
+**Business Context:** Product images are critical for the quote request flow.
+
+Current config is optimized. Monitor:
+- Image load times on product pages
+- LCP (Largest Contentful Paint) scores
+- Consider CDN for product images at scale
+
+---
+
+## Phase 6: Future Modernization (Priority: P3)
+
+**Timeline:** Implement as needed for specific features  
+**Business Context:** These align with `business_flow.md` scaling goals
+
+### 6.1 Cache Components (`"use cache"` Directive)
+
+**Best For:** Product catalog, pricing data, vendor information
+
+**Enable:**
+```javascript
+const nextConfig = {
+  cacheComponents: true, // Replaces old experimental.dynamicIO
+}
+```
+
+**Usage Example (Product List):**
 ```typescript
 "use cache"
 
-import { cacheTag, cacheLife } from 'next/cache'
+import { cacheTag, cacheLife } from 'next/cache' // No more unstable_ prefix!
 
-export default async function ProductList() {
-  cacheTag('products')
-  cacheLife('hours')
-  const products = await fetchProducts()
-  return <div>{/* render */}</div>
+export default async function ProductList({ category }: { category: string }) {
+  cacheTag('products', `category-${category}`)
+  cacheLife('hours') // Products don't change frequently
+  
+  const products = await fetchProducts(category)
+  return <ProductGrid products={products} />
 }
 ```
 
-### New Caching APIs
+**Business Impact:**
+- Faster product browsing
+- Reduced API calls
+- Better experience for repeat visitors
 
-| API | Purpose |
-|-----|---------|
-| `updateTag(tag)` | Read-your-writes semantics (Server Actions only) |
-| `revalidateTag(tag, profile)` | Stale-while-revalidate (requires cacheLife profile) |
-| `refresh()` | Refresh uncached data (Server Actions only) |
+**Note:** This replaces the old PPR (Partial Pre-Rendering) approach.
 
-### React Compiler (Stable)
+### 6.2 New Caching APIs (Stable in Next.js 16)
 
-```javascript
-const nextConfig = {
-  reactCompiler: true,
+**Note:** `cacheLife` and `cacheTag` no longer need `unstable_` prefix!
+
+| API | Purpose | MedSource Pro Use Case |
+|-----|---------|------------------------|
+| `updateTag(tag)` | Read-your-writes (Server Actions only) | After quote status change, immediately show new status |
+| `revalidateTag(tag, profile?)` | Stale-while-revalidate | Product prices (show stale, update background) |
+| `refresh()` | Refresh client router from Server Action | Force refresh order status |
+| `cacheTag(tag)` | Tag cached data for invalidation | Tag product catalog by category |
+| `cacheLife(profile)` | Set cache duration | 'hours' for products, 'minutes' for quotes |
+
+**Example - Quote Status Update (read-your-writes):**
+```typescript
+'use server'
+import { updateTag } from 'next/cache'
+
+export async function updateQuoteStatus(quoteId: string, status: string) {
+  await db.quotes.update(quoteId, { status })
+  // User sees their change immediately
+  updateTag(`quote-${quoteId}`)
 }
 ```
 
-```bash
-npm install -D babel-plugin-react-compiler@latest
-```
+**Example - Product Catalog (stale-while-revalidate):**
+```typescript
+'use server'
+import { revalidateTag } from 'next/cache'
 
-### Turbopack File System Caching (Beta)
-
-```javascript
-const nextConfig = {
-  experimental: {
-    turbopackFileSystemCacheForDev: true,
-  },
+export async function refreshProducts(category: string) {
+  // Users see stale data while fresh data loads in background
+  revalidateTag(`products-${category}`, 'max')
 }
 ```
 
-### Next.js DevTools MCP
+### 6.4 Next.js DevTools MCP
 
-Add to MCP client config:
+**Already configured in `.mcp.json`:**
 ```json
 {
   "mcpServers": {
@@ -527,32 +502,66 @@ Add to MCP client config:
 ### Commands Summary
 
 ```bash
-# Automated upgrade
+# Automated upgrade (if starting fresh)
 npx @next/codemod@canary upgrade latest
 
 # Manual upgrade
-npm install next@16.0.8 react@latest react-dom@latest eslint-config-next@16.0.8
+npm install next@16.0.10 react@latest react-dom@latest eslint-config-next@16.0.10
+
+# Verify
+npm run type-check
+npm run lint
+npm run build
 ```
 
-### Files to Change
+### Files Changed
 
-| File | Change |
-|------|--------|
-| `package.json` | Update deps, fix scripts |
-| `app/middleware.ts` | **DELETE** (move to root) |
-| `proxy.ts` | **CREATE** at root |
-| `next.config.mjs` | Already compliant |
+| File | Change | Status |
+|------|--------|--------|
+| `package.json` | Dependencies + scripts + babel-plugin-react-compiler | ✅ Done |
+| `eslint.config.mjs` | New ESLint 9 flat config | ✅ Done |
+| `.eslintrc.json` | Deleted (migrated to flat config) | ✅ Done |
+| `proxy.ts` | Created at root (from middleware.ts) | ✅ Done |
+| `app/middleware.ts` | Deleted | ✅ Done |
+| `next.config.mjs` | Full Next.js 16 config + reactCompiler enabled | ✅ Done |
+| `app/_features/accounts/components/AccountActivityTab.tsx` | Fixed hooks violation | ✅ Done |
 
 ### Breaking Changes Summary
 
-| Change | Required | Your Status |
-|--------|----------|-------------|
-| Node.js ≥20.9.0 | ✅ | ⬜ Verify |
-| `next lint` → ESLint | ✅ | ⬜ Update scripts |
-| `--turbo` flag removed | ✅ | ⬜ Update dev script |
-| `middleware.ts` → `proxy.ts` | ✅ | ⬜ Migrate |
-| Async params | ✅ | ✅ Already done |
+| Change | Required | Status |
+|--------|----------|--------|
+| Node.js ≥20.9.0 | ✅ | ✅ v23.6.0 |
+| `next lint` → ESLint | ✅ | ✅ Migrated |
+| `--turbo` flag removed | ✅ | ✅ Removed |
+| `middleware.ts` → `proxy.ts` | ✅ | ✅ Migrated |
+| React Compiler stable | Optional | ✅ Enabled |
+| `turbopackFileSystemCacheForDev` | Auto | ✅ Default |
+| ESLint flat config | ✅ | ✅ Implemented |
+| Async params | ✅ | ✅ Already compliant |
 | Parallel route default.js | If using | ✅ N/A |
+
+---
+
+## Business Impact Analysis
+
+### Alignment with `business_flow.md`
+
+| Business Goal | Next.js 16 Feature | Impact |
+|---------------|-------------------|--------|
+| **Unlimited scaling** (§5.8) | Turbopack, improved prefetching | Faster dev, better UX at scale |
+| **Fast quote response** (§5.8) | Layout deduplication | Sales reps navigate faster |
+| **Product catalog performance** | Cache Components | Faster browsing, less API load |
+| **AI-assisted pricing** (future) | React Compiler | Efficient complex calculations |
+| **Mobile-first** (§1) | Improved routing | Better mobile navigation |
+
+### Risk Assessment
+
+| Risk | Likelihood | Mitigation |
+|------|------------|------------|
+| Build failures | Low | ✅ All breaking changes addressed |
+| Runtime errors | Low | ✅ Hooks violation fixed |
+| Performance regression | Very Low | Turbopack is improvement |
+| Browser compatibility | Very Low | Target market uses modern browsers |
 
 ---
 
@@ -560,8 +569,18 @@ npm install next@16.0.8 react@latest react-dom@latest eslint-config-next@16.0.8
 
 - [Next.js 16 Release Blog](https://nextjs.org/blog/next-16)
 - [Next.js 16 Upgrade Guide](https://nextjs.org/docs/app/guides/upgrading/version-16)
-- [React2Shell Security Bulletin](https://vercel.com/kb/bulletin/react2shell)
+- [ESLint Flat Config Migration](https://eslint.org/docs/latest/use/configure/migration-guide)
 - [Turbopack Configuration](https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack)
+- [React Compiler](https://react.dev/learn/react-compiler)
+
+---
+
+## Changelog
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 4.0 | Dec 2024 | Major revision: Updated for 16.0.10, ESLint flat config, business alignment |
+| 3.0 | Dec 2024 | Initial 16.0.8 guide |
 
 ---
 

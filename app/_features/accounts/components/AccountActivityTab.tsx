@@ -72,30 +72,11 @@ export default function AccountActivityTab({
 	hasCustomerAssociation = true,
 }: AccountActivityTabProps) {
 	const router = useRouter()
-	
-	// Show message if no customer association
-	if (!hasCustomerAssociation) {
-		return (
-			<Card className="border border-base-300 bg-base-100 p-8 shadow-sm">
-				<div className="text-center">
-					<div className="flex h-16 w-16 items-center justify-center rounded-full bg-warning/10 mx-auto mb-4">
-						<ShoppingCart className="h-8 w-8 text-warning" />
-					</div>
-					<h2 className="text-lg font-semibold text-base-content mb-2">
-						No Customer Association
-					</h2>
-					<p className="text-sm text-base-content/60 max-w-md mx-auto">
-						This account is not linked to a customer organization. Activity data 
-						(orders and quotes) will be available once the account is associated 
-						with a customer.
-					</p>
-				</div>
-			</Card>
-		)
-	}
 
 	// ============================================================================
 	// COLUMN DEFINITIONS
+	// Note: Hooks must be called unconditionally (before any early returns)
+	// per React's Rules of Hooks
 	// ============================================================================
 
 	const orderColumns: ColumnDef<Order>[] = useMemo(
@@ -202,6 +183,31 @@ export default function AccountActivityTab({
 		],
 		[router]
 	)
+
+	// ============================================================================
+	// EARLY RETURN: No Customer Association
+	// Note: This must come AFTER all hooks per React's Rules of Hooks
+	// ============================================================================
+
+	if (!hasCustomerAssociation) {
+		return (
+			<Card className="border border-base-300 bg-base-100 p-8 shadow-sm">
+				<div className="text-center">
+					<div className="flex h-16 w-16 items-center justify-center rounded-full bg-warning/10 mx-auto mb-4">
+						<ShoppingCart className="h-8 w-8 text-warning" />
+					</div>
+					<h2 className="text-lg font-semibold text-base-content mb-2">
+						No Customer Association
+					</h2>
+					<p className="text-sm text-base-content/60 max-w-md mx-auto">
+						This account is not linked to a customer organization. Activity data 
+						(orders and quotes) will be available once the account is associated 
+						with a customer.
+					</p>
+				</div>
+			</Card>
+		)
+	}
 
 	// ============================================================================
 	// RENDER

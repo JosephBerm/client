@@ -40,3 +40,18 @@ export { useRouteParam, useRouteParams, useRouteParamValidated } from './useRout
 export { useCopyToClipboard } from './useCopyToClipboard'
 export { useBreadcrumbs } from './useBreadcrumbs'
 
+// =============================================================================
+// DEV-ONLY HOOKS (Not exported from @_shared main barrel)
+// =============================================================================
+// Note: useMcpChat is intentionally NOT re-exported from @_shared/index.ts
+// because it's development-only and should not be bundled in production.
+// Import directly from '@_shared/hooks' when needed in dev components.
+export { useMcpChat } from './useMcpChat'
+export type { 
+	McpMessage, 
+	McpTool, 
+	McpResource, 
+	McpConnectionStatus, 
+	UseMcpChatReturn,
+} from './useMcpChat'
+

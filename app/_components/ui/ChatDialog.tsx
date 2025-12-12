@@ -68,6 +68,9 @@ export interface ChatDialogProps {
 	
 	/** Custom title for the dialog (optional, uses "Live Chat" by default) */
 	title?: string
+	
+	/** Custom class for the header area */
+	headerClassName?: string
 }
 
 /**
@@ -99,6 +102,7 @@ export default function ChatDialog({
 	closeOnBackdropClick = true,
 	closeOnEscape = true,
 	title = 'Live Chat',
+	headerClassName,
 }: ChatDialogProps) {
 	const dialogRef = useRef<HTMLDivElement>(null)
 	const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -303,7 +307,10 @@ export default function ChatDialog({
 							tabIndex={-1}
 						>
 							{/* Header */}
-							<div className="flex items-center justify-between p-4 md:p-6 border-b border-base-300 shrink-0">
+							<div className={classNames(
+								"flex items-center justify-between p-4 md:p-6 border-b border-base-300 shrink-0",
+								headerClassName
+							)}>
 								<div className="flex items-center gap-3">
 									<MessageCircle className="h-5 w-5 text-primary" strokeWidth={2} aria-hidden="true" />
 									<h2 id="chat-dialog-title" className="text-xl md:text-2xl font-bold text-base-content">
