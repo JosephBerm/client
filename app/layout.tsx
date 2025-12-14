@@ -65,7 +65,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 			{/* Global Live Chat Bubble - Available on all pages */}
 			{/* Placed at root level to avoid interference from page-specific animations */}
-			<LiveChatBubble />
+			{/* Wrapped in Suspense for Next.js 16 cache components optimization */}
+			<Suspense fallback={null}>
+				<LiveChatBubble />
+			</Suspense>
 			</body>
 		</html>
 	)

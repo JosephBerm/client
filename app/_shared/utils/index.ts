@@ -65,3 +65,12 @@ export {
 	TOAST_PERSISTENT_CONFIG,
 } from './toastConfig'
 
+// Error Message Translation
+export {
+	ERROR_MESSAGES,
+	translateError,
+	tryTranslateError,
+	hasTranslation,
+	getAvailableErrorKeys,
+} from './errorMessages'
+

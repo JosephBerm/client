@@ -29,7 +29,7 @@ export {
 	REDUCED_MOTION_VARIANTS,
 } from './types'
 
-// Configuration (NEW - DRY principle)
+// Configuration (DRY principle)
 export {
 	ANIMATION_DURATION,
 	ANIMATION_DELAY,
@@ -37,4 +37,5 @@ export {
 	ANIMATION_DISTANCE,
 	ANIMATION_PRESETS,
 	STAGGER_PRESETS,
+	MODAL_ANIMATION,
 } from './config'

@@ -54,7 +54,7 @@ import {
 	DEFAULT_LOADING_MESSAGE,
 	TABLE_ERROR_MESSAGES,
 	VIRTUALIZATION_THRESHOLD,
-	MOBILE_BREAKPOINT,
+	CARD_VIEW_BREAKPOINT,
 	TABLE_THEME_CLASSES,
 } from '../DivTable/types/divTableConstants'
 import {
@@ -144,8 +144,8 @@ export function DataGrid<TData>({
 	onRowReorder,
 	dragHandlePosition = 'left',
 
-	// Mobile config
-	mobileBreakpoint = MOBILE_BREAKPOINT,
+	// Responsive card/table view config (MAANG pattern: card < 1024px, table ≥ 1024px)
+	mobileBreakpoint = CARD_VIEW_BREAKPOINT,
 	mobileCardRenderer,
 
 	// Accessibility
@@ -201,10 +201,11 @@ export function DataGrid<TData>({
 	}, [data])
 
 	// ============================================================================
-	// Mobile Detection (must be called before any conditional returns)
+	// Container-Based Responsive Detection (MAANG pattern)
+	// Uses container width instead of viewport for accurate card/table switching
 	// ============================================================================
 
-	const { isMobile } = useMobileDetection(mobileBreakpoint)
+	const { isMobile } = useMobileDetection(mobileBreakpoint, containerRef)
 
 	// ============================================================================
 	// Determine actual state (controlled vs uncontrolled)
@@ -459,13 +460,16 @@ export function DataGrid<TData>({
 					ariaLabel={ariaLabel}
 					customRenderer={mobileCardRenderer}
 				/>
-				{enablePagination && (
-					<DataGridPagination
-						table={table}
-						totalItems={totalItemsCount}
-						enablePageSize={enablePageSize}
-					/>
-				)}
+			{enablePagination && (
+				<DataGridPagination
+					table={table}
+					totalItems={totalItemsCount}
+					enablePageSize={enablePageSize}
+					// Pass controlled state directly for server-side pagination
+					pagination={manualPagination ? pagination : undefined}
+					serverPageCount={manualPagination ? pageCount : undefined}
+				/>
+			)}
 			</div>
 		)
 	}
@@ -491,7 +495,7 @@ export function DataGrid<TData>({
 				{ariaLabel} with {totalItemsCount} rows and {columns.length} columns
 			</div>
 
-			{/* Main grid table */}
+			{/* Main grid table - shown only on desktop (≥1024px) */}
 			<div
 				{...tableARIA}
 				aria-describedby={[ariaDescribedBy, captionId].filter(Boolean).join(' ') || undefined}
@@ -535,14 +539,18 @@ export function DataGrid<TData>({
 				)}
 			</div>
 
-			{/* Pagination */}
-			{enablePagination && rows.length > 0 && (
-				<DataGridPagination
-					table={table}
-					totalItems={totalItemsCount}
-					enablePageSize={enablePageSize}
-				/>
-			)}
+		{/* Pagination */}
+		{enablePagination && rows.length > 0 && (
+			<DataGridPagination
+				table={table}
+				totalItems={totalItemsCount}
+				enablePageSize={enablePageSize}
+				// Pass controlled state directly for server-side pagination
+				// This ensures pagination UI stays in sync with parent's state
+				pagination={manualPagination ? pagination : undefined}
+				serverPageCount={manualPagination ? pageCount : undefined}
+			/>
+		)}
 
 			{/* Loading overlay */}
 			{isLoading && (

@@ -118,8 +118,12 @@ export class ConsoleTransport implements LogTransport {
 		// Handle table output (FAANG Pattern: console.table for structured data)
 		if (entry.useTable && entry.metadata?.tableData && typeof console !== 'undefined') {
 			const consoleMethod = CONSOLE_METHODS[entry.level]
+			// Defensive timestamp handling to prevent toISOString errors
+			const safeTimestamp = entry.timestamp instanceof Date 
+				? entry.timestamp 
+				: new Date(entry.timestamp as unknown as number | string)
 			const timestamp = this.useTimestamp
-				? `[${entry.timestamp.toISOString()}]`
+				? `[${safeTimestamp.toISOString()}]`
 				: ''
 			const namespace = entry.namespace ? `[${entry.namespace}]` : ''
 			const level = `[${entry.level}]`
@@ -172,8 +176,12 @@ export class ConsoleTransport implements LogTransport {
 
 		// Regular log output (non-table)
 		const consoleMethod = CONSOLE_METHODS[entry.level]
+		// Defensive timestamp handling to prevent toISOString errors
+		const safeTimestampRegular = entry.timestamp instanceof Date 
+			? entry.timestamp 
+			: new Date(entry.timestamp as unknown as number | string)
 		const timestamp = this.useTimestamp
-			? `[${entry.timestamp.toISOString()}]`
+			? `[${safeTimestampRegular.toISOString()}]`
 			: ''
 
 		const namespace = entry.namespace ? `[${entry.namespace}]` : ''

@@ -15,6 +15,8 @@
 
 'use client'
 
+import { PackageSearch, Phone, RefreshCw, Search } from 'lucide-react'
+
 import type { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import type { PagedResult } from '@_classes/Base/PagedResult'
 import type { Product } from '@_classes/Product'
@@ -91,19 +93,7 @@ export default function StoreProductGrid({
 				{isLoading && !hasLoaded ? (
 					<ProductCardSkeleton count={currentPageSize} />
 				) : products.length === 0 ? (
-					<div className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-12 text-center">
-						<p className="text-lg font-semibold text-base-content">No products found</p>
-						<p className="mt-2 text-base text-base-content/70">
-							{isFiltered
-								? 'No products match the current filters. Try adjusting your search or filters.'
-								: 'Products will appear here once available.'}
-						</p>
-						{isFiltered && (
-							<Button variant="primary" size="sm" onClick={onClearFilters} className="mt-4">
-								Reset Filters
-							</Button>
-						)}
-					</div>
+					<EmptyState isFiltered={isFiltered} onClearFilters={onClearFilters} />
 				) : (
 					products.map((product, index) => {
 						// Ensure product.id is a valid string for the key
@@ -159,6 +149,90 @@ export default function StoreProductGrid({
 				</div>
 			)}
 		</main>
+	)
+}
+
+// ============================================================================
+// EMPTY STATE COMPONENT
+// ============================================================================
+
+interface EmptyStateProps {
+	/** Whether filters are applied */
+	isFiltered: boolean
+	/** Callback to clear filters */
+	onClearFilters: () => void
+}
+
+/**
+ * Enhanced empty state with B2B-focused messaging
+ * 
+ * **Business Flow Compliance:**
+ * - Encourages contact with sales team (quote-based model)
+ * - Provides helpful next steps
+ * - Mobile-first responsive design
+ */
+function EmptyState({ isFiltered, onClearFilters }: EmptyStateProps) {
+	if (isFiltered) {
+		return (
+			<div className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-8 md:p-12 text-center">
+				<div className="mx-auto w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center mb-4">
+					<Search className="w-6 h-6 text-warning" />
+				</div>
+				<h3 className="text-lg font-semibold text-base-content mb-2">
+					No matching products
+				</h3>
+				<p className="text-sm md:text-base text-base-content/70 mb-6 max-w-md mx-auto">
+					We couldn&apos;t find products matching your current filters. 
+					Try adjusting your search or filters to find what you need.
+				</p>
+				<div className="flex flex-col sm:flex-row gap-3 justify-center">
+					<Button 
+						variant="primary" 
+						size="md" 
+						onClick={onClearFilters}
+						leftIcon={<RefreshCw className="w-4 h-4" />}
+					>
+						Clear Filters
+					</Button>
+					<Button 
+						variant="outline" 
+						size="md"
+						as="a"
+						href="/contact"
+						leftIcon={<Phone className="w-4 h-4" />}
+					>
+						Contact Sales
+					</Button>
+				</div>
+			</div>
+		)
+	}
+
+	// No products available at all (initial state)
+	return (
+		<div className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-8 md:p-12 text-center">
+			<div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+				<PackageSearch className="w-8 h-8 text-primary" />
+			</div>
+			<h3 className="text-lg font-semibold text-base-content mb-2">
+				Catalog Coming Soon
+			</h3>
+			<p className="text-sm md:text-base text-base-content/70 mb-2 max-w-md mx-auto">
+				Our product catalog is being updated. Contact our sales team for immediate assistance with your medical supply needs.
+			</p>
+			<p className="text-xs text-base-content/50 mb-6">
+				We source from 200+ verified vendors to find the best products for your facility.
+			</p>
+			<Button 
+				variant="primary" 
+				size="md"
+				as="a"
+				href="/contact"
+				leftIcon={<Phone className="w-4 h-4" />}
+			>
+				Contact Sales Team
+			</Button>
+		</div>
 	)
 }
 

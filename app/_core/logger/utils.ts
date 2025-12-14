@@ -457,8 +457,12 @@ export function mergeMetadata(...metadatas: (LogMetadata | undefined)[]): LogMet
  * ```
  */
 export function formatLogEntry(entry: LogEntry, pretty: boolean = false): string {
+	// Defensive timestamp handling to prevent toISOString errors
+	const safeTimestamp = entry.timestamp instanceof Date 
+		? entry.timestamp 
+		: new Date(entry.timestamp as unknown as number | string)
 	const formatted = {
-		timestamp: entry.timestamp.toISOString(),
+		timestamp: safeTimestamp.toISOString(),
 		level: entry.level,
 		message: entry.message,
 		namespace: entry.namespace,

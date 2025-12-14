@@ -105,9 +105,30 @@ export const BREAKPOINTS: ResponsiveBreakpoints = {
 }
 
 /**
- * Default breakpoint for mobile card view
+ * Default breakpoint for mobile card view (legacy - use CARD_VIEW_BREAKPOINT)
+ * @deprecated Use CARD_VIEW_BREAKPOINT for responsive card/table switching
  */
 export const MOBILE_BREAKPOINT = BREAKPOINTS.sm // 640px
+
+/**
+ * MAANG-level responsive breakpoint for card vs table view
+ * 
+ * **Design Philosophy (Linear, Notion, Stripe pattern):**
+ * - Card view: < 1024px (mobile + tablet) - Optimized for touch, vertical scanning
+ * - Table view: ≥ 1024px (desktop) - Where columns fit comfortably
+ * 
+ * This is more elegant than:
+ * - Horizontal scroll (not native feeling)
+ * - Truncating columns (bad UX, loses context)
+ * - Hiding columns (loses data)
+ * 
+ * Card view provides:
+ * - Full data visibility at all screen sizes
+ * - Better touch target sizes on tablet
+ * - Natural vertical scrolling pattern
+ * - Clean, scannable layout
+ */
+export const CARD_VIEW_BREAKPOINT = BREAKPOINTS.lg // 1024px
 
 // ============================================================================
 // ARIA Constants
@@ -240,9 +261,12 @@ export const TABLE_THEME_CLASSES: TableThemeClasses = {
   sortable: 'cursor-pointer hover:bg-base-300/60 active:bg-base-300',
   focusVisible: 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded-sm',
   
-  // Mobile
-  mobileCard: 'card bg-base-100 shadow-xl border border-base-300',
-  mobileCardTitle: 'text-lg font-semibold text-base-content',
+  // Mobile Card - MAANG-level styling (Linear, Stripe pattern)
+  // Note: Main styling now in MobileCardList component for better control
+  mobileCard: 'card bg-base-100/80 backdrop-blur-sm shadow-md border border-base-300/50 rounded-2xl',
+  mobileCardTitle: 'text-base font-semibold text-base-content tracking-tight',
+  mobileCardLabel: 'text-xs font-medium uppercase tracking-wider text-base-content/50',
+  mobileCardValue: 'text-sm font-medium text-base-content',
 }
 
 // ============================================================================

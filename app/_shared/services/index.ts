@@ -18,7 +18,12 @@ export {
 } from './httpService.constants'
 
 // API Client
-export { default as API } from './api'
+export { 
+	default as API, 
+	type RoleDistribution,
+	type AdminCreateAccountRequest,
+	type AdminCreateAccountResponse,
+} from './api'
 
 // Notification Service - Unified logging + toast system (FAANG-level)
 export {

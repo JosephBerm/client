@@ -11,7 +11,13 @@
  * - Tax identification
  * - Website reference
  * - Product catalog (products supplied by this provider)
+ * - Status workflow (Active -> Suspended -> Archived)
  * - Timestamp tracking
+ * 
+ * **Status Workflow (Industry Best Practice):**
+ * - Active: Provider is available for orders
+ * - Suspended: Temporary hold (compliance, performance issues)
+ * - Archived: Permanently deactivated
  * 
  * **Related Entities:**
  * - Product: Products supplied by this provider
@@ -27,6 +33,7 @@
  *   taxId: '12-3456789',
  *   website: 'https://medicalsupplies.com',
  *   identifier: 'MSI-001',
+ *   status: ProviderStatus.Active,
  *   address: new Address({
  *     addressOne: '789 Industrial Blvd',
  *     city: 'Chicago',
@@ -34,21 +41,6 @@
  *     zipCode: '60601',
  *     country: 'USA'
  *   }),
- *   products: [
- *     new Product({ name: 'Surgical Mask', providerId: 1 }),
- *     new Product({ name: 'N95 Respirator', providerId: 1 })
- *   ]
- * });
- * 
- * // Provider with legacy address fields
- * const provider2 = new Provider({
- *   name: 'Healthcare Distributors',
- *   email: 'orders@hcdist.com',
- *   phone: '555-987-6543',
- *   city: 'New York',
- *   state: 'NY',
- *   zip: '10001',
- *   country: 'USA'
  * });
  * ```
  * 
@@ -58,8 +50,12 @@
 import { parseDateSafe, parseRequiredTimestamp } from '@_lib/dates'
 
 import Address from '@_classes/common/Address'
+import { ProviderStatus } from '@_classes/Enums'
 
 import { Product } from './Product'
+
+// Re-export for convenience
+export { ProviderStatus }
 
 /**
  * Provider Entity Class
@@ -115,6 +111,47 @@ export default class Provider {
 	updatedAt: Date | null = null
 
 	/**
+	 * Provider status (Active, Suspended, Archived).
+	 * Follows industry best practices for vendor lifecycle management.
+	 */
+	status: ProviderStatus = ProviderStatus.Active
+
+	/** Reason for suspension (if status === Suspended) */
+	suspensionReason: string = ''
+
+	/** Date when status was last changed */
+	statusChangedAt: Date | null = null
+
+	/** Internal notes about this provider */
+	notes: string = ''
+
+	/**
+	 * Legacy isArchived property for backward compatibility.
+	 * Maps to status === Archived.
+	 */
+	get isArchived(): boolean {
+		return this.status === ProviderStatus.Archived
+	}
+
+	set isArchived(value: boolean) {
+		this.status = value ? ProviderStatus.Archived : ProviderStatus.Active
+	}
+
+	/**
+	 * Check if provider is suspended.
+	 */
+	get isSuspended(): boolean {
+		return this.status === ProviderStatus.Suspended
+	}
+
+	/**
+	 * Check if provider is active (not suspended or archived).
+	 */
+	get isActive(): boolean {
+		return this.status === ProviderStatus.Active
+	}
+
+	/**
 	 * Creates a new Provider instance.
 	 * Deeply copies nested objects (address, products).
 	 * Parses date strings to Date objects.
@@ -154,9 +191,11 @@ export default class Provider {
 	 * });
 	 * ```
 	 */
-	constructor(partial?: Partial<Provider>) {
+	constructor(partial?: Partial<Provider> & { isArchived?: boolean }) {
 		if (partial) {
-			Object.assign(this, partial)
+			// Don't assign isArchived directly since it's a getter/setter
+			const { isArchived: _isArchived, ...rest } = partial
+			Object.assign(this, rest)
 			
 			// Deep copy address object
 			if (partial.address) {
@@ -169,6 +208,20 @@ export default class Provider {
 			// Parse update date from string if needed (optional - null until updated)
 			if (partial.updatedAt !== undefined) {
 				this.updatedAt = parseDateSafe(partial.updatedAt)
+			}
+
+			// Parse status changed date if provided
+			if (partial.statusChangedAt !== undefined) {
+				this.statusChangedAt = parseDateSafe(partial.statusChangedAt)
+			}
+			
+			// Handle status (new enum-based system)
+			if (partial.status !== undefined) {
+				this.status = partial.status
+			}
+			// Handle legacy isArchived for backward compatibility
+			else if (_isArchived !== undefined) {
+				this.status = _isArchived ? ProviderStatus.Archived : ProviderStatus.Active
 			}
 			
 			// Deep copy products array

@@ -80,6 +80,14 @@ export {
 	TOAST_PERSISTENT_CONFIG,
 } from './utils/toastConfig'
 
+// Error Message Translation (for user feedback)
+export {
+	ERROR_MESSAGES,
+	translateError,
+	tryTranslateError,
+	hasTranslation,
+} from './utils/errorMessages'
+
 // ============================================================================
 // CLIENT SERVICES (All have 'use client' directive)
 // ============================================================================
@@ -95,7 +103,7 @@ export {
 } from './services/httpService.constants'
 
 // API Client
-export { default as API } from './services/api'
+export { default as API, type RoleDistribution } from './services/api'
 
 // Notification Service
 export {
@@ -168,4 +176,26 @@ export { useBreadcrumbs } from './hooks/useBreadcrumbs'
 
 // Utility Hooks
 export { useCopyToClipboard } from './hooks/useCopyToClipboard'
+
+// RBAC Hooks
+export { usePermissions, Resources, Actions, Contexts, RoleLevels } from './hooks/usePermissions'
+
+// ============================================================================
+// CONSTANTS (Single Source of Truth)
+// ============================================================================
+
+// Role Constants
+export {
+	ROLE_OPTIONS,
+	getRoleOption,
+	getRoleLabel,
+	getRoleColor,
+	roleRequiresConfirmation,
+	getRolesByLevelDescending,
+	getRolesByLevelAscending,
+	getStaffRoles,
+	isStaffRole,
+	getRoleSelectOptions,
+	type RoleOption,
+} from './constants'
 

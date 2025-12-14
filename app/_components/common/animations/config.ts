@@ -140,3 +140,41 @@ export const STAGGER_PRESETS = {
 	},
 } as const
 
+/**
+ * Modal animation configuration
+ * MAANG-level modal animations following industry best practices
+ * 
+ * **Design Principles:**
+ * - Spring physics for natural, organic feel (Apple, Linear, Notion)
+ * - Subtle scale and y-translate for depth perception
+ * - Fast, snappy transitions (200-300ms industry standard)
+ * - Backdrop fade separate from content animation
+ */
+export const MODAL_ANIMATION = {
+	/** Modal content animation timing */
+	content: {
+		/** Spring physics for natural motion */
+		spring: {
+			type: 'spring' as const,
+			stiffness: 400,
+			damping: 30,
+			mass: 0.8,
+		},
+		/** Exit animation (faster, ease-out) */
+		exit: {
+			duration: 0.15,
+			ease: [0.4, 0, 1, 1] as const, // ease-in for exit
+		},
+	},
+	/** Backdrop animation timing */
+	backdrop: {
+		duration: 0.2,
+		ease: [0.4, 0, 0.2, 1] as const, // Material Design standard
+	},
+	/** Animation distances */
+	distance: {
+		y: 16, // Subtle vertical movement
+		scale: 0.98, // Subtle scale (closer to 1 = more premium)
+	},
+} as const
+

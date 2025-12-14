@@ -15,15 +15,22 @@
  * - If initial data provided, uses it for first render (SEO + Performance)
  * - Client-side interactions (search, filter, sort) work as before
  * 
+ * **Business Flow Compliance:**
+ * - Integrates referral tracking (Section 2.2)
+ * - Shows value propositions (Section 4)
+ * - Displays quick quote guarantee
+ * 
+ * @see business_flow.md Section 1 - DISCOVERY & BROWSING
+ * @see business_flow.md Section 2.2 - Referral-Based Assignment
  * @module components/store/StorePageContainer
  * @category Components
  */
 
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 
-import { useStorePageLogic, PRIORITY_IMAGE_COUNT } from '@_features/store'
+import { useStorePageLogic, PRIORITY_IMAGE_COUNT, useReferralTracking } from '@_features/store'
 import type {
 	SerializedProduct,
 	SerializedPagedResult,
@@ -38,6 +45,8 @@ import StoreFilters from '@_components/store/StoreFilters'
 import StoreHeader from '@_components/store/StoreHeader'
 import StoreProductGrid from '@_components/store/StoreProductGrid'
 import UnifiedStoreToolbar from '@_components/store/UnifiedStoreToolbar'
+import ReferralBanner from '@_components/store/ReferralBanner'
+import StoreValueProposition from '@_components/store/StoreValueProposition'
 
 /**
  * Props for StorePageContainer
@@ -91,6 +100,18 @@ export default function StorePageContainer({
 	initialCategories,
 	initialSearchParams,
 }: StorePageContainerProps = {}) {
+	// Track referral banner dismissal
+	const [showReferralBanner, setShowReferralBanner] = useState(true)
+	
+	// Initialize referral tracking - captures ?ref= from URL
+	// Per business_flow.md Section 2.2: Referral-Based Assignment
+	useReferralTracking()
+	
+	// Handler for dismissing referral banner
+	const handleDismissReferral = useCallback(() => {
+		setShowReferralBanner(false)
+	}, [])
+	
 	// Convert serialized data from server to class instances
 	// This is only done once on initial render (useMemo)
 	// Type assertions are safe because Product/ProductsCategory constructors
@@ -176,8 +197,19 @@ export default function StorePageContainer({
 
 	return (
 		<div className="min-h-screen w-full">
-			{/* Page Header - Static */}
+			{/* Referral Banner - Shows when user arrives via ?ref= link */}
+			{showReferralBanner && (
+				<ReferralBanner 
+					dismissible={true} 
+					onDismiss={handleDismissReferral} 
+				/>
+			)}
+			
+			{/* Page Header - Enhanced with Quick Quote Guarantee */}
 			<StoreHeader />
+			
+			{/* Value Propositions - Business Flow Section 4 Competitive Advantages */}
+			<StoreValueProposition variant="horizontal" />
 
 			{/* Unified Store Toolbar - Sticky */}
 			<div 

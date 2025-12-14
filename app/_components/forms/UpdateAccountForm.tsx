@@ -159,11 +159,21 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 			return API.Accounts.update(updatedUser)
 		},
 		{
-			successMessage: 'Account updated successfully',
-			errorMessage: 'Failed to update account',
+			successMessage: 'Profile updated successfully',
+			errorMessage: 'Failed to update profile',
+			componentName: 'UpdateAccountForm',
+			actionName: 'updateProfile',
 			onSuccess: (result) => {
+				// MAANG Pattern: Backend now returns updated user entity
+				// This enables optimistic UI updates and state synchronization
 				if (result) {
-					onUserUpdate?.(new User(result))
+					const updatedUserEntity = new User(result as unknown as Partial<IUser>)
+					onUserUpdate?.(updatedUserEntity)
+					
+					logger.info('Profile update synced to parent', {
+						component: 'UpdateAccountForm',
+						userId: updatedUserEntity.id ?? 'unknown',
+					})
 				}
 			},
 		}

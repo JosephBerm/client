@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -143,11 +143,12 @@ export default function QuoteDetailsPage() {
 		})
 	}
 
-	const contactName = useMemo(() => {
-		if (!quote?.name) {return 'Quote contact'}
+	// Contact name (React Compiler auto-memoizes)
+	const contactName = (() => {
+		if (!quote?.name) return 'Quote contact'
 		const name = quote.name as any
 		return [name.first, name.middle, name.last].filter(Boolean).join(' ') || 'Quote contact'
-	}, [quote?.name])
+	})()
 
 	// Created date is already parsed in Quote class constructor
 	const formattedCreatedDate = formatDate(quote?.createdAt, 'long')
@@ -161,35 +162,32 @@ export default function QuoteDetailsPage() {
 				.join(', ')
 		: 'No address provided'
 
-	// Column definitions for products table
-	const productColumns = useMemo<ColumnDef<any>[]>(
-		() => [
-			{
-				accessorKey: 'product.name',
-				header: 'Product',
-				cell: ({ row }) => {
-					const {product} = row.original
-					return product?.name || 'Product pending'
-				},
+	// Column definitions for products table (React Compiler auto-memoizes)
+	const productColumns: ColumnDef<any>[] = [
+		{
+			accessorKey: 'product.name',
+			header: 'Product',
+			cell: ({ row }) => {
+				const {product} = row.original
+				return product?.name || 'Product pending'
 			},
-			{
-				accessorKey: 'product.sku',
-				header: 'SKU',
-				cell: ({ row }) => {
-					const {product} = row.original
-					return product?.sku || row.original.productId || '—'
-				},
+		},
+		{
+			accessorKey: 'product.sku',
+			header: 'SKU',
+			cell: ({ row }) => {
+				const {product} = row.original
+				return product?.sku || row.original.productId || '—'
 			},
-			{
-				accessorKey: 'quantity',
-				header: 'Quantity',
-				cell: ({ row }) => (
-					<span className="font-semibold">{row.original.quantity ?? 0}</span>
-				),
-			},
-		],
-		[]
-	)
+		},
+		{
+			accessorKey: 'quantity',
+			header: 'Quantity',
+			cell: ({ row }) => (
+				<span className="font-semibold">{row.original.quantity ?? 0}</span>
+			),
+		},
+	]
 
 	return (
 		<>

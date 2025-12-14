@@ -13,6 +13,7 @@
  * - Professional chat dialog (MAANG-level implementation)
  * - Badge support for unread messages (future)
  * - **MCP Chat in Development Mode** (NEW!)
+ * - **Auth-Aware Chat Flow** (NEW!) - Requires authentication in production
  * 
  * **FAANG Principles:**
  * - Mobile-first responsive design
@@ -27,6 +28,12 @@
  * - In development, the chat bubble connects to the Next.js MCP server
  * - Provides a terminal-like interface for AI-assisted development
  * - Access MCP tools and resources directly from the UI
+ * 
+ * **Authentication Flow (Production):**
+ * - If user is not authenticated, clicking "Chat Now" captures the intent
+ * - Opens login modal instead of chat
+ * - After successful login, automatically opens chat (intent-based redirect)
+ * - This ensures users are logged in before contacting support
  * 
  * **Future Enhancements:**
  * - Connect to real chat service (Intercom, Drift, custom)
@@ -44,8 +51,13 @@
 
 import { useState, useEffect } from 'react'
 
+import { useRouter, useSearchParams } from 'next/navigation'
+
 import classNames from 'classnames'
 import { MessageCircle, Terminal } from 'lucide-react'
+
+import { useAuthStore, AuthRedirectService } from '@_features/auth'
+import { Routes } from '@_features/navigation'
 
 import { logger } from '@_core/logger'
 
@@ -109,15 +121,43 @@ export default function LiveChatBubble({
 	additionalBottomPadding = 8,
 	compact = true,
 }: LiveChatBubbleProps) {
+	const router = useRouter()
+	const searchParams = useSearchParams()
 	const [internalIsOpen, setInternalIsOpen] = useState(false)
 	const [isHovered, setIsHovered] = useState(false)
 	const [computedBottomOffset, setComputedBottomOffset] = useState<number>(0)
+	
+	// Auth state for production chat flow
+	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 
 	// Use external state if provided, otherwise use internal state
 	// More defensive: if externalIsOpen is explicitly provided (even if false), use external control
 	const isDialogOpen = externalIsOpen ?? internalIsOpen
 	// Only use internal state setter if external control (onOpenChange) is not provided
 	const setIsDialogOpen = onOpenChange ?? setInternalIsOpen
+	
+	/**
+	 * Handle `action=open_chat` query parameter.
+	 * This is set by AuthRedirectService when user logs in after clicking "Chat Now".
+	 * Auto-opens the chat dialog and cleans up the URL.
+	 */
+	const actionParam = searchParams.get('action')
+	useEffect(() => {
+		if (actionParam === 'open_chat' && isAuthenticated) {
+			logger.info('Auto-opening chat from intent redirect', {
+				component: 'LiveChatBubble',
+			})
+			
+			// Open the chat dialog
+			setIsDialogOpen(true)
+			
+			// Clean up the URL (remove action param)
+			const currentParams = new URLSearchParams(searchParams.toString())
+			currentParams.delete('action')
+			const cleanUrl = window.location.pathname + (currentParams.toString() ? `?${currentParams.toString()}` : '')
+			router.replace(cleanUrl)
+		}
+	}, [actionParam, isAuthenticated, searchParams, router, setIsDialogOpen])
 
 	/**
 	 * Compute safe bottom offset so the bubble does not overlap bottom-fixed UI
@@ -200,11 +240,45 @@ export default function LiveChatBubble({
 	// Don't render if not visible
 	if (!visible) {return null}
 
+	/**
+	 * Handle click on the chat bubble.
+	 * 
+	 * **Authentication Flow (Production Only):**
+	 * - If user is NOT authenticated, capture 'open_chat' intent and redirect to login
+	 * - After successful login, AuthRedirectService will redirect to Dashboard with ?action=open_chat
+	 * - The useEffect above will detect this and auto-open the chat
+	 * 
+	 * **Development Mode:**
+	 * - Always opens chat directly (no auth required for MCP DevTools)
+	 */
 	const handleClick = () => {
 		// Prevent opening if already open (defensive)
-		if (!isDialogOpen) {
-			setIsDialogOpen(true)
+		if (isDialogOpen) {
+			return
 		}
+		
+		// Development mode: Always allow (MCP DevTools doesn't require auth)
+		if (isDevelopment) {
+			setIsDialogOpen(true)
+			return
+		}
+		
+		// Production mode: Require authentication for live chat
+		if (!isAuthenticated) {
+			logger.info('Chat clicked by unauthenticated user - capturing intent', {
+				component: 'LiveChatBubble',
+			})
+			
+			// Capture the intent before redirecting to login
+			AuthRedirectService.captureIntent('openChat')
+			
+			// Redirect to home page with login modal open
+			router.push(Routes.openLoginModal())
+			return
+		}
+		
+		// Authenticated user in production: Open chat directly
+		setIsDialogOpen(true)
 	}
 
 	const handleClose = () => {

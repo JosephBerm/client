@@ -659,6 +659,13 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 			/>
 
 			{/* Login Modal */}
+			{/* 
+			 * Post-Auth Redirect is now handled centrally by AuthRedirectService in useAuthModal.
+			 * The onLoginSuccess callback here only handles UI cleanup (closing modal, resetting refs).
+			 * Navigation logic lives in useAuthModal.handleAuthSuccess → executePostAuthRedirect().
+			 * 
+			 * MAANG Pattern: Single source of truth for redirect logic.
+			 */}
 			<LoginModal
 				isOpen={loginModalOpen}
 				onClose={() => {
@@ -672,15 +679,8 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 					loginParamHandledRef.current = false
 					
 					// Remove login query param on successful login (FAANG pattern: clean URL after state change)
+					// Note: Navigation is handled by useAuthModal via AuthRedirectService
 					cleanupLoginParams()
-					
-					// Navigate to redirectTo if present (FAANG pattern: post-auth redirect)
-					if (redirectToValue) {
-						// Use setTimeout to ensure URL cleanup completes before navigation
-						setTimeout(() => {
-							router.push(redirectToValue)
-						}, 0)
-					}
 				}}
 			/>
 		</>

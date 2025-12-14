@@ -15,6 +15,12 @@ export interface SortOption {
 /**
  * Available sort options following industry standards
  * Based on Amazon, Apple, and Microsoft product catalogs
+ * 
+ * **Note:** Price-based sorting is intentionally excluded because
+ * MedSource Pro uses a quote-based pricing model where prices are
+ * determined per-customer by sales representatives.
+ * 
+ * @see business_flow.md for quote-based ordering details
  */
 export const SORT_OPTIONS: SortOption[] = [
 	{
@@ -33,18 +39,6 @@ export const SORT_OPTIONS: SortOption[] = [
 		label: 'Name: Z to A',
 		value: 'name_desc',
 		field: 'name',
-		order: 'desc',
-	},
-	{
-		label: 'Price: Low to High',
-		value: 'price_asc',
-		field: 'price',
-		order: 'asc',
-	},
-	{
-		label: 'Price: High to Low',
-		value: 'price_desc',
-		field: 'price',
 		order: 'desc',
 	},
 	{

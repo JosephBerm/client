@@ -203,6 +203,35 @@ export class NavigationService {
 					},
 					],
 					roles: [AccountRole.Admin],
+				},
+				// RBAC/Access Control (Admin only)
+				{
+					id: 'rbac',
+					title: 'Access Control',
+					routes: [
+					{
+						id: 'rbac-dashboard',
+						label: 'RBAC Dashboard',
+						href: Routes.RBAC.location,
+						icon: 'shield',
+						description: 'Roles and permissions overview',
+					},
+					{
+						id: 'rbac-roles',
+						label: 'Role Definitions',
+						href: Routes.RBAC.roles,
+						icon: 'key',
+						description: 'View role capabilities',
+					},
+					{
+						id: 'rbac-permissions',
+						label: 'Permissions Matrix',
+						href: Routes.RBAC.permissions,
+						icon: 'lock',
+						description: 'Resource permissions by role',
+					},
+					],
+					roles: [AccountRole.Admin],
 				}
 			)
 		}

@@ -315,8 +315,20 @@ export class Logger implements ILogger {
 		}
 
 		// Create log entry
+		// Ensure timestamp is always a Date object to prevent toISOString errors
+		let entryTimestamp: Date
+		if (mergedMetadata.timestamp instanceof Date) {
+			entryTimestamp = mergedMetadata.timestamp
+		} else if (typeof mergedMetadata.timestamp === 'number') {
+			entryTimestamp = new Date(mergedMetadata.timestamp)
+		} else if (typeof mergedMetadata.timestamp === 'string') {
+			entryTimestamp = new Date(mergedMetadata.timestamp)
+		} else {
+			entryTimestamp = new Date()
+		}
+
 		const entry: LogEntry = {
-			timestamp: mergedMetadata.timestamp || new Date(),
+			timestamp: entryTimestamp,
 			level,
 			message,
 			namespace: this.config.namespace,

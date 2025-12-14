@@ -73,18 +73,54 @@ export enum TypeOfBusiness {
 /**
  * QuoteStatus Enum
  * 
- * Status of quote requests (RFQs).
- * Tracks whether staff has reviewed the quote.
+ * Status of quote requests (RFQs) throughout the lifecycle.
+ * Per business_flow.md Quote Status Lifecycle.
  * 
  * **Status Flow:**
  * 1. Unread - Initial state when customer submits quote
- * 2. Read - Staff has reviewed the quote
+ * 2. Read - Staff has reviewed the quote, takes ownership
+ * 3. Approved - Pricing approved, quote sent to customer
+ * 4. Converted - Customer accepted, quote converted to order
+ * 5. Rejected - Quote declined by staff or customer
+ * 6. Expired - Quote passed validity period without action
+ * 
+ * @see business_flow.md Quote Status Lifecycle
  */
 export enum QuoteStatus {
-	/** Quote has not been reviewed by staff */
-	Unread,
-	/** Quote has been reviewed by staff */
-	Read,
+	/** Initial state - quote request submitted */
+	Unread = 0,
+	/** Staff reviewed quote request */
+	Read = 1,
+	/** Staff approved pricing, quote sent to customer */
+	Approved = 2,
+	/** Customer accepted, quote converted to order */
+	Converted = 3,
+	/** Quote declined by staff or customer */
+	Rejected = 4,
+	/** Quote passed validity period without action */
+	Expired = 5,
+}
+
+/**
+ * QuotePriority Enum
+ * 
+ * Priority levels for quote processing based on order value
+ * and customer relationship. Per business_flow.md.
+ * 
+ * **Priority Rules:**
+ * - Urgent: Customer marked as urgent, or order value >$10,000 (4hr SLA)
+ * - High: Order value $5,000-$10,000, or repeat customer (24hr SLA)
+ * - Standard: Order value <$5,000 (48hr SLA)
+ * 
+ * @see business_flow.md Quote Priority Levels
+ */
+export enum QuotePriority {
+	/** Standard processing - within 48 hours */
+	Standard = 0,
+	/** High priority - within 24 hours */
+	High = 1,
+	/** Urgent - within 4 hours */
+	Urgent = 2,
 }
 
 /**
@@ -112,20 +148,44 @@ export enum NotificationType {
  * 
  * User role levels with role-based access control (RBAC).
  * Determines user permissions and accessible features.
+ * Higher values = more authority.
  * 
- * **Roles:**
- * - **Customer (0)**: Regular users who place orders and request quotes
- * - **Admin (9999999)**: Full system access, can manage all entities
+ * **Role Hierarchy:**
+ * - **Customer (0)**: End users who purchase products
+ * - **SalesRep (100)**: Sales representatives who manage quotes/orders
+ * - **SalesManager (200)**: Managers who oversee sales team, approve high-value quotes
+ * - **FulfillmentCoordinator (300)**: Handles order fulfillment logistics
+ * - **Admin (9999999)**: Full system access
  * 
  * **Usage:**
  * - Navigation filtering: `NavigationService.getNavigationSections(userRole)`
- * - Route protection: Middleware checks user role
+ * - Route protection: Middleware checks user role level
+ * - Permission checks: `user.role >= AccountRole.SalesRep`
  * - Feature gating: Show/hide features based on role
+ * 
+ * @example
+ * ```typescript
+ * // Check if user is at least a SalesRep
+ * if (user.role >= AccountRole.SalesRep) {
+ *   // Show sales features
+ * }
+ * 
+ * // Check if user is exactly a Customer
+ * if (user.role === AccountRole.Customer) {
+ *   // Show customer-only features
+ * }
+ * ```
  */
 export enum AccountRole {
-	/** Regular customer user (value: 0) */
-	Customer,
-	/** Administrator with full access (value: 9999999) */
+	/** End users who purchase products (value: 0) */
+	Customer = 0,
+	/** Sales representatives who manage quotes/orders (value: 100) */
+	SalesRep = 100,
+	/** Managers who oversee sales team, approve high-value quotes (value: 200) */
+	SalesManager = 200,
+	/** Handles order fulfillment logistics (value: 300) */
+	FulfillmentCoordinator = 300,
+	/** Administrator with full system access (value: 9999999) */
 	Admin = 9999999,
 }
 
@@ -164,6 +224,52 @@ export enum AccountStatus {
 	Deactivated = 2,
 	/** Account pending email or license verification */
 	PendingVerification = 3,
+}
+
+/**
+ * CustomerStatus Enum
+ * 
+ * Customer/Company status levels for B2B customer lifecycle management.
+ * Determines whether a customer organization can place orders.
+ * 
+ * **Statuses:**
+ * - **Active (0)**: Customer is active and can place orders
+ * - **Suspended (1)**: Temporarily suspended, cannot place orders
+ * - **PendingVerification (2)**: Awaiting business/license verification
+ * - **Inactive (3)**: No recent activity, may need re-engagement
+ * - **Churned (4)**: Marked as lost customer
+ * 
+ * **Business Flow:**
+ * - New customers start as PendingVerification until verified
+ * - Active customers can place orders and request quotes
+ * - Suspended customers retain account but cannot place orders
+ * - Inactive customers may receive re-engagement campaigns
+ * - Churned customers are archived for historical data
+ * 
+ * @example
+ * ```typescript
+ * import { CustomerStatus } from '@_classes/Enums';
+ * 
+ * if (customer.status === CustomerStatus.Active) {
+ *   // Allow order placement
+ * }
+ * 
+ * if (customer.status === CustomerStatus.PendingVerification) {
+ *   // Show verification required message
+ * }
+ * ```
+ */
+export enum CustomerStatus {
+	/** Customer is active and can place orders */
+	Active = 0,
+	/** Customer temporarily suspended */
+	Suspended = 1,
+	/** Pending business/license verification */
+	PendingVerification = 2,
+	/** No recent activity */
+	Inactive = 3,
+	/** Marked as lost customer */
+	Churned = 4,
 }
 
 /**
@@ -245,4 +351,23 @@ export enum InternalRouteType {
 	Analytics,
 	/** User profile settings */
 	Profile,
+}
+
+/**
+ * Provider/Vendor status enumeration.
+ * Follows industry best practices for vendor lifecycle management.
+ * 
+ * Status workflow: Active -> Suspended -> Archived
+ * (Restore is possible at any step)
+ * 
+ * NOTE: Currently only Active and Archived are supported until
+ * the database migration adds the Status column.
+ */
+export enum ProviderStatus {
+	/** Provider is active and available for orders */
+	Active = 0,
+	/** Provider is temporarily suspended (compliance issues, performance concerns) */
+	Suspended = 1,
+	/** Provider is archived and no longer available */
+	Archived = 2,
 }

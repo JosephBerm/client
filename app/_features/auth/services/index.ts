@@ -12,3 +12,10 @@ export {
 	getAuthToken,
 } from './AuthService'
 
+export {
+	AuthRedirectService,
+	type AuthIntent,
+	type StoredIntent,
+	type PostAuthRedirect,
+} from './AuthRedirectService'
+

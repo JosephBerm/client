@@ -355,8 +355,11 @@ export interface TableThemeClasses {
   dragging: string
   sortable: string
   focusVisible: string
+  // MAANG-level mobile card classes
   mobileCard: string
   mobileCardTitle: string
+  mobileCardLabel: string
+  mobileCardValue: string
 }
 
 /**

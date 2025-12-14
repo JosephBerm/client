@@ -41,6 +41,12 @@ export { useCopyToClipboard } from './useCopyToClipboard'
 export { useBreadcrumbs } from './useBreadcrumbs'
 
 // =============================================================================
+// RBAC HOOKS
+// =============================================================================
+export { usePermissions, Resources, Actions, Contexts, RoleLevels } from './usePermissions'
+export type { default as UsePermissionsReturn } from './usePermissions'
+
+// =============================================================================
 // DEV-ONLY HOOKS (Not exported from @_shared main barrel)
 // =============================================================================
 // Note: useMcpChat is intentionally NOT re-exported from @_shared/index.ts

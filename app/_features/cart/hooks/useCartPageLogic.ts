@@ -30,6 +30,7 @@ import { useRouter } from 'next/navigation'
 
 import { useAuthStore } from '@_features/auth'
 import { Routes } from '@_features/navigation'
+import { getStoredReferral } from '@_features/store/hooks/useReferralTracking'
 
 import { quoteSchema, type QuoteFormData, logger } from '@_core'
 
@@ -319,6 +320,10 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 				? user.customer.name
 				: ''
 
+			// Get referral data if available (per business_flow.md Section 2.2)
+			// Referral attribution is key for sales rep assignment
+			const referralData = getStoredReferral()
+			
 			// Construct a proper Quote object with all form values
 			// Note: createdAt is set to now() as a client-side timestamp for new quotes
 			// The backend will override this with its own server-side timestamp
@@ -332,6 +337,18 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 				createdAt: new Date(), // Required field - backend will set authoritative timestamp
 				// Convert string date back to Date object if needed
 				...(values.validUntil && { validUntil: serializeDate(values.validUntil) }),
+				// Include referral data for sales rep attribution
+				// Per business_flow.md Section 2.2: Referral-Based Assignment
+				...(referralData && {
+					referredBy: referralData.referredBy,
+					referralSource: referralData.source,
+				}),
+			})
+			
+			logger.info('Quote data prepared', {
+				component: 'useCartPageLogic',
+				hasReferral: Boolean(referralData),
+				referralSource: referralData?.source,
 			})
 
 			return API.Public.sendQuote(quoteData)

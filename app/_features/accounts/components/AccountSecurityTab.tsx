@@ -5,7 +5,8 @@
  * Contains password management and security settings.
  * 
  * **Features:**
- * - Password change form
+ * - Password change form (with old password)
+ * - Admin password reset (without old password) 
  * - Security information display
  * - Last login tracking
  * - Account status display
@@ -15,6 +16,7 @@
  * **MAANG-Level Improvements:**
  * - Uses accountStatus prop instead of hardcoded value
  * - Shows last login timestamp
+ * - Admin can reset password without knowing old password
  * - Send password reset email option
  * - Force logout option
  * 
@@ -23,7 +25,16 @@
 
 'use client'
 
-import { Shield, Key, AlertCircle, Mail, LogOut, RefreshCw } from 'lucide-react'
+import { useState } from 'react'
+
+import { Shield, Key, AlertCircle, Mail, LogOut, RefreshCw, KeyRound } from 'lucide-react'
+
+import type { AccountInfo } from '@_types'
+import { toAccountInfo } from '@_types'
+
+import { logger } from '@_core'
+
+import { notificationService, API } from '@_shared'
 
 import { AccountStatus } from '@_classes/Enums'
 import type User from '@_classes/User'
@@ -32,6 +43,8 @@ import AccountStatusBadge from '@_components/common/AccountStatusBadge'
 import ChangePasswordForm from '@_components/forms/ChangePasswordForm'
 import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
+
+import PasswordResetModal from './PasswordResetModal'
 
 // ============================================================================
 // TYPES
@@ -52,6 +65,8 @@ export interface AccountSecurityTabProps {
 	onForceLogout?: () => Promise<void>
 	/** Whether password reset is in progress */
 	isSendingReset?: boolean
+	/** Callback after admin password reset (to refresh data) */
+	onPasswordResetSuccess?: () => void
 }
 
 // ============================================================================
@@ -90,96 +105,115 @@ export default function AccountSecurityTab({
 	onSendPasswordReset,
 	onForceLogout,
 	isSendingReset = false,
+	onPasswordResetSuccess,
 }: AccountSecurityTabProps) {
 	const statusDisplay = getStatusDisplay(accountStatus)
+	
+	// Admin password reset modal state
+	const [isResetModalOpen, setIsResetModalOpen] = useState(false)
+	
+	// Convert User to AccountInfo for the modal
+	const accountInfo = toAccountInfo(account)
+	
+	// Handle admin password reset success
+	const handleResetSuccess = () => {
+		setIsResetModalOpen(false)
+		onPasswordResetSuccess?.()
+	}
 
 	return (
-		<div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-			{/* Main Content - Password Change */}
-			<div className="space-y-6">
-				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
-					<div className="flex items-center gap-3 mb-6">
-						<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-							<Key className="h-5 w-5 text-primary" />
-						</div>
-						<div>
-							<h2 className="text-lg font-semibold text-base-content">Change Password</h2>
-							<p className="text-sm text-base-content/60">
-								Update the password for this account
-							</p>
-						</div>
-					</div>
-
-					{canChangePassword ? (
-						<ChangePasswordForm user={account} />
-					) : (
-						<div className="flex items-start gap-3 rounded-lg border border-warning/30 bg-warning/5 p-4">
-							<AlertCircle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
-							<div>
-								<p className="text-sm font-medium text-warning">
-									Password Change Not Available
-								</p>
-								<p className="text-sm text-base-content/70 mt-1">
-									{isCurrentUserAdmin
-										? 'Admin users can only change their own password from the Profile page.'
-										: 'You do not have permission to change this password.'}
-								</p>
-							</div>
-						</div>
-					)}
-				</Card>
-
-				{/* Admin Security Actions */}
-				{isCurrentUserAdmin && canChangePassword && (
+		<>
+			<div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+				{/* Main Content - Password Change */}
+				<div className="space-y-6">
 					<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
-						<div className="flex items-center gap-3 mb-4">
-							<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
-								<RefreshCw className="h-5 w-5 text-warning" />
+						<div className="flex items-center gap-3 mb-6">
+							<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+								<Key className="h-5 w-5 text-primary" />
 							</div>
 							<div>
-								<h2 className="text-lg font-semibold text-base-content">Admin Actions</h2>
+								<h2 className="text-lg font-semibold text-base-content">Change Password</h2>
 								<p className="text-sm text-base-content/60">
-									Additional security actions for administrators
+									Update the password for this account
 								</p>
 							</div>
 						</div>
 
-						<div className="space-y-3">
-							{onSendPasswordReset && (
+						{canChangePassword ? (
+							<ChangePasswordForm user={account} />
+						) : (
+							<div className="flex items-start gap-3 rounded-lg border border-warning/30 bg-warning/5 p-4">
+								<AlertCircle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+								<div>
+									<p className="text-sm font-medium text-warning">
+										Password Change Not Available
+									</p>
+									<p className="text-sm text-base-content/70 mt-1">
+										{isCurrentUserAdmin
+											? 'Use the "Reset Password" button below to set a new password without the old one.'
+											: 'You do not have permission to change this password.'}
+									</p>
+								</div>
+							</div>
+						)}
+					</Card>
+
+					{/* Admin Security Actions */}
+					{isCurrentUserAdmin && (
+						<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+							<div className="flex items-center gap-3 mb-4">
+								<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
+									<RefreshCw className="h-5 w-5 text-warning" />
+								</div>
+								<div>
+									<h2 className="text-lg font-semibold text-base-content">Admin Actions</h2>
+									<p className="text-sm text-base-content/60">
+										Administrative security actions for this account
+									</p>
+								</div>
+							</div>
+
+							<div className="space-y-3">
+								{/* Admin Password Reset - Always show for admins viewing other accounts */}
 								<Button
-									variant="secondary"
+									variant="primary"
 									size="sm"
-									onClick={() => void onSendPasswordReset()}
-									loading={isSendingReset}
-									disabled={isSendingReset}
-									leftIcon={<Mail className="h-4 w-4" />}
+									onClick={() => setIsResetModalOpen(true)}
+									leftIcon={<KeyRound className="h-4 w-4" />}
 									className="w-full justify-start"
 								>
-									Send Password Reset Email
+									Reset Password
 								</Button>
-							)}
-							
-							{onForceLogout && (
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={() => void onForceLogout()}
-									leftIcon={<LogOut className="h-4 w-4" />}
-									className="w-full justify-start text-error hover:bg-error/10"
-								>
-									Force Logout All Sessions
-								</Button>
-							)}
-
-							{!onSendPasswordReset && !onForceLogout && (
-								<p className="text-sm text-base-content/60 italic">
-									Additional admin actions coming soon...
-								</p>
-							)}
-						</div>
-					</Card>
-				)}
-			</div>
+								
+								{onSendPasswordReset && (
+									<Button
+										variant="secondary"
+										size="sm"
+										onClick={() => void onSendPasswordReset()}
+										loading={isSendingReset}
+										disabled={isSendingReset}
+										leftIcon={<Mail className="h-4 w-4" />}
+										className="w-full justify-start"
+									>
+										Send Password Reset Email
+									</Button>
+								)}
+								
+								{onForceLogout && (
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={() => void onForceLogout()}
+										leftIcon={<LogOut className="h-4 w-4" />}
+										className="w-full justify-start text-error hover:bg-error/10"
+									>
+										Force Logout All Sessions
+									</Button>
+								)}
+							</div>
+						</Card>
+					)}
+				</div>
 
 			{/* Sidebar - Security Info */}
 			<div className="space-y-4">
@@ -267,5 +301,16 @@ export default function AccountSecurityTab({
 				</Card>
 			</div>
 		</div>
+		
+		{/* Admin Password Reset Modal */}
+		{isCurrentUserAdmin && accountInfo && (
+			<PasswordResetModal
+				isOpen={isResetModalOpen}
+				account={accountInfo}
+				onClose={() => setIsResetModalOpen(false)}
+				onSuccess={handleResetSuccess}
+			/>
+		)}
+		</>
 	)
 }

@@ -11,6 +11,12 @@
  * - No max-width (InternalAppShell handles constraints)
  * - Just header content (title, description, actions)
  * 
+ * **Next.js 16 Optimization:**
+ * - Server Component (no 'use client' directive needed)
+ * - No useState, useEffect, or event handlers
+ * - Actions prop accepts React nodes (can include Client Components)
+ * - Better performance: rendered on server, reduces client JS bundle
+ * 
  * **Features:**
  * - Responsive title sizing
  * - Optional description text
@@ -25,6 +31,7 @@
  * @example
  * ```tsx
  * import { InternalPageHeader } from '@/app/app/_components'
+ * import Link from 'next/link'
  * 
  * // Basic usage
  * <InternalPageHeader
@@ -32,14 +39,14 @@
  *   description="Manage all orders in the system"
  * />
  * 
- * // With actions
+ * // With actions (use Link for navigation - Server Component compatible)
  * <InternalPageHeader
  *   title="Products"
  *   description="Browse and manage product catalog"
  *   actions={
- *     <Button variant="primary" onClick={handleCreate}>
- *       Create Product
- *     </Button>
+ *     <Link href="/app/products/create">
+ *       <Button variant="primary">Create Product</Button>
+ *     </Link>
  *   }
  * />
  * 
@@ -53,8 +60,6 @@
  * 
  * @module InternalPageHeader
  */
-
-'use client'
 
 import type { ReactNode } from 'react'
 

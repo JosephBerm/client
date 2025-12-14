@@ -47,6 +47,51 @@
  */
 
 import type CustomerSummary from '@_classes/Base/CustomerSummary'
+
+/**
+ * Role distribution statistics returned by RBAC dashboard API.
+ */
+export interface RoleDistribution {
+	totalUsers: number
+	customerCount: number
+	salesRepCount: number
+	salesManagerCount: number
+	fulfillmentCoordinatorCount: number
+	adminCount: number
+}
+
+/**
+ * Request model for admin account creation.
+ */
+export interface AdminCreateAccountRequest {
+	/** Email address (required, must be unique) */
+	email: string
+	/** Username (optional, defaults to email) */
+	username?: string
+	/** First name (optional) */
+	firstName?: string
+	/** Last name (optional) */
+	lastName?: string
+	/** Role level (numeric, defaults to Customer=0) */
+	role: number
+	/** Temporary password (optional, auto-generated if not provided) */
+	temporaryPassword?: string
+	/** Whether to send invitation email (default: true) */
+	sendInvitationEmail: boolean
+}
+
+/**
+ * Response model for admin account creation.
+ */
+export interface AdminCreateAccountResponse {
+	/** The created account (password cleared) */
+	account: User
+	/** Temporary password (only if auto-generated) */
+	temporaryPassword?: string
+	/** Whether invitation email was sent */
+	invitationEmailSent: boolean
+}
+
 import type { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import type { PagedResult } from '@_classes/Base/PagedResult'
 import type Company from '@_classes/Company'
@@ -88,9 +133,14 @@ const API = {
 		
 		/**
 		 * Updates user account information.
+		 * Returns the updated user account for state synchronization.
+		 * 
+		 * **MAANG Best Practice**: Always returns the updated entity after mutations.
+		 * 
 		 * @param account - User object with updated data
+		 * @returns Updated user account
 		 */
-		update: async <T>(account: User) => HttpService.put<T>('/account', account),
+		update: async (account: User) => HttpService.put<User>('/account', account),
 		
 		/**
 		 * Changes password for current user.
@@ -101,13 +151,21 @@ const API = {
 			HttpService.put<T>('/account/changepassword', { oldPassword, newPassword }),
 		
 		/**
-		 * Changes password for specific user (admin only).
-		 * @param id - User ID
+		 * Changes password for specific user (admin only or self-service).
+		 * @param userId - User ID
 		 * @param oldPassword - Current password
 		 * @param newPassword - New password
 		 */
-		changePasswordById: async <T>(id: string, oldPassword: string, newPassword: string) =>
-			HttpService.put<T>(`/account/changepasswordById`, { id, oldPassword, newPassword }),
+		changePasswordById: async <T>(userId: string, oldPassword: string, newPassword: string) =>
+			HttpService.put<T>(`/account/changepasswordById`, { userId, oldPassword, newPassword }),
+		
+		/**
+		 * Admin-only: Reset any user's password without requiring old password.
+		 * @param userId - User ID to reset password for
+		 * @param newPassword - New password to set
+		 */
+		adminResetPassword: async (userId: string, newPassword: string) =>
+			HttpService.put<boolean>('/account/admin/reset-password', { userId: parseInt(userId, 10), newPassword }),
 		
 		/**
 		 * Gets all user accounts (admin only).
@@ -135,6 +193,33 @@ const API = {
 		 * @returns Success status
 		 */
 		delete: async (id: string) => HttpService.delete<boolean>(`/account/${id}`),
+		
+		/**
+		 * Updates user role (admin only).
+		 * @param id - User ID
+		 * @param role - New role level (numeric)
+		 * @returns Updated user account
+		 */
+		updateRole: async (id: string, role: number) => 
+			HttpService.put<User>(`/account/${id}/role`, { role }),
+		
+		/**
+		 * Gets role distribution statistics (admin only).
+		 * Used by RBAC dashboard for role analytics.
+		 * @returns Role distribution with counts per role
+		 */
+		getRoleStats: async () => 
+			HttpService.get<RoleDistribution>('/account/role-stats'),
+		
+		/**
+		 * Admin-only: Create a new user account with specified role.
+		 * Bypasses normal registration flow. Used for staff account creation.
+		 * 
+		 * @param request - Account creation request
+		 * @returns Created account with optional temp password
+		 */
+		adminCreate: async (request: AdminCreateAccountRequest) =>
+			HttpService.post<AdminCreateAccountResponse>('/account/admin/create', request),
 	},
 	
 	/**
@@ -343,14 +428,14 @@ const API = {
 		 * @param id - Quote ID
 		 */
 		get: async <T>(id: string) => {
-			return HttpService.get<T>(`/quote/${id}`)
+			return HttpService.get<T>(`/quotes/${id}`)
 		},
 		
 		/**
 		 * Gets all quotes.
 		 */
 		getAll: async <T>() => {
-			return HttpService.get<T>('/quote')
+			return HttpService.get<T>('/quotes')
 		},
 		
 		/**
@@ -358,7 +443,7 @@ const API = {
 		 * @param quantity - Number of quotes to return (default: 6)
 		 */
 		getLatest: async (quantity: number = 6) => {
-			return HttpService.get<Quote[]>(`/quote/latest?quantity=${quantity}`)
+			return HttpService.get<Quote[]>(`/quotes/latest?quantity=${quantity}`)
 		},
 		
 		/**
@@ -366,26 +451,34 @@ const API = {
 		 * @param search - Search filter
 		 */
 		search: async (search: GenericSearchFilter) => {
-			return HttpService.post<PagedResult<Quote>>('/quote/search', search)
+			return HttpService.post<PagedResult<Quote>>('/quotes/search', search)
 		},
 		
 		/**
 		 * Creates a new quote request.
 		 * @param quote - Quote data
 		 */
-		create: async <T>(quote: T) => HttpService.post<T>('/quote', quote),
+		create: async <T>(quote: T) => HttpService.post<T>('/quotes', quote),
 		
 		/**
 		 * Updates an existing quote.
 		 * @param quote - Quote with updated data
 		 */
-		update: async <T>(quote: T) => HttpService.put<T>('/quote', quote),
+		update: async <T>(quote: T) => HttpService.put<T>('/quotes', quote),
 		
 		/**
-		 * Deletes a quote.
+		 * Permanently deletes a quote and its cart products.
+		 * Consider using archive() for soft delete instead.
 		 * @param quoteId - Quote ID to delete
 		 */
-		delete: async <T>(quoteId: string) => HttpService.delete<T>(`/quote/${quoteId}`),
+		delete: async <T>(quoteId: string) => HttpService.delete<T>(`/quotes/${quoteId}`),
+
+		/**
+		 * Soft deletes (archives) a quote.
+		 * Preferred over hard delete for data integrity and audit trails.
+		 * @param quoteId - Quote ID to archive
+		 */
+		archive: async (quoteId: string) => HttpService.post<boolean>(`/quotes/${quoteId}/archive`, null),
 	},
 	
 	/**
@@ -510,6 +603,12 @@ const API = {
 	/**
 	 * Provider/Supplier Management API
 	 * Manages medical supply providers and suppliers.
+	 * 
+	 * **Business Flow:**
+	 * - Providers are medical supply vendors (dropshipping model)
+	 * - Sales reps contact providers to get pricing for quotes
+	 * - Providers fulfill orders directly to customers
+	 * - Admin-only access for all operations
 	 */
 	Providers: {
 		/**
@@ -524,6 +623,28 @@ const API = {
 		getAll: async <Provider>() => HttpService.get<Provider[]>('/providers'),
 		
 		/**
+		 * Gets only active (non-archived) providers.
+		 * Used for dropdowns and provider selection.
+		 */
+		getActive: async <Provider>() => HttpService.get<Provider[]>('/providers/active'),
+		
+		/**
+		 * Gets aggregate provider statistics for dashboard.
+		 * Returns counts: total, active, suspended, archived, new this month, etc.
+		 * 
+		 * STATUS WORKFLOW: Active -> Suspended -> Archived
+		 */
+		getAggregateStats: async () => HttpService.get<{
+			totalProviders: number
+			activeProviders: number
+			suspendedProviders: number
+			archivedProviders: number
+			newThisMonth: number
+			withProducts: number
+			withoutProducts: number
+		}>('/providers/stats'),
+		
+		/**
 		 * Creates a new provider.
 		 * @param provider - Provider data
 		 */
@@ -531,15 +652,45 @@ const API = {
 		
 		/**
 		 * Updates an existing provider.
-		 * @param quote - Provider with updated data
+		 * @param provider - Provider with updated data
 		 */
-		update: async <Provider>(quote: Provider) => HttpService.put<Provider>('/provider', quote),
+		update: async <Provider>(provider: Provider) => HttpService.put<Provider>('/provider', provider),
 		
 		/**
-		 * Deletes a provider.
+		 * Archives a provider (final status in workflow).
+		 * STATUS WORKFLOW: Active -> Suspended -> Archived
+		 * @param providerId - Provider ID to archive
+		 */
+		archive: async (providerId: number) => HttpService.put<boolean>(`/provider/${providerId}/archive`),
+		
+		/**
+		 * Suspends a provider (temporary hold).
+		 * STATUS WORKFLOW: Active -> Suspended -> Archived
+		 * @param providerId - Provider ID to suspend
+		 * @param reason - Reason for suspension
+		 */
+		suspend: async (providerId: number, reason: string) => 
+			HttpService.put<boolean>(`/provider/${providerId}/suspend`, { reason }),
+		
+		/**
+		 * Activates a provider (restores from any status).
+		 * @param providerId - Provider ID to activate
+		 */
+		activate: async (providerId: number) => HttpService.put<boolean>(`/provider/${providerId}/activate`),
+		
+		/**
+		 * Restores an archived provider (alias for activate).
+		 * Maintained for backward compatibility.
+		 * @param providerId - Provider ID to restore
+		 */
+		restore: async (providerId: number) => HttpService.put<boolean>(`/provider/${providerId}/restore`),
+		
+		/**
+		 * Deletes a provider (hard delete).
+		 * Use archive for soft delete instead.
 		 * @param providerId - Provider ID to delete
 		 */
-		delete: async (providerId: number) => HttpService.delete<number>(`/provider/${providerId}`),
+		delete: async (providerId: number) => HttpService.delete<boolean>(`/provider/${providerId}`),
 	},
 	
 	/**
@@ -551,7 +702,7 @@ const API = {
 		 * Submits a quote request from public website.
 		 * @param quote - Quote request data
 		 */
-		sendQuote: async (quote: Quote) => HttpService.post<Quote>('/quote', quote),
+		sendQuote: async (quote: Quote) => HttpService.post<Quote>('/quotes', quote),
 		
 		/**
 		 * Submits a contact form request from public website.
@@ -563,7 +714,13 @@ const API = {
 	
 	/**
 	 * Customer/Company Management API
-	 * Manages customer accounts and companies.
+	 * Manages B2B customer organizations and their relationships.
+	 * 
+	 * **Business Flow:**
+	 * - Customers are the core B2B entities (hospitals, clinics, etc.)
+	 * - Each customer should have a primarySalesRepId for relationship continuity
+	 * - TypeOfBusiness enables segmentation and compliance tracking
+	 * - Status controls ordering capabilities
 	 */
 	Customers: {
 		/**
@@ -574,33 +731,97 @@ const API = {
 		
 		/**
 		 * Gets all customers.
+		 * For SalesReps: Returns only assigned customers (backend filters).
+		 * For Admin/SalesManager: Returns all customers.
 		 */
 		getAll: async <Customer>() => HttpService.get<Customer[]>('/customers'),
 		
 		/**
 		 * Creates a new customer.
+		 * Requires: SalesRep or higher role.
+		 * Auto-assigns creating SalesRep as primary rep if not specified.
 		 * @param customer - Customer data
 		 */
 		create: async <Customer>(customer: Customer) => HttpService.post<Customer>('/customer', customer),
 		
 		/**
 		 * Updates an existing customer.
-		 * @param quote - Customer with updated data
+		 * Requires: SalesRep or higher with access to the customer.
+		 * Only Admin/SalesManager can change primary sales rep.
+		 * @param customer - Customer with updated data
 		 */
-		update: async <Customer>(quote: Customer) => HttpService.put<Customer>('/customer', quote),
+		update: async <Customer>(customer: Customer) => HttpService.put<Customer>('/customer', customer),
 		
 		/**
-		 * Deletes a customer.
+		 * Deletes a customer (Admin only).
+		 * Fails if customer has orders, quotes, or linked accounts.
+		 * Consider using archive() for soft delete.
 		 * @param customerId - Customer ID to delete
 		 */
-		delete: async (customerId: number) => HttpService.delete<number>(`/customer/${customerId}`),
+		delete: async (customerId: number) => HttpService.delete<boolean>(`/customer/${customerId}`),
 		
 		/**
 		 * Searches customers with pagination and filtering.
-		 * @param search - Search filter
+		 * 
+		 * Supported filters:
+		 * - searchTerm: Text search across name, email, phone
+		 * - typeOfBusiness: Business type (enum value)
+		 * - status: Customer status (enum value)
+		 * - primarySalesRepId: Filter by assigned sales rep
+		 * - showArchived: Include archived customers
+		 * 
+		 * Access Control:
+		 * - Admin/SalesManager: Can search all customers
+		 * - SalesRep: Auto-filters to assigned customers only
+		 * 
+		 * @param search - Search filter with pagination
 		 */
 		search: async (search: GenericSearchFilter) =>
-			HttpService.post<PagedResult<Company>>(`/customers/search`, { data: { ...search } }),
+			HttpService.post<PagedResult<Company>>(`/customers/search`, search),
+		
+		/**
+		 * Gets customer statistics (order count, revenue, etc.).
+		 * @param customerId - Customer ID
+		 */
+		getStats: async (customerId: number) => 
+			HttpService.get<{
+				customerId: number
+				totalOrders: number
+				totalQuotes: number
+				totalAccounts: number
+				totalRevenue: number
+				lastOrderDate: string | null
+				createdAt: string
+			}>(`/customer/${customerId}/stats`),
+		
+		/**
+		 * Gets aggregate statistics for customer dashboard.
+		 * Returns counts by status and assignment metrics.
+		 * 
+		 * For SalesReps: Counts only assigned customers.
+		 * For Admin/SalesManager: Counts all customers.
+		 */
+		getAggregateStats: async () => 
+			HttpService.get<{
+				totalCustomers: number
+				activeCustomers: number
+				pendingVerification: number
+				suspendedCustomers: number
+				inactiveCustomers: number
+				churnedCustomers: number
+				assignedToSalesRep: number
+				unassigned: number
+				byBusinessType: Record<string, number>
+			}>('/customers/stats/aggregate'),
+		
+		/**
+		 * Assigns a primary sales rep to a customer.
+		 * Requires: SalesManager or higher.
+		 * @param customerId - Customer ID
+		 * @param salesRepId - Sales rep account ID
+		 */
+		assignSalesRep: async (customerId: number, salesRepId: number) =>
+			HttpService.put<Company>(`/customer/${customerId}/assign-sales-rep`, { salesRepId }),
 	},
 	
 	/**

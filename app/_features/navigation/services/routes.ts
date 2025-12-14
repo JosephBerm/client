@@ -311,6 +311,37 @@ class Routes {
 	}
 
 	/**
+	 * RBAC (Role-Based Access Control) management routes (protected, admin only)
+	 * 
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.RBAC.location); // "/app/rbac"
+	 * router.push(Routes.RBAC.roles); // "/app/rbac/roles"
+	 * router.push(Routes.RBAC.users); // "/app/rbac/users"
+	 * router.push(Routes.RBAC.permissions); // "/app/rbac/permissions"
+	 * router.push(Routes.RBAC.audit); // "/app/rbac/audit"
+	 * ```
+	 */
+	public static RBAC = {
+		name: 'Access Control',
+		location: `${Routes.InternalAppRoute}/rbac`,
+		/** Roles management page */
+		roles: `${Routes.InternalAppRoute}/rbac/roles`,
+		/** Users role assignment page */
+		users: `${Routes.InternalAppRoute}/rbac/users`,
+		/** Permissions matrix page */
+		permissions: `${Routes.InternalAppRoute}/rbac/permissions`,
+		/** Audit logs page */
+		audit: `${Routes.InternalAppRoute}/rbac/audit`,
+		/**
+		 * Generates URL for user role detail/edit page.
+		 * @param id - User ID
+		 * @returns User role detail URL (e.g., "/app/rbac/users/101")
+		 */
+		userDetail: (id: string | number): string => `${Routes.InternalAppRoute}/rbac/users/${id}`,
+	}
+
+	/**
 	 * User profile settings route (protected)
 	 * 
 	 * @example

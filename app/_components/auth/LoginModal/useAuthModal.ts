@@ -9,7 +9,13 @@
  * - Authentication API calls
  * - View switching (login ↔ signup)
  * - Success/error handling
- * - Navigation after auth
+ * - Navigation after auth (via centralized AuthRedirectService)
+ * 
+ * **Post-Auth Redirect Logic (MAANG-Level):**
+ * - Default: Always redirects to Dashboard
+ * - Intent: If user clicked auth-required action (e.g., "Chat Now"), redirects to that context
+ * - Return URL: If user was on protected page, redirects back there
+ * - Uses AuthRedirectService for centralized, scalable redirect management
  * 
  * @module LoginModal/useAuthModal
  */
@@ -18,10 +24,7 @@
 
 import { useState, useCallback } from 'react'
 
-import { useRouter } from 'next/navigation'
-
-import { login, signup, useAuthStore } from '@_features/auth'
-import { Routes } from '@_features/navigation'
+import { login, signup, useAuthStore, useAuthRedirect } from '@_features/auth'
 
 import type { LoginFormData, SignupFormData } from '@_core'
 import { loginSchema, signupSchema, logger } from '@_core'
@@ -62,6 +65,11 @@ interface UseAuthModalProps {
  * - Cleaner separation of concerns
  * - Reusable auth flows
  * 
+ * **Post-Auth Redirect (MAANG-Level):**
+ * - Uses centralized AuthRedirectService for all redirect logic
+ * - Priority: Intent → Return URL → Dashboard (default)
+ * - Intents: Captured actions like "Chat Now" that triggered login
+ * 
  * @param props - Hook configuration
  * @returns State and handlers for auth modal
  * 
@@ -77,11 +85,13 @@ interface UseAuthModalProps {
  * ```
  */
 export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): UseAuthModalReturn {
-	const router = useRouter()
 	const [isLoading, setIsLoading] = useState(false)
 	const [showEmailForm, setShowEmailForm] = useState(false)
 	const [currentView, setCurrentView] = useState<AuthModalView>('login')
 	const loginUser = useAuthStore((state) => state.login)
+	
+	// Centralized redirect management (MAANG-level pattern)
+	const { executePostAuthRedirect } = useAuthRedirect()
 
 	// Login form with Zod validation
 	const loginForm = useZodForm(loginSchema, {
@@ -124,7 +134,15 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 
 	/**
 	 * Process successful authentication.
-	 * Updates store, shows notification, and navigates.
+	 * Updates store, shows notification, and navigates using centralized redirect service.
+	 * 
+	 * **Post-Auth Redirect Logic (MAANG-Level):**
+	 * 1. Intent (highest priority): If user clicked "Chat Now" or similar, redirects to that context
+	 * 2. Return URL: If user was trying to access a protected page, redirects there
+	 * 3. Default: Redirects to Dashboard
+	 * 
+	 * This ensures 100% of the time user goes to Dashboard UNLESS they triggered login
+	 * from a specific action like "Chat Now".
 	 */
 	const handleAuthSuccess = useCallback(async (
 		user: Parameters<typeof loginUser>[0] | undefined,
@@ -165,15 +183,31 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 			action: 'login',
 		})
 
+		// Close modal first
 		onClose()
 		onLoginSuccess?.()
 
-		// Redirect to dashboard or previous page
-		const redirectTo = new URLSearchParams(window.location.search).get('redirectTo')
-		router.push(redirectTo ?? Routes.Dashboard.location)
+		// Execute post-auth redirect using centralized service
+		// This handles: Intent → Return URL → Dashboard (default)
+		const redirect = executePostAuthRedirect({
+			onRedirect: (result) => {
+				logger.info('Post-auth redirect executed', {
+					component: COMPONENT_NAME,
+					redirectType: result.type,
+					url: result.url,
+					intent: result.intent?.type,
+				})
+			},
+		})
+
+		logger.debug('Auth success completed', {
+			component: COMPONENT_NAME,
+			redirectUrl: redirect.url,
+			redirectType: redirect.type,
+		})
 
 		return true
-	}, [loginUser, onClose, onLoginSuccess, router])
+	}, [loginUser, onClose, onLoginSuccess, executePostAuthRedirect])
 
 	/**
 	 * Handle email/password form submission.

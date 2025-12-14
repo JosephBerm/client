@@ -1,228 +1,237 @@
+/**
+ * Internal Store Page (Product Catalog Management)
+ * 
+ * Admin-only page for managing the medical supply product catalog.
+ * Displays products in a searchable, sortable, and paginated data grid.
+ * 
+ * **Architecture:**
+ * - Uses useInternalStorePage hook for all business logic
+ * - Modular components from @_features/internalStore
+ * - Column definitions via createProductColumns factory
+ * - Mobile-first responsive design
+ * 
+ * **Business Flow Integration:**
+ * - Products are the foundation of the quote-based ordering system
+ * - Admin maintains catalog → Customers browse → Add to cart → Submit quote
+ * - Product prices inform quote generation (vendor cost + markup)
+ * 
+ * **Access Control (per RBAC_ARCHITECTURE.md):**
+ * - Admin: Full CRUD, archive/restore, view stats
+ * - Non-Admin: No access (redirected by middleware)
+ * 
+ * **Features:**
+ * - Server-side paginated product list
+ * - Product statistics dashboard
+ * - Archive/restore functionality
+ * - Low stock and out-of-stock indicators
+ * - Category badges
+ * - Quick actions (view, archive, delete)
+ * 
+ * @module app/store
+ */
+
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { Eye, Plus, Archive } from 'lucide-react'
+import { Archive, Package, Plus } from 'lucide-react'
 
+import {
+	createProductColumns,
+	ProductDeleteModal,
+	ProductStatsGrid,
+	useInternalStorePage,
+	PRODUCT_API_INCLUDES,
+} from '@_features/internalStore'
 import { Routes } from '@_features/navigation'
-
-import { logger } from '@_core'
-
-import { notificationService, formatCurrency, API } from '@_shared'
 
 import type { Product } from '@_classes/Product'
 
 import ServerDataGrid from '@_components/tables/ServerDataGrid'
-import Badge from '@_components/ui/Badge'
 import Button from '@_components/ui/Button'
-import Modal from '@_components/ui/Modal'
 
 import { InternalPageHeader } from '../_components'
 
+/**
+ * InternalStorePage - Main product catalog management page.
+ * 
+ * Uses the useInternalStorePage hook for all business logic.
+ * Components are imported from @_features/internalStore for DRY.
+ */
+export default function InternalStorePage() {
+	const router = useRouter()
 
-import type { ColumnDef } from '@tanstack/react-table'
+	// All business logic encapsulated in hook
+	const {
+		// State
+		deleteModal,
+		refreshKey,
+		showArchived,
+		isDeleting,
+		isArchiving,
+		// Stats
+		stats,
+		statsLoading,
+		// RBAC
+		canDelete,
+		canViewArchived,
+		// Actions
+		openDeleteModal,
+		openArchiveModal,
+		closeModal,
+		handleDelete,
+		handleArchive,
+		handleRestore,
+		toggleShowArchived,
+	} = useInternalStorePage()
 
-export default function StorePage() {
-  const router = useRouter()
-  const [archiveModal, setArchiveModal] = useState<{ isOpen: boolean; product: Product | null }>({
-    isOpen: false,
-    product: null,
-  })
-  const [refreshKey, setRefreshKey] = useState(0)
+	// Column definitions - memoized since they depend on permissions
+	const columns = useMemo(
+		() =>
+			createProductColumns({
+				canDelete,
+				onDelete: openDeleteModal,
+				onArchive: openArchiveModal,
+				onRestore: handleRestore,
+			}),
+		[canDelete, openDeleteModal, openArchiveModal, handleRestore]
+	)
 
-  // Column definitions
-  const columns = useMemo<ColumnDef<Product>[]>(
-    () => [
-      {
-        accessorKey: 'name',
-        header: 'Product Name',
-        cell: ({ row }) => (
-          <Link
-            href={Routes.InternalStore.detail(row.original.id)}
-            className="link link-primary font-semibold"
-          >
-            {row.original.name}
-          </Link>
-        ),
-      },
-      {
-        accessorKey: 'description',
-        header: 'Description',
-        cell: ({ row }) => (
-          <div className="line-clamp-3 max-w-md">
-            {row.original.description}
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'price',
-        header: 'Price',
-        cell: ({ row }) => formatCurrency(row.original.price || 0),
-      },
-      {
-        accessorKey: 'stock',
-        header: 'Stock',
-        cell: ({ row }) => {
-          const stock = row.original.stock || 0
-          const variant = stock > 10 ? 'success' : stock > 0 ? 'warning' : 'error'
-          return <Badge variant={variant}>{stock}</Badge>
-        },
-      },
-      {
-        accessorKey: 'categories',
-        header: 'Categories',
-        cell: ({ row }) => (
-          <div className="flex gap-2 flex-wrap">
-            {row.original.categories?.map((category: any) => (
-              <Badge key={category.id} variant="info" size="sm">
-                {category.name}
-              </Badge>
-            )) || 'N/A'}
-          </div>
-        ),
-      },
-      {
-        id: 'actions',
-        header: 'Actions',
-        cell: ({ row }) => (
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                router.push(Routes.InternalStore.detail(row.original.id))
-              }
-            >
-              <Eye className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-warning hover:text-warning"
-              onClick={() =>
-                setArchiveModal({ isOpen: true, product: row.original })
-              }
-            >
-              <Archive className="w-4 h-4" />
-            </Button>
-          </div>
-        ),
-      },
-    ],
-    [router]
-  )
+	// Search filters based on showArchived state
+	const searchFilters = useMemo(() => {
+		const filters: Record<string, unknown> = {
+			includes: PRODUCT_API_INCLUDES,
+		}
+		if (showArchived && canViewArchived) {
+			filters.isArchived = true
+		}
+		return filters
+	}, [showArchived, canViewArchived])
 
-  // Async archive handler
-  const handleArchiveAsync = async () => {
-    if (!archiveModal.product) {return}
+	return (
+		<>
+			{/* Page Header */}
+			<InternalPageHeader
+				title="Products"
+				description="Manage your medical equipment inventory and product catalog"
+				actions={
+					<div className="flex items-center gap-2">
+						{/* Archive Toggle - Admin Only */}
+						{canViewArchived && (
+							<Button
+								variant={showArchived ? 'secondary' : 'ghost'}
+								size="sm"
+								onClick={toggleShowArchived}
+								leftIcon={<Archive size={16} />}
+								aria-pressed={showArchived}
+							>
+								<span className="hidden sm:inline">
+									{showArchived ? 'Showing Archived' : 'Show Archived'}
+								</span>
+							</Button>
+						)}
 
-    try {
-      const { data } = await API.Store.Products.delete(archiveModal.product.id)
+						{/* Add Product Button */}
+						<Button
+							variant="primary"
+							onClick={() => router.push(Routes.InternalStore.create())}
+							leftIcon={<Plus className="w-5 h-5" />}
+						>
+							<span className="hidden sm:inline">Add Product</span>
+							<span className="sm:hidden">Add</span>
+						</Button>
+					</div>
+				}
+			/>
 
-      if (data.statusCode !== 200) {
-        notificationService.error(data.message || 'Failed to archive product', {
-          metadata: { productId: archiveModal.product?.id },
-          component: 'StorePage',
-          action: 'archiveProduct',
-        })
-        return
-      }
+			{/* Stats Summary Grid */}
+			<ProductStatsGrid
+				stats={stats}
+				isLoading={statsLoading}
+				showArchived={showArchived}
+			/>
 
-      notificationService.success(data.message || 'Product archived successfully', {
-        metadata: { productId: archiveModal.product?.id },
-        component: 'StorePage',
-        action: 'archiveProduct',
-      })
-      setArchiveModal({ isOpen: false, product: null })
-      // Refresh the table
-      setRefreshKey((prev) => prev + 1)
-    } catch (error) {
-      notificationService.error('An error occurred while archiving the product', {
-        metadata: { error, productId: archiveModal.product?.id },
-        component: 'StorePage',
-        action: 'archiveProduct',
-      })
-    }
-  }
+			{/* Data Grid Card */}
+			<div className="card bg-base-100 shadow-xl">
+				<div className="card-body p-3 sm:p-6">
+					<ServerDataGrid<Product>
+						key={`products-${refreshKey}-${showArchived}`}
+						columns={columns}
+						endpoint="/products/search"
+						initialPageSize={10}
+						initialSortBy="createdAt"
+						initialSortOrder="desc"
+						filters={searchFilters}
+						emptyMessage={
+							<EmptyState
+								showArchived={showArchived}
+								onAddProduct={() => router.push(Routes.InternalStore.create())}
+							/>
+						}
+						ariaLabel="Products table"
+					/>
+				</div>
+			</div>
 
-  /**
-   * Wrapper for archive to handle promise in onClick handler.
-   * FAANG Pattern: Non-async wrapper for async event handlers.
-   */
-  const handleArchive = () => {
-    void handleArchiveAsync().catch((error) => {
-      // Error already handled in handleArchiveAsync, but catch any unhandled rejections
-      logger.error('Unhandled archive error', {
-        error,
-        component: 'StorePage',
-        action: 'handleArchive',
-      })
-    })
-  }
-
-  return (
-    <>
-      <InternalPageHeader
-        title="Products"
-        description="Manage your medical equipment inventory"
-        actions={
-          <Button
-            variant="primary"
-            onClick={() => router.push(Routes.InternalStore.create())}
-            leftIcon={<Plus className="w-5 h-5" />}
-          >
-            Add Product
-          </Button>
-        }
-      />
-
-      <div className="card bg-base-100 shadow-xl">
-        <div className="card-body">
-          <ServerDataGrid<Product>
-            key={refreshKey}
-            columns={columns}
-            endpoint="/products/search"
-            initialPageSize={10}
-            initialSortBy="createdAt"
-            initialSortOrder="desc"
-            filters={{ includes: ['Categories'] }}
-            emptyMessage="No products found"
-            ariaLabel="Products table"
-          />
-        </div>
-      </div>
-
-      {/* Archive Confirmation Modal */}
-      <Modal
-        isOpen={archiveModal.isOpen}
-        onClose={() => setArchiveModal({ isOpen: false, product: null })}
-        title="Archive Product"
-      >
-        <div className="space-y-4">
-          <p>
-            Are you sure you want to archive{' '}
-            <strong>{archiveModal.product?.name}</strong>?
-          </p>
-          <p className="text-warning text-sm">
-            This will hide the product from the store but won&apos;t delete it permanently.
-          </p>
-          <div className="flex justify-end gap-4 mt-6">
-            <Button
-              variant="ghost"
-              onClick={() => setArchiveModal({ isOpen: false, product: null })}
-            >
-              Cancel
-            </Button>
-            <Button variant="accent" onClick={handleArchive}>
-              Archive
-            </Button>
-          </div>
-        </div>
-      </Modal>
-    </>
-  )
+			{/* Delete/Archive Modal */}
+			<ProductDeleteModal
+				isOpen={deleteModal.isOpen}
+				productName={deleteModal.product?.name ?? ''}
+				mode={deleteModal.mode}
+				onClose={closeModal}
+				onDelete={handleDelete}
+				onArchive={handleArchive}
+				isDeleting={isDeleting}
+				isArchiving={isArchiving}
+			/>
+		</>
+	)
 }
 
+/**
+ * Empty state component for when no products are found.
+ * Provides contextual messaging based on whether viewing archived items.
+ */
+interface EmptyStateProps {
+	showArchived: boolean
+	onAddProduct: () => void
+}
+
+function EmptyState({ showArchived, onAddProduct }: EmptyStateProps) {
+	return (
+		<div className="flex flex-col items-center gap-3 py-12">
+			{showArchived ? (
+				<>
+					<Archive size={48} className="text-base-content/30" />
+					<p className="text-base-content/60 text-center">
+						No archived products found
+					</p>
+					<p className="text-sm text-base-content/40 text-center max-w-sm">
+						Archived products are hidden from the public store but can be restored anytime.
+					</p>
+				</>
+			) : (
+				<>
+					<Package size={48} className="text-base-content/30" />
+					<p className="text-base-content/60 text-center">
+						No products in the catalog
+					</p>
+					<p className="text-sm text-base-content/40 text-center max-w-sm">
+						Start building your medical supply catalog by adding your first product.
+					</p>
+					<Button
+						variant="primary"
+						size="sm"
+						onClick={onAddProduct}
+						leftIcon={<Plus size={16} />}
+						className="mt-2"
+					>
+						Add First Product
+					</Button>
+				</>
+			)}
+		</div>
+	)
+}

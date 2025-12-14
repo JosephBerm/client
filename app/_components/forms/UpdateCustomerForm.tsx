@@ -85,7 +85,7 @@
 
 'use client'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -168,6 +168,21 @@ export default function UpdateCustomerForm({ customer, onUserUpdate }: UpdateCus
 			address: customer.address || undefined,
 		},
 	})
+
+	// Reset form when customer data changes (async loading)
+	// Use customer.id as the primary dependency to avoid infinite loops
+	useEffect(() => {
+		// Reset form when customer data loads
+		form.reset({
+			name: customer.name || '',
+			email: customer.email || '',
+			phone: customer.phone || '',
+			taxId: customer.taxId || '',
+			website: customer.website || '',
+			address: customer.address || undefined,
+		})
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [customer.id, customer.name, customer.email])
 
 	const { submit, isSubmitting } = useFormSubmit(
 		async (data: CustomerFormData) => {

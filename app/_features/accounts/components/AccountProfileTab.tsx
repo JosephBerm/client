@@ -31,6 +31,8 @@ import type Company from '@_classes/Company'
 import { AccountRole, AccountStatus } from '@_classes/Enums'
 import type User from '@_classes/User'
 
+import { getRoleSelectOptions } from '@_shared'
+
 import AccountStatusBadge from '@_components/common/AccountStatusBadge'
 import RoleBadge from '@_components/common/RoleBadge'
 import UpdateAccountForm from '@_components/forms/UpdateAccountForm'
@@ -89,12 +91,6 @@ function CopyableField({ label, value }: { label: string; value: string | undefi
 // ============================================================================
 // CONSTANTS
 // ============================================================================
-
-/** Role options for the dropdown */
-const ROLE_OPTIONS: SelectOption<number>[] = [
-	{ value: AccountRole.Customer, label: 'Customer' },
-	{ value: AccountRole.Admin, label: 'Administrator' },
-]
 
 /** Status options for the dropdown */
 const STATUS_OPTIONS: SelectOption<number>[] = [
@@ -389,7 +385,7 @@ export default function AccountProfileTab({
 										void onRoleChange(newRole)
 									}
 								}}
-								options={ROLE_OPTIONS}
+								options={getRoleSelectOptions()}
 								size="sm"
 								width="full"
 								disabled={!canChangeRole || isRoleUpdating}

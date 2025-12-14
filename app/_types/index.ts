@@ -45,3 +45,34 @@ export type {
 	SettingsSection,
 } from './settings'
 
+// ============================================================================
+// RBAC TYPES
+// ============================================================================
+
+export {
+	RoleLevels,
+	RoleNames,
+	RoleDisplayNames,
+	Resources,
+	Actions,
+	Contexts,
+	buildPermission,
+	getRoleDisplayName,
+} from './rbac'
+
+export type {
+	RoleLevel,
+	RoleName,
+	Resource,
+	Action,
+	Context,
+	Permission,
+} from './rbac'
+
+// ============================================================================
+// ACCOUNT TYPES
+// ============================================================================
+
+export type { AccountInfo } from './account'
+export { toAccountInfo, getAccountDisplayName } from './account'
+

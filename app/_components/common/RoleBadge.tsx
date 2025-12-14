@@ -119,19 +119,20 @@ interface RoleBadgeProps {
  * @param props - Component props including role and className
  * @returns RoleBadge component
  */
-export default function RoleBadge({ role, className }: RoleBadgeProps) {
-	const getRoleConfig = (role: number) => {
-		switch (role) {
-			case AccountRole.Admin:
-				return { label: 'Admin', variant: 'error' as const }
-			case AccountRole.Customer:
-				return { label: 'Customer', variant: 'primary' as const }
-			default:
-				return { label: 'User', variant: 'neutral' as const }
-		}
-	}
+/**
+ * Role configuration with display properties.
+ * Maps AccountRole values to human-readable labels and color variants.
+ */
+const ROLE_CONFIG: Record<number, { label: string; variant: 'error' | 'primary' | 'secondary' | 'success' | 'warning' | 'neutral' | 'info' }> = {
+	[AccountRole.Admin]: { label: 'Admin', variant: 'error' },
+	[AccountRole.FulfillmentCoordinator]: { label: 'Fulfillment', variant: 'info' },
+	[AccountRole.SalesManager]: { label: 'Sales Manager', variant: 'success' },
+	[AccountRole.SalesRep]: { label: 'Sales Rep', variant: 'warning' },
+	[AccountRole.Customer]: { label: 'Customer', variant: 'primary' },
+}
 
-	const config = getRoleConfig(role)
+export default function RoleBadge({ role, className }: RoleBadgeProps) {
+	const config = ROLE_CONFIG[role] ?? { label: 'Unknown', variant: 'neutral' as const }
 
 	return (
 		<Badge variant={config.variant} className={className}>

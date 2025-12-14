@@ -31,6 +31,7 @@ export {
 // ============================================================================
 
 export {
+	// Tab Components
 	AccountProfileTab,
 	AccountSecurityTab,
 	AccountActivityTab,
@@ -38,4 +39,14 @@ export {
 	type AccountProfileTabProps,
 	type AccountSecurityTabProps,
 	type AccountActivityTabProps,
+	
+	// Shared Modal Components
+	PasswordResetModal,
+	UserInfoDisplay,
+	type PasswordResetModalProps,
+	type UserInfoDisplayProps,
+	
+	// Admin Account Management
+	AdminCreateAccountForm,
+	type AdminCreateAccountFormProps,
 } from './components'

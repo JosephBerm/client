@@ -20,6 +20,8 @@ export { default as StorePageContainer } from './StorePageContainer'
 export { default as StoreHeader } from './StoreHeader'
 export { default as StoreFilters } from './StoreFilters'
 export { default as StoreProductGrid } from './StoreProductGrid'
+export { default as StoreValueProposition } from './StoreValueProposition'
+export { default as ReferralBanner } from './ReferralBanner'
 
 // ============================================================================
 // PRODUCT COMPONENTS
@@ -87,4 +89,6 @@ export type { StoreFiltersProps } from './StoreFilters'
 export type { StoreProductGridProps } from './StoreProductGrid'
 export type { UnifiedStoreToolbarProps } from './UnifiedStoreToolbar'
 export type { StorePageContainerProps } from './StorePageContainer'
+export type { StoreValuePropositionProps } from './StoreValueProposition'
+export type { ReferralBannerProps } from './ReferralBanner'
 

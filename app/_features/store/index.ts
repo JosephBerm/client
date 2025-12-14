@@ -60,6 +60,15 @@ export {
 	type UseStorePageLogicReturn,
 } from './hooks/useStorePageLogic'
 
+export {
+	useReferralTracking,
+	getStoredReferral,
+	storeReferral,
+	clearReferral,
+	type ReferralData,
+	type UseReferralTrackingReturn,
+} from './hooks/useReferralTracking'
+
 // ============================================================================
 // UTILITIES (Server + Client Safe)
 // ============================================================================
