@@ -150,29 +150,51 @@ export function getProductImageUrl(
 		return urlCache.get(cacheKey)!
 	}
 
-	// Build query parameters - URLSearchParams handles encoding automatically
-	// DO NOT manually encode before passing to URLSearchParams to avoid double encoding
-	const params = new URLSearchParams({
-		productId: productId,
-		image: imageName,
-	})
+	// Build query parameters manually using encodeURIComponent
+	// 
+	// CRITICAL FIX (RFC 3986 Compliant): Use encodeURIComponent instead of URLSearchParams.
+	// 
+	// **Problem**: URLSearchParams encodes spaces as '+' (application/x-www-form-urlencoded).
+	// When Next.js Image optimizer receives this URL, it percent-encodes it AGAIN for the
+	// proxy URL, turning '+' into '%2B'. The backend then receives literal '+' characters
+	// instead of spaces, causing filename mismatch.
+	// 
+	// **Flow with URLSearchParams (BROKEN)**:
+	//   1. Frontend: "file name.jpg" → "file+name.jpg" (URLSearchParams)
+	//   2. Next.js encodes for proxy: "file%2Bname.jpg" 
+	//   3. Backend receives: "file+name.jpg" (literal '+', NOT space)
+	//   4. DB lookup fails: "file+name.jpg" ≠ "file name.jpg"
+	// 
+	// **Flow with encodeURIComponent (FIXED)**:
+	//   1. Frontend: "file name.jpg" → "file%20name.jpg" (encodeURIComponent)
+	//   2. Next.js encodes for proxy: "file%2520name.jpg"
+	//   3. Next.js proxy decodes once: "file%20name.jpg"
+	//   4. Backend query parser decodes: "file name.jpg" ✓
+	//   5. DB lookup succeeds!
+	// 
+	// @see RFC 3986 Section 2.1 - Percent-Encoding
+	// @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent
+	const queryParts: string[] = [
+		`productId=${encodeURIComponent(productId)}`,
+		`image=${encodeURIComponent(imageName)}`,
+	]
 
 	// Add optional size parameters
 	if (options?.width) {
-		params.append('width', options.width.toString())
+		queryParts.push(`width=${options.width}`)
 	}
 	if (options?.height) {
-		params.append('height', options.height.toString())
+		queryParts.push(`height=${options.height}`)
 	}
 	if (options?.quality) {
-		params.append('quality', Math.min(100, Math.max(1, options.quality)).toString())
+		queryParts.push(`quality=${Math.min(100, Math.max(1, options.quality))}`)
 	}
 
 	// Construct full image URL
 	// Format: {baseUrl}/products/image?productId={id}&image={name}
 	// Example: https://prod-server20241205193558.azurewebsites.net/api/products/image?productId=123&image=photo.jpg
 	// This matches the API endpoint structure defined in app/_services/api.ts
-	const finalUrl = `${baseUrl}/products/image?${params.toString()}`
+	const finalUrl = `${baseUrl}/products/image?${queryParts.join('&')}`
 
 	// Cache the URL (limit cache size to prevent memory issues)
 	if (urlCache.size > 1000) {

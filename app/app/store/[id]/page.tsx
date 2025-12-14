@@ -28,6 +28,7 @@ import { useRouter } from 'next/navigation'
 
 import { ArrowLeft, ImageIcon, Package, Save, Trash2, Upload } from 'lucide-react'
 
+import { getProductImageUrl } from '@_features/images'
 import { Routes } from '@_features/navigation'
 import { getStockStatusConfig } from '@_features/internalStore'
 
@@ -81,7 +82,7 @@ function ProductImageGallery({ product, onImageDelete, isDeleting }: ProductImag
 				>
 					{/* Image */}
 					<img
-						src={`/api/products/image?productId=${product.id}&image=${encodeURIComponent(file.name ?? '')}`}
+						src={getProductImageUrl(product.id, file.name ?? '') ?? ''}
 						alt={file.name ?? 'Product image'}
 						className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
 						loading="lazy"
@@ -131,7 +132,7 @@ function ProductInfoCard({ product }: ProductInfoCardProps) {
 				<div className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-base-200 border border-base-300">
 					{product.hasImage() ? (
 						<img
-							src={`/api/products/image?productId=${product.id}&image=${encodeURIComponent(product.getFileName())}`}
+							src={getProductImageUrl(product.id, product.getFileName()) ?? ''}
 							alt={product.name}
 							className="h-full w-full object-cover"
 						/>
