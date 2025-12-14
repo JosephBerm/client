@@ -151,7 +151,7 @@ export function createProductColumns(
 							</Badge>
 						))}
 						{categories.length > 2 && (
-							<Badge variant="ghost" size="sm">
+							<Badge variant="neutral" size="sm">
 								+{categories.length - 2}
 							</Badge>
 						)}

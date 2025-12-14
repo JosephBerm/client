@@ -173,7 +173,7 @@ export default function AccountActivityTab({
 					<Button
 						variant="ghost"
 						size="sm"
-						onClick={() => router.push(Routes.Quotes.detail(row.original.id))}
+						onClick={() => router.push(Routes.Quotes.detail(row.original.id ?? ''))}
 						leftIcon={<Eye className="h-4 w-4" />}
 					>
 						View

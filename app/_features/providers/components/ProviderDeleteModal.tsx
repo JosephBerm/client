@@ -56,7 +56,7 @@ const MODAL_CONFIG: Record<ModalMode, {
 	Icon: typeof Trash2
 	iconContainerClass: string
 	iconClass: string
-	buttonVariant: 'error' | 'warning'
+	buttonVariant: 'error' | 'accent'
 	buttonText: string
 }> = {
 	delete: {
@@ -80,7 +80,7 @@ const MODAL_CONFIG: Record<ModalMode, {
 		Icon: PauseCircle,
 		iconContainerClass: 'w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center shrink-0',
 		iconClass: 'w-6 h-6 text-warning',
-		buttonVariant: 'warning',
+		buttonVariant: 'accent',
 		buttonText: 'Suspend Provider',
 	},
 }

@@ -103,7 +103,12 @@ export {
 } from './services/httpService.constants'
 
 // API Client
-export { default as API, type RoleDistribution } from './services/api'
+export { 
+	default as API, 
+	type RoleDistribution,
+	type AdminCreateAccountRequest,
+	type AdminCreateAccountResponse,
+} from './services/api'
 
 // Notification Service
 export {
@@ -178,7 +183,7 @@ export { useBreadcrumbs } from './hooks/useBreadcrumbs'
 export { useCopyToClipboard } from './hooks/useCopyToClipboard'
 
 // RBAC Hooks
-export { usePermissions, Resources, Actions, Contexts, RoleLevels } from './hooks/usePermissions'
+export { usePermissions, Resources, Actions, Contexts, RoleLevels, type UsePermissionsReturn } from './hooks/usePermissions'
 
 // ============================================================================
 // CONSTANTS (Single Source of Truth)

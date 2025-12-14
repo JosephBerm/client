@@ -51,6 +51,9 @@
  * Contains file metadata and optional binary data.
  */
 export default class UploadedFile {
+	/** Unique identifier from backend (Guid) */
+	public id: string | null = null
+	
 	/** Original file name (e.g., 'image.jpg', 'document.pdf') */
 	public name: string | null = null
 	

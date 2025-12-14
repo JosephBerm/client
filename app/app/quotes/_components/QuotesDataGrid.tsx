@@ -133,10 +133,10 @@ export default function QuotesDataGrid() {
       header: 'Quote ID',
       cell: ({ row }) => (
         <Link
-          href={Routes.Quotes.detail(row.original.id)}
+          href={Routes.Quotes.detail(row.original.id ?? '')}
           className="link link-primary font-semibold"
         >
-          #{row.original.id?.substring(0, 8)}...
+          #{row.original.id?.substring(0, 8) ?? 'N/A'}...
         </Link>
       ),
     },
@@ -173,7 +173,7 @@ export default function QuotesDataGrid() {
       header: 'Actions',
       cell: ({ row }) => (
         <div className="flex gap-2">
-          <Link href={Routes.Quotes.detail(row.original.id)}>
+          <Link href={Routes.Quotes.detail(row.original.id ?? '')}>
             <Button variant="ghost" size="sm" aria-label="View quote details">
               <Eye className="w-4 h-4" />
             </Button>

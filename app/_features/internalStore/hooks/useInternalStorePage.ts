@@ -190,7 +190,7 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 	 */
 	const handleRestoreAsync = useCallback(async (product: Product) => {
 		try {
-			const { data } = await HttpService.put<boolean>(`/products/${product.id}/restore`)
+			const { data } = await HttpService.put<boolean>(`/products/${product.id}/restore`, {})
 			
 			if (data.statusCode !== 200) {
 				notificationService.error(data.message ?? 'Failed to restore product', {

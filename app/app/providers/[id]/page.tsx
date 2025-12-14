@@ -107,7 +107,8 @@ export default function ProviderDetailPage() {
 		const action = provider.isArchived ? 'restore' : 'archive'
 		try {
 			const { data } = await HttpService.put<boolean>(
-				`/provider/${provider.id}/${action}`
+				`/provider/${provider.id}/${action}`,
+				{}
 			)
 			if (data.statusCode === 200) {
 				setProvider(new Provider({ ...provider, isArchived: !provider.isArchived }))
@@ -160,7 +161,7 @@ export default function ProviderDetailPage() {
 						{!isCreateMode && !isEditing && (
 							<>
 								<Button
-									variant={provider.isArchived ? 'success' : 'warning'}
+									variant={provider.isArchived ? 'success' : 'accent'}
 									onClick={() => void handleArchiveToggle()}
 									leftIcon={provider.isArchived ? <RotateCcw className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
 								>
@@ -324,7 +325,7 @@ export default function ProviderDetailPage() {
 														<MapPin className="w-5 h-5 text-primary" />
 													</div>
 													<div>
-														{provider.address.street && <p>{provider.address.street}</p>}
+														{provider.address.addressOne && <p>{provider.address.addressOne}</p>}
 														<p>
 															{[
 																provider.address.city,

@@ -661,7 +661,7 @@ const API = {
 		 * STATUS WORKFLOW: Active -> Suspended -> Archived
 		 * @param providerId - Provider ID to archive
 		 */
-		archive: async (providerId: number) => HttpService.put<boolean>(`/provider/${providerId}/archive`),
+		archive: async (providerId: number) => HttpService.put<boolean>(`/provider/${providerId}/archive`, {}),
 		
 		/**
 		 * Suspends a provider (temporary hold).
@@ -676,14 +676,14 @@ const API = {
 		 * Activates a provider (restores from any status).
 		 * @param providerId - Provider ID to activate
 		 */
-		activate: async (providerId: number) => HttpService.put<boolean>(`/provider/${providerId}/activate`),
+		activate: async (providerId: number) => HttpService.put<boolean>(`/provider/${providerId}/activate`, {}),
 		
 		/**
 		 * Restores an archived provider (alias for activate).
 		 * Maintained for backward compatibility.
 		 * @param providerId - Provider ID to restore
 		 */
-		restore: async (providerId: number) => HttpService.put<boolean>(`/provider/${providerId}/restore`),
+		restore: async (providerId: number) => HttpService.put<boolean>(`/provider/${providerId}/restore`, {}),
 		
 		/**
 		 * Deletes a provider (hard delete).

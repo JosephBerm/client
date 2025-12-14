@@ -11,6 +11,12 @@
  * - Status filter state (All, Active, Suspended, Archived)
  * - Refresh key for table re-fetching
  * 
+ * **React 19 / Next.js 16 Optimizations:**
+ * - No useCallback needed (React Compiler auto-memoizes)
+ * - useMemo only for expensive computations
+ * 
+ * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler
+ * 
  * STATUS WORKFLOW (Industry Best Practice):
  * Active -> Suspended -> Archived (can be restored at each step)
  * 
@@ -19,12 +25,12 @@
 
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 
 import { useAuthStore } from '@_features/auth'
 
 import { logger } from '@_core'
-import { API, HttpService, notificationService } from '@_shared'
+import { API, notificationService } from '@_shared'
 import { AccountRole } from '@_classes/Enums'
 import type Provider from '@_classes/Provider'
 
@@ -91,9 +97,14 @@ interface UseProvidersPageReturn {
  * ```
  */
 export function useProvidersPage(): UseProvidersPageReturn {
-	// Auth state
-	const { user } = useAuthStore()
-	const isAdmin = user?.role === AccountRole.Admin
+	// Auth state for RBAC
+	const user = useAuthStore((state) => state.user)
+	
+	// RBAC checks - simple comparisons, no memoization needed
+	const userRole = user?.role ?? AccountRole.Customer
+	const isAdmin = userRole === AccountRole.Admin
+	const canDelete = isAdmin
+	const canManageStatus = isAdmin
 
 	// Modal state
 	const [modal, setModal] = useState<ModalState>({
@@ -114,32 +125,38 @@ export function useProvidersPage(): UseProvidersPageReturn {
 	// Stats
 	const { stats, isLoading: statsLoading, refetch: refetchStats } = useProviderStats()
 
-	// Modal actions
-	const openDeleteModal = useCallback((provider: Provider) => {
+	// Modal actions - React 19: No useCallback needed
+	const openDeleteModal = (provider: Provider) => {
 		setModal({ isOpen: true, provider, mode: 'delete' })
-	}, [])
+	}
 
-	const openArchiveModal = useCallback((provider: Provider) => {
+	const openArchiveModal = (provider: Provider) => {
 		setModal({ isOpen: true, provider, mode: 'archive' })
-	}, [])
+	}
 
-	const openSuspendModal = useCallback((provider: Provider) => {
+	const openSuspendModal = (provider: Provider) => {
 		setSuspendReason('')
 		setModal({ isOpen: true, provider, mode: 'suspend' })
-	}, [])
+	}
 
-	const closeModal = useCallback(() => {
-		setModal({ isOpen: false, provider: null, mode: 'delete' })
-		setSuspendReason('')
-	}, [])
+	const closeModal = () => {
+		if (!isDeleting && !isArchiving && !isSuspending) {
+			setModal({ isOpen: false, provider: null, mode: 'delete' })
+			setSuspendReason('')
+		}
+	}
 
-	// Refresh table
-	const refreshTable = useCallback(() => {
+	// Refresh table and stats
+	const refreshTable = () => {
 		setRefreshKey((prev) => prev + 1)
-	}, [])
+		void refetchStats()
+	}
 
-	// Delete handler
-	const handleDeleteAsync = useCallback(async () => {
+	/**
+	 * Delete a provider (hard delete).
+	 * Admin only action.
+	 */
+	const handleDelete = async () => {
 		if (!modal.provider) {
 			return
 		}
@@ -164,20 +181,23 @@ export function useProvidersPage(): UseProvidersPageReturn {
 			})
 			closeModal()
 			refreshTable()
-			void refetchStats()
 		} catch (error) {
 			notificationService.error('An error occurred while deleting the provider', {
 				metadata: { error, providerId: modal.provider.id },
 				component: 'ProvidersPage',
 				action: 'deleteProvider',
 			})
+			logger.error('Delete provider error', { error })
 		} finally {
 			setIsDeleting(false)
 		}
-	}, [modal.provider, closeModal, refreshTable, refetchStats])
+	}
 
-	// Archive handler
-	const handleArchiveAsync = useCallback(async () => {
+	/**
+	 * Archive a provider (soft delete).
+	 * Sets status to Archived, preserves all data.
+	 */
+	const handleArchive = async () => {
 		if (!modal.provider) {
 			return
 		}
@@ -202,20 +222,23 @@ export function useProvidersPage(): UseProvidersPageReturn {
 			})
 			closeModal()
 			refreshTable()
-			void refetchStats()
 		} catch (error) {
 			notificationService.error('An error occurred while archiving the provider', {
 				metadata: { error, providerId: modal.provider.id },
 				component: 'ProvidersPage',
 				action: 'archiveProvider',
 			})
+			logger.error('Archive provider error', { error })
 		} finally {
 			setIsArchiving(false)
 		}
-	}, [modal.provider, closeModal, refreshTable, refetchStats])
+	}
 
-	// Suspend handler
-	const handleSuspendAsync = useCallback(async () => {
+	/**
+	 * Suspend a provider with reason.
+	 * Sets status to Suspended, requires reason.
+	 */
+	const handleSuspend = async () => {
 		if (!modal.provider) {
 			return
 		}
@@ -245,20 +268,23 @@ export function useProvidersPage(): UseProvidersPageReturn {
 			})
 			closeModal()
 			refreshTable()
-			void refetchStats()
 		} catch (error) {
 			notificationService.error('An error occurred while suspending the provider', {
 				metadata: { error, providerId: modal.provider.id },
 				component: 'ProvidersPage',
 				action: 'suspendProvider',
 			})
+			logger.error('Suspend provider error', { error })
 		} finally {
 			setIsSuspending(false)
 		}
-	}, [modal.provider, suspendReason, closeModal, refreshTable, refetchStats])
+	}
 
-	// Activate handler (restore to active status)
-	const handleActivateAsync = useCallback(async (provider: Provider) => {
+	/**
+	 * Activate a provider (restore to active status).
+	 * Sets status back to Active from any other status.
+	 */
+	const handleActivate = async (provider: Provider) => {
 		setIsActivating(true)
 		try {
 			const { data } = await API.Providers.activate(provider.id)
@@ -270,55 +296,13 @@ export function useProvidersPage(): UseProvidersPageReturn {
 
 			notificationService.success('Provider activated successfully')
 			refreshTable()
-			void refetchStats()
 		} catch (error) {
 			notificationService.error('An error occurred while activating the provider')
 			logger.error('Activate provider error', { error, providerId: provider.id })
 		} finally {
 			setIsActivating(false)
 		}
-	}, [refreshTable, refetchStats])
-
-	// Wrapper functions for async handlers
-	const handleDelete = useCallback(() => {
-		void handleDeleteAsync().catch((error) => {
-			logger.error('Unhandled delete error', {
-				error,
-				component: 'ProvidersPage',
-				action: 'handleDelete',
-			})
-		})
-	}, [handleDeleteAsync])
-
-	const handleArchive = useCallback(() => {
-		void handleArchiveAsync().catch((error) => {
-			logger.error('Unhandled archive error', {
-				error,
-				component: 'ProvidersPage',
-				action: 'handleArchive',
-			})
-		})
-	}, [handleArchiveAsync])
-
-	const handleSuspend = useCallback(() => {
-		void handleSuspendAsync().catch((error) => {
-			logger.error('Unhandled suspend error', {
-				error,
-				component: 'ProvidersPage',
-				action: 'handleSuspend',
-			})
-		})
-	}, [handleSuspendAsync])
-
-	const handleActivate = useCallback((provider: Provider) => {
-		void handleActivateAsync(provider).catch((error) => {
-			logger.error('Unhandled activate error', {
-				error,
-				component: 'ProvidersPage',
-				action: 'handleActivate',
-			})
-		})
-	}, [handleActivateAsync])
+	}
 
 	return {
 		// State
@@ -336,17 +320,17 @@ export function useProvidersPage(): UseProvidersPageReturn {
 		statsLoading,
 		// RBAC
 		isAdmin,
-		canDelete: isAdmin,
-		canManageStatus: isAdmin,
-		// Actions
+		canDelete,
+		canManageStatus,
+		// Actions - wrap async functions to return void
 		openDeleteModal,
 		openArchiveModal,
 		openSuspendModal,
 		closeModal,
-		handleDelete,
-		handleArchive,
-		handleSuspend,
-		handleActivate,
+		handleDelete: () => void handleDelete(),
+		handleArchive: () => void handleArchive(),
+		handleSuspend: () => void handleSuspend(),
+		handleActivate: (provider: Provider) => void handleActivate(provider),
 		setStatusFilter,
 		refreshTable,
 	}

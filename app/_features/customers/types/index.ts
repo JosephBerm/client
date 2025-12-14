@@ -7,6 +7,7 @@
  */
 
 import type Company from '@_classes/Company'
+import { TypeOfBusiness, CustomerStatus } from '@_classes/Enums'
 
 /**
  * Customer statistics returned from the API.
@@ -35,8 +36,8 @@ export interface CustomerFilterOptions {
 /**
  * Customer list item with computed properties.
  */
-export interface CustomerListItem extends Company {
-	salesRepName?: string
+export interface CustomerListItem extends Omit<Company, 'salesRepName'> {
+	salesRepName?: string | null
 	orderCount?: number
 	lastActivityDate?: Date
 }

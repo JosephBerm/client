@@ -507,40 +507,48 @@ export default function AdminCreateAccountForm({
 					</div>
 
 					<div className="grid gap-4 sm:grid-cols-2">
-						<Input
-							label="Email Address"
-							type="email"
-							value={email}
-							onChange={(e) => setEmail(e.target.value)}
-							placeholder="user@example.com"
-							leftIcon={<Mail className="w-4 h-4" />}
-							error={email.length > 0 && !isEmailValid}
-							errorMessage="Please enter a valid email address"
-							required
-						/>
-						<Input
-							label="Username (optional)"
-							value={username}
-							onChange={(e) => setUsername(e.target.value)}
-							placeholder="Defaults to email"
-							leftIcon={<User className="w-4 h-4" />}
-							helperText="If empty, email will be used as username"
-						/>
+						<div className="space-y-1">
+							<label className="text-sm font-medium text-base-content">Email Address <span className="text-error">*</span></label>
+							<Input
+								type="email"
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								placeholder="user@example.com"
+								leftIcon={<Mail className="w-4 h-4" />}
+								error={email.length > 0 && !isEmailValid}
+								errorMessage="Please enter a valid email address"
+								required
+							/>
+						</div>
+						<div className="space-y-1">
+							<label className="text-sm font-medium text-base-content">Username (optional)</label>
+							<Input
+								value={username}
+								onChange={(e) => setUsername(e.target.value)}
+								placeholder="Defaults to email"
+								leftIcon={<User className="w-4 h-4" />}
+								helperText="If empty, email will be used as username"
+							/>
+						</div>
 					</div>
 
 					<div className="grid gap-4 sm:grid-cols-2 mt-4">
-						<Input
-							label="First Name (optional)"
-							value={firstName}
-							onChange={(e) => setFirstName(e.target.value)}
-							placeholder="John"
-						/>
-						<Input
-							label="Last Name (optional)"
-							value={lastName}
-							onChange={(e) => setLastName(e.target.value)}
-							placeholder="Doe"
-						/>
+						<div className="space-y-1">
+							<label className="text-sm font-medium text-base-content">First Name (optional)</label>
+							<Input
+								value={firstName}
+								onChange={(e) => setFirstName(e.target.value)}
+								placeholder="John"
+							/>
+						</div>
+						<div className="space-y-1">
+							<label className="text-sm font-medium text-base-content">Last Name (optional)</label>
+							<Input
+								value={lastName}
+								onChange={(e) => setLastName(e.target.value)}
+								placeholder="Doe"
+							/>
+						</div>
 					</div>
 				</Card>
 
@@ -587,9 +595,9 @@ export default function AdminCreateAccountForm({
 
 					<div className="space-y-4">
 						<div className="flex gap-2">
-							<div className="flex-1">
+							<div className="flex-1 space-y-1">
+								<label className="text-sm font-medium text-base-content">Temporary Password (optional)</label>
 								<Input
-									label="Temporary Password (optional)"
 									type={showPassword ? 'text' : 'password'}
 									value={temporaryPassword}
 									onChange={(e) => setTemporaryPassword(e.target.value)}
@@ -682,7 +690,7 @@ export default function AdminCreateAccountForm({
 							Cancel
 						</Button>
 						<Button
-							variant={needsConfirmation ? 'warning' : 'primary'}
+							variant={needsConfirmation ? 'accent' : 'primary'}
 							onClick={handleNext}
 							loading={isSubmitting}
 							disabled={!isFormValid}

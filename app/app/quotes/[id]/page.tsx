@@ -32,7 +32,7 @@ const STATUS_CONFIG: Record<
 	QuoteStatus,
 	{
 		label: string
-		variant: 'warning' | 'info'
+		variant: 'warning' | 'info' | 'success' | 'error'
 		description: string
 	}
 > = {
@@ -45,6 +45,26 @@ const STATUS_CONFIG: Record<
 		label: 'Reviewed',
 		variant: 'info',
 		description: 'Reviewed by staff',
+	},
+	[QuoteStatus.Approved]: {
+		label: 'Approved',
+		variant: 'success',
+		description: 'Quote approved and sent',
+	},
+	[QuoteStatus.Converted]: {
+		label: 'Converted',
+		variant: 'success',
+		description: 'Converted to order',
+	},
+	[QuoteStatus.Rejected]: {
+		label: 'Rejected',
+		variant: 'error',
+		description: 'Quote declined',
+	},
+	[QuoteStatus.Expired]: {
+		label: 'Expired',
+		variant: 'warning',
+		description: 'Quote validity expired',
 	},
 }
 

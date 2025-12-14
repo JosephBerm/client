@@ -40,7 +40,7 @@ import { QuoteStatus } from '../Enums'
 /**
  * Badge variant for status indicators
  */
-export type QuoteStatusVariant = 'warning' | 'info' | 'success'
+export type QuoteStatusVariant = 'warning' | 'info' | 'success' | 'error' | 'neutral'
 
 /**
  * Complete metadata for a QuoteStatus enum value
@@ -80,6 +80,38 @@ const QUOTE_STATUS_METADATA_MAP: Record<QuoteStatus, QuoteStatusMetadata> = {
 		variant: 'info',
 		description: 'Quote request has been reviewed by staff',
 		iconName: 'MailReadIcon',
+		needsAttention: false,
+	},
+	[QuoteStatus.Approved]: {
+		value: QuoteStatus.Approved,
+		display: 'Approved',
+		variant: 'success',
+		description: 'Quote pricing has been approved and sent to customer',
+		iconName: 'CheckCircleIcon',
+		needsAttention: false,
+	},
+	[QuoteStatus.Converted]: {
+		value: QuoteStatus.Converted,
+		display: 'Converted',
+		variant: 'success',
+		description: 'Customer accepted the quote and converted to order',
+		iconName: 'ShoppingCartIcon',
+		needsAttention: false,
+	},
+	[QuoteStatus.Rejected]: {
+		value: QuoteStatus.Rejected,
+		display: 'Rejected',
+		variant: 'error',
+		description: 'Quote was declined by staff or customer',
+		iconName: 'XCircleIcon',
+		needsAttention: false,
+	},
+	[QuoteStatus.Expired]: {
+		value: QuoteStatus.Expired,
+		display: 'Expired',
+		variant: 'neutral',
+		description: 'Quote passed validity period without customer action',
+		iconName: 'ClockIcon',
 		needsAttention: false,
 	},
 }

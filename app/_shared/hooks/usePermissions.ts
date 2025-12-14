@@ -60,12 +60,15 @@ interface PermissionCheck {
 /**
  * usePermissions hook return type
  */
-interface UsePermissionsReturn {
+export interface UsePermissionsReturn {
 	// User info
-	user: ReturnType<typeof useAuthStore>['user']
+	/** Current authenticated user or null if not logged in */
+	user: import('@_classes/User').IUser | null
 	roleLevel: RoleLevel | undefined
 	roleName: string
 	isAuthenticated: boolean
+	/** Loading state - false for synchronous store access */
+	isLoading: boolean
 
 	// Role checks (fast, in-memory)
 	isAdmin: boolean
@@ -279,6 +282,7 @@ export function usePermissions(): UsePermissionsReturn {
 		roleLevel,
 		roleName,
 		isAuthenticated: !!user,
+		isLoading: false, // Zustand store access is synchronous - no loading state
 		isAdmin,
 		isSalesManagerOrAbove,
 		isSalesRepOrAbove,

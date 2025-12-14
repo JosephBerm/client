@@ -371,7 +371,7 @@ const CustomerDetailPage = () => {
 						<Button
 							variant="outline"
 							className="flex-col gap-1 h-auto py-3"
-							onClick={() => router.push(Routes.Orders.create({ customerId: customerIdNum }))}
+							onClick={() => router.push(Routes.Orders.create({ customerId: customerIdNum ?? 0 }))}
 						>
 							<Package size={20} />
 							<span className="text-xs">New Order</span>
@@ -379,7 +379,7 @@ const CustomerDetailPage = () => {
 						<Button
 							variant="outline"
 							className="flex-col gap-1 h-auto py-3"
-							onClick={() => router.push(Routes.Quotes.create({ customerId: customerIdNum }))}
+							onClick={() => router.push(Routes.Quotes.create({ customerId: customerIdNum ?? 0 }))}
 						>
 							<FileText size={20} />
 							<span className="text-xs">New Quote</span>

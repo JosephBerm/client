@@ -34,7 +34,7 @@ import { getStoredReferral } from '@_features/store/hooks/useReferralTracking'
 
 import { quoteSchema, type QuoteFormData, logger } from '@_core'
 
-import { formatDateForInput, addMonths, serializeDate, parseDateOrNow } from '@_lib'
+import { formatDateForInput, addMonths, parseDateSafe, parseDateOrNow } from '@_lib'
 
 import { useZodForm, useFormSubmit, API } from '@_shared'
 
@@ -336,7 +336,7 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 				description: values.notes ?? '',
 				createdAt: new Date(), // Required field - backend will set authoritative timestamp
 				// Convert string date back to Date object if needed
-				...(values.validUntil && { validUntil: serializeDate(values.validUntil) }),
+				...(values.validUntil && { validUntil: parseDateSafe(values.validUntil) ?? undefined }),
 				// Include referral data for sales rep attribution
 				// Per business_flow.md Section 2.2: Referral-Based Assignment
 				...(referralData && {

@@ -129,7 +129,7 @@ export function ProductDeleteModal({
 					</Button>
 					{isArchiveMode ? (
 						<Button
-							variant="warning"
+							variant="accent"
 							onClick={onArchive}
 							loading={isArchiving}
 							disabled={isLoading}

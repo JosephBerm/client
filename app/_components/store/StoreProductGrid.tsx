@@ -194,15 +194,15 @@ function EmptyState({ isFiltered, onClearFilters }: EmptyStateProps) {
 					>
 						Clear Filters
 					</Button>
+				<a href="/contact">
 					<Button 
 						variant="outline" 
 						size="md"
-						as="a"
-						href="/contact"
 						leftIcon={<Phone className="w-4 h-4" />}
 					>
 						Contact Sales
 					</Button>
+				</a>
 				</div>
 			</div>
 		)
@@ -223,15 +223,15 @@ function EmptyState({ isFiltered, onClearFilters }: EmptyStateProps) {
 			<p className="text-xs text-base-content/50 mb-6">
 				We source from 200+ verified vendors to find the best products for your facility.
 			</p>
+		<a href="/contact">
 			<Button 
 				variant="primary" 
 				size="md"
-				as="a"
-				href="/contact"
 				leftIcon={<Phone className="w-4 h-4" />}
 			>
 				Contact Sales Team
 			</Button>
+		</a>
 		</div>
 	)
 }

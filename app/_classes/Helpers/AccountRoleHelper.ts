@@ -45,7 +45,7 @@ import { AccountRole } from '../Enums'
 /**
  * Badge variant for role indicators
  */
-export type AccountRoleVariant = 'primary' | 'secondary' | 'info'
+export type AccountRoleVariant = 'primary' | 'secondary' | 'info' | 'success' | 'warning'
 
 /**
  * Complete metadata for an AccountRole enum value
@@ -76,8 +76,32 @@ const ACCOUNT_ROLE_METADATA_MAP: Record<AccountRole, AccountRoleMetadata> = {
 		display: 'Customer',
 		variant: 'info',
 		description: 'Regular customer user who can browse products, place orders, and request quotes',
-		level: 0, // Matches enum value
+		level: 0,
 		shortLabel: 'Customer',
+	},
+	[AccountRole.SalesRep]: {
+		value: AccountRole.SalesRep,
+		display: 'Sales Representative',
+		variant: 'secondary',
+		description: 'Sales representative who manages quotes and orders for customers',
+		level: 100,
+		shortLabel: 'Sales Rep',
+	},
+	[AccountRole.SalesManager]: {
+		value: AccountRole.SalesManager,
+		display: 'Sales Manager',
+		variant: 'secondary',
+		description: 'Manager who oversees sales team and approves high-value quotes',
+		level: 200,
+		shortLabel: 'Sales Mgr',
+	},
+	[AccountRole.FulfillmentCoordinator]: {
+		value: AccountRole.FulfillmentCoordinator,
+		display: 'Fulfillment Coordinator',
+		variant: 'secondary',
+		description: 'Handles order fulfillment logistics and vendor coordination',
+		level: 300,
+		shortLabel: 'Fulfillment',
 	},
 	[AccountRole.Admin]: {
 		value: AccountRole.Admin,
@@ -85,7 +109,7 @@ const ACCOUNT_ROLE_METADATA_MAP: Record<AccountRole, AccountRoleMetadata> = {
 		variant: 'primary',
 		description:
 			'Administrator with full system access, can manage users, orders, quotes, products, and all entities',
-		level: 9999999, // Matches enum value
+		level: 9999999,
 		shortLabel: 'Admin',
 	},
 }
