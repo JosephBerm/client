@@ -90,6 +90,15 @@ export { HttpService } from './services/httpService'
 // API Client
 export { default as API } from './services/api'
 
+// API Types - DTOs for backend contract alignment
+export type {
+	CreateQuoteRequest,
+	QuoteItemRequest,
+	CreateQuoteResponse,
+	ApiResponse,
+	PagedResponse,
+} from './services/api.types'
+
 // Notification Service
 export {
 	notificationService,
