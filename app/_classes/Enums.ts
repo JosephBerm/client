@@ -74,6 +74,7 @@ export enum TypeOfBusiness {
  * QuoteStatus Enum
  * 
  * Status of quote requests (RFQs).
+ * Tracks the quote lifecycle from submission to conversion/rejection.
  * 
  * **Status Flow (per business_flow.md):**
  * 1. Unread (0) - Initial state when customer submits quote
