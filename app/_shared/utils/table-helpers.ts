@@ -129,13 +129,22 @@ export function createServerTableFetcher<T>(
 		// Convert TanStack Table sorting to API format
 		const { sortBy, sortOrder } = convertSortingToApi(sorting || [])
 
+		// Extract 'includes' from additionalFilters if present
+		// Backend expects 'includes' at top level, not inside 'filters'
+		const { includes, ...filters } = additionalFilters || {}
+
 		// Prepare request body matching GenericSearchFilter structure
-		const requestBody = {
+		const requestBody: Record<string, any> = {
 			page,
 			pageSize,
 			sortBy,
 			sortOrder,
-			filters: additionalFilters || {}, // Custom filters (e.g., category, status)
+			filters: filters || {}, // Custom filters (e.g., category, status, isArchived)
+		}
+
+		// Add includes at top level if provided
+		if (includes) {
+			requestBody.includes = Array.isArray(includes) ? includes : [includes]
 		}
 
 		// Dynamic import to avoid circular dependencies

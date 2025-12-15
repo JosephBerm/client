@@ -375,11 +375,18 @@ export type OrderFormData = z.infer<typeof orderSchema>
 /**
  * Quote schema with improved validation for authenticated vs guest users.
  * Uses superRefine for better error messages on specific fields.
+ * 
+ * **Authentication Detection:**
+ * - Checks `isAuthenticated` flag (set by form when user is logged in)
+ * - Falls back to `customerId > 0` for backward compatibility
+ * - Allows authenticated users without customerId (e.g., admin accounts)
  */
 export const quoteSchema = z
 	.object({
 		// Authenticated user fields
 		customerId: z.coerce.number().nonnegative().optional(),
+		// Hidden field to indicate authentication status (set by form)
+		isAuthenticated: z.boolean().optional().default(false),
 		
 		// Non-authenticated user fields
 		firstName: z.string().optional(),
@@ -401,10 +408,12 @@ export const quoteSchema = z
 	})
 	.superRefine((data, ctx) => {
 		// Determine if user is authenticated
-		const isAuthenticated = data.customerId && data.customerId > 0
+		// Check isAuthenticated flag first (set by form for logged-in users)
+		// Fall back to customerId > 0 for backward compatibility
+		const isAuthenticated = data.isAuthenticated === true || (data.customerId && data.customerId > 0)
 		
 		if (isAuthenticated) {
-			// Authenticated users don't need guest fields
+			// Authenticated users don't need guest fields (even if customerId is 0/null)
 			return
 		}
 		

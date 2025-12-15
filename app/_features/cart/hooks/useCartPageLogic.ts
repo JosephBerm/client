@@ -142,6 +142,9 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 		defaultValues: {
 			// Authenticated user fields
 			customerId: user?.customerId ?? 0,
+			// Set isAuthenticated flag to indicate user is logged in (even if customerId is 0/null)
+			// This allows admin accounts without customerId to submit quotes
+			isAuthenticated: isAuthenticated && !!user,
 			// Non-authenticated user fields (optional, will be filled if not logged in)
 			firstName: '',
 			lastName: '',
@@ -254,8 +257,9 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 	// This ensures form reflects current auth state (e.g., user logs in while on cart page)
 	useEffect(() => {
 		if (isAuthenticated && user) {
-			// User logged in: clear guest fields, set customerId
+			// User logged in: clear guest fields, set customerId and isAuthenticated flag
 			form.setValue('customerId', user.customerId ?? 0)
+			form.setValue('isAuthenticated', true) // Set flag to indicate authentication
 			form.setValue('firstName', '')
 			form.setValue('lastName', '')
 			form.setValue('email', '')
@@ -264,8 +268,9 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 			form.clearErrors('lastName')
 			form.clearErrors('email')
 		} else {
-			// User logged out: clear customerId, keep guest fields as-is
+			// User logged out: clear customerId and isAuthenticated flag, keep guest fields as-is
 			form.setValue('customerId', 0)
+			form.setValue('isAuthenticated', false)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isAuthenticated, user?.customerId]) // Only depend on auth state, not form
