@@ -77,6 +77,7 @@ export {
 	parseDateWithFallback,
 	parseDates,
 	parseRequiredTimestamp,
+	parseOptionalTimestamp,
 } from './dates/parse'
 
 // Formatting

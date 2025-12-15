@@ -18,3 +18,12 @@ export {
 	type NotificationResult,
 } from './notification.service'
 
+// API Types - DTOs for backend contract alignment
+export type {
+	CreateQuoteRequest,
+	QuoteItemRequest,
+	CreateQuoteResponse,
+	ApiResponse,
+	PagedResponse,
+} from './api.types'
+

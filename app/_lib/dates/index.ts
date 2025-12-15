@@ -42,7 +42,7 @@ export {
 } from './constants'
 
 // Parsing utilities
-export { parseDate, parseDateSafe, parseDateOrNow, parseDateWithFallback, parseDates, parseRequiredTimestamp } from './parse'
+export { parseDate, parseDateSafe, parseDateOrNow, parseDateWithFallback, parseDates, parseRequiredTimestamp, parseOptionalTimestamp } from './parse'
 
 // Formatting utilities
 export {

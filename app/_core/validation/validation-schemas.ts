@@ -387,12 +387,15 @@ export const quoteSchema = z
 		email: z.string().optional(),
 		
 		// Common fields
+		// NOTE: In a quote-based pricing model, products are added with price=0
+		// The actual price is determined during the quote review process
 		items: z
 			.array(
 				z.object({
 					productId: z.string().min(1, 'Product is required'),
 					quantity: z.coerce.number().int().positive('Quantity must be positive'),
-					price: z.coerce.number().positive('Price must be positive'),
+					// Allow 0 price since this is a quote-based system (price determined later)
+					price: z.coerce.number().nonnegative('Price cannot be negative'),
 				})
 			)
 			.min(1, 'At least one item is required'),

@@ -74,17 +74,52 @@ export enum TypeOfBusiness {
  * QuoteStatus Enum
  * 
  * Status of quote requests (RFQs).
- * Tracks whether staff has reviewed the quote.
  * 
- * **Status Flow:**
- * 1. Unread - Initial state when customer submits quote
- * 2. Read - Staff has reviewed the quote
+ * **Status Flow (per business_flow.md):**
+ * 1. Unread (0) - Initial state when customer submits quote
+ * 2. Read (1) - Staff has reviewed the quote
+ * 3. Approved (2) - Staff approved pricing, quote sent to customer
+ * 4. Converted (3) - Customer accepted, quote converted to order
+ * 5. Rejected (4) - Quote declined by staff or customer
+ * 6. Expired (5) - Quote passed validity period without action
+ * 
+ * **Backend Alignment:** Matches server/Entities/Quote.cs QuoteStatus enum
  */
 export enum QuoteStatus {
-	/** Quote has not been reviewed by staff */
-	Unread,
-	/** Quote has been reviewed by staff */
-	Read,
+	/** Initial state - quote request submitted (value: 0) */
+	Unread = 0,
+	/** Staff reviewed quote request (value: 1) */
+	Read = 1,
+	/** Staff approved pricing, quote sent to customer (value: 2) */
+	Approved = 2,
+	/** Customer accepted, quote converted to order (value: 3) */
+	Converted = 3,
+	/** Quote declined by staff or customer (value: 4) */
+	Rejected = 4,
+	/** Quote passed validity period without action (value: 5) */
+	Expired = 5,
+}
+
+/**
+ * QuotePriority Enum
+ * 
+ * Priority levels for quote processing per business_flow.md.
+ * Determines response time SLA for sales team.
+ * 
+ * **Priority Levels:**
+ * - Standard (0): Within 48 hours
+ * - High (1): Within 24 hours (order value $5k-$10k or repeat customer)
+ * - Urgent (2): Within 4 hours (order value >$10k or customer-marked urgent)
+ * 
+ * **Backend Alignment:** Matches server/Entities/Quote.cs QuotePriority enum
+ */
+export enum QuotePriority {
+	/** Standard processing - within 48 hours (value: 0) */
+	Standard = 0,
+	/** High priority - within 24 hours (value: 1) */
+	High = 1,
+	/** Urgent - within 4 hours (value: 2) */
+	Urgent = 2,
 }
 
 /**

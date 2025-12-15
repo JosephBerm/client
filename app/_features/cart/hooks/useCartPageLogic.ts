@@ -35,11 +35,9 @@ import { quoteSchema, type QuoteFormData, logger } from '@_core'
 
 import { formatDateForInput, addDays, serializeDate, parseDateOrNow } from '@_lib'
 
-import { useZodForm, useFormSubmit, API } from '@_shared'
+import { useZodForm, useFormSubmit, API, type CreateQuoteRequest } from '@_shared'
 
-import Name from '@_classes/common/Name'
-import { Product, CartProduct } from '@_classes/Product'
-import Quote from '@_classes/Quote'
+import { Product } from '@_classes/Product'
 import type { IUser } from '@_classes/User'
 
 import { useCartStore, type CartItem } from '../stores/useCartStore'
@@ -274,6 +272,11 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 	 * Quote submission handler using useFormSubmit for DRY error handling.
 	 * Follows the same pattern as ProductForm, UpdateCustomerForm, etc.
 	 * 
+	 * Uses CreateQuoteRequest DTO for clean API contract:
+	 * - Flat structure (no nested entity classes)
+	 * - Only required fields for quote creation
+	 * - Type-safe with backend contract
+	 * 
 	 * ESLint: useFormSubmit is a custom hook that takes an async function and options object (not a dependency array).
 	 * The async function intentionally captures cart and user from closure.
 	 * These are not React hook dependencies - they're closure variables used in the submit function.
@@ -288,47 +291,43 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 				itemCount: cart.length,
 			})
 
-			// Convert cart to quote items format
-			const quoteItems = cart.map((item) => new CartProduct({
-				productId: item.productId,
-				quantity: item.quantity,
-				product: null, // Product reference can be null for submission
-			}))
-
 			// Determine contact information based on authentication status
 			const userIsAuthenticated = isAuthenticated && user
 			
-			// Construct Name object - use user's name if authenticated, otherwise use form values
-			const contactName = userIsAuthenticated && user?.name
-				? new Name(user.name)
-				: new Name({
-						first: values.firstName ?? '',
-						last: values.lastName ?? '',
-					})
+			// Build CreateQuoteRequest DTO (matches backend server/Classes/Others/CreateQuoteRequest.cs)
+			const quoteRequest: CreateQuoteRequest = {
+				// Contact Information - use user data if authenticated, otherwise form values
+				firstName: userIsAuthenticated && user?.name?.first
+					? user.name.first
+					: values.firstName ?? '',
+				lastName: userIsAuthenticated && user?.name?.last
+					? user.name.last
+					: values.lastName ?? '',
+				middleName: user?.name?.middle,
+				emailAddress: userIsAuthenticated && user?.email
+					? user.email
+					: values.email ?? '',
+				phoneNumber: user?.phone ?? undefined,
+				
+				// Company Information
+				companyName: userIsAuthenticated && user?.customer?.name
+					? user.customer.name
+					: undefined,
+				
+				// Quote Details
+				description: values.notes ?? undefined,
+				
+				// Cart items - simple flat structure
+				items: cart.map((item) => ({
+					productId: item.productId,
+					quantity: item.quantity,
+				})),
+				
+				// Authenticated user ID (for linking to existing customer)
+				customerId: userIsAuthenticated ? user?.customerId : undefined,
+			}
 
-			// Get email - use user's email if authenticated, otherwise use form value
-			const contactEmail = userIsAuthenticated && user?.email
-				? user.email
-				: values.email ?? ''
-
-			// Get company name - use user's company if authenticated, otherwise empty
-			const companyName = userIsAuthenticated && user?.customer?.name
-				? user.customer.name
-				: ''
-
-			// Construct a proper Quote object with all form values
-			const quoteData = new Quote({
-				name: contactName,
-				companyName,
-				emailAddress: contactEmail,
-				phoneNumber: user?.phone ?? '',
-				products: quoteItems,
-				description: values.notes ?? '',
-				// Convert string date back to Date object if needed
-				...(values.validUntil && { validUntil: serializeDate(values.validUntil) }),
-			})
-
-			return API.Public.sendQuote(quoteData)
+			return API.Public.sendQuote(quoteRequest)
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		{

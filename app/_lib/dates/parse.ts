@@ -334,3 +334,67 @@ export function parseRequiredTimestamp(
 	return parsed
 }
 
+/**
+ * Parse an optional timestamp field from an entity.
+ * 
+ * **Purpose:** Clean handling of nullable date fields during entity construction.
+ * Returns undefined if input is null/undefined, otherwise parses the date.
+ * 
+ * **Use Case:** Entity fields like `validUntil`, `assignedAt`, etc. that may be null
+ * from the backend API.
+ * 
+ * @param input - The input value to parse (may be null, undefined, Date, string, or number)
+ * @param entity - Entity name for error logging (e.g., 'Quote')
+ * @param field - Field name for error logging (e.g., 'validUntil')
+ * @returns Parsed Date object, or undefined if input was null/undefined
+ * 
+ * @example
+ * ```typescript
+ * import { parseOptionalTimestamp } from '@_lib/dates'
+ * 
+ * // In entity constructors:
+ * class Quote {
+ *   validUntil?: Date
+ *   assignedAt?: Date
+ *   
+ *   constructor(param?: Partial<Quote>) {
+ *     if (param) {
+ *       this.validUntil = parseOptionalTimestamp(param.validUntil, 'Quote', 'validUntil')
+ *       this.assignedAt = parseOptionalTimestamp(param.assignedAt, 'Quote', 'assignedAt')
+ *     }
+ *   }
+ * }
+ * 
+ * // Behavior:
+ * new Quote({ validUntil: '2024-12-31' })  // ✅ Returns Date object
+ * new Quote({ validUntil: null })          // ✅ Returns undefined
+ * new Quote({ validUntil: undefined })     // ✅ Returns undefined
+ * new Quote({})                            // ✅ Returns undefined
+ * ```
+ */
+export function parseOptionalTimestamp(
+	input: DateInput | undefined,
+	entity: string,
+	field: string
+): Date | undefined {
+	// Return undefined for null/undefined inputs (expected behavior for optional fields)
+	if (input === null || input === undefined) {
+		return undefined
+	}
+	
+	const parsed = parseDate(input)
+	
+	// Log if a non-null value couldn't be parsed (potential API issue)
+	if (!parsed) {
+		logger.warn('date.optional_timestamp_parse_failed', {
+			input,
+			entity,
+			field,
+			location: 'parseOptionalTimestamp',
+			message: `Optional timestamp "${field}" provided but couldn't be parsed`,
+		})
+	}
+	
+	return parsed ?? undefined
+}
+

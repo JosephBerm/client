@@ -63,6 +63,7 @@ import type UploadedFile from '@_classes/UploadedFile'
 import type User from '@_classes/User'
 
 import { HttpService } from './httpService'
+import type { CreateQuoteRequest, CreateQuoteResponse } from './api.types'
 
 /**
  * Main API object with domain-organized endpoints.
@@ -261,21 +262,23 @@ const API = {
 	/**
 	 * Quote Management API
 	 * Handles quote requests (RFQs) from customers.
+	 * 
+	 * **RESTful Endpoint:** `/quotes` (plural, consistent with backend QuotesController)
 	 */
 	Quotes: {
 		/**
 		 * Gets a single quote by ID.
-		 * @param id - Quote ID
+		 * @param id - Quote ID (GUID)
 		 */
 		get: async <T>(id: string) => {
-			return HttpService.get<T>(`/quote/${id}`)
+			return HttpService.get<T>(`/quotes/${id}`)
 		},
 		
 		/**
 		 * Gets all quotes.
 		 */
 		getAll: async <T>() => {
-			return HttpService.get<T>('/quote')
+			return HttpService.get<T>('/quotes')
 		},
 		
 		/**
@@ -283,7 +286,7 @@ const API = {
 		 * @param quantity - Number of quotes to return (default: 6)
 		 */
 		getLatest: async (quantity: number = 6) => {
-			return HttpService.get<Quote[]>(`/quote/latest?quantity=${quantity}`)
+			return HttpService.get<Quote[]>(`/quotes/latest?quantity=${quantity}`)
 		},
 		
 		/**
@@ -291,26 +294,26 @@ const API = {
 		 * @param search - Search filter
 		 */
 		search: async (search: GenericSearchFilter) => {
-			return HttpService.post<PagedResult<Quote>>('/quote/search', search)
+			return HttpService.post<PagedResult<Quote>>('/quotes/search', search)
 		},
 		
 		/**
 		 * Creates a new quote request.
 		 * @param quote - Quote data
 		 */
-		create: async <T>(quote: T) => HttpService.post<T>('/quote', quote),
+		create: async <T>(quote: T) => HttpService.post<T>('/quotes', quote),
 		
 		/**
 		 * Updates an existing quote.
 		 * @param quote - Quote with updated data
 		 */
-		update: async <T>(quote: T) => HttpService.put<T>('/quote', quote),
+		update: async <T>(quote: T) => HttpService.put<T>('/quotes', quote),
 		
 		/**
 		 * Deletes a quote.
 		 * @param quoteId - Quote ID to delete
 		 */
-		delete: async <T>(quoteId: string) => HttpService.delete<T>(`/quote/${quoteId}`),
+		delete: async <T>(quoteId: string) => HttpService.delete<T>(`/quotes/${quoteId}`),
 	},
 	
 	/**
@@ -474,9 +477,14 @@ const API = {
 	Public: {
 		/**
 		 * Submits a quote request from public website.
-		 * @param quote - Quote request data
+		 * Uses CreateQuoteRequest DTO for clean API contract.
+		 * Backend has [AllowAnonymous] on the create endpoint.
+		 * 
+		 * @param request - Quote request DTO (not the Quote entity)
+		 * @returns CreateQuoteResponse with quote ID and reference number
 		 */
-		sendQuote: async (quote: Quote) => HttpService.post<Quote>('/quote', quote),
+		sendQuote: async (request: CreateQuoteRequest) => 
+			HttpService.post<CreateQuoteResponse>('/quotes', request),
 		
 		/**
 		 * Submits a contact form request from public website.
