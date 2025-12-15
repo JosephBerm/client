@@ -182,22 +182,24 @@ const CONTACT_METHOD_CONFIG: Record<
  *
  * @example
  * ```tsx
+ * import { COMPANY_CONTACT } from '@_lib'
+ * 
  * // Phone contact
  * <ContactMethodCard
  *   type="phone"
  *   title="Call Us"
- *   mainText="(786) 578-2145"
+ *   mainText={COMPANY_CONTACT.phone.display}
  *   description="Speak directly with a sourcing specialist in real time."
- *   href="tel:+17865782145"
+ *   href={COMPANY_CONTACT.phone.href}
  * />
  *
  * // Email contact
  * <ContactMethodCard
  *   type="email"
  *   title="Email Support"
- *   mainText="support@medsourcepro.com"
+ *   mainText={COMPANY_CONTACT.email.display}
  *   description="Share requirements or RFQs and receive a tailored response."
- *   href="mailto:support@medsourcepro.com"
+ *   href={COMPANY_CONTACT.email.href}
  * />
  *
  * // Live chat

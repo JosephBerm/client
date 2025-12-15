@@ -1,25 +1,35 @@
 /**
  * Contact Information Constants
  * 
- * Centralized configuration for contact page information.
- * Used across contact page components for consistency.
+ * Re-exports company contact information from centralized source.
+ * This file maintains backward compatibility for contact page components
+ * while delegating to the single source of truth in @_lib.
+ * 
+ * @deprecated Import directly from @_lib for new code:
+ * ```typescript
+ * import { COMPANY_CONTACT } from '@_lib'
+ * ```
  * 
  * @module contact/contact.constants
  */
 
+import { COMPANY_CONTACT } from '@_lib'
+
 /**
  * Contact information configuration
+ * 
+ * @deprecated Use COMPANY_CONTACT from @_lib directly
  */
 export const CONTACT_INFO = {
 	phone: {
-		display: '(786) 578-2145',
-		href: 'tel:+17865782145',
+		display: COMPANY_CONTACT.phone.display,
+		href: COMPANY_CONTACT.phone.href,
 	},
 	email: {
-		display: 'support@medsourcepro.com',
-		href: 'mailto:support@medsourcepro.com',
+		display: COMPANY_CONTACT.email.display,
+		href: COMPANY_CONTACT.email.href,
 	},
-	responseTime: '2 hours',
-	emergencySupport: '24/7',
+	responseTime: COMPANY_CONTACT.responseTime.standard,
+	emergencySupport: COMPANY_CONTACT.responseTime.emergency,
 } as const
 

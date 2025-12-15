@@ -128,3 +128,13 @@ export {
 	validateDateRange,
 } from './dates/validate'
 
+// ============================================================================
+// COMPANY CONSTANTS (Pure Data - Server + Client Safe)
+// ============================================================================
+
+// Company Contact Information
+export {
+	COMPANY_CONTACT,
+	type CompanyContact,
+} from './constants/company'
+
