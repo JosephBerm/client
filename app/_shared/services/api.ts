@@ -857,7 +857,162 @@ const API = {
 		downloadFinanceNumbers: async (search: FinanceSearchFilter) =>
 			HttpService.download<Blob>('/finance/orders/download', search, { responseType: 'blob' }),
 	},
+	
+	/**
+	 * RBAC Management API
+	 * Role-Based Access Control management endpoints.
+	 * All operations require Admin role.
+	 */
+	RBAC: {
+		/**
+		 * Roles Management
+		 */
+		Roles: {
+			/**
+			 * Gets all roles.
+			 */
+			getAll: async () => HttpService.get<Role[]>('/rbac/roles'),
+			
+			/**
+			 * Gets a single role by ID.
+			 */
+			get: async (id: number) => HttpService.get<Role>(`/rbac/roles/${id}`),
+			
+			/**
+			 * Creates a new role.
+			 */
+			create: async (role: CreateRoleRequest) => HttpService.post<Role>('/rbac/roles', role),
+			
+			/**
+			 * Updates an existing role.
+			 */
+			update: async (id: number, role: UpdateRoleRequest) => HttpService.put<Role>(`/rbac/roles/${id}`, role),
+			
+			/**
+			 * Deletes a role.
+			 */
+			delete: async (id: number) => HttpService.delete<boolean>(`/rbac/roles/${id}`),
+			
+			/**
+			 * Gets all permissions assigned to a role.
+			 */
+			getPermissions: async (roleId: number) => HttpService.get<Permission[]>(`/rbac/roles/${roleId}/permissions`),
+			
+			/**
+			 * Assigns a permission to a role.
+			 */
+			assignPermission: async (roleId: number, permissionId: number) =>
+				HttpService.post<boolean>(`/rbac/roles/${roleId}/permissions/${permissionId}`, null),
+			
+			/**
+			 * Removes a permission from a role.
+			 */
+			removePermission: async (roleId: number, permissionId: number) =>
+				HttpService.delete<boolean>(`/rbac/roles/${roleId}/permissions/${permissionId}`),
+			
+			/**
+			 * Bulk assigns multiple permissions to a role (replaces existing).
+			 */
+			bulkAssignPermissions: async (roleId: number, permissionIds: number[]) =>
+				HttpService.put<boolean>(`/rbac/roles/${roleId}/permissions`, { permissionIds }),
+		},
+		
+		/**
+		 * Permissions Management
+		 */
+		Permissions: {
+			/**
+			 * Gets all permissions.
+			 */
+			getAll: async () => HttpService.get<Permission[]>('/rbac/permissions'),
+			
+			/**
+			 * Gets a single permission by ID.
+			 */
+			get: async (id: number) => HttpService.get<Permission>(`/rbac/permissions/${id}`),
+			
+			/**
+			 * Creates a new permission.
+			 */
+			create: async (permission: CreatePermissionRequest) =>
+				HttpService.post<Permission>('/rbac/permissions', permission),
+			
+			/**
+			 * Updates an existing permission.
+			 */
+			update: async (id: number, permission: UpdatePermissionRequest) =>
+				HttpService.put<Permission>(`/rbac/permissions/${id}`, permission),
+			
+			/**
+			 * Deletes a permission.
+			 */
+			delete: async (id: number) => HttpService.delete<boolean>(`/rbac/permissions/${id}`),
+		},
+	},
 }
 
 export default API
+
+// =========================================================================
+// RBAC Type Definitions
+// =========================================================================
+
+export interface Role {
+	id: number
+	name: string
+	displayName: string
+	level: number
+	description?: string
+	isSystemRole: boolean
+	createdAt: string
+	updatedAt: string
+	rolePermissions?: RolePermission[]
+}
+
+export interface Permission {
+	id: number
+	resource: string
+	action: string
+	context?: string
+	description?: string
+	permissionString?: string
+	rolePermissions?: RolePermission[]
+}
+
+export interface RolePermission {
+	roleId: number
+	permissionId: number
+	role?: Role
+	permission?: Permission
+}
+
+export interface CreateRoleRequest {
+	name: string
+	displayName: string
+	level: number
+	description?: string
+	isSystemRole?: boolean
+}
+
+export interface UpdateRoleRequest {
+	name: string
+	displayName: string
+	level: number
+	description?: string
+	isSystemRole?: boolean
+}
+
+export interface CreatePermissionRequest {
+	resource: string
+	action: string
+	context?: string
+	description?: string
+}
+
+export interface UpdatePermissionRequest {
+	resource: string
+	action: string
+	context?: string
+	description?: string
+}
 

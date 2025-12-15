@@ -20,7 +20,8 @@ import {
 	ChevronLeft,
 	Check,
 	X,
-	Info
+	Info,
+	Edit
 } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
@@ -314,6 +315,11 @@ export default function RBACRolesPage() {
 
 			{/* Quick Links */}
 			<div className="mt-8 flex flex-wrap gap-4">
+				<Link href={Routes.RBAC.rolesManage}>
+					<Button variant="primary" size="sm" leftIcon={<Edit className="w-4 h-4" />}>
+						Manage Roles
+					</Button>
+				</Link>
 				<Link href={Routes.RBAC.permissions}>
 					<Button variant="outline" size="sm" leftIcon={<Lock className="w-4 h-4" />}>
 						View Permissions Matrix

@@ -17,7 +17,8 @@ import {
 	Check,
 	X,
 	Filter,
-	Info
+	Info,
+	Edit
 } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
@@ -296,11 +297,18 @@ export default function RBACPermissionsPage() {
 				title="Permission Matrix"
 				description="Complete overview of permissions by role"
 				actions={
+					<div className="flex items-center gap-2">
+						<Link href={Routes.RBAC.permissionsManage}>
+							<Button variant="primary" size="sm" leftIcon={<Edit className="w-4 h-4" />}>
+								Manage Permissions
+							</Button>
+						</Link>
 					<Link href={Routes.RBAC.location}>
-						<Button variant="ghost" leftIcon={<ChevronLeft className="w-4 h-4" />}>
+							<Button variant="ghost" size="sm" leftIcon={<ChevronLeft className="w-4 h-4" />}>
 							Back to RBAC
 						</Button>
 					</Link>
+					</div>
 				}
 			/>
 

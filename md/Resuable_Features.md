@@ -144,6 +144,27 @@ Below is a categorized list of reusable items. Each item links to a brief descri
     - [_components/navigation/NavigationIcon.tsx](#desc-navigation-icon)
     - [_components/navigation/Sidebar.tsx](#desc-sidebar)
 
+- Features: RBAC (Role-Based Access Control)
+  - Components
+    - [app/rbac/_components/AccessDenied.tsx](#desc-rbac-access-denied)
+    - [app/rbac/_components/LoadingState.tsx](#desc-rbac-loading-state)
+    - [app/rbac/_components/FormFooter.tsx](#desc-rbac-form-footer)
+    - [app/rbac/_components/RoleCard.tsx](#desc-rbac-role-card)
+    - [app/rbac/_components/PermissionItem.tsx](#desc-rbac-permission-item)
+    - [app/rbac/_components/RoleFormModal.tsx](#desc-rbac-role-form-modal)
+    - [app/rbac/_components/PermissionFormModal.tsx](#desc-rbac-permission-form-modal)
+    - [app/rbac/_components/PermissionSelector.tsx](#desc-rbac-permission-selector)
+    - [app/rbac/_components/RolePermissionsModal.tsx](#desc-rbac-role-permissions-modal)
+  - Hooks
+    - [app/rbac/_hooks/useCRUDEntity.ts](#desc-rbac-use-crud-entity)
+    - [app/rbac/_hooks/useRoles.ts](#desc-rbac-use-roles)
+    - [app/rbac/_hooks/usePermissions.ts](#desc-rbac-use-permissions-data)
+    - [app/rbac/_hooks/useRolePermissions.ts](#desc-rbac-use-role-permissions)
+  - Utils
+    - [app/rbac/_utils/permissionUtils.ts](#desc-rbac-permission-utils)
+    - [app/rbac/_utils/confirmationUtils.ts](#desc-rbac-confirmation-utils)
+    - [app/rbac/_utils/arrayUtils.ts](#desc-rbac-array-utils)
+
 - Features: Images
   - [_features/images/index.ts](#desc-images-index)
   - Services
@@ -900,6 +921,56 @@ Server-backed table state helpers (pagination/sort/filter).
 #### _shared/hooks/useBreadcrumbs.ts {#desc-use-breadcrumbs}
 Auto-generates breadcrumbs from pathname and user role for internal application pages. Wraps BreadcrumbService.generateBreadcrumbs with memoization via useMemo (only recalculates when pathname or user.role changes). Reads current pathname from Next.js usePathname() hook and user role from useAuthStore. Accepts optional customPathname parameter for edge cases. Returns array of BreadcrumbItem (typed from @_types/navigation). Features: auto-generation from current route, role-based filtering (Admin vs Customer via BreadcrumbService), dynamic route handling ([id] → "Order #123"), performance optimized (memoized), type-safe, SSR-compatible. Used exclusively for internal app pages (/app/*). Public pages define items manually. Pattern: Hook provides data (application layer), Breadcrumb component renders UI (presentation layer) - Separation of Concerns. Benefits: zero breadcrumb generation logic in components, consistent behavior across internal pages, single source of truth (BreadcrumbService), eliminates 150 lines of deprecated breadcrumbGenerator utilities.
 
+
+### Features: RBAC (Role-Based Access Control)
+
+#### app/rbac/_components/AccessDenied.tsx {#desc-rbac-access-denied}
+Reusable access denied component for RBAC pages. Displays standardized message when user lacks admin permissions. Pure presentation component with customizable title and description props.
+
+#### app/rbac/_components/LoadingState.tsx {#desc-rbac-loading-state}
+Standardized loading indicator component for RBAC pages. Displays spinner with customizable message. Pure presentation component.
+
+#### app/rbac/_components/FormFooter.tsx {#desc-rbac-form-footer}
+Reusable modal footer with Cancel and Save buttons. Handles loading states and provides consistent footer UI across all RBAC modals. Pure presentation component with callbacks.
+
+#### app/rbac/_components/RoleCard.tsx {#desc-rbac-role-card}
+Displays a single role with its details and action buttons (Edit, Delete, Permissions). Shows role level, system role badge, and description. Pure presentation component with callbacks.
+
+#### app/rbac/_components/PermissionItem.tsx {#desc-rbac-permission-item}
+Displays a single permission with edit/delete actions. Shows formatted permission string and description. Pure presentation component with callbacks.
+
+#### app/rbac/_components/RoleFormModal.tsx {#desc-rbac-role-form-modal}
+Complete role create/edit form modal. Manages its own form state, handles validation, and provides save/cancel actions. Client component with 'use client' directive. Optimized with useCallback and useMemo per Next.js 16 best practices.
+
+#### app/rbac/_components/PermissionFormModal.tsx {#desc-rbac-permission-form-modal}
+Complete permission create/edit form modal. Manages its own form state, handles validation, and provides save/cancel actions. Client component with 'use client' directive. Optimized with useCallback and useMemo per Next.js 16 best practices.
+
+#### app/rbac/_components/PermissionSelector.tsx {#desc-rbac-permission-selector}
+Permission selection UI grouped by resource. Reusable for any permission selection scenario. Uses memoized grouping for performance. Client component with 'use client' directive.
+
+#### app/rbac/_components/RolePermissionsModal.tsx {#desc-rbac-role-permissions-modal}
+Complete role-permission assignment interface. Uses PermissionSelector internally and FormFooter for consistent UI. Client component with 'use client' directive. Optimized with useCallback and useMemo.
+
+#### app/rbac/_hooks/useCRUDEntity.ts {#desc-rbac-use-crud-entity}
+Generic CRUD entity hook for managing any entity type. Eliminates duplication between useRoles and usePermissionsData. Provides standardized create, read, update, delete operations with consistent error handling and notifications. Reusable for any CRUD entity type across the application.
+
+#### app/rbac/_hooks/useRoles.ts {#desc-rbac-use-roles}
+Custom hook for managing roles data and operations. Built on top of useCRUDEntity for DRY compliance. Wraps generic CRUD with role-specific logic (system role deletion protection). Uses useMemo to stabilize API service object.
+
+#### app/rbac/_hooks/usePermissions.ts {#desc-rbac-use-permissions-data}
+Custom hook for managing permissions data and operations. Built on top of useCRUDEntity for DRY compliance. Named usePermissionsData to avoid conflict with usePermissions from @_shared. Uses useMemo to stabilize API service object.
+
+#### app/rbac/_hooks/useRolePermissions.ts {#desc-rbac-use-role-permissions}
+Custom hook for managing role-permission assignments. Handles fetching and bulk assignment of permissions to roles. Uses useCallback for optimized callbacks.
+
+#### app/rbac/_utils/permissionUtils.ts {#desc-rbac-permission-utils}
+Shared utilities for formatting and grouping permissions. Functions: formatPermissionString (full permission string), formatPermissionDisplay (action:context format), groupPermissionsByResource (grouping logic). Pure functions with no side effects.
+
+#### app/rbac/_utils/confirmationUtils.ts {#desc-rbac-confirmation-utils}
+Shared utilities for confirmation dialogs. Functions: confirmAction (generic confirmation), confirmDelete (entity deletion confirmation). Centralized confirmation logic, easier to replace with custom modal later.
+
+#### app/rbac/_utils/arrayUtils.ts {#desc-rbac-array-utils}
+Shared utilities for array operations. Function: toggleArrayItem (toggles item in array - add if missing, remove if present). Pure function, reusable for any array toggle operation.
 
 ### Lib / Helpers / Scripts
 

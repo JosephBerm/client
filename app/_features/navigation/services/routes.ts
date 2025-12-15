@@ -327,10 +327,14 @@ class Routes {
 		location: `${Routes.InternalAppRoute}/rbac`,
 		/** Roles management page */
 		roles: `${Routes.InternalAppRoute}/rbac/roles`,
+		/** Role management page (CRUD) */
+		rolesManage: `${Routes.InternalAppRoute}/rbac/roles/manage`,
 		/** Users role assignment page */
 		users: `${Routes.InternalAppRoute}/rbac/users`,
 		/** Permissions matrix page */
 		permissions: `${Routes.InternalAppRoute}/rbac/permissions`,
+		/** Permission management page (CRUD) */
+		permissionsManage: `${Routes.InternalAppRoute}/rbac/permissions/manage`,
 		/** Audit logs page */
 		audit: `${Routes.InternalAppRoute}/rbac/audit`,
 		/**
