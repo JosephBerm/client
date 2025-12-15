@@ -68,19 +68,19 @@ const mockSendQuote = vi.fn()
 const mockGetProduct = vi.fn()
 
 vi.mock('@_shared', async () => {
-  const actual = await vi.importActual('@_shared')
+  const actual = await vi.importActual('@_shared') as typeof import('@_shared')
   return {
     ...actual,
     API: {
       ...actual.API,
       Public: {
-        ...actual.API?.Public,
+        ...(actual.API?.Public || {}),
         sendQuote: mockSendQuote,
       },
       Store: {
-        ...actual.API?.Store,
+        ...(actual.API?.Store || {}),
         Products: {
-          ...actual.API?.Store?.Products,
+          ...(actual.API?.Store?.Products || {}),
           get: mockGetProduct,
         },
       },
@@ -295,6 +295,7 @@ describe('useCartPageLogic - Quote Submission', () => {
       vi.mocked(referralTracking.getStoredReferral).mockReturnValue({
         referredBy: 'salesrep@example.com',
         source: 'url',
+        capturedAt: new Date().toISOString(),
       })
 
       const formData: QuoteFormData = new QuoteFormDataBuilder()

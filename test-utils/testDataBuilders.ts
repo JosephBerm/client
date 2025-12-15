@@ -22,7 +22,7 @@
  * ```
  */
 
-import Product from '@_classes/Product'
+import { Product } from '@_classes/Product'
 import Quote from '@_classes/Quote'
 import Name from '@_classes/common/Name'
 import Address from '@_classes/common/Address'
@@ -42,7 +42,6 @@ export class ProductBuilder {
     sku: 'TEST-001',
     price: 99.99,
     stock: 10,
-    quantity: 10, // Legacy field
     category: 'PPE',
     description: 'Test product description',
     manufacturer: 'Test Manufacturer',
@@ -72,7 +71,6 @@ export class ProductBuilder {
 
   withStock(stock: number): this {
     this.product.stock = stock
-    this.product.quantity = stock // Legacy field
     return this
   }
 
@@ -103,7 +101,6 @@ export class ProductBuilder {
 
   withZeroStock(): this {
     this.product.stock = 0
-    this.product.quantity = 0
     return this
   }
 
@@ -390,15 +387,15 @@ export class NameBuilder {
  */
 export class AddressBuilder {
   private address: Partial<Address> = {
-    street: '123 Test Street',
+    addressOne: '123 Test Street',
     city: 'Austin',
     state: 'TX',
-    zip: '78701',
+    zipCode: '78701',
     country: 'USA',
   }
 
   withStreet(street: string): this {
-    this.address.street = street
+    this.address.addressOne = street
     return this
   }
 
@@ -413,7 +410,7 @@ export class AddressBuilder {
   }
 
   withZip(zip: string): this {
-    this.address.zip = zip
+    this.address.zipCode = zip
     return this
   }
 
@@ -423,7 +420,7 @@ export class AddressBuilder {
   }
 
   withEmptyStreet(): this {
-    this.address.street = ''
+    this.address.addressOne = ''
     return this
   }
 

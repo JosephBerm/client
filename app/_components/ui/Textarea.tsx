@@ -66,7 +66,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 		ref
 	) => {
 		const hasHelperText = Boolean(helperText || errorMessage)
-		const isDisabled = disabled
+		const isDisabled = Boolean(disabled)
 
 		const helperId = id ? `${id}-helper` : undefined
 		const errorId = id ? `${id}-error` : undefined

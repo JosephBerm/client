@@ -21,7 +21,7 @@
 
 import { http, HttpResponse } from 'msw'
 import type { ApiResponse } from '@_shared/services/httpService'
-import type Product from '@_classes/Product'
+import type { Product } from '@_classes/Product'
 import type Quote from '@_classes/Quote'
 
 // ============================================================================
@@ -37,7 +37,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5254/a
 /**
  * Creates a success API response.
  */
-function createSuccessResponse<T>(data: T, message: string = 'success'): HttpResponse {
+function createSuccessResponse<T>(data: T, message: string = 'success') {
   const apiResponse: ApiResponse<T> = {
     payload: data,
     message,
@@ -50,7 +50,7 @@ function createSuccessResponse<T>(data: T, message: string = 'success'): HttpRes
 /**
  * Creates an error API response.
  */
-function createErrorResponse(message: string, statusCode: number = 400): HttpResponse {
+function createErrorResponse(message: string, statusCode: number = 400) {
   const apiResponse: ApiResponse<null> = {
     payload: null,
     message,
@@ -201,10 +201,10 @@ export const handlers = [
   // Contact Form Submission (Public)
   // ==========================================================================
   http.post(`${API_BASE_URL}/contact`, async ({ request }) => {
-    const contactRequest = await request.json()
+    const contactRequest = await request.json() as { email?: string; message?: string } | null
     
     // Basic validation
-    if (!contactRequest.email || !contactRequest.message) {
+    if (!contactRequest || !contactRequest.email || !contactRequest.message) {
       return createErrorResponse('Email and message are required', 400)
     }
     
@@ -226,9 +226,13 @@ export const handlers = [
   }),
 
   http.post(`${API_BASE_URL}/account/signup`, async ({ request }) => {
-    const signupData = await request.json()
+    const signupData = await request.json() as { email?: string; firstName?: string; lastName?: string } | null
     
     // Mock successful signup
+    if (!signupData || !signupData.email || !signupData.firstName || !signupData.lastName) {
+      return createErrorResponse('Email, first name, and last name are required', 400)
+    }
+    
     return createSuccessResponse(
       {
         id: 1,

@@ -101,11 +101,6 @@ export default defineConfig({
     
     // Parallel execution
     pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: false,
-      },
-    },
     
     // Reporter configuration
     reporters: ['verbose', 'json', 'html'],
