@@ -213,6 +213,8 @@ export default class Quote {
 			if (param.assignedAt) {
 				this.assignedAt = parseDateSafe(param.assignedAt) ?? undefined
 			}
+			
+			// Copy assignment tracking fields
 		}
 	}
 	

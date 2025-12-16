@@ -70,6 +70,12 @@ export const ERROR_MESSAGES: Record<string, string> = {
 	'password_missing_lowercase': 'Password must contain a lowercase letter.',
 	'password_missing_number': 'Password must contain a number.',
 	'password_missing_special': 'Password must contain a special character.',
+	// Backend password validation keys (used by AccountController.ValidatePasswordStrength)
+	'password_needs_uppercase': 'Password must contain at least one uppercase letter.',
+	'password_needs_lowercase': 'Password must contain at least one lowercase letter.',
+	'password_needs_number': 'Password must contain at least one number.',
+	'password_needs_special_char': 'Password must contain at least one special character.',
+	'password_is_not_valid': 'Password does not meet security requirements. Please ensure it has at least 8 characters, includes uppercase and lowercase letters, a number, and a special character.',
 	'password_reset_failed': 'Failed to reset password. Please try again.',
 	'current_password_incorrect': 'Current password is incorrect.',
 	

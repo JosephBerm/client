@@ -47,6 +47,7 @@
  */
 
 import type CustomerSummary from '@_classes/Base/CustomerSummary'
+import type { AccountRole } from '@_classes/Enums'
 
 /**
  * Role distribution statistics returned by RBAC dashboard API.
@@ -169,15 +170,96 @@ const API = {
 			HttpService.put<boolean>('/account/admin/reset-password', { userId: parseInt(userId, 10), newPassword }),
 		
 		/**
+		 * Gets all sales representatives and sales managers (for quote assignment).
+		 * 
+		 * **DEPRECATED:** Use `search()` with Role filter instead for better scalability.
+		 * This method is kept for backward compatibility but will be removed in future versions.
+		 * 
+		 * @deprecated Use `API.Accounts.search({ Filters: { Role: '100|200' } })` instead
+		 * @see search - Centralized, scalable solution for all account filtering needs
+		 */
+		getSalesReps: async () => HttpService.get<User[]>('/account/sales-reps'),
+
+		/**
+		 * Gets accounts by role list (defaults to SalesRep + SalesManager).
+		 * Uses backend AccountService.GetByRole for server-side filtering.
+		 *
+		 * @param roles - Array of AccountRole enum values or numeric role ids
+		 */
+		getByRole: async (roles?: Array<AccountRole | number>) => {
+			const roleParam = roles?.length ? `?roles=${encodeURIComponent(roles.join('|'))}` : ''
+			return HttpService.get<User[]>(`/account/by-role${roleParam}`)
+		},
+		
+		/**
 		 * Gets all user accounts (admin only).
 		 * @returns Array of all users
 		 */
 		getAll: async () => HttpService.get<User[]>('/account/all'),
 		
 		/**
-		 * Searches users with pagination and filtering.
-		 * @param search - Search filter with page, pageSize, sortBy, etc.
+		 * Centralized account search with flexible filtering, pagination, and sorting.
+		 * 
+		 * **MAANG-Level Centralized Solution:**
+		 * - Single endpoint for all account filtering needs
+		 * - Server-side filtering for scalability (handles thousands of users efficiently)
+		 * - Supports filtering by Role (single or array), Id (single or array), Email, Username, Name, CustomerId
+		 * - Supports pagination for large result sets
+		 * - Supports custom sorting
+		 * - **Type-safe: Uses AccountRole enum values (no magic numbers)**
+		 * 
+		 * **Supported Filters (via GenericSearchFilter.filters dictionary):**
+		 * - **Role**: Single role or pipe-separated roles using AccountRole enum values (type-safe)
+		 *   - Type-safe: Use AccountRole enum values (e.g., `${AccountRole.SalesRep}|${AccountRole.SalesManager}`)
+		 *   - Example: `{ filters: { Role: `${AccountRole.SalesRep}|${AccountRole.SalesManager}` } }` returns SalesRep OR SalesManager
+		 *   - Validates enum values at runtime (invalid values are ignored)
+		 *   - Supports all AccountRole values: Customer (0), SalesRep (100), SalesManager (200), FulfillmentCoordinator (300), Admin (9999999)
+		 * - **Id**: Single ID or pipe-separated IDs (e.g., "1|2|3" for multiple users)
+		 *   - Example: `{ filters: { Id: "1|2|3" } }` returns users with ID 1, 2, or 3
+		 * - **Email**: Contains search (case-insensitive)
+		 * - **Username**: Contains search (case-insensitive)
+		 * - **Name.First**: Contains search on first name
+		 * - **Name.Last**: Contains search on last name
+		 * - **CustomerId**: Exact match for customer ID
+		 * 
+		 * **Pagination:**
+		 * - Use `page` and `pageSize` in GenericSearchFilter
+		 * - Default: Page 1, PageSize 10
+		 * 
+		 * **Sorting:**
+		 * - Use `sortBy` (property name) and `sortOrder` ("asc" or "desc")
+		 * - Default: Role (descending), then Name (ascending)
+		 * 
+		 * @param search - Search filter with filters, pagination, and sorting options
 		 * @returns Paginated user results
+		 * 
+		 * @example
+		 * ```typescript
+		 * import { AccountRole } from '@_classes/Enums'
+		 * 
+		 * // Get all SalesReps and SalesManagers (for quote assignment)
+		 * // MAANG-Level: Uses AccountRole enum values (type-safe, no magic numbers)
+		 * const { data } = await API.Accounts.search({
+		 *   filters: { 
+		 *     Role: `${AccountRole.SalesRep}|${AccountRole.SalesManager}` 
+		 *   },
+		 *   sortBy: "Role",
+		 *   sortOrder: "desc",
+		 *   page: 1,
+		 *   pageSize: 50
+		 * });
+		 * const salesReps = data.payload?.data ?? [];
+		 * 
+		 * // Get specific users by ID
+		 * const { data } = await API.Accounts.search({
+		 *   filters: { Id: "1|2|3" }
+		 * });
+		 * 
+		 * // Search by email
+		 * const { data } = await API.Accounts.search({
+		 *   filters: { Email: "john" }
+		 * });
+		 * ```
 		 */
 		search: async (search: GenericSearchFilter) =>
 			HttpService.post<PagedResult<User>>(`/account/search`, search),

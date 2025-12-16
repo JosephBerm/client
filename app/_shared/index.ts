@@ -88,6 +88,14 @@ export {
 	hasTranslation,
 } from './utils/errorMessages'
 
+// User Helpers
+export {
+	filterUsersByRole,
+	sortUsersByRoleAndName,
+	transformUsersToSelectOptions,
+	getUserDisplayName,
+} from './utils/userHelpers'
+
 // ============================================================================
 // CLIENT SERVICES (All have 'use client' directive)
 // ============================================================================

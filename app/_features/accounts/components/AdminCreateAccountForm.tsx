@@ -205,8 +205,15 @@ export default function AdminCreateAccountForm({
 				onSuccess?.(data.payload)
 			} else {
 				// Translate backend message keys to user-friendly messages
+				// Provide helpful fallback for password errors
+				const errorMessage = data.message
+				const isPasswordError = errorMessage?.toLowerCase().includes('password')
+				const fallbackMessage = isPasswordError
+					? 'Password does not meet security requirements. Please ensure it has at least 8 characters, includes uppercase and lowercase letters, a number, and a special character.'
+					: 'Failed to create account. Please try again.'
+				
 				notificationService.error(
-					translateError(data.message, 'Failed to create account. Please try again.'),
+					translateError(errorMessage, fallbackMessage),
 					{ component: 'AdminCreateAccountForm', action: 'create' }
 				)
 			}

@@ -74,3 +74,11 @@ export {
 	getAvailableErrorKeys,
 } from './errorMessages'
 
+// User Helpers
+export {
+	filterUsersByRole,
+	sortUsersByRoleAndName,
+	transformUsersToSelectOptions,
+	getUserDisplayName,
+} from './userHelpers'
+
