@@ -103,6 +103,7 @@ import type { PagedData } from '@_classes/PagedData'
 import type { Product } from '@_classes/Product'
 import type ProductsCategory from '@_classes/ProductsCategory'
 import type Quote from '@_classes/Quote'
+import type { CreateQuoteRequest, CreateQuoteResponse } from './api.types'
 import type { SubmitOrderRequest } from '@_classes/RequestClasses'
 import type UploadedFile from '@_classes/UploadedFile'
 import type User from '@_classes/User'
@@ -700,9 +701,14 @@ const API = {
 	Public: {
 		/**
 		 * Submits a quote request from public website.
-		 * @param quote - Quote request data
+		 * Uses CreateQuoteRequest DTO for clean API contract.
+		 * Backend has [AllowAnonymous] on the create endpoint.
+		 * 
+		 * @param request - Quote request DTO (not the Quote entity)
+		 * @returns CreateQuoteResponse with quote ID and reference number
 		 */
-		sendQuote: async (quote: Quote) => HttpService.post<Quote>('/quotes', quote),
+		sendQuote: async (request: CreateQuoteRequest) => 
+			HttpService.post<CreateQuoteResponse>('/quotes', request),
 		
 		/**
 		 * Submits a contact form request from public website.
