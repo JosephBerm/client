@@ -569,6 +569,91 @@ const API = {
 		downloadFinanceNumbers: async (search: FinanceSearchFilter) =>
 			HttpService.download<Blob>('/finance/orders/download', search, { responseType: 'blob' }),
 	},
+
+	/**
+	 * RBAC (Role-Based Access Control) API
+	 * Handles roles, permissions, and role-permission assignments.
+	 * ADMIN ONLY: All RBAC operations require administrative privileges.
+	 */
+	RBAC: {
+		/**
+		 * Gets all roles with their permissions loaded.
+		 */
+		getAllRoles: async () => HttpService.get<import('../../app/rbac/_types').Role[]>('/rbac/roles'),
+
+		/**
+		 * Gets a single role by ID.
+		 */
+		getRole: async (id: number) => HttpService.get<import('../../app/rbac/_types').Role>(`/rbac/roles/${id}`),
+
+		/**
+		 * Creates a new role.
+		 */
+		createRole: async (request: import('../../app/rbac/_types').CreateRoleRequest) =>
+			HttpService.post<import('../../app/rbac/_types').Role>('/rbac/roles', request),
+
+		/**
+		 * Updates an existing role.
+		 */
+		updateRole: async (id: number, request: import('../../app/rbac/_types').UpdateRoleRequest) =>
+			HttpService.put<import('../../app/rbac/_types').Role>(`/rbac/roles/${id}`, request),
+
+		/**
+		 * Deletes a role (cannot delete system roles).
+		 */
+		deleteRole: async (id: number) => HttpService.delete(`/rbac/roles/${id}`),
+
+		/**
+		 * Gets all permissions.
+		 */
+		getAllPermissions: async () => HttpService.get<import('../../app/rbac/_types').Permission[]>('/rbac/permissions'),
+
+		/**
+		 * Gets a single permission by ID.
+		 */
+		getPermission: async (id: number) => HttpService.get<import('../../app/rbac/_types').Permission>(`/rbac/permissions/${id}`),
+
+		/**
+		 * Creates a new permission.
+		 */
+		createPermission: async (request: import('../../app/rbac/_types').CreatePermissionRequest) =>
+			HttpService.post<import('../../app/rbac/_types').Permission>('/rbac/permissions', request),
+
+		/**
+		 * Updates an existing permission.
+		 */
+		updatePermission: async (id: number, request: import('../../app/rbac/_types').UpdatePermissionRequest) =>
+			HttpService.put<import('../../app/rbac/_types').Permission>(`/rbac/permissions/${id}`, request),
+
+		/**
+		 * Deletes a permission.
+		 */
+		deletePermission: async (id: number) => HttpService.delete(`/rbac/permissions/${id}`),
+
+		/**
+		 * Gets all permissions assigned to a role.
+		 */
+		getRolePermissions: async (roleId: number) =>
+			HttpService.get<import('../../app/rbac/_types').Permission[]>(`/rbac/roles/${roleId}/permissions`),
+
+		/**
+		 * Assigns a permission to a role.
+		 */
+		assignPermissionToRole: async (roleId: number, permissionId: number) =>
+			HttpService.post<boolean>(`/rbac/roles/${roleId}/permissions/${permissionId}`, {}),
+
+		/**
+		 * Removes a permission from a role.
+		 */
+		removePermissionFromRole: async (roleId: number, permissionId: number) =>
+			HttpService.delete(`/rbac/roles/${roleId}/permissions/${permissionId}`),
+
+		/**
+		 * Bulk assigns multiple permissions to a role (replaces existing).
+		 */
+		bulkAssignPermissions: async (roleId: number, request: import('../../app/rbac/_types').BulkAssignPermissionsRequest) =>
+			HttpService.post(`/rbac/roles/${roleId}/permissions/bulk`, request),
+	},
 }
 
 export default API
