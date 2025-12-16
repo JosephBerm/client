@@ -35,11 +35,11 @@ export {
 } from './notification.service'
 
 // API Types - DTOs for backend contract alignment
+// Note: ApiResponse is exported from httpService above, not re-exported from api.types
 export type {
 	CreateQuoteRequest,
 	QuoteItemRequest,
 	CreateQuoteResponse,
-	ApiResponse,
 	PagedResponse,
 } from './api.types'
 

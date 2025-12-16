@@ -127,6 +127,14 @@ export {
 	type NotificationResult,
 } from './services/notification.service'
 
+// API Types - DTOs for backend contract alignment
+export type {
+	CreateQuoteRequest,
+	QuoteItemRequest,
+	CreateQuoteResponse,
+	PagedResponse,
+} from './services/api.types'
+
 // ============================================================================
 // CLIENT HOOKS (All have 'use client' directive)
 // ============================================================================
