@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { MessageSquare } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
+import { COMPANY_CONTACT } from '@_lib'
 
 import { isBusinessOpen, getGroupedBusinessHours } from '@_shared/utils/businessHours'
 
@@ -93,22 +94,8 @@ import StatusDot from '@_components/ui/StatusDot'
  * - Progressive web app features
  */
 
-/** Contact information configuration - centralized for easy updates */
-const CONTACT_INFO = {
-	phone: {
-		display: '(786) 578-2145',
-		href: 'tel:+17865782145',
-		formatted: '+1-786-578-2145', // For schema.org
-	},
-	email: {
-		display: 'support@medsourcepro.com',
-		href: 'mailto:support@medsourcepro.com',
-	},
-	hours: {
-		response: '2 hours',
-		emergency: '24/7',
-	},
-} as const
+// Contact information is now centralized in @_lib/constants/company
+// Import COMPANY_CONTACT for single source of truth
 
 export default function ContactUs() {
 	const router = useRouter()
@@ -172,14 +159,14 @@ export default function ContactUs() {
 					<ContactMethodCard
 						type="phone"
 						title="Call Us"
-						mainText={CONTACT_INFO.phone.display}
+						mainText={COMPANY_CONTACT.phone.display}
 						description={
 							<>
 								Speak directly with a sourcing specialist in{' '}
 								<span className="font-medium text-primary">real time</span>.
 							</>
 						}
-						href={CONTACT_INFO.phone.href}
+						href={COMPANY_CONTACT.phone.href}
 						itemProp="telephone"
 					/>
 				</StaggerItem>
@@ -189,9 +176,9 @@ export default function ContactUs() {
 					<ContactMethodCard
 						type="email"
 						title="Email Support"
-						mainText={CONTACT_INFO.email.display}
+						mainText={COMPANY_CONTACT.email.display}
 						description="Share requirements or RFQs and receive a tailored response."
-						href={CONTACT_INFO.email.href}
+						href={COMPANY_CONTACT.email.href}
 						itemProp="email"
 					/>
 				</StaggerItem>
@@ -254,11 +241,11 @@ export default function ContactUs() {
 							<ul className="space-y-2.5 text-sm text-base-content/70">
 								<li className="flex items-start gap-3">
 									<CheckIcon className="h-4 w-4 shrink-0 text-success mt-0.5" aria-hidden="true" />
-									<span>Average response: {CONTACT_INFO.hours.response} during business hours</span>
+									<span>Average response: {COMPANY_CONTACT.responseTime.standard} during business hours</span>
 								</li>
 								<li className="flex items-start gap-3">
 									<CheckIcon className="h-4 w-4 shrink-0 text-success mt-0.5" aria-hidden="true" />
-									<span>Emergency support available {CONTACT_INFO.hours.emergency}</span>
+									<span>Emergency support available {COMPANY_CONTACT.responseTime.emergency}</span>
 								</li>
 								<li className="flex items-start gap-3">
 									<CheckIcon className="h-4 w-4 shrink-0 text-success mt-0.5" aria-hidden="true" />

@@ -185,7 +185,9 @@ export function trackContactCTA(
  * 
  * @example
  * ```typescript
- * trackPhoneClick('(786) 578-2145', 'contact_section');
+ * import { COMPANY_CONTACT } from '@_lib'
+ * 
+ * trackPhoneClick(COMPANY_CONTACT.phone.display, 'contact_section');
  * ```
  */
 export function trackPhoneClick(phoneNumber: string, location: string): void {
@@ -207,7 +209,9 @@ export function trackPhoneClick(phoneNumber: string, location: string): void {
  * 
  * @example
  * ```typescript
- * trackEmailClick('support@medsourcepro.com', 'contact_section');
+ * import { COMPANY_CONTACT } from '@_lib'
+ * 
+ * trackEmailClick(COMPANY_CONTACT.email.display, 'contact_section');
  * ```
  */
 export function trackEmailClick(email: string, location: string): void {
