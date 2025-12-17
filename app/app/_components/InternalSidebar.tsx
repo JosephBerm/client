@@ -375,7 +375,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 			ref={sidebarRef}
 			aria-label="Internal application navigation"
 			className={classNames(
-					'bg-base-200 border-r border-base-300 overflow-y-auto',
+					'bg-base-200 border-r border-base-300',
 					// Desktop: Fixed position, always visible
 					'lg:fixed lg:top-0 lg:left-0 lg:h-screen lg:w-96',
 					// Mobile: Fixed position, drawer style
