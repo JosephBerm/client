@@ -27,6 +27,11 @@
 
 import Modal from '@_components/ui/Modal'
 
+// Phase 1: Account status modals
+import AccountLockedModal from '@_components/modals/AccountLockedModal'
+import AccountSuspendedModal from '@_components/modals/AccountSuspendedModal'
+import EmailVerificationModal from '@_components/modals/EmailVerificationModal'
+
 import AuthModalHeader from './AuthModalHeader'
 import SocialLoginButtons from './SocialLoginButtons'
 import AuthDivider from './AuthDivider'
@@ -68,63 +73,92 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 		handleSwitchToSignup,
 		handleSwitchToLogin,
 		handleClose,
+		// Phase 1: Account status modal states
+		showLockedModal,
+		setShowLockedModal,
+		showSuspendedModal,
+		setShowSuspendedModal,
+		showVerificationModal,
+		setShowVerificationModal,
+		userEmail,
 	} = useAuthModal({ onClose, onLoginSuccess })
 
 	return (
-		<Modal
-			isOpen={isOpen}
-			onClose={handleClose}
-			size='sm'
-			closeOnOverlayClick={true}
-			closeOnEscape={true}
-		>
-			<div className={LAYOUT_CLASSES.MODAL_CONTAINER}>
-				{/* Header with navigation controls */}
-				<AuthModalHeader
-					currentView={currentView}
-					onSwitchToLogin={handleSwitchToLogin}
-					onClose={handleClose}
-				/>
-
-				{/* Subtitle */}
-				<p className={LAYOUT_CLASSES.SUBTITLE}>
-					{MODAL_SUBTITLES[currentView]}
-				</p>
-
-				{/* Login View */}
-				{currentView === 'login' && (
-					<>
-						{/* Social login options */}
-						<SocialLoginButtons
-							isHidden={showEmailForm}
-							onSocialLogin={handleSocialLogin}
-						/>
-
-						{/* Divider */}
-						<AuthDivider isHidden={showEmailForm} />
-
-						{/* Email/password form */}
-						<LoginForm
-							form={loginForm}
-							isLoading={isLoading}
-							showPasswordField={showEmailForm}
-							onSubmit={handleLoginFormSubmit}
-							onSwitchToSignup={handleSwitchToSignup}
-						/>
-					</>
-				)}
-
-				{/* Signup View */}
-				{currentView === 'signup' && (
-					<SignupForm
-						form={signupForm}
-						isLoading={isLoading}
-						onSubmit={handleSignupFormSubmit}
+		<>
+			{/* Main Authentication Modal */}
+			<Modal
+				isOpen={isOpen}
+				onClose={handleClose}
+				size='sm'
+				closeOnOverlayClick={true}
+				closeOnEscape={true}
+			>
+				<div className={LAYOUT_CLASSES.MODAL_CONTAINER}>
+					{/* Header with navigation controls */}
+					<AuthModalHeader
+						currentView={currentView}
 						onSwitchToLogin={handleSwitchToLogin}
+						onClose={handleClose}
 					/>
-				)}
-			</div>
-		</Modal>
+
+					{/* Subtitle */}
+					<p className={LAYOUT_CLASSES.SUBTITLE}>
+						{MODAL_SUBTITLES[currentView]}
+					</p>
+
+					{/* Login View */}
+					{currentView === 'login' && (
+						<>
+							{/* Social login options */}
+							<SocialLoginButtons
+								isHidden={showEmailForm}
+								onSocialLogin={handleSocialLogin}
+							/>
+
+							{/* Divider */}
+							<AuthDivider isHidden={showEmailForm} />
+
+							{/* Email/password form */}
+							<LoginForm
+								form={loginForm}
+								isLoading={isLoading}
+								showPasswordField={showEmailForm}
+								onSubmit={handleLoginFormSubmit}
+								onSwitchToSignup={handleSwitchToSignup}
+							/>
+						</>
+					)}
+
+					{/* Signup View */}
+					{currentView === 'signup' && (
+						<SignupForm
+							form={signupForm}
+							isLoading={isLoading}
+							onSubmit={handleSignupFormSubmit}
+							onSwitchToLogin={handleSwitchToLogin}
+						/>
+					)}
+				</div>
+			</Modal>
+
+			{/* Phase 1: Account Status Modals */}
+			{/* These appear when login fails due to account status */}
+			<AccountLockedModal
+				isOpen={showLockedModal}
+				onClose={() => setShowLockedModal(false)}
+			/>
+
+			<AccountSuspendedModal
+				isOpen={showSuspendedModal}
+				onClose={() => setShowSuspendedModal(false)}
+			/>
+
+			<EmailVerificationModal
+				isOpen={showVerificationModal}
+				onClose={() => setShowVerificationModal(false)}
+				email={userEmail}
+			/>
+		</>
 	)
 }
 

@@ -23,8 +23,10 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 
 import { login, signup, useAuthStore, useAuthRedirect } from '@_features/auth'
+import { Routes } from '@_features/navigation'
 
 import type { LoginFormData, SignupFormData } from '@_core'
 import { loginSchema, signupSchema, logger } from '@_core'
@@ -46,6 +48,17 @@ import type {
 	SocialProvider,
 	UseAuthModalReturn,
 } from './LoginModal.types'
+
+/**
+ * Account status error messages from backend (Phase 1)
+ * These match the backend AccountController error messages
+ */
+const ACCOUNT_STATUS_ERRORS = {
+	LOCKED: 'account_locked',
+	SUSPENDED: 'account_suspended',
+	VERIFICATION_REQUIRED: 'email_verification_required',
+	FORCE_PASSWORD_CHANGE: 'force_password_change',
+} as const
 
 /**
  * Props for useAuthModal hook
@@ -85,10 +98,17 @@ interface UseAuthModalProps {
  * ```
  */
 export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): UseAuthModalReturn {
+	const router = useRouter()
 	const [isLoading, setIsLoading] = useState(false)
 	const [showEmailForm, setShowEmailForm] = useState(false)
 	const [currentView, setCurrentView] = useState<AuthModalView>('login')
 	const loginUser = useAuthStore((state) => state.login)
+	
+	// Phase 1: Account status modals (MAANG-level security UX)
+	const [showLockedModal, setShowLockedModal] = useState(false)
+	const [showSuspendedModal, setShowSuspendedModal] = useState(false)
+	const [showVerificationModal, setShowVerificationModal] = useState(false)
+	const [userEmail, setUserEmail] = useState<string | null>(null)
 	
 	// Centralized redirect management (MAANG-level pattern)
 	const { executePostAuthRedirect } = useAuthRedirect()
@@ -211,9 +231,15 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 
 	/**
 	 * Handle email/password form submission.
+	 * 
+	 * **Phase 1 Enhancement**: Status-aware error handling
+	 * - Detects account status errors from backend
+	 * - Shows appropriate modal for each status
+	 * - Provides clear resolution paths
 	 */
 	const handleLoginSubmit = useCallback(async (values: LoginFormData) => {
 		setIsLoading(true)
+		setUserEmail(values.identifier) // Store for modals
 
 		try {
 			const result = await login({
@@ -225,6 +251,61 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 			if (result.success) {
 				await handleAuthSuccess(result.user, result.token, values.identifier)
 			} else {
+				// Phase 1: Check for account status errors
+				const errorMessage = result.message?.toLowerCase() ?? ''
+				
+				// Account locked (5 failed attempts)
+				if (errorMessage.includes(ACCOUNT_STATUS_ERRORS.LOCKED)) {
+					logger.warn('Login blocked: Account locked', {
+						identifier: values.identifier,
+						component: COMPONENT_NAME,
+					})
+					onClose() // Close login modal
+					setShowLockedModal(true) // Show lockout modal
+					return
+				}
+				
+				// Account suspended by admin
+				if (errorMessage.includes(ACCOUNT_STATUS_ERRORS.SUSPENDED)) {
+					logger.warn('Login blocked: Account suspended', {
+						identifier: values.identifier,
+						component: COMPONENT_NAME,
+					})
+					onClose() // Close login modal
+					setShowSuspendedModal(true) // Show suspension modal
+					return
+				}
+				
+				// Email verification required
+				if (errorMessage.includes(ACCOUNT_STATUS_ERRORS.VERIFICATION_REQUIRED)) {
+					logger.warn('Login blocked: Email verification required', {
+						identifier: values.identifier,
+						component: COMPONENT_NAME,
+					})
+					onClose() // Close login modal
+					setShowVerificationModal(true) // Show verification modal
+					return
+				}
+				
+				// Force password change required
+				if (errorMessage.includes(ACCOUNT_STATUS_ERRORS.FORCE_PASSWORD_CHANGE)) {
+					logger.info('Login requires password change', {
+						identifier: values.identifier,
+						component: COMPONENT_NAME,
+					})
+					onClose() // Close login modal
+					router.push(Routes.Auth.forcePasswordChange({ required: 'true' }))
+					notificationService.warning(
+						'You must change your password before continuing',
+						{
+							component: COMPONENT_NAME,
+							action: 'forcePasswordChange',
+						}
+					)
+					return
+				}
+				
+				// Standard login failure (invalid credentials)
 				notificationService.error(result.message ?? ERROR_MESSAGES.LOGIN_FAILED, {
 					metadata: { identifier: values.identifier, message: result.message },
 					component: COMPONENT_NAME,
@@ -240,7 +321,7 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 		} finally {
 			setIsLoading(false)
 		}
-	}, [handleAuthSuccess])
+	}, [handleAuthSuccess, onClose, router])
 
 	/**
 	 * Handle signup form submission.
@@ -405,6 +486,14 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 		handleSwitchToSignup,
 		handleSwitchToLogin,
 		handleClose,
+		// Phase 1: Account status modal states
+		showLockedModal,
+		setShowLockedModal,
+		showSuspendedModal,
+		setShowSuspendedModal,
+		showVerificationModal,
+		setShowVerificationModal,
+		userEmail,
 	}
 }
 

@@ -303,6 +303,140 @@ const API = {
 		 */
 		adminCreate: async (request: AdminCreateAccountRequest) =>
 			HttpService.post<AdminCreateAccountResponse>('/account/admin/create', request),
+
+		// ========================================================================
+		// PHASE 1: ACCOUNT STATUS MANAGEMENT (Admin Only)
+		// Backend endpoints from server/Controllers/AccountController.cs
+		// ========================================================================
+
+		/**
+		 * Admin-only: Suspend user account with reason (Phase 1).
+		 * Suspended accounts cannot login until reactivated.
+		 * 
+		 * **Business Logic:**
+		 * - Account status → Suspended
+		 * - User cannot login until activated
+		 * - Reason stored for audit
+		 * - Triggers audit log entry
+		 * 
+		 * @param id - Account ID to suspend
+		 * @param reason - Reason for suspension (max 500 chars)
+		 * @returns Success boolean
+		 * 
+		 * @example
+		 * ```typescript
+		 * await API.Accounts.suspend('123', 'Policy violation: spam activity');
+		 * ```
+		 */
+		suspend: async (id: string, reason: string) =>
+			HttpService.put<boolean>(`/account/${id}/suspend`, { reason }),
+
+		/**
+		 * Admin-only: Activate suspended/locked account (Phase 1).
+		 * Resets account to Active status.
+		 * 
+		 * **Business Logic:**
+		 * - Account status → Active
+		 * - Clears suspension reason
+		 * - Clears lockout timestamp
+		 * - Resets failed login attempts
+		 * - Triggers audit log entry
+		 * 
+		 * @param id - Account ID to activate
+		 * @returns Success boolean
+		 * 
+		 * @example
+		 * ```typescript
+		 * await API.Accounts.activate('123');
+		 * ```
+		 */
+		activate: async (id: string) =>
+			HttpService.put<boolean>(`/account/${id}/activate`, {}),
+
+		/**
+		 * Admin-only: Unlock locked account (Phase 1).
+		 * Removes automatic lockout from failed login attempts.
+		 * 
+		 * **Business Logic:**
+		 * - Account status → Active
+		 * - Clears lockout timestamp
+		 * - Resets failed login attempts to 0
+		 * - Triggers audit log entry
+		 * 
+		 * @param id - Account ID to unlock
+		 * @returns Success boolean
+		 * 
+		 * @example
+		 * ```typescript
+		 * await API.Accounts.unlock('123');
+		 * ```
+		 */
+		unlock: async (id: string) =>
+			HttpService.put<boolean>(`/account/${id}/unlock`, {}),
+
+		/**
+		 * Admin-only: Archive (soft delete) account (Phase 1).
+		 * Archived accounts cannot login but data is preserved.
+		 * 
+		 * **Business Logic:**
+		 * - Account status → Archived
+		 * - Sets archivedAt timestamp
+		 * - User cannot login
+		 * - Data preserved for compliance
+		 * - Can be restored later
+		 * - Triggers audit log entry
+		 * 
+		 * @param id - Account ID to archive
+		 * @returns Success boolean
+		 * 
+		 * @example
+		 * ```typescript
+		 * await API.Accounts.archive('123');
+		 * ```
+		 */
+		archive: async (id: string) =>
+			HttpService.put<boolean>(`/account/${id}/archive`, {}),
+
+		/**
+		 * Admin-only: Restore archived account (Phase 1).
+		 * Returns archived account to Active status.
+		 * 
+		 * **Business Logic:**
+		 * - Account status → Active
+		 * - Clears archivedAt timestamp
+		 * - User can login again
+		 * - Triggers audit log entry
+		 * 
+		 * @param id - Account ID to restore
+		 * @returns Success boolean
+		 * 
+		 * @example
+		 * ```typescript
+		 * await API.Accounts.restore('123');
+		 * ```
+		 */
+		restore: async (id: string) =>
+			HttpService.put<boolean>(`/account/${id}/restore`, {}),
+
+		/**
+		 * Admin-only: Force user to change password on next login (Phase 1).
+		 * Sets forcePasswordChange flag and status.
+		 * 
+		 * **Business Logic:**
+		 * - Sets forcePasswordChange flag
+		 * - User can login but redirected to password change
+		 * - Triggers audit log entry
+		 * 
+		 * @param id - Account ID to force password change
+		 * @returns Success boolean
+		 * 
+		 * @example
+		 * ```typescript
+		 * await API.Accounts.forcePasswordChange('123');
+		 * ```
+		 */
+		forcePasswordChange: async (id: string) =>
+			HttpService.put<boolean>(`/account/${id}/force-password-change`, {}),
 	},
 	
 	/**

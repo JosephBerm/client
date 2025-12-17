@@ -11,6 +11,8 @@
  * @module types/account
  */
 
+import type { AccountStatus } from '@_classes/Enums'
+
 // ============================================================================
 // MINIMAL ACCOUNT INFO (for modals, displays, etc.)
 // ============================================================================
@@ -24,6 +26,8 @@
  * - Role change modal
  * - User info displays
  * - Table row actions
+ * 
+ * **Phase 1 Enhancement**: Added status field for account status system
  */
 export interface AccountInfo {
 	/** Unique identifier */
@@ -36,11 +40,15 @@ export interface AccountInfo {
 	role: number
 	/** Account creation timestamp (optional for backward compatibility) */
 	createdAt?: Date | string
+	/** Account status (Phase 1 - optional for backward compatibility) */
+	status?: AccountStatus
 }
 
 /**
  * Convert any user-like object to AccountInfo.
  * Handles null IDs gracefully for defensive programming.
+ * 
+ * **Phase 1 Enhancement**: Includes status field
  * 
  * @param user - Any object with id, username, email, role properties
  * @returns AccountInfo or null if invalid
@@ -51,6 +59,7 @@ export function toAccountInfo(user: {
 	email?: string
 	role?: number | null
 	createdAt?: Date | string
+	status?: AccountStatus
 } | null | undefined): AccountInfo | null {
 	if (!user?.id) {
 		return null
@@ -62,6 +71,7 @@ export function toAccountInfo(user: {
 		email: user.email ?? '',
 		role: user.role ?? 0,
 		createdAt: user.createdAt,
+		status: user.status,
 	}
 }
 

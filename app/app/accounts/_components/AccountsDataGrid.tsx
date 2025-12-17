@@ -41,8 +41,10 @@ import {
 } from '@_shared'
 
 import type { AccountRole } from '@_classes/Enums'
+import { AccountStatus } from '@_classes/Enums'
 
-import { RoleBadge } from '@_components/common'
+import { RoleBadge, AccountStatusBadge } from '@_components/common'
+import AccountActionsDropdown from '@_components/admin/AccountActionsDropdown'
 import ServerDataGrid from '@_components/tables/ServerDataGrid'
 import Button from '@_components/ui/Button'
 import ConfirmationModal from '@_components/ui/ConfirmationModal'
@@ -229,6 +231,19 @@ export default function AccountsDataGrid() {
 	// COLUMN DEFINITIONS (React Compiler auto-memoizes)
 	// ========================================================================
 
+	/**
+	 * Handle account status change from dropdown
+	 */
+	const handleStatusChange = (accountId: string, newStatus: AccountStatus) => {
+		logger.info('Account status changed', {
+			component: 'AccountsDataGrid',
+			accountId,
+			newStatus,
+		})
+		// Refresh table to show updated status
+		refreshTable()
+	}
+
 	const columns: ColumnDef<Account>[] = [
 		{
 			accessorKey: 'username',
@@ -252,6 +267,16 @@ export default function AccountsDataGrid() {
 			cell: ({ row }) => <RoleBadge role={row.original.role} />,
 		},
 		{
+			accessorKey: 'status',
+			header: 'Status',
+			cell: ({ row }) => (
+				<AccountStatusBadge 
+					status={row.original.status ?? AccountStatus.Active} 
+					size="sm"
+				/>
+			),
+		},
+		{
 			accessorKey: 'createdAt',
 			header: 'Created',
 			cell: ({ row }) => formatDate(row.original.createdAt),
@@ -260,7 +285,7 @@ export default function AccountsDataGrid() {
 			id: 'actions',
 			header: 'Actions',
 			cell: ({ row }) => (
-				<div className="flex gap-2">
+				<div className="flex gap-2 items-center">
 					<Link href={Routes.Accounts.detail(row.original.id)}>
 						<Button variant="ghost" size="sm" title="View account">
 							<Eye className="w-4 h-4" />
@@ -284,6 +309,11 @@ export default function AccountsDataGrid() {
 							>
 								<Key className="w-4 h-4" />
 							</Button>
+							{/* Phase 1: Admin Account Actions Dropdown */}
+							<AccountActionsDropdown
+								account={row.original}
+								onStatusChange={handleStatusChange}
+							/>
 						</>
 					)}
 					<Button

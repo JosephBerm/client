@@ -104,6 +104,8 @@ export interface SignupFormProps {
 /**
  * Return type for useAuthModal hook.
  * Contains all state and handlers for the auth modal.
+ * 
+ * **Phase 1 Enhancement**: Includes account status modal states
  */
 export interface UseAuthModalReturn {
 	/** Current view (login or signup) */
@@ -128,5 +130,21 @@ export interface UseAuthModalReturn {
 	handleSwitchToLogin: () => void
 	/** Handler to close modal */
 	handleClose: () => void
+	
+	// Phase 1: Account status modal states
+	/** Whether account locked modal is shown */
+	showLockedModal: boolean
+	/** Set account locked modal state */
+	setShowLockedModal: (show: boolean) => void
+	/** Whether account suspended modal is shown */
+	showSuspendedModal: boolean
+	/** Set account suspended modal state */
+	setShowSuspendedModal: (show: boolean) => void
+	/** Whether email verification modal is shown */
+	showVerificationModal: boolean
+	/** Set email verification modal state */
+	setShowVerificationModal: (show: boolean) => void
+	/** User's email for modal display */
+	userEmail: string | null
 }
 

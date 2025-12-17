@@ -74,6 +74,7 @@ import Address from '@_classes/common/Address'
 import Name from '@_classes/common/Name'
 import Company from '@_classes/Company'
 import Notification from '@_classes/Notification'
+import { AccountStatus, canAccountLogin } from '@_classes/Enums'
 
 import Order from './Order'
 
@@ -139,6 +140,73 @@ export default class User {
 	
 	/** Path to profile picture file */
 	public profilePicturePath?: string
+
+	// ============================================================================
+	// PHASE 1: ACCOUNT STATUS SYSTEM PROPERTIES
+	// Backend-aligned properties from server/Entities/Account.cs
+	// ============================================================================
+
+	/**
+	 * Account status (Phase 1)
+	 * @see AccountStatus enum in Enums.ts
+	 * @default AccountStatus.Active (100)
+	 */
+	public status: AccountStatus = AccountStatus.Active
+
+	/**
+	 * Number of consecutive failed login attempts (Phase 1)
+	 * Increments on failed login, resets on successful login
+	 * Account locks after 5 failed attempts
+	 * @default 0
+	 */
+	public failedLoginAttempts: number = 0
+
+	/**
+	 * Timestamp when account will be automatically unlocked (Phase 1)
+	 * Set to 30 minutes after account lockout
+	 * @default null
+	 */
+	public lockedUntil: Date | string | null = null
+
+	/**
+	 * Timestamp of most recent successful login (Phase 1)
+	 * Used for security audit and session management
+	 * @default null
+	 */
+	public lastLoginAt: Date | string | null = null
+
+	/**
+	 * IP address of most recent successful login (Phase 1)
+	 * Used for security audit and anomaly detection
+	 * Max length: 45 characters (IPv6 support)
+	 * @default null
+	 */
+	public lastLoginIP: string | null = null
+
+	/**
+	 * Reason for account suspension (Phase 1)
+	 * Provided by admin when suspending account
+	 * Displayed to user in suspension modal
+	 * Max length: 500 characters
+	 * @default null
+	 */
+	public suspensionReason: string | null = null
+
+	/**
+	 * Timestamp when account was archived (Phase 1)
+	 * Archived accounts cannot login but data is preserved
+	 * Used for compliance and data retention
+	 * @default null
+	 */
+	public archivedAt: Date | string | null = null
+
+	/**
+	 * Flag indicating password change required on next login (Phase 1)
+	 * Set by admin to force password reset
+	 * User redirected to password change page after login
+	 * @default false
+	 */
+	public forcePasswordChange: boolean = false
 
 	/**
 	 * Creates a new User instance.
@@ -242,6 +310,93 @@ export default class User {
 	 */
 	public addNotification(notification: Notification): void {
 		this.notifications.push(notification)
+	}
+
+	// ============================================================================
+	// PHASE 1: ACCOUNT STATUS HELPER METHODS
+	// Convenience methods for status checking (MAANG-level encapsulation)
+	// ============================================================================
+
+	/**
+	 * Check if account is in Active status (Phase 1)
+	 * @returns {boolean} True if status is Active
+	 * @example user.isActive() // true if Active
+	 */
+	public isActive(): boolean {
+		return this.status === AccountStatus.Active
+	}
+
+	/**
+	 * Check if account is locked due to failed login attempts (Phase 1)
+	 * @returns {boolean} True if status is Locked
+	 * @example user.isLocked() // true if Locked
+	 */
+	public isLocked(): boolean {
+		return this.status === AccountStatus.Locked
+	}
+
+	/**
+	 * Check if account is suspended by admin (Phase 1)
+	 * @returns {boolean} True if status is Suspended
+	 * @example user.isSuspended() // true if Suspended
+	 */
+	public isSuspended(): boolean {
+		return this.status === AccountStatus.Suspended
+	}
+
+	/**
+	 * Check if account is archived (soft deleted) (Phase 1)
+	 * @returns {boolean} True if status is Archived
+	 * @example user.isArchived() // true if Archived
+	 */
+	public isArchived(): boolean {
+		return this.status === AccountStatus.Archived
+	}
+
+	/**
+	 * Check if account email is pending verification (Phase 1)
+	 * @returns {boolean} True if status is PendingVerification
+	 * @example user.isPendingVerification() // true if pending
+	 */
+	public isPendingVerification(): boolean {
+		return this.status === AccountStatus.PendingVerification
+	}
+
+	/**
+	 * Check if account can login (Phase 1)
+	 * Uses the shared canAccountLogin helper from Enums
+	 * @returns {boolean} True if account status allows login
+	 * @example user.canLogin() // true if Active or ForcePasswordChange
+	 */
+	public canLogin(): boolean {
+		return canAccountLogin(this.status)
+	}
+
+	/**
+	 * Check if password change is required on next login (Phase 1)
+	 * @returns {boolean} True if forcePasswordChange flag is set or status is ForcePasswordChange
+	 * @example user.needsPasswordChange() // true if password change required
+	 */
+	public needsPasswordChange(): boolean {
+		return (
+			this.forcePasswordChange || this.status === AccountStatus.ForcePasswordChange
+		)
+	}
+
+	/**
+	 * Check if account lockout is still active (Phase 1)
+	 * @returns {boolean} True if locked and lockout period hasn't expired
+	 * @example user.isLockoutActive() // true if currently locked
+	 */
+	public isLockoutActive(): boolean {
+		if (!this.isLocked() || !this.lockedUntil) {
+			return false
+		}
+		const lockoutDate =
+			typeof this.lockedUntil === 'string'
+				? new Date(this.lockedUntil)
+				: this.lockedUntil
+		return lockoutDate > new Date()
 	}
 }
 

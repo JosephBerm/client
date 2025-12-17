@@ -94,10 +94,12 @@ function CopyableField({ label, value }: { label: string; value: string | undefi
 
 /** Status options for the dropdown */
 const STATUS_OPTIONS: SelectOption<number>[] = [
-	{ value: AccountStatus.Active, label: 'Active' },
-	{ value: AccountStatus.Suspended, label: 'Suspended' },
-	{ value: AccountStatus.Deactivated, label: 'Deactivated' },
 	{ value: AccountStatus.PendingVerification, label: 'Pending Verification' },
+	{ value: AccountStatus.Active, label: 'Active' },
+	{ value: AccountStatus.ForcePasswordChange, label: 'Password Change Required' },
+	{ value: AccountStatus.Suspended, label: 'Suspended' },
+	{ value: AccountStatus.Locked, label: 'Locked' },
+	{ value: AccountStatus.Archived, label: 'Archived' },
 ]
 
 // ============================================================================
@@ -480,8 +482,9 @@ export default function AccountProfileTab({
 					title="Change Account Status"
 					message={`Are you sure you want to change this account's status to ${pendingStatusLabel}?`}
 					variant={
-						pendingStatusChange === AccountStatus.Deactivated || 
-						pendingStatusChange === AccountStatus.Suspended 
+						pendingStatusChange === AccountStatus.Archived || 
+						pendingStatusChange === AccountStatus.Suspended ||
+						pendingStatusChange === AccountStatus.Locked
 							? 'danger' 
 							: 'warning'
 					}
@@ -491,11 +494,15 @@ export default function AccountProfileTab({
 					details={
 						pendingStatusChange === AccountStatus.Suspended
 							? 'Suspended accounts cannot access the system until reactivated by an administrator.'
-							: pendingStatusChange === AccountStatus.Deactivated
-								? 'Deactivated accounts are permanently disabled and may require manual reactivation.'
-								: pendingStatusChange === AccountStatus.PendingVerification
-									? 'Pending accounts require email verification before gaining full access.'
-									: 'Active accounts have full access to the system based on their role.'
+							: pendingStatusChange === AccountStatus.Locked
+								? 'Locked accounts are temporarily blocked and will auto-unlock after 30 minutes.'
+								: pendingStatusChange === AccountStatus.Archived
+									? 'Archived accounts are soft-deleted and cannot login. Data is preserved for compliance.'
+									: pendingStatusChange === AccountStatus.ForcePasswordChange
+										? 'User will be required to change their password on next login.'
+										: pendingStatusChange === AccountStatus.PendingVerification
+											? 'Pending accounts require email verification before gaining full access.'
+											: 'Active accounts have full access to the system based on their role.'
 					}
 				/>
 			)}

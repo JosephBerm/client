@@ -190,40 +190,90 @@ export enum AccountRole {
 }
 
 /**
- * AccountStatus Enum
+ * AccountStatus Enum - UPDATED TO MATCH BACKEND (Phase 1)
  * 
- * Account status levels for user account management.
- * Determines whether an account can access the system.
+ * Account lifecycle states that determine login eligibility and user access.
+ * Values MUST match server/Entities/Account.cs AccountStatus enum exactly.
  * 
- * **Statuses:**
- * - **Active (0)**: Account is active and can access all features
- * - **Suspended (1)**: Account temporarily suspended, cannot login
- * - **Deactivated (2)**: Account permanently deactivated
- * - **PendingVerification (3)**: Account awaiting email/license verification
+ * **State Machine:**
+ * ```
+ * PendingVerification (0) → Active (100) ⟷ Suspended (200)
+ *                                   ↓              ↓
+ *                              Locked (300) → Archived (400)
+ *                                   ↓
+ *                         ForcePasswordChange (150)
+ * ```
  * 
- * **Usage:**
- * - Login validation: Check status before allowing authentication
- * - Admin management: Suspend/deactivate problematic accounts
- * - Compliance: Track account status for audit trails
+ * **Login Eligibility:**
+ * - ✅ Can Login: Active, ForcePasswordChange
+ * - ❌ Cannot Login: PendingVerification, Suspended, Locked, Archived
  * 
  * @example
  * ```typescript
- * import { AccountStatus } from '@_classes/Enums';
+ * import { AccountStatus, canAccountLogin } from '@_classes/Enums';
  * 
- * if (user.status === AccountStatus.Suspended) {
- *   // Show suspended message, prevent login
+ * if (!canAccountLogin(user.status)) {
+ *   // Show appropriate modal based on status
  * }
  * ```
  */
 export enum AccountStatus {
-	/** Account is active and operational */
-	Active = 0,
-	/** Account temporarily suspended (can be reactivated) */
-	Suspended = 1,
-	/** Account permanently deactivated */
-	Deactivated = 2,
-	/** Account pending email or license verification */
-	PendingVerification = 3,
+	/** Email not yet verified - cannot login */
+	PendingVerification = 0,
+	/** Fully operational account */
+	Active = 100,
+	/** Must change password on next login - can login but redirected */
+	ForcePasswordChange = 150,
+	/** Admin suspended - cannot login until reactivated */
+	Suspended = 200,
+	/** Auto-locked (5 failed attempts) - 30 min lockout */
+	Locked = 300,
+	/** Soft-deleted - cannot login, data preserved */
+	Archived = 400,
+}
+
+/**
+ * Get human-readable label for account status.
+ * Used in badges, tables, and admin interfaces.
+ */
+export function getAccountStatusLabel(status: AccountStatus): string {
+	const labels: Record<AccountStatus, string> = {
+		[AccountStatus.PendingVerification]: 'Pending Verification',
+		[AccountStatus.Active]: 'Active',
+		[AccountStatus.ForcePasswordChange]: 'Password Change Required',
+		[AccountStatus.Suspended]: 'Suspended',
+		[AccountStatus.Locked]: 'Temporarily Locked',
+		[AccountStatus.Archived]: 'Archived',
+	}
+	return labels[status] ?? 'Unknown'
+}
+
+/**
+ * Check if account status allows login.
+ * ForcePasswordChange allows login but requires immediate password change.
+ */
+export function canAccountLogin(status: AccountStatus): boolean {
+	return status === AccountStatus.Active || status === AccountStatus.ForcePasswordChange
+}
+
+/**
+ * Get status severity for UI styling (error, warning, success, neutral).
+ */
+export function getAccountStatusSeverity(status: AccountStatus): 'success' | 'warning' | 'error' | 'neutral' {
+	switch (status) {
+		case AccountStatus.Active:
+			return 'success'
+		case AccountStatus.PendingVerification:
+		case AccountStatus.ForcePasswordChange:
+			return 'warning'
+		case AccountStatus.Suspended:
+		case AccountStatus.Locked:
+			return 'error'
+		case AccountStatus.Archived:
+			return 'neutral'
+		default:
+			return 'neutral'
+	}
 }
 
 /**

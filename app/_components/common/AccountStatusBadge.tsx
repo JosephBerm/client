@@ -6,19 +6,21 @@
  * Provides consistent visual representation of account status throughout the app.
  *
  * **Features:**
- * - Account status enum support
- * - Automatic color mapping based on status
+ * - Account status enum support (matches backend Phase 1 implementation)
+ * - Automatic color mapping based on status severity
  * - Human-readable status labels
  * - DaisyUI Badge integration
  * - Custom className support
  * - Type-safe status handling
  * - Icon support for visual clarity
  *
- * **Status Mapping:**
- * - Active (0): Success (green) - Account operational
- * - Suspended (1): Warning (yellow/orange) - Temporarily suspended
- * - Deactivated (2): Error (red) - Permanently deactivated
- * - PendingVerification (3): Info (blue) - Awaiting verification
+ * **Status Mapping (Phase 1 - Backend Aligned):**
+ * - PendingVerification (0): Info (blue) - Awaiting email verification
+ * - Active (100): Success (green) - Account operational
+ * - ForcePasswordChange (150): Warning (yellow) - Must change password
+ * - Suspended (200): Error (red) - Admin suspended
+ * - Locked (300): Error (red) - Auto-locked (5 failed attempts)
+ * - Archived (400): Neutral (gray) - Soft deleted
  *
  * **Use Cases:**
  * - User list tables
@@ -34,7 +36,7 @@
  *
  * // Basic usage
  * <AccountStatusBadge status={AccountStatus.Active} />
- * <AccountStatusBadge status={AccountStatus.Suspended} />
+ * <AccountStatusBadge status={AccountStatus.Locked} />
  *
  * // With numeric value from API
  * <AccountStatusBadge status={user.status} />
@@ -58,7 +60,7 @@
  * @module AccountStatusBadge
  */
 
-import { CheckCircle2, AlertTriangle, XCircle, Clock } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, XCircle, Clock, Lock, Archive, Key } from 'lucide-react'
 
 import { AccountStatus } from '@_classes/Enums'
 
@@ -109,18 +111,23 @@ interface StatusConfig {
 }
 
 /**
- * Get status configuration based on status value
+ * Get status configuration based on status value.
+ * Updated to match backend Phase 1 AccountStatus enum.
  */
 function getStatusConfig(status: number | null | undefined): StatusConfig {
 	switch (status) {
 		case AccountStatus.Active:
 			return { label: 'Active', variant: 'success', icon: CheckCircle2 }
-		case AccountStatus.Suspended:
-			return { label: 'Suspended', variant: 'warning', icon: AlertTriangle }
-		case AccountStatus.Deactivated:
-			return { label: 'Deactivated', variant: 'error', icon: XCircle }
 		case AccountStatus.PendingVerification:
-			return { label: 'Pending', variant: 'info', icon: Clock }
+			return { label: 'Pending Verification', variant: 'info', icon: Clock }
+		case AccountStatus.ForcePasswordChange:
+			return { label: 'Password Required', variant: 'warning', icon: Key }
+		case AccountStatus.Suspended:
+			return { label: 'Suspended', variant: 'error', icon: AlertTriangle }
+		case AccountStatus.Locked:
+			return { label: 'Locked', variant: 'error', icon: Lock }
+		case AccountStatus.Archived:
+			return { label: 'Archived', variant: 'neutral', icon: Archive }
 		default:
 			// Default to Active for undefined/null (backward compatibility)
 			return { label: 'Active', variant: 'success', icon: CheckCircle2 }

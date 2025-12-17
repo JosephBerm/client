@@ -418,6 +418,61 @@ class Routes {
 	}
 
 	/**
+	 * Authentication routes (public, used for login/password flows)
+	 * 
+	 * **Phase 1: Account Status System**
+	 * 
+	 * @example
+	 * ```typescript
+	 * // Force password change (required)
+	 * router.push(Routes.Auth.forcePasswordChange({ required: 'true' }));
+	 * // Result: "/auth/force-password-change?required=true"
+	 * 
+	 * // Force password change (optional)
+	 * router.push(Routes.Auth.forcePasswordChange());
+	 * // Result: "/auth/force-password-change"
+	 * ```
+	 */
+	public static Auth = {
+		name: 'Auth',
+		location: '/auth',
+		/**
+		 * Generates URL for force password change page.
+		 * Used when admin requires user to change password.
+		 * 
+		 * @param params - Optional query parameters
+		 * @param params.required - If 'true', user cannot skip password change
+		 * @returns Force password change URL
+		 * 
+		 * @example
+		 * ```typescript
+		 * // Required password change (cannot skip)
+		 * Routes.Auth.forcePasswordChange({ required: 'true' })
+		 * // "/auth/force-password-change?required=true"
+		 * 
+		 * // Optional password change
+		 * Routes.Auth.forcePasswordChange()
+		 * // "/auth/force-password-change"
+		 * ```
+		 */
+		forcePasswordChange: (params?: { required?: 'true' | 'false' }): string =>
+			appendQueryParams('/auth/force-password-change', params),
+		/**
+		 * URL for forgot password page.
+		 * Used when user needs to reset their password.
+		 * 
+		 * @returns Forgot password URL
+		 * 
+		 * @example
+		 * ```typescript
+		 * router.push(Routes.Auth.forgotPassword)
+		 * // "/auth/forgot-password"
+		 * ```
+		 */
+		forgotPassword: '/auth/forgot-password',
+	}
+
+	/**
 	 * Generates a URL to open the login modal.
 	 * 
 	 * The login modal is opened by navigating to the home page with the `?login=true` query parameter.

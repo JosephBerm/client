@@ -561,10 +561,12 @@ export function useAccountDetailLogic(): UseAccountDetailLogicReturn {
 			// TODO: When backend supports status field, make API call here
 			// For now, just show a notification about the intended action
 			const statusLabels: Record<AccountStatus, string> = {
-				[AccountStatus.Active]: 'Active',
-				[AccountStatus.Suspended]: 'Suspended',
-				[AccountStatus.Deactivated]: 'Deactivated',
 				[AccountStatus.PendingVerification]: 'Pending Verification',
+				[AccountStatus.Active]: 'Active',
+				[AccountStatus.ForcePasswordChange]: 'Password Change Required',
+				[AccountStatus.Suspended]: 'Suspended',
+				[AccountStatus.Locked]: 'Locked',
+				[AccountStatus.Archived]: 'Archived',
 			}
 			
 			// Simulate API call delay

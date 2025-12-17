@@ -81,11 +81,15 @@ function getStatusDisplay(status: AccountStatus) {
 		case AccountStatus.Active:
 			return { label: 'Active', color: 'text-success', bg: 'bg-success' }
 		case AccountStatus.Suspended:
-			return { label: 'Suspended', color: 'text-warning', bg: 'bg-warning' }
-		case AccountStatus.Deactivated:
-			return { label: 'Deactivated', color: 'text-error', bg: 'bg-error' }
+			return { label: 'Suspended', color: 'text-error', bg: 'bg-error' }
+		case AccountStatus.Locked:
+			return { label: 'Locked', color: 'text-error', bg: 'bg-error' }
+		case AccountStatus.ForcePasswordChange:
+			return { label: 'Password Required', color: 'text-warning', bg: 'bg-warning' }
 		case AccountStatus.PendingVerification:
 			return { label: 'Pending', color: 'text-info', bg: 'bg-info' }
+		case AccountStatus.Archived:
+			return { label: 'Archived', color: 'text-neutral', bg: 'bg-neutral' }
 		default:
 			return { label: 'Unknown', color: 'text-base-content/50', bg: 'bg-base-300' }
 	}
@@ -250,7 +254,7 @@ export default function AccountSecurityTab({
 					</div>
 				</Card>
 
-				{/* Last Activity Card */}
+				{/* Last Activity Card - Phase 1 Enhanced */}
 				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
 					<h2 className="text-lg font-semibold text-base-content mb-4">Recent Activity</h2>
 					<div className="space-y-3 text-sm">
@@ -264,16 +268,36 @@ export default function AccountSecurityTab({
 						</div>
 						<div className="flex items-center justify-between">
 							<span className="text-base-content/70">Last Login</span>
-							<span className="text-base-content/50 text-xs">
-								Coming Soon
+							<span className="text-base-content font-medium">
+								{account.lastLoginAt
+									? new Date(account.lastLoginAt).toLocaleString()
+									: 'Never'}
 							</span>
 						</div>
-						<div className="flex items-center justify-between">
-							<span className="text-base-content/70">Password Changed</span>
-							<span className="text-base-content/50 text-xs">
-								Coming Soon
-							</span>
-						</div>
+						{account.lastLoginIP && (
+							<div className="flex items-center justify-between">
+								<span className="text-base-content/70">Last Login IP</span>
+								<span className="text-base-content/50 text-xs font-mono">
+									{account.lastLoginIP}
+								</span>
+							</div>
+						)}
+						{account.failedLoginAttempts > 0 && (
+							<div className="flex items-center justify-between">
+								<span className="text-base-content/70">Failed Attempts</span>
+								<span className="text-warning font-medium">
+									{account.failedLoginAttempts} / 5
+								</span>
+							</div>
+						)}
+						{account.lockedUntil && new Date(account.lockedUntil) > new Date() && (
+							<div className="flex flex-col gap-1">
+								<span className="text-base-content/70">Locked Until</span>
+								<span className="text-error text-xs font-medium">
+									{new Date(account.lockedUntil).toLocaleString()}
+								</span>
+							</div>
+						)}
 					</div>
 				</Card>
 
