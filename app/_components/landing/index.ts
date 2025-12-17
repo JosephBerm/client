@@ -44,3 +44,15 @@ export { default as ScrollIntoViewComponent } from './ScrollIntoViewComponent'
 
 export { default as StatsBanner } from './StatsBanner'
 
+// ============================================================================
+// COLOR VARIANTS (Theme-Aware DaisyUI Colors)
+// ============================================================================
+
+export {
+	type ColorVariant,
+	type ColorClasses,
+	getColorClasses,
+	isColorVariant,
+	ALL_COLOR_VARIANTS,
+} from './colorVariants'
+

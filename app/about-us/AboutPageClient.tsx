@@ -65,8 +65,7 @@ export default function AboutPageClient() {
 							description={feature.description}
 							image={featureImages[idx]}
 							icon={feature.icon}
-							iconColor={feature.color}
-							iconBg={feature.bg}
+							colorVariant={feature.colorVariant}
 							layout={isEven ? 'left' : 'right'}
 							index={idx}
 						/>

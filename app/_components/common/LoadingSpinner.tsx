@@ -80,6 +80,31 @@ interface LoadingSpinnerProps {
 }
 
 /**
+ * Color class mapping
+ * 
+ * **IMPORTANT**: Uses static class names to prevent Tailwind CSS purging.
+ * Dynamic class construction like `text-${color}` gets purged in production.
+ */
+const colorClasses = {
+	primary: 'text-primary',
+	secondary: 'text-secondary',
+	accent: 'text-accent',
+	neutral: 'text-neutral',
+} as const
+
+/**
+ * Size class mapping
+ * 
+ * **IMPORTANT**: Uses static class names to prevent Tailwind CSS purging.
+ */
+const sizeClasses = {
+	xs: 'loading-xs',
+	sm: 'loading-sm',
+	md: 'loading-md',
+	lg: 'loading-lg',
+} as const
+
+/**
  * LoadingSpinner Component
  *
  * Flexible loading indicator with inline and full-screen modes.
@@ -108,7 +133,7 @@ export default function LoadingSpinner({
 }: LoadingSpinnerProps) {
 	const spinner = (
 		<div className="flex flex-col items-center justify-center gap-4">
-			<span className={classNames('loading loading-spinner', `loading-${size}`, `text-${color}`)} />
+			<span className={classNames('loading loading-spinner', sizeClasses[size], colorClasses[color])} />
 			{text && <p className="text-sm text-base-content/70">{text}</p>}
 		</div>
 	)

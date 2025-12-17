@@ -59,11 +59,16 @@
 
 import { type LucideIcon, Activity, Shield, Users, Heart, CheckCircle2 } from 'lucide-react'
 
+import type { ColorVariant } from '@_components/landing/colorVariants'
+
 /**
  * Feature Interface
  *
  * Type definition for feature objects displayed in alternating sections.
  * Ensures consistent structure for all feature entries.
+ * 
+ * **Important**: Uses ColorVariant instead of raw class strings to ensure
+ * Tailwind CSS classes are detected at build time and not purged in production.
  */
 export interface Feature {
 	/** Feature title */
@@ -72,10 +77,8 @@ export interface Feature {
 	description: string
 	/** Icon component from lucide-react */
 	icon: LucideIcon
-	/** Icon text color class */
-	color: string
-	/** Icon background color class */
-	bg: string
+	/** Color variant for icon styling (type-safe, not purged in production) */
+	colorVariant: ColorVariant
 }
 
 /**
@@ -157,6 +160,16 @@ export default class About {
 	 *
 	 * Company values, mission, and differentiators displayed in alternating sections.
 	 * Communicates brand promise and company culture to potential customers.
+	 * 
+	 * **MAANG-Level**: Uses DaisyUI semantic color variants that follow the theme.
+	 * Colors automatically adapt when user switches themes (light, dark, etc.)
+	 * 
+	 * **Semantic Color Mapping:**
+	 * - Mission → `info` (informational content, blue family)
+	 * - Quality → `success` (positive assurance, green family)
+	 * - Customer → `secondary` (supporting brand message)
+	 * - Community → `error` (heart/passion/love, red family)
+	 * - Vision → `warning` (forward-looking, amber family)
 	 */
 	public static Features: Feature[] = [
 		{
@@ -164,40 +177,35 @@ export default class About {
 			description:
 				'To connect healthcare providers with trusted medical supplies and services that improve patient care, building healthier communities.',
 			icon: Activity,
-			color: 'text-blue-500',
-			bg: 'bg-blue-50',
+			colorVariant: 'info',
 		},
 		{
 			title: 'Quality Assurance',
 			description:
 				'We partner exclusively with vetted manufacturers. Every item is evaluated for safety, efficacy, and reliability.',
 			icon: Shield,
-			color: 'text-emerald-500',
-			bg: 'bg-emerald-50',
+			colorVariant: 'success',
 		},
 		{
 			title: 'Customer Focus',
 			description:
 				'Our customer success team supports you from product discovery through post-delivery, ensuring tailored interactions.',
 			icon: Users,
-			color: 'text-purple-500',
-			bg: 'bg-purple-50',
+			colorVariant: 'secondary',
 		},
 		{
 			title: 'Community Impact',
 			description:
 				'We invest in health initiatives and collaborate with nonprofits to increase access in underserved regions.',
 			icon: Heart,
-			color: 'text-rose-500',
-			bg: 'bg-rose-50',
+			colorVariant: 'error',
 		},
 		{
 			title: 'Future Vision',
 			description:
 				'Helping you deliver better outcomes. Whether you run a clinic or coordinate care networks, we are your partner.',
 			icon: CheckCircle2,
-			color: 'text-amber-500',
-			bg: 'bg-amber-50',
+			colorVariant: 'warning',
 		},
 	]
 

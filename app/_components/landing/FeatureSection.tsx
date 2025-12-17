@@ -62,6 +62,8 @@ import {
 import PageContainer from '@_components/layouts/PageContainer'
 import Button from '@_components/ui/Button'
 
+import { getColorClasses, type ColorVariant } from './colorVariants'
+
 export interface FeatureSectionProps {
 	/** Feature title */
 	title: string
@@ -71,10 +73,14 @@ export interface FeatureSectionProps {
 	image: StaticImageData
 	/** Icon component from lucide-react */
 	icon: LucideIcon
-	/** Icon text color class */
-	iconColor: string
-	/** Icon background color class */
-	iconBg: string
+	/** 
+	 * Theme-aware color variant for icon styling
+	 * Uses DaisyUI semantic colors (primary, success, warning, error, info, etc.)
+	 * that automatically adapt to the current theme (light, dark, etc.)
+	 * 
+	 * @see colorVariants.ts for available variants
+	 */
+	colorVariant: ColorVariant
 	/** Layout direction ('left' = image left, 'right' = image right) */
 	layout: 'left' | 'right'
 	/** Index for alternating background colors */
@@ -97,8 +103,7 @@ export default function FeatureSection({
 	description,
 	image,
 	icon: Icon,
-	iconColor,
-	iconBg,
+	colorVariant,
 	layout,
 	index,
 	id,
@@ -108,6 +113,10 @@ export default function FeatureSection({
 	const isEven = index % 2 === 0
 	const bgClass = isEven ? 'bg-base-100' : 'bg-base-200/50'
 	const isImageLeft = layout === 'left'
+	
+	// Get color classes from the type-safe variant system
+	// This ensures Tailwind classes are detected at build time
+	const colorClasses = getColorClasses(colorVariant)
 
 	// Image error handler (FAANG best practice: track image load failures)
 	const handleImageError = () => {
@@ -153,7 +162,7 @@ export default function FeatureSection({
 						className="flex-1 space-y-6 w-full"
 					>
 						<div
-							className={`inline-flex items-center justify-center p-3 rounded-2xl ${iconBg} ${iconColor} mb-4`}
+							className={`inline-flex items-center justify-center p-3 rounded-2xl ${colorClasses.bg} ${colorClasses.text} mb-4`}
 							aria-hidden="true"
 						>
 							<Icon className="w-7 h-7 sm:w-8 sm:h-8" />
