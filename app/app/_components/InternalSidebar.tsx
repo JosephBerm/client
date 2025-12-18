@@ -32,16 +32,15 @@
  * - **Mobile (< 1024px)**: Full-screen overlay drawer, closes on link click
  *
  * **Performance:**
- * - Memoized navigation sections
- * - Memoized callbacks
- * - Optimized re-renders
+ * - React Compiler automatically optimizes re-renders and callbacks
+ * - No manual memoization needed (React Compiler handles it)
  *
  * @module InternalSidebar
  */
 
 'use client'
 
-import { useEffect, useMemo, useCallback, useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -55,7 +54,7 @@ import { NavigationService, Routes } from '@_features/navigation'
 
 import { logger } from '@_core'
 
-import { useMediaQuery } from '@_shared'
+import { useMediaQuery, useSidebarDrawer } from '@_shared'
 
 import NavigationIcon from '@_components/navigation/NavigationIcon'
 import SettingsModal from '@_components/settings/SettingsModal'
@@ -124,26 +123,23 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 
 	// Get navigation sections for internal app only
 	// Filter to show only internal app routes (exclude public routes)
-	const sections = useMemo(() => {
-		const allSections = NavigationService.getNavigationSections(user?.role)
-		
-		// Filter out public routes (Home, About, Store public, Contact)
-		// Keep only internal app routes
-		return allSections
-			.map((section) => ({
-				...section,
-				routes: section.routes.filter(
-					(route) =>
-						route.href.startsWith('/app') ||
-						route.id === 'profile' ||
-						route.id === 'notifications'
-				),
-			}))
-			.filter((section) => section.routes.length > 0)
-	}, [user?.role])
+	// React Compiler automatically optimizes this computation
+	const allSections = NavigationService.getNavigationSections(user?.role)
+	const sections = allSections
+		.map((section) => ({
+			...section,
+			routes: section.routes.filter(
+				(route) =>
+					route.href.startsWith('/app') ||
+					route.id === 'profile' ||
+					route.id === 'notifications'
+			),
+		}))
+		.filter((section) => section.routes.length > 0)
 
 	// State for collapsible sections
-	const initialCollapsed = useMemo<Set<string>>(() => {
+	// React Compiler automatically optimizes this computation
+	const initialCollapsed = (() => {
 		const collapsed = new Set<string>()
 		sections.forEach((section) => {
 			if (section.defaultCollapsed) {
@@ -151,14 +147,35 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 			}
 		})
 		return collapsed
-	}, [sections])
+	})()
 
 	const [collapsedSections, setCollapsedSections] = useState<Set<string>>(initialCollapsed)
 	const [settingsModalOpen, setSettingsModalOpen] = useState(false)
 	const sidebarRef = useRef<HTMLElement>(null)
 
+	/**
+	 * Shared sidebar drawer behavior (MAANG DRY principle)
+	 * 
+	 * Handles all common mobile drawer logic in one place:
+	 * - Outside click detection (modal-aware)
+	 * - Escape key handling (modal-aware)
+	 * - Body scroll lock
+	 * - Child state reset on close
+	 * 
+	 * @see useSidebarDrawer for implementation details
+	 */
+	useSidebarDrawer({
+		isOpen,
+		isMobile,
+		onClose,
+		sidebarRef,
+		hasOpenModal: settingsModalOpen,
+		onSidebarClose: () => setSettingsModalOpen(false),
+	})
+
 	// Toggle section collapse
-	const toggleSection = useCallback((sectionId: string) => {
+	// React Compiler automatically optimizes this callback
+	const toggleSection = (sectionId: string) => {
 		setCollapsedSections((prev) => {
 			const next = new Set(prev)
 			if (next.has(sectionId)) {
@@ -168,14 +185,15 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 			}
 			return next
 		})
-	}, [])
+	}
 
 	// Handle link click - close sidebar on mobile
-	const handleLinkClick = useCallback(() => {
+	// React Compiler automatically optimizes this callback
+	const handleLinkClick = () => {
 		if (isMobile) {
 			onClose()
 		}
-	}, [isMobile, onClose])
+	}
 
 	/**
 	 * Handle user logout with FAANG-level cleanup.
@@ -205,7 +223,8 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 	 * 
 	 * Used by: Google, Facebook, Stripe, Airbnb, LinkedIn
 	 */
-	const handleLogout = useCallback(async () => {
+	// React Compiler automatically optimizes this async callback
+	const handleLogout = async () => {
 		// Prevent double-logout
 		if (isLoggingOut) {
 			logger.warn('Logout already in progress, ignoring duplicate request', {
@@ -282,13 +301,14 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 			// Always reset loading state
 			setIsLoggingOut(false)
 		}
-	}, [isLoggingOut, user, clearAuthState, router])
+	}
 
 	/**
 	 * Wrapper for logout to handle promise in onClick handler.
 	 * FAANG Pattern: Non-async wrapper for async event handlers.
+	 * React Compiler automatically optimizes this callback
 	 */
-	const handleLogoutClick = useCallback(() => {
+	const handleLogoutClick = () => {
 		void handleLogout().catch((error) => {
 			// Error already handled in handleLogout, but catch any unhandled rejections
 			logger.error('Unhandled logout error', {
@@ -297,58 +317,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 				action: 'handleLogoutClick',
 			})
 		})
-	}, [handleLogout])
-
-	// Handle Escape key to close on mobile
-	useEffect(() => {
-		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === 'Escape' && isOpen && isMobile) {
-				onClose()
-			}
-		}
-
-		window.addEventListener('keydown', handleEscape)
-		return () => window.removeEventListener('keydown', handleEscape)
-	}, [isOpen, isMobile, onClose])
-
-	// Handle outside click on mobile
-	useEffect(() => {
-		const handleOutsideClick = (e: MouseEvent) => {
-			if (
-				isMobile &&
-				isOpen &&
-				sidebarRef.current &&
-				!sidebarRef.current.contains(e.target as Node)
-			) {
-				onClose()
-			}
-		}
-
-		if (isOpen && isMobile) {
-			// Slight delay to prevent immediate closing
-			const timeoutId = setTimeout(() => {
-				document.addEventListener('mousedown', handleOutsideClick)
-			}, 100)
-
-			return () => {
-				clearTimeout(timeoutId)
-				document.removeEventListener('mousedown', handleOutsideClick)
-			}
-		}
-	}, [isOpen, isMobile, onClose])
-
-	// Body scroll lock on mobile
-	useEffect(() => {
-		if (isOpen && isMobile) {
-			document.body.style.overflow = 'hidden'
-		} else {
-			document.body.style.overflow = ''
-		}
-
-		return () => {
-			document.body.style.overflow = ''
-		}
-	}, [isOpen, isMobile])
+	}
 
 	// Desktop: Always render (permanent sidebar)
 	// Mobile: Only render when isOpen is true

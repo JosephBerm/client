@@ -150,6 +150,8 @@ export { useFocusTrap } from './hooks/useFocusTrap'
 export { useAccordion } from './hooks/useAccordion'
 export { useElementRefs } from './hooks/useElementRefs'
 export { useKeyboardNavigation } from './hooks/useKeyboardNavigation'
+export { useSidebarDrawer } from './hooks/useSidebarDrawer'
+export type { UseSidebarDrawerOptions } from './hooks/useSidebarDrawer'
 export type {
 	UseKeyboardNavigationOptions,
 	UseKeyboardNavigationReturn,

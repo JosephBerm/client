@@ -66,7 +66,7 @@
 
 'use client'
 
-import { useState, useEffect, useRef, useCallback, type ReactNode } from 'react'
+import { useState, useEffect, useRef, type ReactNode } from 'react'
 
 import classNames from 'classnames'
 import { Menu } from 'lucide-react'
@@ -85,6 +85,37 @@ import Logo from '@_components/ui/Logo'
 
 import Breadcrumb from './Breadcrumb'
 import InternalSidebar from './InternalSidebar'
+
+/**
+ * Synchronizes server-fetched user data to client auth store.
+ * Uses ref to ensure one-time initialization (React-safe pattern).
+ */
+function useAuthSync(user: IUser | null | undefined): void {
+	const initialized = useRef(false)
+
+	// Run synchronously on first render only (before children mount)
+	if (!initialized.current && user) {
+		const currentUser = useAuthStore.getState().user
+		if (!currentUser || currentUser.id !== user.id) {
+			useAuthStore.getState().setUser(user)
+		}
+		initialized.current = true
+	}
+
+	// Handle user prop changes after initial mount
+	useEffect(() => {
+		if (!user) return
+		
+		const currentUser = useAuthStore.getState().user
+		if (currentUser?.id !== user.id) {
+			useAuthStore.getState().setUser(user)
+			logger.info('Auth store updated with new user', {
+				userId: user.id ?? 'unknown user',
+				component: 'InternalAppShell',
+			})
+		}
+	}, [user])
+}
 
 /**
  * InternalAppShell component props interface.
@@ -168,120 +199,29 @@ interface InternalAppShellProps {
  * @returns Internal app shell layout
  */
 export default function InternalAppShell({ children, user }: InternalAppShellProps) {
-	// Mobile-only state: sidebar drawer open/close
-	// Desktop: sidebar is always visible (no state needed)
+	// Sync server user data to client auth store (React-safe one-time init)
+	useAuthSync(user)
+
+	// Mobile drawer state (desktop sidebar is always visible)
 	const [sidebarOpen, setSidebarOpen] = useState(false)
 
-	// Initialize auth store with server-fetched user data
-	// This ensures client-side state matches server-side authentication
-	// CRITICAL: Must run before any components that depend on auth state
-	// 
-	// **Defensive Coding:**
-	// - Validates user prop exists and has valid id
-	// - Handles null/undefined user.id gracefully
-	// - Only updates store if user actually changed (deep equality)
-	// - Error handling with structured logging
-	// - Prevents unnecessary re-renders with stable comparison
-	useEffect(() => {
-		// Defensive: Validate user prop exists
-		if (!user) {
-			logger.error('InternalAppShell received invalid user prop', {
-				component: 'InternalAppShell',
-				user: user,
-			})
-			return
-		}
-
-		try {
-			const currentUser = useAuthStore.getState().user
-			const currentUserId = currentUser?.id ?? null
-			const newUserId = user?.id ?? null
-
-			// Only update if user data actually changed
-			// Handles null id cases gracefully (users without id shouldn't exist, but defensive)
-			if (!currentUser || currentUserId !== newUserId) {
-				useAuthStore.getState().setUser(user)
-				logger.debug('Auth store initialized with server user data', {
-					userId: newUserId ?? 'unknown',
-					userName: user.name?.getFullName?.() ?? 'Unknown User',
-					component: 'InternalAppShell',
-				})
-			}
-		} catch (error) {
-			// Defensive: Handle errors gracefully without crashing the app
-			logger.error('Failed to initialize auth store with user data', {
-				error,
-				userId: user?.id ?? 'unknown',
-				component: 'InternalAppShell',
-			})
-		}
-	}, [user])
-
-	// Detect mobile vs desktop breakpoint
-	// Mobile: < 1024px (drawer), Desktop: >= 1024px (permanent sidebar)
 	const isMobile = useMediaQuery('(max-width: 1023px)')
 	const prevIsMobile = useRef<boolean | null>(null)
 
-	// Close mobile drawer when transitioning to desktop
-	// Desktop doesn't need drawer state (sidebar is permanent)
-	// 
-	// **Defensive Coding:**
-	// - Handles initial mount (prevIsMobile.current is null)
-	// - Only closes if transitioning FROM mobile TO desktop
-	// - Updates ref before state check to prevent race conditions
-	// - Cleanup on unmount not needed (ref cleanup is automatic)
+	// Close drawer when transitioning mobile → desktop
 	useEffect(() => {
-		// Only process transitions (skip initial mount)
 		if (prevIsMobile.current === null) {
 			prevIsMobile.current = isMobile
 			return
 		}
-
-		// Close drawer only when transitioning from mobile to desktop
 		if (!isMobile && prevIsMobile.current && sidebarOpen) {
 			setSidebarOpen(false)
-			logger.debug('Mobile drawer closed on desktop transition', {
-				component: 'InternalAppShell',
-			})
 		}
-
-		// Update ref AFTER processing (prevents race conditions)
 		prevIsMobile.current = isMobile
 	}, [isMobile, sidebarOpen])
 
-	// Mobile-only: Toggle sidebar drawer
-	// Memoized to prevent unnecessary Sidebar re-renders
-	// 
-	// **Defensive Coding:**
-	// - Safe to call even if already in desired state
-	// - Uses functional update to prevent stale closure issues
-	const toggleSidebar = useCallback(() => {
-		setSidebarOpen((prev) => {
-			const newState = !prev
-			logger.debug('Mobile sidebar drawer toggled', {
-				open: newState,
-				component: 'InternalAppShell',
-			})
-			return newState
-		})
-	}, [])
-
-	// Mobile-only: Close sidebar drawer
-	// Memoized to prevent unnecessary Sidebar re-renders
-	// 
-	// **Defensive Coding:**
-	// - Idempotent (safe to call multiple times)
-	// - No-op if already closed
-	const closeSidebar = useCallback(() => {
-		setSidebarOpen((prev) => {
-			if (prev) {
-				logger.debug('Mobile sidebar drawer closed', {
-					component: 'InternalAppShell',
-				})
-			}
-			return false
-		})
-	}, [])
+	const toggleSidebar = () => setSidebarOpen((prev) => !prev)
+	const closeSidebar = () => setSidebarOpen(false)
 
 	return (
 		<div className="relative flex min-h-screen w-full bg-base-100">

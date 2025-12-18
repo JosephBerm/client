@@ -30,8 +30,8 @@
  * - Width: 320px (mobile) to 384px (desktop)
  *
  * **Performance:**
- * - Memoized sections with useMemo
- * - Memoized callbacks with useCallback
+ * - React Compiler automatically optimizes re-renders and callbacks
+ * - No manual memoization needed (React Compiler handles it)
  * - SSR-safe media query hook
  * - Optimized re-renders
  *
@@ -61,7 +61,7 @@
 
 'use client'
 
-import { useEffect, useMemo, useCallback, useState } from 'react'
+import { useState, useRef } from 'react'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -72,7 +72,7 @@ import { Settings, ChevronDown, ExternalLink } from 'lucide-react'
 import { useAuthStore } from '@_features/auth'
 import { NavigationService, Routes } from '@_features/navigation'
 
-import { useMediaQuery } from '@_shared'
+import { useMediaQuery, useSidebarDrawer } from '@_shared'
 
 import SettingsModal from '@_components/settings/SettingsModal'
 
@@ -139,13 +139,11 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 	// Use media query hook instead of window.innerWidth (prevents hydration issues)
 	const isMobile = useMediaQuery('(max-width: 1023px)')
 
-	// Memoize navigation sections - recomputes when user role changes
-	const sections = useMemo(() => {
-		return NavigationService.getNavigationSections(user?.role)
-	}, [user?.role])
+	// Get navigation sections - React Compiler automatically optimizes this computation
+	const sections = NavigationService.getNavigationSections(user?.role)
 
-	// State for collapsible sections
-	const initialCollapsed = useMemo<Set<string>>(() => {
+	// State for collapsible sections - React Compiler automatically optimizes this computation
+	const initialCollapsed = (() => {
 		const collapsed = new Set<string>()
 		sections.forEach((section) => {
 			if (section.defaultCollapsed) {
@@ -153,13 +151,35 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 			}
 		})
 		return collapsed
-	}, [sections])
+	})()
 
 	const [collapsedSections, setCollapsedSections] = useState<Set<string>>(initialCollapsed)
 	const [settingsModalOpen, setSettingsModalOpen] = useState(false)
+	const sidebarRef = useRef<HTMLElement>(null)
 
-	// Memoized toggle function for section collapse
-	const toggleSection = useCallback((sectionId: string) => {
+	/**
+	 * Shared sidebar drawer behavior (MAANG DRY principle)
+	 * 
+	 * Handles all common mobile drawer logic in one place:
+	 * - Outside click detection (modal-aware)
+	 * - Escape key handling (modal-aware)
+	 * - Body scroll lock
+	 * - Child state reset on close
+	 * 
+	 * @see useSidebarDrawer for implementation details
+	 */
+	useSidebarDrawer({
+		isOpen,
+		isMobile,
+		onClose,
+		sidebarRef,
+		hasOpenModal: settingsModalOpen,
+		onSidebarClose: () => setSettingsModalOpen(false),
+	})
+
+	// Toggle function for section collapse
+	// React Compiler automatically optimizes this callback
+	const toggleSection = (sectionId: string) => {
 		setCollapsedSections((prev) => {
 			const next = new Set(prev)
 			if (next.has(sectionId)) {
@@ -169,52 +189,31 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 			}
 			return next
 		})
-	}, [])
+	}
 
-	// Memoized link click handler
-	const handleLinkClick = useCallback(() => {
+	// Link click handler - React Compiler automatically optimizes this callback
+	const handleLinkClick = () => {
 		// Close sidebar on mobile when link is clicked
 		if (isMobile) {
 			onClose()
 		}
-	}, [isMobile, onClose])
+	}
 
 	// Keyboard handler for overlay accessibility
-	const handleOverlayKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+	// React Compiler automatically optimizes this callback
+	const handleOverlayKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
 		// Keyboard support for backdrop (Enter or Space to close)
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault()
 			onClose()
 		}
-	}, [onClose])
+	}
 
-	const handleSidebarClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
+	// React Compiler automatically optimizes this callback
+	const handleSidebarClick = (e: React.MouseEvent<HTMLElement>) => {
 		// Prevent click events from bubbling to overlay (prevents accidental sidebar close)
 		e.stopPropagation()
-	}, [])
-
-	// Handle outside click and body scroll lock
-	useEffect(() => {
-		const handleOutsideClick = (e: MouseEvent) => {
-			const sidebar = document.getElementById('app-sidebar')
-			if (sidebar && !sidebar.contains(e.target as Node) && isOpen) {
-				onClose()
-			}
-		}
-
-		// Disable body scroll when sidebar is open on mobile
-		if (isOpen && isMobile) {
-			document.body.style.overflow = 'hidden'
-			document.addEventListener('mousedown', handleOutsideClick)
-		} else {
-			document.body.style.overflow = ''
-		}
-
-		return () => {
-			document.body.style.overflow = ''
-			document.removeEventListener('mousedown', handleOutsideClick)
-		}
-	}, [isOpen, isMobile, onClose])
+	}
 
 	return (
 		<>
@@ -238,6 +237,7 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 			{/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */}
 			<aside
 				id="app-sidebar"
+				ref={sidebarRef}
 				aria-label={ariaLabel}
 				className={classNames(
 					// Use h-dvh (dynamic viewport height) to account for mobile browser UI (URL bar, navigation)
