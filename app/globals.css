@@ -11,6 +11,139 @@
  */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, [data-theme=luxury], [data-theme=luxury] *, [data-theme=sunset], [data-theme=sunset] *));
 
+/* ========================================
+   Mobile Safe Area & Dynamic Viewport System
+   
+   MAANG-Level Implementation (Apple, Google, Stripe, Linear, Notion)
+   
+   Problem: Mobile browser UI (URL bar, nav bar) causes content to be
+   hidden when using traditional viewport units (vh).
+   
+   Solution: 
+   1. Dynamic Viewport Units (dvh/svh/lvh) - CSS native
+   2. Safe Area Insets - iOS notches, Dynamic Island, Android gesture bars
+   3. CSS Custom Properties - Maximum flexibility and composability
+   
+   Browser Support:
+   - dvh/svh/lvh: Chrome 108+, Safari 15.4+, Firefox 110+, Edge 108+
+   - env(): Chrome 69+, Safari 11.1+, Firefox 65+, Edge 79+
+   
+   Reference: https://webkit.org/blog/7929/designing-websites-for-iphone-x/
+   ======================================== */
+
+/* CSS Custom Properties for Safe Areas - Enables composability */
+@layer base {
+	:root {
+		/* Safe area insets with fallbacks */
+		--safe-area-inset-top: env(safe-area-inset-top, 0px);
+		--safe-area-inset-right: env(safe-area-inset-right, 0px);
+		--safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+		--safe-area-inset-left: env(safe-area-inset-left, 0px);
+		
+		/* Minimum safe padding (1rem = 16px baseline) */
+		--safe-padding-min: 1rem;
+	}
+}
+
+@layer utilities {
+	/* ========================================
+	   Safe Area Padding Utilities
+	   Uses max() for graceful fallback on non-notched devices
+	   ======================================== */
+	
+	/* Individual side utilities */
+	.pt-safe {
+		padding-top: max(var(--safe-padding-min), var(--safe-area-inset-top));
+	}
+	
+	.pr-safe {
+		padding-right: max(var(--safe-padding-min), var(--safe-area-inset-right));
+	}
+	
+	.pb-safe {
+		padding-bottom: max(var(--safe-padding-min), var(--safe-area-inset-bottom));
+	}
+	
+	.pl-safe {
+		padding-left: max(var(--safe-padding-min), var(--safe-area-inset-left));
+	}
+	
+	/* Horizontal and Vertical shortcuts */
+	.px-safe {
+		padding-left: max(var(--safe-padding-min), var(--safe-area-inset-left));
+		padding-right: max(var(--safe-padding-min), var(--safe-area-inset-right));
+	}
+	
+	.py-safe {
+		padding-top: max(var(--safe-padding-min), var(--safe-area-inset-top));
+		padding-bottom: max(var(--safe-padding-min), var(--safe-area-inset-bottom));
+	}
+	
+	/* All sides */
+	.p-safe {
+		padding-top: max(var(--safe-padding-min), var(--safe-area-inset-top));
+		padding-right: max(var(--safe-padding-min), var(--safe-area-inset-right));
+		padding-bottom: max(var(--safe-padding-min), var(--safe-area-inset-bottom));
+		padding-left: max(var(--safe-padding-min), var(--safe-area-inset-left));
+	}
+	
+	/* ========================================
+	   Safe Area Margin Utilities
+	   For elements that need margin instead of padding
+	   ======================================== */
+	
+	.mt-safe {
+		margin-top: max(var(--safe-padding-min), var(--safe-area-inset-top));
+	}
+	
+	.mb-safe {
+		margin-bottom: max(var(--safe-padding-min), var(--safe-area-inset-bottom));
+	}
+	
+	.ml-safe {
+		margin-left: max(var(--safe-padding-min), var(--safe-area-inset-left));
+	}
+	
+	.mr-safe {
+		margin-right: max(var(--safe-padding-min), var(--safe-area-inset-right));
+	}
+	
+	/* ========================================
+	   Mobile-Optimized Scrollable Container
+	   Prevents iOS overscroll bounce issues
+	   ======================================== */
+	
+	.scroll-safe {
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		overscroll-behavior: contain;
+	}
+	
+	/* ========================================
+	   Full-Height Mobile Container
+	   Use instead of h-screen on mobile overlays/modals/sidebars
+	   
+	   CSS Cascade Fallback Pattern:
+	   1. First: vh (fallback for older browsers)
+	   2. Last: dvh (modern browsers use this, ignoring vh)
+	   ======================================== */
+	
+	.h-screen-safe {
+		height: 100vh;  /* Fallback for browsers without dvh support */
+		height: 100dvh; /* Modern browsers override with dynamic viewport height */
+	}
+	
+	.min-h-screen-safe {
+		min-height: 100vh;
+		min-height: 100dvh;
+	}
+	
+	.max-h-screen-safe {
+		max-height: 100vh;
+		max-height: 100dvh;
+	}
+}
+
 @layer base {
 	/* ========================================
 	   CSS Custom Properties (Design Tokens)

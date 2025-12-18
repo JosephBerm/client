@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 
 import { Suspense } from 'react'
 
@@ -17,9 +17,31 @@ import 'react-toastify/dist/ReactToastify.css'
 import './globals.css'
 import '@_scripts/theme-init'
 
+/**
+ * SEO Metadata - Next.js 14+ standard
+ */
 export const metadata: Metadata = {
 	title: 'MedSource Pro - Medical B2B Marketplace',
 	description: 'Professional medical supply marketplace for healthcare providers',
+}
+
+/**
+ * Viewport Configuration - Next.js 14+ standard
+ * 
+ * MAANG-level mobile viewport handling:
+ * - viewportFit: 'cover' enables env(safe-area-inset-*) for iOS notches/Dynamic Island
+ * - userScalable: true maintains accessibility (WCAG 2.1 compliance)
+ * - maximumScale: 5 allows zoom for accessibility
+ * 
+ * Used by: Apple, Google, Stripe, Linear, Notion
+ * Reference: https://webkit.org/blog/7929/designing-websites-for-iphone-x/
+ */
+export const viewport: Viewport = {
+	width: 'device-width',
+	initialScale: 1,
+	maximumScale: 5,
+	userScalable: true,
+	viewportFit: 'cover',
 }
 
 // No dynamic export needed - Next.js 15.5 automatically handles Client Components correctly.

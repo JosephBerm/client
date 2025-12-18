@@ -378,8 +378,9 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 					'bg-base-200 border-r border-base-300',
 					// Desktop: Fixed position, always visible
 					'lg:fixed lg:top-0 lg:left-0 lg:h-screen lg:w-96',
-					// Mobile: Fixed position, drawer style
-					'fixed top-0 left-0 h-screen w-80 z-50',
+					// Mobile: Fixed position, drawer style with dynamic viewport height
+					// Use h-dvh (dynamic viewport height) to account for mobile browser UI
+					'fixed top-0 left-0 h-dvh w-80 z-50',
 					'transition-transform duration-300 ease-in-out',
 					// Mobile transform (drawer slide)
 					{
@@ -388,7 +389,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 					}
 				)}
 			>
-				<div className="flex flex-col h-full">
+				<div className="flex flex-col h-full max-h-dvh">
 					{/* Header */}
 					<div className="flex items-center justify-between p-6 border-b border-base-300 shrink-0">
 						<Logo
@@ -413,8 +414,8 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 					)}
 					</div>
 
-					{/* Navigation Content */}
-					<nav className="flex-1 overflow-y-auto p-4">
+					{/* Navigation Content - Scrollable with safe area for mobile */}
+					<nav className="flex-1 overflow-y-auto p-4 overscroll-contain">
 						{sections.map((section) => (
 							<div key={section.id} className="mb-6">
 								{/* Section Header */}
@@ -525,8 +526,8 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 						))}
 					</nav>
 
-				{/* Footer */}
-				<div className="p-4 border-t border-base-300 space-y-2 shrink-0">
+				{/* Footer - Always visible with safe area padding for mobile browsers */}
+				<div className="p-4 pb-safe border-t border-base-300 space-y-2 shrink-0 bg-base-200">
 					<Button
 						variant="ghost"
 						size="sm"

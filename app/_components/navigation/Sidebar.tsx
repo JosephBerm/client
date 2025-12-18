@@ -240,8 +240,10 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 				id="app-sidebar"
 				aria-label={ariaLabel}
 				className={classNames(
-					'fixed top-0 left-0 h-full bg-base-200 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl border-r border-base-300',
-					'w-80 lg:w-96 overflow-y-auto',
+					// Use h-dvh (dynamic viewport height) to account for mobile browser UI (URL bar, navigation)
+					// This prevents content from being hidden behind mobile browser chrome
+					'fixed top-0 left-0 h-dvh bg-base-200 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl border-r border-base-300',
+					'w-80 lg:w-96 overflow-y-auto overscroll-contain',
 					{
 						'translate-x-0': isOpen,
 						'-translate-x-full': !isOpen,
@@ -254,7 +256,7 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 						: 'none',
 				}}
 			>
-				<div className="flex flex-col h-full">
+				<div className="flex flex-col h-full max-h-dvh">
 					{/* Header */}
 					<div className="flex items-center justify-between p-4 md:p-6 border-b border-base-300">
 						<h2 className="text-xl md:text-2xl font-semibold text-base-content">MedSource</h2>
@@ -269,8 +271,8 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 						</button>
 					</div>
 
-					{/* Navigation Content */}
-					<nav className="flex-1 overflow-y-auto p-4">
+					{/* Navigation Content - Scrollable with proper mobile handling */}
+					<nav className="flex-1 overflow-y-auto p-4 overscroll-contain">
 						{sections.map((section) => (
 							<div key={section.id} className="mb-4 md:mb-8">
 								{/* Section Header */}
@@ -349,8 +351,8 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 						))}
 					</nav>
 
-					{/* Footer */}
-				<div className="p-4 border-t border-base-300">
+					{/* Footer - Safe area padding for mobile browsers */}
+				<div className="p-4 pb-safe border-t border-base-300 shrink-0 bg-base-200">
 					<Link
 						href={Routes.Contact.location}
 						onClick={handleLinkClick}
