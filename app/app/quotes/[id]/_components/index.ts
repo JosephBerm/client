@@ -58,9 +58,11 @@ export {
 	useQuotePermissions,
 	useQuoteActions,
 	useQuoteAssignment,
+	useAutoMarkQuoteAsRead,
 	type UseQuoteDetailsReturn,
 	type UseQuotePermissionsReturn,
 	type UseQuoteActionsReturn,
 	type UseQuoteAssignmentReturn,
+	type UseAutoMarkQuoteAsReadConfig,
 } from './hooks'
 

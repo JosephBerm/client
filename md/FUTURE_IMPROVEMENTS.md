@@ -827,6 +827,104 @@ This section tracks larger architectural changes and improvements.
 
 ---
 
+### Account Status Management - Unified DTO Pattern Consideration
+
+**Priority**: P3  
+**Category**: Architecture Improvement / API Design  
+**Status**: Not Started  
+**Estimated Effort**: S  
+**Dependencies**: None (optional refactoring)
+
+**Description**:  
+Consider consolidating account status change endpoints into a single endpoint using a unified DTO pattern. Currently, each status change operation (suspend, activate, unlock, archive, restore, force-password-change) has its own dedicated endpoint. While this approach is explicit and RESTful, a unified DTO approach could simplify the API surface and provide more flexibility.
+
+**Current Implementation**:  
+Account status management uses separate endpoints:
+- `PUT /account/{id}/suspend` - Takes `SuspendAccountRequest` DTO with `Reason` field
+- `PUT /account/{id}/activate` - No request body
+- `PUT /account/{id}/unlock` - No request body
+- `PUT /account/{id}/archive` - No request body
+- `PUT /account/{id}/restore` - No request body
+- `PUT /account/{id}/force-password-change` - No request body
+
+Each endpoint has separate authorization checks, validation, and routes to corresponding `AccountService` methods.
+
+**Proposed Solution**:  
+Consolidate into a single endpoint with a unified DTO:
+
+```csharp
+// Unified DTO
+public class ChangeAccountStatusRequest
+{
+    public AccountStatus Status { get; set; }
+    public string? Reason { get; set; } // Optional, for suspend operations
+}
+
+// Single endpoint
+[HttpPut("/account/{id}/status")]
+public async Task<IResponse<bool>> ChangeAccountStatus(
+    int id, 
+    [FromBody] ChangeAccountStatusRequest request)
+{
+    // Route to appropriate service method based on request.Status
+    // Handle optional reason for suspend
+}
+```
+
+**Benefits**:  
+- **Simpler API surface**: One endpoint instead of six
+- **More flexible**: Easier to add new status types without new endpoints
+- **Consistent pattern**: All status changes use the same contract
+- **Frontend simplification**: Single API call pattern for all status changes
+
+**Trade-offs & Considerations**:  
+- **Less RESTful**: Status is a property, not a resource, so separate endpoints are more RESTful
+- **Less explicit**: Separate endpoints make operations clearer in API documentation
+- **Current pattern is consistent**: Similar to `/account/{id}/role` endpoint pattern
+- **Matches existing patterns**: `ProvidersController` uses separate suspend/activate endpoints
+
+**Recommendation**:  
+The current implementation is **appropriate** for the following reasons:
+1. Follows existing codebase patterns (see `ProvidersController.SuspendProvider`)
+2. More explicit and self-documenting (each operation is clear)
+3. Aligns with REST principles (each operation is a distinct action)
+4. Easier to apply different validation/permission rules per operation
+5. Matches the pattern used for role changes (`/account/{id}/role`)
+
+**When to Consider Refactoring**:  
+- If adding many more status types in the future (currently 6 statuses)
+- If status change logic becomes more complex and needs shared validation
+- If API surface reduction becomes a priority
+- If frontend requests consolidation
+
+**Implementation Notes**:  
+If refactoring:
+- Maintain backward compatibility with deprecated endpoints (mark as `[Obsolete]`)
+- Add comprehensive validation in the unified endpoint
+- Document status-to-method routing clearly
+- Consider using a strategy pattern for status-specific logic
+- Ensure frontend migration is straightforward
+
+**Current Approach Score**: 8/10 ✅
+- Follows existing patterns: 9/10
+- RESTfulness: 9/10
+- Maintainability: 8/10
+- API clarity: 9/10
+- Flexibility: 7/10
+
+**Related Files**:  
+- `server/Controllers/AccountController.cs` (status management endpoints)
+- `server/Controllers/ProvidersController.cs` (similar pattern reference)
+- `server/Services/DB/AccountService.cs` (status management methods)
+
+**References**:  
+- REST API Design: Resource vs Action endpoints
+- See `ProvidersController` for similar multi-endpoint pattern
+
+**Completion Date**: TBD (low priority, optional improvement)
+
+---
+
 ## MCP DevTools - Backend-Dependent Enhancements
 
 This section documents powerful MCP DevTools features that require Next.js server-side (backend) changes. These enhancements would transform the DevTools from a debugging interface into a comprehensive Developer Command Center.

@@ -42,6 +42,9 @@ export type { UseQuotePermissionsReturn } from './useQuotePermissions'
 export { useQuoteActions } from './useQuoteActions'
 export type { UseQuoteActionsReturn } from './useQuoteActions'
 
+export { useAutoMarkQuoteAsRead } from './useAutoMarkQuoteAsRead'
+export type { UseAutoMarkQuoteAsReadConfig } from './useAutoMarkQuoteAsRead'
+
 // ============================================================================
 // ASSIGNMENT HOOKS
 // ============================================================================

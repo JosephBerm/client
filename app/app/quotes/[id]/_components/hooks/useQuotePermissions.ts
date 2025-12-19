@@ -125,7 +125,11 @@ export function useQuotePermissions(quote: Quote | null): UseQuotePermissionsRet
 		const isOwnQuote = user.customerId && quoteCustomerId
 			? user.customerId === quoteCustomerId
 			: user.email === quote.emailAddress || user.customer?.name === quote.companyName
-		const isAssignedQuote = quote.assignedSalesRepId === user.id
+		// Compare assignedSalesRepId as strings (backend stores as string, user.id is string|null)
+		// Handle type coercion: convert both to string for comparison to avoid type mismatch issues
+		const isAssignedQuote = quote.assignedSalesRepId != null && user.id != null
+			? String(quote.assignedSalesRepId) === String(user.id)
+			: false
 		const isTeamQuote = hasMinimumRole(RoleLevels.SalesManager) // SalesManager+ can see team quotes
 		const isAllQuote = hasMinimumRole(RoleLevels.SalesManager) // SalesManager+ can see all quotes
 

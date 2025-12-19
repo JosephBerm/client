@@ -22,30 +22,29 @@
 
 import { describe, it, expect, beforeEach, vi, type MockedFunction } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
-import { useCartPageLogic } from '../useCartPageLogic'
-import { useCartStore } from '../../stores/useCartStore'
-import { useAuthStore } from '@_features/auth'
-import { API } from '@_shared'
-import * as referralTracking from '@_features/store/hooks/useReferralTracking'
 import { QuoteFormDataBuilder, CartItemBuilder } from '@/test-utils/testDataBuilders'
 import type { QuoteFormData } from '@_core'
 import Quote from '@_classes/Quote'
 
 // ============================================================================
-// Mocks
+// Mocks - Using vi.hoisted() to ensure variables are available for vi.mock()
 // ============================================================================
 
-// Mock useCartStore and useHydratedCart
-const mockUseCartStore = vi.fn()
-const mockUseHydratedCart = vi.fn()
+// Hoisted mock functions - these are initialized BEFORE vi.mock() calls
+const { mockSendQuote, mockGetProduct, mockUseCartStore, mockUseHydratedCart } = vi.hoisted(() => ({
+  mockSendQuote: vi.fn(),
+  mockGetProduct: vi.fn(),
+  mockUseCartStore: vi.fn(),
+  mockUseHydratedCart: vi.fn(),
+}))
 
 vi.mock('@_features/cart/stores/useCartStore', () => ({
-  useCartStore: vi.fn(),
-  useHydratedCart: vi.fn(() => ({
+  useCartStore: mockUseCartStore,
+  useHydratedCart: () => ({
     cart: [],
     isHydrated: true,
     itemCount: 0,
-  })),
+  }),
 }))
 
 vi.mock('@_features/auth', () => ({
@@ -62,10 +61,6 @@ vi.mock('next/navigation', () => ({
     prefetch: vi.fn(),
   })),
 }))
-
-// Mock API service - defined before mocks so they can reference it
-const mockSendQuote = vi.fn()
-const mockGetProduct = vi.fn()
 
 vi.mock('@_shared', async () => {
   const actual = await vi.importActual('@_shared') as typeof import('@_shared')
@@ -91,6 +86,13 @@ vi.mock('@_shared', async () => {
 vi.mock('@_features/store/hooks/useReferralTracking', () => ({
   getStoredReferral: vi.fn(() => null),
 }))
+
+// Import after mocks are set up
+import { useCartPageLogic } from '../useCartPageLogic'
+import { useCartStore } from '../../stores/useCartStore'
+import { useAuthStore } from '@_features/auth'
+import { API } from '@_shared'
+import * as referralTracking from '@_features/store/hooks/useReferralTracking'
 
 // ============================================================================
 // Test Helpers

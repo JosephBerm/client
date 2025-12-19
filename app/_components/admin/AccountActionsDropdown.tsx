@@ -151,7 +151,7 @@ export default function AccountActionsDropdown({
 			try {
 				switch (action) {
 					case 'activate':
-						await API.Accounts.activate(accountId)
+						await API.Accounts.changeStatus(accountId, AccountStatus.Active)
 						onStatusChange?.(accountId, AccountStatus.Active)
 						notificationService.success('Account activated successfully')
 						break
@@ -163,7 +163,7 @@ export default function AccountActionsDropdown({
 						return
 
 					case 'unlock':
-						await API.Accounts.unlock(accountId)
+						await API.Accounts.changeStatus(accountId, AccountStatus.Active)
 						onStatusChange?.(accountId, AccountStatus.Active)
 						notificationService.success('Account unlocked successfully')
 						break
@@ -176,13 +176,13 @@ export default function AccountActionsDropdown({
 					return
 
 					case 'restore':
-						await API.Accounts.restore(accountId)
+						await API.Accounts.changeStatus(accountId, AccountStatus.Active)
 						onStatusChange?.(accountId, AccountStatus.Active)
 						notificationService.success('Account restored successfully')
 						break
 
 					case 'force_password':
-						await API.Accounts.forcePasswordChange(accountId)
+						await API.Accounts.changeStatus(accountId, AccountStatus.ForcePasswordChange)
 						// Status doesn't necessarily change to ForcePasswordChange (just sets flag)
 						// But we can notify the parent if needed
 						notificationService.success(
@@ -224,7 +224,7 @@ export default function AccountActionsDropdown({
 
 			const accountId = account.id
 
-			await API.Accounts.suspend(accountId, reason)
+			await API.Accounts.changeStatus(accountId, AccountStatus.Suspended, reason)
 			onStatusChange?.(accountId, AccountStatus.Suspended)
 			notificationService.success('Account suspended successfully')
 
@@ -247,7 +247,7 @@ export default function AccountActionsDropdown({
 
 		setIsLoading(true)
 		try {
-			await API.Accounts.archive(accountId)
+			await API.Accounts.changeStatus(accountId, AccountStatus.Archived)
 			onStatusChange?.(accountId, AccountStatus.Archived)
 			notificationService.success('Account archived successfully')
 

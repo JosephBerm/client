@@ -261,6 +261,181 @@ export const handlers = [
   }),
 
   // ==========================================================================
+  // RBAC Endpoints (Admin Protected)
+  // ==========================================================================
+  
+  // Mock Roles Data
+  http.get(`${API_BASE_URL}/rbac/roles`, () => {
+    const mockRoles = [
+      { id: 1, name: 'customer', displayName: 'Customer', level: 0, description: 'Standard customer', isSystemRole: true },
+      { id: 2, name: 'sales_rep', displayName: 'Sales Representative', level: 100, description: 'Sales representative', isSystemRole: true },
+      { id: 3, name: 'sales_manager', displayName: 'Sales Manager', level: 200, description: 'Sales manager', isSystemRole: true },
+      { id: 4, name: 'fulfillment_coordinator', displayName: 'Fulfillment Coordinator', level: 300, description: 'Order fulfillment', isSystemRole: true },
+      { id: 5, name: 'admin', displayName: 'Administrator', level: 9999999, description: 'Full system access', isSystemRole: true },
+    ]
+    
+    return createSuccessResponse(mockRoles, 'roles_retrieved')
+  }),
+
+  http.get(`${API_BASE_URL}/rbac/roles/:id`, ({ params }) => {
+    const { id } = params
+    
+    const mockRole = {
+      id: Number(id),
+      name: 'sales_rep',
+      displayName: 'Sales Representative',
+      level: 100,
+      description: 'Sales representative',
+      isSystemRole: true,
+      rolePermissions: [
+        { id: 1, permissionId: 1, permission: { id: 1, name: 'quotes:read:assigned' } },
+        { id: 2, permissionId: 2, permission: { id: 2, name: 'quotes:update:assigned' } },
+      ],
+    }
+    
+    return createSuccessResponse(mockRole, 'role_retrieved')
+  }),
+
+  http.post(`${API_BASE_URL}/rbac/roles`, async ({ request }) => {
+    const body = await request.json() as { name?: string; displayName?: string; level?: number } | null
+    
+    if (!body || !body.name || !body.displayName || body.level === undefined) {
+      return createErrorResponse('Name, display name, and level are required', 400)
+    }
+    
+    const newRole = {
+      id: Date.now(),
+      name: body.name,
+      displayName: body.displayName,
+      level: body.level,
+      isSystemRole: false,
+      createdAt: new Date().toISOString(),
+    }
+    
+    return createSuccessResponse(newRole, 'role_created')
+  }),
+
+  http.put(`${API_BASE_URL}/rbac/roles/:id`, async ({ params, request }) => {
+    const { id } = params
+    const body = await request.json() as { displayName?: string; description?: string } | null
+    
+    const updatedRole = {
+      id: Number(id),
+      name: 'sales_rep',
+      displayName: body?.displayName || 'Sales Representative',
+      description: body?.description || 'Updated description',
+      level: 100,
+      updatedAt: new Date().toISOString(),
+    }
+    
+    return createSuccessResponse(updatedRole, 'role_updated')
+  }),
+
+  http.delete(`${API_BASE_URL}/rbac/roles/:id`, ({ params }) => {
+    const { id } = params
+    
+    // System roles cannot be deleted
+    if (Number(id) <= 5) {
+      return createErrorResponse('Cannot delete system roles', 400)
+    }
+    
+    return createSuccessResponse(true, 'role_deleted')
+  }),
+
+  // Mock Permissions Data
+  http.get(`${API_BASE_URL}/rbac/permissions`, () => {
+    const mockPermissions = [
+      { id: 1, name: 'quotes:read', description: 'Read quotes' },
+      { id: 2, name: 'quotes:create', description: 'Create quotes' },
+      { id: 3, name: 'quotes:update', description: 'Update quotes' },
+      { id: 4, name: 'quotes:delete', description: 'Delete quotes' },
+      { id: 5, name: 'quotes:approve', description: 'Approve quotes' },
+      { id: 6, name: 'quotes:assign', description: 'Assign quotes' },
+      { id: 7, name: 'orders:read', description: 'Read orders' },
+      { id: 8, name: 'orders:create', description: 'Create orders' },
+      { id: 9, name: 'orders:update', description: 'Update orders' },
+      { id: 10, name: 'orders:delete', description: 'Delete orders' },
+      { id: 11, name: 'orders:approve', description: 'Approve orders' },
+      { id: 12, name: 'users:read', description: 'Read users' },
+      { id: 13, name: 'users:create', description: 'Create users' },
+      { id: 14, name: 'users:update', description: 'Update users' },
+      { id: 15, name: 'users:delete', description: 'Delete users' },
+      { id: 16, name: 'settings:manage', description: 'Manage settings' },
+    ]
+    
+    return createSuccessResponse(mockPermissions, 'permissions_retrieved')
+  }),
+
+  http.post(`${API_BASE_URL}/rbac/permissions`, async ({ request }) => {
+    const body = await request.json() as { name?: string; description?: string } | null
+    
+    if (!body || !body.name) {
+      return createErrorResponse('Permission name is required', 400)
+    }
+    
+    const newPermission = {
+      id: Date.now(),
+      name: body.name,
+      description: body.description || '',
+      createdAt: new Date().toISOString(),
+    }
+    
+    return createSuccessResponse(newPermission, 'permission_created')
+  }),
+
+  // Role-Permission Assignment
+  http.get(`${API_BASE_URL}/rbac/roles/:roleId/permissions`, ({ params }) => {
+    const mockRolePermissions = [
+      { id: 1, name: 'quotes:read:assigned', description: 'Read assigned quotes' },
+      { id: 2, name: 'quotes:update:assigned', description: 'Update assigned quotes' },
+      { id: 3, name: 'orders:create', description: 'Create orders' },
+    ]
+    
+    return createSuccessResponse(mockRolePermissions, 'role_permissions_retrieved')
+  }),
+
+  http.post(`${API_BASE_URL}/rbac/roles/:roleId/permissions/:permissionId`, ({ params }) => {
+    const { roleId, permissionId } = params
+    
+    return createSuccessResponse(true, 'permission_assigned')
+  }),
+
+  http.delete(`${API_BASE_URL}/rbac/roles/:roleId/permissions/:permissionId`, ({ params }) => {
+    const { roleId, permissionId } = params
+    
+    return createSuccessResponse(true, 'permission_removed')
+  }),
+
+  http.post(`${API_BASE_URL}/rbac/roles/:roleId/permissions/bulk`, async ({ params, request }) => {
+    const { roleId } = params
+    const body = await request.json() as { permissionIds?: number[] } | null
+    
+    if (!body || !body.permissionIds || body.permissionIds.length === 0) {
+      return createErrorResponse('Permission IDs are required', 400)
+    }
+    
+    return createSuccessResponse(true, 'permissions_assigned')
+  }),
+
+  // ==========================================================================
+  // Account Role Stats (for RBAC Dashboard)
+  // ==========================================================================
+  http.get(`${API_BASE_URL}/accounts/role-stats`, () => {
+    const stats = {
+      totalAccounts: 150,
+      byRole: [
+        { role: 0, roleName: 'Customer', count: 120 },
+        { role: 100, roleName: 'Sales Representative', count: 15 },
+        { role: 200, roleName: 'Sales Manager', count: 8 },
+        { role: 300, roleName: 'Fulfillment Coordinator', count: 5 },
+        { role: 9999999, roleName: 'Administrator', count: 2 },
+      ],
+    }
+    
+    return createSuccessResponse(stats, 'role_stats_retrieved')
+  }),
+
+  // ==========================================================================
   // Network Error Simulation
   // ==========================================================================
   // You can add handlers that simulate network errors:

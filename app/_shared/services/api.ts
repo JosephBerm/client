@@ -110,6 +110,36 @@ import type UploadedFile from '@_classes/UploadedFile'
 import type User from '@_classes/User'
 
 import { HttpService } from './httpService'
+import type { AxiosResponse, ApiResponse } from './httpService'
+
+/**
+ * Request DTO for changing account status (unified endpoint).
+ * Matches backend ChangeAccountStatusRequest DTO.
+ */
+export interface ChangeAccountStatusRequest {
+	/** Target account status (AccountStatus enum value) */
+	status: number
+	/** Optional reason (required for Suspended status, max 500 chars) */
+	reason?: string
+}
+
+/**
+ * Response DTO for account status changes.
+ * Includes old/new status and audit information.
+ * Matches backend StatusChangeResult DTO.
+ */
+export interface StatusChangeResult {
+	/** Whether the status change was successful */
+	success: boolean
+	/** Previous account status (AccountStatus enum value) */
+	oldStatus: number
+	/** New account status (AccountStatus enum value) */
+	newStatus: number
+	/** Error message if status change failed */
+	errorMessage?: string
+	/** Timestamp when status was changed (ISO string) */
+	changedAt: string
+}
 
 /**
  * Main API object with domain-organized endpoints.
@@ -305,138 +335,62 @@ const API = {
 			HttpService.post<AdminCreateAccountResponse>('/account/admin/create', request),
 
 		// ========================================================================
-		// PHASE 1: ACCOUNT STATUS MANAGEMENT (Admin Only)
-		// Backend endpoints from server/Controllers/AccountController.cs
+		// UNIFIED ACCOUNT STATUS MANAGEMENT (Unified DTO Pattern)
 		// ========================================================================
 
 		/**
-		 * Admin-only: Suspend user account with reason (Phase 1).
-		 * Suspended accounts cannot login until reactivated.
+		 * Admin-only: Change account status (unified endpoint).
+		 * Consolidates all status change operations into a single method.
+		 * 
+		 * **Status Options:**
+		 * - `AccountStatus.Active` - Activates account (routes to activate/unlock/restore based on current status)
+		 * - `AccountStatus.Suspended` - Suspends account (reason required)
+		 * - `AccountStatus.Archived` - Archives account (soft delete)
+		 * - `AccountStatus.ForcePasswordChange` - Forces password change on next login
+		 * 
+		 * **Invalid Statuses:**
+		 * - `AccountStatus.Locked` - Cannot be set manually (auto-only after 5 failed logins)
+		 * - `AccountStatus.PendingVerification` - Set during registration only
 		 * 
 		 * **Business Logic:**
-		 * - Account status → Suspended
-		 * - User cannot login until activated
-		 * - Reason stored for audit
-		 * - Triggers audit log entry
+		 * - Admin-only operation
+		 * - Cannot suspend/archive own account
+		 * - Reason required for Suspended status
+		 * - Returns StatusChangeResult with old/new status and audit info
 		 * 
-		 * @param id - Account ID to suspend
-		 * @param reason - Reason for suspension (max 500 chars)
-		 * @returns Success boolean
+		 * @param id - Account ID to change status for
+		 * @param status - Target account status (AccountStatus enum value)
+		 * @param reason - Optional reason (required for Suspended status, max 500 chars)
+		 * @returns Status change result with old/new status and success indicator
 		 * 
 		 * @example
 		 * ```typescript
-		 * await API.Accounts.suspend('123', 'Policy violation: spam activity');
+		 * import { AccountStatus } from '@_classes/Enums';
+		 * 
+		 * // Suspend account with reason
+		 * await API.Accounts.changeStatus('123', AccountStatus.Suspended, 'Policy violation');
+		 * 
+		 * // Activate account (auto-routes to activate/unlock/restore)
+		 * await API.Accounts.changeStatus('123', AccountStatus.Active);
+		 * 
+		 * // Archive account
+		 * await API.Accounts.changeStatus('123', AccountStatus.Archived);
+		 * 
+		 * // Force password change
+		 * await API.Accounts.changeStatus('123', AccountStatus.ForcePasswordChange);
 		 * ```
 		 */
-		suspend: async (id: string, reason: string) =>
-			HttpService.put<boolean>(`/account/${id}/suspend`, { reason }),
-
-		/**
-		 * Admin-only: Activate suspended/locked account (Phase 1).
-		 * Resets account to Active status.
-		 * 
-		 * **Business Logic:**
-		 * - Account status → Active
-		 * - Clears suspension reason
-		 * - Clears lockout timestamp
-		 * - Resets failed login attempts
-		 * - Triggers audit log entry
-		 * 
-		 * @param id - Account ID to activate
-		 * @returns Success boolean
-		 * 
-		 * @example
-		 * ```typescript
-		 * await API.Accounts.activate('123');
-		 * ```
-		 */
-		activate: async (id: string) =>
-			HttpService.put<boolean>(`/account/${id}/activate`, {}),
-
-		/**
-		 * Admin-only: Unlock locked account (Phase 1).
-		 * Removes automatic lockout from failed login attempts.
-		 * 
-		 * **Business Logic:**
-		 * - Account status → Active
-		 * - Clears lockout timestamp
-		 * - Resets failed login attempts to 0
-		 * - Triggers audit log entry
-		 * 
-		 * @param id - Account ID to unlock
-		 * @returns Success boolean
-		 * 
-		 * @example
-		 * ```typescript
-		 * await API.Accounts.unlock('123');
-		 * ```
-		 */
-		unlock: async (id: string) =>
-			HttpService.put<boolean>(`/account/${id}/unlock`, {}),
-
-		/**
-		 * Admin-only: Archive (soft delete) account (Phase 1).
-		 * Archived accounts cannot login but data is preserved.
-		 * 
-		 * **Business Logic:**
-		 * - Account status → Archived
-		 * - Sets archivedAt timestamp
-		 * - User cannot login
-		 * - Data preserved for compliance
-		 * - Can be restored later
-		 * - Triggers audit log entry
-		 * 
-		 * @param id - Account ID to archive
-		 * @returns Success boolean
-		 * 
-		 * @example
-		 * ```typescript
-		 * await API.Accounts.archive('123');
-		 * ```
-		 */
-		archive: async (id: string) =>
-			HttpService.put<boolean>(`/account/${id}/archive`, {}),
-
-		/**
-		 * Admin-only: Restore archived account (Phase 1).
-		 * Returns archived account to Active status.
-		 * 
-		 * **Business Logic:**
-		 * - Account status → Active
-		 * - Clears archivedAt timestamp
-		 * - User can login again
-		 * - Triggers audit log entry
-		 * 
-		 * @param id - Account ID to restore
-		 * @returns Success boolean
-		 * 
-		 * @example
-		 * ```typescript
-		 * await API.Accounts.restore('123');
-		 * ```
-		 */
-		restore: async (id: string) =>
-			HttpService.put<boolean>(`/account/${id}/restore`, {}),
-
-		/**
-		 * Admin-only: Force user to change password on next login (Phase 1).
-		 * Sets forcePasswordChange flag and status.
-		 * 
-		 * **Business Logic:**
-		 * - Sets forcePasswordChange flag
-		 * - User can login but redirected to password change
-		 * - Triggers audit log entry
-		 * 
-		 * @param id - Account ID to force password change
-		 * @returns Success boolean
-		 * 
-		 * @example
-		 * ```typescript
-		 * await API.Accounts.forcePasswordChange('123');
-		 * ```
-		 */
-		forcePasswordChange: async (id: string) =>
-			HttpService.put<boolean>(`/account/${id}/force-password-change`, {}),
+		changeStatus: async (
+			id: string,
+			status: number,
+			reason?: string
+		) => {
+			const request: ChangeAccountStatusRequest = {
+				status,
+				...(reason && { reason }), // Only include reason if provided
+			}
+			return HttpService.put<StatusChangeResult>(`/account/${id}/status`, request)
+		},
 	},
 	
 	/**

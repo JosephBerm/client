@@ -60,6 +60,7 @@ const Page = () => {
 		isCurrentUserAdmin,
 		
 		// Derived State
+		accountName,
 		memberSince,
 		hasCustomerAssociation,
 		pageTitle,
@@ -248,6 +249,7 @@ const Page = () => {
 					<TabPanel value="profile">
 						<AccountProfileTab
 							account={account}
+							accountName={accountName}
 							memberSince={memberSince}
 							isCurrentUserAdmin={isCurrentUserAdmin}
 							canChangeRole={canChangeRole}

@@ -17,15 +17,29 @@
 		"check:all": "npm run type-check && npm run lint:all",
 		"check:ci": "npm run type-check:ci && npm run lint:ci",
 		"check:watch": "npm run type-check:watch",
+
 		"test": "vitest",
 		"test:run": "vitest run",
 		"test:watch": "vitest --watch",
 		"test:coverage": "vitest run --coverage",
 		"test:ui": "vitest --ui",
+
+		"test:rbac": "vitest run rbac Permission Role guards",
+		"test:cart": "vitest run cart",
+		"test:validation": "vitest run validation",
+		"test:quotes": "vitest run quotes Quote",
+		"test:security": "vitest run rbac Permission guards",
+		"test:core": "vitest run _core",
+		"test:features": "vitest run _features",
+		"test:shared": "vitest run _shared",
+
 		"test:e2e": "playwright test",
 		"test:e2e:ui": "playwright test --ui",
 		"test:e2e:headed": "playwright test --headed",
-		"test:all": "npm run test:run && npm run test:e2e"
+
+		"test:all": "npm run test:run && npm run test:e2e",
+		"test:ci": "vitest run --reporter=json --reporter=verbose --outputFile=test-results.json",
+		"test:ci:coverage": "vitest run --coverage --reporter=json --outputFile=test-results.json"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.3.1",

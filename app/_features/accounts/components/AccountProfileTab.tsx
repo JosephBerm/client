@@ -36,6 +36,7 @@ import { getRoleSelectOptions } from '@_shared'
 import AccountStatusBadge from '@_components/common/AccountStatusBadge'
 import RoleBadge from '@_components/common/RoleBadge'
 import UpdateAccountForm from '@_components/forms/UpdateAccountForm'
+import { SuspendAccountModal } from '@_components/modals'
 import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
 import ConfirmationModal from '@_components/ui/ConfirmationModal'
@@ -109,6 +110,8 @@ const STATUS_OPTIONS: SelectOption<number>[] = [
 export interface AccountProfileTabProps {
 	/** Account being viewed/edited */
 	account: User
+	/** Account display name (already computed in hook) */
+	accountName: string
 	/** Member since formatted date */
 	memberSince: string
 	/** Whether current user is admin */
@@ -134,7 +137,7 @@ export interface AccountProfileTabProps {
 	/** Handler for role changes */
 	onRoleChange: (role: AccountRole) => Promise<void>
 	/** Handler for status changes */
-	onStatusChange: (status: AccountStatus) => Promise<void>
+	onStatusChange: (status: AccountStatus, reason?: string) => Promise<void>
 	/** Handler for view customer navigation */
 	onViewCustomer: () => void
 	/** Handler for view orders navigation */
@@ -173,6 +176,7 @@ export interface AccountProfileTabProps {
  */
 export default function AccountProfileTab({
 	account,
+	accountName,
 	memberSince,
 	isCurrentUserAdmin,
 	canChangeRole,
@@ -205,6 +209,23 @@ export default function AccountProfileTab({
 	// Get labels for pending changes
 	const pendingRoleLabel = pendingRoleChange === AccountRole.Admin ? 'Administrator' : 'Customer'
 	const pendingStatusLabel = STATUS_OPTIONS.find(s => s.value === pendingStatusChange)?.label ?? ''
+	
+	// Memoize suspend confirmation handler
+	const handleSuspendConfirm = useCallback(
+		async (reason: string) => {
+			if (pendingStatusChange === AccountStatus.Suspended) {
+				await onStatusChange(AccountStatus.Suspended, reason)
+				onSetPendingStatusChange?.(null)
+			}
+		},
+		[pendingStatusChange, onStatusChange, onSetPendingStatusChange]
+	)
+	
+	// Memoize modal close handler
+	const handleSuspendModalClose = useCallback(() => {
+		onSetPendingStatusChange?.(null)
+	}, [onSetPendingStatusChange])
+	
 	return (
 		<div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
 			{/* Main Content - Profile Form */}
@@ -473,8 +494,20 @@ export default function AccountProfileTab({
 				/>
 			)}
 
-			{/* Status Change Confirmation Modal */}
-			{onConfirmStatusChange && onSetPendingStatusChange && (
+			{/* Suspend Account Modal (with reason collection) */}
+			{pendingStatusChange === AccountStatus.Suspended && (
+				<SuspendAccountModal
+					isOpen={true}
+					onClose={handleSuspendModalClose}
+					onConfirm={handleSuspendConfirm}
+					accountName={accountName || 'this account'}
+				/>
+			)}
+			
+			{/* Status Change Confirmation Modal (for other statuses) */}
+			{onConfirmStatusChange && onSetPendingStatusChange && 
+			 pendingStatusChange !== null && 
+			 pendingStatusChange !== AccountStatus.Suspended && (
 				<ConfirmationModal
 					isOpen={pendingStatusChange !== null}
 					onClose={() => onSetPendingStatusChange(null)}
@@ -483,7 +516,6 @@ export default function AccountProfileTab({
 					message={`Are you sure you want to change this account's status to ${pendingStatusLabel}?`}
 					variant={
 						pendingStatusChange === AccountStatus.Archived || 
-						pendingStatusChange === AccountStatus.Suspended ||
 						pendingStatusChange === AccountStatus.Locked
 							? 'danger' 
 							: 'warning'
@@ -492,10 +524,8 @@ export default function AccountProfileTab({
 					cancelText="Keep Current Status"
 					isLoading={isStatusUpdating}
 					details={
-						pendingStatusChange === AccountStatus.Suspended
-							? 'Suspended accounts cannot access the system until reactivated by an administrator.'
-							: pendingStatusChange === AccountStatus.Locked
-								? 'Locked accounts are temporarily blocked and will auto-unlock after 30 minutes.'
+						pendingStatusChange === AccountStatus.Locked
+							? 'Locked accounts are temporarily blocked and will auto-unlock after 30 minutes.'
 								: pendingStatusChange === AccountStatus.Archived
 									? 'Archived accounts are soft-deleted and cannot login. Data is preserved for compliance.'
 									: pendingStatusChange === AccountStatus.ForcePasswordChange

@@ -18,6 +18,8 @@ import { InternalPageHeader } from '../../_components'
 import {
 	useQuoteDetails,
 	useQuotePermissions,
+	useQuoteActions,
+	useAutoMarkQuoteAsRead,
 	QuoteHeader,
 	QuoteContactInfo,
 	QuoteProducts,
@@ -31,6 +33,17 @@ export default function QuoteDetailsPage() {
 	// Use custom hooks for data fetching and permissions (Phase 1)
 	const { quote, isLoading, error, refresh } = useQuoteDetails()
 	const permissions = useQuotePermissions(quote)
+	
+	// Get quote actions for auto-mark-as-read functionality
+	const { handleMarkAsRead } = useQuoteActions(quote, permissions, refresh)
+	
+	// Auto-mark quote as Read when assigned sales rep opens Unread quote
+	useAutoMarkQuoteAsRead({
+		quote,
+		permissions,
+		handleMarkAsRead,
+		isLoading,
+	})
 
 	// Early return if no permission to view
 	if (!isLoading && quote && !permissions.canView) {

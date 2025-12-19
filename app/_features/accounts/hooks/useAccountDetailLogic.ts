@@ -38,7 +38,7 @@ import { notificationService, useRouteParam, API } from '@_shared'
 
 import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import type Company from '@_classes/Company'
-import { AccountRole, AccountStatus } from '@_classes/Enums'
+import { AccountRole, AccountStatus, getAccountStatusLabel } from '@_classes/Enums'
 import Order from '@_classes/Order'
 import Quote from '@_classes/Quote'
 import type { IUser } from '@_classes/User'
@@ -108,7 +108,7 @@ export interface UseAccountDetailLogicReturn {
 	accountStatus: AccountStatus
 	isStatusUpdating: boolean
 	canChangeStatus: boolean
-	handleStatusChange: (newStatus: AccountStatus) => Promise<void>
+	handleStatusChange: (newStatus: AccountStatus, reason?: string) => Promise<void>
 	
 	// Activity Summary (counts)
 	activitySummary: AccountActivitySummary
@@ -247,11 +247,11 @@ export function useAccountDetailLogic(): UseAccountDetailLogicReturn {
 		[isCurrentUserAdmin, account?.id, currentUser?.id]
 	)
 	
-	// Account status (default to Active for existing accounts without status field)
-	// Note: When backend supports status field, this will use account.status
+	// Account status from the account entity (Phase 1 integration)
+	// Falls back to Active for backwards compatibility with older accounts
 	const accountStatus = useMemo(
-		() => AccountStatus.Active, // Default to Active - update when backend supports
-		[]
+		() => account?.status ?? AccountStatus.Active,
+		[account?.status]
 	)
 	
 	// Customer/Company association
@@ -313,7 +313,7 @@ export function useAccountDetailLogic(): UseAccountDetailLogicReturn {
 				const { data } = await API.Accounts.get(accountId)
 				
 				if (!data.payload) {
-					notificationService.error(data.message || 'Unable to load account', {
+					notificationService.error(data.message ?? 'Unable to load account', {
 						metadata: { accountId },
 						component: 'AccountDetailPage',
 						action: 'fetchAccount',
@@ -543,45 +543,117 @@ export function useAccountDetailLogic(): UseAccountDetailLogicReturn {
 	}, [account, canChangeRole])
 	
 	/**
+	 * Refresh account data from server
+	 */
+	const handleRefreshAccount = useCallback(async () => {
+		if (!accountId || isCreateMode) {
+			return
+		}
+		
+		try {
+			setIsLoading(true)
+			const { data } = await API.Accounts.get(accountId)
+			
+			if (data.payload) {
+				setAccount(new User(data.payload))
+			}
+		} catch (error) {
+			notificationService.error('Failed to refresh account data', {
+				metadata: { error, accountId },
+				component: 'AccountDetailPage',
+				action: 'handleRefreshAccount',
+			})
+		} finally {
+			setIsLoading(false)
+		}
+	}, [accountId, isCreateMode])
+	
+	/**
 	 * Handle status change for the account
 	 * Only available for admin users editing other accounts
 	 * 
-	 * Note: This is a UI-ready handler. When backend supports account status,
-	 * update this to call the appropriate API endpoint.
+	 * Uses unified status change endpoint and existing status label helper.
 	 */
-	const handleStatusChange = useCallback(async (newStatus: AccountStatus) => {
-		if (!account || !canChangeStatus) {
-			notificationService.warning('You do not have permission to change this status')
+	const handleStatusChange = useCallback(async (newStatus: AccountStatus, reason?: string) => {
+		if (!account?.id || !canChangeStatus) {
+			notificationService.warning('You do not have permission to change this status', {
+				component: 'AccountDetailPage',
+				action: 'handleStatusChange',
+			})
 			return
 		}
 		
 		try {
 			setIsStatusUpdating(true)
 			
-			// TODO: When backend supports status field, make API call here
-			// For now, just show a notification about the intended action
-			const statusLabels: Record<AccountStatus, string> = {
-				[AccountStatus.PendingVerification]: 'Pending Verification',
-				[AccountStatus.Active]: 'Active',
-				[AccountStatus.ForcePasswordChange]: 'Password Change Required',
-				[AccountStatus.Suspended]: 'Suspended',
-				[AccountStatus.Locked]: 'Locked',
-				[AccountStatus.Archived]: 'Archived',
+			const accountIdStr = String(account.id)
+			
+			// Handle status-specific requirements (remove Suspended case - reason comes from caller)
+			switch (newStatus) {
+				case AccountStatus.Locked:
+					// Locking is automatic via failed login attempts
+					notificationService.warning(
+						'Accounts are locked automatically after 5 failed login attempts. Use "Active" to unlock.',
+						{
+							component: 'AccountDetailPage',
+							action: 'handleStatusChange',
+						}
+					)
+					return
+					
+				case AccountStatus.PendingVerification:
+					// PendingVerification is set during registration
+					notificationService.warning(
+						'Pending Verification status is set during account creation.',
+						{
+							component: 'AccountDetailPage',
+							action: 'handleStatusChange',
+						}
+					)
+					return
 			}
 			
-			// Simulate API call delay
-			await new Promise((resolve) => setTimeout(resolve, 500))
+			// Call unified status change endpoint (reason is now a parameter)
+			const response = await API.Accounts.changeStatus(accountIdStr, newStatus, reason)
 			
-			notificationService.info(
-				`Status change to "${statusLabels[newStatus]}" - Backend integration pending`,
-				{ component: 'AccountDetailPage', action: 'handleStatusChange' }
+			// Check response using existing pattern
+			if (response?.data?.statusCode === 200 && response?.data?.payload?.success) {
+				// Refresh account data to get updated status
+				await handleRefreshAccount()
+				
+				// Use existing getAccountStatusLabel helper (DRY)
+				const statusLabel = getAccountStatusLabel(newStatus)
+				notificationService.success(
+					`Account status updated to "${statusLabel}"`,
+					{
+						component: 'AccountDetailPage',
+						action: 'handleStatusChange',
+					}
 			)
 			
-			logger.info('Account status change requested', {
+				logger.info('Account status changed', {
 				component: 'useAccountDetailLogic',
 				accountId: account.id,
-				newStatus: statusLabels[newStatus],
+					oldStatus: response.data.payload.oldStatus,
+					newStatus: response.data.payload.newStatus,
+				})
+			} else {
+				// Extract error message from response (follows existing pattern)
+				const errorMessage = 
+					response?.data?.payload?.errorMessage ?? 
+					response?.data?.message ?? 
+					'Failed to update status'
+				
+				notificationService.error(errorMessage, {
+					metadata: { 
+						statusCode: response?.data?.statusCode,
+						accountId: account.id,
+						newStatus,
+					},
+					component: 'AccountDetailPage',
+					action: 'handleStatusChange',
 			})
+			}
 		} catch (error) {
 			notificationService.error('Failed to update status', {
 				metadata: { error, accountId: account.id },
@@ -591,13 +663,15 @@ export function useAccountDetailLogic(): UseAccountDetailLogicReturn {
 		} finally {
 			setIsStatusUpdating(false)
 		}
-	}, [account, canChangeStatus])
+	}, [account?.id, canChangeStatus, handleRefreshAccount])
 	
 	/**
 	 * Confirm and execute pending role change
 	 */
 	const confirmRoleChange = useCallback(async () => {
-		if (pendingRoleChange === null) return
+		if (pendingRoleChange === null) {
+			return
+		}
 		await handleRoleChange(pendingRoleChange)
 		setPendingRoleChange(null)
 	}, [pendingRoleChange, handleRoleChange])
@@ -606,7 +680,9 @@ export function useAccountDetailLogic(): UseAccountDetailLogicReturn {
 	 * Confirm and execute pending status change
 	 */
 	const confirmStatusChange = useCallback(async () => {
-		if (pendingStatusChange === null) return
+		if (pendingStatusChange === null) {
+			return
+		}
 		await handleStatusChange(pendingStatusChange)
 		setPendingStatusChange(null)
 	}, [pendingStatusChange, handleStatusChange])
@@ -685,31 +761,6 @@ export function useAccountDetailLogic(): UseAccountDetailLogicReturn {
 			})
 		}
 	}, [account, canChangePassword])
-	
-	/**
-	 * Refresh account data from server
-	 */
-	const handleRefreshAccount = useCallback(async () => {
-		if (!accountId || isCreateMode) return
-		
-		try {
-			setIsLoading(true)
-			const { data } = await API.Accounts.get(accountId)
-			
-			if (data.payload) {
-				setAccount(new User(data.payload))
-				notificationService.success('Account data refreshed')
-			}
-		} catch (error) {
-			notificationService.error('Failed to refresh account data', {
-				metadata: { error, accountId },
-				component: 'AccountDetailPage',
-				action: 'handleRefreshAccount',
-			})
-		} finally {
-			setIsLoading(false)
-		}
-	}, [accountId, isCreateMode])
 	
 	// ============================================================================
 	// NAVIGATION HANDLERS
