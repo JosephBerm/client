@@ -1,175 +1,258 @@
 'use client'
 
-import { useEffect } from 'react'
+/**
+ * Analytics Dashboard Page
+ *
+ * Role-based business intelligence dashboard.
+ * Orchestrates data fetching and renders appropriate view based on user role.
+ *
+ * **Architecture (per Next.js 16 + React 19 best practices):**
+ *
+ * This page follows the "Orchestrator Pattern":
+ * - Handles authentication and role detection
+ * - Manages data fetching via custom hooks (SWR-based)
+ * - Delegates rendering to role-specific view components
+ * - Handles error/loading/empty states
+ *
+ * **Performance Optimizations:**
+ * - View components use React.memo() for shallow prop comparison
+ * - useMemo() used ONLY for expensive calculations (per React docs:
+ *   "useMemo is a performance optimization, not a semantic guarantee")
+ * - roleFlags memoized since it's passed as conditional to render
+ * - Simple boolean/primitive derived state NOT memoized (unnecessary overhead)
+ *
+ * **'use client' Boundary:**
+ * Per Next.js 16 docs: "add 'use client' to specific interactive components
+ * instead of marking large parts of your UI as Client Components"
+ * This page requires client-side interactivity (hooks, state, effects).
+ *
+ * **Role Views:**
+ * - Customer → CustomerAnalytics: Spending history, order trends
+ * - Sales Rep → SalesRepAnalytics: Personal performance, team comparison
+ * - Manager/Admin → ManagerAnalytics: Business intelligence, team metrics
+ *
+ * @see prd_analytics.md
+ * @see https://nextjs.org/docs/app/building-your-application/rendering/client-components
+ * @see https://react.dev/reference/react/useMemo#should-you-add-usememo-everywhere
+ * @module app/analytics/page
+ */
+
+import { useEffect, useMemo } from 'react'
 
 import { logger } from '@_core'
-
-import { useFinanceAnalytics } from '@_features/analytics'
-
-import {
-	AnalyticsFilters,
-	AnalyticsSummaryCards,
-	AnalyticsSalesMetrics,
-	AnalyticsOrderMetrics,
-	AnalyticsPerformanceTrends,
-	DetailedMetricsSkeleton,
-} from '@_components/analytics'
-import Button from '@_components/ui/Button'
+import { useAuthStore } from '@_features/auth'
+import { AccountRole } from '@_classes/Enums'
 
 import { InternalPageHeader } from '../_components'
 
-// Component name for logging (FAANG-level best practice)
+// Import from barrel for external consumption (page.tsx is external to _components)
+import {
+	// Role-based views (React.memo wrapped)
+	CustomerAnalytics,
+	SalesRepAnalytics,
+	ManagerAnalytics,
+	// State components
+	AnalyticsErrorState,
+	AnalyticsLoadingState,
+	AnalyticsEmptyState,
+	// UI components
+	AnalyticsDateRangePicker,
+} from './_components'
+
+import {
+	useAnalyticsSummary,
+	useTeamPerformance,
+	useRevenueTimeline,
+} from './_hooks'
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
 const COMPONENT_NAME = 'AnalyticsPage'
 
 /**
- * Analytics Dashboard Page
- * 
- * Main analytics page displaying financial metrics and performance data.
- * Uses extracted components and custom hooks for clean separation of concerns.
- * 
- * **Architecture:**
- * - Custom hook handles all data fetching and state management
- * - Components handle UI rendering and user interactions
- * - Utilities handle formatting and validation
- * - Comprehensive logging and error handling
- * 
- * @module app/analytics/page
+ * Role-specific page descriptions.
+ * Defined outside component to prevent recreation on each render.
  */
-const Page = () => {
-	const {
-		financeNumbers,
-		filter,
-		isLoading,
-		hasLoaded,
-		timeRange,
-		error,
-		hasData,
-		profitMarginValue,
-		averageOrderValueValue,
-		productsPerOrderValue,
-		handleTimeRangeChange,
-		handleDateChange,
-		handleApplyFilter,
-		handleDownload,
-		handleRetry,
-	} = useFinanceAnalytics()
+const ROLE_DESCRIPTIONS: Readonly<Record<number, string>> = {
+	[AccountRole.Customer]: 'Track your spending and order history.',
+	[AccountRole.SalesRep]: 'Monitor your performance and compare with team averages.',
+	[AccountRole.SalesManager]: 'Business intelligence and team performance metrics.',
+	[AccountRole.Admin]: 'Complete business analytics and team management.',
+} as const
 
-	// Log error state changes - always log errors for production debugging
+// ============================================================================
+// PAGE COMPONENT
+// ============================================================================
+
+/**
+ * Analytics Dashboard Page
+ *
+ * Entry point for analytics feature.
+ * Orchestrates data, role detection, and view rendering.
+ */
+export default function AnalyticsPage() {
+	// =========================================================================
+	// AUTH STATE
+	// =========================================================================
+	// Zustand selector pattern for optimal re-render behavior
+
+	const user = useAuthStore((state) => state.user)
+	const authLoading = useAuthStore((state) => state.isLoading)
+
+	// =========================================================================
+	// DATA HOOKS
+	// =========================================================================
+	// All hooks use useFetchWithCache internally (SWR pattern)
+
+	// Core analytics summary (all roles)
+	const {
+		data: summary,
+		isLoading: summaryLoading,
+		error: summaryError,
+		timeRange,
+		setTimeRange,
+		setCustomDateRange,
+		retry: retrySummary,
+		hasLoaded: summaryHasLoaded,
+	} = useAnalyticsSummary({ initialTimeRange: '12m' })
+
+	// Team performance (managers/admins only)
+	const {
+		data: teamData,
+		isLoading: teamLoading,
+		error: teamError,
+	} = useTeamPerformance({
+		autoFetch: (user?.role ?? -1) >= AccountRole.SalesManager,
+	})
+
+	// Revenue timeline (managers/admins only)
+	const {
+		data: revenueData,
+		isLoading: revenueLoading,
+	} = useRevenueTimeline({
+		autoFetch: (user?.role ?? -1) >= AccountRole.SalesManager,
+	})
+
+	// =========================================================================
+	// DERIVED STATE
+	// =========================================================================
+
+	const userRole = user?.role ?? AccountRole.Customer
+
+	/**
+	 * Role flags for conditional rendering.
+	 *
+	 * useMemo() justified here because:
+	 * 1. Object reference changes on each render without memoization
+	 * 2. Used in JSX conditionals which would cause child re-renders
+	 *
+	 * Per React docs: "useMemo is a React Hook that lets you cache the result
+	 * of a calculation between re-renders"
+	 *
+	 * @see https://react.dev/reference/react/useMemo
+	 */
+	const roleFlags = useMemo(
+		() => ({
+			isCustomer: userRole === AccountRole.Customer,
+			isSalesRep: userRole === AccountRole.SalesRep,
+			isManagerOrAdmin: userRole >= AccountRole.SalesManager,
+		}),
+		[userRole]
+	)
+
+	// Simple primitives - no useMemo needed (per React docs: "don't add useMemo
+	// for primitives... JavaScript engines are heavily optimized for primitives")
+	const isLoading = authLoading || summaryLoading
+	const pageDescription = ROLE_DESCRIPTIONS[userRole] ?? ROLE_DESCRIPTIONS[AccountRole.SalesManager]
+
+	// =========================================================================
+	// EFFECTS
+	// =========================================================================
+
+	/**
+	 * Error logging effect.
+	 *
+	 * Uses centralized logger from @_core for consistent error tracking.
+	 * Logs include component context for debugging.
+	 */
 	useEffect(() => {
-		if (error) {
-			logger.error('Analytics page error state', {
+		if (summaryError) {
+			logger.error('Analytics summary fetch failed', {
 				component: COMPONENT_NAME,
-				error,
+				error: summaryError,
+				userId: user?.id ?? undefined,
+				role: userRole,
 			})
 		}
-	}, [error])
+		if (teamError) {
+			logger.error('Team performance fetch failed', {
+				component: COMPONENT_NAME,
+				error: teamError,
+				userId: user?.id ?? undefined,
+			})
+		}
+	}, [summaryError, teamError, user?.id, userRole])
 
-	try {
+	// =========================================================================
+	// RENDER
+	// =========================================================================
+
 	return (
 		<>
+			{/* Page Header */}
 			<InternalPageHeader
 				title="Analytics Dashboard"
-				description="Track your business performance and financial metrics."
-				loading={!hasLoaded && isLoading}
+				description={pageDescription}
+				loading={!summaryHasLoaded && isLoading}
 				actions={
-					<Button
-						variant="secondary"
-						onClick={handleDownload}
-						disabled={isLoading || !hasData}
-					>
-						Export Data
-					</Button>
+					<AnalyticsDateRangePicker
+						timeRange={timeRange}
+						onPresetChange={setTimeRange}
+						onCustomRangeChange={setCustomDateRange}
+						disabled={isLoading}
+					/>
 				}
 			/>
 
-			<div className="space-y-8">
-				{error && (
-					<div className="alert alert-error">
-						<div className="flex-1">
-						<span>{error}</span>
-						</div>
-						<Button variant="ghost" size="sm" onClick={handleRetry}>
-							Retry
-						</Button>
-					</div>
+			{/* Main Content */}
+			<main className="space-y-6">
+				{/* Error State */}
+				{summaryError && (
+					<AnalyticsErrorState
+						error={summaryError}
+						onRetry={retrySummary}
+						context="summary"
+					/>
 				)}
 
-				{isLoading && hasLoaded && (
-					<div className="alert alert-info flex items-center gap-2">
-						<span className="loading loading-spinner loading-sm" aria-hidden="true"></span>
-						<span>Refreshing analytics&hellip;</span>
-					</div>
+				{/* Refresh Loading State */}
+				{isLoading && summaryHasLoaded && <AnalyticsLoadingState />}
+
+				{/* Role-Based Views - memo() prevents unnecessary re-renders */}
+				{summary && roleFlags.isCustomer && (
+					<CustomerAnalytics summary={summary} isLoading={isLoading} />
 				)}
 
-				<AnalyticsFilters
-					timeRange={timeRange}
-					filter={filter}
-					isLoading={isLoading}
-					hasLoaded={hasLoaded}
-					onTimeRangeChange={handleTimeRangeChange}
-					onDateChange={handleDateChange}
-					onApplyFilter={handleApplyFilter}
-								/>
+				{summary && roleFlags.isSalesRep && (
+					<SalesRepAnalytics summary={summary} isLoading={isLoading} />
+				)}
 
-				<AnalyticsSummaryCards
-					financeNumbers={financeNumbers}
-					profitMarginValue={profitMarginValue}
-					isLoading={isLoading}
-					hasLoaded={hasLoaded}
-					hasData={hasData}
-				/>
+				{summary && roleFlags.isManagerOrAdmin && (
+					<ManagerAnalytics
+						summary={summary}
+						teamData={teamData}
+						revenueData={revenueData}
+						isLoading={isLoading}
+						teamLoading={teamLoading}
+						revenueLoading={revenueLoading}
+					/>
+				)}
 
-				{/* Detailed Metrics Section */}
-				{isLoading && !hasLoaded ? (
-					<DetailedMetricsSkeleton />
-				) : hasData ? (
-				<section className="grid gap-6 lg:grid-cols-3">
-						<AnalyticsSalesMetrics
-							financeNumbers={financeNumbers}
-							averageOrderValueValue={averageOrderValueValue}
-							hasData={hasData}
-						/>
-
-						<AnalyticsOrderMetrics
-							financeNumbers={financeNumbers}
-							productsPerOrderValue={productsPerOrderValue}
-							hasData={hasData}
-						/>
-				</section>
-				) : null}
-
-				{/* Performance Trends Section */}
-				<section className="grid gap-6 lg:grid-cols-3">
-					<AnalyticsPerformanceTrends />
-				</section>
-			</div>
+				{/* Empty State */}
+				{!isLoading && !summary && !summaryError && <AnalyticsEmptyState />}
+			</main>
 		</>
 	)
-	} catch (error) {
-		logger.error('Analytics page rendering error', {
-			component: COMPONENT_NAME,
-			error: error instanceof Error ? error.message : 'Unknown error',
-			stack: error instanceof Error ? error.stack : undefined,
-		})
-		
-		// Return error UI to prevent complete crash
-		return (
-			<>
-				<InternalPageHeader
-					title="Analytics Dashboard"
-					description="Track your business performance and financial metrics."
-				/>
-				<div className="alert alert-error">
-					<div className="flex-1">
-						<span>An error occurred while loading the analytics dashboard. Please refresh the page.</span>
-					</div>
-					<Button variant="ghost" size="sm" onClick={() => window.location.reload()}>
-						Refresh Page
-					</Button>
-				</div>
-			</>
-		)
-	}
 }
-
-export default Page

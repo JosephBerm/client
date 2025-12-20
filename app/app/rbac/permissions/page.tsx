@@ -22,7 +22,7 @@ import {
 } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
-import { usePermissions, RoleLevels, Resources, Actions, Contexts } from '@_shared/hooks/usePermissions'
+import { usePermissions, RoleLevels, Resources, Actions, Contexts } from '@_shared'
 import { RoleDisplayNames, type RoleLevel, type Resource, type Action, type Context } from '@_types/rbac'
 
 import Card from '@_components/ui/Card'

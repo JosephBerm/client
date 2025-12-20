@@ -150,12 +150,12 @@ export enum NotificationType {
  * Determines user permissions and accessible features.
  * Higher values = more authority.
  * 
- * **Role Hierarchy:**
- * - **Customer (0)**: End users who purchase products
- * - **SalesRep (100)**: Sales representatives who manage quotes/orders
- * - **SalesManager (200)**: Managers who oversee sales team, approve high-value quotes
- * - **FulfillmentCoordinator (300)**: Handles order fulfillment logistics
- * - **Admin (9999999)**: Full system access
+ * **Role Hierarchy (per medsource_prd_system.md):**
+ * - **Customer (100)**: End users who purchase products
+ * - **FulfillmentCoordinator (200)**: Handles order fulfillment logistics
+ * - **SalesRep (300)**: Sales representatives who manage quotes/orders
+ * - **SalesManager (400)**: Managers who oversee sales team, approve high-value quotes
+ * - **Admin (500)**: Full system access
  * 
  * **Usage:**
  * - Navigation filtering: `NavigationService.getNavigationSections(userRole)`
@@ -177,16 +177,16 @@ export enum NotificationType {
  * ```
  */
 export enum AccountRole {
-	/** End users who purchase products (value: 0) */
-	Customer = 0,
-	/** Sales representatives who manage quotes/orders (value: 100) */
-	SalesRep = 100,
-	/** Managers who oversee sales team, approve high-value quotes (value: 200) */
-	SalesManager = 200,
-	/** Handles order fulfillment logistics (value: 300) */
-	FulfillmentCoordinator = 300,
-	/** Administrator with full system access (value: 9999999) */
-	Admin = 9999999,
+	/** End users who purchase products (value: 100) */
+	Customer = 100,
+	/** Handles order fulfillment logistics (value: 200) */
+	FulfillmentCoordinator = 200,
+	/** Sales representatives who manage quotes/orders (value: 300) */
+	SalesRep = 300,
+	/** Managers who oversee sales team, approve high-value quotes (value: 400) */
+	SalesManager = 400,
+	/** Administrator with full system access (value: 500) */
+	Admin = 500,
 }
 
 /**
@@ -332,15 +332,18 @@ export enum CustomerStatus {
  * 1. **Pending (100)**: Initial state, awaiting staff review
  * 2. **WaitingCustomerApproval (200)**: Quote sent, awaiting customer approval
  * 3. **Placed (300)**: Customer approved, order confirmed
- * 4. **Processing (400)**: Order being prepared for shipment
- * 5. **Shipped (500)**: Order in transit to customer
- * 6. **Delivered (600)**: Order received by customer
- * 7. **Cancelled (0)**: Order cancelled (lowest value for filtering)
+ * 4. **Paid (350)**: Payment confirmed by sales rep
+ * 5. **Processing (400)**: Order being prepared for shipment
+ * 6. **Shipped (500)**: Order in transit to customer
+ * 7. **Delivered (600)**: Order received by customer
+ * 8. **Cancelled (0)**: Order cancelled (lowest value for filtering)
  * 
  * **Numeric Values:**
  * - Used for sorting (ascending = oldest to newest stage)
  * - Used for filtering (e.g., "show all orders from Placed to Delivered")
  * - Enables status range queries in FinanceSearchFilter
+ * 
+ * @see prd_orders.md - Order Management PRD
  */
 export enum OrderStatus {
 	/** Order cancelled (value: 0) */
@@ -351,6 +354,8 @@ export enum OrderStatus {
 	WaitingCustomerApproval = 200,
 	/** Customer approved and placed order (value: 300) */
 	Placed = 300,
+	/** Payment confirmed by sales rep (value: 350) */
+	Paid = 350,
 	/** Order being prepared for shipment (value: 400) */
 	Processing = 400,
 	/** Order shipped and in transit (value: 500) */

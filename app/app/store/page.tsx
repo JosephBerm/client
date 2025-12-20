@@ -32,11 +32,11 @@
 
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { Archive, Package, Plus } from 'lucide-react'
+import { Archive, Filter, Package, Plus, X } from 'lucide-react'
 
 import {
 	createProductColumns,
@@ -47,10 +47,14 @@ import {
 } from '@_features/internalStore'
 import { Routes } from '@_features/navigation'
 
+import { API, usePermissions, flattenCategories } from '@_shared'
+
 import type { Product } from '@_classes/Product'
+import type ProductsCategory from '@_classes/ProductsCategory'
 
 import ServerDataGrid from '@_components/tables/ServerDataGrid'
 import Button from '@_components/ui/Button'
+import Select from '@_components/ui/Select'
 
 import { InternalPageHeader } from '../_components'
 
@@ -62,6 +66,11 @@ import { InternalPageHeader } from '../_components'
  */
 export default function InternalStorePage() {
 	const router = useRouter()
+	const [categories, setCategories] = useState<ProductsCategory[]>([])
+	const [categoriesLoading, setCategoriesLoading] = useState(true)
+	
+	// RBAC: Check if user can see cost field
+	const { isSalesRepOrAbove } = usePermissions()
 
 	// All business logic encapsulated in hook
 	const {
@@ -71,6 +80,9 @@ export default function InternalStorePage() {
 		showArchived,
 		isDeleting,
 		isArchiving,
+		// Filters
+		selectedCategoryId,
+		setSelectedCategoryId,
 		// Stats
 		stats,
 		statsLoading,
@@ -87,19 +99,38 @@ export default function InternalStorePage() {
 		toggleShowArchived,
 	} = useInternalStorePage()
 
+	// Fetch categories for filter dropdown
+	useEffect(() => {
+		const fetchCategories = async () => {
+			setCategoriesLoading(true)
+			try {
+				const { data } = await API.Store.Products.getAllCategories()
+				if (data.payload) {
+					setCategories(data.payload)
+				}
+			} catch {
+				// Silent fail - categories are optional filter
+			} finally {
+				setCategoriesLoading(false)
+			}
+		}
+		void fetchCategories()
+	}, [])
+
 	// Column definitions - memoized since they depend on permissions
 	const columns = useMemo(
 		() =>
 			createProductColumns({
 				canDelete,
+				showCost: isSalesRepOrAbove, // Only show cost to SalesRep+
 				onDelete: openDeleteModal,
 				onArchive: openArchiveModal,
 				onRestore: handleRestore,
 			}),
-		[canDelete, openDeleteModal, openArchiveModal, handleRestore]
+		[canDelete, isSalesRepOrAbove, openDeleteModal, openArchiveModal, handleRestore]
 	)
 
-	// Search filters based on showArchived state
+	// Search filters based on showArchived state and category
 	const searchFilters = useMemo(() => {
 		const filters: Record<string, unknown> = {
 			includes: PRODUCT_API_INCLUDES,
@@ -107,8 +138,14 @@ export default function InternalStorePage() {
 		if (showArchived && canViewArchived) {
 			filters.isArchived = true
 		}
+		if (selectedCategoryId !== null) {
+			filters.CategorieIds = String(selectedCategoryId)
+		}
 		return filters
-	}, [showArchived, canViewArchived])
+	}, [showArchived, canViewArchived, selectedCategoryId])
+
+	// Use shared utility for DRY
+	const flatCategories = flattenCategories(categories)
 
 	return (
 		<>
@@ -146,6 +183,44 @@ export default function InternalStorePage() {
 				}
 			/>
 
+			{/* Category Filter Bar */}
+			<div className="mb-6 flex flex-wrap items-center gap-3">
+				<div className="flex items-center gap-2">
+					<Filter className="w-4 h-4 text-base-content/50" />
+					<span className="text-sm text-base-content/70 font-medium">Filter:</span>
+				</div>
+				
+				{/* Category Dropdown */}
+				<Select
+					value={selectedCategoryId ?? ''}
+					onChange={(e) => setSelectedCategoryId(e.target.value ? parseInt(e.target.value, 10) : null)}
+					options={[
+						{ value: '', label: 'All Categories' },
+						...flatCategories.map((cat) => ({
+							value: cat.id,
+							label: `${'—'.repeat(cat.depth)} ${cat.name}`,
+						})),
+					]}
+					size="sm"
+					width="md"
+					disabled={categoriesLoading}
+					aria-label="Filter by category"
+				/>
+
+				{/* Clear Filter Button */}
+				{selectedCategoryId !== null && (
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={() => setSelectedCategoryId(null)}
+						leftIcon={<X className="w-4 h-4" />}
+						aria-label="Clear category filter"
+					>
+						Clear
+					</Button>
+				)}
+			</div>
+
 			{/* Stats Summary Grid */}
 			<ProductStatsGrid
 				stats={stats}
@@ -157,7 +232,7 @@ export default function InternalStorePage() {
 			<div className="card bg-base-100 shadow-xl">
 				<div className="card-body p-3 sm:p-6">
 					<ServerDataGrid<Product>
-						key={`products-${refreshKey}-${showArchived}`}
+						key={`products-${refreshKey}-${showArchived}-${selectedCategoryId}`}
 						columns={columns}
 						endpoint="/products/search"
 						initialPageSize={10}
@@ -167,7 +242,9 @@ export default function InternalStorePage() {
 						emptyMessage={
 							<EmptyState
 								showArchived={showArchived}
+								hasFilters={selectedCategoryId !== null}
 								onAddProduct={() => router.push(Routes.InternalStore.create())}
+								onClearFilters={() => setSelectedCategoryId(null)}
 							/>
 						}
 						ariaLabel="Products table"
@@ -192,46 +269,74 @@ export default function InternalStorePage() {
 
 /**
  * Empty state component for when no products are found.
- * Provides contextual messaging based on whether viewing archived items.
+ * Provides contextual messaging based on whether viewing archived items or filters.
  */
 interface EmptyStateProps {
 	showArchived: boolean
+	hasFilters: boolean
 	onAddProduct: () => void
+	onClearFilters: () => void
 }
 
-function EmptyState({ showArchived, onAddProduct }: EmptyStateProps) {
+function EmptyState({ showArchived, hasFilters, onAddProduct, onClearFilters }: EmptyStateProps) {
+	// If filters are active, show filter-related message
+	if (hasFilters) {
+		return (
+			<div className="flex flex-col items-center gap-3 py-12">
+				<Filter size={48} className="text-base-content/30" />
+				<p className="text-base-content/60 text-center">
+					No products match your filters
+				</p>
+				<p className="text-sm text-base-content/40 text-center max-w-sm">
+					Try adjusting your filters or clear them to see all products.
+				</p>
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={onClearFilters}
+					leftIcon={<X size={16} />}
+					className="mt-2"
+				>
+					Clear Filters
+				</Button>
+			</div>
+		)
+	}
+
+	// Archived products view
+	if (showArchived) {
+		return (
+			<div className="flex flex-col items-center gap-3 py-12">
+				<Archive size={48} className="text-base-content/30" />
+				<p className="text-base-content/60 text-center">
+					No archived products found
+				</p>
+				<p className="text-sm text-base-content/40 text-center max-w-sm">
+					Archived products are hidden from the public store but can be restored anytime.
+				</p>
+			</div>
+		)
+	}
+
+	// Default empty state - no products at all
 	return (
 		<div className="flex flex-col items-center gap-3 py-12">
-			{showArchived ? (
-				<>
-					<Archive size={48} className="text-base-content/30" />
-					<p className="text-base-content/60 text-center">
-						No archived products found
-					</p>
-					<p className="text-sm text-base-content/40 text-center max-w-sm">
-						Archived products are hidden from the public store but can be restored anytime.
-					</p>
-				</>
-			) : (
-				<>
-					<Package size={48} className="text-base-content/30" />
-					<p className="text-base-content/60 text-center">
-						No products in the catalog
-					</p>
-					<p className="text-sm text-base-content/40 text-center max-w-sm">
-						Start building your medical supply catalog by adding your first product.
-					</p>
-					<Button
-						variant="primary"
-						size="sm"
-						onClick={onAddProduct}
-						leftIcon={<Plus size={16} />}
-						className="mt-2"
-					>
-						Add First Product
-					</Button>
-				</>
-			)}
+			<Package size={48} className="text-base-content/30" />
+			<p className="text-base-content/60 text-center">
+				No products in the catalog
+			</p>
+			<p className="text-sm text-base-content/40 text-center max-w-sm">
+				Start building your medical supply catalog by adding your first product.
+			</p>
+			<Button
+				variant="primary"
+				size="sm"
+				onClick={onAddProduct}
+				leftIcon={<Plus size={16} />}
+				className="mt-2"
+			>
+				Add First Product
+			</Button>
 		</div>
 	)
 }

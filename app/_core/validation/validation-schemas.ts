@@ -295,6 +295,17 @@ export type ProfileUpdateFormData = z.infer<typeof profileUpdateSchema>
  * Product form validation schema.
  * Used for creating and updating medical supply products.
  * 
+ * **Fields:**
+ * - name: Product name (required, max 200 chars)
+ * - description: Product description (required)
+ * - price: Display price (required, must be positive)
+ * - cost: Vendor cost (admin/sales rep only, optional)
+ * - quantity: Stock quantity (required, non-negative)
+ * - categoryIds: Array of category IDs (optional, for category selection)
+ * - sku: Stock Keeping Unit (optional)
+ * - manufacturer: Manufacturer name (optional)
+ * - providerId: Provider/vendor ID (optional)
+ * 
  * @constant
  * @example
  * ```typescript
@@ -302,21 +313,25 @@ export type ProfileUpdateFormData = z.infer<typeof profileUpdateSchema>
  *   name: 'Surgical Gloves',
  *   description: 'Latex-free surgical gloves',
  *   price: 29.99,
+ *   cost: 15.00,  // Admin/Sales Rep only
  *   quantity: 100,
- *   category: 'PPE',
+ *   categoryIds: [1, 2],
  *   sku: 'SG-001',
- *   manufacturer: 'MedSupply Co'
+ *   manufacturer: 'MedSupply Co',
+ *   providerId: 5
  * });
  * ```
  */
 export const productSchema = z.object({
 	name: z.string().min(1, 'Product name is required').max(200, 'Product name is too long'),
 	description: z.string().min(1, 'Description is required'),
-	price: z.coerce.number().positive('Price must be positive'),
+	price: z.coerce.number().nonnegative('Price must be non-negative'),
+	cost: z.coerce.number().nonnegative('Cost must be non-negative').nullable().optional(),
 	quantity: z.coerce.number().int().nonnegative('Quantity cannot be negative'),
-	category: z.string().min(1, 'Category is required'),
+	categoryIds: z.array(z.coerce.number().int()).optional().default([]),
 	sku: z.string().optional(),
 	manufacturer: z.string().optional(),
+	providerId: z.coerce.number().int().nullable().optional(),
 })
 
 /** Type-safe form data inferred from productSchema */
@@ -456,15 +471,42 @@ export type QuoteFormData = z.infer<typeof quoteSchema>
  * Customer (Company) form validation schema.
  * For managing customer/company records.
  * 
+ * Enhanced to include business classification, status, and sales rep assignment
+ * per the Customer Management PRD (prd_customers.md).
+ * 
+ * **Fields:**
+ * - Core: name, email, phone, taxId, website, identifier
+ * - Classification: typeOfBusiness, status
+ * - Sales Rep: primarySalesRepId (SalesManager+ only)
+ * - Addresses: address, shippingAddress, billingAddress
+ * - Internal: internalNotes (staff only, not visible to customers)
+ * 
+ * @see prd_customers.md - Customer Management PRD
  * @constant
  */
 export const customerSchema = z.object({
+	// Core fields
 	name: z.string().min(1, 'Company name is required'),
 	email: emailSchema,
 	phone: phoneSchema,
-	address: addressSchema.optional(),
 	taxId: z.string().optional(),
 	website: z.string().url('Invalid URL').optional().or(z.literal('')),
+	identifier: z.string().optional(),
+	
+	// Business classification
+	typeOfBusiness: z.number().int().min(0).max(6).optional(), // TypeOfBusiness enum (0-6)
+	status: z.number().int().min(0).max(4).optional(), // CustomerStatus enum (0-4)
+	
+	// Sales rep assignment (SalesManager+ only)
+	primarySalesRepId: z.number().int().positive().nullable().optional(),
+	
+	// Addresses
+	address: addressSchema.optional(),
+	shippingAddress: addressSchema.optional(),
+	billingAddress: addressSchema.optional(),
+	
+	// Internal notes (staff only - not visible to customers)
+	internalNotes: z.string().max(5000, 'Notes cannot exceed 5000 characters').optional(),
 })
 
 /** Type-safe form data inferred from customerSchema */
@@ -543,5 +585,184 @@ export const searchFilterSchema = z.object({
 
 /** Type-safe form data inferred from searchFilterSchema */
 export type SearchFilterFormData = z.infer<typeof searchFilterSchema>
+
+// ==========================================
+// QUOTE PRICING SCHEMAS
+// @see prd_quotes_pricing.md
+// ==========================================
+
+/**
+ * Product pricing validation schema.
+ * Used in QuotePricingEditor component.
+ * 
+ * **Business Rules:**
+ * - vendorCost: Optional, must be non-negative if provided
+ * - customerPrice: Optional (but required before sending quote), must be non-negative
+ * - customerPrice must be >= vendorCost when both are set
+ * 
+ * @see prd_quotes_pricing.md - US-QP-001, US-QP-002
+ * 
+ * @example
+ * ```typescript
+ * // Valid pricing
+ * productPricingSchema.parse({
+ *   productId: 'abc-123-def',
+ *   vendorCost: 100.00,
+ *   customerPrice: 150.00,
+ * }); // OK
+ * 
+ * // Invalid: customerPrice < vendorCost
+ * productPricingSchema.parse({
+ *   productId: 'abc-123-def',
+ *   vendorCost: 100.00,
+ *   customerPrice: 80.00,
+ * }); // Error: Customer price must be >= vendor cost
+ * ```
+ */
+export const productPricingSchema = z.object({
+	productId: z.string().min(1, 'Product ID is required'),
+	vendorCost: z.coerce.number().nonnegative('Vendor cost must be non-negative').nullable(),
+	customerPrice: z.coerce.number().nonnegative('Customer price must be non-negative').nullable(),
+}).refine(
+	(data) => {
+		// If both are set, customer price must be >= vendor cost
+		if (data.vendorCost != null && data.customerPrice != null) {
+			return data.customerPrice >= data.vendorCost
+		}
+		return true
+	},
+	{
+		message: 'Customer price must be greater than or equal to vendor cost',
+		path: ['customerPrice'],
+	}
+)
+
+/** Type-safe form data inferred from productPricingSchema */
+export type ProductPricingFormData = z.infer<typeof productPricingSchema>
+
+/**
+ * Quote pricing summary type (from API).
+ * Contains totals, margins, and can-send status.
+ * 
+ * @see prd_quotes_pricing.md - US-QP-003
+ */
+export interface QuotePricingSummary {
+	/** Quote ID */
+	quoteId: string
+	/** Sum of (vendorCost × quantity) for all products */
+	totalVendorCost: number | null
+	/** Sum of (customerPrice × quantity) for all products */
+	totalCustomerPrice: number | null
+	/** Total margin (totalCustomerPrice - totalVendorCost) */
+	totalMargin: number | null
+	/** Total margin percentage */
+	totalMarginPercent: number | null
+	/** Count of products with customerPrice set */
+	productsWithPricing: number
+	/** Total products in quote */
+	totalProducts: number
+	/** True if all products have customerPrice set */
+	canSendToCustomer: boolean
+}
+
+// ==========================================
+// ORDER WORKFLOW SCHEMAS
+// @see prd_orders.md
+// ==========================================
+
+/**
+ * Confirm payment validation schema.
+ * Used when sales rep confirms payment for an order.
+ * 
+ * @see prd_orders.md - US-ORD-003
+ * 
+ * @example
+ * ```typescript
+ * confirmPaymentSchema.parse({
+ *   paymentReference: 'CHK-12345',
+ *   notes: 'Payment received via check',
+ * })
+ * ```
+ */
+export const confirmPaymentSchema = z.object({
+	paymentReference: z.string().max(100, 'Payment reference cannot exceed 100 characters').optional(),
+	notes: z.string().max(500, 'Notes cannot exceed 500 characters').optional(),
+})
+
+/** Type-safe form data inferred from confirmPaymentSchema */
+export type ConfirmPaymentFormData = z.infer<typeof confirmPaymentSchema>
+
+/**
+ * Update order status validation schema.
+ * Used for status transitions (Processing, Shipped, Delivered).
+ * 
+ * **Business Rules:**
+ * - trackingNumber required when newStatus is Shipped (500)
+ * - cancellationReason required when newStatus is Cancelled (0)
+ * 
+ * @see prd_orders.md - US-ORD-004, US-ORD-005
+ */
+export const updateOrderStatusSchema = z.object({
+	newStatus: z.coerce.number().int(),
+	trackingNumber: z.string().max(100, 'Tracking number cannot exceed 100 characters').optional(),
+	carrier: z.string().max(50, 'Carrier cannot exceed 50 characters').optional(),
+	cancellationReason: z.string().max(500, 'Cancellation reason cannot exceed 500 characters').optional(),
+	internalNotes: z.string().max(500, 'Notes cannot exceed 500 characters').optional(),
+}).refine(
+	(data) => {
+		// Shipped (500) requires tracking number
+		if (data.newStatus === 500 && !data.trackingNumber) {
+			return false
+		}
+		return true
+	},
+	{
+		message: 'Tracking number is required when marking as Shipped',
+		path: ['trackingNumber'],
+	}
+).refine(
+	(data) => {
+		// Cancelled (0) requires reason
+		if (data.newStatus === 0 && !data.cancellationReason) {
+			return false
+		}
+		return true
+	},
+	{
+		message: 'Cancellation reason is required',
+		path: ['cancellationReason'],
+	}
+)
+
+/** Type-safe form data inferred from updateOrderStatusSchema */
+export type UpdateOrderStatusFormData = z.infer<typeof updateOrderStatusSchema>
+
+/**
+ * Add tracking validation schema.
+ * Used when adding tracking to a specific order item.
+ * 
+ * @see prd_orders.md - US-ORD-004
+ */
+export const addTrackingSchema = z.object({
+	orderItemId: z.coerce.number().int().positive('Order item ID is required'),
+	trackingNumber: z.string().min(1, 'Tracking number is required').max(100, 'Tracking number cannot exceed 100 characters'),
+	carrier: z.string().max(50, 'Carrier cannot exceed 50 characters').optional(),
+})
+
+/** Type-safe form data inferred from addTrackingSchema */
+export type AddTrackingFormData = z.infer<typeof addTrackingSchema>
+
+/**
+ * Request cancellation validation schema.
+ * Used when customer requests order cancellation.
+ * 
+ * @see prd_orders.md - US-ORD-006
+ */
+export const requestCancellationSchema = z.object({
+	reason: z.string().min(10, 'Please provide a detailed reason (at least 10 characters)').max(500, 'Reason cannot exceed 500 characters'),
+})
+
+/** Type-safe form data inferred from requestCancellationSchema */
+export type RequestCancellationFormData = z.infer<typeof requestCancellationSchema>
 
 

@@ -284,17 +284,24 @@ function toAxiosResponse<T>(response: Response, data: T): AxiosResponse<T> {
 /**
  * Handles HTTP request with standardized error handling
  * 
+ * MAANG-Level Token Management:
+ * - Automatic token refresh on 401 (expired token)
+ * - Retry original request after successful refresh
+ * - Graceful fallback to logout on refresh failure
+ * 
  * @param url - Full URL to request
  * @param method - HTTP method
  * @param options - Fetch options
  * @param body - Request body (optional)
+ * @param isRetry - Whether this is a retry after token refresh
  * @returns Promise resolving to AxiosResponse<ApiResponse<T>>
  */
 async function handleRequest<T>(
 	url: string,
 	method: string,
 	options: RequestInit,
-	body?: BodyInit
+	body?: BodyInit,
+	isRetry: boolean = false
 ): Promise<AxiosResponse<ApiResponse<T>>> {
 	try {
 		const response = await fetchWithTimeout(url, {
@@ -304,6 +311,62 @@ async function handleRequest<T>(
 		})
 
 		if (!response.ok) {
+			// =====================================================================
+			// AUTOMATIC TOKEN REFRESH (MAANG-Level Security)
+			// =====================================================================
+			// If 401 and not already a retry, try to refresh token and retry request
+			if (response.status === HTTP_STATUS.UNAUTHORIZED && !isRetry) {
+				// Check if this is a client-side request (can use tokenService)
+				if (typeof window !== 'undefined') {
+					try {
+						// Dynamic import to avoid SSR issues
+						const { refreshAccessToken } = await import('./tokenService')
+						const newToken = await refreshAccessToken()
+						
+						if (newToken) {
+							// Update headers with new token and retry
+							const newHeaders = new Headers(options.headers)
+							newHeaders.set('Authorization', `Bearer ${newToken}`)
+							
+							return handleRequest<T>(
+								url,
+								method,
+								{ ...options, headers: newHeaders },
+								body,
+								true // Mark as retry to prevent infinite loop
+							)
+						}
+					} catch (refreshError) {
+						// Token refresh failed - log and continue to normal 401 handling
+						logger.debug('Token refresh failed during request retry', {
+							component: 'HttpService',
+							action: 'handleRequest',
+							error: refreshError instanceof Error ? refreshError.message : 'Unknown error',
+						})
+					}
+				}
+			}
+
+			// =====================================================================
+			// ACCOUNT STATUS CHECK (MAANG-Level Security)
+			// =====================================================================
+			// Check if this 401 is due to account status (suspended/locked/archived)
+			// If so, dispatch event for forced logout
+			if (response.status === HTTP_STATUS.UNAUTHORIZED) {
+				// Dynamic import to avoid circular dependency and SSR issues
+				try {
+					const { checkAndHandleAccountStatusError } = await import('./accountStatusHandler')
+					checkAndHandleAccountStatusError(response)
+				} catch (statusCheckError) {
+					// Log import/SSR errors at debug level (expected in SSR context)
+					logger.debug('Account status check skipped', {
+						component: 'HttpService',
+						action: 'handleRequest',
+						reason: statusCheckError instanceof Error ? statusCheckError.message : 'SSR context',
+					})
+				}
+			}
+
 			const errorData = await parseJsonResponse<T>(response)
 			return toAxiosResponse(response, errorData)
 		}

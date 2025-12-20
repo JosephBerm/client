@@ -51,8 +51,10 @@
 
 // Components
 export {
+	AssignSalesRepModal,
 	BusinessTypeBadge,
 	CustomerDeleteModal,
+	CustomerHistory,
 	CustomerStatsCard,
 	CustomerStatsGrid,
 	CustomerStatusBadge,

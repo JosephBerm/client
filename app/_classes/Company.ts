@@ -98,6 +98,13 @@ export default class Company {
 	 */
 	primarySalesRep: User | null = null
 	
+	/**
+	 * Internal notes about the customer.
+	 * Only visible to sales reps, sales managers, and admins.
+	 * Not visible to customers.
+	 */
+	internalNotes: string = ''
+	
 	// =========================================================================
 	// LEGACY FIELDS (Prefer structured addresses)
 	// =========================================================================

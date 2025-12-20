@@ -9,7 +9,7 @@
  * Tests must cover EVERY possible permission combination, edge case, and security scenario.
  * 
  * **Testing Strategy:**
- * 1. Role hierarchy validation (Admin > FulfillmentCoordinator > SalesManager > SalesRep > Customer)
+ * 1. Role hierarchy validation (Admin > SalesManager > SalesRep > FulfillmentCoordinator > Customer)
  * 2. Permission checks for ALL resources and actions
  * 3. Context-aware permissions (Own, Assigned, Team, All)
  * 4. Edge cases and security bypass attempts
@@ -204,9 +204,10 @@ describe('usePermissions Hook - RBAC Security Tests', () => {
         expect(result.current.isFulfillmentCoordinatorOrAbove).toBe(true)
       })
 
-      it('isSalesManagerOrAbove should be true (300 > 200)', () => {
+      it('isSalesManagerOrAbove should be false (200 < 400 per corrected hierarchy)', () => {
+        // Per PRD: FulfillmentCoordinator (200) is BELOW SalesManager (400)
         const { result } = renderHook(() => usePermissions())
-        expect(result.current.isSalesManagerOrAbove).toBe(true)
+        expect(result.current.isSalesManagerOrAbove).toBe(false)
       })
 
       it('hasMinimumRole should return false for Admin', () => {
@@ -235,15 +236,18 @@ describe('usePermissions Hook - RBAC Security Tests', () => {
         expect(result.current.isSalesRepOrAbove).toBe(true)
       })
 
-      it('isFulfillmentCoordinatorOrAbove should be false (200 < 300)', () => {
+      it('isFulfillmentCoordinatorOrAbove should be true (400 > 200 per corrected hierarchy)', () => {
+        // Per PRD: SalesManager (400) is ABOVE FulfillmentCoordinator (200)
         const { result } = renderHook(() => usePermissions())
-        expect(result.current.isFulfillmentCoordinatorOrAbove).toBe(false)
+        expect(result.current.isFulfillmentCoordinatorOrAbove).toBe(true)
       })
 
-      it('hasMinimumRole should return false for Admin and FulfillmentCoordinator', () => {
+      it('hasMinimumRole should return false for Admin but true for FulfillmentCoordinator', () => {
+        // Per PRD hierarchy: Customer (100) < Fulfillment (200) < SalesRep (300) < SalesManager (400) < Admin (500)
         const { result } = renderHook(() => usePermissions())
         expect(result.current.hasMinimumRole(RoleLevels.Admin)).toBe(false)
-        expect(result.current.hasMinimumRole(RoleLevels.FulfillmentCoordinator)).toBe(false)
+        // SalesManager (400) is above FulfillmentCoordinator (200), so this should be TRUE
+        expect(result.current.hasMinimumRole(RoleLevels.FulfillmentCoordinator)).toBe(true)
       })
     })
 
@@ -685,9 +689,10 @@ describe('usePermissions Hook - RBAC Security Tests', () => {
       })
 
       it('FulfillmentCoordinator CANNOT manage quotes', () => {
+        // Per PRD: FulfillmentCoordinator (200) is BELOW SalesManager (400)
+        // Quotes.Approve is a SalesManager+ permission, so FulfillmentCoordinator should NOT have it
         const { result } = renderHook(() => usePermissions())
-        // Should inherit SalesManager permissions for quotes
-        expect(result.current.hasPermission(Resources.Quotes, Actions.Approve)).toBe(true)
+        expect(result.current.hasPermission(Resources.Quotes, Actions.Approve)).toBe(false)
       })
     })
 
@@ -1011,13 +1016,16 @@ describe('usePermissions Hook - RBAC Security Tests', () => {
       expect(customerResult.current.hasPermission(Resources.Quotes, Actions.Delete)).toBe(false)
     })
 
-    it('should handle role level 0 correctly (Customer)', () => {
+    it('should handle role level 0 correctly (below Customer)', () => {
+      // Role level 0 is below Customer (100), so should have no/minimal permissions
       mockAuthStore({ ...createMockUser(0), role: 0 })
       const { result } = renderHook(() => usePermissions())
       
       expect(result.current.roleLevel).toBe(0)
-      expect(result.current.isCustomer).toBe(true)
-      expect(result.current.hasPermission(Resources.Quotes, Actions.Create)).toBe(true)
+      // Role 0 is below Customer (100), so isCustomer should be false
+      expect(result.current.isCustomer).toBe(false)
+      // Role 0 should have no permissions (below minimum)
+      expect(result.current.hasPermission(Resources.Quotes, Actions.Create)).toBe(false)
     })
 
     it('should handle negative role level gracefully', () => {
@@ -1038,8 +1046,8 @@ describe('usePermissions Hook - RBAC Security Tests', () => {
     })
 
     it('should handle role level between defined roles', () => {
-      // Role level 150 is between SalesRep (100) and SalesManager (200)
-      mockAuthStore({ ...createMockUser(0), role: 150 })
+      // Role level 350 is between SalesRep (300) and SalesManager (400)
+      mockAuthStore({ ...createMockUser(0), role: 350 })
       const { result } = renderHook(() => usePermissions())
       
       // Should have SalesRep permissions but not SalesManager

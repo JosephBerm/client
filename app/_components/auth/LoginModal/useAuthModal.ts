@@ -249,7 +249,7 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 			})
 
 			if (result.success) {
-				await handleAuthSuccess(result.user, result.token, values.identifier)
+				await handleAuthSuccess(result.user, result.accessToken, values.identifier)
 			} else {
 				// Phase 1: Check for account status errors
 				const errorMessage = result.message?.toLowerCase() ?? ''
@@ -369,7 +369,7 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 				})
 
 				if (loginResult.success) {
-					await handleAuthSuccess(loginResult.user, loginResult.token, values.username)
+					await handleAuthSuccess(loginResult.user, loginResult.accessToken, values.username)
 				} else {
 					// Account created but auto-login failed
 					notificationService.info(SUCCESS_MESSAGES.SIGNUP_MANUAL_LOGIN, {

@@ -124,6 +124,8 @@ export interface OrderStatusMetadata {
  * you MUST add its metadata here or get a compile error.
  * 
  * **FAANG Pattern:** Record<Enum, Metadata> ensures completeness
+ * 
+ * @see prd_orders.md - Order Management PRD
  */
 const ORDER_STATUS_METADATA_MAP: Record<OrderStatus, OrderStatusMetadata> = {
 	[OrderStatus.Cancelled]: {
@@ -160,8 +162,18 @@ const ORDER_STATUS_METADATA_MAP: Record<OrderStatus, OrderStatusMetadata> = {
 		value: OrderStatus.Placed,
 		display: 'Placed',
 		variant: 'info',
-		description: 'Customer has approved quote and order has been confirmed',
+		description: 'Customer has approved quote and order is awaiting payment confirmation',
 		sortOrder: OrderStatus.Placed, // 300
+		category: 'active',
+		isTerminal: false,
+		allowedTransitions: [OrderStatus.Paid, OrderStatus.Cancelled],
+	},
+	[OrderStatus.Paid]: {
+		value: OrderStatus.Paid,
+		display: 'Paid',
+		variant: 'success',
+		description: 'Payment has been confirmed and order is ready for fulfillment',
+		sortOrder: OrderStatus.Paid, // 350
 		category: 'active',
 		isTerminal: false,
 		allowedTransitions: [OrderStatus.Processing, OrderStatus.Cancelled],
@@ -247,7 +259,15 @@ export default class OrderStatusHelper {
 	 * ```
 	 */
 	static getDisplay(status: OrderStatus): string {
-		return ORDER_STATUS_METADATA_MAP[status]?.display || 'Unknown'
+		return ORDER_STATUS_METADATA_MAP[status]?.display ?? 'Unknown'
+	}
+
+	/**
+	 * Alias for getDisplay - matches backend naming convention
+	 * @see OrderStatusTransitions.GetDisplayName in backend
+	 */
+	static getDisplayName(status: OrderStatus): string {
+		return ORDER_STATUS_METADATA_MAP[status]?.display ?? 'Unknown'
 	}
 
 	/**

@@ -173,6 +173,30 @@ if (typeof document === 'undefined') {
 }
 
 // ============================================================================
+// Browser API Mocks
+// ============================================================================
+
+/**
+ * Mock window.matchMedia for components that check reduced motion preferences.
+ * This prevents "matchMedia is not a function" errors in tests.
+ * 
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia
+ */
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(), // Deprecated but included for compatibility
+    removeListener: vi.fn(), // Deprecated but included for compatibility
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+})
+
+// ============================================================================
 // Next.js Navigation Mock
 // ============================================================================
 

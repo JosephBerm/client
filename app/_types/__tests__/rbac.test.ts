@@ -44,38 +44,41 @@ import {
 // ============================================================================
 
 describe('RBAC Constants - RoleLevels', () => {
-  describe('Value Validation', () => {
-    it('Customer should be 0 (lowest level)', () => {
-      expect(RoleLevels.Customer).toBe(0)
+  describe('Value Validation (per medsource_prd_system.md)', () => {
+    it('Customer should be 100 (lowest level)', () => {
+      expect(RoleLevels.Customer).toBe(100)
     })
 
-    it('SalesRep should be 100', () => {
-      expect(RoleLevels.SalesRep).toBe(100)
+    it('FulfillmentCoordinator should be 200 (below SalesRep per PRD)', () => {
+      // PRD: Fulfillment CANNOT confirm payments or cancel orders
+      // Therefore must be below SalesRep in hierarchy
+      expect(RoleLevels.FulfillmentCoordinator).toBe(200)
     })
 
-    it('SalesManager should be 200', () => {
-      expect(RoleLevels.SalesManager).toBe(200)
+    it('SalesRep should be 300', () => {
+      expect(RoleLevels.SalesRep).toBe(300)
     })
 
-    it('FulfillmentCoordinator should be 300', () => {
-      expect(RoleLevels.FulfillmentCoordinator).toBe(300)
+    it('SalesManager should be 400', () => {
+      expect(RoleLevels.SalesManager).toBe(400)
     })
 
-    it('Admin should be 9999999 (highest level)', () => {
-      expect(RoleLevels.Admin).toBe(9999999)
+    it('Admin should be 500 (highest level)', () => {
+      expect(RoleLevels.Admin).toBe(500)
     })
   })
 
   describe('Hierarchy Ordering', () => {
-    it('roles should be ordered correctly in hierarchy', () => {
-      expect(RoleLevels.Customer).toBeLessThan(RoleLevels.SalesRep)
+    it('roles should be ordered correctly in hierarchy (per PRD medsource_prd_system.md)', () => {
+      // PRD Hierarchy: Admin → Sales Manager → Sales Rep → Fulfillment → Customer
+      expect(RoleLevels.Customer).toBeLessThan(RoleLevels.FulfillmentCoordinator)
+      expect(RoleLevels.FulfillmentCoordinator).toBeLessThan(RoleLevels.SalesRep)
       expect(RoleLevels.SalesRep).toBeLessThan(RoleLevels.SalesManager)
-      expect(RoleLevels.SalesManager).toBeLessThan(RoleLevels.FulfillmentCoordinator)
-      expect(RoleLevels.FulfillmentCoordinator).toBeLessThan(RoleLevels.Admin)
+      expect(RoleLevels.SalesManager).toBeLessThan(RoleLevels.Admin)
     })
 
-    it('Admin should be significantly higher than other roles', () => {
-      // Business Rule: Admin level should be much higher to prevent accidental escalation
+    it('Admin should be higher than all other roles', () => {
+      // PRD hierarchy: Admin (500) is the highest role
       const highestNonAdmin = Math.max(
         RoleLevels.Customer,
         RoleLevels.SalesRep,
@@ -83,7 +86,7 @@ describe('RBAC Constants - RoleLevels', () => {
         RoleLevels.FulfillmentCoordinator
       )
       
-      expect(RoleLevels.Admin).toBeGreaterThan(highestNonAdmin * 10)
+      expect(RoleLevels.Admin).toBeGreaterThan(highestNonAdmin)
     })
   })
 
@@ -265,8 +268,9 @@ describe('RBAC Helper Functions', () => {
       expect(hasMinimumRole(RoleLevels.Customer, RoleLevels.Customer)).toBe(true)
     })
 
-    it('should handle edge case of role level 0', () => {
-      expect(hasMinimumRole(0, RoleLevels.Customer)).toBe(true) // 0 >= 0
+    it('should handle edge case of role level below minimum', () => {
+      // PRD: Customer is 100, so 0 should not meet minimum
+      expect(hasMinimumRole(0, RoleLevels.Customer)).toBe(false) // 0 < 100
     })
   })
 
@@ -295,12 +299,13 @@ describe('RBAC Helper Functions', () => {
   describe('isSalesManagerOrAbove()', () => {
     it('should return true for SalesManager and above', () => {
       expect(isSalesManagerOrAbove(RoleLevels.SalesManager)).toBe(true)
-      expect(isSalesManagerOrAbove(RoleLevels.FulfillmentCoordinator)).toBe(true)
       expect(isSalesManagerOrAbove(RoleLevels.Admin)).toBe(true)
     })
 
-    it('should return false for below SalesManager', () => {
+    it('should return false for below SalesManager (includes Fulfillment per PRD)', () => {
+      // PRD: Fulfillment is below SalesManager - cannot cancel orders
       expect(isSalesManagerOrAbove(RoleLevels.Customer)).toBe(false)
+      expect(isSalesManagerOrAbove(RoleLevels.FulfillmentCoordinator)).toBe(false)
       expect(isSalesManagerOrAbove(RoleLevels.SalesRep)).toBe(false)
     })
 
@@ -316,8 +321,10 @@ describe('RBAC Helper Functions', () => {
       expect(isSalesRepOrAbove(RoleLevels.Admin)).toBe(true)
     })
 
-    it('should return false for Customer', () => {
+    it('should return false for below SalesRep (includes Customer and Fulfillment per PRD)', () => {
+      // PRD: Fulfillment is below SalesRep - cannot confirm payments
       expect(isSalesRepOrAbove(RoleLevels.Customer)).toBe(false)
+      expect(isSalesRepOrAbove(RoleLevels.FulfillmentCoordinator)).toBe(false)
     })
 
     it('should return false for undefined', () => {
@@ -486,19 +493,19 @@ describe('Backend Consistency', () => {
    * If these fail, there may be a mismatch between frontend and backend.
    */
 
-  it('role levels should match C# AccountRole enum', () => {
-    // Backend: AccountRole enum values
-    // Customer = 0
-    // SalesRep = 100
-    // SalesManager = 200
-    // FulfillmentCoordinator = 300
-    // Admin = 9999999
+  it('role levels should match C# AccountRole enum (per PRD medsource_prd_system.md)', () => {
+    // Backend: AccountRole enum values (per PRD)
+    // Customer = 100
+    // FulfillmentCoordinator = 200
+    // SalesRep = 300
+    // SalesManager = 400
+    // Admin = 500
     
-    expect(RoleLevels.Customer).toBe(0)
-    expect(RoleLevels.SalesRep).toBe(100)
-    expect(RoleLevels.SalesManager).toBe(200)
-    expect(RoleLevels.FulfillmentCoordinator).toBe(300)
-    expect(RoleLevels.Admin).toBe(9999999)
+    expect(RoleLevels.Customer).toBe(100)
+    expect(RoleLevels.FulfillmentCoordinator).toBe(200)
+    expect(RoleLevels.SalesRep).toBe(300)
+    expect(RoleLevels.SalesManager).toBe(400)
+    expect(RoleLevels.Admin).toBe(500)
   })
 
   it('resources should match RBACConstants.Resources', () => {

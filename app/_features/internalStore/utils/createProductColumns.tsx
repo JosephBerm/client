@@ -10,7 +10,9 @@
  * - Responsive cell rendering
  * - Stock status badges
  * - Category badges
+ * - Cost column (only visible to SalesRep or above)
  * 
+ * @see prd_products.md - Role-Based Requirements
  * @module internalStore/utils
  */
 
@@ -37,6 +39,9 @@ import type { ColumnDef } from '@tanstack/react-table'
 /**
  * Creates column definitions for the product data grid.
  * 
+ * **Role-Based Columns:**
+ * - Cost column only shown when `showCost` is true (SalesRep+ per PRD)
+ * 
  * @param config - Configuration including permissions and callbacks
  * @returns Array of TanStack Table column definitions
  * 
@@ -44,6 +49,7 @@ import type { ColumnDef } from '@tanstack/react-table'
  * ```tsx
  * const columns = createProductColumns({
  *   canDelete: isAdmin,
+ *   showCost: isSalesRepOrAbove,  // Only show cost to staff
  *   onDelete: openDeleteModal,
  *   onArchive: openArchiveModal,
  *   onRestore: handleRestore,
@@ -55,9 +61,9 @@ import type { ColumnDef } from '@tanstack/react-table'
 export function createProductColumns(
 	config: ProductColumnsConfig
 ): ColumnDef<Product>[] {
-	const { canDelete, onDelete, onArchive, onRestore } = config
+	const { canDelete, showCost = false, onDelete, onArchive, onRestore } = config
 
-	return [
+	const columns: ColumnDef<Product>[] = [
 		// Product Name
 		{
 			accessorKey: 'name',
@@ -92,7 +98,7 @@ export function createProductColumns(
 			),
 		},
 
-		// Price
+		// Price (customer-facing display price)
 		{
 			accessorKey: 'price',
 			header: 'Price',
@@ -102,7 +108,29 @@ export function createProductColumns(
 				</span>
 			),
 		},
+	]
 
+	// Cost column - only shown to SalesRep or above (per PRD)
+	if (showCost) {
+		columns.push({
+			accessorKey: 'cost',
+			header: 'Cost',
+			cell: ({ row }) => {
+				const cost = row.original.cost
+				if (cost == null) {
+					return <span className="text-base-content/40">—</span>
+				}
+				return (
+					<span className="font-medium tabular-nums text-base-content/70">
+						{formatCurrency(cost)}
+					</span>
+				)
+			},
+		})
+	}
+
+	// Add remaining columns
+	columns.push(
 		// Stock
 		{
 			accessorKey: 'stock',
@@ -166,24 +194,18 @@ export function createProductColumns(
 			header: '',
 			cell: ({ row }) => {
 				const product = row.original
-				const isArchived = (product as any).isArchived || false
+				const isArchived = product.isArchived || false
 
 				return (
 					<div className="flex items-center justify-end gap-1">
-						{/* View */}
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => {
-								// Use Link for navigation instead of onClick
-							}}
+						{/* View - Using Link directly for proper accessibility */}
+						<Link
+							href={Routes.InternalStore.detail(product.id)}
+							className="btn btn-ghost btn-sm btn-square"
 							aria-label={`View ${product.name}`}
-							className="btn-square"
 						>
-							<Link href={Routes.InternalStore.detail(product.id)}>
-								<Eye className="h-4 w-4" />
-							</Link>
-						</Button>
+							<Eye className="h-4 w-4" />
+						</Link>
 
 						{/* Archive/Restore */}
 						{canDelete && (
@@ -227,8 +249,10 @@ export function createProductColumns(
 					</div>
 				)
 			},
-		},
-	]
+		}
+	)
+
+	return columns
 }
 
 export default createProductColumns

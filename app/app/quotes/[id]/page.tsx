@@ -25,6 +25,7 @@ import {
 	QuoteProducts,
 	QuoteActions,
 	QuoteAssignment,
+	QuotePricingEditor,
 } from './_components'
 
 export default function QuoteDetailsPage() {
@@ -144,6 +145,11 @@ export default function QuoteDetailsPage() {
 							<QuoteAssignment quote={quote} permissions={permissions} onRefresh={refresh} />
 						</div>
 					</div>
+
+					{/* Pricing Section - Only visible to Sales Rep+ on quotes with status 'Read' */}
+					{permissions.canUpdate && (
+						<QuotePricingEditor quote={quote} permissions={permissions} onRefresh={refresh} />
+					)}
 
 					{/* Products Section */}
 					<QuoteProducts quote={quote} />

@@ -7,3 +7,4 @@
 
 export * from './renderWithProviders'
 export * from './testDataBuilders'
+export * from './analyticsTestBuilders'

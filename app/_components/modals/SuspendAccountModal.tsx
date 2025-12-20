@@ -179,7 +179,7 @@ export default function SuspendAccountModal({ isOpen, onClose, onConfirm, accoun
 						<strong className='font-semibold'>{accountName}</strong>.
 					</p>
 					<ul className='text-xs text-base-content/70 mt-2 space-y-1'>
-						<li>• User will be immediately logged out</li>
+						<li>• Active sessions will be terminated on next API request</li>
 						<li>• User cannot log in until reactivated</li>
 						<li>• Suspension reason will be shown to user</li>
 						<li>• Action logged for audit purposes</li>

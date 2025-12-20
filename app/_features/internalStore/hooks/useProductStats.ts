@@ -12,7 +12,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { logger } from '@_core'
-import { HttpService, notificationService } from '@_shared'
+import { API } from '@_shared'
 
 import type { ProductStats } from '../types'
 
@@ -74,7 +74,8 @@ export function useProductStats(): UseProductStatsReturn {
 		setError(null)
 
 		try {
-			const { data } = await HttpService.get<ProductStats>('/products/stats')
+			// Use centralized API method for consistency
+			const { data } = await API.Store.Products.getStats()
 
 			if (data.statusCode !== 200) {
 				setError(data.message ?? 'Failed to fetch product statistics')

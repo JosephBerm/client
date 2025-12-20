@@ -34,6 +34,15 @@ export {
 	type NotificationResult,
 } from './notification.service'
 
+// Account Status Handler - Forced logout for suspended/locked/archived accounts
+export {
+	subscribeToAccountStatusErrors,
+	clearAuthState,
+	getLoginUrl,
+	type AccountStatusCode,
+	type AccountStatusError,
+} from './accountStatusHandler'
+
 // API Types - DTOs for backend contract alignment
 // Note: ApiResponse is exported from httpService above, not re-exported from api.types
 export type {

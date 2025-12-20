@@ -48,6 +48,22 @@
 
 import type CustomerSummary from '@_classes/Base/CustomerSummary'
 import type { AccountRole } from '@_classes/Enums'
+import type { DashboardStats, DashboardTask, RecentItem } from '@_types/dashboard.types'
+import type { 
+	AnalyticsSummary, 
+	SalesRepPerformance as SalesRepPerformanceType,
+	RevenueData as RevenueDataType 
+} from '@_types/analytics.types'
+import type {
+	RBACOverview,
+	PermissionMatrixEntry,
+	PermissionAuditEntryDto,
+	BulkRoleUpdateRequest,
+	BulkRoleUpdateResult,
+	UserWithRole,
+	AuditLogFilters,
+	UsersWithRolesFilters,
+} from '@_types/rbac-management'
 
 /**
  * Role distribution statistics returned by RBAC dashboard API.
@@ -105,6 +121,7 @@ import type { Product } from '@_classes/Product'
 import type ProductsCategory from '@_classes/ProductsCategory'
 import type Quote from '@_classes/Quote'
 import type { CreateQuoteRequest, CreateQuoteResponse } from './api.types'
+import type { QuotePricingSummary } from '@_core/validation/validation-schemas'
 import type { SubmitOrderRequest } from '@_classes/RequestClasses'
 import type UploadedFile from '@_classes/UploadedFile'
 import type User from '@_classes/User'
@@ -445,10 +462,55 @@ const API = {
 			update: async <T>(product: T) => HttpService.put<T>(`/products`, product),
 			
 			/**
-			 * Deletes a product.
+			 * Deletes a product (hard delete).
+			 * Use archive() for soft delete instead.
 			 * @param productId - Product ID to delete
 			 */
 			delete: async <T>(productId: string) => HttpService.delete<T>(`/products/${productId}`),
+			
+			/**
+			 * Archives a product (soft delete).
+			 * Product is hidden from public store but can be restored.
+			 * Preferred over hard delete for data integrity.
+			 * @param productId - Product ID to archive
+			 * @returns Success status
+			 * 
+			 * @see prd_products.md - US-PRD-005
+			 */
+			archive: async (productId: string) => 
+				HttpService.post<boolean>(`/products/${productId}/archive`, null),
+			
+			/**
+			 * Restores an archived product.
+			 * Product becomes visible in public store again.
+			 * @param productId - Product ID to restore
+			 * @returns Success status
+			 * 
+			 * @see prd_products.md - US-PRD-005
+			 */
+			restore: async (productId: string) => 
+				HttpService.put<boolean>(`/products/${productId}/restore`, {}),
+			
+			/**
+			 * Gets product statistics for admin dashboard.
+			 * Returns counts for total, active, archived, low stock, etc.
+			 * @returns Product statistics
+			 * 
+			 * @example
+			 * ```typescript
+			 * const { data } = await API.Store.Products.getStats()
+			 * console.log(data.payload?.totalProducts)
+			 * ```
+			 */
+			getStats: async () => HttpService.get<{
+				totalProducts: number
+				activeProducts: number
+				archivedProducts: number
+				lowStockProducts: number
+				outOfStockProducts: number
+				totalInventoryValue: number
+				categoryCount: number
+			}>('/products/stats'),
 			
 			/**
 			 * Gets latest products for home page display.
@@ -650,11 +712,67 @@ const API = {
 		 * @param quoteId - Quote ID to archive
 		 */
 		archive: async (quoteId: string) => HttpService.post<boolean>(`/quotes/${quoteId}/archive`, null),
+
+		// =========================================================================
+		// PRICING METHODS - Quote Pricing Workflow
+		// @see prd_quotes_pricing.md
+		// =========================================================================
+
+		/**
+		 * Updates pricing for a single product in a quote.
+		 * Sets vendor cost and/or customer price.
+		 * 
+		 * **Authorization:**
+		 * - SalesRep: Can only update pricing for assigned quotes
+		 * - SalesManager+: Can update pricing for any quote
+		 * - Customer: CANNOT update pricing
+		 * 
+		 * **Business Rules:**
+		 * - customerPrice must be >= vendorCost (when both set)
+		 * - Can only update pricing on quotes with status 'Read'
+		 * 
+		 * @param quoteId - Quote ID
+		 * @param productId - CartProduct ID
+		 * @param vendorCost - Vendor cost (nullable)
+		 * @param customerPrice - Customer price (nullable)
+		 * @returns Updated quote
+		 * 
+		 * @see prd_quotes_pricing.md - US-QP-001, US-QP-002
+		 */
+		updateProductPricing: async (
+			quoteId: string,
+			productId: string,
+			vendorCost: number | null,
+			customerPrice: number | null
+		) => HttpService.put<Quote>(`/quotes/${quoteId}/pricing`, {
+			productId,
+			vendorCost,
+			customerPrice,
+		}),
+
+		/**
+		 * Gets pricing summary for a quote.
+		 * Contains totals, margins, and can-send status.
+		 * 
+		 * **Authorization:**
+		 * - SalesRep: Can only view pricing for assigned quotes
+		 * - SalesManager+: Can view pricing for any quote
+		 * - Customer: CANNOT view pricing summary (contains margin data)
+		 * 
+		 * @param quoteId - Quote ID
+		 * @returns Pricing summary with totals and can-send status
+		 * 
+		 * @see prd_quotes_pricing.md - US-QP-003
+		 */
+		getPricingSummary: async (quoteId: string) =>
+			HttpService.get<QuotePricingSummary>(`/quotes/${quoteId}/pricing/summary`),
 	},
 	
 	/**
 	 * Order Management API
-	 * Handles order processing, approval, and fulfillment.
+	 * Handles order processing, approval, fulfillment, and full order lifecycle.
+	 * 
+	 * @see prd_orders.md - Order Management PRD
 	 */
 	Orders: {
 		/**
@@ -733,6 +851,135 @@ const API = {
 		 */
 		deleteProduct: async (orderId: string, productId: number) =>
 			HttpService.delete<boolean>(`/orders/${orderId}/product/${productId}`),
+
+		// =========================================================================
+		// ORDER WORKFLOW METHODS
+		// @see prd_orders.md
+		// =========================================================================
+
+		/**
+		 * Confirms payment for an order (Placed → Paid).
+		 * 
+		 * **Authorization:**
+		 * - SalesRep: Can confirm for assigned orders only
+		 * - SalesManager+: Can confirm for any order
+		 * 
+		 * @param orderId - Order ID
+		 * @param paymentReference - Optional payment reference (check #, transaction ID)
+		 * @param notes - Optional internal notes
+		 * 
+		 * @see prd_orders.md - US-ORD-003
+		 */
+		confirmPayment: async (orderId: number, paymentReference?: string, notes?: string) =>
+			HttpService.post<Order>(`/orders/${orderId}/confirm-payment`, {
+				paymentReference,
+				notes,
+			}),
+
+		/**
+		 * Updates order status.
+		 * Used by fulfillment to progress orders through workflow.
+		 * 
+		 * **Valid transitions:**
+		 * - Paid → Processing
+		 * - Processing → Shipped (requires trackingNumber)
+		 * - Shipped → Delivered
+		 * - Any → Cancelled (requires cancellationReason)
+		 * 
+		 * **Authorization:**
+		 * - FulfillmentCoordinator+: Processing, Shipped, Delivered
+		 * - SalesManager+: Cancelled
+		 * 
+		 * @param orderId - Order ID
+		 * @param newStatus - Target status
+		 * @param trackingNumber - Required for Shipped status
+		 * @param carrier - Optional carrier name
+		 * @param cancellationReason - Required for Cancelled status
+		 * @param internalNotes - Optional notes
+		 * 
+		 * @see prd_orders.md - US-ORD-004, US-ORD-005
+		 */
+		updateStatus: async (
+			orderId: number,
+			newStatus: number,
+			trackingNumber?: string,
+			carrier?: string,
+			cancellationReason?: string,
+			internalNotes?: string
+		) =>
+			HttpService.post<Order>(`/orders/${orderId}/status`, {
+				newStatus,
+				trackingNumber,
+				carrier,
+				cancellationReason,
+				internalNotes,
+			}),
+
+		/**
+		 * Adds tracking number to a specific order item.
+		 * Allows tracking different products from different vendors.
+		 * 
+		 * **Authorization:**
+		 * - FulfillmentCoordinator+
+		 * 
+		 * @param orderId - Order ID
+		 * @param orderItemId - Order item ID
+		 * @param trackingNumber - Tracking number
+		 * @param carrier - Optional carrier name
+		 * 
+		 * @see prd_orders.md - US-ORD-004
+		 */
+		addTracking: async (orderId: number, orderItemId: number, trackingNumber: string, carrier?: string) =>
+			HttpService.post<Order>(`/orders/${orderId}/tracking`, {
+				orderItemId,
+				trackingNumber,
+				carrier,
+			}),
+
+		/**
+		 * Requests order cancellation (customer-facing).
+		 * Creates a support request for sales manager review.
+		 * 
+		 * **Authorization:**
+		 * - Customer: Own orders with status Placed or Paid only
+		 * 
+		 * @param orderId - Order ID
+		 * @param reason - Cancellation reason
+		 * 
+		 * @see prd_orders.md - US-ORD-006
+		 */
+		requestCancellation: async (orderId: number, reason: string) =>
+			HttpService.post<boolean>(`/orders/${orderId}/request-cancellation`, {
+				reason,
+			}),
+
+		/**
+		 * Gets order summary statistics for dashboard.
+		 * Filtered based on user role.
+		 * 
+		 * @returns Order summary with counts and revenue
+		 */
+		getSummary: async () =>
+			HttpService.get<{
+				totalOrders: number
+				placedCount: number
+				paidCount: number
+				processingCount: number
+				shippedCount: number
+				deliveredCount: number
+				cancelledCount: number
+				totalRevenue: number
+				requiresActionCount: number
+			}>('/orders/summary'),
+
+		/**
+		 * Gets orders assigned to current sales rep.
+		 * 
+		 * **Authorization:**
+		 * - SalesRep: Returns assigned orders
+		 * - SalesManager+: Returns all orders
+		 */
+		getAssigned: async () => HttpService.get<Order[]>('/orders/assigned'),
 	},
 	
 	/**
@@ -1001,6 +1248,42 @@ const API = {
 	},
 	
 	/**
+	 * Dashboard API
+	 * Role-based dashboard statistics, tasks, and recent items.
+	 * 
+	 * **Role-Specific Data:**
+	 * - Customer: Own quotes/orders, spending
+	 * - SalesRep: Assigned quotes/orders, performance metrics
+	 * - Fulfillment: Shipping tasks and metrics
+	 * - SalesManager: Team workload and performance
+	 * - Admin: System-wide metrics and health
+	 * 
+	 * @see prd_dashboard.md
+	 */
+	Dashboard: {
+		/**
+		 * Gets dashboard statistics for the current user based on their role.
+		 * @returns Role-specific dashboard statistics
+		 */
+		getStats: async () => HttpService.get<DashboardStats>('/dashboard/stats'),
+		
+		/**
+		 * Gets dashboard tasks requiring attention for the current user.
+		 * Tasks are sorted by urgency (urgent first) then by creation date.
+		 * @returns List of dashboard tasks
+		 */
+		getTasks: async () => HttpService.get<DashboardTask[]>('/dashboard/tasks'),
+		
+		/**
+		 * Gets recent items (quotes and orders) for dashboard display.
+		 * @param count - Number of items to return (default: 5, max: 20)
+		 * @returns List of recent items
+		 */
+		getRecentItems: async (count: number = 5) =>
+			HttpService.get<RecentItem[]>(`/dashboard/recent?count=${count}`),
+	},
+
+	/**
 	 * Finance and Analytics API
 	 * Financial reports, analytics, and data exports.
 	 */
@@ -1035,11 +1318,184 @@ const API = {
 	},
 	
 	/**
+	 * Business Intelligence Analytics API
+	 * Role-based analytics for sales performance, revenue tracking, and quote pipeline.
+	 * 
+	 * **Role-Based Access:**
+	 * - Customer: Own spending history, order trends
+	 * - SalesRep: Personal performance, team comparison (anonymized)
+	 * - SalesManager: Team performance, individual rep metrics, revenue by rep
+	 * - Admin: Full system analytics, all metrics
+	 * 
+	 * @see prd_analytics.md
+	 */
+	Analytics: {
+		/**
+		 * Gets analytics summary for the current user based on their role.
+		 * 
+		 * @param startDate - Optional start date filter (ISO string)
+		 * @param endDate - Optional end date filter (ISO string)
+		 * @returns Role-specific analytics summary
+		 * 
+		 * @example
+		 * ```typescript
+		 * // Get last 12 months analytics
+		 * const { data } = await API.Analytics.getSummary()
+		 * 
+		 * // Get specific date range
+		 * const { data } = await API.Analytics.getSummary('2024-01-01', '2024-12-31')
+		 * ```
+		 */
+		getSummary: async (startDate?: string, endDate?: string) => {
+			const params = new URLSearchParams()
+			if (startDate) params.append('startDate', startDate)
+			if (endDate) params.append('endDate', endDate)
+			const query = params.toString()
+			return HttpService.get<AnalyticsSummary>(`/analytics/summary${query ? `?${query}` : ''}`)
+		},
+
+		/**
+		 * Gets team performance metrics.
+		 * 
+		 * **Authorization:** SalesManager or Admin only.
+		 * 
+		 * @param startDate - Optional start date filter
+		 * @param endDate - Optional end date filter
+		 * @returns List of sales rep performance metrics
+		 * 
+		 * @example
+		 * ```typescript
+		 * const { data } = await API.Analytics.getTeamPerformance()
+		 * const topPerformer = data.payload?.[0]
+		 * ```
+		 */
+		getTeamPerformance: async (startDate?: string, endDate?: string) => {
+			const params = new URLSearchParams()
+			if (startDate) params.append('startDate', startDate)
+			if (endDate) params.append('endDate', endDate)
+			const query = params.toString()
+			return HttpService.get<SalesRepPerformanceType[]>(`/analytics/team${query ? `?${query}` : ''}`)
+		},
+
+		/**
+		 * Gets revenue timeline data for charting.
+		 * 
+		 * **Authorization:** SalesManager or Admin only.
+		 * 
+		 * @param startDate - Start date for the timeline
+		 * @param endDate - End date for the timeline
+		 * @param granularity - Grouping: "day", "week", or "month" (default: month)
+		 * @returns List of revenue data points
+		 * 
+		 * @example
+		 * ```typescript
+		 * const { data } = await API.Analytics.getRevenueTimeline(
+		 *   '2024-01-01',
+		 *   '2024-12-31',
+		 *   'month'
+		 * )
+		 * ```
+		 */
+		getRevenueTimeline: async (
+			startDate: string,
+			endDate: string,
+			granularity: 'day' | 'week' | 'month' = 'month'
+		) =>
+			HttpService.get<RevenueDataType[]>(
+				`/analytics/revenue?startDate=${startDate}&endDate=${endDate}&granularity=${granularity}`
+			),
+
+		/**
+		 * Gets individual sales rep performance.
+		 * 
+		 * **Authorization:**
+		 * - SalesRep: Can only view own performance
+		 * - SalesManager/Admin: Can view any sales rep
+		 * 
+		 * @param salesRepId - Sales rep ID (optional, defaults to current user)
+		 * @param startDate - Optional start date filter
+		 * @param endDate - Optional end date filter
+		 * @returns Sales rep performance metrics
+		 */
+		getRepPerformance: async (
+			salesRepId?: string,
+			startDate?: string,
+			endDate?: string
+		) => {
+			const params = new URLSearchParams()
+			if (startDate) params.append('startDate', startDate)
+			if (endDate) params.append('endDate', endDate)
+			const query = params.toString()
+			const path = salesRepId ? `/analytics/rep/${salesRepId}` : '/analytics/rep'
+			return HttpService.get<SalesRepPerformanceType>(`${path}${query ? `?${query}` : ''}`)
+		},
+	},
+
+	/**
 	 * RBAC Management API
 	 * Role-Based Access Control management endpoints.
-	 * All operations require Admin role.
+	 * All operations require Admin role (except Overview/Matrix which allow SalesManager).
+	 * 
+	 * @see prd_rbac_management.md
 	 */
 	RBAC: {
+		/**
+		 * Gets RBAC overview including roles, permissions, and matrix.
+		 * SalesManager can view (read-only), Admin can modify.
+		 * 
+		 * @see prd_rbac_management.md - US-RBAC-001, US-RBAC-002
+		 */
+		getOverview: async () => HttpService.get<RBACOverview>('/rbac/overview'),
+
+		/**
+		 * Gets permission matrix (feature x role).
+		 * SalesManager can view (read-only), Admin can modify.
+		 * 
+		 * @see prd_rbac_management.md - US-RBAC-002
+		 */
+		getMatrix: async () => HttpService.get<PermissionMatrixEntry[]>('/rbac/matrix'),
+
+		/**
+		 * Gets permission audit log with pagination and filtering.
+		 * ADMIN ONLY: Audit logs contain sensitive information.
+		 * 
+		 * @see prd_rbac_management.md - US-RBAC-005
+		 */
+		getAuditLog: async (filters: AuditLogFilters = {}) => {
+			const params = new URLSearchParams()
+			if (filters.page) params.append('page', String(filters.page))
+			if (filters.pageSize) params.append('pageSize', String(filters.pageSize))
+			if (filters.startDate) params.append('startDate', filters.startDate)
+			if (filters.endDate) params.append('endDate', filters.endDate)
+			if (filters.userId) params.append('userId', String(filters.userId))
+			if (filters.resource) params.append('resource', filters.resource)
+			const query = params.toString()
+			return HttpService.get<PagedResult<PermissionAuditEntryDto>>(`/rbac/audit${query ? `?${query}` : ''}`)
+		},
+
+		/**
+		 * Bulk updates user roles.
+		 * ADMIN ONLY: Role changes require administrative privileges.
+		 * 
+		 * @see prd_rbac_management.md - US-RBAC-004
+		 */
+		bulkUpdateRoles: async (request: BulkRoleUpdateRequest) =>
+			HttpService.post<BulkRoleUpdateResult>('/rbac/bulk-role', request),
+
+		/**
+		 * Gets users with their roles for RBAC management.
+		 * ADMIN ONLY: User role information requires administrative privileges.
+		 */
+		getUsersWithRoles: async (filters: UsersWithRolesFilters = {}) => {
+			const params = new URLSearchParams()
+			if (filters.page) params.append('page', String(filters.page))
+			if (filters.pageSize) params.append('pageSize', String(filters.pageSize))
+			if (filters.roleFilter !== undefined) params.append('roleFilter', String(filters.roleFilter))
+			if (filters.search) params.append('search', filters.search)
+			const query = params.toString()
+			return HttpService.get<PagedResult<UserWithRole>>(`/rbac/users${query ? `?${query}` : ''}`)
+		},
+
 		/**
 		 * Roles Management
 		 */

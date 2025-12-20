@@ -38,6 +38,7 @@ import Card from '@_components/ui/Card'
 import Modal from '@_components/ui/Modal'
 
 import { useQuoteActions } from './hooks/useQuoteActions'
+import { useQuotePricing } from './hooks/useQuotePricing'
 import type { UseQuotePermissionsReturn } from './hooks/useQuotePermissions'
 import type { QuoteComponentProps } from './types'
 
@@ -64,6 +65,11 @@ export default function QuoteActions({ quote, permissions, onRefresh }: QuoteAct
 	const router = useRouter()
 	const { handleMarkAsRead, handleApprove, handleReject, handleSendToCustomer, handleConvertToOrder, isProcessing } =
 		useQuoteActions(quote, permissions, onRefresh)
+	
+	// Quote pricing validation - checks if all products have customer price
+	// @see prd_quotes_pricing.md - US-QP-004
+	const { canSendToCustomer } = useQuotePricing(quote, onRefresh)
+	const hasPricing = canSendToCustomer(quote)
 
 	// Confirmation dialog state
 	const [showRejectConfirm, setShowRejectConfirm] = useState(false)
@@ -136,16 +142,24 @@ export default function QuoteActions({ quote, permissions, onRefresh }: QuoteAct
 						<>
 							{permissions.canApprove && (
 								<PermissionGuard resource={Resources.Quotes} action={Actions.Approve}>
-									<Button
-										variant="primary"
-										onClick={handleApprove}
-										disabled={isProcessing}
-										loading={isProcessing}
-										className="w-full"
-									>
-										<CheckCircle className="h-4 w-4 mr-2" />
-										Approve Quote
-									</Button>
+									<div className="tooltip w-full" data-tip={!hasPricing ? 'Set customer prices for all products first' : ''}>
+										<Button
+											variant="primary"
+											onClick={handleApprove}
+											disabled={isProcessing || !hasPricing}
+											loading={isProcessing}
+											className="w-full"
+										>
+											<CheckCircle className="h-4 w-4 mr-2" />
+											Approve Quote
+										</Button>
+									</div>
+									{!hasPricing && (
+										<p className="text-xs text-warning mt-1 flex items-center gap-1">
+											<AlertTriangle className="h-3 w-3" />
+											Complete pricing for all products to approve
+										</p>
+									)}
 								</PermissionGuard>
 							)}
 							{permissions.canReject && (

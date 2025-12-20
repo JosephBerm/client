@@ -1,17 +1,83 @@
 /**
- * RBAC Components Index
- * 
- * Centralized exports for all RBAC components.
- * 
- * @module RBAC Components
+ * RBAC Management Components Barrel Export
+ *
+ * Organizes exports into logical groups:
+ * 1. Page-level components (main page composition)
+ * 2. Feature components (role hierarchy, matrix, etc.)
+ * 3. CRUD components (forms, modals)
+ * 4. Utility components (loading, error, empty states)
+ * 5. Hooks
+ *
+ * @see prd_rbac_management.md
+ * @module app/rbac/_components
  */
+
+// =========================================================================
+// PAGE-LEVEL COMPONENTS
+// Components used to compose the main RBAC management page
+// =========================================================================
+
+export { RBACStatsCards } from './RBACStatsCards'
+export { RBACTabNav, RBAC_TABS } from './RBACTabNav'
+export type { RBACTabId, RBACTab } from './RBACTabNav'
+export { RBACTabContent } from './RBACTabContent'
+export { RBACPageActions } from './RBACPageActions'
+export { RBACErrorAlert } from './RBACErrorAlert'
+
+// =========================================================================
+// FEATURE COMPONENTS
+// Main feature visualizations and data displays
+// =========================================================================
+
+export { RoleHierarchyDiagram } from './RoleHierarchyDiagram'
+export { PermissionMatrix } from './PermissionMatrix'
+export { AuditLogTable } from './AuditLogTable'
+export { BulkRoleModal } from './BulkRoleModal'
+export { UserRolesTable } from './UserRolesTable'
+
+// =========================================================================
+// CRUD COMPONENTS
+// Forms and modals for create/update/delete operations
+// =========================================================================
+
+export { default as RoleCard } from './RoleCard'
+export { default as RoleFormModal } from './RoleFormModal'
+export { default as RolePermissionsModal } from './RolePermissionsModal'
+export { default as PermissionItem } from './PermissionItem'
+export { default as PermissionFormModal } from './PermissionFormModal'
+export { default as PermissionSelector } from './PermissionSelector'
+export { default as FormFooter } from './FormFooter'
+
+// =========================================================================
+// UTILITY COMPONENTS
+// Loading, error, and empty state displays
+// =========================================================================
 
 export { default as AccessDenied } from './AccessDenied'
 export { default as LoadingState } from './LoadingState'
-export { default as FormFooter } from './FormFooter'
-export { default as RoleCard } from './RoleCard'
-export { default as PermissionItem } from './PermissionItem'
-export { default as RoleFormModal } from './RoleFormModal'
-export { default as PermissionFormModal } from './PermissionFormModal'
-export { default as PermissionSelector } from './PermissionSelector'
-export { default as RolePermissionsModal } from './RolePermissionsModal'
+export { RBACErrorBoundary } from './RBACErrorBoundary'
+
+// =========================================================================
+// HOOKS
+// Custom hooks for RBAC management
+// =========================================================================
+
+export { useRBACManagement } from './hooks'
+export type { UseRBACManagementReturn } from './hooks'
+
+// =========================================================================
+// CONSTANTS
+// Configuration and constant values
+// =========================================================================
+
+export {
+	CACHE_KEYS,
+	CACHE_CONFIG,
+	PAGINATION,
+	ROLE_HIERARCHY,
+	getRoleConfig,
+	ANIMATIONS,
+	STAT_CARDS,
+	ERROR_MESSAGES as RBAC_ERROR_MESSAGES,
+	ACCESS_REQUIREMENTS,
+} from '../_constants'

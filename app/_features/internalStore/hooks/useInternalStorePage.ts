@@ -11,23 +11,28 @@
  * - Archive toggle state
  * - Refresh key for table re-fetching
  * 
+ * **React 19 / Next.js 16 Optimizations:**
+ * - No useCallback needed (React Compiler auto-memoizes)
+ * - useMemo only for expensive computations
+ * 
  * **Business Flow:**
  * - Admin-only page for product catalog management
  * - Products are the foundation of the quote-based ordering system
  * - Supports soft delete (archive) and hard delete
  * 
+ * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler
  * @module internalStore/hooks
  */
 
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 
 import { useAuthStore } from '@_features/auth'
 
 import { logger } from '@_core'
 
-import { notificationService, API, HttpService } from '@_shared'
+import { notificationService, API } from '@_shared'
 
 import { AccountRole } from '@_classes/Enums'
 import type { Product } from '@_classes/Product'
@@ -54,9 +59,12 @@ import { useProductStats } from './useProductStats'
  * ```
  */
 export function useInternalStorePage(): UseInternalStorePageReturn {
-	// Auth state
-	const { user } = useAuthStore()
-	const isAdmin = user?.role === AccountRole.Admin
+	// Auth state for RBAC
+	const user = useAuthStore((state) => state.user)
+	
+	// RBAC checks - simple comparisons, no memoization needed
+	const userRole = user?.role ?? AccountRole.Customer
+	const isAdmin = userRole === AccountRole.Admin
 
 	// Modal state
 	const [deleteModal, setDeleteModal] = useState<ProductModalState>({
@@ -70,33 +78,36 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 	const [showArchived, setShowArchived] = useState(false)
 	const [isDeleting, setIsDeleting] = useState(false)
 	const [isArchiving, setIsArchiving] = useState(false)
+	const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
 
 	// Stats
 	const { stats, isLoading: statsLoading, refetch: refetchStats } = useProductStats()
 
 	// ========================
-	// Modal Actions
+	// Modal Actions - React 19: No useCallback needed
 	// ========================
 
-	const openDeleteModal = useCallback((product: Product) => {
+	const openDeleteModal = (product: Product) => {
 		setDeleteModal({ isOpen: true, product, mode: 'delete' })
-	}, [])
+	}
 
-	const openArchiveModal = useCallback((product: Product) => {
+	const openArchiveModal = (product: Product) => {
 		setDeleteModal({ isOpen: true, product, mode: 'archive' })
-	}, [])
+	}
 
-	const closeModal = useCallback(() => {
-		setDeleteModal({ isOpen: false, product: null, mode: 'archive' })
-	}, [])
+	const closeModal = () => {
+		if (!isDeleting && !isArchiving) {
+			setDeleteModal({ isOpen: false, product: null, mode: 'archive' })
+		}
+	}
 
 	// ========================
 	// Table Actions
 	// ========================
 
-	const refreshTable = useCallback(() => {
+	const refreshTable = () => {
 		setRefreshKey((prev) => prev + 1)
-	}, [])
+	}
 
 	// ========================
 	// CRUD Operations
@@ -106,7 +117,7 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 	 * Permanently delete a product.
 	 * This is a hard delete - product is removed from database.
 	 */
-	const handleDeleteAsync = useCallback(async () => {
+	const handleDelete = async () => {
 		if (!deleteModal.product) {
 			return
 		}
@@ -141,21 +152,21 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 		} finally {
 			setIsDeleting(false)
 		}
-	}, [deleteModal.product, closeModal, refreshTable, refetchStats])
+	}
 
 	/**
 	 * Archive a product (soft delete).
 	 * Product is hidden from public store but can be restored.
 	 */
-	const handleArchiveAsync = useCallback(async () => {
+	const handleArchive = async () => {
 		if (!deleteModal.product) {
 			return
 		}
 
 		setIsArchiving(true)
 		try {
-			// Use the same delete endpoint as it performs archive (soft delete)
-			const { data } = await API.Store.Products.delete(deleteModal.product.id)
+			// Use the dedicated archive endpoint
+			const { data } = await API.Store.Products.archive(deleteModal.product.id)
 
 			if (data.statusCode !== 200) {
 				notificationService.error(data.message ?? 'Failed to archive product', {
@@ -183,14 +194,14 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 		} finally {
 			setIsArchiving(false)
 		}
-	}, [deleteModal.product, closeModal, refreshTable, refetchStats])
+	}
 
 	/**
 	 * Restore an archived product.
 	 */
-	const handleRestoreAsync = useCallback(async (product: Product) => {
+	const handleRestore = async (product: Product) => {
 		try {
-			const { data } = await HttpService.put<boolean>(`/products/${product.id}/restore`, {})
+			const { data } = await API.Store.Products.restore(product.id)
 			
 			if (data.statusCode !== 200) {
 				notificationService.error(data.message ?? 'Failed to restore product', {
@@ -212,49 +223,15 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 			notificationService.error('An error occurred while restoring the product')
 			logger.error('Restore product error', { error, productId: product.id })
 		}
-	}, [refreshTable, refetchStats])
-
-	// ========================
-	// Wrapper Functions for Async Handlers
-	// ========================
-
-	const handleDelete = useCallback(() => {
-		void handleDeleteAsync().catch((error) => {
-			logger.error('Unhandled delete error', {
-				error,
-				component: 'InternalStorePage',
-				action: 'handleDelete',
-			})
-		})
-	}, [handleDeleteAsync])
-
-	const handleArchive = useCallback(() => {
-		void handleArchiveAsync().catch((error) => {
-			logger.error('Unhandled archive error', {
-				error,
-				component: 'InternalStorePage',
-				action: 'handleArchive',
-			})
-		})
-	}, [handleArchiveAsync])
-
-	const handleRestore = useCallback((product: Product) => {
-		void handleRestoreAsync(product).catch((error) => {
-			logger.error('Unhandled restore error', {
-				error,
-				component: 'InternalStorePage',
-				action: 'handleRestore',
-			})
-		})
-	}, [handleRestoreAsync])
+	}
 
 	// ========================
 	// Toggle Actions
 	// ========================
 
-	const toggleShowArchived = useCallback(() => {
+	const toggleShowArchived = () => {
 		setShowArchived((prev) => !prev)
-	}, [])
+	}
 
 	// ========================
 	// Return
@@ -267,6 +244,9 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 		showArchived,
 		isDeleting,
 		isArchiving,
+		// Filters
+		selectedCategoryId,
+		setSelectedCategoryId,
 		// Stats
 		stats,
 		statsLoading,
@@ -280,9 +260,9 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 		openDeleteModal,
 		openArchiveModal,
 		closeModal,
-		handleDelete,
-		handleArchive,
-		handleRestore,
+		handleDelete: () => void handleDelete(),
+		handleArchive: () => void handleArchive(),
+		handleRestore: (product: Product) => void handleRestore(product),
 		toggleShowArchived,
 		refreshTable,
 	}

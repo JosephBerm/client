@@ -241,7 +241,7 @@ describe('useQuotePermissions Hook', () => {
     describe('Assigned Quote (SalesRep)', () => {
       it('should recognize quote as assigned to user', () => {
         const mockUser = createMockUser({ id: 200 })
-        const mockQuote = createMockQuote({ assignedSalesRepId: 200 })
+        const mockQuote = createMockQuote({ assignedSalesRepId: '200' })
         mockUsePermissions(mockUser, RoleLevels.SalesRep)
 
         const { result } = renderHook(() => useQuotePermissions(mockQuote))
@@ -251,7 +251,7 @@ describe('useQuotePermissions Hook', () => {
 
       it('SalesRep can view assigned quote', () => {
         const mockUser = createMockUser({ id: 200 })
-        const mockQuote = createMockQuote({ assignedSalesRepId: 200 })
+        const mockQuote = createMockQuote({ assignedSalesRepId: '200' })
         mockUsePermissions(mockUser, RoleLevels.SalesRep)
 
         const { result } = renderHook(() => useQuotePermissions(mockQuote))
@@ -261,7 +261,7 @@ describe('useQuotePermissions Hook', () => {
 
       it('SalesRep can update assigned quote', () => {
         const mockUser = createMockUser({ id: 200 })
-        const mockQuote = createMockQuote({ assignedSalesRepId: 200 })
+        const mockQuote = createMockQuote({ assignedSalesRepId: '200' })
         mockUsePermissions(mockUser, RoleLevels.SalesRep)
 
         const { result } = renderHook(() => useQuotePermissions(mockQuote))
@@ -272,7 +272,7 @@ describe('useQuotePermissions Hook', () => {
       it('SalesRep can convert approved quote to order', () => {
         const mockUser = createMockUser({ id: 200 })
         const mockQuote = createMockQuote({ 
-          assignedSalesRepId: 200, 
+          assignedSalesRepId: '200', 
           status: QuoteStatus.Approved 
         })
         mockUsePermissions(mockUser, RoleLevels.SalesRep)
@@ -284,7 +284,7 @@ describe('useQuotePermissions Hook', () => {
 
       it('SalesRep CANNOT approve assigned quote', () => {
         const mockUser = createMockUser({ id: 200 })
-        const mockQuote = createMockQuote({ assignedSalesRepId: 200 })
+        const mockQuote = createMockQuote({ assignedSalesRepId: '200' })
         mockUsePermissions(mockUser, RoleLevels.SalesRep)
 
         const { result } = renderHook(() => useQuotePermissions(mockQuote))
@@ -294,7 +294,7 @@ describe('useQuotePermissions Hook', () => {
 
       it('SalesRep CANNOT assign quotes', () => {
         const mockUser = createMockUser({ id: 200 })
-        const mockQuote = createMockQuote({ assignedSalesRepId: 200 })
+        const mockQuote = createMockQuote({ assignedSalesRepId: '200' })
         mockUsePermissions(mockUser, RoleLevels.SalesRep)
 
         const { result } = renderHook(() => useQuotePermissions(mockQuote))
@@ -304,7 +304,7 @@ describe('useQuotePermissions Hook', () => {
 
       it('SalesRep can add internal notes', () => {
         const mockUser = createMockUser({ id: 200 })
-        const mockQuote = createMockQuote({ assignedSalesRepId: 200 })
+        const mockQuote = createMockQuote({ assignedSalesRepId: '200' })
         mockUsePermissions(mockUser, RoleLevels.SalesRep)
 
         const { result } = renderHook(() => useQuotePermissions(mockQuote))
@@ -314,7 +314,7 @@ describe('useQuotePermissions Hook', () => {
 
       it('SalesRep can view customer history', () => {
         const mockUser = createMockUser({ id: 200 })
-        const mockQuote = createMockQuote({ assignedSalesRepId: 200 })
+        const mockQuote = createMockQuote({ assignedSalesRepId: '200' })
         mockUsePermissions(mockUser, RoleLevels.SalesRep)
 
         const { result } = renderHook(() => useQuotePermissions(mockQuote))
@@ -328,7 +328,7 @@ describe('useQuotePermissions Hook', () => {
         const mockUser = createMockUser({ id: 999, customerId: 999 })
         const mockQuote = createMockQuote({ 
           customerId: 300, 
-          assignedSalesRepId: 200 
+          assignedSalesRepId: '200' 
         })
         mockUsePermissions(mockUser, RoleLevels.Customer)
 
@@ -363,7 +363,7 @@ describe('useQuotePermissions Hook', () => {
 
     describe('Unread Status', () => {
       const unreadQuote = createMockQuote({ 
-        assignedSalesRepId: 200, 
+        assignedSalesRepId: '200', 
         status: QuoteStatus.Unread 
       })
 
@@ -388,7 +388,7 @@ describe('useQuotePermissions Hook', () => {
 
     describe('Read Status', () => {
       const readQuote = createMockQuote({ 
-        assignedSalesRepId: 200, 
+        assignedSalesRepId: '200', 
         status: QuoteStatus.Read 
       })
 
@@ -413,7 +413,7 @@ describe('useQuotePermissions Hook', () => {
 
     describe('Approved Status', () => {
       const approvedQuote = createMockQuote({ 
-        assignedSalesRepId: 200, 
+        assignedSalesRepId: '200', 
         status: QuoteStatus.Approved 
       })
 
@@ -438,7 +438,7 @@ describe('useQuotePermissions Hook', () => {
 
     describe('Rejected Status', () => {
       const rejectedQuote = createMockQuote({ 
-        assignedSalesRepId: 200, 
+        assignedSalesRepId: '200', 
         status: QuoteStatus.Rejected 
       })
 
@@ -473,7 +473,7 @@ describe('useQuotePermissions Hook', () => {
       it('Manager can view all quotes', () => {
         const unrelatedQuote = createMockQuote({ 
           customerId: 999, 
-          assignedSalesRepId: 888 
+          assignedSalesRepId: '888' 
         })
         
         const { result } = renderHook(() => useQuotePermissions(unrelatedQuote))
@@ -571,7 +571,7 @@ describe('useQuotePermissions Hook', () => {
     it('Assigned Approved quote: SalesRep can convert to order', () => {
       const mockUser = createMockUser({ id: 200 })
       const mockQuote = createMockQuote({ 
-        assignedSalesRepId: 200, 
+        assignedSalesRepId: '200', 
         status: QuoteStatus.Approved 
       })
       mockUsePermissions(mockUser, RoleLevels.SalesRep)

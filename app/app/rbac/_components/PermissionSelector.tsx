@@ -2,15 +2,24 @@
 
 /**
  * Permission Selector Component
- * 
+ *
  * Component for selecting multiple permissions, grouped by resource.
  * Used in role permission assignment.
- * 
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ARCHITECTURE: Next.js 16 + React Compiler Optimized
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * With React Compiler (`reactCompiler: true`):
+ * - No useMemo needed - compiler auto-optimizes derived state
+ * - groupPermissionsByResource is called directly, compiler handles caching
+ *
+ * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler
  * @module RBAC PermissionSelector
  */
 
-import { useMemo } from 'react'
 import type { Permission } from '@_shared/services/api'
+
 import { groupPermissionsByResource, formatPermissionDisplay } from '../_utils'
 
 interface PermissionSelectorProps {
@@ -24,8 +33,8 @@ export default function PermissionSelector({
 	selectedPermissionIds,
 	onToggle,
 }: PermissionSelectorProps) {
-	// Memoize expensive grouping operation
-	const groupedPermissions = useMemo(() => groupPermissionsByResource(permissions), [permissions])
+	// React Compiler auto-optimizes - no useMemo needed
+	const groupedPermissions = groupPermissionsByResource(permissions)
 
 	return (
 		<div className="space-y-4 max-h-[60vh] overflow-y-auto">

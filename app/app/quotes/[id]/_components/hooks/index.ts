@@ -2,17 +2,17 @@
  * Quote Detail Hooks - Barrel Export (Optimized for Tree-Shaking)
  * 
  * Custom hooks for quote detail page functionality.
- * Each hook handles a specific concern (data, actions, permissions).
+ * Each hook handles a specific concern (data, actions, permissions, pricing).
  * 
  * **Architecture:**
  * - Named exports enable optimal tree-shaking
  * - Types exported alongside implementations
- * - Organized by concern (data, actions, permissions)
+ * - Organized by concern (data, actions, permissions, pricing)
  * 
  * **Import Pattern:**
  * ```tsx
  * // ✅ GOOD: Import from barrel
- * import { useQuoteDetails, useQuotePermissions } from './hooks'
+ * import { useQuoteDetails, useQuotePermissions, useQuotePricing } from './hooks'
  * 
  * // ❌ BAD: Direct file imports
  * import { useQuoteDetails } from './hooks/useQuoteDetails'
@@ -51,4 +51,12 @@ export type { UseAutoMarkQuoteAsReadConfig } from './useAutoMarkQuoteAsRead'
 
 export { useQuoteAssignment } from './useQuoteAssignment'
 export type { UseQuoteAssignmentReturn } from './useQuoteAssignment'
+
+// ============================================================================
+// PRICING HOOKS
+// @see prd_quotes_pricing.md
+// ============================================================================
+
+export { useQuotePricing } from './useQuotePricing'
+export type { UseQuotePricingReturn } from './useQuotePricing'
 

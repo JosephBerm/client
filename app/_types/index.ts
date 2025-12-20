@@ -76,3 +76,36 @@ export type {
 export type { AccountInfo } from './account'
 export { toAccountInfo, getAccountDisplayName } from './account'
 
+// ============================================================================
+// DASHBOARD TYPES
+// ============================================================================
+
+export type {
+	DashboardStats,
+	DashboardTask,
+	RecentItem,
+	SalesRepWorkload,
+	RevenueOverview,
+} from './dashboard.types'
+
+// ============================================================================
+// ANALYTICS TYPES
+// ============================================================================
+
+export type {
+	DateRange,
+	SalesRepPerformance,
+	RevenueData,
+	QuotePipelineData,
+	AnalyticsSummary,
+	TimeRangePreset,
+	AnalyticsFilter,
+	TimelineGranularity,
+	RevenueTimelineParams,
+	ChartDataPoint,
+	RevenueChartProps,
+	ConversionFunnelProps,
+	TeamLeaderboardProps,
+	AnalyticsMetricProps,
+} from './analytics.types'
+

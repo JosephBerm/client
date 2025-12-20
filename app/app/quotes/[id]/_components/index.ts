@@ -12,7 +12,7 @@
  * **Import Pattern:**
  * ```tsx
  * // ✅ GOOD: Import from barrel
- * import { QuoteHeader, QuoteContactInfo } from './_components'
+ * import { QuoteHeader, QuoteContactInfo, QuotePricingEditor } from './_components'
  * 
  * // ❌ BAD: Direct file imports
  * import QuoteHeader from './_components/QuoteHeader'
@@ -49,6 +49,9 @@ export type { QuoteActionsProps } from './QuoteActions'
 export { default as QuoteAssignment } from './QuoteAssignment'
 export type { QuoteAssignmentProps } from './QuoteAssignment'
 
+export { default as QuotePricingEditor } from './QuotePricingEditor'
+export type { QuotePricingEditorProps } from './QuotePricingEditor'
+
 // ============================================================================
 // HOOKS (Re-export from hooks barrel)
 // ============================================================================
@@ -59,10 +62,12 @@ export {
 	useQuoteActions,
 	useQuoteAssignment,
 	useAutoMarkQuoteAsRead,
+	useQuotePricing,
 	type UseQuoteDetailsReturn,
 	type UseQuotePermissionsReturn,
 	type UseQuoteActionsReturn,
 	type UseQuoteAssignmentReturn,
 	type UseAutoMarkQuoteAsReadConfig,
+	type UseQuotePricingReturn,
 } from './hooks'
 

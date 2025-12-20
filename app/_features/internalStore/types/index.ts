@@ -67,6 +67,9 @@ export interface UseInternalStorePageReturn {
 	showArchived: boolean
 	isDeleting: boolean
 	isArchiving: boolean
+	// Filters
+	selectedCategoryId: number | null
+	setSelectedCategoryId: (categoryId: number | null) => void
 	// Stats
 	stats: ProductStats | null
 	statsLoading: boolean
@@ -127,6 +130,8 @@ export interface ProductStatsGridProps {
 export interface ProductColumnsConfig {
 	/** Whether user can delete products */
 	canDelete: boolean
+	/** Whether to show cost column (SalesRep+ only per PRD) */
+	showCost?: boolean
 	/** Callback when delete is clicked */
 	onDelete: (product: Product) => void
 	/** Callback when archive is clicked */

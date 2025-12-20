@@ -15,14 +15,22 @@
 
 /**
  * Role level constants. Higher values = more authority.
- * Matches backend Account.AccountRole enum.
+ * Matches backend Account.AccountRole enum in RBACConstants.cs.
+ * 
+ * Hierarchy (from PRD medsource_prd_system.md):
+ * Admin (500) > Sales Manager (400) > Sales Rep (300) > Fulfillment (200) > Customer (100)
+ * 
+ * Note: Fulfillment Coordinator is BELOW Sales Rep because:
+ * - Fulfillment CANNOT confirm payments (only Sales Rep+ can)
+ * - Fulfillment CANNOT cancel orders (only Sales Manager+ can)
+ * - Fulfillment CAN update order status (Processing, Shipped, Delivered)
  */
 export const RoleLevels = {
-	Customer: 0,
-	SalesRep: 100,
-	SalesManager: 200,
-	FulfillmentCoordinator: 300,
-	Admin: 9999999,
+	Customer: 100,
+	FulfillmentCoordinator: 200,
+	SalesRep: 300,
+	SalesManager: 400,
+	Admin: 500,
 } as const
 
 export type RoleLevel = (typeof RoleLevels)[keyof typeof RoleLevels]

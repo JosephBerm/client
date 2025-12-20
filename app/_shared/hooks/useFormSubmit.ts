@@ -150,11 +150,40 @@ export function useFormSubmit<TData, TResult = any>(
  * Specialized CRUD (Create, Read, Update, Delete) hook built on useFormSubmit.
  * Provides standardized create, update, and delete operations with consistent
  * success messages and error handling.
- * 
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ARCHITECTURE NOTE: useCRUDSubmit vs useCRUDEntity
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * This hook (useCRUDSubmit) is STATELESS - it only provides CRUD functions.
+ * It does NOT manage entity list state or auto-fetch data.
+ *
+ * | Feature              | useCRUDSubmit (this hook)  | useCRUDEntity (RBAC)       |
+ * |----------------------|----------------------------|----------------------------|
+ * | Entity list state    | ❌ No - stateless          | ✅ Yes - manages `entities`|
+ * | Auto-fetch on mount  | ❌ No                      | ✅ Yes - `autoFetch` option|
+ * | Refresh after CRUD   | ❌ No - use callbacks      | ✅ Yes - auto-refetches    |
+ * | Uses useFormSubmit   | ✅ Yes - composes it       | ❌ No - direct impl        |
+ * | Use case             | Form submissions           | Entity list management     |
+ *
+ * WHEN TO USE EACH:
+ *
+ * - **useCRUDSubmit** (this hook):
+ *   Use for simple form submissions where you DON'T need to manage a list of entities.
+ *   You handle data fetching and state separately.
+ *   Example: Single entity edit forms, one-off create operations.
+ *
+ * - **useCRUDEntity** (app/rbac/_hooks):
+ *   Use when you need to manage a LIST of entities with auto-fetch and auto-refresh.
+ *   The hook maintains the entity list state and refreshes it after each operation.
+ *   Example: Admin panels with entity tables (roles, permissions, users).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
  * **Use Case:** Simplifies CRUD operations for entity management pages (users, products, orders).
- * 
+ *
  * @template TEntity - The entity type being managed (e.g., User, Product, Order)
- * 
+ *
  * @param {Object} apiService - API service object with CRUD methods
  * @param {Function} apiService.create - Function to create a new entity
  * @param {Function} apiService.update - Function to update an existing entity
@@ -164,13 +193,15 @@ export function useFormSubmit<TData, TResult = any>(
  * @param {Function} options.onCreateSuccess - Callback after successful creation
  * @param {Function} options.onUpdateSuccess - Callback after successful update
  * @param {Function} options.onDeleteSuccess - Callback after successful deletion
- * 
+ *
  * @returns {Object} Object containing CRUD functions and loading state
  * @returns {Function} returns.create - Function to create a new entity
  * @returns {Function} returns.update - Function to update an entity
  * @returns {Function} returns.remove - Function to delete an entity
  * @returns {boolean} returns.isLoading - True if any CRUD operation is in progress
- * 
+ *
+ * @see useCRUDEntity - For stateful entity list management with auto-refresh
+ *
  * @example
  * ```typescript
  * // Basic usage for user management
@@ -188,16 +219,16 @@ export function useFormSubmit<TData, TResult = any>(
  *     notificationService.info('User removed from system', { component: 'UserDeleteButton', action: 'delete' });
  *   }
  * });
- * 
+ *
  * // In component
  * const handleCreate = async (userData) => {
  *   await create(userData);
  * };
- * 
+ *
  * const handleUpdate = async (userData) => {
  *   await update(userData);
  * };
- * 
+ *
  * const handleDelete = async (userId) => {
  *   await remove(userId);
  * };

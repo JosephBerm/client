@@ -82,6 +82,7 @@ import type { IUser } from '@_classes/User'
 
 import Button from '@_components/ui/Button'
 import Logo from '@_components/ui/Logo'
+import AccountStatusListener from '@_components/auth/AccountStatusListener'
 
 import Breadcrumb from './Breadcrumb'
 import InternalSidebar from './InternalSidebar'
@@ -225,9 +226,13 @@ export default function InternalAppShell({ children, user }: InternalAppShellPro
 
 	return (
 		<div className="relative flex min-h-screen w-full bg-base-100">
-			{/* Internal Sidebar Navigation */}
-			{/* Mobile: Overlay drawer (controlled by sidebarOpen) */}
-			{/* Desktop: Always visible, permanent (isOpen=true) */}
+			{/* ============================================================= */}
+			{/* ACCOUNT STATUS LISTENER (MAANG-Level Security)                */}
+			{/* ============================================================= */}
+			{/* Listens for account status errors (suspended/locked/archived) */}
+			{/* Forces immediate logout with user notification                */}
+			<AccountStatusListener />
+
 			{/* Internal Sidebar Navigation */}
 			{/* Mobile: Overlay drawer (controlled by sidebarOpen) */}
 			{/* Desktop: Always visible, permanent (isOpen=true) */}

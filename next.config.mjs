@@ -283,6 +283,27 @@ const nextConfig = {
 		mcpServer: true,
 
 		/**
+		 * Optimize Package Imports
+		 * Improves compilation speed for packages with many named exports (barrel files).
+		 * 
+		 * @see https://nextjs.org/docs/app/guides/package-bundling#packages-with-many-exports
+		 * @see https://vercel.com/docs/conformance/rules/NEXTJS_MISSING_OPTIMIZE_PACKAGE_IMPORTS
+		 * 
+		 * Note: Many common packages (lucide-react, @heroicons/react, etc.) are 
+		 * already auto-optimized by Next.js. We add less common ones here.
+		 * 
+		 * Benefits for MedSource Pro:
+		 * - @tanstack/react-table: Used in 24+ files for data grids
+		 * - react-hook-form: Used in 18+ files for form handling
+		 * - zod: Schema validation library with many exports
+		 */
+		optimizePackageImports: [
+			'@tanstack/react-table',
+			'react-hook-form',
+			'zod',
+		],
+
+		/**
 		 * Turbopack File System Caching Notes:
 		 *
 		 * Next.js 16 Status:

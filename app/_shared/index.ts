@@ -96,6 +96,13 @@ export {
 	getUserDisplayName,
 } from './utils/userHelpers'
 
+// Category Utilities
+export {
+	flattenCategories,
+	formatCategoryLabel,
+	type FlattenedCategory,
+} from './utils/categoryUtils'
+
 // ============================================================================
 // CLIENT SERVICES (All have 'use client' directive)
 // ============================================================================
@@ -126,6 +133,32 @@ export {
 	type NotificationOptions,
 	type NotificationResult,
 } from './services/notification.service'
+
+// Account Status Handler (forced logout for suspended/locked/archived accounts)
+export {
+	subscribeToAccountStatusErrors,
+	clearAuthState,
+	getLoginUrl,
+	type AccountStatusCode,
+	type AccountStatusError,
+} from './services/accountStatusHandler'
+
+// Token Service (MAANG-Level JWT Management)
+export {
+	storeTokens,
+	clearTokens,
+	getAccessToken,
+	getRefreshToken,
+	isTokenExpired,
+	refreshAccessToken,
+	ensureValidToken,
+	startAutoRefresh,
+	stopAutoRefresh,
+	setupVisibilityRefresh,
+	REFRESH_TOKEN_COOKIE,
+	TOKEN_EXPIRY_COOKIE,
+	type TokenPair,
+} from './services/tokenService'
 
 // API Types - DTOs for backend contract alignment
 export type {
@@ -189,6 +222,16 @@ export {
 // Form Hooks
 export { useZodForm } from './hooks/useZodForm'
 export { useFormSubmit } from './hooks/useFormSubmit'
+
+// Data Fetching Hooks (MAANG-Level Caching)
+export {
+	useFetchWithCache,
+	prefetch,
+	invalidateCache,
+	getCacheStats,
+	type FetchWithCacheOptions,
+	type FetchWithCacheReturn,
+} from './hooks/useFetchWithCache'
 
 // Table Hooks
 export { useServerTable } from './hooks/useServerTable'

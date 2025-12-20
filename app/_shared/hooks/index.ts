@@ -13,6 +13,14 @@ export { useModal } from './useModal'
 export { useFocusTrap } from './useFocusTrap'
 export { useAccordion } from './useAccordion'
 export { useScrollSpy } from './useScrollSpy'
+export { 
+	useFetchWithCache, 
+	prefetch, 
+	invalidateCache, 
+	getCacheStats,
+	type FetchWithCacheOptions,
+	type FetchWithCacheReturn,
+} from './useFetchWithCache'
 export type { UseScrollSpyOptions, UseScrollSpyReturn } from './useScrollSpy'
 export { useKeyboardNavigation } from './useKeyboardNavigation'
 export type { UseKeyboardNavigationOptions, UseKeyboardNavigationReturn } from './useKeyboardNavigation'

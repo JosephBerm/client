@@ -25,8 +25,7 @@ import {
 } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
-
-import { usePermissions, RoleLevels } from '@_shared/hooks/usePermissions'
+import { usePermissions, RoleLevels } from '@_shared'
 
 import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
