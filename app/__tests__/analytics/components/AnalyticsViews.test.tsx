@@ -134,7 +134,9 @@ describe('CustomerAnalytics', () => {
 
 			// Should still render KPI cards with default/fallback values
 			expect(screen.getByText(/total spent/i)).toBeInTheDocument()
-			expect(screen.getByText(/no data available/i)).toBeInTheDocument()
+			// Multiple "No data available" elements expected (one per KPI card)
+			const noDataElements = screen.getAllByText(/no data available/i)
+			expect(noDataElements.length).toBeGreaterThan(0)
 		})
 
 		it('should handle empty summary object', () => {

@@ -130,7 +130,7 @@ describe('RoleGuard Component', () => {
   // ==========================================================================
 
   describe('Role Hierarchy', () => {
-    describe('Admin (9999999)', () => {
+    describe('Admin (500)', () => {
       beforeEach(() => {
         mockUsePermissions(RoleLevels.Admin)
       })
@@ -181,7 +181,7 @@ describe('RoleGuard Component', () => {
       })
     })
 
-    describe('FulfillmentCoordinator (300)', () => {
+    describe('FulfillmentCoordinator (200)', () => {
       beforeEach(() => {
         mockUsePermissions(RoleLevels.FulfillmentCoordinator)
       })
@@ -204,8 +204,8 @@ describe('RoleGuard Component', () => {
         expect(screen.getByTestId('content')).toBeInTheDocument()
       })
 
-      it('should NOT access SalesManager content (50 < 200 per corrected hierarchy)', () => {
-        // Per PRD: FulfillmentCoordinator (50) is BELOW SalesManager (200)
+      it('should NOT access SalesManager content (200 < 400 per PRD hierarchy)', () => {
+        // Per PRD: FulfillmentCoordinator (200) is BELOW SalesManager (400)
         render(
           <RoleGuard minimumRole={RoleLevels.SalesManager}>
             <div data-testid="content">Content</div>
@@ -214,8 +214,8 @@ describe('RoleGuard Component', () => {
         expect(screen.queryByTestId('content')).not.toBeInTheDocument()
       })
 
-      it('should NOT access SalesRep content (50 < 100 per corrected hierarchy)', () => {
-        // Per PRD: FulfillmentCoordinator (50) is BELOW SalesRep (100)
+      it('should NOT access SalesRep content (200 < 300 per PRD hierarchy)', () => {
+        // Per PRD: FulfillmentCoordinator (200) is BELOW SalesRep (300)
         render(
           <RoleGuard minimumRole={RoleLevels.SalesRep}>
             <div data-testid="content">Content</div>
@@ -234,7 +234,7 @@ describe('RoleGuard Component', () => {
       })
     })
 
-    describe('SalesManager (200)', () => {
+    describe('SalesManager (400)', () => {
       beforeEach(() => {
         mockUsePermissions(RoleLevels.SalesManager)
       })
@@ -248,8 +248,8 @@ describe('RoleGuard Component', () => {
         expect(screen.queryByTestId('content')).not.toBeInTheDocument()
       })
 
-      it('should access FulfillmentCoordinator content (200 > 50 per corrected hierarchy)', () => {
-        // Per PRD: SalesManager (200) is ABOVE FulfillmentCoordinator (50)
+      it('should access FulfillmentCoordinator content (400 > 200 per PRD hierarchy)', () => {
+        // Per PRD: SalesManager (400) is ABOVE FulfillmentCoordinator (200)
         render(
           <RoleGuard minimumRole={RoleLevels.FulfillmentCoordinator}>
             <div data-testid="content">Content</div>
@@ -286,7 +286,7 @@ describe('RoleGuard Component', () => {
       })
     })
 
-    describe('SalesRep (100)', () => {
+    describe('SalesRep (300)', () => {
       beforeEach(() => {
         mockUsePermissions(RoleLevels.SalesRep)
       })
@@ -328,7 +328,7 @@ describe('RoleGuard Component', () => {
       })
     })
 
-    describe('Customer (0)', () => {
+    describe('Customer (100)', () => {
       beforeEach(() => {
         mockUsePermissions(RoleLevels.Customer)
       })
@@ -612,11 +612,11 @@ describe('RoleGuard Component', () => {
      * Critical for ensuring no unauthorized access.
      */
     const roleHierarchy = [
-      RoleLevels.Customer,       // 0
-      RoleLevels.SalesRep,       // 100
-      RoleLevels.SalesManager,   // 200
-      RoleLevels.FulfillmentCoordinator, // 300
-      RoleLevels.Admin,          // 9999999
+      RoleLevels.Customer,       // 100
+      RoleLevels.FulfillmentCoordinator, // 200
+      RoleLevels.SalesRep,       // 300
+      RoleLevels.SalesManager,   // 400
+      RoleLevels.Admin,          // 500
     ]
 
     it('should enforce complete role hierarchy', () => {
