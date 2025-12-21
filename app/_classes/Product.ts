@@ -207,7 +207,7 @@ export class Product {
 	 * ```typescript
 	 * const imageName = product.getFileName();
 	 * if (imageName) {
-	 *   const imageUrl = `/api/products/image?productId=${product.id}&image=${imageName}`;
+	 *   const imageUrl = `/products/image?productId=${product.id}&image=${imageName}`;
 	 * }
 	 * ```
 	 */

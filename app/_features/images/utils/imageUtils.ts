@@ -52,20 +52,23 @@ export interface ImageSize {
 
 /**
  * Gets the API base URL for image requests.
- * Returns the full API URL including '/api' path, as image endpoints are under /api/products/image.
+ * Returns the API base URL without any path prefix.
  * 
- * **Industry Best Practice (FAANG-level):**
+ * **Industry Best Practice (MAANG-level):**
  * - Use environment variables for base URL configuration
  * - Support both server-side and client-side execution
  * - Provide clear error messages for debugging
  * - Follow Next.js Image optimization patterns (Vercel/Shopify/Amazon)
  * 
- * @returns {string} Full API base URL (e.g., 'https://api.example.com/api')
+ * NOTE: API routes are at root level (e.g., /products/image), not under /api prefix.
+ * This is the MAANG-standard approach where API paths are defined by route attributes.
+ * 
+ * @returns {string} API base URL (e.g., 'http://localhost:5254')
  * 
  * @example
  * ```typescript
  * const baseUrl = getImageBaseUrl();
- * // Returns: 'https://prod-server20241205193558.azurewebsites.net/api'
+ * // Returns: 'http://localhost:5254' (dev) or 'https://prod-server20241205193558.azurewebsites.net' (prod)
  * ```
  */
 export function getImageBaseUrl(): string {
@@ -83,17 +86,8 @@ export function getImageBaseUrl(): string {
 		return ''
 	}
 	
-	// Ensure URL ends with '/api' for consistency
-	// Image endpoint is /api/products/image, so we need the full API URL
-	const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl}/api`
-	
-	if (!baseUrl) {
-		logger.error('ImageUtils: Base URL is empty after processing', {
-			originalApiUrl: apiUrl,
-			processedBaseUrl: baseUrl,
-		})
-		return ''
-	}
+	// Remove trailing slash if present for consistency
+	const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl
 	
 	return baseUrl
 }
@@ -192,8 +186,9 @@ export function getProductImageUrl(
 
 	// Construct full image URL
 	// Format: {baseUrl}/products/image?productId={id}&image={name}
-	// Example: https://prod-server20241205193558.azurewebsites.net/api/products/image?productId=123&image=photo.jpg
-	// This matches the API endpoint structure defined in app/_services/api.ts
+	// Example: http://localhost:5254/products/image?productId=123&image=photo.jpg (dev)
+	// Example: https://prod-server20241205193558.azurewebsites.net/products/image?productId=123&image=photo.jpg (prod)
+	// This matches the API endpoint structure defined in backend ProductsController
 	const finalUrl = `${baseUrl}/products/image?${queryParts.join('&')}`
 
 	// Cache the URL (limit cache size to prevent memory issues)

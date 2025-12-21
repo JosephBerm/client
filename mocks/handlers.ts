@@ -28,7 +28,7 @@ import type Quote from '@_classes/Quote'
 // Base URL Configuration
 // ============================================================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5254/api'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5254'
 
 // ============================================================================
 // Mock Data Helpers
