@@ -26,7 +26,7 @@
 
 // Service Worker version - update to invalidate caches
 // CRITICAL: Increment this after major code refactorings to force cache clear
-const VERSION = 'v1.1.0' // Updated after INITIAL_FILTER fix
+const VERSION = 'v1.2.0' // Updated with MAANG-level security improvements
 const CACHE_NAME = `medsource-images-${VERSION}`
 const API_CACHE_NAME = `medsource-api-${VERSION}`
 const STATIC_CACHE_NAME = `medsource-static-${VERSION}`
@@ -39,6 +39,34 @@ const MAX_API_CACHE_ITEMS = 50 // Maximum number of cached API responses
 // Cache duration (milliseconds)
 const IMAGE_CACHE_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days
 const API_CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
+// =============================================================================
+// MAANG-LEVEL SECURITY: ALLOWED ORIGINS
+// =============================================================================
+// 
+// **Why MAANG companies use explicit allowlists:**
+// 1. Security: Prevents Service Worker from intercepting unauthorized domains
+// 2. Privacy: Avoids triggering browser permission prompts for local network access
+// 3. Performance: Only processes requests from trusted sources
+// 4. Compliance: Follows web security best practices (OWASP, W3C)
+//
+// **Pattern**: Google, Meta, Amazon all use explicit origin allowlists in SW
+// This prevents the "local network access" permission dialog that users see
+//
+// **Production Origins**: Only intercept requests from these domains
+const ALLOWED_ORIGINS = [
+	'www.medsourcepro.com',
+	'medsourcepro.com',
+	'prod-server20241205193558.azurewebsites.net',
+]
+
+// **Development Origins**: Only intercept in development if explicitly enabled
+// Note: Service Worker is disabled in dev by default (see ServiceWorkerRegistration.tsx)
+const ALLOWED_DEV_ORIGINS = [
+	// Intentionally empty - Service Worker disabled in development
+	// If you need dev support, add 'localhost' here, but be aware it may trigger
+	// local network permission prompts in some browsers
+]
 
 /**
  * Install Event
@@ -115,14 +143,49 @@ self.addEventListener('fetch', (event) => {
 	const { request } = event
 	const url = new URL(request.url)
 
-	// Only handle GET requests
+	// =============================================================================
+	// MAANG-LEVEL SECURITY: REQUEST VALIDATION (Order matters!)
+	// =============================================================================
+	// 
+	// **Security-First Approach**: All security checks happen BEFORE any processing
+	// This follows Google/Meta/Amazon patterns where security is the first concern
+	//
+	// **Why this order matters:**
+	// 1. Method check first (fastest rejection)
+	// 2. Origin check second (prevents unauthorized domain interception)
+	// 3. Local network check third (prevents permission prompts)
+	// 4. Content type checks last (most expensive)
+
+	// MAANG Best Practice #1: Only intercept GET requests
+	// PUT/POST/DELETE should never be cached (security + data integrity)
 	if (request.method !== 'GET') {
 		return
 	}
 
-	// FAANG Best Practice #1: NEVER cache JavaScript chunks
+	// MAANG Best Practice #2: Explicit Origin Allowlist (Google/Meta Pattern)
+	// Only intercept requests from trusted origins
+	// This is MORE secure than blocking localhost (positive security model)
+	if (!isAllowedOrigin(url)) {
+		// Let browser handle unauthorized origins normally (don't intercept)
+		return
+	}
+
+	// MAANG Best Practice #3: Skip Local Network Requests (Privacy Protection)
+	// Even if origin is allowed, skip local network IPs to prevent permission prompts
+	// This protects user privacy and avoids annoying browser dialogs
+	if (isLocalNetworkUrl(url)) {
+		// Let browser handle local network requests normally (don't intercept)
+		return
+	}
+
+	// =============================================================================
+	// CONTENT TYPE VALIDATION (After security checks)
+	// =============================================================================
+
+	// FAANG Best Practice #4: NEVER cache JavaScript chunks
 	// This prevents issues like the INITIAL_FILTER error you experienced
 	// JavaScript should always come fresh from the server to get latest code
+	// Pattern: Google, Meta, Amazon never cache JS chunks (cache-busting hashes instead)
 	if (isJavaScriptChunk(url)) {
 		event.respondWith(fetch(request, { cache: 'no-store' }))
 		return
@@ -329,6 +392,111 @@ async function enforceAPICacheLimit(cache) {
 			await cache.delete(keys[i])
 		}
 	}
+}
+
+/**
+ * MAANG-LEVEL SECURITY: Origin Allowlist Check
+ * 
+ * **Why MAANG companies use explicit allowlists:**
+ * - Security: Positive security model (allow only trusted origins)
+ * - Privacy: Prevents unauthorized domain interception
+ * - Performance: Only processes requests from known-good sources
+ * - Compliance: Follows OWASP and W3C security guidelines
+ * 
+ * **Pattern**: Google Workbox, Meta's Service Worker patterns, Amazon's PWA implementation
+ * All use explicit origin allowlists rather than blocking lists
+ * 
+ * @param {URL} url - URL object
+ * @returns {boolean} True if origin is in allowlist
+ */
+function isAllowedOrigin(url) {
+	const hostname = url.hostname.toLowerCase()
+	
+	// Check against production allowlist
+	for (const allowed of ALLOWED_ORIGINS) {
+		if (hostname === allowed.toLowerCase() || hostname.endsWith('.' + allowed.toLowerCase())) {
+			return true
+		}
+	}
+	
+	// Check against development allowlist (usually empty)
+	// Only used if Service Worker is explicitly enabled in dev
+	for (const allowed of ALLOWED_DEV_ORIGINS) {
+		if (hostname === allowed.toLowerCase()) {
+			return true
+		}
+	}
+	
+	return false
+}
+
+/**
+ * MAANG-LEVEL SECURITY: Local Network Detection
+ * 
+ * **Why MAANG companies block local network interception:**
+ * 1. Privacy: Prevents browser permission prompts for local network access
+ * 2. Security: Local network resources may be sensitive (printers, IoT devices)
+ * 3. User Experience: Permission dialogs are annoying and reduce trust
+ * 4. Compliance: Follows browser security model (Chrome, Firefox, Safari all require permission)
+ * 
+ * **RFC 1918 Private IP Ranges:**
+ * - 10.0.0.0/8 (10.0.0.0 - 10.255.255.255)
+ * - 172.16.0.0/12 (172.16.0.0 - 172.31.255.255)
+ * - 192.168.0.0/16 (192.168.0.0 - 192.168.255.255)
+ * 
+ * **RFC 3927 Link-Local:**
+ * - 169.254.0.0/16 (169.254.0.0 - 169.254.255.255)
+ * 
+ * **Pattern**: Google, Meta, Amazon all skip local network interception
+ * This is why you don't see permission prompts on their PWAs
+ * 
+ * @param {URL} url - URL object
+ * @returns {boolean} True if local network URL (should be skipped)
+ */
+function isLocalNetworkUrl(url) {
+	const hostname = url.hostname.toLowerCase()
+	
+	// Check for localhost variants (IPv4 and IPv6)
+	if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]') {
+		return true
+	}
+	
+	// Validate IPv4 format (RFC 3986 compliant)
+	// Pattern: 4 octets, each 0-255, separated by dots
+	const ipv4Pattern = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/
+	const match = hostname.match(ipv4Pattern)
+	
+	if (match) {
+		const octets = match.slice(1).map(Number)
+		const [a, b] = octets
+		
+		// Validate octet ranges (0-255) - invalid IPs are not local network
+		if (octets.some(o => o > 255)) {
+			return false
+		}
+		
+		// RFC 1918: Private Network Addresses
+		// 192.168.0.0/16 (192.168.0.0 - 192.168.255.255)
+		if (a === 192 && b === 168) return true
+		
+		// 10.0.0.0/8 (10.0.0.0 - 10.255.255.255)
+		if (a === 10) return true
+		
+		// 172.16.0.0/12 (172.16.0.0 - 172.31.255.255)
+		if (a === 172 && b >= 16 && b <= 31) return true
+		
+		// RFC 3927: Link-Local Addresses
+		// 169.254.0.0/16 (169.254.0.0 - 169.254.255.255)
+		if (a === 169 && b === 254) return true
+	}
+	
+	// Check for IPv6 link-local (fe80::/10)
+	// Format: fe80:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx
+	if (hostname.startsWith('fe80:') || hostname.startsWith('[fe80:')) {
+		return true
+	}
+	
+	return false
 }
 
 /**
