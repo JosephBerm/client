@@ -2,13 +2,14 @@
  * Internal Store Page (Product Catalog Management)
  * 
  * Admin-only page for managing the medical supply product catalog.
- * Displays products in a searchable, sortable, and paginated data grid.
+ * Displays products in a searchable, sortable, and paginated RichDataGrid.
  * 
  * **Architecture:**
  * - Uses useInternalStorePage hook for all business logic
  * - Modular components from @_features/internalStore
- * - Column definitions via createProductColumns factory
+ * - Column definitions via createProductRichColumns factory
  * - Mobile-first responsive design
+ * - RichDataGrid with server-side pagination, sorting, filtering
  * 
  * **Business Flow Integration:**
  * - Products are the foundation of the quote-based ordering system
@@ -20,6 +21,7 @@
  * - Non-Admin: No access (redirected by middleware)
  * 
  * **Features:**
+ * - RichDataGrid with global search and sorting
  * - Server-side paginated product list
  * - Product statistics dashboard
  * - Archive/restore functionality
@@ -27,19 +29,22 @@
  * - Category badges
  * - Quick actions (view, archive, delete)
  * 
+ * **Migration:** Phase 2.1 - Migrated from ServerDataGrid to RichDataGrid
+ * @see RICHDATAGRID_MIGRATION_PLAN.md
+ * 
  * @module app/store
  */
 
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
 import { Archive, Filter, Package, Plus, X } from 'lucide-react'
 
 import {
-	createProductColumns,
+	createProductRichColumns,
 	ProductDeleteModal,
 	ProductStatsGrid,
 	useInternalStorePage,
@@ -52,7 +57,8 @@ import { API, usePermissions, flattenCategories } from '@_shared'
 import type { Product } from '@_classes/Product'
 import type ProductsCategory from '@_classes/ProductsCategory'
 
-import ServerDataGrid from '@_components/tables/ServerDataGrid'
+import { RichDataGrid, FilterType, SortDirection, createColumnId } from '@_components/tables/RichDataGrid'
+import type { RichSearchFilter, RichPagedResult } from '@_components/tables/RichDataGrid'
 import Button from '@_components/ui/Button'
 import Select from '@_components/ui/Select'
 
@@ -120,7 +126,7 @@ export default function InternalStorePage() {
 	// Column definitions - memoized since they depend on permissions
 	const columns = useMemo(
 		() =>
-			createProductColumns({
+			createProductRichColumns({
 				canDelete,
 				showCost: isSalesRepOrAbove, // Only show cost to SalesRep+
 				onDelete: openDeleteModal,
@@ -130,19 +136,58 @@ export default function InternalStorePage() {
 		[canDelete, isSalesRepOrAbove, openDeleteModal, openArchiveModal, handleRestore]
 	)
 
-	// Search filters based on showArchived state and category
-	const searchFilters = useMemo(() => {
-		const filters: Record<string, unknown> = {
-			includes: PRODUCT_API_INCLUDES,
-		}
-		if (showArchived && canViewArchived) {
-			filters.isArchived = true
-		}
-		if (selectedCategoryId !== null) {
-			filters.CategorieIds = String(selectedCategoryId)
-		}
-		return filters
-	}, [showArchived, canViewArchived, selectedCategoryId])
+	// Custom fetcher that includes external filters (category, archived)
+	// This allows RichDataGrid's internal filtering to work alongside external filters
+	const fetcher = useCallback(
+		async (filter: RichSearchFilter): Promise<RichPagedResult<Product>> => {
+			// Build the enhanced filter with external filters
+			const enhancedFilter: RichSearchFilter = {
+				...filter,
+				includes: [...PRODUCT_API_INCLUDES],
+			}
+
+			// Add isArchived filter if viewing archived
+			if (showArchived && canViewArchived) {
+				enhancedFilter.columnFilters = [
+					...(filter.columnFilters || []),
+					{
+						columnId: 'isArchived',
+						filterType: FilterType.Boolean,
+						operator: 'Is',
+						value: true,
+					},
+				]
+			}
+
+			// Add category filter if selected
+			if (selectedCategoryId !== null) {
+				// Note: This requires backend support for category filtering
+				// For now, we add it as a facet filter
+				enhancedFilter.facetFilters = {
+					...(filter.facetFilters || {}),
+					categoryId: [String(selectedCategoryId)],
+				}
+			}
+
+			const response = await API.Store.Products.richSearch(enhancedFilter)
+
+			if (response.data?.payload) {
+				return response.data.payload
+			}
+
+			// Return empty result on error
+			return {
+				data: [],
+				page: 1,
+				pageSize: filter.pageSize,
+				total: 0,
+				totalPages: 0,
+				hasNext: false,
+				hasPrevious: false,
+			}
+		},
+		[showArchived, canViewArchived, selectedCategoryId]
+	)
 
 	// Use shared utility for DRY
 	const flatCategories = flattenCategories(categories)
@@ -231,15 +276,16 @@ export default function InternalStorePage() {
 			{/* Data Grid Card */}
 			<div className="card bg-base-100 shadow-xl">
 				<div className="card-body p-3 sm:p-6">
-					<ServerDataGrid<Product>
+					<RichDataGrid<Product>
 						key={`products-${refreshKey}-${showArchived}-${selectedCategoryId}`}
 						columns={columns}
-						endpoint="/products/search"
-						initialPageSize={10}
-						initialSortBy="createdAt"
-						initialSortOrder="desc"
-						filters={searchFilters}
-						emptyMessage={
+						fetcher={fetcher}
+						defaultPageSize={10}
+						defaultSorting={[{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending }]}
+						enableGlobalSearch
+						searchPlaceholder="Search products by name..."
+						persistStateKey="products-grid"
+						emptyState={
 							<EmptyState
 								showArchived={showArchived}
 								hasFilters={selectedCategoryId !== null}

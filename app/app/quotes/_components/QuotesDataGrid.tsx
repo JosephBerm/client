@@ -2,7 +2,13 @@
  * QuotesDataGrid Component
  * 
  * Client component that displays a server-side paginated table of quotes
- * with delete functionality. Uses ServerDataGrid for data fetching.
+ * with delete functionality. Uses RichDataGrid for advanced data operations.
+ * 
+ * **Features (Phase 2.2 Migration):**
+ * - RichDataGrid with global search and sorting
+ * - Server-side pagination via /quotes/search/rich endpoint
+ * - Status filtering with faceted counts
+ * - Text search on company name and email
  * 
  * **Next.js 16 Optimization:**
  * - React Compiler enabled - automatic memoization
@@ -11,13 +17,14 @@
  * **Next.js Pattern**: Co-located in _components (private folder) following
  * Next.js project structure conventions.
  * 
+ * @see RICHDATAGRID_MIGRATION_PLAN.md - Phase 2.2
  * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler
  * @module app/quotes/_components/QuotesDataGrid
  */
 
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import Link from 'next/link'
 
@@ -32,12 +39,17 @@ import { formatDate, API, notificationService } from '@_shared'
 import { QuoteStatus } from '@_classes/Enums'
 import type Quote from '@_classes/Quote'
 
-import ServerDataGrid from '@_components/tables/ServerDataGrid'
+import {
+	RichDataGrid,
+	createRichColumnHelper,
+	createColumnId,
+	FilterType,
+	SortDirection,
+} from '@_components/tables/RichDataGrid'
+import type { RichSearchFilter, RichPagedResult, RichColumnDef } from '@_components/tables/RichDataGrid'
 import Badge from '@_components/ui/Badge'
 import Button from '@_components/ui/Button'
 import ConfirmationModal from '@_components/ui/ConfirmationModal'
-
-import type { ColumnDef } from '@tanstack/react-table'
 
 // ============================================================================
 // TYPES
@@ -124,13 +136,42 @@ export default function QuotesDataGrid() {
   }
 
   // ---------------------------------------------------------------------------
+  // FETCHER (React Compiler auto-memoizes)
+  // ---------------------------------------------------------------------------
+
+  const fetcher = useCallback(
+    async (filter: RichSearchFilter): Promise<RichPagedResult<Quote>> => {
+      const response = await API.Quotes.richSearch(filter)
+
+      if (response.data?.payload) {
+        return response.data.payload
+      }
+
+      // Return empty result on error
+      return {
+        data: [],
+        page: 1,
+        pageSize: filter.pageSize,
+        total: 0,
+        totalPages: 0,
+        hasNext: false,
+        hasPrevious: false,
+      }
+    },
+    []
+  )
+
+  // ---------------------------------------------------------------------------
   // COLUMN DEFINITIONS (React Compiler auto-memoizes)
   // ---------------------------------------------------------------------------
   
-  const columns: ColumnDef<Quote>[] = [
-    {
-      accessorKey: 'id',
+  const columnHelper = createRichColumnHelper<Quote>()
+  
+  const columns: RichColumnDef<Quote, unknown>[] = [
+    // Quote ID - Text filter, searchable
+    columnHelper.accessor('id', {
       header: 'Quote ID',
+      filterType: FilterType.Text,
       cell: ({ row }) => (
         <Link
           href={Routes.Quotes.detail(row.original.id ?? '')}
@@ -139,36 +180,51 @@ export default function QuotesDataGrid() {
           #{row.original.id?.substring(0, 8) ?? 'N/A'}...
         </Link>
       ),
-    },
-    {
-      accessorKey: 'companyName',
+    }),
+
+    // Company Name - Text filter, searchable
+    columnHelper.accessor('companyName', {
       header: 'Company',
+      filterType: FilterType.Text,
+      searchable: true,
       cell: ({ row }) => row.original.companyName || 'N/A',
-    },
-    {
-      accessorKey: 'emailAddress',
+    }),
+
+    // Email - Text filter, searchable
+    columnHelper.accessor('emailAddress', {
       header: 'Email',
-    },
-    {
-      accessorKey: 'phoneNumber',
+      filterType: FilterType.Text,
+      searchable: true,
+    }),
+
+    // Phone - Text filter
+    columnHelper.accessor('phoneNumber', {
       header: 'Phone',
-    },
-    {
-      accessorKey: 'status',
+      filterType: FilterType.Text,
+    }),
+
+    // Status - Select filter, faceted
+    columnHelper.accessor('status', {
       header: 'Status',
+      filterType: FilterType.Select,
+      faceted: true,
       cell: ({ row }) => {
         const { status } = row.original
         const variant = status === QuoteStatus.Read ? 'success' : 'warning'
         const label = status === QuoteStatus.Read ? 'Read' : 'Unread'
         return <Badge variant={variant}>{label}</Badge>
       },
-    },
-    {
-      accessorKey: 'createdAt',
+    }),
+
+    // Created At - Date filter
+    columnHelper.accessor('createdAt', {
       header: 'Requested',
+      filterType: FilterType.Date,
       cell: ({ row }) => formatDate(row.original.createdAt),
-    },
-    {
+    }),
+
+    // Actions - Display only
+    columnHelper.display({
       id: 'actions',
       header: 'Actions',
       cell: ({ row }) => (
@@ -189,7 +245,7 @@ export default function QuotesDataGrid() {
           </Button>
         </div>
       ),
-    },
+    }),
   ]
 
   // ---------------------------------------------------------------------------
@@ -198,14 +254,23 @@ export default function QuotesDataGrid() {
 
   return (
     <>
-      <ServerDataGrid<Quote>
+      <RichDataGrid<Quote>
         key={refreshKey}
         columns={columns}
-        endpoint="/quotes/search"
-        initialPageSize={10}
-        initialSortBy="createdAt"
-        initialSortOrder="desc"
-        emptyMessage="No quotes found"
+        fetcher={fetcher}
+        defaultPageSize={10}
+        defaultSorting={[{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending }]}
+        enableGlobalSearch
+        searchPlaceholder="Search quotes by company or email..."
+        persistStateKey="quotes-grid"
+        emptyState={
+          <div className="flex flex-col items-center gap-3 py-12">
+            <p className="text-base-content/60">No quotes found</p>
+            <p className="text-sm text-base-content/40">
+              Quotes will appear here when customers submit quote requests.
+            </p>
+          </div>
+        }
         ariaLabel="Quotes table"
       />
 

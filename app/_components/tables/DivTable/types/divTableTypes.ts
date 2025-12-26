@@ -87,6 +87,15 @@ export interface DataGridProps<TData> extends TableFeatureToggles, TableManualMo
   // UI states
   /** Loading state */
   isLoading?: boolean
+  /**
+   * Loading indicator variant.
+   * - 'spinner': Overlay spinner (default, backward compatible)
+   * - 'skeleton': Skeleton rows replace content when loading
+   * - 'skeleton-overlay': Skeleton rows with semi-transparent overlay
+   */
+  loadingVariant?: LoadingVariant
+  /** Number of skeleton rows to show when using skeleton variant (default: 10) */
+  skeletonRowCount?: number
   /** Error state */
   error?: Error | null
   /** Empty state message */
@@ -213,6 +222,15 @@ export interface KeyboardNavState {
  * ARIA sort attribute values
  */
 export type AriaSort = 'ascending' | 'descending' | 'none'
+
+/**
+ * Loading variant for DataGrid component.
+ *
+ * - 'spinner': Overlay spinner (default, backward compatible)
+ * - 'skeleton': Skeleton rows replace content when loading
+ * - 'skeleton-overlay': Skeleton rows with semi-transparent overlay
+ */
+export type LoadingVariant = 'spinner' | 'skeleton' | 'skeleton-overlay'
 
 /**
  * ARIA role for table container

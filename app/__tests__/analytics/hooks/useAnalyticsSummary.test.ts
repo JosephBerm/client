@@ -45,14 +45,15 @@ vi.mock('@_shared/hooks', async (importOriginal) => {
 	const actual = await importOriginal<typeof import('@_shared/hooks')>()
 	return {
 		...actual,
-		useFetchWithCache: vi.fn((key: string, fetcher: () => Promise<any>, options: any) => {
-			const React = require('react')
+		useFetchWithCache: vi.fn((key: string, fetcher: () => Promise<unknown>, options: { enabled?: boolean }) => {
+			// eslint-disable-next-line @typescript-eslint/no-require-imports
+			const React = require('react') as typeof import('react')
 			const mountedRef = React.useRef(true)
 			const fetcherRef = React.useRef(fetcher)
 			fetcherRef.current = fetcher
 			
 			const [state, setState] = React.useState({
-				data: null as any,
+				data: null as unknown,
 				isLoading: options?.enabled !== false,
 				isValidating: false,
 				error: null as Error | null,
@@ -61,7 +62,7 @@ vi.mock('@_shared/hooks', async (importOriginal) => {
 
 			const refetch = React.useCallback(async () => {
 				if (!mountedRef.current) return
-				setState((s: any) => ({ ...s, isLoading: true, error: null }))
+				setState((s) => ({ ...s, isLoading: true, error: null }))
 				try {
 					const data = await fetcherRef.current()
 					if (mountedRef.current) {
@@ -69,13 +70,13 @@ vi.mock('@_shared/hooks', async (importOriginal) => {
 					}
 				} catch (err) {
 					if (mountedRef.current) {
-						setState((s: any) => ({ ...s, isLoading: false, error: err as Error }))
+						setState((s) => ({ ...s, isLoading: false, error: err as Error }))
 					}
 				}
 			}, [])
 
 			const invalidate = React.useCallback(() => {
-				setState((s: any) => ({ ...s, data: null, isFromCache: false }))
+				setState((s) => ({ ...s, data: null, isFromCache: false }))
 			}, [])
 
 			// Track key changes - always refetch when key changes

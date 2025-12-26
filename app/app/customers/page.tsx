@@ -2,13 +2,14 @@
  * CustomersPage Component
  * 
  * Main customer management page displaying all customers in a searchable,
- * sortable, and paginated data grid. Follows business flow requirements
+ * sortable, and paginated RichDataGrid. Follows business flow requirements
  * for customer relationship management.
  * 
  * **Architecture:**
  * - Server Component wrapper (Next.js 16+ optimization)
  * - Client-side interactivity via useCustomersPage hook
  * - Modular components for separation of concerns
+ * - RichDataGrid with server-side pagination and filtering
  * 
  * **Business Flow Integration:**
  * - Displays customer status for lifecycle management
@@ -23,28 +24,39 @@
  * - Archive toggle: Admin only
  * - Delete button: Admin only
  * 
+ * **Migration:** Phase 3.1 - Migrated from ServerDataGrid to RichDataGrid
+ * @see RICHDATAGRID_MIGRATION_PLAN.md
+ * 
  * @module app/customers
  */
 
 'use client'
 
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { useRouter } from 'next/navigation'
 
 import { Archive, Building2, Plus } from 'lucide-react'
 
 import {
-	createCustomerColumns,
+	createCustomerRichColumns,
 	CustomerDeleteModal,
 	CustomerStatsGrid,
 	useCustomersPage,
 } from '@_features/customers'
 import { Routes } from '@_features/navigation'
 
+import { API } from '@_shared'
+
 import type Company from '@_classes/Company'
 
-import ServerDataGrid from '@_components/tables/ServerDataGrid'
+import {
+	RichDataGrid,
+	createColumnId,
+	FilterType,
+	SortDirection,
+} from '@_components/tables/RichDataGrid'
+import type { RichSearchFilter, RichPagedResult } from '@_components/tables/RichDataGrid'
 import Button from '@_components/ui/Button'
 
 import { InternalPageHeader } from '../_components'
@@ -83,20 +95,53 @@ export default function CustomersPage() {
 	// Column definitions - memoized since they depend on canDelete
 	const columns = useMemo(
 		() =>
-			createCustomerColumns({
+			createCustomerRichColumns({
 				canDelete,
 				onDelete: openDeleteModal,
 			}),
 		[canDelete, openDeleteModal]
 	)
 
-	// Search filters based on showArchived state
-	const searchFilters = useMemo(() => {
-		if (showArchived && canViewArchived) {
-			return { ShowArchived: 'true' }
-		}
-		return {}
-	}, [showArchived, canViewArchived])
+	// Custom fetcher that includes external filters (archived)
+	const fetcher = useCallback(
+		async (filter: RichSearchFilter): Promise<RichPagedResult<Company>> => {
+			// Build enhanced filter with external filters
+			const enhancedFilter: RichSearchFilter = {
+				...filter,
+			}
+
+			// Add isArchived filter if viewing archived
+			if (showArchived && canViewArchived) {
+				enhancedFilter.columnFilters = [
+					...(filter.columnFilters || []),
+					{
+						columnId: 'ShowArchived',
+						filterType: FilterType.Boolean,
+						operator: 'Is',
+						value: true,
+					},
+				]
+			}
+
+			const response = await API.Customers.richSearch(enhancedFilter)
+
+			if (response.data?.payload) {
+				return response.data.payload
+			}
+
+			// Return empty result on error
+			return {
+				data: [],
+				page: 1,
+				pageSize: filter.pageSize,
+				total: 0,
+				totalPages: 0,
+				hasNext: false,
+				hasPrevious: false,
+			}
+		},
+		[showArchived, canViewArchived]
+	)
 
 	return (
 		<>
@@ -144,13 +189,16 @@ export default function CustomersPage() {
 			{/* Data Grid Card */}
 			<div className="card bg-base-100 shadow-xl">
 				<div className="card-body p-3 sm:p-6">
-					<ServerDataGrid<Company>
+					<RichDataGrid<Company>
 						key={`customers-${refreshKey}-${showArchived}`}
 						columns={columns}
-						endpoint="/customers/search"
-						initialPageSize={10}
-						filters={searchFilters}
-						emptyMessage={
+						fetcher={fetcher}
+						defaultPageSize={10}
+						defaultSorting={[{ columnId: createColumnId('name'), direction: SortDirection.Ascending }]}
+						enableGlobalSearch
+						searchPlaceholder="Search customers by name or email..."
+						persistStateKey="customers-grid"
+						emptyState={
 							<EmptyState
 								showArchived={showArchived}
 								onAddCustomer={() => router.push(Routes.Customers.create())}

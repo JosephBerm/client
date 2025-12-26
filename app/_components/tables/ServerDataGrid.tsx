@@ -1,6 +1,84 @@
 /**
  * Server-Side Data Grid Component
  * 
+ * @deprecated **DEPRECATED** - Use `RichDataGrid` instead for server-side data operations.
+ * This component will be removed in a future release.
+ * 
+ * ## Migration Guide
+ * 
+ * **Step 1: Replace component import**
+ * ```tsx
+ * // Before
+ * import ServerDataGrid from '@_components/tables/ServerDataGrid';
+ * 
+ * // After
+ * import { RichDataGrid, createRichColumnHelper, FilterType } from '@_components/tables';
+ * ```
+ * 
+ * **Step 2: Update column definitions**
+ * ```tsx
+ * // Before
+ * const columns: ColumnDef<Product>[] = [
+ *   { accessorKey: 'name', header: 'Name' },
+ *   { accessorKey: 'price', header: 'Price' },
+ * ];
+ * 
+ * // After
+ * const columnHelper = createRichColumnHelper<Product>();
+ * const columns = [
+ *   columnHelper.accessor('name', {
+ *     header: 'Name',
+ *     filterType: FilterType.Text,
+ *     searchable: true,
+ *   }),
+ *   columnHelper.accessor('price', {
+ *     header: 'Price',
+ *     filterType: FilterType.Number,
+ *   }),
+ * ];
+ * ```
+ * 
+ * **Step 3: Replace component usage**
+ * ```tsx
+ * // Before
+ * <ServerDataGrid
+ *   endpoint="/products/search"
+ *   columns={columns}
+ *   filters={{ isArchived: false }}
+ * />
+ * 
+ * // After
+ * const customFetcher = async (filter: RichSearchFilter): Promise<RichPagedResult<Product>> => {
+ *   const { data } = await API.Products.richSearch(filter);
+ *   return data.payload!;
+ * };
+ * 
+ * <RichDataGrid
+ *   columns={columns}
+ *   customFetcher={customFetcher}
+ *   enableGlobalSearch={true}
+ *   enableColumnFilters={true}
+ * />
+ * ```
+ * 
+ * ## RichDataGrid Benefits
+ * - Type-safe column definitions with `createRichColumnHelper`
+ * - Advanced filtering (Text, Number, Date, Select, Boolean)
+ * - Faceted filters with counts
+ * - Global search across searchable columns
+ * - Row selection with bulk actions
+ * - Column visibility management
+ * - State persistence (URL sync)
+ * - WCAG AA accessibility
+ * - Mobile-first responsive design
+ * 
+ * @see RichDataGrid for the recommended MAANG-level table component
+ * @see createRichColumnHelper for type-safe column definitions
+ * 
+ * ---
+ * 
+ * **LEGACY DOCUMENTATION (for existing usage):**
+ * 
  * High-level wrapper around DataGrid that automatically handles server-side pagination,
  * sorting, and filtering. Built with TanStack Table for maximum flexibility.
  * 
@@ -16,57 +94,9 @@
  * - Initial sort and page size configuration
  * - Custom filters support
  * - Feature toggles: enableSorting, enableFiltering, enablePagination, enablePageSize
- * - **NEW**: Virtualization for large datasets (>100 rows)
- * - **NEW**: Mobile card views
- * - **NEW**: Enhanced accessibility (WCAG AA)
- * 
- * **Use Cases:**
- * - Large datasets (100+ records) - benefits from virtualization
- * - Backend-paginated APIs
- * - Search and filter operations on server
- * - Real-time data tables
- * 
- * **Two Usage Patterns:**
- * 1. **Endpoint-based** (recommended): Provide `endpoint` string, uses createServerTableFetcher
- * 2. **Custom fetch function**: Provide `fetchData` function for custom logic
- * 
- * @example
- * ```tsx
- * import ServerDataGrid from '@_components/tables/ServerDataGrid';
- * import { ColumnDef } from '@tanstack/react-table';
- * import { Product } from '@_classes/Product';
- * 
- * // Define columns
- * const columns: ColumnDef<Product>[] = [
- *   {
- *     accessorKey: 'name',
- *     header: 'Product Name',
- *   },
- *   {
- *     accessorKey: 'price',
- *     header: 'Price',
- *     cell: ({ getValue }) => `$${getValue()}`,
- *   },
- * ];
- * 
- * // Basic usage with endpoint
- * <ServerDataGrid
- *   endpoint="/api/products/search"
- *   columns={columns}
- *   initialPageSize={20}
- *   ariaLabel="Products grid"
- * />
- * 
- * // With filters
- * <ServerDataGrid
- *   endpoint="/api/products/search"
- *   columns={columns}
- *   filters={{ category: 'medical', inStock: true }}
- *   initialSortBy="name"
- *   initialSortOrder="asc"
- *   ariaLabel="Filtered products"
- * />
- * ```
+ * - Virtualization for large datasets (>100 rows)
+ * - Mobile card views
+ * - Enhanced accessibility (WCAG AA)
  * 
  * @module ServerDataGrid
  */

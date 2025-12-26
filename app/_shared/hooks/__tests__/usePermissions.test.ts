@@ -116,7 +116,7 @@ describe('usePermissions Hook - RBAC Security Tests', () => {
     })
 
     it('should handle string role name (legacy format)', () => {
-      const user = { ...createMockUser(0), role: 'admin' as any }
+      const user = { ...createMockUser(RoleLevels.Customer), role: 'admin' as unknown as number }
       mockAuthStore(user)
       
       const { result } = renderHook(() => usePermissions())
@@ -125,7 +125,7 @@ describe('usePermissions Hook - RBAC Security Tests', () => {
     })
 
     it('should handle unknown string role gracefully', () => {
-      const user = { ...createMockUser(0), role: 'unknown_role' as any }
+      const user = { ...createMockUser(RoleLevels.Customer), role: 'unknown_role' as unknown as number }
       mockAuthStore(user)
       
       const { result } = renderHook(() => usePermissions())
@@ -1018,7 +1018,7 @@ describe('usePermissions Hook - RBAC Security Tests', () => {
 
     it('should handle role level 0 correctly (below Customer)', () => {
       // Role level 0 is below Customer (100), so should have no/minimal permissions
-      mockAuthStore({ ...createMockUser(0), role: 0 })
+      mockAuthStore({ ...createMockUser(RoleLevels.Customer), role: 0 })
       const { result } = renderHook(() => usePermissions())
       
       expect(result.current.roleLevel).toBe(0)
@@ -1029,7 +1029,7 @@ describe('usePermissions Hook - RBAC Security Tests', () => {
     })
 
     it('should handle negative role level gracefully', () => {
-      mockAuthStore({ ...createMockUser(0), role: -1 })
+      mockAuthStore({ ...createMockUser(RoleLevels.Customer), role: -1 })
       const { result } = renderHook(() => usePermissions())
       
       // Negative role should have no permissions (lower than Customer)
@@ -1037,7 +1037,7 @@ describe('usePermissions Hook - RBAC Security Tests', () => {
     })
 
     it('should handle extremely large role level (Admin+)', () => {
-      mockAuthStore({ ...createMockUser(0), role: Number.MAX_SAFE_INTEGER })
+      mockAuthStore({ ...createMockUser(RoleLevels.Customer), role: Number.MAX_SAFE_INTEGER })
       const { result } = renderHook(() => usePermissions())
       
       // Should be treated as Admin
@@ -1047,7 +1047,7 @@ describe('usePermissions Hook - RBAC Security Tests', () => {
 
     it('should handle role level between defined roles', () => {
       // Role level 350 is between SalesRep (300) and SalesManager (400)
-      mockAuthStore({ ...createMockUser(0), role: 350 })
+      mockAuthStore({ ...createMockUser(RoleLevels.Customer), role: 350 })
       const { result } = renderHook(() => usePermissions())
       
       // Should have SalesRep permissions but not SalesManager

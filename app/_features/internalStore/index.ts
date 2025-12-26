@@ -72,7 +72,7 @@ export { useInternalStorePage, useProductStats } from './hooks'
 // UTILITIES
 // ============================================================================
 
-export { createProductColumns } from './utils'
+export { createProductColumns, createProductRichColumns } from './utils'
 
 // ============================================================================
 // CONSTANTS

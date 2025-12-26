@@ -48,7 +48,15 @@ vi.mock('@_features/auth', () => ({
 }))
 
 // Hoisted mock for useRouter - must be vi.fn() to allow mockReturnValue
-const mockUseRouter = vi.hoisted(() => vi.fn())
+interface MockRouter {
+  push: ReturnType<typeof vi.fn>
+  replace: ReturnType<typeof vi.fn>
+  refresh: ReturnType<typeof vi.fn>
+  back: ReturnType<typeof vi.fn>
+  forward: ReturnType<typeof vi.fn>
+  prefetch: ReturnType<typeof vi.fn>
+}
+const mockUseRouter = vi.hoisted(() => vi.fn<() => MockRouter>())
 
 vi.mock('next/navigation', () => ({
   useRouter: mockUseRouter,
@@ -123,7 +131,7 @@ function createMockAuthStore(user: any = null, isAuthenticated: boolean = false)
 describe('useCartPageLogic - Quote Submission', () => {
   let mockCartStore: ReturnType<typeof createMockCartStore>
   let mockAuthStore: ReturnType<typeof createMockAuthStore>
-  let mockRouter: { push: MockedFunction<any> }
+  let mockRouter: MockRouter
 
   beforeEach(() => {
     // Reset all mocks

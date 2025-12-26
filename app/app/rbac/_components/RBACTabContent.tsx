@@ -15,7 +15,7 @@
 import type { RBACTabId } from './RBACTabNav'
 import { RoleHierarchyDiagram } from './RoleHierarchyDiagram'
 import { PermissionMatrix } from './PermissionMatrix'
-import { AuditLogTable } from './AuditLogTable'
+import { AuditLogDataGrid } from './AuditLogDataGrid'
 import { UserRolesTable } from './UserRolesTable'
 
 import type { RBACOverview, PermissionMatrixEntry, PermissionAuditEntryDto, UserWithRole, AuditLogFilters } from '@_types/rbac-management'
@@ -66,7 +66,7 @@ interface RBACTabContentProps {
  * Renders the appropriate component based on active tab:
  * - hierarchy: RoleHierarchyDiagram
  * - matrix: PermissionMatrix
- * - audit: AuditLogTable (admin only)
+ * - audit: AuditLogDataGrid (admin only)
  * - users: UserRolesTable (admin only)
  */
 export function RBACTabContent({
@@ -104,7 +104,7 @@ export function RBACTabContent({
 
 			{/* Audit Log Tab (Admin Only) */}
 			{activeTab === 'audit' && canViewAuditLogs && (
-				<AuditLogTable
+				<AuditLogDataGrid
 					data={auditLog}
 					isLoading={isLoadingAuditLog}
 					error={auditLogError}

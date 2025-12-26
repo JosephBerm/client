@@ -2,6 +2,7 @@
  * Orders List Page
  * 
  * Displays a paginated, sortable list of orders with role-based columns.
+ * Uses RichDataGrid for advanced data grid features.
  * 
  * **Role-Based Features:**
  * - Customer: View own orders (limited columns)
@@ -9,13 +10,20 @@
  * - Fulfillment: View all orders + Processing/Shipping columns
  * - SalesManager/Admin: View all orders + All columns + Summary stats
  * 
+ * **Features (Phase 2.3 Migration):**
+ * - RichDataGrid with global search and sorting
+ * - Server-side pagination via /orders/search/rich endpoint
+ * - Status filtering with faceted counts
+ * - Role-based column visibility
+ * 
+ * @see RICHDATAGRID_MIGRATION_PLAN.md - Phase 2.3
  * @see prd_orders.md - Order Management PRD
  * @module app/orders/page
  */
 
 'use client'
 
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import Link from 'next/link'
 
@@ -24,25 +32,34 @@ import { Eye, Package, Plus, Truck } from 'lucide-react'
 import { useAuthStore } from '@_features/auth'
 import { Routes } from '@_features/navigation'
 
-import { createServerTableFetcher, formatDate, formatCurrency } from '@_shared'
+import { formatDate, formatCurrency, API } from '@_shared'
 
 import { AccountRole, OrderStatus } from '@_classes/Enums'
 
 import OrderStatusBadge from '@_components/common/OrderStatusBadge'
-import ServerDataGrid from '@_components/tables/ServerDataGrid'
+import {
+	RichDataGrid,
+	createRichColumnHelper,
+	createColumnId,
+	FilterType,
+	SortDirection,
+} from '@_components/tables/RichDataGrid'
+import type { RichSearchFilter, RichPagedResult, RichColumnDef } from '@_components/tables/RichDataGrid'
 import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
 
 import { InternalPageHeader } from '../_components'
 
-import type { ColumnDef } from '@tanstack/react-table'
-
-interface Order {
-	id: number
-	customerId: number
+/**
+ * Order interface for RichDataGrid display
+ * Extends the base Order class with additional display properties
+ * from backend API response
+ */
+interface OrderRow {
+	id?: number
+	customerId?: number
 	customerName?: string
-	totalAmount: number
-	total?: number
+	total: number
 	status: number
 	createdAt: string | Date
 	shippingAddress?: string
@@ -64,150 +81,192 @@ export default function OrdersPage() {
 	const isManager = role >= AccountRole.SalesManager
 	const canCreateOrders = isManager
 
+	// Fetcher for RichDataGrid
+	const fetcher = useCallback(
+		async (filter: RichSearchFilter): Promise<RichPagedResult<OrderRow>> => {
+			const response = await API.Orders.richSearch(filter)
+
+			if (response.data?.payload) {
+				return response.data.payload as unknown as RichPagedResult<OrderRow>
+			}
+
+			// Return empty result on error
+			return {
+				data: [],
+				page: 1,
+				pageSize: filter.pageSize,
+				total: 0,
+				totalPages: 0,
+				hasNext: false,
+				hasPrevious: false,
+			}
+		},
+		[]
+	)
+
+	// Column helper for type-safe column definitions
+	const columnHelper = createRichColumnHelper<OrderRow>()
+
 	// Column definitions with role-based visibility
-	const columns: ColumnDef<Order>[] = useMemo(() => {
-		const baseColumns: ColumnDef<Order>[] = [
-			{
-				accessorKey: 'id',
+	const columns: RichColumnDef<OrderRow, unknown>[] = useMemo(() => {
+		const baseColumns: RichColumnDef<OrderRow, unknown>[] = [
+			// Order ID - Text filter
+			columnHelper.accessor('id', {
 				header: 'Order #',
+				filterType: FilterType.Number,
 				cell: ({ row }) => (
 					<Link
-						href={Routes.Orders.detail(row.original.id)}
+						href={Routes.Orders.detail(row.original.id ?? 0)}
 						className="link link-primary font-semibold"
 					>
 						#{row.original.id}
 					</Link>
 				),
-			},
+			}),
 		]
 
 		// Customer column for staff roles
 		if (!isCustomer) {
-			baseColumns.push({
-				accessorKey: 'customerName',
-				header: 'Customer',
-				cell: ({ row }) => (
-					<div className="flex flex-col">
-						<span className="font-medium">{row.original.customerName ?? 'N/A'}</span>
-						<span className="text-xs text-base-content/60">ID: {row.original.customerId}</span>
-					</div>
-				),
-			})
+			baseColumns.push(
+				columnHelper.accessor('customerName', {
+					header: 'Customer',
+					filterType: FilterType.Text,
+					searchable: true,
+					cell: ({ row }) => (
+						<div className="flex flex-col">
+							<span className="font-medium">{row.original.customerName ?? 'N/A'}</span>
+							<span className="text-xs text-base-content/60">ID: {row.original.customerId}</span>
+						</div>
+					),
+				})
+			)
 		}
 
 		// Sales Rep column for managers and fulfillment
 		if (isManager || isFulfillment) {
-			baseColumns.push({
-				accessorKey: 'assignedSalesRepName',
-				header: 'Sales Rep',
+			baseColumns.push(
+				columnHelper.accessor('assignedSalesRepName', {
+					header: 'Sales Rep',
+					filterType: FilterType.Text,
+					cell: ({ row }) => (
+						<span className="text-sm text-base-content/80">
+							{row.original.assignedSalesRepName ?? '—'}
+						</span>
+					),
+				})
+			)
+		}
+
+		// Total column - Number filter
+		baseColumns.push(
+			columnHelper.accessor('total', {
+				header: 'Total',
+				filterType: FilterType.Number,
 				cell: ({ row }) => (
-					<span className="text-sm text-base-content/80">
-						{row.original.assignedSalesRepName ?? '—'}
+					<span className="font-semibold">
+						{formatCurrency(row.original.total ?? 0)}
 					</span>
 				),
 			})
-		}
+		)
 
-		// Total column
-		baseColumns.push({
-			accessorKey: 'totalAmount',
-			header: 'Total',
-			cell: ({ row }) => (
-				<span className="font-semibold">
-					{formatCurrency(row.original.totalAmount ?? row.original.total ?? 0)}
-				</span>
-			),
-		})
-
-		// Status column
-		baseColumns.push({
-			accessorKey: 'status',
-			header: 'Status',
-			cell: ({ row }) => <OrderStatusBadge status={row.original.status} />,
-		})
+		// Status column - Select filter, faceted
+		baseColumns.push(
+			columnHelper.accessor('status', {
+				header: 'Status',
+				filterType: FilterType.Select,
+				faceted: true,
+				cell: ({ row }) => <OrderStatusBadge status={row.original.status} />,
+			})
+		)
 
 		// Payment confirmed column for SalesRep and above
 		if (isSalesRep || isManager) {
-			baseColumns.push({
-				accessorKey: 'paymentConfirmedAt',
-				header: 'Payment',
-				cell: ({ row }) => {
-					const order = row.original
-					if (order.status === OrderStatus.Placed) {
-						return (
-							<span className="badge badge-warning badge-sm">Awaiting Payment</span>
-						)
-					}
-					if (order.paymentConfirmedAt) {
-						return (
-							<span className="text-xs text-success">
-								{formatDate(order.paymentConfirmedAt)}
-							</span>
-						)
-					}
-					return <span className="text-base-content/40">—</span>
-				},
-			})
+			baseColumns.push(
+				columnHelper.accessor('paymentConfirmedAt', {
+					header: 'Payment',
+					filterType: FilterType.Date,
+					cell: ({ row }) => {
+						const order = row.original
+						if (order.status === OrderStatus.Placed) {
+							return (
+								<span className="badge badge-warning badge-sm">Awaiting Payment</span>
+							)
+						}
+						if (order.paymentConfirmedAt) {
+							return (
+								<span className="text-xs text-success">
+									{formatDate(order.paymentConfirmedAt)}
+								</span>
+							)
+						}
+						return <span className="text-base-content/40">—</span>
+					},
+				})
+			)
 		}
 
 		// Shipping column for fulfillment and managers
 		if (isFulfillment || isManager) {
-			baseColumns.push({
-				accessorKey: 'shippedAt',
-				header: 'Shipped',
-				cell: ({ row }) => {
-					const order = row.original
-					if (order.status === OrderStatus.Processing) {
-						return <span className="badge badge-info badge-sm">In Processing</span>
-					}
-					if (order.shippedAt) {
-						return (
-							<div className="flex flex-col">
-								<span className="text-xs">{formatDate(order.shippedAt)}</span>
-								{order.trackingNumber && (
-									<span className="text-xs text-base-content/60 font-mono">
-										{order.trackingNumber}
-									</span>
-								)}
-							</div>
-						)
-					}
-					return <span className="text-base-content/40">—</span>
-				},
-			})
+			baseColumns.push(
+				columnHelper.accessor('shippedAt', {
+					header: 'Shipped',
+					filterType: FilterType.Date,
+					cell: ({ row }) => {
+						const order = row.original
+						if (order.status === OrderStatus.Processing) {
+							return <span className="badge badge-info badge-sm">In Processing</span>
+						}
+						if (order.shippedAt) {
+							return (
+								<div className="flex flex-col">
+									<span className="text-xs">{formatDate(order.shippedAt)}</span>
+									{order.trackingNumber && (
+										<span className="text-xs text-base-content/60 font-mono">
+											{order.trackingNumber}
+										</span>
+									)}
+								</div>
+							)
+						}
+						return <span className="text-base-content/40">—</span>
+					},
+				})
+			)
 		}
 
-		// Created date column
-		baseColumns.push({
-			accessorKey: 'createdAt',
-			header: 'Created',
-			cell: ({ row }) => (
-				<span className="text-sm text-base-content/70">
-					{formatDate(row.original.createdAt)}
-				</span>
-			),
-		})
+		// Created date column - Date filter
+		baseColumns.push(
+			columnHelper.accessor('createdAt', {
+				header: 'Created',
+				filterType: FilterType.Date,
+				cell: ({ row }) => (
+					<span className="text-sm text-base-content/70">
+						{formatDate(row.original.createdAt)}
+					</span>
+				),
+			})
+		)
 
-		// Actions column
-		baseColumns.push({
-			id: 'actions',
-			header: 'Actions',
-			cell: ({ row }) => (
-				<div className="flex items-center gap-1">
-					<Link href={Routes.Orders.detail(row.original.id)}>
-						<Button variant="ghost" size="sm" title="View Order">
-							<Eye className="w-4 h-4" />
-						</Button>
-					</Link>
-				</div>
-			),
-		})
+		// Actions column - Display only
+		baseColumns.push(
+			columnHelper.display({
+				id: 'actions',
+				header: 'Actions',
+				cell: ({ row }) => (
+					<div className="flex items-center gap-1">
+						<Link href={Routes.Orders.detail(row.original.id ?? 0)}>
+							<Button variant="ghost" size="sm" title="View Order">
+								<Eye className="w-4 h-4" />
+							</Button>
+						</Link>
+					</div>
+				),
+			})
+		)
 
 		return baseColumns
-	}, [isCustomer, isSalesRep, isFulfillment, isManager])
-
-	// Fetch function for server-side table
-	const fetchOrders = createServerTableFetcher<Order>('/orders/search')
+	}, [isCustomer, isSalesRep, isFulfillment, isManager, columnHelper])
 
 	// Page description based on role
 	const pageDescription = useMemo(() => {
@@ -257,13 +316,26 @@ export default function OrdersPage() {
 
 			<Card className="border border-base-300 bg-base-100 shadow-sm">
 				<div className="p-6">
-					<ServerDataGrid
+					<RichDataGrid<OrderRow>
 						columns={columns}
-						fetchData={fetchOrders}
-						initialPageSize={10}
-						emptyMessage="No orders found"
+						fetcher={fetcher}
+						defaultPageSize={10}
+						defaultSorting={[{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending }]}
+						enableGlobalSearch
+						searchPlaceholder="Search orders by customer..."
+						persistStateKey="orders-grid"
+						emptyState={
+							<div className="flex flex-col items-center gap-3 py-12">
+								<Package className="w-12 h-12 text-base-content/30" />
+								<p className="text-base-content/60">No orders found</p>
+								<p className="text-sm text-base-content/40">
+									{isCustomer
+										? 'Your orders will appear here once placed.'
+										: 'Orders matching your filters will appear here.'}
+								</p>
+							</div>
+						}
 						ariaLabel="Orders table"
-						enableFiltering={true}
 					/>
 				</div>
 			</Card>

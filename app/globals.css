@@ -1066,4 +1066,96 @@
 	.scrollbar-hide::-webkit-scrollbar {
 		display: none !important;  /* Chrome, Safari, Opera */
 	}
+
+	/* ============================================================
+	 * DATA GRID SKELETON LOADING STYLES
+	 * ============================================================
+	 * 
+	 * MAANG-Level skeleton loading for DataGrid component.
+	 * Supports staggered animations and shimmer effect.
+	 */
+
+	/* DataGrid Skeleton Container */
+	.data-grid-skeleton-container {
+		position: relative;
+		overflow: hidden;
+	}
+
+	/* DataGrid Skeleton Row - supports staggered animation */
+	.data-grid-skeleton-row {
+		animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		animation-delay: var(--skeleton-stagger-delay, 0ms);
+		will-change: opacity;
+	}
+
+	/* DataGrid Skeleton Header */
+	.data-grid-skeleton-header {
+		z-index: 10;
+	}
+
+	/* DataGrid Skeleton Cell */
+	.data-grid-skeleton-cell {
+		min-height: 1.25rem;
+	}
+
+	/* DataGrid Skeleton Pagination */
+	.data-grid-skeleton-pagination {
+		min-height: 3rem;
+	}
+
+	/* Shimmer variant for DataGrid skeleton */
+	.data-grid-skeleton-container.skeleton-shimmer .data-grid-skeleton-row {
+		animation: none;
+	}
+
+	.data-grid-skeleton-container.skeleton-shimmer .skeleton {
+		position: relative;
+		overflow: hidden;
+		background: var(--skeleton-bg);
+	}
+
+	.data-grid-skeleton-container.skeleton-shimmer .skeleton::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			90deg,
+			var(--shimmer-color-start) 0%,
+			var(--shimmer-color-low) 20%,
+			var(--shimmer-color-mid) 40%,
+			var(--shimmer-color-peak) 50%,
+			var(--shimmer-color-mid) 60%,
+			var(--shimmer-color-low) 80%,
+			var(--shimmer-color-start) 100%
+		);
+		animation: skeleton-shimmer-wave 2s ease-in-out infinite;
+		will-change: transform;
+	}
+
+	/* Staggered shimmer for rows */
+	.data-grid-skeleton-container.skeleton-shimmer .data-grid-skeleton-row .skeleton::after {
+		animation-delay: var(--skeleton-stagger-delay, 0ms);
+	}
+
+	/* Reduced motion for skeleton grid */
+	@media (prefers-reduced-motion: reduce) {
+		.data-grid-skeleton-row {
+			animation: skeleton-pulse 3s ease-in-out infinite;
+		}
+
+		.data-grid-skeleton-container.skeleton-shimmer .skeleton::after {
+			animation: none;
+			opacity: 0.2;
+		}
+	}
+
+	/* User override for reduced motion */
+	[data-reduced-motion="true"] .data-grid-skeleton-row {
+		animation: skeleton-pulse 3s ease-in-out infinite;
+	}
+
+	[data-reduced-motion="true"] .data-grid-skeleton-container.skeleton-shimmer .skeleton::after {
+		animation: none;
+		opacity: 0.2;
+	}
 }

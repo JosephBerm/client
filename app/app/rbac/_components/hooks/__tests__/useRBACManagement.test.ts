@@ -36,6 +36,7 @@ import type {
   RoleDefinitionDto,
   PermissionDefinitionDto,
 } from '@_types/rbac-management'
+import { AccountRole } from '@_classes/Enums'
 
 // Mock dependencies BEFORE importing the hook
 vi.mock('@_shared', () => ({
@@ -85,11 +86,11 @@ import { useRBACManagement } from '../useRBACManagement'
 function createMockRole(overrides: Partial<RoleDefinitionDto> = {}): RoleDefinitionDto {
   return {
     id: 1,
-    role: 9999999,
+    role: AccountRole.Admin,
     name: 'admin',
     displayName: 'Administrator',
     description: 'Full system access',
-    level: 9999999,
+    level: 500,
     isSystemRole: true,
     userCount: 5,
     permissions: ['quotes:read:all', 'quotes:create'],
@@ -115,7 +116,7 @@ function createMockMatrixEntry(overrides: Partial<PermissionMatrixEntry> = {}): 
     action: 'read',
     context: 'all',
     description: 'Read all quotes',
-    roleAccess: { 9999999: true, 200: true, 100: false, 0: false },
+    roleAccess: { [AccountRole.Admin]: true, [AccountRole.FulfillmentCoordinator]: true, [AccountRole.Customer]: false },
     ...overrides,
   }
 }
@@ -123,10 +124,10 @@ function createMockMatrixEntry(overrides: Partial<PermissionMatrixEntry> = {}): 
 function createMockOverview(overrides: Partial<RBACOverview> = {}): RBACOverview {
   return {
     roles: [
-      createMockRole({ id: 1, role: 9999999, name: 'admin', displayName: 'Administrator', level: 9999999 }),
-      createMockRole({ id: 2, role: 200, name: 'sales_manager', displayName: 'Sales Manager', level: 200 }),
-      createMockRole({ id: 3, role: 100, name: 'sales_rep', displayName: 'Sales Representative', level: 100 }),
-      createMockRole({ id: 4, role: 0, name: 'customer', displayName: 'Customer', level: 0 }),
+      createMockRole({ id: 1, role: AccountRole.Admin, name: 'admin', displayName: 'Administrator', level: 500 }),
+      createMockRole({ id: 2, role: AccountRole.SalesManager, name: 'sales_manager', displayName: 'Sales Manager', level: 400 }),
+      createMockRole({ id: 3, role: AccountRole.SalesRep, name: 'sales_rep', displayName: 'Sales Representative', level: 300 }),
+      createMockRole({ id: 4, role: AccountRole.Customer, name: 'customer', displayName: 'Customer', level: 100 }),
     ],
     permissions: [
       createMockPermission({ id: 1, resource: 'quotes', action: 'read', context: 'all', permissionString: 'quotes:read:all' }),
@@ -139,7 +140,7 @@ function createMockOverview(overrides: Partial<RBACOverview> = {}): RBACOverview
     ],
     userStats: {
       totalUsers: 150,
-      countByRole: { 9999999: 5, 200: 10, 100: 50, 0: 85 },
+      countByRole: { [AccountRole.Admin]: 5, [AccountRole.SalesManager]: 10, [AccountRole.SalesRep]: 50, [AccountRole.Customer]: 85 },
     },
     ...overrides,
   }

@@ -40,6 +40,9 @@ import { DataGridBody } from '../DivTable/components/DivTableBody'
 import { DataGridHeader } from '../DivTable/components/DivTableHeader'
 import { DataGridPagination } from '../DivTable/components/DivTablePagination'
 import { MobileCardList } from '../DivTable/components/MobileCardList'
+
+// Skeleton components for loading state
+import { DataGridSkeletonBody } from './skeleton/DataGridSkeletonBody'
 // Hook imports
 import { useFocusManagement } from '../DivTable/hooks/useFocusManagement'
 import { useKeyboardNav } from '../DivTable/hooks/useKeyboardNav'
@@ -133,6 +136,8 @@ export function DataGrid<TData>({
 
 	// UI states
 	isLoading = false,
+	loadingVariant = 'spinner',
+	skeletonRowCount = 10,
 	error = null,
 	emptyMessage = DEFAULT_EMPTY_MESSAGE,
 
@@ -514,7 +519,23 @@ export function DataGrid<TData>({
 				/>
 
 				{/* Body */}
-				{rows.length === 0 ? (
+				{isLoading && (loadingVariant === 'skeleton' || loadingVariant === 'skeleton-overlay') ? (
+					// Skeleton loading state
+					<div
+						className={`col-span-full ${loadingVariant === 'skeleton-overlay' ? 'relative' : ''}`}
+						role='status'
+						aria-busy='true'
+						aria-label='Loading data...'>
+						<DataGridSkeletonBody
+							columns={gridColumnCount}
+							rows={skeletonRowCount}
+							staggerDelay={40}
+						/>
+						{loadingVariant === 'skeleton-overlay' && (
+							<div className='absolute inset-0 bg-base-100/30 pointer-events-none' />
+						)}
+					</div>
+				) : rows.length === 0 ? (
 					// Empty state
 					<div
 						role='status'
@@ -552,8 +573,8 @@ export function DataGrid<TData>({
 			/>
 		)}
 
-			{/* Loading overlay */}
-			{isLoading && (
+			{/* Loading overlay - only show for spinner variant */}
+			{isLoading && loadingVariant === 'spinner' && (
 				<div className='data-grid-loading-overlay absolute inset-0 flex items-center justify-center bg-base-100/50'>
 					<span className='loading loading-spinner loading-lg' />
 				</div>

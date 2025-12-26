@@ -64,6 +64,7 @@ import type {
 	AuditLogFilters,
 	UsersWithRolesFilters,
 } from '@_types/rbac-management'
+import type { RichSearchFilter, RichPagedResult } from '@_components/tables/RichDataGrid'
 
 /**
  * Role distribution statistics returned by RBAC dashboard API.
@@ -310,6 +311,16 @@ const API = {
 		 */
 		search: async (search: GenericSearchFilter) =>
 			HttpService.post<PagedResult<User>>(`/account/search`, search),
+		
+		/**
+		 * Rich search for accounts with advanced filtering, sorting, and facets.
+		 * Used by RichDataGrid for MAANG-level data grid functionality.
+		 * 
+		 * @param filter - RichSearchFilter with pagination, sorting, column filters, and global search
+		 * @returns RichPagedResult with data, facets, and metadata
+		 */
+		richSearch: async (filter: RichSearchFilter) =>
+			HttpService.post<RichPagedResult<User>>(`/account/search/rich`, filter),
 		
 		/**
 		 * Gets dashboard analytics summary for current user.
@@ -561,6 +572,27 @@ const API = {
 				HttpService.post<PagedResult<Product>>(`/Products/search`, search),
 			
 			/**
+			 * Rich search for products with advanced filtering, sorting, and facets.
+			 * Used by RichDataGrid for MAANG-level data grid functionality.
+			 * 
+			 * @param filter - RichSearchFilter with pagination, sorting, column filters, and global search
+			 * @returns RichPagedResult with data, facets, and metadata
+			 * 
+			 * @example
+			 * ```typescript
+			 * const { data } = await API.Store.Products.richSearch({
+			 *   page: 1,
+			 *   pageSize: 20,
+			 *   sortDescriptors: [{ columnId: 'name', direction: 'Asc' }],
+			 *   columnFilters: [{ columnId: 'price', filterType: 'Number', operator: 'Gt', value: 10 }],
+			 *   globalSearchTerm: 'surgical',
+			 * });
+			 * ```
+			 */
+			richSearch: async (filter: RichSearchFilter) =>
+				HttpService.post<RichPagedResult<Product>>(`/Products/search/rich`, filter),
+			
+			/**
 			 * Searches products with pagination and filtering (public).
 			 * No authentication required.
 			 * 
@@ -688,6 +720,17 @@ const API = {
 		},
 		
 		/**
+		 * Rich search for quotes with advanced filtering, sorting, and facets.
+		 * Used by RichDataGrid for MAANG-level data grid functionality.
+		 * 
+		 * @param filter - RichSearchFilter with pagination, sorting, column filters, and global search
+		 * @returns RichPagedResult with data, facets, and metadata
+		 */
+		richSearch: async (filter: RichSearchFilter) => {
+			return HttpService.post<RichPagedResult<Quote>>('/quotes/search/rich', filter)
+		},
+		
+		/**
 		 * Creates a new quote request.
 		 * @param quote - Quote data
 		 */
@@ -797,6 +840,17 @@ const API = {
 		 */
 		search: async (search: GenericSearchFilter) => {
 			return HttpService.post<PagedResult<Order>>('/orders/search', search)
+		},
+		
+		/**
+		 * Rich search for orders with advanced filtering, sorting, and facets.
+		 * Used by RichDataGrid for MAANG-level data grid functionality.
+		 * 
+		 * @param filter - RichSearchFilter with pagination, sorting, column filters, and global search
+		 * @returns RichPagedResult with data, facets, and metadata
+		 */
+		richSearch: async (filter: RichSearchFilter) => {
+			return HttpService.post<RichPagedResult<Order>>('/orders/search/rich', filter)
 		},
 		
 		/**
@@ -1109,6 +1163,16 @@ const API = {
 		 * @param providerId - Provider ID to delete
 		 */
 		delete: async (providerId: number) => HttpService.delete<boolean>(`/provider/${providerId}`),
+		
+		/**
+		 * Rich search for providers with advanced filtering, sorting, and facets.
+		 * Used by RichDataGrid for MAANG-level data grid functionality.
+		 * 
+		 * @param filter - RichSearchFilter with pagination, sorting, column filters, and global search
+		 * @returns RichPagedResult with data, facets, and metadata
+		 */
+		richSearch: async <Provider>(filter: RichSearchFilter) =>
+			HttpService.post<RichPagedResult<Provider>>(`/providers/search/rich`, filter),
 	},
 	
 	/**
@@ -1201,6 +1265,16 @@ const API = {
 		 */
 		search: async (search: GenericSearchFilter) =>
 			HttpService.post<PagedResult<Company>>(`/customers/search`, search),
+		
+		/**
+		 * Rich search for customers with advanced filtering, sorting, and facets.
+		 * Used by RichDataGrid for MAANG-level data grid functionality.
+		 * 
+		 * @param filter - RichSearchFilter with pagination, sorting, column filters, and global search
+		 * @returns RichPagedResult with data, facets, and metadata
+		 */
+		richSearch: async (filter: RichSearchFilter) =>
+			HttpService.post<RichPagedResult<Company>>(`/customers/search/rich`, filter),
 		
 		/**
 		 * Gets customer statistics (order count, revenue, etc.).

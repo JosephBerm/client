@@ -8,6 +8,7 @@
  * - Role change modal (admin only)
  * - Delete confirmation modal
  * - Automatic table refresh after mutations
+ * - RichDataGrid with global search and sorting
  * 
  * This component encapsulates all account table logic,
  * keeping the page component clean and focused.
@@ -16,11 +17,13 @@
  * - React Compiler enabled - automatic memoization
  * - No manual useMemo/useCallback needed
  * 
+ * **Migration:** Phase 3.3 - Migrated from ServerDataGrid to RichDataGrid
+ * @see RICHDATAGRID_MIGRATION_PLAN.md
  * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler
  * @module accounts/AccountsDataGrid
  */
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import Link from 'next/link'
 
@@ -33,7 +36,6 @@ import { logger } from '@_core'
 
 import { 
 	notificationService, 
-	createServerTableFetcher, 
 	formatDate, 
 	API, 
 	usePermissions,
@@ -45,7 +47,14 @@ import { AccountStatus } from '@_classes/Enums'
 
 import { RoleBadge, AccountStatusBadge } from '@_components/common'
 import AccountActionsDropdown from '@_components/admin/AccountActionsDropdown'
-import ServerDataGrid from '@_components/tables/ServerDataGrid'
+import {
+	RichDataGrid,
+	createRichColumnHelper,
+	createColumnId,
+	FilterType,
+	SortDirection,
+} from '@_components/tables/RichDataGrid'
+import type { RichSearchFilter, RichPagedResult, RichColumnDef } from '@_components/tables/RichDataGrid'
 import Button from '@_components/ui/Button'
 import ConfirmationModal from '@_components/ui/ConfirmationModal'
 
@@ -55,8 +64,6 @@ import RoleChangeModal from './RoleChangeModal'
 
 // Use shared type
 type Account = AccountInfo
-
-import type { ColumnDef } from '@tanstack/react-table'
 
 // ============================================================================
 // TYPES
@@ -99,8 +106,28 @@ export default function AccountsDataGrid() {
 		account: null,
 	})
 
-	// Data fetcher
-	const fetchAccounts = createServerTableFetcher<Account>('/account/search')
+	// Custom fetcher for RichDataGrid
+	const fetcher = useCallback(
+		async (filter: RichSearchFilter): Promise<RichPagedResult<Account>> => {
+			const response = await API.Accounts.richSearch(filter)
+
+			if (response.data?.payload) {
+				return response.data.payload as unknown as RichPagedResult<Account>
+			}
+
+			// Return empty result on error
+			return {
+				data: [],
+				page: 1,
+				pageSize: filter.pageSize,
+				total: 0,
+				totalPages: 0,
+				hasNext: false,
+				hasPrevious: false,
+			}
+		},
+		[]
+	)
 
 	// Refresh table data (React Compiler auto-memoizes)
 	const refreshTable = () => {
@@ -244,10 +271,15 @@ export default function AccountsDataGrid() {
 		refreshTable()
 	}
 
-	const columns: ColumnDef<Account>[] = [
-		{
-			accessorKey: 'username',
+	// Column helper for type-safe column definitions
+	const columnHelper = createRichColumnHelper<Account>()
+
+	const columns: RichColumnDef<Account, unknown>[] = [
+		// Username - Text filter, searchable
+		columnHelper.accessor('username', {
 			header: 'Username',
+			filterType: FilterType.Text,
+			searchable: true,
 			cell: ({ row }) => (
 				<Link
 					href={Routes.Accounts.detail(row.original.id)}
@@ -256,32 +288,45 @@ export default function AccountsDataGrid() {
 					{row.original.username}
 				</Link>
 			),
-		},
-		{
-			accessorKey: 'email',
+		}),
+
+		// Email - Text filter, searchable
+		columnHelper.accessor('email', {
 			header: 'Email',
-		},
-		{
-			accessorKey: 'role',
+			filterType: FilterType.Text,
+			searchable: true,
+		}),
+
+		// Role - Select filter, faceted
+		columnHelper.accessor('role', {
 			header: 'Role',
+			filterType: FilterType.Select,
+			faceted: true,
 			cell: ({ row }) => <RoleBadge role={row.original.role} />,
-		},
-		{
-			accessorKey: 'status',
+		}),
+
+		// Status - Select filter, faceted
+		columnHelper.accessor('status', {
 			header: 'Status',
+			filterType: FilterType.Select,
+			faceted: true,
 			cell: ({ row }) => (
 				<AccountStatusBadge 
 					status={row.original.status ?? AccountStatus.Active} 
 					size="sm"
 				/>
 			),
-		},
-		{
-			accessorKey: 'createdAt',
+		}),
+
+		// Created At - Date filter
+		columnHelper.accessor('createdAt', {
 			header: 'Created',
+			filterType: FilterType.Date,
 			cell: ({ row }) => formatDate(row.original.createdAt),
-		},
-		{
+		}),
+
+		// Actions - Display only
+		columnHelper.display({
 			id: 'actions',
 			header: 'Actions',
 			cell: ({ row }) => (
@@ -327,7 +372,7 @@ export default function AccountsDataGrid() {
 					</Button>
 				</div>
 			),
-		},
+		}),
 	]
 
 	// ========================================================================
@@ -336,12 +381,23 @@ export default function AccountsDataGrid() {
 
 	return (
 		<>
-			<ServerDataGrid
+			<RichDataGrid<Account>
 				key={refreshKey}
 				columns={columns}
-				fetchData={fetchAccounts}
-				initialPageSize={10}
-				emptyMessage="No accounts found"
+				fetcher={fetcher}
+				defaultPageSize={10}
+				defaultSorting={[{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending }]}
+				enableGlobalSearch
+				searchPlaceholder="Search accounts by username or email..."
+				persistStateKey="accounts-grid"
+				emptyState={
+					<div className="flex flex-col items-center gap-3 py-12">
+						<p className="text-base-content/60">No accounts found</p>
+						<p className="text-sm text-base-content/40">
+							User accounts will appear here.
+						</p>
+					</div>
+				}
 				ariaLabel="Accounts table"
 			/>
 

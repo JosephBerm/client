@@ -2,13 +2,14 @@
  * ProvidersPage Component
  * 
  * Main provider/vendor management page displaying all providers in a searchable,
- * sortable, and paginated data grid. Follows business flow requirements
+ * sortable, and paginated RichDataGrid. Follows business flow requirements
  * for vendor management in the dropshipping model.
  * 
  * **Architecture:**
  * - Client-side interactivity via useProvidersPage hook
  * - Modular components for separation of concerns
- * - Column definitions via createProviderColumns factory
+ * - Column definitions via createProviderRichColumns factory
+ * - RichDataGrid with server-side pagination and filtering
  * 
  * **Business Flow Integration:**
  * - Providers are medical supply vendors
@@ -25,12 +26,15 @@
  * - Admin: Full CRUD, status management, see all providers
  * - Non-Admin: No access (redirected by middleware)
  * 
+ * **Migration:** Phase 3.2 - Migrated from ServerDataGrid to RichDataGrid
+ * @see RICHDATAGRID_MIGRATION_PLAN.md
+ * 
  * @module app/providers
  */
 
 'use client'
 
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -38,16 +42,24 @@ import { Archive, Factory, PauseCircle, Plus } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
 import {
-	createProviderColumns,
+	createProviderRichColumns,
 	ProviderDeleteModal,
 	ProviderStatsGrid,
 	useProvidersPage,
 	type ProviderStatusKey,
 } from '@_features/providers'
 
+import { API } from '@_shared'
+
 import type Provider from '@_classes/Provider'
 
-import ServerDataGrid from '@_components/tables/ServerDataGrid'
+import {
+	RichDataGrid,
+	createColumnId,
+	FilterType,
+	SortDirection,
+} from '@_components/tables/RichDataGrid'
+import type { RichSearchFilter, RichPagedResult } from '@_components/tables/RichDataGrid'
 import Button from '@_components/ui/Button'
 
 import { InternalPageHeader } from '../_components'
@@ -93,7 +105,7 @@ export default function ProvidersPage() {
 	// Column definitions - memoized since they depend on permissions
 	const columns = useMemo(
 		() =>
-			createProviderColumns({
+			createProviderRichColumns({
 				canDelete,
 				canManageStatus,
 				onDelete: openDeleteModal,
@@ -104,14 +116,58 @@ export default function ProvidersPage() {
 		[canDelete, canManageStatus, openDeleteModal, openArchiveModal, openSuspendModal, handleActivate]
 	)
 
-	// Search filters based on statusFilter
-	const searchFilters = useMemo(() => {
-		if (statusFilter === 'all') {
-			return { ShowArchived: 'true' }
-		}
-		// Filter by specific status
-		return { status: statusFilter }
-	}, [statusFilter])
+	// Custom fetcher that includes status filter
+	const fetcher = useCallback(
+		async (filter: RichSearchFilter): Promise<RichPagedResult<Provider>> => {
+			// Build enhanced filter with external status filter
+			const enhancedFilter: RichSearchFilter = {
+				...filter,
+			}
+
+			// Apply status filter from stats grid
+			if (statusFilter === 'all') {
+				// Show all including archived
+				enhancedFilter.columnFilters = [
+					...(filter.columnFilters || []),
+					{
+						columnId: 'ShowArchived',
+						filterType: FilterType.Boolean,
+						operator: 'Is',
+						value: true,
+					},
+				]
+			} else if (statusFilter !== 'active') {
+				// Filter by specific status
+				enhancedFilter.columnFilters = [
+					...(filter.columnFilters || []),
+					{
+						columnId: 'status',
+						filterType: FilterType.Select,
+						operator: 'Is',
+						value: statusFilter,
+					},
+				]
+			}
+
+			const response = await API.Providers.richSearch(enhancedFilter)
+
+			if (response.data?.payload) {
+				return response.data.payload as unknown as RichPagedResult<Provider>
+			}
+
+			// Return empty result on error
+			return {
+				data: [],
+				page: 1,
+				pageSize: filter.pageSize,
+				total: 0,
+				totalPages: 0,
+				hasNext: false,
+				hasPrevious: false,
+			}
+		},
+		[statusFilter]
+	)
 
 	return (
 		<>
@@ -142,15 +198,16 @@ export default function ProvidersPage() {
 			{/* Data Grid Card */}
 			<div className="card bg-base-100 shadow-xl">
 				<div className="card-body p-3 sm:p-6">
-					<ServerDataGrid<Provider>
+					<RichDataGrid<Provider>
 						key={`providers-${refreshKey}-${statusFilter}`}
 						columns={columns}
-						endpoint="/providers/search"
-						initialPageSize={10}
-						initialSortBy="createdAt"
-						initialSortOrder="desc"
-						filters={searchFilters}
-						emptyMessage={
+						fetcher={fetcher}
+						defaultPageSize={10}
+						defaultSorting={[{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending }]}
+						enableGlobalSearch
+						searchPlaceholder="Search providers by name or email..."
+						persistStateKey="providers-grid"
+						emptyState={
 							<EmptyState
 								statusFilter={statusFilter}
 								onAddProvider={() => router.push(Routes.Providers.create())}

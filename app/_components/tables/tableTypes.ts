@@ -85,3 +85,12 @@ export interface PaginationRange {
 	end: number
 }
 
+/**
+ * Loading variant for DataGrid component.
+ *
+ * - 'spinner': Overlay spinner (default, backward compatible)
+ * - 'skeleton': Skeleton rows replace content when loading
+ * - 'skeleton-overlay': Skeleton rows with semi-transparent overlay
+ */
+export type LoadingVariant = 'spinner' | 'skeleton' | 'skeleton-overlay'
+

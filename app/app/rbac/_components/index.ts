@@ -32,8 +32,10 @@ export { RBACErrorAlert } from './RBACErrorAlert'
 export { RoleHierarchyDiagram } from './RoleHierarchyDiagram'
 export { PermissionMatrix } from './PermissionMatrix'
 export { AuditLogTable } from './AuditLogTable'
+export { AuditLogDataGrid } from './AuditLogDataGrid'
 export { BulkRoleModal } from './BulkRoleModal'
 export { UserRolesTable } from './UserRolesTable'
+export { UserRolesDataGrid } from './UserRolesDataGrid'
 
 // =========================================================================
 // CRUD COMPONENTS

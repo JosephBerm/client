@@ -64,7 +64,7 @@ export {
 export { useAggregateStats, useCustomerStats, useCustomersPage } from './hooks'
 
 // Utils
-export { createCustomerColumns } from './utils'
+export { createCustomerColumns, createCustomerRichColumns } from './utils'
 
 // Constants
 export {

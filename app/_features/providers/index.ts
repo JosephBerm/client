@@ -77,7 +77,7 @@ export {
 export { useProviderStats, useProvidersPage } from './hooks'
 
 // Utils
-export { createProviderColumns } from './utils'
+export { createProviderColumns, createProviderRichColumns } from './utils'
 
 // Constants
 export {
