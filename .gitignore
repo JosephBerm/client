@@ -37,3 +37,7 @@ next-env.d.ts
 
 # eslint
 .eslintcache
+
+# mcp configuration (contains secrets)
+mcp.json
+**/*mcp.json
