@@ -44,6 +44,7 @@ import ProductsCategory from '@_classes/ProductsCategory'
 import StoreFilters from '@_components/store/StoreFilters'
 import StoreHeader from '@_components/store/StoreHeader'
 import StoreProductGrid from '@_components/store/StoreProductGrid'
+import VirtualizedProductGrid from '@_components/store/VirtualizedProductGrid'
 import UnifiedStoreToolbar from '@_components/store/UnifiedStoreToolbar'
 import ReferralBanner from '@_components/store/ReferralBanner'
 import StoreValueProposition from '@_components/store/StoreValueProposition'
@@ -188,11 +189,17 @@ export default function StorePageContainer({
 		handlePageChange,
 		handleClearFilters,
 		handleCategoryFilter,
+		
+		// Infinite scroll mode
+		handleLoadMore,
+		mode,
+		hasMoreProducts,
 	} = useStorePageLogic({
 		initialProducts: hydratedProducts,
 		initialProductsResult: hydratedProductsResult,
 		initialCategories: hydratedCategories,
 		initialSearchParams,
+		mode: 'infinite', // Use infinite scroll mode
 	})
 
 	return (
@@ -256,19 +263,31 @@ export default function StorePageContainer({
 					/>
 
 					{/* Product Grid - Main Content */}
-					<StoreProductGrid
-						products={products}
-						productsResult={productsResult}
-						searchCriteria={searchCriteria}
-						isLoading={isLoading}
-						hasLoaded={hasLoaded}
-						isFiltered={isFiltered}
-						currentPageSize={currentPageSize}
-						priorityImageCount={PRIORITY_IMAGE_COUNT}
-						onClearFilters={handleClearFilters}
-						onCategoryFilter={handleCategoryFilter}
-						onPageChange={handlePageChange}
-					/>
+					{/* Conditionally render VirtualizedProductGrid for infinite mode */}
+					{/* Modern API: Pass filters, component fetches its own data via React Query */}
+					{mode === 'infinite' ? (
+						<VirtualizedProductGrid
+							searchText={searchText}
+							selectedCategories={selectedCategories}
+							sortValue={currentSort}
+							onCategoryFilter={handleCategoryFilter}
+							priorityImageCount={PRIORITY_IMAGE_COUNT}
+						/>
+					) : (
+						<StoreProductGrid
+							products={products}
+							productsResult={productsResult}
+							searchCriteria={searchCriteria}
+							isLoading={isLoading}
+							hasLoaded={hasLoaded}
+							isFiltered={isFiltered}
+							currentPageSize={currentPageSize}
+							priorityImageCount={PRIORITY_IMAGE_COUNT}
+							onClearFilters={handleClearFilters}
+							onCategoryFilter={handleCategoryFilter}
+							onPageChange={handlePageChange}
+						/>
+					)}
 				</div>
 			</div>
 		</div>

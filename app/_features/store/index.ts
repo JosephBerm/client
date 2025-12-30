@@ -69,6 +69,15 @@ export {
 	type UseReferralTrackingReturn,
 } from './hooks/useReferralTracking'
 
+export {
+	useProductsInfiniteQuery,
+	flattenProductPages,
+	getTotalProductCount,
+	productQueryKeys,
+	type ProductsPage,
+	type ProductQueryFilters,
+} from './hooks/useProductsInfiniteQuery'
+
 // ============================================================================
 // UTILITIES (Server + Client Safe)
 // ============================================================================

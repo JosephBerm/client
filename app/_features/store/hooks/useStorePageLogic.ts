@@ -64,6 +64,13 @@ import type { RetrievalOverrides } from './useStoreData'
  * When these are provided, the hook skips initial data fetching
  * and uses the server-fetched data instead.
  */
+/**
+ * Display mode for the store page
+ * - 'pagination': Traditional page-based navigation (default, SEO-friendly)
+ * - 'infinite': Infinite scroll with virtualization (better UX for browsing)
+ */
+export type StoreDisplayMode = 'pagination' | 'infinite'
+
 export interface UseStorePageLogicProps {
 	/** Initial products from server-side fetch */
 	initialProducts?: Product[]
@@ -79,6 +86,8 @@ export interface UseStorePageLogicProps {
 		page?: number
 		pageSize?: number
 	}
+	/** Display mode: 'pagination' or 'infinite' (default: 'infinite') */
+	mode?: StoreDisplayMode
 }
 
 /**
@@ -120,6 +129,10 @@ export interface UseStorePageLogicReturn {
 	handlePageChange: (page: number) => void
 	handleClearFilters: () => void
 	handleCategoryFilter: (category: ProductsCategory) => void
+	
+	// Infinite scroll mode
+	handleLoadMore: () => void
+	mode: StoreDisplayMode
 }
 
 /**
@@ -165,6 +178,7 @@ export function useStorePageLogic(props: UseStorePageLogicProps = {}): UseStoreP
 		initialProductsResult,
 		initialCategories,
 		initialSearchParams,
+		mode = 'infinite', // Default to infinite scroll for better UX
 	} = props
 	
 	// Determine if we have server-side data to hydrate from
@@ -216,6 +230,19 @@ export function useStorePageLogic(props: UseStorePageLogicProps = {}): UseStoreP
 	
 	// Data fetching hook
 	const { fetchCategories, fetchProducts, cancelPendingRequests } = useStoreData() // ✅ ENABLED - cancellation
+	
+	// ============================================================================
+	// ACCUMULATED PRODUCTS STATE (for infinite scroll mode)
+	// ============================================================================
+	
+	/**
+	 * Accumulated products for infinite scroll mode.
+	 * In pagination mode, this mirrors `products`.
+	 * In infinite mode, this accumulates products across page fetches.
+	 */
+	const [accumulatedProducts, setAccumulatedProducts] = useState<Product[]>(
+		initialProducts ?? []
+	)
 
 	// ============================================================================
 	// REFS (Mutable values that don't trigger re-renders)
@@ -675,6 +702,86 @@ export function useStorePageLogic(props: UseStorePageLogicProps = {}): UseStoreP
 		)
 	}, [setSelectedCategoriesAction, fetchAndUpdateProducts, searchCriteria, searchText])
 
+	/**
+	 * ✅ INFINITE SCROLL - Load more handler
+	 * 
+	 * Fetches the next page of products and appends to accumulated list.
+	 * Used by VirtualizedProductGrid for infinite scroll.
+	 * This is a user-initiated action (triggered by scroll), safe from infinite loops.
+	 */
+	const handleLoadMore = useCallback(() => {
+		// Guard: Don't fetch if already loading or no more products
+		if (isLoading || !hasMoreProducts) {
+			logger.debug('⏭️ handleLoadMore skipped', { isLoading, hasMoreProducts })
+			return
+		}
+		
+		const nextPage = searchCriteria.page + 1
+		logger.info('✅ Infinite scroll: Loading more products', { 
+			currentPage: searchCriteria.page,
+			nextPage,
+			currentCount: accumulatedProducts.length,
+		})
+		
+		// Fetch next page and accumulate (don't replace)
+		void (async () => {
+			try {
+				setLoading(true)
+				
+				const updatedCriteria = new GenericSearchFilter({
+					...searchCriteria,
+					page: nextPage,
+				})
+				
+				const { products: newProducts, result } = await fetchProducts(
+					updatedCriteria,
+					currentSort,
+					{ search: searchText, categories: selectedCategories }
+				)
+				
+				// Update search criteria to track current page
+				setSearchCriteriaAction(updatedCriteria)
+				
+				// In infinite mode: Accumulate products
+				if (mode === 'infinite') {
+					setAccumulatedProducts(prev => [...prev, ...newProducts])
+					// Also update products state with accumulated list
+					setProducts([...accumulatedProducts, ...newProducts], result)
+				} else {
+					// In pagination mode: Replace products (normal behavior)
+					setProducts(newProducts, result)
+				}
+				
+				logger.info('✅ Load more successful', { 
+					newCount: newProducts.length,
+					totalAccumulated: accumulatedProducts.length + newProducts.length,
+				})
+			} catch (error) {
+				logger.error('❌ Load more failed', { error })
+				notificationService.error('Failed to load more products', {
+					metadata: { error },
+					component: 'useStorePageLogic',
+					action: 'handleLoadMore',
+				})
+			} finally {
+				setLoading(false)
+			}
+		})()
+	}, [
+		isLoading,
+		hasMoreProducts,
+		searchCriteria,
+		accumulatedProducts,
+		mode,
+		fetchProducts,
+		currentSort,
+		searchText,
+		selectedCategories,
+		setSearchCriteriaAction,
+		setProducts,
+		setLoading,
+	])
+
 	// ============================================================================
 	// EFFECTS - MINIMAL (Only initial fetch)
 	// ============================================================================
@@ -822,6 +929,10 @@ export function useStorePageLogic(props: UseStorePageLogicProps = {}): UseStoreP
 		handlePageChange,
 		handleClearFilters,
 		handleCategoryFilter,
+		
+		// Infinite scroll mode
+		handleLoadMore,
+		mode,
 	}
 }
 

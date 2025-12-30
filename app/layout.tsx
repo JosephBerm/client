@@ -6,6 +6,7 @@ import { themeInitScript } from '@_scripts/theme-init-inline'
 
 import AuthInitializer from '@_components/common/AuthInitializer'
 import ImageServiceInitializer from '@_components/common/ImageServiceInitializer'
+import QueryProvider from '@_components/common/QueryProvider'
 import ServiceWorkerRegistration from '@_components/common/ServiceWorkerRegistration'
 import ToastProvider from '@_components/common/ToastProvider'
 import UserSettingsInitializer from '@_components/common/UserSettingsInitializer'
@@ -68,30 +69,33 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				<script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
 			</head>
 		<body>
-			{/* Initialize services on app load */}
-			<UserSettingsInitializer />
-			<AuthInitializer />
-			<ImageServiceInitializer />
-			<ServiceWorkerRegistration />
+			{/* React Query Provider - Enables caching, deduplication, and infinite queries */}
+			<QueryProvider>
+				{/* Initialize services on app load */}
+				<UserSettingsInitializer />
+				<AuthInitializer />
+				<ImageServiceInitializer />
+				<ServiceWorkerRegistration />
 
-			{/* Main navigation wrapper - Wrapped in Suspense for useSearchParams() in Navbar */}
-			{/* Next.js 15 requires Suspense boundary for components using useSearchParams during prerender */}
-			<Suspense fallback={null}>
-				<NavigationLayout>
-					{children}
-				</NavigationLayout>
-			</Suspense>
+				{/* Main navigation wrapper - Wrapped in Suspense for useSearchParams() in Navbar */}
+				{/* Next.js 15 requires Suspense boundary for components using useSearchParams during prerender */}
+				<Suspense fallback={null}>
+					<NavigationLayout>
+						{children}
+					</NavigationLayout>
+				</Suspense>
 
-			{/* Theme-aware toast notifications */}
-			<ToastProvider />
+				{/* Theme-aware toast notifications */}
+				<ToastProvider />
 
-			{/* Global Live Chat Bubble - Available on all pages */}
-			{/* Placed at root level to avoid interference from page-specific animations */}
-			{/* Wrapped in Suspense for Next.js 16 cache components optimization */}
-			<Suspense fallback={null}>
-				<LiveChatBubble />
-			</Suspense>
-			</body>
+				{/* Global Live Chat Bubble - Available on all pages */}
+				{/* Placed at root level to avoid interference from page-specific animations */}
+				{/* Wrapped in Suspense for Next.js 16 cache components optimization */}
+				<Suspense fallback={null}>
+					<LiveChatBubble />
+				</Suspense>
+			</QueryProvider>
+		</body>
 		</html>
 	)
 }

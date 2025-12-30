@@ -47,6 +47,8 @@ export type { SharedObserverOptions, IntersectionCallback } from './useSharedInt
 export { useRouteParam, useRouteParams, useRouteParamValidated } from './useRouteParam'
 export { useCopyToClipboard } from './useCopyToClipboard'
 export { useBreadcrumbs } from './useBreadcrumbs'
+export { useInfiniteScroll } from './useInfiniteScroll'
+export type { UseInfiniteScrollOptions, UseInfiniteScrollReturn } from './useInfiniteScroll'
 
 // =============================================================================
 // RBAC HOOKS

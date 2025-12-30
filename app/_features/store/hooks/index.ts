@@ -35,6 +35,8 @@ export {
 export {
 	useStorePageLogic,
 	type UseStorePageLogicReturn,
+	type UseStorePageLogicProps,
+	type StoreDisplayMode,
 } from './useStorePageLogic'
 
 export {
