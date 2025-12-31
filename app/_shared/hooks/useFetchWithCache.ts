@@ -173,7 +173,7 @@ function subscribe(key: string, callback: () => void): () => void {
 
 export function useFetchWithCache<T>(
 	key: string,
-	fetcher: () => Promise<{ data: { statusCode: number; payload?: T | null } }>,
+	fetcher: () => Promise<{ data: { statusCode: number; message?: string | null; payload?: T | null } }>,
 	options: FetchWithCacheOptions<T> = {}
 ): FetchWithCacheReturn<T> {
 	const {
@@ -236,7 +236,10 @@ export function useFetchWithCache<T>(
 					try {
 						const response = await fetcher()
 
-						if (response.data.statusCode === 200 && response.data.payload !== undefined) {
+						// Check for successful response (2xx status codes)
+						const isSuccess = response.data.statusCode >= 200 && response.data.statusCode < 300
+
+						if (isSuccess && response.data.payload !== undefined) {
 							const result = response.data.payload as T
 							setCachedData(key, result, cacheTime)
 							retryCountRef.current = 0
@@ -251,7 +254,10 @@ export function useFetchWithCache<T>(
 							return result
 						}
 
-						throw new Error('Invalid response')
+						// Propagate actual API error message instead of generic error
+						const errorMessage = response.data.message 
+							|| `Request failed with status ${response.data.statusCode}`
+						throw new Error(errorMessage)
 					} catch (err) {
 						if (attempt < maxRetries) {
 							await new Promise((r) => setTimeout(r, retryDelay * Math.pow(2, attempt)))
@@ -411,7 +417,7 @@ export function useFetchWithCache<T>(
  */
 export async function prefetch<T>(
 	key: string,
-	fetcher: () => Promise<{ data: { statusCode: number; payload?: T | null } }>,
+	fetcher: () => Promise<{ data: { statusCode: number; message?: string | null; payload?: T | null } }>,
 	cacheTime = 30 * 60 * 1000
 ): Promise<void> {
 	try {
