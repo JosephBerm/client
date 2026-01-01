@@ -47,7 +47,7 @@
  */
 
 import type CustomerSummary from '@_classes/Base/CustomerSummary'
-import type { AccountRole } from '@_classes/Enums'
+// AccountRole enum removed - now using numeric role levels from API
 import type { DashboardStats, DashboardTask, RecentItem } from '@_types/dashboard.types'
 import type { 
 	AnalyticsSummary, 
@@ -229,13 +229,13 @@ const API = {
 		getSalesReps: async () => HttpService.get<User[]>('/account/sales-reps'),
 
 		/**
-		 * Gets accounts by role list (defaults to SalesRep + SalesManager).
-		 * Uses backend AccountService.GetByRole for server-side filtering.
+		 * Gets accounts by role level list (defaults to SalesRep + SalesManager).
+		 * Uses backend AccountService.GetByRoleLevel for server-side filtering.
 		 *
-		 * @param roles - Array of AccountRole enum values or numeric role ids
+		 * @param roleLevels - Array of numeric role levels (e.g., [3000, 4000] for SalesRep + SalesManager)
 		 */
-		getByRole: async (roles?: Array<AccountRole | number>) => {
-			const roleParam = roles?.length ? `?roles=${encodeURIComponent(roles.join('|'))}` : ''
+		getByRole: async (roleLevels?: number[]) => {
+			const roleParam = roleLevels?.length ? `?roles=${encodeURIComponent(roleLevels.join('|'))}` : ''
 			return HttpService.get<User[]>(`/account/by-role${roleParam}`)
 		},
 		
@@ -254,14 +254,14 @@ const API = {
 		 * - Supports filtering by Role (single or array), Id (single or array), Email, Username, Name, CustomerId
 		 * - Supports pagination for large result sets
 		 * - Supports custom sorting
-		 * - **Type-safe: Uses AccountRole enum values (no magic numbers)**
+		 * - **White-label ready: Uses numeric role levels from API configuration**
 		 * 
 		 * **Supported Filters (via GenericSearchFilter.filters dictionary):**
-		 * - **Role**: Single role or pipe-separated roles using AccountRole enum values (type-safe)
-		 *   - Type-safe: Use AccountRole enum values (e.g., `${AccountRole.SalesRep}|${AccountRole.SalesManager}`)
-		 *   - Example: `{ filters: { Role: `${AccountRole.SalesRep}|${AccountRole.SalesManager}` } }` returns SalesRep OR SalesManager
-		 *   - Validates enum values at runtime (invalid values are ignored)
-		 *   - Supports all AccountRole values: Customer (0), SalesRep (100), SalesManager (200), FulfillmentCoordinator (300), Admin (9999999)
+		 * - **Role**: Single role level or pipe-separated role levels
+		 *   - Use numeric role levels from API thresholds (e.g., "3000|4000" for SalesRep + SalesManager)
+		 *   - Example: `{ filters: { Role: "3000|4000" } }` returns SalesRep OR SalesManager
+		 *   - Default levels: Customer (1000), FulfillmentCoordinator (2000), SalesRep (3000), SalesManager (4000), Admin (5000), SuperAdmin (9999)
+		 *   - White-label: Actual values come from GET /rbac/roles/thresholds
 		 * - **Id**: Single ID or pipe-separated IDs (e.g., "1|2|3" for multiple users)
 		 *   - Example: `{ filters: { Id: "1|2|3" } }` returns users with ID 1, 2, or 3
 		 * - **Email**: Contains search (case-insensitive)
@@ -283,13 +283,12 @@ const API = {
 		 * 
 		 * @example
 		 * ```typescript
-		 * import { AccountRole } from '@_classes/Enums'
-		 * 
 		 * // Get all SalesReps and SalesManagers (for quote assignment)
-		 * // MAANG-Level: Uses AccountRole enum values (type-safe, no magic numbers)
+		 * // White-label: Role levels come from API thresholds configuration
+		 * const { thresholds } = await API.RBAC.getThresholds()
 		 * const { data } = await API.Accounts.search({
 		 *   filters: { 
-		 *     Role: `${AccountRole.SalesRep}|${AccountRole.SalesManager}` 
+		 *     Role: `${thresholds.salesRepThreshold}|${thresholds.salesManagerThreshold}` 
 		 *   },
 		 *   sortBy: "Role",
 		 *   sortOrder: "desc",
@@ -1571,6 +1570,24 @@ const API = {
 		},
 
 		/**
+		 * Gets role level thresholds from configuration.
+		 * Used for level-based authorization checks (isAdmin, isSuperAdmin).
+		 * 
+		 * @returns Threshold configuration
+		 * @see server/Controllers/RBACController.cs - GetThresholds
+		 */
+		getThresholds: async () => HttpService.get<RoleThresholdsResponse>('/rbac/roles/thresholds'),
+
+		/**
+		 * Gets the current user's permissions from database.
+		 * Used by usePermissions hook to determine allowed actions.
+		 * 
+		 * @returns User permissions with role information
+		 * @see server/Controllers/RBACController.cs - GetMyPermissions
+		 */
+		getMyPermissions: async () => HttpService.get<UserPermissionsResponse>('/rbac/my-permissions'),
+
+		/**
 		 * Roles Management
 		 */
 		Roles: {
@@ -1720,5 +1737,36 @@ export interface UpdatePermissionRequest {
 	action: string
 	context?: string
 	description?: string
+}
+
+/**
+ * Role thresholds response from GET /api/rbac/roles/thresholds
+ * 
+ * WHITE-LABEL: All thresholds are configurable via appsettings.json.
+ * No code changes needed to customize role levels for different deployments.
+ */
+export interface RoleThresholdsResponse {
+	/** Default level for customers (default: 1000) */
+	customerLevel: number
+	/** Minimum level for Fulfillment Coordinator (default: 2000) */
+	fulfillmentCoordinatorThreshold: number
+	/** Minimum level for Sales Rep (default: 3000) */
+	salesRepThreshold: number
+	/** Minimum level for Sales Manager (default: 4000) */
+	salesManagerThreshold: number
+	/** Minimum level for Admin (default: 5000) */
+	adminThreshold: number
+	/** Minimum level for Super Admin (default: 9999) */
+	superAdminThreshold: number
+}
+
+/**
+ * User permissions response from GET /api/rbac/my-permissions
+ */
+export interface UserPermissionsResponse {
+	userId: number
+	roleLevel: number
+	roleName: string
+	permissions: string[]
 }
 

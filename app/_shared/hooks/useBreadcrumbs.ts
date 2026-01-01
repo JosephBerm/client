@@ -97,9 +97,10 @@ export function useBreadcrumbs(customPathname?: string): BreadcrumbItem[] {
 	const pathname = customPathname ?? routerPathname
 
 	// Generate breadcrumbs (memoized)
+	// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
 	const breadcrumbs = useMemo(() => {
-		return BreadcrumbService.generateBreadcrumbs(pathname, user?.role)
-	}, [pathname, user?.role])
+		return BreadcrumbService.generateBreadcrumbs(pathname, user?.roleLevel)
+	}, [pathname, user?.roleLevel])
 
 	return breadcrumbs
 }

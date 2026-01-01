@@ -223,9 +223,11 @@ export function useAccountDetailLogic(): UseAccountDetailLogicReturn {
 	
 	const isCreateMode = accountId === 'create'
 	
+	// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
+	// Use >= for admin check to include SuperAdmin (9999) and Admin (5000)
 	const isCurrentUserAdmin = useMemo(
-		() => currentUser?.role === AccountRole.Admin,
-		[currentUser?.role]
+		() => (currentUser?.roleLevel ?? 0) >= AccountRole.Admin,
+		[currentUser?.roleLevel]
 	)
 	
 	// Can only change role if current user is admin and not editing their own account

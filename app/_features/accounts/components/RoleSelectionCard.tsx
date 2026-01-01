@@ -112,8 +112,15 @@ export default function RoleSelectionCard({
 }: RoleSelectionCardProps) {
 	const [isExpanded, setIsExpanded] = useState(false)
 	
-	const IconComponent = LUCIDE_ICONS[role.lucideIcon]
-	const colors = COLOR_CLASSES[role.color]
+	// Map RoleBadgeVariant to COLOR_CLASSES keys (defensive programming)
+	const colorKey = role.color === 'secondary' ? 'default' : role.color === 'primary' ? 'info' : role.color
+	const colors = COLOR_CLASSES[colorKey as keyof typeof COLOR_CLASSES] ?? COLOR_CLASSES.default
+	
+	// Handle optional lucideIcon (defensive programming)
+	const IconComponent = role.lucideIcon && role.lucideIcon in LUCIDE_ICONS 
+		? LUCIDE_ICONS[role.lucideIcon as keyof typeof LUCIDE_ICONS]
+		: LUCIDE_ICONS.User
+	
 	const requiresConfirmation = roleRequiresConfirmation(role.value)
 
 	const handleClick = () => {
@@ -150,11 +157,9 @@ export default function RoleSelectionCard({
 						? `${colors.bg} ${colors.selectedBorder} cursor-pointer ring-2 ring-offset-2 ring-offset-base-100`
 						: `bg-base-100 border-base-300 hover:border-base-content/30 hover:shadow-md cursor-pointer`
 				}
-				${isSelected && role.color === 'error' ? 'ring-error/50' : ''}
-				${isSelected && role.color === 'success' ? 'ring-success/50' : ''}
-				${isSelected && role.color === 'warning' ? 'ring-warning/50' : ''}
-				${isSelected && role.color === 'info' ? 'ring-info/50' : ''}
-				${isSelected && role.color === 'default' ? 'ring-base-content/20' : ''}
+				${isSelected && colorKey === 'warning' ? 'ring-warning/50' : ''}
+				${isSelected && colorKey === 'info' ? 'ring-info/50' : ''}
+				${isSelected && colorKey === 'default' ? 'ring-base-content/20' : ''}
 			`}
 		>
 			{/* Selection indicator */}
@@ -194,7 +199,7 @@ export default function RoleSelectionCard({
 			</div>
 
 			{/* Permissions preview (expandable) */}
-			{showPermissions && role.keyPermissions.length > 0 && (
+    {showPermissions && role.keyPermissions && role.keyPermissions.length > 0 && (
 				<div className="mt-3 pt-3 border-t border-base-300/50">
 					<button
 						type="button"
@@ -204,12 +209,12 @@ export default function RoleSelectionCard({
 						<ChevronDown 
 							className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
 						/>
-						{isExpanded ? 'Hide' : 'View'} permissions ({role.keyPermissions.length})
+       {isExpanded ? 'Hide' : 'View'} permissions ({role.keyPermissions?.length ?? 0})
 					</button>
 					
 					{isExpanded && (
 						<ul className="mt-2 space-y-1">
-							{role.keyPermissions.map((permission, idx) => (
+        {role.keyPermissions?.map((permission: string, idx: number) => (
 								<li 
 									key={idx}
 									className="flex items-center gap-2 text-xs text-base-content/70"

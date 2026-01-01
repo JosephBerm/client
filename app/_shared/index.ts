@@ -250,8 +250,20 @@ export { usePermissions, Resources, Actions, Contexts, RoleLevels, type UsePermi
 // CONSTANTS (Single Source of Truth)
 // ============================================================================
 
-// Role Constants
+// RBAC Constants - Export everything from the barrel
 export {
+	// Core constants
+	DEFAULT_ROLE_THRESHOLDS,
+	LEGACY_ROLE_LEVELS,
+	DEFAULT_ROLE_METADATA,
+	// Display helpers
+	getRoleDisplayName,
+	getRoleBadgeVariant,
+	// Types
+	type RoleThresholds,
+	type RoleMetadataEntry,
+	type RoleBadgeVariant,
+	// Legacy compatibility (deprecated but maintained for backward compat)
 	ROLE_OPTIONS,
 	getRoleOption,
 	getRoleLabel,

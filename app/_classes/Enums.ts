@@ -144,50 +144,45 @@ export enum NotificationType {
 }
 
 /**
- * AccountRole Enum
+ * AccountRole - Legacy Compatibility Layer
  * 
- * User role levels with role-based access control (RBAC).
- * Determines user permissions and accessible features.
- * Higher values = more authority.
+ * @deprecated The AccountRole enum has been replaced with numeric role levels.
+ * Use the usePermissions() hook instead.
  * 
- * **Role Hierarchy (per medsource_prd_system.md):**
- * - **Customer (100)**: End users who purchase products
- * - **FulfillmentCoordinator (200)**: Handles order fulfillment logistics
- * - **SalesRep (300)**: Sales representatives who manage quotes/orders
- * - **SalesManager (400)**: Managers who oversee sales team, approve high-value quotes
- * - **Admin (500)**: Full system access
+ * DRY: Re-exports from centralized constants to avoid duplication.
  * 
- * **Usage:**
- * - Navigation filtering: `NavigationService.getNavigationSections(userRole)`
- * - Route protection: Middleware checks user role level
- * - Permission checks: `user.role >= AccountRole.SalesRep`
- * - Feature gating: Show/hide features based on role
- * 
- * @example
- * ```typescript
- * // Check if user is at least a SalesRep
- * if (user.role >= AccountRole.SalesRep) {
- *   // Show sales features
- * }
- * 
- * // Check if user is exactly a Customer
- * if (user.role === AccountRole.Customer) {
- *   // Show customer-only features
- * }
- * ```
+ * Migration Guide:
+ * - OLD: `if (user.role === AccountRole.Admin) { ... }`
+ * - NEW: `const { isAdmin } = usePermissions(); if (isAdmin) { ... }`
  */
-export enum AccountRole {
-	/** End users who purchase products (value: 100) */
-	Customer = 100,
-	/** Handles order fulfillment logistics (value: 200) */
-	FulfillmentCoordinator = 200,
-	/** Sales representatives who manage quotes/orders (value: 300) */
-	SalesRep = 300,
-	/** Managers who oversee sales team, approve high-value quotes (value: 400) */
-	SalesManager = 400,
-	/** Administrator with full system access (value: 500) */
-	Admin = 500,
+import { LEGACY_ROLE_LEVELS, getRoleNameFromLevel } from '@_shared/constants'
+
+// Type that supports both string keys and numeric keys
+type AccountRoleType = typeof LEGACY_ROLE_LEVELS & {
+	[key: number]: string | undefined
+	[key: string]: number | string | undefined
 }
+
+// Create a Proxy that supports both string keys (AccountRole.Admin) and numeric keys (AccountRole[5000])
+const AccountRoleProxy = new Proxy(LEGACY_ROLE_LEVELS, {
+	get(target, prop) {
+		// If prop is a number (as string), reverse lookup the role name
+		if (typeof prop === 'string' && /^\d+$/.test(prop)) {
+			const level = Number(prop)
+			return getRoleNameFromLevel(level) ?? `Role${level}`
+		}
+		// Otherwise, use normal property access
+		return Reflect.get(target, prop)
+	},
+}) as AccountRoleType
+
+export { AccountRoleProxy as AccountRole }
+
+/** @deprecated Use numeric role levels from usePermissions() hook */
+export type AccountRole = number
+
+/** @deprecated Use usePermissions() hook for role checks */
+export type RoleLevel = number
 
 /**
  * AccountStatus Enum - UPDATED TO MATCH BACKEND (Phase 1)

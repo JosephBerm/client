@@ -124,6 +124,7 @@ interface RoleBadgeProps {
  * Maps AccountRole values to human-readable labels and color variants.
  */
 const ROLE_CONFIG: Record<number, { label: string; variant: 'error' | 'primary' | 'secondary' | 'success' | 'warning' | 'neutral' | 'info' }> = {
+	[AccountRole.SuperAdmin]: { label: 'Super Admin', variant: 'error' },
 	[AccountRole.Admin]: { label: 'Admin', variant: 'error' },
 	[AccountRole.FulfillmentCoordinator]: { label: 'Fulfillment', variant: 'info' },
 	[AccountRole.SalesManager]: { label: 'Sales Manager', variant: 'success' },

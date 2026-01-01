@@ -72,7 +72,8 @@ interface OrderRow {
 
 export default function OrdersPage() {
 	const user = useAuthStore((state) => state.user)
-	const role = user?.role ?? AccountRole.Customer
+	// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
+	const role = user?.roleLevel ?? AccountRole.Customer
 
 	// Role checks
 	const isCustomer = role === AccountRole.Customer

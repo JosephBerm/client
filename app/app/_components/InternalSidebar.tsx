@@ -124,7 +124,8 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 	// Get navigation sections for internal app only
 	// Filter to show only internal app routes (exclude public routes)
 	// React Compiler automatically optimizes this computation
-	const allSections = NavigationService.getNavigationSections(user?.role)
+	// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
+	const allSections = NavigationService.getNavigationSections(user?.roleLevel)
 	const sections = allSections
 		.map((section) => ({
 			...section,

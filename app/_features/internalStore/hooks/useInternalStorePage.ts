@@ -63,8 +63,10 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 	const user = useAuthStore((state) => state.user)
 	
 	// RBAC checks - simple comparisons, no memoization needed
-	const userRole = user?.role ?? AccountRole.Customer
-	const isAdmin = userRole === AccountRole.Admin
+	// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
+	const userRole = user?.roleLevel ?? AccountRole.Customer
+	// Use >= for admin check to include SuperAdmin (9999) and Admin (5000)
+	const isAdmin = userRole >= AccountRole.Admin
 
 	// Modal state
 	const [deleteModal, setDeleteModal] = useState<ProductModalState>({

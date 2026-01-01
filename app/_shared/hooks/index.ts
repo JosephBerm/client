@@ -53,8 +53,8 @@ export type { UseInfiniteScrollOptions, UseInfiniteScrollReturn } from './useInf
 // =============================================================================
 // RBAC HOOKS
 // =============================================================================
-export { usePermissions, Resources, Actions, Contexts, RoleLevels } from './usePermissions'
-export type { default as UsePermissionsReturn } from './usePermissions'
+export { usePermissions, Resources, Actions, Contexts } from './usePermissions'
+export type { UsePermissionsReturn } from './usePermissions'
 
 // =============================================================================
 // DEV-ONLY HOOKS (Not exported from @_shared main barrel)

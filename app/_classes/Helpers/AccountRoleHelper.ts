@@ -1,349 +1,86 @@
 /**
- * AccountRoleHelper - FAANG-Level Enum Helper
+ * RoleLevelHelper - Role Level Utilities (White-Label Ready)
  * 
- * Centralized metadata and helper functions for AccountRole enum.
- * Used for role-based access control (RBAC) and user permissions.
+ * @deprecated For React components, prefer usePermissions() hook.
+ * This helper is for non-React contexts (utilities, tests, etc.)
  * 
- * **Pattern:** Exhaustive metadata mapping (Google/Netflix/Stripe standard)
+ * DRY: Uses centralized constants from @_shared/constants/rbac-defaults
  * 
- * **Features:**
- * - Display names for UI
- * - Badge variants for role indicators
- * - Permission levels for access control
- * - Descriptions for onboarding/help
- * - Priority/hierarchy for sorting
- * 
- * @example
- * ```typescript
- * import AccountRoleHelper from '@_classes/Helpers/AccountRoleHelper'
- * import { AccountRole } from '@_classes/Enums'
- * 
- * // Get display name
- * const name = AccountRoleHelper.getDisplay(AccountRole.Admin)
- * // → "Administrator"
- * 
- * // Check if role has admin privileges
- * const isAdmin = AccountRoleHelper.isAdmin(user.role)
- * // → true
- * 
- * // Render role badge
- * <Badge variant={AccountRoleHelper.getVariant(user.role)}>
- *   {AccountRoleHelper.getDisplay(user.role)}
- * </Badge>
- * 
- * // Check permission level
- * if (AccountRoleHelper.getLevel(user.role) >= AccountRoleHelper.getLevel(AccountRole.Admin)) {
- *   // Allow admin action
- * }
- * ```
- * 
- * @module Helpers/AccountRoleHelper
+ * @module Helpers/RoleLevelHelper
  */
 
-import { AccountRole } from '../Enums'
+import {
+	DEFAULT_ROLE_THRESHOLDS,
+	DEFAULT_ROLE_METADATA,
+	getRoleDisplayName,
+	getRoleBadgeVariant,
+	type RoleBadgeVariant,
+	type RoleMetadataEntry,
+} from '@_shared/constants'
+
+// Re-export types for backward compatibility
+export type RoleLevelVariant = RoleBadgeVariant
+export type AccountRoleVariant = RoleBadgeVariant
+export type RoleLevelMetadata = RoleMetadataEntry
+export type AccountRoleMetadata = RoleMetadataEntry
 
 /**
- * Badge variant for role indicators
- */
-export type AccountRoleVariant = 'primary' | 'secondary' | 'info' | 'success' | 'warning'
-
-/**
- * Complete metadata for an AccountRole enum value
- */
-export interface AccountRoleMetadata {
-	/** Enum value */
-	value: AccountRole
-	/** Human-readable display name */
-	display: string
-	/** Badge variant for UI */
-	variant: AccountRoleVariant
-	/** Detailed description */
-	description: string
-	/** Permission level (higher = more permissions) */
-	level: number
-	/** Short label for compact UIs */
-	shortLabel: string
-}
-
-/**
- * Exhaustive metadata map for AccountRole enum
+ * RoleLevelHelper - Static utility class for role level operations
  * 
- * TypeScript enforces: If you add a new AccountRole, you MUST add metadata here.
+ * @deprecated For React components, use usePermissions() hook instead.
+ * This class is provided for backward compatibility and non-React contexts.
  */
-const ACCOUNT_ROLE_METADATA_MAP: Record<AccountRole, AccountRoleMetadata> = {
-	[AccountRole.Customer]: {
-		value: AccountRole.Customer,
-		display: 'Customer',
-		variant: 'info',
-		description: 'Regular customer user who can browse products, place orders, and request quotes',
-		level: 0,
-		shortLabel: 'Customer',
-	},
-	[AccountRole.SalesRep]: {
-		value: AccountRole.SalesRep,
-		display: 'Sales Representative',
-		variant: 'secondary',
-		description: 'Sales representative who manages quotes and orders for customers',
-		level: 100,
-		shortLabel: 'Sales Rep',
-	},
-	[AccountRole.SalesManager]: {
-		value: AccountRole.SalesManager,
-		display: 'Sales Manager',
-		variant: 'secondary',
-		description: 'Manager who oversees sales team and approves high-value quotes',
-		level: 200,
-		shortLabel: 'Sales Mgr',
-	},
-	[AccountRole.FulfillmentCoordinator]: {
-		value: AccountRole.FulfillmentCoordinator,
-		display: 'Fulfillment Coordinator',
-		variant: 'secondary',
-		description: 'Handles order fulfillment logistics and vendor coordination',
-		level: 300,
-		shortLabel: 'Fulfillment',
-	},
-	[AccountRole.Admin]: {
-		value: AccountRole.Admin,
-		display: 'Administrator',
-		variant: 'primary',
-		description:
-			'Administrator with full system access, can manage users, orders, quotes, products, and all entities',
-		level: 9999999,
-		shortLabel: 'Admin',
-	},
-}
+class RoleLevelHelper {
+	/** Default thresholds - use for non-React contexts only */
+	static readonly defaultThresholds = DEFAULT_ROLE_THRESHOLDS
 
-/**
- * AccountRoleHelper - Static helper class
- * 
- * Provides type-safe access to AccountRole metadata and RBAC utilities.
- */
-export default class AccountRoleHelper {
-	/**
-	 * Array of all AccountRole metadata
-	 * 
-	 * @example
-	 * ```typescript
-	 * // Populate role selector
-	 * <FormSelect
-	 *   options={AccountRoleHelper.toList.map(meta => ({
-	 *     value: meta.value,
-	 *     label: meta.display,
-	 *   }))}
-	 * />
-	 * ```
-	 */
-	static readonly toList: AccountRoleMetadata[] = Object.values(ACCOUNT_ROLE_METADATA_MAP)
+	/** List of all default role metadata */
+	static readonly toList = Object.values(DEFAULT_ROLE_METADATA)
 
-	/**
-	 * Get display name for a role
-	 * 
-	 * @param role - AccountRole enum value
-	 * @returns Display name string
-	 * 
-	 * @example
-	 * ```typescript
-	 * AccountRoleHelper.getDisplay(AccountRole.Admin)
-	 * // → "Administrator"
-	 * ```
-	 */
-	static getDisplay(role: AccountRole): string {
-		return ACCOUNT_ROLE_METADATA_MAP[role]?.display || 'Unknown'
+	/** Get display name for a role level */
+	static getDisplay(roleLevel: number): string {
+		return getRoleDisplayName(roleLevel)
 	}
 
-	/**
-	 * Get short label for a role (compact UIs)
-	 * 
-	 * @param role - AccountRole enum value
-	 * @returns Short label string
-	 * 
-	 * @example
-	 * ```typescript
-	 * AccountRoleHelper.getShortLabel(AccountRole.Admin)
-	 * // → "Admin"
-	 * ```
-	 */
-	static getShortLabel(role: AccountRole): string {
-		return ACCOUNT_ROLE_METADATA_MAP[role]?.shortLabel || 'Unknown'
+	/** Get short label for compact UIs */
+	static getShortLabel(roleLevel: number): string {
+		const metadata = DEFAULT_ROLE_METADATA[roleLevel as keyof typeof DEFAULT_ROLE_METADATA]
+		return metadata?.shortLabel ?? getRoleDisplayName(roleLevel)
 	}
 
-	/**
-	 * Get badge variant for UI styling
-	 * 
-	 * @param role - AccountRole enum value
-	 * @returns Variant string
-	 * 
-	 * @example
-	 * ```typescript
-	 * <Badge variant={AccountRoleHelper.getVariant(user.role)}>
-	 *   {AccountRoleHelper.getDisplay(user.role)}
-	 * </Badge>
-	 * ```
-	 */
-	static getVariant(role: AccountRole): AccountRoleVariant {
-		return ACCOUNT_ROLE_METADATA_MAP[role]?.variant || 'info'
+	/** Get badge variant for UI styling */
+	static getVariant(roleLevel: number): RoleBadgeVariant {
+		return getRoleBadgeVariant(roleLevel)
 	}
 
-	/**
-	 * Get description for a role
-	 * 
-	 * @param role - AccountRole enum value
-	 * @returns Description string
-	 * 
-	 * @example
-	 * ```typescript
-	 * const desc = AccountRoleHelper.getDescription(AccountRole.Customer)
-	 * // → "Regular customer user who can browse products..."
-	 * ```
-	 */
-	static getDescription(role: AccountRole): string {
-		return ACCOUNT_ROLE_METADATA_MAP[role]?.description || 'No description available'
+	/** Check if role level is Admin or higher */
+	static isAdmin(roleLevel: number, threshold = DEFAULT_ROLE_THRESHOLDS.adminThreshold): boolean {
+		return roleLevel >= threshold
 	}
 
-	/**
-	 * Get full metadata for a role
-	 * 
-	 * @param role - AccountRole enum value
-	 * @returns Complete metadata object
-	 * 
-	 * @example
-	 * ```typescript
-	 * const meta = AccountRoleHelper.getMetadata(AccountRole.Admin)
-	 * console.log(meta.level)      // 9999999
-	 * console.log(meta.shortLabel) // "Admin"
-	 * ```
-	 */
-	static getMetadata(role: AccountRole): AccountRoleMetadata {
-		return ACCOUNT_ROLE_METADATA_MAP[role]
+	/** Check if role level is SuperAdmin */
+	static isSuperAdmin(roleLevel: number, threshold = DEFAULT_ROLE_THRESHOLDS.superAdminThreshold): boolean {
+		return roleLevel >= threshold
 	}
 
-	/**
-	 * Get permission level for a role
-	 * 
-	 * @param role - AccountRole enum value
-	 * @returns Permission level (higher = more permissions)
-	 * 
-	 * @example
-	 * ```typescript
-	 * AccountRoleHelper.getLevel(AccountRole.Admin)    // 9999999
-	 * AccountRoleHelper.getLevel(AccountRole.Customer) // 0
-	 * ```
-	 */
-	static getLevel(role: AccountRole): number {
-		return ACCOUNT_ROLE_METADATA_MAP[role]?.level || 0
+	/** Check if role level is exactly Customer level */
+	static isCustomer(roleLevel: number, customerLevel = DEFAULT_ROLE_THRESHOLDS.customerLevel): boolean {
+		return roleLevel === customerLevel
 	}
 
-	/**
-	 * Check if role is Admin
-	 * 
-	 * @param role - AccountRole enum value
-	 * @returns True if Admin role
-	 * 
-	 * @example
-	 * ```typescript
-	 * if (AccountRoleHelper.isAdmin(user.role)) {
-	 *   // Show admin features
-	 * }
-	 * ```
-	 */
-	static isAdmin(role: AccountRole): boolean {
-		return role === AccountRole.Admin
+	/** Check if role level meets minimum required level */
+	static hasMinimumLevel(roleLevel: number, requiredLevel: number): boolean {
+		return roleLevel >= requiredLevel
 	}
 
-	/**
-	 * Check if role is Customer
-	 * 
-	 * @param role - AccountRole enum value
-	 * @returns True if Customer role
-	 * 
-	 * @example
-	 * ```typescript
-	 * if (AccountRoleHelper.isCustomer(user.role)) {
-	 *   // Show customer-specific UI
-	 * }
-	 * ```
-	 */
-	static isCustomer(role: AccountRole): boolean {
-		return role === AccountRole.Customer
-	}
-
-	/**
-	 * Check if one role has higher permissions than another
-	 * 
-	 * @param role - Role to check
-	 * @param thanRole - Role to compare against
-	 * @returns True if role has higher permissions
-	 * 
-	 * @example
-	 * ```typescript
-	 * AccountRoleHelper.hasHigherPermissionsThan(AccountRole.Admin, AccountRole.Customer)
-	 * // → true
-	 * ```
-	 */
-	static hasHigherPermissionsThan(role: AccountRole, thanRole: AccountRole): boolean {
-		return this.getLevel(role) > this.getLevel(thanRole)
-	}
-
-	/**
-	 * Check if one role has same or higher permissions than another
-	 * 
-	 * @param role - Role to check
-	 * @param thanRole - Role to compare against
-	 * @returns True if role has same or higher permissions
-	 * 
-	 * @example
-	 * ```typescript
-	 * // Check if user can perform action requiring Admin
-	 * if (AccountRoleHelper.hasPermissionLevel(user.role, AccountRole.Admin)) {
-	 *   // Allow admin action
-	 * }
-	 * ```
-	 */
-	static hasPermissionLevel(role: AccountRole, requiredRole: AccountRole): boolean {
-		return this.getLevel(role) >= this.getLevel(requiredRole)
-	}
-
-	/**
-	 * Sort roles by permission level (high to low)
-	 * 
-	 * @param roles - Array of AccountRole values
-	 * @returns Sorted array (admins first, then customers)
-	 * 
-	 * @example
-	 * ```typescript
-	 * const roles = [AccountRole.Customer, AccountRole.Admin]
-	 * const sorted = AccountRoleHelper.sortByLevel(roles)
-	 * // → [AccountRole.Admin, AccountRole.Customer]
-	 * ```
-	 */
-	static sortByLevel(roles: AccountRole[]): AccountRole[] {
-		return [...roles].sort((a, b) => {
-			const levelA = this.getLevel(a)
-			const levelB = this.getLevel(b)
-			return levelB - levelA // High to low
-		})
-	}
-
-	/**
-	 * Check if a value is a valid AccountRole enum value
-	 * 
-	 * @param value - Value to check
-	 * @returns True if valid AccountRole
-	 * 
-	 * @example
-	 * ```typescript
-	 * const role = getRoleFromAPI()
-	 * 
-	 * if (AccountRoleHelper.isValid(role)) {
-	 *   // TypeScript now knows role is AccountRole
-	 *   const display = AccountRoleHelper.getDisplay(role)
-	 * }
-	 * ```
-	 */
-	static isValid(value: unknown): value is AccountRole {
-		if (typeof value !== 'number') {return false}
-		return Object.values(AccountRole).includes(value as AccountRole)
+	/** Check if a value is a valid role level (positive number) */
+	static isValid(value: unknown): value is number {
+		return typeof value === 'number' && value > 0
 	}
 }
 
+// Default export
+export default RoleLevelHelper
+
+// Legacy alias for backward compatibility
+export { RoleLevelHelper as AccountRoleHelper }

@@ -140,7 +140,8 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 	const isMobile = useMediaQuery('(max-width: 1023px)')
 
 	// Get navigation sections - React Compiler automatically optimizes this computation
-	const sections = NavigationService.getNavigationSections(user?.role)
+	// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
+	const sections = NavigationService.getNavigationSections(user?.roleLevel)
 
 	// State for collapsible sections - React Compiler automatically optimizes this computation
 	const initialCollapsed = (() => {

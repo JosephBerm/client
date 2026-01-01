@@ -43,14 +43,15 @@ import Routes from './routes'
  */
 export class NavigationService {
 	/**
-	 * Retrieves all navigation sections filtered by user role.
+	 * Retrieves all navigation sections filtered by user role level.
 	 * 
 	 * Navigation sections are organized into logical groups:
 	 * - **Main**: Dashboard, Store (all users)
 	 * - **My Orders**: Orders, Quotes (customers only)
-	 * - **Management**: Products, Orders, Quotes (admins only)
-	 * - **Users**: Accounts, Customers, Providers (admins only)
-	 * - **Analytics**: Reports, metrics, and insights (admins only)
+	 * - **Management**: Products, Orders, Quotes (admin-level users)
+	 * - **Users**: Accounts, Customers, Providers (admin-level users)
+	 * - **Analytics**: Reports, metrics, and insights (admin-level users)
+	 * - **Access Control**: RBAC management (admin-level users)
 	 * - **Account**: Profile, Notifications (all users)
 	 * 
 	 * Each section contains routes with:
@@ -58,25 +59,31 @@ export class NavigationService {
 	 * - Label and optional description for display
 	 * - Path for navigation
 	 * - Icon identifier for visual representation
-	 * - Optional role restrictions
 	 * 
-	 * @param userRole - User's role (AccountRole.Customer = 0, AccountRole.Admin = 9999999, null = not logged in)
+	 * **Role Hierarchy (threshold-based):**
+	 * - Customer: 1000 (base level)
+	 * - FulfillmentCoordinator: 2000
+	 * - SalesRep: 3000
+	 * - SalesManager: 4000
+	 * - Admin: 5000
+	 * - SuperAdmin: 9999
+	 * 
+	 * Admin sections shown to any user with roleLevel >= Admin (5000)
+	 * 
+	 * @param userRole - User's role level (number), null if not logged in
 	 * @returns Array of navigation sections filtered by role
 	 * 
 	 * @example
 	 * ```tsx
-	 * import { AccountRole } from '@_classes/Enums'
-	 * 
 	 * const user = useAuthStore(state => state.user)
-	 * const sections = NavigationService.getNavigationSections(user?.role)
-	 * 
-	 * // Check if admin
-	 * const isAdmin = user?.role === AccountRole.Admin
+	 * // Use roleLevel directly (Zustand stores plain JSON, not class instances)
+	 * const sections = NavigationService.getNavigationSections(user?.roleLevel)
 	 * ```
 	 */
 	static getNavigationSections(userRole?: number | null): NavigationSection[] {
-	// Check if user is an administrator using AccountRole enum
-	const isAdmin = userRole === AccountRole.Admin
+	// Check if user is an administrator (Admin level or higher, including SuperAdmin)
+	// Using >= threshold check for proper RBAC hierarchy
+	const isAdmin = userRole != null && userRole >= AccountRole.Admin
 
 		// Initialize sections array with main section (visible to all)
 		const sections: NavigationSection[] = [
@@ -150,16 +157,16 @@ export class NavigationService {
 						icon: 'clipboard-list',
 						description: 'Process customer orders',
 					},
-					{
-						id: 'admin-quotes',
-						label: 'Quotes',
-						href: Routes.Quotes.location,
-						icon: 'receipt',
-						description: 'Review quote requests',
-					},
-					],
-					roles: [AccountRole.Admin],
+				{
+					id: 'admin-quotes',
+					label: 'Quotes',
+					href: Routes.Quotes.location,
+					icon: 'receipt',
+					description: 'Review quote requests',
 				},
+				],
+				// Note: Section visibility controlled by isAdmin check (line 80), not roles array
+			},
 				// User and company management
 				{
 					id: 'users',
@@ -179,31 +186,31 @@ export class NavigationService {
 						icon: 'hospital',
 						description: 'Healthcare facilities and professionals',
 					},
-					{
-						id: 'providers',
-						label: 'Providers',
-						href: Routes.Providers.location,
-						icon: 'factory',
-						description: 'Supplier management',
-					},
-					],
-					roles: [AccountRole.Admin],
+				{
+					id: 'providers',
+					label: 'Providers',
+					href: Routes.Providers.location,
+					icon: 'factory',
+					description: 'Supplier management',
 				},
+				],
+				// Note: Section visibility controlled by isAdmin check (line 80), not roles array
+			},
 				// Analytics and reporting
 				{
 					id: 'analytics',
 					title: 'Analytics',
 					routes: [
-					{
-						id: 'analytics-dashboard',
-						label: 'Analytics',
-						href: Routes.Analytics.location,
-						icon: 'bar-chart',
-						description: 'Reports, metrics, and insights',
-					},
-					],
-					roles: [AccountRole.Admin],
+				{
+					id: 'analytics-dashboard',
+					label: 'Analytics',
+					href: Routes.Analytics.location,
+					icon: 'bar-chart',
+					description: 'Reports, metrics, and insights',
 				},
+				],
+				// Note: Section visibility controlled by isAdmin check (line 80), not roles array
+			},
 				// RBAC/Access Control (Admin only)
 				{
 					id: 'rbac',
@@ -223,16 +230,16 @@ export class NavigationService {
 						icon: 'users',
 						description: 'View role capabilities',
 					},
-					{
-						id: 'rbac-permissions',
-						label: 'Permissions Matrix',
-						href: Routes.RBAC.permissions,
-						icon: 'settings',
-						description: 'Resource permissions by role',
-					},
-					],
-					roles: [AccountRole.Admin],
-				}
+				{
+					id: 'rbac-permissions',
+					label: 'Permissions Matrix',
+					href: Routes.RBAC.permissions,
+					icon: 'settings',
+					description: 'Resource permissions by role',
+				},
+				],
+				// Note: Section visibility controlled by isAdmin check (line 80), not roles array
+			}
 			)
 		}
 

@@ -49,7 +49,8 @@ export function useCustomerPermissions(): UseCustomerPermissionsReturn {
 	const currentUser = useAuthStore((state) => state.user)
 
 	return useMemo(() => {
-		const userRole = currentUser?.role ?? AccountRole.Customer
+		// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
+		const userRole = currentUser?.roleLevel ?? AccountRole.Customer
 
 		const isSalesRepOrAbove = userRole >= AccountRole.SalesRep
 		const isSalesManagerOrAbove = userRole >= AccountRole.SalesManager
@@ -65,7 +66,7 @@ export function useCustomerPermissions(): UseCustomerPermissionsReturn {
 			isSalesManagerOrAbove,
 			isAdmin,
 		}
-	}, [currentUser?.role])
+	}, [currentUser?.roleLevel])
 }
 
 export default useCustomerPermissions

@@ -136,8 +136,9 @@ export default function UpdateCustomerForm({
 	const isCreateMode = params?.id === 'create'
 	
 	// Get current user for RBAC
+	// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
 	const currentUser = useAuthStore((state) => state.user)
-	const userRole = currentUser?.role ?? AccountRole.Customer
+	const userRole = currentUser?.roleLevel ?? AccountRole.Customer
 	
 	// Determine if internal fields should be shown
 	// SalesRep+ can see internal fields, customers cannot

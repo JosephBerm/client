@@ -1,300 +1,288 @@
 'use client'
 
 /**
- * usePermissions Hook
- * 
- * React hook for permission-based access control in the frontend.
- * 
- * Features:
- * - Role level checks
- * - Permission checks (against user's role)
- * - Memoized for performance
- * - Type-safe with TypeScript
- * 
- * Architecture: Designed for portability and reusability.
- * 
- * @example
- * ```typescript
- * const { hasPermission, isAdmin, isSalesRepOrAbove } = usePermissions()
- * 
- * if (hasPermission(Resources.Quotes, Actions.Delete)) {
- *   // Show delete button
- * }
- * 
- * if (isAdmin) {
- *   // Show admin panel
- * }
- * ```
- * 
+ * usePermissions Hook - Database-Driven Version
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ARCHITECTURE: Next.js 16 + React Compiler Optimized
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * This hook fetches permissions from the backend API instead of hardcoding them.
+ * Uses useFetchWithCache for SWR-pattern caching (following codebase conventions).
+ *
+ * DRY COMPLIANCE:
+ * - BEFORE: ~80 lines of hardcoded if (roleLevel >= X) perms.add(...)
+ * - AFTER: Fetches from /rbac/my-permissions API
+ *
+ * CACHING:
+ * - Uses useFetchWithCache (existing codebase pattern)
+ * - 5 minute stale time
+ * - Background revalidation on focus
+ *
+ * Industry Reference: AWS IAM getEffectivePermissions pattern
+ * @see https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html
+ *
+ * @see useFetchWithCache - For caching implementation
+ * @see server/Controllers/RBACController.cs - GetMyPermissions endpoint
  * @module usePermissions
  */
 
 import { useMemo, useCallback } from 'react'
-import { useAuthStore } from '@_features/auth/stores/useAuthStore'
-import {
-	RoleLevels,
-	Resources,
-	Actions,
-	Contexts,
-	type Resource,
-	type Action,
-	type Context,
-	type Permission,
-	type RoleLevel,
-	getRoleDisplayName,
-	buildPermission,
-} from '@_types/rbac'
 
-// Re-export constants for convenience
-export { Resources, Actions, Contexts, RoleLevels }
+import { useAuthStore } from '@_features/auth/stores/useAuthStore'
+import { logger } from '@_core'
+import { API } from '@_shared'
+import { useFetchWithCache } from './useFetchWithCache'
+import {
+    Resources,
+    Actions,
+    Contexts,
+    type Resource,
+    type Action,
+    type Context,
+    type Permission,
+    buildPermission,
+} from '@_types/rbac'
+import { DEFAULT_ROLE_THRESHOLDS } from '@_shared/constants'
+
+// Re-export constants for convenience (backwards compatibility)
+export { Resources, Actions, Contexts }
+
+// Re-export RoleLevels for backward compatibility
+export { LEGACY_ROLE_LEVELS as RoleLevels } from '@_shared/constants'
 
 /**
- * Permission check result type
+ * Permission check parameters
  */
 interface PermissionCheck {
-	resource: Resource
-	action: Action
-	context?: Context
+    resource: Resource
+    action: Action
+    context?: Context
 }
 
 /**
  * usePermissions hook return type
  */
 export interface UsePermissionsReturn {
-	// User info
-	/** Current authenticated user or null if not logged in */
-	user: import('@_classes/User').IUser | null
-	roleLevel: RoleLevel | undefined
-	roleName: string
-	isAuthenticated: boolean
-	/** Loading state - false for synchronous store access */
-	isLoading: boolean
+    // User info
+    user: import('@_classes/User').IUser | null
+    roleLevel: number | undefined
+    roleName: string
+    isAuthenticated: boolean
+    isLoading: boolean
 
-	// Role checks (fast, in-memory)
-	isAdmin: boolean
-	isSalesManagerOrAbove: boolean
-	isSalesRepOrAbove: boolean
-	isFulfillmentCoordinatorOrAbove: boolean
-	isCustomer: boolean
+    // Role checks (use thresholds from API)
+    isAdmin: boolean
+    isSuperAdmin: boolean
+    isSalesManagerOrAbove: boolean
+    isSalesRepOrAbove: boolean
+    isFulfillmentCoordinatorOrAbove: boolean
+    isCustomer: boolean
 
-	// Permission checks
-	hasPermission: (resource: Resource, action: Action, context?: Context) => boolean
-	hasAnyPermission: (checks: PermissionCheck[]) => boolean
-	hasAllPermissions: (checks: PermissionCheck[]) => boolean
+    // Permission checks (database-driven)
+    hasPermission: (resource: Resource, action: Action, context?: Context) => boolean
+    hasAnyPermission: (checks: PermissionCheck[]) => boolean
+    hasAllPermissions: (checks: PermissionCheck[]) => boolean
 
-	// Role level checks
-	hasMinimumRole: (minimumRole: RoleLevel) => boolean
+    // Role level checks
+    hasMinimumRole: (minimumLevel: number) => boolean
 
-	// Utilities
-	permissions: Set<Permission>
+    // Utilities
+    permissions: Set<Permission>
+    refreshPermissions: () => Promise<void>
 }
 
 /**
  * Hook for checking user permissions and roles.
- * 
- * @returns Permission check utilities
+ *
+ * ARCHITECTURE: Permissions are fetched from API, not hardcoded.
+ * Role checks use thresholds from configuration.
+ *
+ * @example
+ * ```typescript
+ * const { hasPermission, isAdmin, isSalesRepOrAbove } = usePermissions()
+ *
+ * if (hasPermission(Resources.Quotes, Actions.Delete)) {
+ *   // Show delete button
+ * }
+ *
+ * if (isAdmin) {
+ *   // Show admin panel
+ * }
+ * ```
  */
 export function usePermissions(): UsePermissionsReturn {
-	const user = useAuthStore((state) => state.user)
+    const user = useAuthStore((state) => state.user)
 
-	// Get role level from user (backend sends role as number)
-	const roleLevel = useMemo(() => {
-		if (!user) return undefined
-		// Handle both numeric role and string role
-		const role = (user as any).role
-		if (typeof role === 'number') return role as RoleLevel
-		if (typeof role === 'string') {
-			// Parse string role name to level
-			const roleMap: Record<string, RoleLevel> = {
-				customer: RoleLevels.Customer,
-				salesrep: RoleLevels.SalesRep,
-				sales_rep: RoleLevels.SalesRep,
-				salesmanager: RoleLevels.SalesManager,
-				sales_manager: RoleLevels.SalesManager,
-				fulfillmentcoordinator: RoleLevels.FulfillmentCoordinator,
-				fulfillment_coordinator: RoleLevels.FulfillmentCoordinator,
-				admin: RoleLevels.Admin,
-			}
-			return roleMap[role.toLowerCase()] ?? RoleLevels.Customer
-		}
-		return RoleLevels.Customer
-	}, [user])
+    // Get role level from user (backend sends roleLevel as integer)
+    const roleLevel = useMemo(() => {
+        if (!user) return undefined
+        // Support both old 'role' and new 'roleLevel' field names
+        // Type assertion needed for transition period - user type will be updated
+        const userWithRole = user as { roleLevel?: number; role?: number }
+        const level = userWithRole.roleLevel ?? userWithRole.role
+        return typeof level === 'number' ? level : undefined
+    }, [user])
 
-	// Role display name
-	const roleName = useMemo(() => getRoleDisplayName(roleLevel), [roleLevel])
+    // Fetch thresholds from API
+    const { data: thresholdsData } = useFetchWithCache(
+        'rbac-thresholds',
+        () => API.RBAC.getThresholds(),
+        {
+            staleTime: 60 * 60 * 1000, // 1 hour - thresholds rarely change
+            revalidateOnFocus: false,
+            componentName: 'usePermissions',
+        }
+    )
 
-	// Role checks (memoized)
-	const isAdmin = useMemo(() => roleLevel !== undefined && roleLevel >= RoleLevels.Admin, [roleLevel])
-	const isSalesManagerOrAbove = useMemo(
-		() => roleLevel !== undefined && roleLevel >= RoleLevels.SalesManager,
-		[roleLevel]
-	)
-	const isSalesRepOrAbove = useMemo(
-		() => roleLevel !== undefined && roleLevel >= RoleLevels.SalesRep,
-		[roleLevel]
-	)
-	const isFulfillmentCoordinatorOrAbove = useMemo(
-		() => roleLevel !== undefined && roleLevel >= RoleLevels.FulfillmentCoordinator,
-		[roleLevel]
-	)
-	const isCustomer = useMemo(() => roleLevel === RoleLevels.Customer, [roleLevel])
+    // Default thresholds (fallback if API hasn't loaded yet)
+    // DRY: Uses centralized constants from @_shared/constants/rbac-defaults
+    const thresholds = thresholdsData ?? DEFAULT_ROLE_THRESHOLDS
 
-	// Build permissions set based on role level
-	const permissions = useMemo(() => {
-		const perms = new Set<Permission>()
+    // Fetch permissions from API
+    const {
+        data: permissionsData,
+        isLoading,
+        refetch,
+    } = useFetchWithCache(
+        user ? `rbac-permissions-${user.id}` : '',
+        () => API.RBAC.getMyPermissions(),
+        {
+            enabled: !!user,
+            staleTime: 5 * 60 * 1000, // 5 minutes
+            revalidateOnFocus: true,
+            componentName: 'usePermissions',
+            onError: (error) => {
+                logger.error('Failed to fetch permissions', {
+                    component: 'usePermissions',
+                    action: 'fetchPermissions',
+                    error: error.message,
+                })
+            },
+        }
+    )
 
-		if (roleLevel === undefined) return perms
+    // Get permissions array from API response
+    const apiPermissions = useMemo(
+        () => permissionsData?.permissions ?? [],
+        [permissionsData]
+    )
 
-		// Customer permissions (base level)
-		if (roleLevel >= RoleLevels.Customer) {
-			perms.add(buildPermission(Resources.Quotes, Actions.Read, Contexts.Own))
-			perms.add(buildPermission(Resources.Quotes, Actions.Create))
-			perms.add(buildPermission(Resources.Quotes, Actions.Update, Contexts.Own))
-			perms.add(buildPermission(Resources.Orders, Actions.Read, Contexts.Own))
-			perms.add(buildPermission(Resources.Orders, Actions.Update, Contexts.Own))
-			perms.add(buildPermission(Resources.Products, Actions.Read))
-			perms.add(buildPermission(Resources.Customers, Actions.Read, Contexts.Own))
-			perms.add(buildPermission(Resources.Customers, Actions.Update, Contexts.Own))
-			perms.add(buildPermission(Resources.Users, Actions.Read, Contexts.Own))
-			perms.add(buildPermission(Resources.Users, Actions.Update, Contexts.Own))
-			perms.add(buildPermission(Resources.Settings, Actions.Read))
-		}
+    // Build permissions set
+    const permissions = useMemo(() => {
+        const perms = new Set<Permission>()
+        apiPermissions.forEach((p) => perms.add(p as Permission))
+        return perms
+    }, [apiPermissions])
 
-		// SalesRep permissions
-		if (roleLevel >= RoleLevels.SalesRep) {
-			perms.add(buildPermission(Resources.Quotes, Actions.Read, Contexts.Assigned))
-			perms.add(buildPermission(Resources.Quotes, Actions.Update, Contexts.Assigned))
-			perms.add(buildPermission(Resources.Orders, Actions.Read, Contexts.Assigned))
-			perms.add(buildPermission(Resources.Orders, Actions.Create))
-			perms.add(buildPermission(Resources.Orders, Actions.Update, Contexts.Assigned))
-			perms.add(buildPermission(Resources.Orders, Actions.ConfirmPayment))
-			perms.add(buildPermission(Resources.Orders, Actions.UpdateTracking))
-			perms.add(buildPermission(Resources.Customers, Actions.Read, Contexts.Assigned))
-			perms.add(buildPermission(Resources.Customers, Actions.Create))
-			perms.add(buildPermission(Resources.Customers, Actions.Update, Contexts.Assigned))
-			perms.add(buildPermission(Resources.Vendors, Actions.Read))
-			perms.add(buildPermission(Resources.Analytics, Actions.Read, Contexts.Own))
-		}
+    // Role checks using thresholds
+    const isSuperAdmin = useMemo(
+        () => roleLevel !== undefined && roleLevel >= thresholds.superAdminThreshold,
+        [roleLevel, thresholds.superAdminThreshold]
+    )
 
-		// SalesManager permissions
-		if (roleLevel >= RoleLevels.SalesManager) {
-			perms.add(buildPermission(Resources.Quotes, Actions.Read, Contexts.Team))
-			perms.add(buildPermission(Resources.Quotes, Actions.Read, Contexts.All))
-			perms.add(buildPermission(Resources.Quotes, Actions.Update, Contexts.All))
-			perms.add(buildPermission(Resources.Quotes, Actions.Approve))
-			perms.add(buildPermission(Resources.Quotes, Actions.Assign))
-			perms.add(buildPermission(Resources.Orders, Actions.Read, Contexts.Team))
-			perms.add(buildPermission(Resources.Orders, Actions.Read, Contexts.All))
-			perms.add(buildPermission(Resources.Orders, Actions.Update, Contexts.All))
-			perms.add(buildPermission(Resources.Orders, Actions.Approve))
-			perms.add(buildPermission(Resources.Customers, Actions.Read, Contexts.Team))
-			perms.add(buildPermission(Resources.Customers, Actions.Read, Contexts.All))
-			perms.add(buildPermission(Resources.Customers, Actions.Update, Contexts.All))
-			perms.add(buildPermission(Resources.Analytics, Actions.Read, Contexts.Team))
-			perms.add(buildPermission(Resources.Analytics, Actions.Export))
-			perms.add(buildPermission(Resources.Users, Actions.Read, Contexts.Team))
-			perms.add(buildPermission(Resources.Users, Actions.Create))
-			perms.add(buildPermission(Resources.Users, Actions.Update, Contexts.Team))
-		}
+    const isAdmin = useMemo(
+        () => roleLevel !== undefined && roleLevel >= thresholds.adminThreshold,
+        [roleLevel, thresholds.adminThreshold]
+    )
 
-		// FulfillmentCoordinator permissions
-		if (roleLevel >= RoleLevels.FulfillmentCoordinator) {
-			perms.add(buildPermission(Resources.Orders, Actions.Read, Contexts.All))
-			perms.add(buildPermission(Resources.Orders, Actions.Update, Contexts.All))
-			perms.add(buildPermission(Resources.Vendors, Actions.Update))
-		}
+    // ALL role checks now use API thresholds (100% white-label ready)
+    const isSalesManagerOrAbove = useMemo(
+        () => roleLevel !== undefined && roleLevel >= thresholds.salesManagerThreshold,
+        [roleLevel, thresholds.salesManagerThreshold]
+    )
 
-		// Admin permissions (all)
-		if (roleLevel >= RoleLevels.Admin) {
-			perms.add(buildPermission(Resources.Quotes, Actions.Delete))
-			perms.add(buildPermission(Resources.Orders, Actions.Delete))
-			perms.add(buildPermission(Resources.Products, Actions.Create))
-			perms.add(buildPermission(Resources.Products, Actions.Update))
-			perms.add(buildPermission(Resources.Products, Actions.Delete))
-			perms.add(buildPermission(Resources.Customers, Actions.Delete))
-			perms.add(buildPermission(Resources.Vendors, Actions.Create))
-			perms.add(buildPermission(Resources.Vendors, Actions.Delete))
-			perms.add(buildPermission(Resources.Analytics, Actions.Read, Contexts.All))
-			perms.add(buildPermission(Resources.Users, Actions.Read, Contexts.All))
-			perms.add(buildPermission(Resources.Users, Actions.Update, Contexts.All))
-			perms.add(buildPermission(Resources.Users, Actions.Delete))
-			perms.add(buildPermission(Resources.Settings, Actions.Update))
-			perms.add(buildPermission(Resources.Settings, Actions.Manage))
-		}
+    const isSalesRepOrAbove = useMemo(
+        () => roleLevel !== undefined && roleLevel >= thresholds.salesRepThreshold,
+        [roleLevel, thresholds.salesRepThreshold]
+    )
 
-		return perms
-	}, [roleLevel])
+    const isFulfillmentCoordinatorOrAbove = useMemo(
+        () => roleLevel !== undefined && roleLevel >= thresholds.fulfillmentCoordinatorThreshold,
+        [roleLevel, thresholds.fulfillmentCoordinatorThreshold]
+    )
 
-	// Permission check function
-	const hasPermission = useCallback(
-		(resource: Resource, action: Action, context?: Context): boolean => {
-			if (!user) return false
+    const isCustomer = useMemo(
+        () => roleLevel === thresholds.customerLevel,
+        [roleLevel, thresholds.customerLevel]
+    )
 
-			// Admin bypasses all checks
-			if (isAdmin) return true
+    // Permission check function
+    const hasPermission = useCallback(
+        (resource: Resource, action: Action, context?: Context): boolean => {
+            if (!user) return false
 
-			// Check exact permission with context
-			if (context) {
-				const exactPermission = buildPermission(resource, action, context)
-				if (permissions.has(exactPermission)) return true
-			}
+            // Admin/SuperAdmin bypasses all checks
+            if (isAdmin || isSuperAdmin) return true
 
-			// Check permission without context (wildcard)
-			const wildcardPermission = buildPermission(resource, action)
-			if (permissions.has(wildcardPermission)) return true
+            // Check exact permission with context
+            if (context) {
+                const exactPerm = buildPermission(resource, action, context)
+                if (permissions.has(exactPerm)) return true
+            }
 
-			// Check "all" context permission
-			const allPermission = buildPermission(resource, action, Contexts.All)
-			if (permissions.has(allPermission)) return true
+            // Check permission without context (wildcard)
+            const wildcardPerm = buildPermission(resource, action)
+            if (permissions.has(wildcardPerm)) return true
 
-			return false
-		},
-		[user, isAdmin, permissions]
-	)
+            // Check "all" context permission
+            const allPerm = buildPermission(resource, action, Contexts.All)
+            if (permissions.has(allPerm)) return true
 
-	// Check if user has any of the specified permissions
-	const hasAnyPermission = useCallback(
-		(checks: PermissionCheck[]): boolean => {
-			return checks.some((check) => hasPermission(check.resource, check.action, check.context))
-		},
-		[hasPermission]
-	)
+            return false
+        },
+        [user, isAdmin, isSuperAdmin, permissions]
+    )
 
-	// Check if user has all of the specified permissions
-	const hasAllPermissions = useCallback(
-		(checks: PermissionCheck[]): boolean => {
-			return checks.every((check) => hasPermission(check.resource, check.action, check.context))
-		},
-		[hasPermission]
-	)
+    const hasAnyPermission = useCallback(
+        (checks: PermissionCheck[]): boolean => {
+            return checks.some((check) =>
+                hasPermission(check.resource, check.action, check.context)
+            )
+        },
+        [hasPermission]
+    )
 
-	// Check minimum role level
-	const hasMinimumRole = useCallback(
-		(minimumRole: RoleLevel): boolean => {
-			if (roleLevel === undefined) return false
-			return roleLevel >= minimumRole
-		},
-		[roleLevel]
-	)
+    const hasAllPermissions = useCallback(
+        (checks: PermissionCheck[]): boolean => {
+            return checks.every((check) =>
+                hasPermission(check.resource, check.action, check.context)
+            )
+        },
+        [hasPermission]
+    )
 
-	return {
-		user,
-		roleLevel,
-		roleName,
-		isAuthenticated: !!user,
-		isLoading: false, // Zustand store access is synchronous - no loading state
-		isAdmin,
-		isSalesManagerOrAbove,
-		isSalesRepOrAbove,
-		isFulfillmentCoordinatorOrAbove,
-		isCustomer,
-		hasPermission,
-		hasAnyPermission,
-		hasAllPermissions,
-		hasMinimumRole,
-		permissions,
-	}
+    const hasMinimumRole = useCallback(
+        (minimumLevel: number): boolean => {
+            if (roleLevel === undefined) return false
+            return roleLevel >= minimumLevel
+        },
+        [roleLevel]
+    )
+
+    const refreshPermissions = useCallback(async () => {
+        await refetch()
+    }, [refetch])
+
+    return {
+        user,
+        roleLevel,
+        roleName: permissionsData?.roleName ?? 'Unknown',
+        isAuthenticated: !!user,
+        isLoading,
+        isAdmin,
+        isSuperAdmin,
+        isSalesManagerOrAbove,
+        isSalesRepOrAbove,
+        isFulfillmentCoordinatorOrAbove,
+        isCustomer,
+        hasPermission,
+        hasAnyPermission,
+        hasAllPermissions,
+        hasMinimumRole,
+        permissions,
+        refreshPermissions,
+    }
 }
 
 export default usePermissions
-

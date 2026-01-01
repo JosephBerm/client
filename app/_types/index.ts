@@ -58,6 +58,11 @@ export {
 	Contexts,
 	buildPermission,
 	getRoleDisplayName,
+	hasMinimumRole,
+	isAdmin,
+	isSalesManagerOrAbove,
+	isSalesRepOrAbove,
+	isCustomer,
 } from './rbac'
 
 export type {

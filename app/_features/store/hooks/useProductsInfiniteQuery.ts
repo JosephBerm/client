@@ -197,18 +197,18 @@ export function useProductsInfiniteQuery(
 		/** Whether the query is enabled (default: true) */
 		enabled?: boolean
 		/** Initial data from server-side fetch */
-		initialData?: InfiniteData<ProductsPage>
+		initialData?: InfiniteData<ProductsPage, number>
 	}
 ) {
 	const { enabled = true, initialData } = options ?? {}
 	
-	return useInfiniteQuery({
+	return useInfiniteQuery<ProductsPage, Error, InfiniteData<ProductsPage, number>, ReturnType<typeof productQueryKeys.list>, number>({
 		// Structured query key for cache management
 		queryKey: productQueryKeys.list(filters),
 		
 		// Fetch function - called for each page
 		queryFn: async ({ pageParam }): Promise<ProductsPage> => {
-			const page = pageParam as number
+			const page = pageParam
 			const criteria = buildSearchCriteria(filters, page)
 			
 			const { data } = await API.Store.Products.searchPublic(criteria)
@@ -236,7 +236,7 @@ export function useProductsInfiniteQuery(
 		
 		// Determine next page parameter
 		// Returns undefined when no more pages (stops fetchNextPage)
-		getNextPageParam: (lastPage): number | undefined => {
+		getNextPageParam: (lastPage: ProductsPage): number | undefined => {
 			if (lastPage.result.hasNext) {
 				return lastPage.page + 1
 			}
@@ -250,7 +250,7 @@ export function useProductsInfiniteQuery(
 		enabled,
 		
 		// Keep previous data while refetching (prevents flicker)
-		placeholderData: (prev) => prev,
+		placeholderData: (prev: InfiniteData<ProductsPage, number> | undefined) => prev,
 	})
 }
 
@@ -270,7 +270,7 @@ export function flattenProductPages(
 	data: InfiniteData<ProductsPage> | undefined
 ): Product[] {
 	if (!data) return []
-	return data.pages.flatMap(page => page.products)
+	return data.pages.flatMap((page: ProductsPage) => page.products)
 }
 
 /**

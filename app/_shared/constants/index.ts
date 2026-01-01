@@ -7,8 +7,21 @@
  * @module shared/constants
  */
 
-// Role constants and helpers
+// RBAC Default Constants (Single Source of Truth for Role Levels)
 export {
+	// Core constants
+	DEFAULT_ROLE_THRESHOLDS,
+	LEGACY_ROLE_LEVELS,
+	DEFAULT_ROLE_METADATA,
+	// Display helpers
+	getRoleDisplayName,
+	getRoleBadgeVariant,
+	getRoleNameFromLevel,
+	// Types
+	type RoleThresholds,
+	type RoleMetadataEntry,
+	type RoleBadgeVariant,
+	// Legacy compatibility (deprecated)
 	ROLE_OPTIONS,
 	getRoleOption,
 	getRoleLabel,
@@ -20,5 +33,5 @@ export {
 	isStaffRole,
 	getRoleSelectOptions,
 	type RoleOption,
-} from './roles'
+} from './rbac-defaults'
 

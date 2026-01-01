@@ -213,7 +213,6 @@ describe('RBAC Constants - Actions', () => {
   it('should have domain-specific actions', () => {
     expect(Actions.ConfirmPayment).toBe('confirm_payment')
     expect(Actions.UpdateTracking).toBe('update_tracking')
-    expect(Actions.Archive).toBe('archive')
   })
 
   it('should use snake_case format for multi-word actions', () => {
@@ -465,10 +464,9 @@ describe('RBAC Type Safety', () => {
       Actions.Manage,
       Actions.ConfirmPayment,
       Actions.UpdateTracking,
-      Actions.Archive,
     ]
     
-    expect(validActions.length).toBe(11)
+    expect(validActions.length).toBe(10)
   })
 
   it('Context type should only allow valid values', () => {

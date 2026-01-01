@@ -124,7 +124,8 @@ export default function AnalyticsPage() {
 		isLoading: teamLoading,
 		error: teamError,
 	} = useTeamPerformance({
-		autoFetch: (user?.role ?? -1) >= AccountRole.SalesManager,
+		// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
+		autoFetch: (user?.roleLevel ?? -1) >= AccountRole.SalesManager,
 	})
 
 	// Revenue timeline (managers/admins only)
@@ -132,14 +133,16 @@ export default function AnalyticsPage() {
 		data: revenueData,
 		isLoading: revenueLoading,
 	} = useRevenueTimeline({
-		autoFetch: (user?.role ?? -1) >= AccountRole.SalesManager,
+		// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
+		autoFetch: (user?.roleLevel ?? -1) >= AccountRole.SalesManager,
 	})
 
 	// =========================================================================
 	// DERIVED STATE
 	// =========================================================================
 
-	const userRole = user?.role ?? AccountRole.Customer
+	// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
+	const userRole = user?.roleLevel ?? AccountRole.Customer
 
 	/**
 	 * Role flags for conditional rendering.

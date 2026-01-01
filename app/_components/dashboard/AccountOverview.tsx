@@ -186,7 +186,8 @@ export default function AccountOverview() {
 				<div className="flex flex-col gap-4 sm:gap-4 min-w-0">
 					<div className="flex flex-row items-center justify-between gap-3 min-w-0 flex-wrap">
 						<div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
-							<RoleBadge role={user.role ?? 0} />
+							{/* Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class) */}
+							<RoleBadge role={user.roleLevel ?? 1000} />
 							<span className="text-xs uppercase tracking-wide text-base-content/60 whitespace-nowrap">
 								Account {user.id ? `#${user.id}` : 'pending'}
 							</span>
