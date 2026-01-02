@@ -33,7 +33,7 @@ import {
 } from 'lucide-react'
 
 import type { PagedResult } from '@_classes/Base/PagedResult'
-import { AccountRole } from '@_classes/Enums'
+import { AccountRole, type AccountRoleType } from '@_classes/Enums'
 import Button from '@_components/ui/Button'
 import Modal from '@_components/ui/Modal'
 import { RoleDisplayNames } from '@_types/rbac'
@@ -48,7 +48,7 @@ interface BulkRoleModalProps {
 	onClose: () => void
 	users: PagedResult<UserWithRole> | null
 	isLoadingUsers: boolean
-	onBulkUpdate: (userIds: number[], newRole: AccountRole, reason?: string) => Promise<BulkRoleUpdateResult | null>
+	onBulkUpdate: (userIds: number[], newRole: AccountRoleType, reason?: string) => Promise<BulkRoleUpdateResult | null>
 	onLoadUsers: () => void
 }
 
@@ -77,7 +77,7 @@ export function BulkRoleModal({
 	onLoadUsers,
 }: BulkRoleModalProps) {
 	const [selectedUserIds, setSelectedUserIds] = useState<number[]>([])
-	const [newRole, setNewRole] = useState<AccountRole | null>(null)
+	const [newRole, setNewRole] = useState<AccountRoleType | null>(null)
 	const [reason, setReason] = useState('')
 	const [searchTerm, setSearchTerm] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)

@@ -20,7 +20,7 @@ import { Check } from 'lucide-react'
 
 import { ROLE_OPTIONS, getRolesByLevelDescending, type RoleOption } from '@_shared'
 
-import { AccountRole } from '@_classes/Enums'
+import { AccountRole, type AccountRoleType } from '@_classes/Enums'
 
 // ============================================================================
 // TYPES
@@ -30,9 +30,9 @@ export interface RoleSelectorProps {
 	/** Current role of the user (disabled in selector) */
 	currentRole: number
 	/** Currently selected role */
-	selectedRole: AccountRole | null
+	selectedRole: AccountRoleType | null
 	/** Callback when a role is selected */
-	onSelect: (role: AccountRole) => void
+	onSelect: (role: AccountRoleType) => void
 }
 
 // Re-export for backwards compatibility
@@ -67,11 +67,11 @@ export default function RoleSelector({
 						key={option.value}
 						role="button"
 						tabIndex={isCurrentRole ? -1 : 0}
-						onClick={() => !isCurrentRole && onSelect(option.value)}
+						onClick={() => !isCurrentRole && onSelect(option.value as AccountRoleType)}
 						onKeyDown={(e) => {
 							if (!isCurrentRole && (e.key === 'Enter' || e.key === ' ')) {
 								e.preventDefault()
-								onSelect(option.value)
+								onSelect(option.value as AccountRoleType)
 							}
 						}}
 						aria-disabled={isCurrentRole}

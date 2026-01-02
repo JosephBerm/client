@@ -46,6 +46,7 @@ export {
 	getAccountStatusLabel,
 	canAccountLogin,
 	getAccountStatusSeverity,
+	type AccountRoleType,
 } from './Enums'
 
 export { Theme } from './SharedEnums'

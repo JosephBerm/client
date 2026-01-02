@@ -140,6 +140,7 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 	columns,
 	fetcher,
 	getRowId,
+	filterKey,
 	// Feature flags
 	enableGlobalSearch = true,
 	enableColumnFilters = false,
@@ -176,6 +177,7 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 		columns: preparedColumns as RichColumnDef<TData, unknown>[],
 		fetcher,
 		getRowId,
+		filterKey,
 		enableGlobalSearch,
 		enableColumnFilters,
 		enableRowSelection,
@@ -231,13 +233,12 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 				)}
 
 				{/* Table Container - Mobile-first horizontal scroll */}
-				<div className="overflow-x-auto -webkit-overflow-scrolling-touch">
+				<div className="overflow-x-auto -webkit-overflow-scrolling-touch relative">
 					<table className="table w-full min-w-[320px]">
 						<RichDataGridHeader />
 
-						{/* Loading State */}
-						{(loadingState === LoadingState.Loading || loadingState === LoadingState.Idle) &&
-						!gridState.data.length ? (
+						{/* Loading State - Show skeleton during initial load or when idle with no data */}
+						{(loadingState === LoadingState.Loading || loadingState === LoadingState.Idle) ? (
 							loadingComponent ? (
 								<tbody>
 									<tr>
@@ -252,11 +253,12 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 								onRowClick={onRowClick}
 								onRowDoubleClick={onRowDoubleClick}
 								getRowClassName={getRowClassName}
+								emptyState={emptyState}
 							/>
 						)}
 					</table>
 
-					{/* Loading Overlay for Refreshing */}
+					{/* Loading Overlay for Refreshing - shows spinner over existing data */}
 					{loadingState === LoadingState.Refreshing && (
 						<div className="absolute inset-0 bg-base-100/50 dark:bg-base-100/70 backdrop-blur-sm flex items-center justify-center">
 							<span className="loading loading-spinner loading-lg text-primary" />

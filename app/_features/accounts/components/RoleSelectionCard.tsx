@@ -31,7 +31,7 @@ import {
 
 import { type RoleOption, roleRequiresConfirmation } from '@_shared'
 
-import { AccountRole } from '@_classes/Enums'
+import { AccountRole, type AccountRoleType } from '@_classes/Enums'
 
 // ============================================================================
 // ICON MAPPING
@@ -53,7 +53,7 @@ export interface RoleSelectionCardProps {
 	role: RoleOption
 	isSelected: boolean
 	isCurrentRole?: boolean
-	onSelect: (role: AccountRole) => void
+	onSelect: (role: AccountRoleType) => void
 	showPermissions?: boolean
 }
 
@@ -125,14 +125,14 @@ export default function RoleSelectionCard({
 
 	const handleClick = () => {
 		if (isCurrentRole) return
-		onSelect(role.value)
+		onSelect(role.value as AccountRoleType)
 	}
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (isCurrentRole) return
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault()
-			onSelect(role.value)
+			onSelect(role.value as AccountRoleType)
 		}
 	}
 

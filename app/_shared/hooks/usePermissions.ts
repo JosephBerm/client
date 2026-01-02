@@ -43,13 +43,16 @@ import {
     type Permission,
     buildPermission,
 } from '@_types/rbac'
-import { DEFAULT_ROLE_THRESHOLDS } from '@_shared/constants'
+import { DEFAULT_ROLE_THRESHOLDS, RBAC_QUERY_KEYS, RBAC_CACHE_CONFIG } from '@_shared/constants'
 
 // Re-export constants for convenience (backwards compatibility)
 export { Resources, Actions, Contexts }
 
-// Re-export RoleLevels for backward compatibility
-export { LEGACY_ROLE_LEVELS as RoleLevels } from '@_shared/constants'
+/**
+ * @deprecated Use usePermissions() hook for role checks instead.
+ * Re-exported for backward compatibility only.
+ */
+export { RoleLevels } from '@_types/rbac'
 
 /**
  * Permission check parameters
@@ -126,10 +129,10 @@ export function usePermissions(): UsePermissionsReturn {
 
     // Fetch thresholds from API
     const { data: thresholdsData } = useFetchWithCache(
-        'rbac-thresholds',
+        RBAC_QUERY_KEYS.thresholds,
         () => API.RBAC.getThresholds(),
         {
-            staleTime: 60 * 60 * 1000, // 1 hour - thresholds rarely change
+            staleTime: RBAC_CACHE_CONFIG.thresholdsStaleTime,
             revalidateOnFocus: false,
             componentName: 'usePermissions',
         }
@@ -145,11 +148,11 @@ export function usePermissions(): UsePermissionsReturn {
         isLoading,
         refetch,
     } = useFetchWithCache(
-        user ? `rbac-permissions-${user.id}` : '',
+        user?.id ? RBAC_QUERY_KEYS.permissions(user.id) : '',
         () => API.RBAC.getMyPermissions(),
         {
             enabled: !!user,
-            staleTime: 5 * 60 * 1000, // 5 minutes
+            staleTime: RBAC_CACHE_CONFIG.permissionsStaleTime,
             revalidateOnFocus: true,
             componentName: 'usePermissions',
             onError: (error) => {
@@ -163,12 +166,9 @@ export function usePermissions(): UsePermissionsReturn {
     )
 
     // Get permissions array from API response
-    const apiPermissions = useMemo(
-        () => permissionsData?.permissions ?? [],
-        [permissionsData]
-    )
+    const apiPermissions = permissionsData?.permissions ?? []
 
-    // Build permissions set
+    // Build permissions set (useMemo justified - creates new Set object)
     const permissions = useMemo(() => {
         const perms = new Set<Permission>()
         apiPermissions.forEach((p) => perms.add(p as Permission))
@@ -176,36 +176,16 @@ export function usePermissions(): UsePermissionsReturn {
     }, [apiPermissions])
 
     // Role checks using thresholds
-    const isSuperAdmin = useMemo(
-        () => roleLevel !== undefined && roleLevel >= thresholds.superAdminThreshold,
-        [roleLevel, thresholds.superAdminThreshold]
-    )
-
-    const isAdmin = useMemo(
-        () => roleLevel !== undefined && roleLevel >= thresholds.adminThreshold,
-        [roleLevel, thresholds.adminThreshold]
-    )
+    // NOTE: React 19 Compiler auto-memoizes simple boolean comparisons
+    // See: https://react.dev/reference/react/useMemo
+    const isSuperAdmin = roleLevel !== undefined && roleLevel >= thresholds.superAdminThreshold
+    const isAdmin = roleLevel !== undefined && roleLevel >= thresholds.adminThreshold
 
     // ALL role checks now use API thresholds (100% white-label ready)
-    const isSalesManagerOrAbove = useMemo(
-        () => roleLevel !== undefined && roleLevel >= thresholds.salesManagerThreshold,
-        [roleLevel, thresholds.salesManagerThreshold]
-    )
-
-    const isSalesRepOrAbove = useMemo(
-        () => roleLevel !== undefined && roleLevel >= thresholds.salesRepThreshold,
-        [roleLevel, thresholds.salesRepThreshold]
-    )
-
-    const isFulfillmentCoordinatorOrAbove = useMemo(
-        () => roleLevel !== undefined && roleLevel >= thresholds.fulfillmentCoordinatorThreshold,
-        [roleLevel, thresholds.fulfillmentCoordinatorThreshold]
-    )
-
-    const isCustomer = useMemo(
-        () => roleLevel === thresholds.customerLevel,
-        [roleLevel, thresholds.customerLevel]
-    )
+    const isSalesManagerOrAbove = roleLevel !== undefined && roleLevel >= thresholds.salesManagerThreshold
+    const isSalesRepOrAbove = roleLevel !== undefined && roleLevel >= thresholds.salesRepThreshold
+    const isFulfillmentCoordinatorOrAbove = roleLevel !== undefined && roleLevel >= thresholds.fulfillmentCoordinatorThreshold
+    const isCustomer = roleLevel === thresholds.customerLevel
 
     // Permission check function
     const hasPermission = useCallback(

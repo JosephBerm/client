@@ -28,7 +28,7 @@ import { useState, useCallback } from 'react'
 import { Building2, ExternalLink, Copy, Check, Mail, RefreshCw } from 'lucide-react'
 
 import type Company from '@_classes/Company'
-import { AccountRole, AccountStatus } from '@_classes/Enums'
+import { AccountRole, AccountStatus, type AccountRoleType } from '@_classes/Enums'
 import type User from '@_classes/User'
 
 import { getRoleSelectOptions } from '@_shared'
@@ -135,7 +135,7 @@ export interface AccountProfileTabProps {
 	/** Handler for account updates from form */
 	onAccountUpdate: (user: User) => void
 	/** Handler for role changes */
-	onRoleChange: (role: AccountRole) => Promise<void>
+	onRoleChange: (role: AccountRoleType) => Promise<void>
 	/** Handler for status changes */
 	onStatusChange: (status: AccountStatus, reason?: string) => Promise<void>
 	/** Handler for view customer navigation */
@@ -151,11 +151,11 @@ export interface AccountProfileTabProps {
 	/** Whether data is currently loading/refreshing */
 	isLoading?: boolean
 	/** Pending role change awaiting confirmation */
-	pendingRoleChange?: AccountRole | null
+	pendingRoleChange?: AccountRoleType | null
 	/** Pending status change awaiting confirmation */
 	pendingStatusChange?: AccountStatus | null
 	/** Set pending role change (triggers confirmation modal) */
-	onSetPendingRoleChange?: (role: AccountRole | null) => void
+	onSetPendingRoleChange?: (role: AccountRoleType | null) => void
 	/** Set pending status change (triggers confirmation modal) */
 	onSetPendingStatusChange?: (status: AccountStatus | null) => void
 	/** Confirm role change */
@@ -401,7 +401,7 @@ export default function AccountProfileTab({
 							<Select
 								value={account.role ?? AccountRole.Customer}
 								onChange={(e) => {
-									const newRole = Number(e.target.value) as AccountRole
+									const newRole = Number(e.target.value) as AccountRoleType
 									if (onSetPendingRoleChange && useConfirmation) {
 										onSetPendingRoleChange(newRole)
 									} else {

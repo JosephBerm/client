@@ -515,11 +515,11 @@ describe('useRBACManagement Hook - RBAC Management Tests', () => {
       const { result } = renderHook(() => useRBACManagement())
 
       await act(async () => {
-        await result.current.fetchUsers({ page: 1, pageSize: 20, roleFilter: 100 })
+        await result.current.fetchUsers({ page: 1, pageSize: 20, roleFilter: 1000 as any })
       })
 
       expect(API.RBAC.getUsersWithRoles).toHaveBeenCalledWith(
-        expect.objectContaining({ roleFilter: 100 })
+        expect.objectContaining({ roleFilter: 1000 })
       )
     })
 
@@ -580,12 +580,12 @@ describe('useRBACManagement Hook - RBAC Management Tests', () => {
       const { result } = renderHook(() => useRBACManagement())
 
       await act(async () => {
-        await result.current.bulkUpdateRoles([1, 2, 3], 200, 'Promotion to Sales Manager')
+        await result.current.bulkUpdateRoles([1, 2, 3], 4000 as any, 'Promotion to Sales Manager')
       })
 
       expect(API.RBAC.bulkUpdateRoles).toHaveBeenCalledWith({
         userIds: [1, 2, 3],
-        newRole: 200,
+        newRole: 4000,
         reason: 'Promotion to Sales Manager',
       })
     })
@@ -615,7 +615,7 @@ describe('useRBACManagement Hook - RBAC Management Tests', () => {
       const { result } = renderHook(() => useRBACManagement())
 
       await act(async () => {
-        await result.current.bulkUpdateRoles([1, 2], 200)
+        await result.current.bulkUpdateRoles([1, 2], 4000 as any)
       })
 
       expect(notificationService.success).toHaveBeenCalled()
@@ -638,7 +638,7 @@ describe('useRBACManagement Hook - RBAC Management Tests', () => {
 
       let updateResult: unknown
       await act(async () => {
-        updateResult = await result.current.bulkUpdateRoles([1, 2], 200)
+        updateResult = await result.current.bulkUpdateRoles([1, 2], 4000 as any)
       })
 
       expect(updateResult).toBeNull()
@@ -670,7 +670,7 @@ describe('useRBACManagement Hook - RBAC Management Tests', () => {
 
       let updateResult: unknown
       await act(async () => {
-        updateResult = await result.current.bulkUpdateRoles([1, 2, 3], 200)
+        updateResult = await result.current.bulkUpdateRoles([1, 2, 3], 4000 as any)
       })
 
       expect((updateResult as { updatedCount: number }).updatedCount).toBe(2)

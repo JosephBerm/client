@@ -1612,9 +1612,15 @@ const API = {
 			update: async (id: number, role: UpdateRoleRequest) => HttpService.put<Role>(`/rbac/roles/${id}`, role),
 			
 			/**
-			 * Deletes a role.
+			 * Deletes a role if no users are assigned.
+			 * If users are assigned, returns BlockedByUsers=true with user count.
+			 * Caller must migrate users via bulkUpdateRoles before retrying.
+			 *
+			 * AWS IAM Pattern: Returns structured result instead of throwing.
+			 *
+			 * @see https://docs.aws.amazon.com/IAM/latest/APIReference/API_DeleteRole.html
 			 */
-			delete: async (id: number) => HttpService.delete<boolean>(`/rbac/roles/${id}`),
+			delete: async (id: number) => HttpService.delete<RoleDeleteResult>(`/rbac/roles/${id}`),
 			
 			/**
 			 * Gets all permissions assigned to a role.
@@ -1768,5 +1774,23 @@ export interface UserPermissionsResponse {
 	roleLevel: number
 	roleName: string
 	permissions: string[]
+}
+
+/**
+ * Result of attempting to delete a role.
+ * Follows AWS IAM DeleteConflict pattern - if users are assigned,
+ * deletion is blocked and caller must migrate users first.
+ *
+ * @see https://docs.aws.amazon.com/IAM/latest/APIReference/API_DeleteRole.html
+ */
+export interface RoleDeleteResult {
+	/** True if role was successfully deleted */
+	deleted: boolean
+	/** True if deletion was blocked due to assigned users */
+	blockedByUsers: boolean
+	/** Number of users currently assigned to this role level */
+	assignedUserCount: number
+	/** Human-readable status message */
+	message?: string
 }
 

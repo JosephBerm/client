@@ -5,21 +5,21 @@
  * Ensures consistency across the RBAC management feature.
  *
  * ═══════════════════════════════════════════════════════════════════════════
- * ARCHITECTURE: Centralized Constants Pattern
+ * ARCHITECTURE: Database-Driven RBAC
  * ═══════════════════════════════════════════════════════════════════════════
  *
+ * Role levels are NOT hardcoded. All role data comes from the database.
+ * This file only contains UI configuration like cache keys, colors, etc.
+ *
  * Benefits:
- * - Single source of truth for RBAC values
- * - Easy to modify across all components
- * - Type-safe with TypeScript enums/constants
- * - Enables tree-shaking of unused exports
+ * - White-label deployments can customize roles without code changes
+ * - Role levels are fetched from API at runtime
+ * - UI styling is based on role name, not level
  *
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * @module RBAC Constants
  */
-
-import { RoleLevels, type RoleLevel } from '@_types/rbac'
 
 // =========================================================================
 // CACHE KEYS
@@ -69,47 +69,116 @@ export const PAGINATION = {
 } as const
 
 // =========================================================================
-// ROLE CONFIGURATION
+// ROLE HIERARCHY CONFIGURATION (by role name - white-label friendly)
 // =========================================================================
 
 /**
- * Role hierarchy configuration.
- * Higher level = more authority.
+ * Complete role configuration for UI components.
+ * Maps role NAME (from database) to UI properties.
+ *
+ * ARCHITECTURE: Single source of truth for role UI styling.
+ * All components should use getRoleConfig() to access these values.
+ *
+ * Properties:
+ * - abbreviation: Short label for compact views (headers, mobile)
+ * - label: Full display name (fallback if DB displayName not available)
+ * - description: Brief description of role's purpose
+ * - headerColor: Background color for matrix header badges
+ * - bgColor: Background color for cards/indicators (with border)
+ * - gradient: Gradient for icon backgrounds
+ * - badgeColor: Color for badge/pill components
  */
-export const ROLE_HIERARCHY: Record<RoleLevel, { label: string; description: string; color: string }> = {
-	[RoleLevels.Customer]: {
-		label: 'Customer',
-		description: 'Basic access to own data and orders',
-		color: 'bg-base-200 text-base-content',
+export interface RoleConfig {
+	abbreviation: string
+	label: string
+	description: string
+	headerColor: string
+	bgColor: string
+	gradient: string
+	badgeColor: string
+}
+
+export const ROLE_HIERARCHY: Record<string, RoleConfig> = {
+	super_admin: {
+		abbreviation: 'Super',
+		label: 'Super Administrator',
+		description: 'Highest authority with all system access',
+		headerColor: 'bg-amber-500',
+		bgColor: 'bg-amber-500/10 border-amber-500/30',
+		gradient: 'from-amber-500 to-orange-600',
+		badgeColor: 'bg-amber-100 text-amber-800',
 	},
-	[RoleLevels.SalesRep]: {
-		label: 'Sales Representative',
-		description: 'Manage assigned customers and quotes',
-		color: 'bg-blue-100 text-blue-800',
-	},
-	[RoleLevels.FulfillmentCoordinator]: {
-		label: 'Fulfillment Coordinator',
-		description: 'Manage orders and vendor coordination',
-		color: 'bg-amber-100 text-amber-800',
-	},
-	[RoleLevels.SalesManager]: {
-		label: 'Sales Manager',
-		description: 'Oversee team and view analytics',
-		color: 'bg-purple-100 text-purple-800',
-	},
-	[RoleLevels.Admin]: {
+	admin: {
+		abbreviation: 'Admin',
 		label: 'Administrator',
 		description: 'Full system access and configuration',
-		color: 'bg-rose-100 text-rose-800',
+		headerColor: 'bg-rose-500',
+		bgColor: 'bg-rose-500/10 border-rose-500/30',
+		gradient: 'from-rose-500 to-rose-600',
+		badgeColor: 'bg-rose-100 text-rose-800',
+	},
+	sales_manager: {
+		abbreviation: 'Mgr',
+		label: 'Sales Manager',
+		description: 'Oversee team and view analytics',
+		headerColor: 'bg-purple-500',
+		bgColor: 'bg-purple-500/10 border-purple-500/30',
+		gradient: 'from-purple-500 to-purple-600',
+		badgeColor: 'bg-purple-100 text-purple-800',
+	},
+	sales_rep: {
+		abbreviation: 'Rep',
+		label: 'Sales Representative',
+		description: 'Manage assigned customers and quotes',
+		headerColor: 'bg-blue-500',
+		bgColor: 'bg-blue-500/10 border-blue-500/30',
+		gradient: 'from-blue-500 to-blue-600',
+		badgeColor: 'bg-blue-100 text-blue-800',
+	},
+	fulfillment_coordinator: {
+		abbreviation: 'Fulfill',
+		label: 'Fulfillment Coordinator',
+		description: 'Manage orders and vendor coordination',
+		headerColor: 'bg-cyan-500',
+		bgColor: 'bg-cyan-500/10 border-cyan-500/30',
+		gradient: 'from-cyan-500 to-cyan-600',
+		badgeColor: 'bg-cyan-100 text-cyan-800',
+	},
+	customer: {
+		abbreviation: 'Cust',
+		label: 'Customer',
+		description: 'Basic access to own data and orders',
+		headerColor: 'bg-slate-500',
+		bgColor: 'bg-slate-500/10 border-slate-500/30',
+		gradient: 'from-slate-500 to-slate-600',
+		badgeColor: 'bg-base-200 text-base-content',
 	},
 }
 
-/**
- * Get role configuration by level.
- */
-export function getRoleConfig(level: RoleLevel) {
-	return ROLE_HIERARCHY[level] ?? ROLE_HIERARCHY[RoleLevels.Customer]
+const DEFAULT_ROLE_CONFIG: RoleConfig = {
+	abbreviation: 'Role',
+	label: 'Unknown Role',
+	description: 'Role not configured',
+	headerColor: 'bg-gray-500',
+	bgColor: 'bg-gray-500/10 border-gray-500/30',
+	gradient: 'from-gray-500 to-gray-600',
+	badgeColor: 'bg-gray-100 text-gray-800',
 }
+
+/**
+ * Get complete role configuration by name.
+ * Falls back to default if role name is not found.
+ *
+ * @param roleName - Role name from database (e.g., "sales_manager")
+ * @returns Complete role configuration for UI rendering
+ */
+export function getRoleConfig(roleName: string): RoleConfig {
+	return ROLE_HIERARCHY[roleName] ?? DEFAULT_ROLE_CONFIG
+}
+
+// Legacy exports for backwards compatibility
+export const ROLE_STYLES = ROLE_HIERARCHY
+export const getRoleStyle = getRoleConfig
 
 // =========================================================================
 // ANIMATION CONFIGURATION
@@ -196,20 +265,26 @@ export const ERROR_MESSAGES = {
 } as const
 
 // =========================================================================
-// ACCESS REQUIREMENTS
+// ACCESS REQUIREMENTS (use usePermissions hook for runtime checks)
 // =========================================================================
 
 /**
- * Minimum role requirements for RBAC features.
+ * Access requirements for RBAC features.
+ *
+ * NOTE: These are descriptive only. Actual access control is handled by:
+ * - usePermissions() hook for frontend checks
+ * - IRoleService for backend API authorization
+ *
+ * The values here match role NAMES (not levels) for documentation purposes.
  */
 export const ACCESS_REQUIREMENTS = {
-	/** View RBAC overview and matrix */
-	VIEW: RoleLevels.SalesManager,
-	/** Edit roles and permissions */
-	EDIT: RoleLevels.Admin,
-	/** View audit logs */
-	AUDIT_LOG: RoleLevels.Admin,
-	/** Bulk update roles */
-	BULK_UPDATE: RoleLevels.Admin,
+	/** View RBAC overview and matrix - requires Sales Manager or above */
+	VIEW: 'sales_manager',
+	/** Edit roles and permissions - requires Admin or above */
+	EDIT: 'admin',
+	/** View audit logs - requires Admin or above */
+	AUDIT_LOG: 'admin',
+	/** Bulk update roles - requires Admin or above */
+	BULK_UPDATE: 'admin',
 } as const
 

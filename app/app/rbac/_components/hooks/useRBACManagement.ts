@@ -42,7 +42,7 @@ import { useState } from 'react'
 
 import { logger } from '@_core'
 import type { PagedResult } from '@_classes/Base/PagedResult'
-import type { AccountRole } from '@_classes/Enums'
+import type { AccountRoleType } from '@_classes/Enums'
 import {
 	notificationService,
 	API,
@@ -98,7 +98,7 @@ export interface UseRBACManagementReturn {
 	refreshMatrix: () => Promise<void>
 	fetchAuditLog: (filters?: AuditLogFilters) => Promise<void>
 	fetchUsers: (filters?: UsersWithRolesFilters) => Promise<void>
-	bulkUpdateRoles: (userIds: number[], newRole: AccountRole, reason?: string) => Promise<BulkRoleUpdateResult | null>
+	bulkUpdateRoles: (userIds: number[], newRole: AccountRoleType, reason?: string) => Promise<BulkRoleUpdateResult | null>
 	invalidateAll: () => void
 
 	// Filters
@@ -291,7 +291,7 @@ export function useRBACManagement(): UseRBACManagementReturn {
 	 */
 	const bulkUpdateRoles = async (
 		userIds: number[],
-		newRole: AccountRole,
+		newRole: AccountRoleType,
 		reason?: string
 	): Promise<BulkRoleUpdateResult | null> => {
 		if (!canEdit) {

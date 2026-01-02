@@ -38,7 +38,7 @@ import { notificationService, useRouteParam, API } from '@_shared'
 
 import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import type Company from '@_classes/Company'
-import { AccountRole, AccountStatus, getAccountStatusLabel } from '@_classes/Enums'
+import { AccountRole, AccountStatus, getAccountStatusLabel, type AccountRoleType } from '@_classes/Enums'
 import Order from '@_classes/Order'
 import Quote from '@_classes/Quote'
 import type { IUser } from '@_classes/User'
@@ -119,12 +119,12 @@ export interface UseAccountDetailLogicReturn {
 	// Role Management
 	isRoleUpdating: boolean
 	canChangeRole: boolean
-	handleRoleChange: (newRole: AccountRole) => Promise<void>
+	handleRoleChange: (newRole: AccountRoleType) => Promise<void>
 	
 	// Confirmation State (for MAANG-level UX)
-	pendingRoleChange: AccountRole | null
+	pendingRoleChange: AccountRoleType | null
 	pendingStatusChange: AccountStatus | null
-	setPendingRoleChange: (role: AccountRole | null) => void
+	setPendingRoleChange: (role: AccountRoleType | null) => void
 	setPendingStatusChange: (status: AccountStatus | null) => void
 	confirmRoleChange: () => Promise<void>
 	confirmStatusChange: () => Promise<void>
@@ -211,7 +211,7 @@ export function useAccountDetailLogic(): UseAccountDetailLogicReturn {
 	const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false)
 	
 	// Confirmation state for destructive actions
-	const [pendingRoleChange, setPendingRoleChange] = useState<AccountRole | null>(null)
+	const [pendingRoleChange, setPendingRoleChange] = useState<AccountRoleType | null>(null)
 	const [pendingStatusChange, setPendingStatusChange] = useState<AccountStatus | null>(null)
 	
 	// Auth state (current logged-in user)
@@ -502,7 +502,7 @@ export function useAccountDetailLogic(): UseAccountDetailLogicReturn {
 	 * Handle role change for the account
 	 * Only available for admin users editing other accounts
 	 */
-	const handleRoleChange = useCallback(async (newRole: AccountRole) => {
+	const handleRoleChange = useCallback(async (newRole: AccountRoleType) => {
 		if (!account || !canChangeRole) {
 			notificationService.warning('You do not have permission to change this role')
 			return

@@ -18,7 +18,6 @@ import { Shield, Lock, Users, UserCog } from 'lucide-react'
 import Card from '@_components/ui/Card'
 
 import type { RBACOverview } from '@_types/rbac-management'
-import { RoleLevels } from '@_types/rbac'
 
 // =========================================================================
 // TYPES
@@ -85,15 +84,19 @@ function StatCard({ title, value, icon: Icon, gradient, delay }: StatCardProps) 
  * 1. Total roles defined in the system
  * 2. Total permissions configured
  * 3. Total user accounts
- * 4. Staff accounts (SalesRep + SalesManager + Admin)
+ * 4. Staff accounts (all non-customer roles, calculated dynamically)
  */
 export function RBACStatsCards({ overview }: RBACStatsCardsProps) {
-	// Calculate staff accounts (non-customer roles)
-	const staffAccountsCount =
-		(overview.userStats.countByRole[RoleLevels.SalesRep] || 0) +
-		(overview.userStats.countByRole[RoleLevels.SalesManager] || 0) +
-		(overview.userStats.countByRole[RoleLevels.FulfillmentCoordinator] || 0) +
-		(overview.userStats.countByRole[RoleLevels.Admin] || 0)
+	// Calculate staff accounts dynamically from roles data
+	// Staff = users with roles above the lowest role level (customer)
+	const lowestRoleLevel = overview.roles.length > 0
+		? Math.min(...overview.roles.map(r => r.level))
+		: 0
+
+	// Sum up all users in roles above the lowest level
+	const staffAccountsCount = Object.entries(overview.userStats.countByRole)
+		.filter(([level]) => Number(level) > lowestRoleLevel)
+		.reduce((sum, [, count]) => sum + count, 0)
 
 	// Stats configuration - defines what cards to show
 	const stats: Omit<StatCardProps, 'delay'>[] = [

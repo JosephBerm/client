@@ -26,7 +26,13 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { renderHook } from '@testing-library/react'
-import { AccountRole } from '@_classes/Enums'
+import { AccountRole, type AccountRoleType } from '@_classes/Enums'
+import { RoleLevelNames } from '@_types/rbac'
+
+/** Helper to get role name for test descriptions */
+function getRoleName(role: AccountRoleType): string {
+	return RoleLevelNames[role] ?? `Role ${role}`
+}
 
 // ============================================================================
 // MOCK SETUP
@@ -34,7 +40,7 @@ import { AccountRole } from '@_classes/Enums'
 
 // Mock user state
 const mockUser = vi.hoisted(() => ({
-	current: null as { id: number; role: AccountRole; customerId?: number } | null,
+	current: null as { id: number; role: AccountRoleType; customerId?: number } | null,
 }))
 
 vi.mock('@_features/auth', () => ({
@@ -89,11 +95,11 @@ vi.mock('next/navigation', () => ({
 
 interface TestUser {
 	id: number
-	role: AccountRole
+	role: AccountRoleType
 	customerId?: number
 }
 
-function loginAs(role: AccountRole, overrides: Partial<TestUser> = {}) {
+function loginAs(role: AccountRoleType, overrides: Partial<TestUser> = {}) {
 	mockUser.current = {
 		id: 1,
 		role,
@@ -544,7 +550,7 @@ describe('Customer RBAC Integration Tests', () => {
 				
 				expect(
 					result.current.canDelete,
-					`Role ${AccountRole[role]} should NOT have delete permission`
+					`Role ${getRoleName(role)} should NOT have delete permission`
 				).toBe(false)
 			}
 
@@ -567,7 +573,7 @@ describe('Customer RBAC Integration Tests', () => {
 				
 				expect(
 					result.current.canAssignSalesRep,
-					`Role ${AccountRole[role]} should NOT have assign permission`
+					`Role ${getRoleName(role)} should NOT have assign permission`
 				).toBe(false)
 			}
 

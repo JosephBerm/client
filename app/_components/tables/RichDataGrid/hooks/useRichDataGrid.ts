@@ -11,14 +11,15 @@
  *
  * Following TanStack Table official patterns and MAANG best practices.
  *
- * ## React Compiler Optimizations (Next.js 16+)
+ * ## React 19 / Next.js 16 Patterns
  *
- * This hook uses the `"use memo"` directive to enable React Compiler
- * automatic memoization. This eliminates the need for manual `useMemo`
- * and `useCallback` calls while maintaining optimal performance.
+ * This hook follows React 19 best practices:
+ * - Single useEffect with AbortController for data fetching (per React docs)
+ * - Proper cleanup to prevent race conditions in Strict Mode
+ * - React Compiler auto-memoization via `"use memo"` directive
  *
+ * @see https://react.dev/reference/react/useEffect#fetching-data-with-effects
  * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler
- * @see https://react.dev/learn/react-compiler
  *
  * @module useRichDataGrid
  */
@@ -26,7 +27,7 @@
 'use client'
 'use memo'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useReducer } from 'react'
 
 import {
 	useReactTable,
@@ -96,6 +97,16 @@ export interface UseRichDataGridOptions<TData> {
 	fetcher?: (filter: RichSearchFilter) => Promise<RichPagedResult<TData>>
 	/** Row ID accessor */
 	getRowId?: (row: TData) => string
+	/**
+	 * External filter key - changes to this value trigger a re-fetch.
+	 * Use this when your fetcher depends on external state (filters, toggles, etc.)
+	 * that the grid doesn't know about.
+	 *
+	 * @example
+	 * // Re-fetch when category or archived filter changes
+	 * filterKey={`${selectedCategoryId}-${showArchived}`}
+	 */
+	filterKey?: string
 }
 
 /**
@@ -151,14 +162,21 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 	searchDebounceMs = DEFAULT_SEARCH_DEBOUNCE_MS,
 	fetcher,
 	getRowId = (row) => String(row.id),
+	filterKey,
 }: UseRichDataGridOptions<TData>): UseRichDataGridReturn<TData> {
 	// Determine mode: server-side or client-side
 	const isServerSide = !!endpoint || !!fetcher
 
-	// Store fetcher in ref to avoid infinite re-fetch loops
-	// when fetcher function reference changes but endpoint doesn't
+	// Store fetcher in ref to maintain stable reference across renders
+	// This prevents infinite loops when fetcher prop changes reference but not behavior
 	const fetcherRef = useRef(fetcher)
 	fetcherRef.current = fetcher
+
+	// Track fetch sequence to ignore stale responses (belt-and-suspenders with AbortController)
+	const fetchIdRef = useRef(0)
+
+	// Refresh trigger - incrementing this forces a re-fetch
+	const [refreshTrigger, forceRefresh] = useReducer((x: number) => x + 1, 0)
 
 	// ========================================================================
 	// STATE MANAGEMENT
@@ -251,71 +269,126 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 	// ========================================================================
 
 	/**
-	 * Fetch data from server.
+	 * Single useEffect for data fetching with AbortController.
 	 *
-	 * Note: With React Compiler enabled, this function is automatically
-	 * memoized based on its captured dependencies. No manual useCallback needed.
+	 * This pattern follows React 19 official documentation for data fetching:
+	 * @see https://react.dev/reference/react/useEffect#fetching-data-with-effects
 	 *
-	 * The fetcherRef pattern is essential (not for memoization) to avoid
-	 * infinite loops when the fetcher prop changes reference but not behavior.
+	 * Key features:
+	 * - AbortController prevents race conditions when deps change rapidly
+	 * - fetchId prevents stale responses from overwriting fresh data
+	 * - Proper cleanup ensures Strict Mode double-execution works correctly
+	 * - Single effect (not dual) avoids timing race conditions
 	 */
-	const fetchServerData = async () => {
+	useEffect(() => {
 		if (!isServerSide) {
 			return
 		}
 
-		// Use functional update to avoid loadingState in dependencies
-		setLoadingState((prev) => prev === LoadingState.Idle ? LoadingState.Loading : LoadingState.Refreshing)
+		// Create AbortController for this fetch cycle
+		const abortController = new AbortController()
+		const currentFetchId = ++fetchIdRef.current
+
+		// DEBUG: Log fetch initiation
+		logger.debug('[RichDataGrid] Starting fetch', {
+			fetchId: currentFetchId,
+			filterKey,
+			page: pagination.pageIndex + 1,
+		})
+
+		// Set loading state
+		setLoadingState((prev) =>
+			prev === LoadingState.Idle ? LoadingState.Loading : LoadingState.Refreshing
+		)
 		setError(null)
 
-		try {
-			// Build filter object
-			const filter: RichSearchFilter = {
-				page: pagination.pageIndex + 1, // Convert 0-based to 1-based
-				pageSize: pagination.pageSize,
-				sorting: sorting.map((s) => ({
-					columnId: s.id as ColumnId,
-					direction: s.desc ? SortDirection.Descending : SortDirection.Ascending,
-				})),
-				globalSearch: debouncedGlobalFilter || undefined,
-				columnFilters: columnFilters.map((cf) => ({
-					columnId: cf.id,
-					filterType: FilterType.Text, // Default filter type
-					operator: TextFilterOperator.Contains,
-					value: cf.value,
-				})),
-			}
-
-			// Fetch data - use ref to avoid infinite loops from fetcher reference changes
-			const fetchFn: ServerFetcher<TData> = fetcherRef.current ?? (async (f) => {
-				if (!endpoint) {
-					throw new Error('Endpoint is required when no fetcher is provided')
+		const fetchData = async () => {
+			try {
+				// Build filter object
+				const filter: RichSearchFilter = {
+					page: pagination.pageIndex + 1, // Convert 0-based to 1-based
+					pageSize: pagination.pageSize,
+					sorting: sorting.map((s) => ({
+						columnId: s.id as ColumnId,
+						direction: s.desc ? SortDirection.Descending : SortDirection.Ascending,
+					})),
+					globalSearch: debouncedGlobalFilter || undefined,
+					columnFilters: columnFilters.map((cf) => ({
+						columnId: cf.id,
+						filterType: FilterType.Text, // Default filter type
+						operator: TextFilterOperator.Contains,
+						value: cf.value,
+					})),
 				}
-				return defaultFetcher(endpoint, f)
-			})
-			const result = await fetchFn(filter)
 
-			setServerData(result.data)
-			setTotalItems(result.total)
-			setPageCount(result.totalPages)
-			setFacets(result.facets)
-			setLoadingState(LoadingState.Success)
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error('Unknown error')
-			setError(error)
-			setLoadingState(LoadingState.Error)
-			logger.error('RichDataGrid fetch failed', { error, endpoint })
-		}
-	}
+				// Use custom fetcher or default endpoint fetcher
+				const fetchFn: ServerFetcher<TData> = fetcherRef.current ?? (async (f) => {
+					if (!endpoint) {
+						throw new Error('Endpoint is required when no fetcher is provided')
+					}
+					return defaultFetcher(endpoint, f)
+				})
 
-	// Fetch data on state changes (server-side only)
-	// Dependencies listed explicitly since fetchServerData is not wrapped in useCallback
-	// React Compiler will optimize this effect automatically
-	useEffect(() => {
-		if (isServerSide) {
-			void fetchServerData()
+				const result = await fetchFn(filter)
+
+				// DEBUG: Log fetch result
+				logger.debug('[RichDataGrid] Fetch completed', {
+					fetchId: currentFetchId,
+					currentRef: fetchIdRef.current,
+					aborted: abortController.signal.aborted,
+					dataLength: result.data?.length,
+					total: result.total,
+				})
+
+				// Guard: Only update state if this is still the current fetch
+				// This prevents stale responses from overwriting fresh data
+				if (abortController.signal.aborted || currentFetchId !== fetchIdRef.current) {
+					logger.debug('[RichDataGrid] Fetch result ignored (stale)', {
+						fetchId: currentFetchId,
+						currentRef: fetchIdRef.current,
+					})
+					return
+				}
+
+				// Update all state atomically (React 18+ batches these)
+				setServerData(result.data)
+				setTotalItems(result.total)
+				setPageCount(result.totalPages)
+				setFacets(result.facets)
+				setLoadingState(LoadingState.Success)
+
+				logger.debug('[RichDataGrid] State updated successfully', {
+					fetchId: currentFetchId,
+					dataLength: result.data?.length,
+					total: result.total,
+				})
+			} catch (err) {
+				// Ignore abort errors - these are expected during cleanup
+				if (err instanceof Error && err.name === 'AbortError') {
+					logger.debug('[RichDataGrid] Fetch aborted', { fetchId: currentFetchId })
+					return
+				}
+
+				// Ignore if this fetch was superseded
+				if (abortController.signal.aborted || currentFetchId !== fetchIdRef.current) {
+					return
+				}
+
+				const error = err instanceof Error ? err : new Error('Unknown error')
+				setError(error)
+				setLoadingState(LoadingState.Error)
+				logger.error('RichDataGrid fetch failed', { error, endpoint })
+			}
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- React Compiler handles memoization
+
+		void fetchData()
+
+		// Cleanup: abort in-flight request when deps change or component unmounts
+		// This is the React 19 recommended pattern for preventing race conditions
+		return () => {
+			logger.debug('[RichDataGrid] Cleanup - aborting fetch', { fetchId: currentFetchId })
+			abortController.abort()
+		}
 	}, [
 		isServerSide,
 		pagination.pageIndex,
@@ -324,6 +397,8 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 		debouncedGlobalFilter,
 		columnFilters,
 		endpoint,
+		filterKey, // External filter changes trigger re-fetch
+		refreshTrigger, // Allows manual refresh via forceRefresh()
 	])
 
 	// ========================================================================
@@ -425,7 +500,7 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 
 	const refresh = () => {
 		if (isServerSide) {
-			void fetchServerData()
+			forceRefresh()
 		}
 	}
 

@@ -44,27 +44,31 @@ import {
 // ============================================================================
 
 describe('RBAC Constants - RoleLevels', () => {
-  describe('Value Validation (per medsource_prd_system.md)', () => {
-    it('Customer should be 100 (lowest level)', () => {
-      expect(RoleLevels.Customer).toBe(100)
+  describe('Value Validation (per backend RBACConstants.cs)', () => {
+    it('Customer should be 1000 (lowest level)', () => {
+      expect(RoleLevels.Customer).toBe(1000)
     })
 
-    it('FulfillmentCoordinator should be 200 (below SalesRep per PRD)', () => {
+    it('FulfillmentCoordinator should be 2000 (below SalesRep per PRD)', () => {
       // PRD: Fulfillment CANNOT confirm payments or cancel orders
       // Therefore must be below SalesRep in hierarchy
-      expect(RoleLevels.FulfillmentCoordinator).toBe(200)
+      expect(RoleLevels.FulfillmentCoordinator).toBe(2000)
     })
 
-    it('SalesRep should be 300', () => {
-      expect(RoleLevels.SalesRep).toBe(300)
+    it('SalesRep should be 3000', () => {
+      expect(RoleLevels.SalesRep).toBe(3000)
     })
 
-    it('SalesManager should be 400', () => {
-      expect(RoleLevels.SalesManager).toBe(400)
+    it('SalesManager should be 4000', () => {
+      expect(RoleLevels.SalesManager).toBe(4000)
     })
 
-    it('Admin should be 500 (highest level)', () => {
-      expect(RoleLevels.Admin).toBe(500)
+    it('Admin should be 5000', () => {
+      expect(RoleLevels.Admin).toBe(5000)
+    })
+
+    it('SuperAdmin should be 9999 (highest level)', () => {
+      expect(RoleLevels.SuperAdmin).toBe(9999)
     })
   })
 
@@ -77,16 +81,17 @@ describe('RBAC Constants - RoleLevels', () => {
       expect(RoleLevels.SalesManager).toBeLessThan(RoleLevels.Admin)
     })
 
-    it('Admin should be higher than all other roles', () => {
-      // PRD hierarchy: Admin (500) is the highest role
-      const highestNonAdmin = Math.max(
+    it('SuperAdmin should be higher than all other roles', () => {
+      // PRD hierarchy: SuperAdmin (9999) is the highest role
+      const highestNonSuperAdmin = Math.max(
         RoleLevels.Customer,
         RoleLevels.SalesRep,
         RoleLevels.SalesManager,
-        RoleLevels.FulfillmentCoordinator
+        RoleLevels.FulfillmentCoordinator,
+        RoleLevels.Admin
       )
-      
-      expect(RoleLevels.Admin).toBeGreaterThan(highestNonAdmin)
+
+      expect(RoleLevels.SuperAdmin).toBeGreaterThan(highestNonSuperAdmin)
     })
   })
 
@@ -111,11 +116,13 @@ describe('RBAC Constants - RoleLevels', () => {
 
 describe('RBAC Constants - RoleNames', () => {
   it('should have correct string values', () => {
-    expect(RoleNames.Customer).toBe('customer')
-    expect(RoleNames.SalesRep).toBe('sales_rep')
-    expect(RoleNames.SalesManager).toBe('sales_manager')
-    expect(RoleNames.FulfillmentCoordinator).toBe('fulfillment_coordinator')
-    expect(RoleNames.Admin).toBe('admin')
+    // RoleNames is keyed by role level, not by name
+    expect(RoleNames[RoleLevels.Customer]).toBe('customer')
+    expect(RoleNames[RoleLevels.SalesRep]).toBe('sales_rep')
+    expect(RoleNames[RoleLevels.SalesManager]).toBe('sales_manager')
+    expect(RoleNames[RoleLevels.FulfillmentCoordinator]).toBe('fulfillment_coordinator')
+    expect(RoleNames[RoleLevels.Admin]).toBe('admin')
+    expect(RoleNames[RoleLevels.SuperAdmin]).toBe('super_admin')
   })
 
   it('should use snake_case format (API convention)', () => {
@@ -139,6 +146,7 @@ describe('RBAC Constants - RoleDisplayNames', () => {
     expect(RoleDisplayNames[RoleLevels.SalesManager]).toBe('Sales Manager')
     expect(RoleDisplayNames[RoleLevels.FulfillmentCoordinator]).toBe('Fulfillment Coordinator')
     expect(RoleDisplayNames[RoleLevels.Admin]).toBe('Administrator')
+    expect(RoleDisplayNames[RoleLevels.SuperAdmin]).toBe('Super Administrator')
   })
 
   it('should have human-readable format (Title Case)', () => {
@@ -268,8 +276,8 @@ describe('RBAC Helper Functions', () => {
     })
 
     it('should handle edge case of role level below minimum', () => {
-      // PRD: Customer is 100, so 0 should not meet minimum
-      expect(hasMinimumRole(0, RoleLevels.Customer)).toBe(false) // 0 < 100
+      // Customer is 1000, so 0 should not meet minimum
+      expect(hasMinimumRole(0, RoleLevels.Customer)).toBe(false) // 0 < 1000
     })
   })
 

@@ -18,7 +18,7 @@
 
 import { AlertTriangle } from 'lucide-react'
 
-import { AccountRole } from '@_classes/Enums'
+import { AccountRole, type AccountRoleType } from '@_classes/Enums'
 
 import { RoleBadge } from '@_components/common'
 import Button from '@_components/ui/Button'
@@ -45,13 +45,13 @@ export interface RoleChangeModalProps {
 	/** Account to change role for (null when closed) */
 	account: Account | null
 	/** Currently selected role */
-	selectedRole: AccountRole | null
+	selectedRole: AccountRoleType | null
 	/** Whether role update is in progress */
 	isLoading: boolean
 	/** Close the modal */
 	onClose: () => void
 	/** Update the selected role */
-	onSelectRole: (role: AccountRole | null) => void
+	onSelectRole: (role: AccountRoleType | null) => void
 	/** Confirm the role change */
 	onConfirm: () => void
 }
@@ -59,12 +59,12 @@ export interface RoleChangeModalProps {
 /**
  * Warning message based on role change type
  */
-function RoleChangeWarning({ 
-	account, 
-	selectedRole 
-}: { 
+function RoleChangeWarning({
+	account,
+	selectedRole
+}: {
 	account: Account
-	selectedRole: AccountRole 
+	selectedRole: AccountRoleType
 }) {
 	const isUpgrade = selectedRole > account.role
 	const isAdmin = selectedRole === AccountRole.Admin
@@ -144,7 +144,7 @@ export default function RoleChangeModal({
 		: 'Confirm Change'
 
 	// Get the role label for messages
-	const getRoleLabel = (role: AccountRole) => 
+	const getRoleLabel = (role: AccountRoleType) =>
 		ROLE_OPTIONS.find(r => r.value === role)?.label ?? 'Unknown'
 
 	if (!account) return null

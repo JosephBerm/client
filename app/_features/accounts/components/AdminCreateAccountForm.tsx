@@ -56,7 +56,7 @@ import {
 	type AdminCreateAccountResponse,
 } from '@_shared'
 
-import { AccountRole } from '@_classes/Enums'
+import { AccountRole, type AccountRoleType } from '@_classes/Enums'
 
 import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
@@ -123,7 +123,7 @@ export default function AdminCreateAccountForm({
 	const [username, setUsername] = useState('')
 	const [firstName, setFirstName] = useState('')
 	const [lastName, setLastName] = useState('')
-	const [selectedRole, setSelectedRole] = useState<AccountRole>(AccountRole.Customer)
+	const [selectedRole, setSelectedRole] = useState<AccountRoleType>(AccountRole.Customer)
 	const [temporaryPassword, setTemporaryPassword] = useState('')
 	const [showPassword, setShowPassword] = useState(false)
 	const [sendInvitation, setSendInvitation] = useState(true)
@@ -157,7 +157,7 @@ export default function AdminCreateAccountForm({
 	}, [isFormValid, isSubmitting, step])
 
 	// Handle role selection
-	const handleRoleSelect = useCallback((role: AccountRole) => {
+	const handleRoleSelect = useCallback((role: AccountRoleType) => {
 		setSelectedRole(role)
 		// Reset confirmation when role changes
 		setConfirmChecked(false)
@@ -303,7 +303,7 @@ export default function AdminCreateAccountForm({
 	// RENDER: SUCCESS STATE
 	// ========================================================================
 	if (step === 'success' && createdAccount) {
-		const roleOption = getRoleOption(createdAccount.account.role as AccountRole)
+		const roleOption = getRoleOption(createdAccount.account.role as AccountRoleType)
 		
 		return (
 			<Card className="border border-success/30 bg-success/5 p-6">

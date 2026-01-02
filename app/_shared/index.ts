@@ -254,8 +254,10 @@ export { usePermissions, Resources, Actions, Contexts, RoleLevels, type UsePermi
 export {
 	// Core constants
 	DEFAULT_ROLE_THRESHOLDS,
-	LEGACY_ROLE_LEVELS,
 	DEFAULT_ROLE_METADATA,
+	// Cache configuration (centralized keys and TTL values)
+	RBAC_QUERY_KEYS,
+	RBAC_CACHE_CONFIG,
 	// Display helpers
 	getRoleDisplayName,
 	getRoleBadgeVariant,

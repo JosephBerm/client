@@ -8,7 +8,7 @@
  * @module RBAC Management
  */
 
-import type { AccountRole } from '@_classes/Enums'
+import type { AccountRoleType } from '@_classes/Enums'
 
 // =========================================================================
 // ROLE DEFINITION (Enhanced for UI)
@@ -20,7 +20,7 @@ import type { AccountRole } from '@_classes/Enums'
  */
 export interface RoleDefinitionDto {
 	id: number
-	role: AccountRole
+	role: AccountRoleType
 	name: string
 	displayName: string
 	description: string
@@ -123,8 +123,8 @@ export interface PermissionAuditEntryDto {
 export interface BulkRoleUpdateRequest {
 	/** List of user IDs to update */
 	userIds: number[]
-	/** New role to assign (AccountRole enum value) */
-	newRole: AccountRole
+	/** New role to assign (AccountRole value) */
+	newRole: AccountRoleType
 	/** Optional reason for the change (for audit) */
 	reason?: string
 }
@@ -158,7 +158,7 @@ export interface UserWithRole {
 	username: string
 	email: string
 	fullName: string
-	role: AccountRole
+	role: AccountRoleType
 	roleDisplayName: string
 	lastLoginAt: string | null
 	isActive: boolean
@@ -186,7 +186,7 @@ export interface AuditLogFilters {
 export interface UsersWithRolesFilters {
 	page?: number
 	pageSize?: number
-	roleFilter?: AccountRole
+	roleFilter?: AccountRoleType
 	search?: string
 }
 

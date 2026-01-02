@@ -169,13 +169,30 @@ export default function InternalStorePage() {
 				}
 			}
 
+			// DEBUG: Log the API call
+			console.log('[Store Page] Fetcher called', {
+				page: filter.page,
+				showArchived,
+				canViewArchived,
+				selectedCategoryId,
+			})
+
 			const response = await API.Store.Products.richSearch(enhancedFilter)
+
+			// DEBUG: Log the response
+			console.log('[Store Page] API response', {
+				statusCode: response.data?.statusCode,
+				hasPayload: !!response.data?.payload,
+				dataLength: response.data?.payload?.data?.length,
+				total: response.data?.payload?.total,
+			})
 
 			if (response.data?.payload) {
 				return response.data.payload
 			}
 
 			// Return empty result on error
+			console.warn('[Store Page] No payload in response, returning empty result')
 			return {
 				data: [],
 				page: 1,
@@ -277,9 +294,9 @@ export default function InternalStorePage() {
 			<div className="card bg-base-100 shadow-xl">
 				<div className="card-body p-3 sm:p-6">
 					<RichDataGrid<Product>
-						key={`products-${refreshKey}-${showArchived}-${selectedCategoryId}`}
 						columns={columns}
 						fetcher={fetcher}
+						filterKey={`${refreshKey}-${showArchived}-${selectedCategoryId}`}
 						defaultPageSize={10}
 						defaultSorting={[{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending }]}
 						enableGlobalSearch

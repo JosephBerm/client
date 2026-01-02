@@ -42,8 +42,8 @@ import {
 	ROLE_OPTIONS,
 } from '@_shared'
 
-import type { AccountRole } from '@_classes/Enums'
-import { AccountStatus } from '@_classes/Enums'
+import type { AccountRoleType } from '@_classes/Enums'
+import { AccountRole, AccountStatus } from '@_classes/Enums'
 
 import { RoleBadge, AccountStatusBadge } from '@_components/common'
 import AccountActionsDropdown from '@_components/admin/AccountActionsDropdown'
@@ -72,7 +72,7 @@ type Account = AccountInfo
 interface RoleModalState {
 	isOpen: boolean
 	account: Account | null
-	selectedRole: AccountRole | null
+	selectedRole: AccountRoleType | null
 }
 
 // ============================================================================
@@ -231,10 +231,10 @@ export default function AccountsDataGrid() {
 	}
 
 	const openRoleModal = (account: Account) => {
-		setRoleModal({ 
-			isOpen: true, 
-			account, 
-			selectedRole: account.role as AccountRole 
+		setRoleModal({
+			isOpen: true,
+			account,
+			selectedRole: account.role as AccountRoleType
 		})
 	}
 
@@ -242,7 +242,7 @@ export default function AccountsDataGrid() {
 		setRoleModal({ isOpen: false, account: null, selectedRole: null })
 	}
 
-	const updateSelectedRole = (role: AccountRole | null) => {
+	const updateSelectedRole = (role: AccountRoleType | null) => {
 		setRoleModal(prev => ({ ...prev, selectedRole: role }))
 	}
 

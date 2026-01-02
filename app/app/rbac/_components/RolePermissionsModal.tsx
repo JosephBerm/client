@@ -68,6 +68,7 @@ export default function RolePermissionsModal({
 				permissions={permissions}
 				selectedPermissionIds={selectedPermissionIds}
 				onToggle={handleToggle}
+				initialPermissionIds={initialPermissionIds}
 			/>
 			<div className="pt-4 border-t border-base-300 mt-4">
 				<FormFooter

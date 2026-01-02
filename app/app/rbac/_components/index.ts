@@ -44,6 +44,7 @@ export { UserRolesDataGrid } from './UserRolesDataGrid'
 
 export { default as RoleCard } from './RoleCard'
 export { default as RoleFormModal } from './RoleFormModal'
+export { default as RoleDeleteModal } from './RoleDeleteModal'
 export { default as RolePermissionsModal } from './RolePermissionsModal'
 export { default as PermissionItem } from './PermissionItem'
 export { default as PermissionFormModal } from './PermissionFormModal'

@@ -2,10 +2,14 @@
 
 /**
  * RBAC Role Management Page
- * 
+ *
  * Full CRUD interface for managing roles and their permissions.
  * Uses extracted components and hooks for clean separation of concerns.
- * 
+ *
+ * Role Deletion: Uses RoleDeleteModal with AWS IAM pattern.
+ * If users are assigned, requires migration before delete.
+ *
+ * @see PLAN_ROLE_DELETE_WITH_MIGRATION.md
  * @module RBAC Role Management
  */
 
@@ -20,30 +24,29 @@ import Button from '@_components/ui/Button'
 import { InternalPageHeader } from '../../../_components'
 
 // RBAC Components (using barrel exports)
-import { AccessDenied, LoadingState, RoleCard, RoleFormModal, RolePermissionsModal } from '../../_components'
+import { AccessDenied, LoadingState, RoleCard, RoleFormModal, RoleDeleteModal, RolePermissionsModal } from '../../_components'
 
 // RBAC Hooks (using barrel exports)
 import { useRoles, usePermissionsData, useRolePermissions } from '../../_hooks'
 
-// RBAC Utils (using barrel exports)
-import { confirmDelete } from '../../_utils'
-
 export default function RBACRoleManagementPage() {
 	const { isAdmin } = usePermissions()
 	const [editingRole, setEditingRole] = useState<Role | null>(null)
+	const [deletingRole, setDeletingRole] = useState<Role | null>(null)
 	const [showCreateModal, setShowCreateModal] = useState(false)
+	const [showDeleteModal, setShowDeleteModal] = useState(false)
 	const [showPermissionsModal, setShowPermissionsModal] = useState(false)
 	const [selectedRolePermissions, setSelectedRolePermissions] = useState<number[]>([])
 
 	// Data hooks
-	const { roles, isLoading, isSaving, createRole, updateRole, deleteRole } = useRoles({
+	const { roles, isLoading, isSaving, createRole, updateRole, deleteRole, migrateUsers } = useRoles({
 		componentName: 'RBACRoleManagementPage',
 	})
 	const { permissions } = usePermissionsData({
 		componentName: 'RBACRoleManagementPage',
 		autoFetch: true,
 	})
-	const { isLoading: isLoadingPermissions, isSaving: isSavingPermissions, fetchRolePermissions, bulkAssignPermissions } = useRolePermissions({
+	const { isSaving: isSavingPermissions, fetchRolePermissions, bulkAssignPermissions } = useRolePermissions({
 		componentName: 'RBACRoleManagementPage',
 	})
 
@@ -67,10 +70,16 @@ export default function RBACRoleManagementPage() {
 		setEditingRole(null)
 	}
 
-	const handleDelete = async (role: Role) => {
-		const confirmed = await confirmDelete('role', role.displayName)
-		if (!confirmed) return
-		await deleteRole(role)
+	// Open delete modal instead of immediate delete
+	const handleDelete = (role: Role) => {
+		setDeletingRole(role)
+		setShowDeleteModal(true)
+	}
+
+	// Close delete modal
+	const handleCloseDeleteModal = () => {
+		setShowDeleteModal(false)
+		setDeletingRole(null)
 	}
 
 	const handleManagePermissions = async (role: Role) => {
@@ -106,9 +115,9 @@ export default function RBACRoleManagementPage() {
 								Back
 							</Button>
 						</Link>
-						<Button 
-							variant="primary" 
-							size="sm" 
+						<Button
+							variant="primary"
+							size="sm"
 							leftIcon={<Plus className="w-4 h-4" />}
 							onClick={handleCreate}
 						>
@@ -143,6 +152,15 @@ export default function RBACRoleManagementPage() {
 				onSave={handleSave}
 				role={editingRole}
 				isSaving={isSaving}
+			/>
+
+			<RoleDeleteModal
+				isOpen={showDeleteModal}
+				onClose={handleCloseDeleteModal}
+				role={deletingRole}
+				roles={roles}
+				onDelete={deleteRole}
+				onMigrateUsers={migrateUsers}
 			/>
 
 			<RolePermissionsModal

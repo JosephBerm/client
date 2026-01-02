@@ -70,7 +70,7 @@
  * @module RoleBadge
  */
 
-import { AccountRole } from '@_classes/Enums'
+import { AccountRole, type AccountRoleType } from '@_classes/Enums'
 
 import Badge from '@_components/ui/Badge'
 
@@ -88,7 +88,7 @@ interface RoleBadgeProps {
 	 * <RoleBadge role={user.role} />
 	 * ```
 	 */
-	role: AccountRole | number
+	role: AccountRoleType | number
 
 	/**
 	 * Additional CSS classes to apply to the badge.

@@ -126,29 +126,30 @@ export default class User {
 	/** Default shipping address (optional) */
 	public shippingDetails?: Address  // Added for user shipping information
 
-	/** 
+	/**
 	 * User role level (numeric)
 	 * WHITE-LABEL: Role levels are configurable via backend.
 	 * @see usePermissions() hook for role checks
 	 * @default null (Customer level assumed if null)
 	 */
 	public roleLevel: number | null = null
-	
+
 	/**
-	 * @deprecated Use roleLevel instead. Kept for backward compatibility.
-	 * Getter that returns roleLevel for legacy code using `user.role`
+	 * @deprecated Use roleLevel property instead.
+	 * Maintained for backward compatibility.
 	 */
 	public get role(): number | null {
 		return this.roleLevel
 	}
-	
+
 	/**
-	 * @deprecated Use roleLevel instead. Setter for backward compatibility.
+	 * @deprecated Use roleLevel property instead.
+	 * Maintained for backward compatibility.
 	 */
 	public set role(value: number | null) {
 		this.roleLevel = value
 	}
-	
+
 	/** Associated customer/company ID (foreign key) */
 	public customerId: number = -99
 	

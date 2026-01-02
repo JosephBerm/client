@@ -4,6 +4,15 @@
  * Visual representation of the role hierarchy.
  * Shows roles as connected nodes with level indicators.
  *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ARCHITECTURE: Database-Driven RBAC
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Icons and colors are mapped by role NAME (from database), not by level.
+ * This enables white-label customization without code changes.
+ *
+ * Uses shared ROLE_HIERARCHY config from _constants for DRY compliance.
+ *
  * @see prd_rbac_management.md - US-RBAC-001
  * @module app/rbac/_components/RoleHierarchyDiagram
  */
@@ -21,11 +30,12 @@ import {
 	ChevronDown,
 	ChevronUp,
 	Lock,
+	Key,
 } from 'lucide-react'
 
 import Card from '@_components/ui/Card'
-
 import type { RoleDefinitionDto } from '@_types/rbac-management'
+import { getRoleConfig } from '../_constants'
 
 // =========================================================================
 // TYPES
@@ -37,31 +47,26 @@ interface RoleHierarchyDiagramProps {
 }
 
 // =========================================================================
-// ROLE ICONS
+// ROLE ICONS (kept local as icons are component-specific)
 // =========================================================================
 
-const ROLE_ICONS: Record<number, typeof Shield> = {
-	0: Users, // Customer
-	100: UserCheck, // SalesRep
-	200: Shield, // SalesManager
-	300: Package, // FulfillmentCoordinator
-	9999999: Crown, // Admin
+/**
+ * Maps role names to Lucide icon components.
+ * Icons are specific to this component's visual representation.
+ */
+const ROLE_ICONS: Record<string, typeof Shield> = {
+	super_admin: Crown,
+	admin: Shield,
+	sales_manager: Key,
+	sales_rep: Users,
+	fulfillment_coordinator: Package,
+	customer: Lock,
 }
 
-const ROLE_COLORS: Record<number, string> = {
-	0: 'from-slate-500 to-slate-600',
-	100: 'from-blue-500 to-blue-600',
-	200: 'from-purple-500 to-purple-600',
-	300: 'from-amber-500 to-amber-600',
-	9999999: 'from-rose-500 to-rose-600',
-}
+const DEFAULT_ICON = UserCheck
 
-const ROLE_BG_COLORS: Record<number, string> = {
-	0: 'bg-slate-500/10 border-slate-500/30',
-	100: 'bg-blue-500/10 border-blue-500/30',
-	200: 'bg-purple-500/10 border-purple-500/30',
-	300: 'bg-amber-500/10 border-amber-500/30',
-	9999999: 'bg-rose-500/10 border-rose-500/30',
+function getRoleIcon(roleName: string): typeof Shield {
+	return ROLE_ICONS[roleName] ?? DEFAULT_ICON
 }
 
 // =========================================================================
@@ -89,9 +94,9 @@ export function RoleHierarchyDiagram({ roles, onRoleClick }: RoleHierarchyDiagra
 
 			<div className="space-y-4">
 				{sortedRoles.map((role, index) => {
-					const Icon = ROLE_ICONS[role.level] || Shield
-					const gradient = ROLE_COLORS[role.level] || 'from-gray-500 to-gray-600'
-					const bgColor = ROLE_BG_COLORS[role.level] || 'bg-gray-500/10 border-gray-500/30'
+					// Use role name for styling (database-driven via shared constants)
+					const Icon = getRoleIcon(role.name)
+					const roleConfig = getRoleConfig(role.name)
 					const isExpanded = expandedRole === role.id
 					const isLast = index === sortedRoles.length - 1
 
@@ -107,7 +112,7 @@ export function RoleHierarchyDiagram({ roles, onRoleClick }: RoleHierarchyDiagra
 								initial={{ opacity: 0, x: -20 }}
 								animate={{ opacity: 1, x: 0 }}
 								transition={{ delay: index * 0.1 }}
-								className={`relative rounded-xl border p-4 transition-all ${bgColor} ${
+								className={`relative rounded-xl border p-4 transition-all ${roleConfig.bgColor} ${
 									onRoleClick ? 'cursor-pointer hover:shadow-md' : ''
 								}`}
 								onClick={() => onRoleClick?.(role)}
@@ -117,7 +122,7 @@ export function RoleHierarchyDiagram({ roles, onRoleClick }: RoleHierarchyDiagra
 									<div className="flex items-start gap-4">
 										{/* Icon */}
 										<div
-											className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} shadow-lg`}
+											className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${roleConfig.gradient} shadow-lg`}
 										>
 											<Icon className="h-6 w-6 text-white" />
 										</div>
@@ -228,4 +233,3 @@ export function RoleHierarchyDiagram({ roles, onRoleClick }: RoleHierarchyDiagra
 }
 
 export default RoleHierarchyDiagram
-

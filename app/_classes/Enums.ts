@@ -144,45 +144,31 @@ export enum NotificationType {
 }
 
 /**
- * AccountRole - Legacy Compatibility Layer
- * 
- * @deprecated The AccountRole enum has been replaced with numeric role levels.
- * Use the usePermissions() hook instead.
- * 
- * DRY: Re-exports from centralized constants to avoid duplication.
- * 
- * Migration Guide:
- * - OLD: `if (user.role === AccountRole.Admin) { ... }`
- * - NEW: `const { isAdmin } = usePermissions(); if (isAdmin) { ... }`
+ * @deprecated Use usePermissions() hook for role-based checks instead.
+ * Migration:
+ * - OLD: if (user.role === AccountRole.Admin)
+ * - NEW: const { isAdmin } = usePermissions(); if (isAdmin)
+ *
+ * These are FALLBACK values - actual values come from API.
+ * Maintained for backward compatibility only.
+ *
+ * ⚠️  DRY EXCEPTION: Values duplicated for backward compatibility.
+ * SYNC REQUIRED: If values change, also update:
+ *   - @_types/rbac.ts (RoleLevels)
+ *   - @_shared/constants/rbac-defaults.ts (DEFAULT_ROLE_THRESHOLDS)
+ *   - server/appsettings.json (RBAC:Thresholds)
  */
-import { LEGACY_ROLE_LEVELS, getRoleNameFromLevel } from '@_shared/constants'
+export const AccountRole = {
+	Customer: 1000,
+	FulfillmentCoordinator: 2000,
+	SalesRep: 3000,
+	SalesManager: 4000,
+	Admin: 5000,
+	SuperAdmin: 9999,
+} as const
 
-// Type that supports both string keys and numeric keys
-type AccountRoleType = typeof LEGACY_ROLE_LEVELS & {
-	[key: number]: string | undefined
-	[key: string]: number | string | undefined
-}
-
-// Create a Proxy that supports both string keys (AccountRole.Admin) and numeric keys (AccountRole[5000])
-const AccountRoleProxy = new Proxy(LEGACY_ROLE_LEVELS, {
-	get(target, prop) {
-		// If prop is a number (as string), reverse lookup the role name
-		if (typeof prop === 'string' && /^\d+$/.test(prop)) {
-			const level = Number(prop)
-			return getRoleNameFromLevel(level) ?? `Role${level}`
-		}
-		// Otherwise, use normal property access
-		return Reflect.get(target, prop)
-	},
-}) as AccountRoleType
-
-export { AccountRoleProxy as AccountRole }
-
-/** @deprecated Use numeric role levels from usePermissions() hook */
-export type AccountRole = number
-
-/** @deprecated Use usePermissions() hook for role checks */
-export type RoleLevel = number
+/** @deprecated Use number type directly */
+export type AccountRoleType = (typeof AccountRole)[keyof typeof AccountRole]
 
 /**
  * AccountStatus Enum - UPDATED TO MATCH BACKEND (Phase 1)

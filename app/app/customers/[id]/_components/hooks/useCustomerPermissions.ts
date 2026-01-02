@@ -19,12 +19,12 @@ import { useMemo } from 'react'
 
 import { useAuthStore } from '@_features/auth'
 
-import { AccountRole } from '@_classes/Enums'
+import { AccountRole, type AccountRoleType } from '@_classes/Enums'
 
 /** Hook return type */
 interface UseCustomerPermissionsReturn {
 	/** Current user role */
-	userRole: AccountRole
+	userRole: AccountRoleType
 	/** Can assign/reassign sales rep to customer */
 	canAssignSalesRep: boolean
 	/** Can view internal fields (notes, status changes) */
@@ -50,7 +50,7 @@ export function useCustomerPermissions(): UseCustomerPermissionsReturn {
 
 	return useMemo(() => {
 		// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
-		const userRole = currentUser?.roleLevel ?? AccountRole.Customer
+		const userRole = (currentUser?.roleLevel ?? AccountRole.Customer) as AccountRoleType
 
 		const isSalesRepOrAbove = userRole >= AccountRole.SalesRep
 		const isSalesManagerOrAbove = userRole >= AccountRole.SalesManager

@@ -39,21 +39,46 @@ export const DEFAULT_ROLE_THRESHOLDS = {
 	superAdminThreshold: SUPER_ADMIN_LEVEL,
 } as const
 
-/**
- * Legacy AccountRole-style constants (backward compatibility).
- * @deprecated Use DEFAULT_ROLE_THRESHOLDS or usePermissions() hook instead.
- */
-export const LEGACY_ROLE_LEVELS = {
-	Customer: CUSTOMER_LEVEL,
-	FulfillmentCoordinator: FULFILLMENT_COORDINATOR_LEVEL,
-	SalesRep: SALES_REP_LEVEL,
-	SalesManager: SALES_MANAGER_LEVEL,
-	Admin: ADMIN_LEVEL,
-	SuperAdmin: SUPER_ADMIN_LEVEL,
-} as const
+// REMOVED: LEGACY_ROLE_LEVELS
+// Migration: Use DEFAULT_ROLE_THRESHOLDS or usePermissions() hook instead
 
 /** Type for role thresholds */
 export type RoleThresholds = typeof DEFAULT_ROLE_THRESHOLDS
+
+// ============================================================================
+// CACHE CONFIGURATION - Centralized cache keys and TTL values
+// ============================================================================
+
+/**
+ * RBAC Query Keys for React Query / TanStack Query
+ * Centralized to prevent magic string duplication
+ */
+export const RBAC_QUERY_KEYS = {
+	/** Role thresholds query key */
+	thresholds: 'rbac-thresholds',
+	/** User permissions query key factory */
+	permissions: (userId: number | string) => `rbac-permissions-${userId}`,
+	/** User role query key factory */
+	userRole: (userId: number | string) => `rbac-user-role-${userId}`,
+} as const
+
+/**
+ * RBAC Cache Configuration
+ * Centralized TTL values for consistent caching behavior
+ *
+ * @remarks
+ * - thresholdsStaleTime: Long TTL - role thresholds rarely change
+ * - permissionsStaleTime: Short TTL - permissions may change more frequently
+ * - userRoleStaleTime: Short TTL - user role may be updated by admin
+ */
+export const RBAC_CACHE_CONFIG = {
+	/** Role thresholds stale time: 1 hour (rarely change) */
+	thresholdsStaleTime: 60 * 60 * 1000, // 1 hour
+	/** User permissions stale time: 5 minutes (may change) */
+	permissionsStaleTime: 5 * 60 * 1000, // 5 minutes
+	/** User role stale time: 5 minutes (may be updated) */
+	userRoleStaleTime: 5 * 60 * 1000, // 5 minutes
+} as const
 
 /**
  * Default role metadata for UI display.
@@ -214,14 +239,6 @@ export function getRoleSelectOptions(): Array<{ value: number; label: string }> 
 	return ROLE_OPTIONS.map((r) => ({ value: r.value, label: r.label }))
 }
 
-/**
- * Reverse lookup: Get role name (key) from role level (value).
- * Used for backward compatibility with AccountRole[level] pattern.
- * 
- * @deprecated Use getRoleDisplayName() instead
- */
-export function getRoleNameFromLevel(level: number): string | undefined {
-	const entry = Object.entries(LEGACY_ROLE_LEVELS).find(([, value]) => value === level)
-	return entry?.[0]
-}
+// REMOVED: getRoleNameFromLevel() function
+// Migration: Use getRoleDisplayName() or DEFAULT_ROLE_METADATA[level]?.name instead
 

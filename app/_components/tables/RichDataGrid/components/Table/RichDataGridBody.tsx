@@ -24,6 +24,8 @@ export interface RichDataGridBodyProps<TData> {
 	onRowDoubleClick?: (row: TData) => void
 	/** Custom row class getter */
 	getRowClassName?: (row: TData) => string
+	/** Custom empty state component */
+	emptyState?: React.ReactNode
 	/** Additional CSS classes */
 	className?: string
 }
@@ -44,13 +46,14 @@ export function RichDataGridBody<TData>({
 	onRowClick,
 	onRowDoubleClick,
 	getRowClassName,
+	emptyState,
 	className = '',
 }: RichDataGridBodyProps<TData>) {
 	const { table, isLoading } = useRichDataGridContext<TData>()
 
 	const rows = table.getRowModel().rows
 
-	// Empty state
+	// Empty state - use custom emptyState if provided, otherwise show default
 	if (!isLoading && rows.length === 0) {
 		return (
 			<tbody className={className}>
@@ -59,10 +62,12 @@ export function RichDataGridBody<TData>({
 						colSpan={table.getVisibleLeafColumns().length}
 						className="px-4 py-8 sm:py-12 text-center text-base-content/60 dark:text-base-content/50"
 					>
-						<div className="flex flex-col items-center gap-2 sm:gap-3">
-							<FileText className="h-10 w-10 sm:h-12 sm:w-12 text-base-content/30 dark:text-base-content/20" strokeWidth={1} />
-							<p className="text-xs sm:text-sm">No data available</p>
-						</div>
+						{emptyState ?? (
+							<div className="flex flex-col items-center gap-2 sm:gap-3">
+								<FileText className="h-10 w-10 sm:h-12 sm:w-12 text-base-content/30 dark:text-base-content/20" strokeWidth={1} />
+								<p className="text-xs sm:text-sm">No data available</p>
+							</div>
+						)}
 					</td>
 				</tr>
 			</tbody>

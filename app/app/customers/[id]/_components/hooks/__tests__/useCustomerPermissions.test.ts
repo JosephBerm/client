@@ -26,7 +26,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useCustomerPermissions } from '../useCustomerPermissions'
-import { AccountRole } from '@_classes/Enums'
+import { AccountRole, type AccountRoleType } from '@_classes/Enums'
+import { RoleLevelNames } from '@_types/rbac'
 
 // ============================================================================
 // MOCK SETUP
@@ -34,11 +35,11 @@ import { AccountRole } from '@_classes/Enums'
 
 // Mock the auth store
 const mockUser = vi.hoisted(() => ({
-	current: null as { role: AccountRole } | null,
+	current: null as { role: AccountRoleType } | null,
 }))
 
 vi.mock('@_features/auth', () => ({
-	useAuthStore: vi.fn((selector: (state: any) => any) => 
+	useAuthStore: vi.fn((selector: (state: any) => any) =>
 		selector({ user: mockUser.current })
 	),
 }))
@@ -47,8 +48,13 @@ vi.mock('@_features/auth', () => ({
 // TEST HELPERS
 // ============================================================================
 
-function setUserRole(role: AccountRole) {
+function setUserRole(role: AccountRoleType) {
 	mockUser.current = { role }
+}
+
+/** Helper to get role name for test descriptions */
+function getRoleName(role: AccountRoleType): string {
+	return RoleLevelNames[role] ?? `Role ${role}`
 }
 
 function clearUser() {
@@ -526,7 +532,7 @@ describe('useCustomerPermissions Hook', () => {
 				
 				expect(
 					result.current.canDelete,
-					`Role ${AccountRole[role]} should NOT have delete permission`
+					`Role ${getRoleName(role)} should NOT have delete permission`
 				).toBe(false)
 			}
 
@@ -550,7 +556,7 @@ describe('useCustomerPermissions Hook', () => {
 				
 				expect(
 					result.current.canAssignSalesRep,
-					`Role ${AccountRole[role]} should NOT have assign permission`
+					`Role ${getRoleName(role)} should NOT have assign permission`
 				).toBe(false)
 			}
 
@@ -565,7 +571,7 @@ describe('useCustomerPermissions Hook', () => {
 				
 				expect(
 					result.current.canAssignSalesRep,
-					`Role ${AccountRole[role]} SHOULD have assign permission`
+					`Role ${getRoleName(role)} SHOULD have assign permission`
 				).toBe(true)
 			}
 		})
@@ -582,7 +588,7 @@ describe('useCustomerPermissions Hook', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
 				expect(
 					result.current.canViewInternalFields,
-					`Role ${AccountRole[role]} should NOT see internal fields`
+					`Role ${getRoleName(role)} should NOT see internal fields`
 				).toBe(false)
 			}
 
@@ -599,7 +605,7 @@ describe('useCustomerPermissions Hook', () => {
 				
 				expect(
 					result.current.canViewInternalFields,
-					`Role ${AccountRole[role]} SHOULD see internal fields`
+					`Role ${getRoleName(role)} SHOULD see internal fields`
 				).toBe(true)
 			}
 		})

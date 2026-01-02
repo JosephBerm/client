@@ -13,9 +13,77 @@
  */
 
 // =========================================================================
-// REMOVED: RoleLevels, RoleNames, RoleDisplayNames
-// These are now fetched from API. Use useRoles() or usePermissions() hooks.
+// BACKWARD COMPATIBILITY EXPORTS
+// These are deprecated but maintained to prevent breaking changes.
+// New code should use usePermissions() hook or DEFAULT_ROLE_THRESHOLDS.
+//
+// ⚠️  DRY EXCEPTION: Values duplicated here intentionally.
+// This file must remain import-free to avoid circular dependencies.
+// SYNC REQUIRED: If values change, also update:
+//   - @_shared/constants/rbac-defaults.ts (DEFAULT_ROLE_THRESHOLDS)
+//   - @_classes/Enums.ts (AccountRole)
+//   - server/appsettings.json (RBAC:Thresholds)
 // =========================================================================
+
+/**
+ * @deprecated Use `number` type directly. Role levels are dynamic integers.
+ * Migration: Replace `RoleLevel` with `number`
+ */
+export type RoleLevel = number
+
+/**
+ * @deprecated Use DEFAULT_ROLE_THRESHOLDS from '@_shared/constants' instead.
+ * Migration: import { DEFAULT_ROLE_THRESHOLDS } from '@_shared/constants'
+ *
+ * These are FALLBACK values - actual values come from API.
+ */
+export const RoleLevels = {
+	Customer: 1000,
+	FulfillmentCoordinator: 2000,
+	SalesRep: 3000,
+	SalesManager: 4000,
+	Admin: 5000,
+	SuperAdmin: 9999,
+} as const
+
+/**
+ * @deprecated Use getRoleDisplayName() from '@_shared/constants' instead.
+ * Migration: import { getRoleDisplayName } from '@_shared/constants'
+ */
+export const RoleDisplayNames: Record<number, string> = {
+	[RoleLevels.Customer]: 'Customer',
+	[RoleLevels.FulfillmentCoordinator]: 'Fulfillment Coordinator',
+	[RoleLevels.SalesRep]: 'Sales Representative',
+	[RoleLevels.SalesManager]: 'Sales Manager',
+	[RoleLevels.Admin]: 'Administrator',
+	[RoleLevels.SuperAdmin]: 'Super Administrator',
+}
+
+/**
+ * @deprecated Use DEFAULT_ROLE_METADATA[level].name from '@_shared/constants' instead.
+ */
+export const RoleNames: Record<number, string> = {
+	[RoleLevels.Customer]: 'customer',
+	[RoleLevels.FulfillmentCoordinator]: 'fulfillment_coordinator',
+	[RoleLevels.SalesRep]: 'sales_rep',
+	[RoleLevels.SalesManager]: 'sales_manager',
+	[RoleLevels.Admin]: 'admin',
+	[RoleLevels.SuperAdmin]: 'super_admin',
+}
+
+/**
+ * @deprecated For test backward compatibility only.
+ * Reverse lookup: gets role name key from role level value.
+ * Example: getRoleLevelName(1000) returns 'Customer'
+ */
+export const RoleLevelNames: Record<number, string> = {
+	[RoleLevels.Customer]: 'Customer',
+	[RoleLevels.FulfillmentCoordinator]: 'FulfillmentCoordinator',
+	[RoleLevels.SalesRep]: 'SalesRep',
+	[RoleLevels.SalesManager]: 'SalesManager',
+	[RoleLevels.Admin]: 'Admin',
+	[RoleLevels.SuperAdmin]: 'SuperAdmin',
+}
 
 /**
  * Role entity from database.
@@ -122,128 +190,63 @@ export function buildPermission(resource: Resource, action: Action, context?: Co
     return `${resource}:${action}` as Permission
 }
 
-// ============================================================================
-// BACKWARD COMPATIBILITY EXPORTS (Deprecated)
-// ============================================================================
+// =========================================================================
+// DEPRECATED HELPER FUNCTIONS
+// Maintained for backward compatibility. Use usePermissions() hook instead.
+// =========================================================================
 
 /**
- * @deprecated Use numeric role levels directly or usePermissions() hook.
- * Role levels are now fetched from API. This is a type alias for backward compatibility.
- */
-export type RoleLevel = number
-
-/**
- * @deprecated Use DEFAULT_ROLE_THRESHOLDS from @_shared/constants or fetch from API.
- * Re-exported from @_shared/constants for backward compatibility.
- */
-export { LEGACY_ROLE_LEVELS as RoleLevels } from '@_shared/constants'
-
-/**
- * @deprecated Use DEFAULT_ROLE_METADATA from @_shared/constants or fetch roles from API.
- * Re-exported from @_shared/constants for backward compatibility.
- */
-export { DEFAULT_ROLE_METADATA } from '@_shared/constants'
-
-/**
- * @deprecated Use getRoleDisplayName from @_shared/constants.
- * Re-exported for backward compatibility.
- */
-export { getRoleDisplayName } from '@_shared/constants'
-
-/**
- * @deprecated Role names are now fetched from API. Use useRoles() hook.
- * This is a backward compatibility export that maps to DEFAULT_ROLE_METADATA.
- */
-export const RoleNames = {
-    Customer: 'customer',
-    FulfillmentCoordinator: 'fulfillment_coordinator',
-    SalesRep: 'sales_rep',
-    SalesManager: 'sales_manager',
-    Admin: 'admin',
-    SuperAdmin: 'super_admin',
-} as const
-
-/**
- * @deprecated Role display names are now fetched from API. Use useRoles() hook.
- * This is a backward compatibility export that maps to DEFAULT_ROLE_METADATA.
- */
-import { getRoleDisplayName } from '@_shared/constants'
-import { LEGACY_ROLE_LEVELS } from '@_shared/constants'
-
-const RoleDisplayNamesBase = {
-    Customer: 'Customer',
-    FulfillmentCoordinator: 'Fulfillment Coordinator',
-    SalesRep: 'Sales Representative',
-    SalesManager: 'Sales Manager',
-    Admin: 'Administrator',
-    SuperAdmin: 'Super Administrator',
-} as const
-
-// Create a Proxy that supports both string keys (RoleDisplayNames.Customer) and numeric keys (RoleDisplayNames[1000])
-export const RoleDisplayNames = new Proxy(RoleDisplayNamesBase, {
-	get(target, prop) {
-		// If prop is a number (as string), use getRoleDisplayName helper
-		if (typeof prop === 'string' && /^\d+$/.test(prop)) {
-			const level = Number(prop)
-			return getRoleDisplayName(level)
-		}
-		// Otherwise, use normal property access
-		return Reflect.get(target, prop)
-	},
-}) as typeof RoleDisplayNamesBase & { [key: number]: string }
-
-/**
- * @deprecated Role names are now fetched from API. Use useRoles() hook.
+ * @deprecated Use `string` type directly. Role names are dynamic strings.
  */
 export type RoleName = string
 
-// ============================================================================
-// BACKWARD COMPATIBILITY HELPER FUNCTIONS (Deprecated)
-// ============================================================================
-
-import { DEFAULT_ROLE_THRESHOLDS } from '@_shared/constants'
-
 /**
- * @deprecated Use usePermissions() hook instead.
- * Check if a role level meets the minimum required level.
+ * @deprecated Use getRoleDisplayName() from '@_shared/constants' instead.
+ *
+ * ⚠️  DRY EXCEPTION: Duplicated to keep @_types import-free.
+ * Implementation MUST match @_shared/constants/rbac-defaults.ts
  */
-export function hasMinimumRole(userLevel: number | undefined, minimumLevel: number): boolean {
-	if (userLevel === undefined) return false
-	return userLevel >= minimumLevel
+export function getRoleDisplayName(roleLevel: number | undefined): string {
+    if (roleLevel === undefined) return 'Unknown'
+    return RoleDisplayNames[roleLevel] ?? `Role ${roleLevel}`
 }
 
 /**
- * @deprecated Use usePermissions() hook instead.
- * Check if a role level is Admin or higher.
+ * @deprecated Use usePermissions().hasMinimumRole() instead.
+ */
+export function hasMinimumRole(userRoleLevel: number | undefined, minimumLevel: number): boolean {
+    if (userRoleLevel === undefined) return false
+    return userRoleLevel >= minimumLevel
+}
+
+/**
+ * @deprecated Use usePermissions().isAdmin instead.
  */
 export function isAdmin(roleLevel: number | undefined): boolean {
-	if (roleLevel === undefined) return false
-	return roleLevel >= DEFAULT_ROLE_THRESHOLDS.adminThreshold
+    if (roleLevel === undefined) return false
+    return roleLevel >= RoleLevels.Admin
 }
 
 /**
- * @deprecated Use usePermissions() hook instead.
- * Check if a role level is SalesManager or higher.
+ * @deprecated Use usePermissions().isSalesManagerOrAbove instead.
  */
 export function isSalesManagerOrAbove(roleLevel: number | undefined): boolean {
-	if (roleLevel === undefined) return false
-	return roleLevel >= DEFAULT_ROLE_THRESHOLDS.salesManagerThreshold
+    if (roleLevel === undefined) return false
+    return roleLevel >= RoleLevels.SalesManager
 }
 
 /**
- * @deprecated Use usePermissions() hook instead.
- * Check if a role level is SalesRep or higher.
+ * @deprecated Use usePermissions().isSalesRepOrAbove instead.
  */
 export function isSalesRepOrAbove(roleLevel: number | undefined): boolean {
-	if (roleLevel === undefined) return false
-	return roleLevel >= DEFAULT_ROLE_THRESHOLDS.salesRepThreshold
+    if (roleLevel === undefined) return false
+    return roleLevel >= RoleLevels.SalesRep
 }
 
 /**
- * @deprecated Use usePermissions() hook instead.
- * Check if a role level is exactly Customer level.
+ * @deprecated Use usePermissions().isCustomer instead.
  */
 export function isCustomer(roleLevel: number | undefined): boolean {
-	if (roleLevel === undefined) return false
-	return roleLevel === DEFAULT_ROLE_THRESHOLDS.customerLevel
+    if (roleLevel === undefined) return false
+    return roleLevel === RoleLevels.Customer
 }

@@ -32,7 +32,7 @@
  * @module userHelpers
  */
 
-import { AccountRole } from '@_classes/Enums'
+import { AccountRole, type AccountRoleType } from '@_classes/Enums'
 import AccountRoleHelper from '@_classes/Helpers/AccountRoleHelper'
 
 import type User from '@_classes/User'
@@ -53,7 +53,7 @@ import type { SelectOption } from '@_components/ui/Select'
  * // Returns: SalesRep (100), SalesManager (200), FulfillmentCoordinator (300), Admin (9999999)
  * ```
  */
-export function filterUsersByRole(users: User[], minimumRole: AccountRole): User[] {
+export function filterUsersByRole(users: User[], minimumRole: AccountRoleType): User[] {
 	return users.filter((user) => {
 		const roleValue = user.role ?? 0
 		return roleValue >= minimumRole

@@ -2,251 +2,224 @@
 
 /**
  * RBAC Roles Page
- * 
+ *
  * Displays all system roles with their permissions and capabilities.
  * Admin-only page for understanding and managing role definitions.
- * 
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ARCHITECTURE: Database-Driven RBAC
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * All role data is fetched from the database via API.
+ * NO hardcoded role definitions - enables white-label customization.
+ *
  * @module RBAC Roles
  */
 
 import Link from 'next/link'
 
-import { 
-	Shield, 
-	Users, 
-	Key, 
-	Lock, 
+import {
+	Shield,
+	Users,
+	Key,
+	Lock,
 	UserCheck,
 	ChevronLeft,
 	Check,
 	X,
 	Info,
-	Edit
+	Edit,
+	Crown,
+	Package,
+	Loader2,
+	AlertCircle,
 } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
-import { usePermissions, RoleLevels } from '@_shared'
+import { usePermissions } from '@_shared'
 
 import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
 
-import type { RoleLevel } from '@_types/rbac'
-
 import { InternalPageHeader } from '../../_components'
+import { useRoles } from '../_hooks/useRoles'
+
+import type { Role } from '@_shared/services/api'
 
 // ============================================================================
-// TYPES
+// ICON & COLOR MAPPING (by role name, not level)
 // ============================================================================
 
-interface RoleDefinition {
-	level: RoleLevel
-	name: string
-	displayName: string
-	description: string
-	color: string
-	bgColor: string
-	textColor: string
-	icon: React.ReactNode
-	capabilities: string[]
-	restrictions: string[]
+/**
+ * Maps role names to Lucide icons.
+ * Uses role name (from database) for flexibility.
+ */
+const ROLE_ICON_MAP: Record<string, React.ReactNode> = {
+	super_admin: <Crown className="w-6 h-6" />,
+	admin: <Shield className="w-6 h-6" />,
+	sales_manager: <Key className="w-6 h-6" />,
+	sales_rep: <Users className="w-6 h-6" />,
+	fulfillment_coordinator: <Package className="w-6 h-6" />,
+	customer: <Lock className="w-6 h-6" />,
 }
 
-// ============================================================================
-// ROLE DEFINITIONS
-// ============================================================================
-
-const ROLE_DEFINITIONS: RoleDefinition[] = [
-	{
-		level: RoleLevels.Admin,
-		name: 'admin',
-		displayName: 'Administrator',
-		description: 'Full system access with unrestricted permissions across all resources and actions.',
-		color: 'border-error/30',
-		bgColor: 'bg-error/5',
-		textColor: 'text-error',
-		icon: <Shield className="w-6 h-6" />,
-		capabilities: [
-			'Full access to all resources',
-			'Delete quotes, orders, and users',
-			'Manage system settings',
-			'Create and modify products',
-			'Access all analytics',
-			'Manage vendors and providers',
-			'Assign roles to any user',
-		],
-		restrictions: [
-			'No restrictions - full system access',
-		],
-	},
-	{
-		level: RoleLevels.FulfillmentCoordinator,
-		name: 'fulfillment_coordinator',
-		displayName: 'Fulfillment Coordinator',
-		description: 'Specialized role for managing order fulfillment, shipping logistics, and vendor coordination.',
-		color: 'border-info/30',
-		bgColor: 'bg-info/5',
-		textColor: 'text-info',
-		icon: <UserCheck className="w-6 h-6" />,
-		capabilities: [
-			'View and update all orders',
-			'Confirm payments',
-			'Update tracking information',
-			'Read vendor information',
-			'Update vendor details',
-			'View products',
-		],
-		restrictions: [
-			'Cannot delete orders or quotes',
-			'Cannot manage user roles',
-			'No access to analytics',
-			'Cannot create vendors',
-			'Limited customer access',
-		],
-	},
-	{
-		level: RoleLevels.SalesManager,
-		name: 'sales_manager',
-		displayName: 'Sales Manager',
-		description: 'Oversees sales team operations with access to team data, approvals, and analytics.',
+/**
+ * Maps role names to color schemes.
+ * Fallback provided for custom roles.
+ */
+const ROLE_COLOR_MAP: Record<string, { color: string; bgColor: string; textColor: string }> = {
+	super_admin: {
 		color: 'border-warning/30',
 		bgColor: 'bg-warning/5',
 		textColor: 'text-warning',
-		icon: <Key className="w-6 h-6" />,
-		capabilities: [
-			'View all quotes and orders',
-			'Approve quotes',
-			'Assign quotes to team members',
-			'View team analytics',
-			'Export analytics data',
-			'Create user accounts',
-			'View and update team members',
-			'Access all customers',
-		],
-		restrictions: [
-			'Cannot delete quotes or orders',
-			'Cannot modify products',
-			'Cannot manage vendors',
-			'Limited to team user management',
-			'No system settings access',
-		],
 	},
-	{
-		level: RoleLevels.SalesRep,
-		name: 'sales_rep',
-		displayName: 'Sales Representative',
-		description: 'Handles assigned customer relationships, quotes, and orders.',
+	admin: {
+		color: 'border-error/30',
+		bgColor: 'bg-error/5',
+		textColor: 'text-error',
+	},
+	sales_manager: {
+		color: 'border-purple-500/30',
+		bgColor: 'bg-purple-500/5',
+		textColor: 'text-purple-500',
+	},
+	sales_rep: {
 		color: 'border-success/30',
 		bgColor: 'bg-success/5',
 		textColor: 'text-success',
-		icon: <Users className="w-6 h-6" />,
-		capabilities: [
-			'View own and assigned quotes',
-			'Update assigned quotes',
-			'View own and assigned orders',
-			'Create orders from quotes',
-			'Confirm payments',
-			'Update tracking info',
-			'Create and manage assigned customers',
-			'View own analytics',
-			'Read vendor information',
-		],
-		restrictions: [
-			'Cannot approve quotes',
-			'Cannot view team or all resources',
-			'No delete permissions',
-			'Cannot manage other users',
-			'No analytics export',
-		],
 	},
-	{
-		level: RoleLevels.Customer,
-		name: 'customer',
-		displayName: 'Customer',
-		description: 'Standard customer account with access to own resources and basic functionality.',
+	fulfillment_coordinator: {
+		color: 'border-info/30',
+		bgColor: 'bg-info/5',
+		textColor: 'text-info',
+	},
+	customer: {
 		color: 'border-base-300',
 		bgColor: 'bg-base-200',
 		textColor: 'text-base-content/70',
-		icon: <Lock className="w-6 h-6" />,
-		capabilities: [
-			'View own quotes and orders',
-			'Create quote requests',
-			'Update own profile',
-			'View products',
-			'Read system settings',
-		],
-		restrictions: [
-			'Cannot view other users\' resources',
-			'Cannot delete any resources',
-			'No admin access',
-			'Cannot view vendors',
-			'No analytics access',
-		],
 	},
-]
+}
+
+const DEFAULT_COLORS = {
+	color: 'border-base-300',
+	bgColor: 'bg-base-200',
+	textColor: 'text-base-content/70',
+}
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+function getRoleIcon(roleName: string): React.ReactNode {
+	return ROLE_ICON_MAP[roleName] ?? <UserCheck className="w-6 h-6" />
+}
+
+function getRoleColors(roleName: string) {
+	return ROLE_COLOR_MAP[roleName] ?? DEFAULT_COLORS
+}
 
 // ============================================================================
 // COMPONENTS
 // ============================================================================
 
-function RoleCard({ role }: { role: RoleDefinition }) {
+function RoleCard({ role }: { role: Role }) {
+	const colors = getRoleColors(role.name)
+	const icon = getRoleIcon(role.name)
+
 	return (
-		<Card className={`${role.color} ${role.bgColor}`}>
+		<Card className={`${colors.color} ${colors.bgColor}`}>
 			<div className="p-6">
 				{/* Header */}
 				<div className="flex items-start gap-4">
-					<div className={`p-3 rounded-xl ${role.bgColor} ${role.textColor} border ${role.color}`}>
-						{role.icon}
+					<div className={`p-3 rounded-xl ${colors.bgColor} ${colors.textColor} border ${colors.color}`}>
+						{icon}
 					</div>
 					<div className="flex-1">
 						<div className="flex items-center gap-3">
-							<h3 className={`text-lg font-semibold ${role.textColor}`}>
+							<h3 className={`text-lg font-semibold ${colors.textColor}`}>
 								{role.displayName}
 							</h3>
-							<span className={`px-2 py-0.5 rounded text-xs font-mono ${role.bgColor} ${role.textColor} border ${role.color}`}>
-								Level {role.level}
+							<span className={`px-2 py-0.5 rounded text-xs font-mono ${colors.bgColor} ${colors.textColor} border ${colors.color}`}>
+								Level {role.level.toLocaleString()}
 							</span>
+							{role.isSystemRole && (
+								<span className="px-2 py-0.5 rounded text-xs bg-base-content/10 text-base-content/60 flex items-center gap-1">
+									<Lock className="w-3 h-3" />
+									System
+								</span>
+							)}
 						</div>
 						<p className="mt-1 text-sm text-base-content/60">
-							{role.description}
+							{role.description || 'No description provided'}
 						</p>
 					</div>
 				</div>
 
-				{/* Capabilities & Restrictions */}
-				<div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-					{/* Capabilities */}
-					<div>
-						<h4 className="text-sm font-medium text-base-content/80 flex items-center gap-2 mb-3">
-							<Check className="w-4 h-4 text-success" />
-							Capabilities
-						</h4>
-						<ul className="space-y-2">
-							{role.capabilities.map((cap, i) => (
-								<li key={i} className="flex items-start gap-2 text-sm text-base-content/70">
-									<Check className="w-4 h-4 text-success shrink-0 mt-0.5" />
-									<span>{cap}</span>
-								</li>
-							))}
-						</ul>
-					</div>
-
-					{/* Restrictions */}
-					<div>
-						<h4 className="text-sm font-medium text-base-content/80 flex items-center gap-2 mb-3">
-							<X className="w-4 h-4 text-error" />
-							Restrictions
-						</h4>
-						<ul className="space-y-2">
-							{role.restrictions.map((res, i) => (
-								<li key={i} className="flex items-start gap-2 text-sm text-base-content/70">
-									<X className="w-4 h-4 text-error shrink-0 mt-0.5" />
-									<span>{res}</span>
-								</li>
-							))}
-						</ul>
+				{/* Role Metadata */}
+				<div className="mt-4 pt-4 border-t border-base-content/10">
+					<div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+						<div>
+							<span className="text-base-content/50 text-xs uppercase tracking-wider">Name</span>
+							<p className="font-mono text-base-content/70">{role.name}</p>
+						</div>
+						<div>
+							<span className="text-base-content/50 text-xs uppercase tracking-wider">Level</span>
+							<p className="font-mono text-base-content/70">{role.level.toLocaleString()}</p>
+						</div>
+						<div>
+							<span className="text-base-content/50 text-xs uppercase tracking-wider">Created</span>
+							<p className="text-base-content/70">
+								{new Date(role.createdAt).toLocaleDateString()}
+							</p>
+						</div>
+						<div>
+							<span className="text-base-content/50 text-xs uppercase tracking-wider">Updated</span>
+							<p className="text-base-content/70">
+								{new Date(role.updatedAt).toLocaleDateString()}
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
+		</Card>
+	)
+}
+
+function LoadingState() {
+	return (
+		<div className="flex flex-col items-center justify-center py-12">
+			<Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+			<p className="text-base-content/60">Loading roles from database...</p>
+		</div>
+	)
+}
+
+function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+	return (
+		<Card className="border-error/30 bg-error/5 p-8 text-center">
+			<AlertCircle className="w-12 h-12 text-error mx-auto mb-4" />
+			<h3 className="text-lg font-semibold text-error">Failed to Load Roles</h3>
+			<p className="mt-2 text-base-content/70">{message}</p>
+			<Button
+				variant="outline"
+				size="sm"
+				onClick={onRetry}
+				className="mt-4"
+			>
+				Try Again
+			</Button>
+		</Card>
+	)
+}
+
+function EmptyState() {
+	return (
+		<Card className="border-warning/30 bg-warning/5 p-8 text-center">
+			<Info className="w-12 h-12 text-warning mx-auto mb-4" />
+			<h3 className="text-lg font-semibold text-warning">No Roles Found</h3>
+			<p className="mt-2 text-base-content/70">
+				The RBAC system has no roles configured. Please run the RBAC reset to seed default roles.
+			</p>
 		</Card>
 	)
 }
@@ -257,6 +230,10 @@ function RoleCard({ role }: { role: RoleDefinition }) {
 
 export default function RBACRolesPage() {
 	const { isAdmin } = usePermissions()
+	const { roles, isLoading, fetchRoles } = useRoles({ autoFetch: true })
+
+	// Sort roles by level (highest first)
+	const sortedRoles = [...(roles ?? [])].sort((a, b) => b.level - a.level)
 
 	if (!isAdmin) {
 		return (
@@ -280,7 +257,7 @@ export default function RBACRolesPage() {
 		<>
 			<InternalPageHeader
 				title="Role Definitions"
-				description="System roles, capabilities, and access restrictions"
+				description="System roles fetched from database"
 				actions={
 					<Link href={Routes.RBAC.location}>
 						<Button variant="ghost" size="sm" leftIcon={<ChevronLeft className="w-4 h-4" />}>
@@ -295,22 +272,28 @@ export default function RBACRolesPage() {
 				<div className="p-4 flex items-start gap-3">
 					<Info className="w-5 h-5 text-info shrink-0 mt-0.5" />
 					<div>
-						<h4 className="font-medium text-info">Hierarchical Role System</h4>
+						<h4 className="font-medium text-info">Database-Driven Role System</h4>
 						<p className="mt-1 text-sm text-base-content/70">
-							Roles in MedSource Pro follow a hierarchical structure where higher-level roles 
-							automatically inherit all permissions from lower levels. The Administrator role 
-							has full system access, while Customer has the most restricted access.
+							All roles are fetched from the database and can be customized for white-label deployments.
+							Higher-level roles inherit permissions from lower levels. Use the Manage Roles page to
+							create, edit, or delete roles.
 						</p>
 					</div>
 				</div>
 			</Card>
 
-			{/* Role Cards */}
-			<div className="space-y-6">
-				{ROLE_DEFINITIONS.map((role) => (
-					<RoleCard key={role.level} role={role} />
-				))}
-			</div>
+			{/* Content */}
+			{isLoading ? (
+				<LoadingState />
+			) : !roles || roles.length === 0 ? (
+				<EmptyState />
+			) : (
+				<div className="space-y-6">
+					{sortedRoles.map((role) => (
+						<RoleCard key={role.id} role={role} />
+					))}
+				</div>
+			)}
 
 			{/* Quick Links */}
 			<div className="mt-8 flex flex-wrap gap-4">
@@ -333,4 +316,3 @@ export default function RBACRolesPage() {
 		</>
 	)
 }
-
