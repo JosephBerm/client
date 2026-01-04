@@ -714,6 +714,8 @@ export class AnalyticsSummaryBuilder {
 		totalRevenue: 500000,
 		revenueGrowthPercent: 15.5,
 		totalOrders: 250,
+		completedOrders: 200,
+		pendingOrders: 50,
 		orderGrowthPercent: 12.3,
 		totalQuotes: 400,
 		overallConversionRate: 62.5,
@@ -741,6 +743,16 @@ export class AnalyticsSummaryBuilder {
 
 	withTotalOrders(count: number): this {
 		this.data.totalOrders = count
+		return this
+	}
+
+	withCompletedOrders(count: number): this {
+		this.data.completedOrders = count
+		return this
+	}
+
+	withPendingOrders(count: number): this {
+		this.data.pendingOrders = count
 		return this
 	}
 
@@ -858,6 +870,8 @@ export class AnalyticsSummaryBuilder {
 			totalRevenue: 0, // Not visible to customer
 			revenueGrowthPercent: 0,
 			totalOrders: 0,
+			completedOrders: 12,
+			pendingOrders: 3,
 			orderGrowthPercent: 0,
 			totalQuotes: 0,
 			overallConversionRate: 0,
@@ -885,6 +899,8 @@ export class AnalyticsSummaryBuilder {
 			totalRevenue: 150000,
 			revenueGrowthPercent: 8.5,
 			totalOrders: 75,
+			completedOrders: 60,
+			pendingOrders: 15,
 			orderGrowthPercent: 10.2,
 			totalQuotes: 120,
 			overallConversionRate: 0, // Use personalConversionRate instead
@@ -914,6 +930,8 @@ export class AnalyticsSummaryBuilder {
 			totalRevenue: 750000,
 			revenueGrowthPercent: 12.3,
 			totalOrders: 400,
+			completedOrders: 320,
+			pendingOrders: 80,
 			orderGrowthPercent: 8.5,
 			totalQuotes: 650,
 			overallConversionRate: 61.5,
@@ -939,6 +957,8 @@ export class AnalyticsSummaryBuilder {
 			totalRevenue: 1500000,
 			revenueGrowthPercent: 15.8,
 			totalOrders: 800,
+			completedOrders: 650,
+			pendingOrders: 150,
 			orderGrowthPercent: 12.5,
 			totalQuotes: 1200,
 			overallConversionRate: 66.7,
@@ -964,6 +984,8 @@ export class AnalyticsSummaryBuilder {
 			totalRevenue: 0,
 			revenueGrowthPercent: 0,
 			totalOrders: 0,
+			completedOrders: 0,
+			pendingOrders: 0,
 			orderGrowthPercent: 0,
 			totalQuotes: 0,
 			overallConversionRate: 0,

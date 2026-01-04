@@ -57,37 +57,11 @@ import {
 	REQUEST_TIMEOUT_MS,
 } from './httpService.constants'
 
-/**
- * Standard API response structure from the backend.
- * All backend endpoints wrap their responses in this format.
- * 
- * @template T - The type of data in the payload
- * 
- * @example
- * ```typescript
- * // Success response
- * {
- *   payload: { id: 1, name: 'John' },
- *   message: 'User retrieved successfully',
- *   statusCode: 200
- * }
- * 
- * // Error response
- * {
- *   payload: null,
- *   message: 'User not found',
- *   statusCode: 404
- * }
- * ```
- */
-export interface ApiResponse<T> {
-	/** The actual data returned from the API (null on error) */
-	payload: T | null
-	/** Success or error message from the server */
-	message: string | null
-	/** HTTP status code (200, 201, 400, 401, 404, 500, etc.) */
-	statusCode: number
-}
+// Import ApiResponse from the canonical location for internal use
+import type { ApiResponse } from './api.types'
+
+// Re-export for backward compatibility with imports from httpService
+export type { ApiResponse } from './api.types'
 
 /**
  * AxiosResponse-compatible interface for backward compatibility.

@@ -32,11 +32,9 @@
 
 'use client'
 
-import { useCallback, useMemo } from 'react'
-
 import { useRouter } from 'next/navigation'
 
-import { Archive, Building2, Plus } from 'lucide-react'
+import { Archive, Building2, Download, Plus, Trash2 } from 'lucide-react'
 
 import {
 	createCustomerRichColumns,
@@ -46,7 +44,7 @@ import {
 } from '@_features/customers'
 import { Routes } from '@_features/navigation'
 
-import { API } from '@_shared'
+import { API, notificationService, formatDate } from '@_shared'
 
 import type Company from '@_classes/Company'
 
@@ -55,6 +53,8 @@ import {
 	createColumnId,
 	FilterType,
 	SortDirection,
+	BulkActionVariant,
+	type BulkAction,
 } from '@_components/tables/RichDataGrid'
 import type { RichSearchFilter, RichPagedResult } from '@_components/tables/RichDataGrid'
 import Button from '@_components/ui/Button'
@@ -92,56 +92,56 @@ export default function CustomersPage() {
 		toggleShowArchived,
 	} = useCustomersPage()
 
-	// Column definitions - memoized since they depend on canDelete
-	const columns = useMemo(
-		() =>
-			createCustomerRichColumns({
-				canDelete,
-				onDelete: openDeleteModal,
-			}),
-		[canDelete, openDeleteModal]
-	)
+	/**
+	 * Column definitions - React Compiler auto-memoizes based on dependencies.
+	 * @see NEXTJS16_OPTIMIZATION_PLAN.md - Priority 1
+	 */
+	const columns = createCustomerRichColumns({
+		canDelete,
+		onDelete: openDeleteModal,
+	})
 
-	// Custom fetcher that includes external filters (archived)
-	const fetcher = useCallback(
-		async (filter: RichSearchFilter): Promise<RichPagedResult<Company>> => {
-			// Build enhanced filter with external filters
-			const enhancedFilter: RichSearchFilter = {
-				...filter,
-			}
+	/**
+	 * Custom fetcher that includes external filters (archived).
+	 * React Compiler auto-memoizes based on captured variables.
+	 * @see NEXTJS16_OPTIMIZATION_PLAN.md - Priority 1
+	 */
+	const fetcher = async (filter: RichSearchFilter): Promise<RichPagedResult<Company>> => {
+		// Build enhanced filter with external filters
+		const enhancedFilter: RichSearchFilter = {
+			...filter,
+		}
 
-			// Add isArchived filter if viewing archived
-			if (showArchived && canViewArchived) {
-				enhancedFilter.columnFilters = [
-					...(filter.columnFilters || []),
-					{
-						columnId: 'ShowArchived',
-						filterType: FilterType.Boolean,
-						operator: 'Is',
-						value: true,
-					},
-				]
-			}
+		// Add isArchived filter if viewing archived
+		if (showArchived && canViewArchived) {
+			enhancedFilter.columnFilters = [
+				...(filter.columnFilters || []),
+				{
+					columnId: 'ShowArchived',
+					filterType: FilterType.Boolean,
+					operator: 'Is',
+					value: true,
+				},
+			]
+		}
 
-			const response = await API.Customers.richSearch(enhancedFilter)
+		const response = await API.Customers.richSearch(enhancedFilter)
 
-			if (response.data?.payload) {
-				return response.data.payload
-			}
+		if (response.data?.payload) {
+			return response.data.payload
+		}
 
-			// Return empty result on error
-			return {
-				data: [],
-				page: 1,
-				pageSize: filter.pageSize,
-				total: 0,
-				totalPages: 0,
-				hasNext: false,
-				hasPrevious: false,
-			}
-		},
-		[showArchived, canViewArchived]
-	)
+		// Return empty result on error
+		return {
+			data: [],
+			page: 1,
+			pageSize: filter.pageSize,
+			total: 0,
+			totalPages: 0,
+			hasNext: false,
+			hasPrevious: false,
+		}
+	}
 
 	return (
 		<>
@@ -190,12 +190,37 @@ export default function CustomersPage() {
 			<div className="card bg-base-100 shadow-xl">
 				<div className="card-body p-3 sm:p-6">
 					<RichDataGrid<Company>
-						key={`customers-${refreshKey}-${showArchived}`}
 						columns={columns}
 						fetcher={fetcher}
+						filterKey={`${refreshKey}-${showArchived}`}
 						defaultPageSize={10}
 						defaultSorting={[{ columnId: createColumnId('name'), direction: SortDirection.Ascending }]}
 						enableGlobalSearch
+						enableColumnFilters
+						enableRowSelection={canDelete}
+						enableColumnResizing
+						bulkActions={canDelete ? [
+							{
+								id: 'export-csv',
+								label: 'Export CSV',
+								icon: <Download className="w-4 h-4" />,
+								variant: BulkActionVariant.Default,
+								onAction: async (rows: Company[]) => {
+									const headers = 'ID,Name,Email,Phone,Status,Type,Created\n'
+									const csv = rows.map(r =>
+										`${r.id},"${r.name ?? ''}","${r.email ?? ''}","${r.phone ?? ''}",${r.status},"${r.typeOfBusiness ?? ''}","${formatDate(r.createdAt)}"`
+									).join('\n')
+									const blob = new Blob([headers + csv], { type: 'text/csv' })
+									const url = URL.createObjectURL(blob)
+									const a = document.createElement('a')
+									a.href = url
+									a.download = `customers-export-${new Date().toISOString().split('T')[0]}.csv`
+									a.click()
+									URL.revokeObjectURL(url)
+									notificationService.success(`Exported ${rows.length} customers`)
+								},
+							},
+						] satisfies BulkAction<Company>[] : undefined}
 						searchPlaceholder="Search customers by name or email..."
 						persistStateKey="customers-grid"
 						emptyState={

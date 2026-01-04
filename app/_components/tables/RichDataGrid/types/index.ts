@@ -76,6 +76,10 @@ export type {
 	DeepPartial,
 } from './richDataGridTypes'
 
+// Virtualization Types
+export type { VirtualizationConfig } from './richDataGridTypes'
+export { DEFAULT_VIRTUALIZATION_CONFIG } from './richDataGridTypes'
+
 // Constants
 export {
 	DEFAULT_PAGE_SIZE_OPTIONS,
@@ -109,6 +113,7 @@ export type {
 	VisibilityState,
 	RowSelectionState,
 	PaginationState,
+	ColumnPinningState,
 	Table,
 	Row,
 	Header,

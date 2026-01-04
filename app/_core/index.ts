@@ -109,6 +109,13 @@ export {
 	providerSchema,
 	contactSchema,
 	searchFilterSchema,
+	// RBAC schemas
+	roleNameSchema,
+	roleDisplayNameSchema,
+	roleLevelSchema,
+	roleBadgeVariantSchema,
+	roleSchema,
+	roleUpdateSchema,
 } from './validation/validation-schemas'
 
 // Form types
@@ -124,5 +131,8 @@ export type {
 	ProviderFormData,
 	ContactFormData,
 	SearchFilterFormData,
+	// RBAC types
+	RoleFormData,
+	RoleUpdateFormData,
 } from './validation/validation-schemas'
 

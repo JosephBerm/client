@@ -206,22 +206,13 @@ export default function RBACManagementPage() {
 				canEdit={canEdit}
 			/>
 
-			{/* Tab Content */}
+			{/* Tab Content - Now uses RichDataGrid internally for server-side filtering */}
 			<RBACTabContent
 				activeTab={activeTab}
 				overview={overview}
 				matrix={matrix}
-				auditLog={auditLog}
-				users={users}
-				isLoadingAuditLog={isLoadingAuditLog}
-				isLoadingUsers={isLoadingUsers}
-				auditLogError={auditLogError}
-				usersError={usersError}
 				canEdit={canEdit}
 				canViewAuditLogs={canViewAuditLogs}
-				auditLogFilters={auditLogFilters}
-				onAuditLogFiltersChange={handleAuditLogFiltersChange}
-				onRefreshAuditLog={() => fetchAuditLog()}
 				onOpenBulkModal={handleOpenBulkModal}
 			/>
 

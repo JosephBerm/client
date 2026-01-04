@@ -152,12 +152,15 @@ export function createProductRichColumns(
 		})
 	)
 
-	// Categories - Select filter, faceted (for category dropdown)
+	// Categories - Faceted Select filter with multi-select (AND logic on backend)
 	columns.push(
 		columnHelper.accessor('categories', {
 			header: 'Categories',
 			enableSorting: false,
-			// Note: Categories is an array, faceted filtering would use categoryId
+			// Enable faceted filtering: server aggregates category names with counts
+			// Filter uses AND logic: products must have ALL selected categories
+			filterType: FilterType.Select,
+			faceted: true,
 			cell: ({ row }) => {
 				const categories = row.original.categories || []
 

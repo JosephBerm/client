@@ -41,6 +41,7 @@ import {
 	type VisibilityState,
 	type RowSelectionState,
 	type PaginationState,
+	type ColumnPinningState,
 } from '@tanstack/react-table'
 
 import { logger } from '@_core'
@@ -55,10 +56,16 @@ import {
 	type SortDescriptor,
 	type ExportOptions,
 	type ColumnId,
+	type ColumnFilterValue,
+	type BackendColumnFilter,
+	type ColumnFilterOptions,
+	type SelectFilterValue,
 	LoadingState,
 	SortDirection,
 	FilterType,
 	TextFilterOperator,
+	SelectFilterOperator,
+	isSelectFilter,
 	DEFAULT_SEARCH_DEBOUNCE_MS,
 	createRowId,
 } from '../types'
@@ -91,6 +98,14 @@ export interface UseRichDataGridOptions<TData> {
 	enableColumnFilters?: boolean
 	/** Enable row selection */
 	enableRowSelection?: boolean
+	/** Enable column resizing */
+	enableColumnResizing?: boolean
+	/** Column resize mode: 'onChange' for live preview, 'onEnd' for final value only */
+	columnResizeMode?: 'onChange' | 'onEnd'
+	/** Enable column pinning */
+	enableColumnPinning?: boolean
+	/** Default column pinning state */
+	defaultColumnPinning?: ColumnPinningState
 	/** Debounce delay for search (ms) */
 	searchDebounceMs?: number
 	/** Custom fetcher function (overrides endpoint) */
@@ -159,6 +174,10 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 	enableGlobalSearch = true,
 	enableColumnFilters = true,
 	enableRowSelection = true,
+	enableColumnResizing = false,
+	columnResizeMode = 'onChange',
+	enableColumnPinning = false,
+	defaultColumnPinning = { left: [], right: [] },
 	searchDebounceMs = DEFAULT_SEARCH_DEBOUNCE_MS,
 	fetcher,
 	getRowId = (row) => String(row.id),
@@ -218,6 +237,9 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 		pageIndex: 0,
 		pageSize: defaultPageSize,
 	})
+
+	// Column pinning
+	const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(defaultColumnPinning)
 
 	// ========================================================================
 	// PERSISTENCE (localStorage)
@@ -289,21 +311,94 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 		const abortController = new AbortController()
 		const currentFetchId = ++fetchIdRef.current
 
-		// DEBUG: Log fetch initiation
-		logger.debug('[RichDataGrid] Starting fetch', {
-			fetchId: currentFetchId,
-			filterKey,
-			page: pagination.pageIndex + 1,
-		})
-
 		// Set loading state
-		setLoadingState((prev) =>
-			prev === LoadingState.Idle ? LoadingState.Loading : LoadingState.Refreshing
-		)
+		// Use Loading (shows skeleton) when we don't have data yet
+		// Use Refreshing (shows overlay spinner) only when we have existing data
+		// This handles React 19 Strict Mode where effect runs twice on mount
+		setLoadingState((prev) => {
+			// If we're in Idle or Loading state, we don't have data yet - show skeleton
+			if (prev === LoadingState.Idle || prev === LoadingState.Loading) {
+				return LoadingState.Loading
+			}
+			// Success or Error state means we had a previous fetch - show refresh overlay
+			return LoadingState.Refreshing
+		})
 		setError(null)
 
 		const fetchData = async () => {
 			try {
+				// Extract faceted column IDs from column definitions
+				// These columns will have their unique values aggregated by the server
+				// Note: filterOptions can be in col.meta (runtime) or directly on col (type extension)
+				const facetedColumnIds = columns
+					.filter((col) => {
+						// Check both meta.filterOptions (TanStack convention) and direct filterOptions (our extension)
+						const meta = col.meta as { filterOptions?: { faceted?: boolean } } | undefined
+						const filterOptions = meta?.filterOptions ?? col.filterOptions
+						return filterOptions?.faceted === true
+					})
+					.map((col) => {
+						// TanStack columns can have accessorKey or id
+						const accessorKey = (col as { accessorKey?: string }).accessorKey
+						return accessorKey ?? col.id
+					})
+					.filter((id): id is string => typeof id === 'string')
+
+				// Build helper to look up column filter options by column ID
+				const getColumnFilterOptions = (columnId: string): ColumnFilterOptions<TData> | undefined => {
+					const col = columns.find((c) => {
+						const accessorKey = (c as { accessorKey?: string }).accessorKey
+						return (accessorKey ?? c.id) === columnId
+					})
+					if (!col) return undefined
+					const meta = col.meta as { filterOptions?: ColumnFilterOptions<TData> } | undefined
+					return meta?.filterOptions ?? col.filterOptions
+				}
+
+				// Separate faceted Select filters from regular column filters
+				// Faceted filters go to facetFilters, others go to columnFilters
+				const backendColumnFilters: BackendColumnFilter[] = []
+				const facetFilterValues: Record<string, string[]> = {}
+
+				for (const cf of columnFilters) {
+					const filterValue = cf.value as ColumnFilterValue | undefined
+					if (!filterValue) continue
+
+					const filterOptions = getColumnFilterOptions(cf.id)
+					const isFaceted = filterOptions?.faceted === true
+
+					// Handle Select filters with faceted=true via facetFilters
+					if (filterValue && isSelectFilter(filterValue) && isFaceted) {
+						const selectValue = filterValue as SelectFilterValue
+						if (selectValue.values.length > 0) {
+							facetFilterValues[cf.id] = selectValue.values
+						}
+						continue
+					}
+
+					// Handle typed filters for columnFilters
+					if (filterValue && typeof filterValue === 'object' && 'filterType' in filterValue) {
+						const typedFilter = filterValue as ColumnFilterValue
+						backendColumnFilters.push({
+							columnId: cf.id,
+							filterType: typedFilter.filterType,
+							operator: 'operator' in typedFilter ? String(typedFilter.operator) : TextFilterOperator.Contains,
+							value: 'value' in typedFilter ? typedFilter.value : undefined,
+							valueTo: 'valueTo' in typedFilter ? typedFilter.valueTo : undefined,
+							values: 'values' in typedFilter ? typedFilter.values : undefined,
+						})
+						continue
+					}
+
+					// Fallback: treat as simple text filter (legacy support)
+					backendColumnFilters.push({
+						columnId: cf.id,
+						filterType: FilterType.Text,
+						operator: TextFilterOperator.Contains,
+						value: cf.value,
+					})
+				}
+
 				// Build filter object
 				const filter: RichSearchFilter = {
 					page: pagination.pageIndex + 1, // Convert 0-based to 1-based
@@ -313,12 +408,11 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 						direction: s.desc ? SortDirection.Descending : SortDirection.Ascending,
 					})),
 					globalSearch: debouncedGlobalFilter || undefined,
-					columnFilters: columnFilters.map((cf) => ({
-						columnId: cf.id,
-						filterType: FilterType.Text, // Default filter type
-						operator: TextFilterOperator.Contains,
-						value: cf.value,
-					})),
+					columnFilters: backendColumnFilters,
+					// Request facet aggregation for columns marked as faceted
+					facetColumns: facetedColumnIds.length > 0 ? facetedColumnIds : undefined,
+					// Send faceted Select filter selections
+					facetFilters: Object.keys(facetFilterValues).length > 0 ? facetFilterValues : undefined,
 				}
 
 				// Use custom fetcher or default endpoint fetcher
@@ -331,22 +425,9 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 
 				const result = await fetchFn(filter)
 
-				// DEBUG: Log fetch result
-				logger.debug('[RichDataGrid] Fetch completed', {
-					fetchId: currentFetchId,
-					currentRef: fetchIdRef.current,
-					aborted: abortController.signal.aborted,
-					dataLength: result.data?.length,
-					total: result.total,
-				})
-
 				// Guard: Only update state if this is still the current fetch
 				// This prevents stale responses from overwriting fresh data
 				if (abortController.signal.aborted || currentFetchId !== fetchIdRef.current) {
-					logger.debug('[RichDataGrid] Fetch result ignored (stale)', {
-						fetchId: currentFetchId,
-						currentRef: fetchIdRef.current,
-					})
 					return
 				}
 
@@ -356,16 +437,9 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 				setPageCount(result.totalPages)
 				setFacets(result.facets)
 				setLoadingState(LoadingState.Success)
-
-				logger.debug('[RichDataGrid] State updated successfully', {
-					fetchId: currentFetchId,
-					dataLength: result.data?.length,
-					total: result.total,
-				})
 			} catch (err) {
 				// Ignore abort errors - these are expected during cleanup
 				if (err instanceof Error && err.name === 'AbortError') {
-					logger.debug('[RichDataGrid] Fetch aborted', { fetchId: currentFetchId })
 					return
 				}
 
@@ -386,7 +460,6 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 		// Cleanup: abort in-flight request when deps change or component unmounts
 		// This is the React 19 recommended pattern for preventing race conditions
 		return () => {
-			logger.debug('[RichDataGrid] Cleanup - aborting fetch', { fetchId: currentFetchId })
 			abortController.abort()
 		}
 	}, [
@@ -425,6 +498,7 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 			columnVisibility,
 			sorting,
 			pagination,
+			columnPinning: enableColumnPinning ? columnPinning : { left: [], right: [] },
 		},
 		// Mode settings
 		manualPagination: isServerSide,
@@ -439,6 +513,7 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 		onColumnVisibilityChange: setColumnVisibility,
 		onSortingChange: setSorting,
 		onPaginationChange: setPagination,
+		onColumnPinningChange: enableColumnPinning ? setColumnPinning : undefined,
 
 		// Row models
 		getCoreRowModel: getCoreRowModel(),
@@ -455,6 +530,13 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 
 		// Selection
 		enableRowSelection,
+
+		// Column resizing
+		enableColumnResizing,
+		columnResizeMode,
+
+		// Column pinning
+		enableColumnPinning,
 	})
 
 	// ========================================================================
@@ -483,6 +565,24 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 		setColumnFilters([])
 	}
 
+	const setColumnFilter = (columnId: string, value: ColumnFilterValue | null) => {
+		setColumnFilters((prev) => {
+			// Remove existing filter for this column
+			const filtered = prev.filter((f) => f.id !== columnId)
+			// If null, just return filtered (removes the filter)
+			if (value === null) {
+				return filtered
+			}
+			// Otherwise, add the new filter
+			return [...filtered, { id: columnId, value }]
+		})
+	}
+
+	const getColumnFilter = (columnId: string): ColumnFilterValue | undefined => {
+		const filter = columnFilters.find((f) => f.id === columnId)
+		return filter?.value as ColumnFilterValue | undefined
+	}
+
 	const clearSelection = () => {
 		setRowSelection({})
 	}
@@ -504,11 +604,53 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 		}
 	}
 
-	const exportData = async (options: ExportOptions): Promise<void> => {
-		// TODO: Implement export functionality
+	// Column pinning actions
+	const pinColumn = (columnId: string, position: 'left' | 'right' | false) => {
+		setColumnPinning((prev) => {
+			// Remove from both sides first
+			const left = (prev.left ?? []).filter((id) => id !== columnId)
+			const right = (prev.right ?? []).filter((id) => id !== columnId)
+
+			// Add to the new position if not false
+			if (position === 'left') {
+				return { left: [...left, columnId], right }
+			} else if (position === 'right') {
+				return { left, right: [...right, columnId] }
+			}
+
+			// If false, just return with column removed from both
+			return { left, right }
+		})
+	}
+
+	const unpinColumn = (columnId: string) => {
+		pinColumn(columnId, false)
+	}
+
+	const isPinned = (columnId: string): 'left' | 'right' | false => {
+		if (columnPinning.left?.includes(columnId)) return 'left'
+		if (columnPinning.right?.includes(columnId)) return 'right'
+		return false
+	}
+
+	const exportGridData = async (options: ExportOptions): Promise<void> => {
+		// Dynamic import to keep export libraries out of the main bundle
+		const { exportData: doExport } = await import('../utils/exportUtils')
+
 		logger.info('Export requested', { options })
-		await Promise.resolve() // Placeholder for future async operations
-		throw new Error('Export not yet implemented')
+
+		const result = await doExport(table, {
+			format: options.format,
+			scope: options.scope,
+			filename: options.filename ?? 'export',
+			includeTimestamp: true,
+		}, selectedRows)
+
+		if (!result.success) {
+			throw new Error(result.error ?? 'Export failed')
+		}
+
+		logger.info('Export completed', { filename: result.filename, rowCount: result.rowCount })
 	}
 
 	// ========================================================================
@@ -537,6 +679,8 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 		// Column filters
 		columnFilters,
 		setColumnFilters,
+		setColumnFilter,
+		getColumnFilter,
 		clearColumnFilters,
 		activeFilterCount,
 
@@ -567,9 +711,16 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 		sorting,
 		setSorting,
 
+		// Column pinning
+		columnPinning,
+		setColumnPinning,
+		pinColumn,
+		unpinColumn,
+		isPinned,
+
 		// Actions
 		refresh,
-		exportData,
+		exportData: exportGridData,
 	}
 }
 

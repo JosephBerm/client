@@ -23,16 +23,14 @@
 
 'use client'
 
-import { useCallback, useMemo } from 'react'
-
 import Link from 'next/link'
 
-import { Eye, Package, Plus, Truck } from 'lucide-react'
+import { Download, Eye, FileSpreadsheet, Package, Plus, Truck } from 'lucide-react'
 
 import { useAuthStore } from '@_features/auth'
 import { Routes } from '@_features/navigation'
 
-import { formatDate, formatCurrency, API } from '@_shared'
+import { formatDate, formatCurrency, API, notificationService } from '@_shared'
 
 import { AccountRole, OrderStatus } from '@_classes/Enums'
 
@@ -43,6 +41,9 @@ import {
 	createColumnId,
 	FilterType,
 	SortDirection,
+	BulkActionVariant,
+	type BulkAction,
+	type RowId,
 } from '@_components/tables/RichDataGrid'
 import type { RichSearchFilter, RichPagedResult, RichColumnDef } from '@_components/tables/RichDataGrid'
 import Button from '@_components/ui/Button'
@@ -82,34 +83,38 @@ export default function OrdersPage() {
 	const isManager = role >= AccountRole.SalesManager
 	const canCreateOrders = isManager
 
-	// Fetcher for RichDataGrid
-	const fetcher = useCallback(
-		async (filter: RichSearchFilter): Promise<RichPagedResult<OrderRow>> => {
-			const response = await API.Orders.richSearch(filter)
+	/**
+	 * Fetcher for RichDataGrid - React Compiler auto-memoizes this function.
+	 * @see NEXTJS16_OPTIMIZATION_PLAN.md - Priority 1
+	 */
+	const fetcher = async (filter: RichSearchFilter): Promise<RichPagedResult<OrderRow>> => {
+		const response = await API.Orders.richSearch(filter)
 
-			if (response.data?.payload) {
-				return response.data.payload as unknown as RichPagedResult<OrderRow>
-			}
+		if (response.data?.payload) {
+			return response.data.payload as unknown as RichPagedResult<OrderRow>
+		}
 
-			// Return empty result on error
-			return {
-				data: [],
-				page: 1,
-				pageSize: filter.pageSize,
-				total: 0,
-				totalPages: 0,
-				hasNext: false,
-				hasPrevious: false,
-			}
-		},
-		[]
-	)
+		// Return empty result on error
+		return {
+			data: [],
+			page: 1,
+			pageSize: filter.pageSize,
+			total: 0,
+			totalPages: 0,
+			hasNext: false,
+			hasPrevious: false,
+		}
+	}
 
 	// Column helper for type-safe column definitions
 	const columnHelper = createRichColumnHelper<OrderRow>()
 
-	// Column definitions with role-based visibility
-	const columns: RichColumnDef<OrderRow, unknown>[] = useMemo(() => {
+	/**
+	 * Column definitions with role-based visibility.
+	 * React Compiler auto-memoizes based on dependency tracking.
+	 * @see NEXTJS16_OPTIMIZATION_PLAN.md - Priority 1
+	 */
+	const columns: RichColumnDef<OrderRow, unknown>[] = (() => {
 		const baseColumns: RichColumnDef<OrderRow, unknown>[] = [
 			// Order ID - Text filter
 			columnHelper.accessor('id', {
@@ -267,21 +272,16 @@ export default function OrdersPage() {
 		)
 
 		return baseColumns
-	}, [isCustomer, isSalesRep, isFulfillment, isManager, columnHelper])
+	})()
 
-	// Page description based on role
-	const pageDescription = useMemo(() => {
-		if (isCustomer) {
-			return 'View and track your orders'
-		}
-		if (isSalesRep) {
-			return 'View orders for your assigned customers'
-		}
-		if (isFulfillment) {
-			return 'Process and fulfill pending orders'
-		}
-		return 'Manage all orders in the system'
-	}, [isCustomer, isSalesRep, isFulfillment])
+	// Page description based on role - simple conditional, no memoization needed
+	const pageDescription = isCustomer
+		? 'View and track your orders'
+		: isSalesRep
+			? 'View orders for your assigned customers'
+			: isFulfillment
+				? 'Process and fulfill pending orders'
+				: 'Manage all orders in the system'
 
 	return (
 		<>
@@ -323,6 +323,31 @@ export default function OrdersPage() {
 						defaultPageSize={10}
 						defaultSorting={[{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending }]}
 						enableGlobalSearch
+						enableColumnFilters
+						enableRowSelection={isManager}
+						enableColumnResizing
+						bulkActions={isManager ? [
+							{
+								id: 'export-csv',
+								label: 'Export CSV',
+								icon: <Download className="w-4 h-4" />,
+								variant: BulkActionVariant.Default,
+								onAction: async (rows: OrderRow[]) => {
+									const headers = 'Order ID,Customer,Total,Status,Created\n'
+									const csv = rows.map(r =>
+										`${r.id},"${r.customerName ?? ''}",${r.total},${r.status},"${formatDate(r.createdAt)}"`
+									).join('\n')
+									const blob = new Blob([headers + csv], { type: 'text/csv' })
+									const url = URL.createObjectURL(blob)
+									const a = document.createElement('a')
+									a.href = url
+									a.download = `orders-export-${new Date().toISOString().split('T')[0]}.csv`
+									a.click()
+									URL.revokeObjectURL(url)
+									notificationService.success(`Exported ${rows.length} orders`)
+								},
+							},
+						] satisfies BulkAction<OrderRow>[] : undefined}
 						searchPlaceholder="Search orders by customer..."
 						persistStateKey="orders-grid"
 						emptyState={

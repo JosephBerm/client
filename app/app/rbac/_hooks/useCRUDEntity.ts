@@ -61,13 +61,13 @@
 import { useState, useEffect } from 'react'
 
 import { logger } from '@_core'
-import { notificationService } from '@_shared'
+import { notificationService, type ApiResponse } from '@_shared'
 
 interface CRUDApiService<TEntity, TCreateRequest, TUpdateRequest> {
-	getAll: () => Promise<{ data: { statusCode: number; payload?: TEntity[] | null } }>
-	create: (request: TCreateRequest) => Promise<{ data: { statusCode: number; payload?: TEntity | null } }>
-	update: (id: number, request: TUpdateRequest) => Promise<{ data: { statusCode: number; payload?: TEntity | null } }>
-	delete: (id: number) => Promise<{ data: { statusCode: number } }>
+	getAll: () => Promise<{ data: ApiResponse<TEntity[]> }>
+	create: (request: TCreateRequest) => Promise<{ data: ApiResponse<TEntity> }>
+	update: (id: number, request: TUpdateRequest) => Promise<{ data: ApiResponse<TEntity> }>
+	delete: (id: number) => Promise<{ data: ApiResponse<unknown> }>
 }
 
 interface UseCRUDEntityOptions {
@@ -96,7 +96,22 @@ export function useCRUDEntity<TEntity, TCreateRequest, TUpdateRequest>(
 			const response = await apiService.getAll()
 			if (response.data.statusCode === 200 && response.data.payload) {
 				setEntities(response.data.payload)
+				return { success: true, data: response.data.payload }
 			}
+
+			// Handle error response from backend
+			const errorMessage = response.data.message || `Failed to load ${entityName.toLowerCase()}s`
+			logger.warn(`Failed to fetch ${entityName}s: ${errorMessage}`, {
+				component: componentName,
+				action: 'fetchEntities',
+				statusCode: response.data.statusCode,
+				message: response.data.message,
+			})
+			notificationService.error(errorMessage, {
+				component: componentName,
+				action: 'fetchEntities',
+			})
+			return { success: false, error: errorMessage }
 		} catch (err) {
 			logger.error(`Failed to fetch ${entityName.toLowerCase()}s`, {
 				component: componentName,
@@ -107,6 +122,7 @@ export function useCRUDEntity<TEntity, TCreateRequest, TUpdateRequest>(
 				component: componentName,
 				action: 'fetchEntities',
 			})
+			return { success: false }
 		} finally {
 			setIsLoading(false)
 		}
@@ -116,7 +132,8 @@ export function useCRUDEntity<TEntity, TCreateRequest, TUpdateRequest>(
 		setIsSaving(true)
 		try {
 			const response = await apiService.create(request)
-			if (response.data.statusCode === 201) {
+			// Accept both 200 (our backend standard) and 201 (HTTP standard for created)
+			if (response.data.statusCode === 200 || response.data.statusCode === 201) {
 				logger.info(`${entityName} created successfully`, {
 					component: componentName,
 					action: 'createEntity',
@@ -128,7 +145,20 @@ export function useCRUDEntity<TEntity, TCreateRequest, TUpdateRequest>(
 				await fetchEntities()
 				return { success: true, data: response.data.payload }
 			}
-			return { success: false }
+
+			// Handle error response from backend (e.g., 400 Bad Request)
+			const errorMessage = response.data.message || `Failed to create ${entityName.toLowerCase()}`
+			logger.warn(`Failed to create ${entityName}: ${errorMessage}`, {
+				component: componentName,
+				action: 'createEntity',
+				statusCode: response.data.statusCode,
+				message: response.data.message,
+			})
+			notificationService.error(errorMessage, {
+				component: componentName,
+				action: 'createEntity',
+			})
+			return { success: false, error: errorMessage }
 		} catch (err) {
 			logger.error(`Failed to create ${entityName.toLowerCase()}`, {
 				component: componentName,
@@ -162,7 +192,21 @@ export function useCRUDEntity<TEntity, TCreateRequest, TUpdateRequest>(
 				await fetchEntities()
 				return { success: true, data: response.data.payload }
 			}
-			return { success: false }
+
+			// Handle error response from backend (e.g., 400 Bad Request)
+			const errorMessage = response.data.message || `Failed to update ${entityName.toLowerCase()}`
+			logger.warn(`Failed to update ${entityName}: ${errorMessage}`, {
+				component: componentName,
+				action: 'updateEntity',
+				entityId: id,
+				statusCode: response.data.statusCode,
+				message: response.data.message,
+			})
+			notificationService.error(errorMessage, {
+				component: componentName,
+				action: 'updateEntity',
+			})
+			return { success: false, error: errorMessage }
 		} catch (err) {
 			logger.error(`Failed to update ${entityName.toLowerCase()}`, {
 				component: componentName,
@@ -196,7 +240,21 @@ export function useCRUDEntity<TEntity, TCreateRequest, TUpdateRequest>(
 				await fetchEntities()
 				return { success: true }
 			}
-			return { success: false }
+
+			// Handle error response from backend
+			const errorMessage = response.data.message || `Failed to delete ${entityName.toLowerCase()}`
+			logger.warn(`Failed to delete ${entityName}: ${errorMessage}`, {
+				component: componentName,
+				action: 'deleteEntity',
+				entityId: id,
+				statusCode: response.data.statusCode,
+				message: response.data.message,
+			})
+			notificationService.error(errorMessage, {
+				component: componentName,
+				action: 'deleteEntity',
+			})
+			return { success: false, error: errorMessage }
 		} catch (err) {
 			logger.error(`Failed to delete ${entityName.toLowerCase()}`, {
 				component: componentName,

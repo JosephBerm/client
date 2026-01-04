@@ -11,7 +11,7 @@
 
 import { flexRender, type Row } from '@tanstack/react-table'
 import { FileText } from 'lucide-react'
-import { useRichDataGridContext } from '../../context/RichDataGridContext'
+import { useRichDataGridContext, useRichDataGridPinning } from '../../context/RichDataGridContext'
 
 // ============================================================================
 // PROPS
@@ -26,6 +26,8 @@ export interface RichDataGridBodyProps<TData> {
 	getRowClassName?: (row: TData) => string
 	/** Custom empty state component */
 	emptyState?: React.ReactNode
+	/** Enable column pinning */
+	enableColumnPinning?: boolean
 	/** Additional CSS classes */
 	className?: string
 }
@@ -47,9 +49,11 @@ export function RichDataGridBody<TData>({
 	onRowDoubleClick,
 	getRowClassName,
 	emptyState,
+	enableColumnPinning = false,
 	className = '',
 }: RichDataGridBodyProps<TData>) {
 	const { table, isLoading } = useRichDataGridContext<TData>()
+	const { isPinned } = useRichDataGridPinning()
 
 	const rows = table.getRowModel().rows
 
@@ -94,15 +98,29 @@ export function RichDataGridBody<TData>({
 						`}
 						data-selected={isSelected}
 					>
-						{row.getVisibleCells().map((cell) => (
-							<td
-								key={cell.id}
-								className="px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-base-content dark:text-base-content/90"
-								style={{ width: cell.column.getSize() }}
-							>
-								{flexRender(cell.column.columnDef.cell, cell.getContext())}
-							</td>
-						))}
+						{row.getVisibleCells().map((cell) => {
+							// Column pinning
+							const pinned = enableColumnPinning ? isPinned(cell.column.id) : false
+							const pinnedStyles = pinned ? {
+								position: 'sticky' as const,
+								left: pinned === 'left' ? `${cell.column.getStart('left')}px` : undefined,
+								right: pinned === 'right' ? `${cell.column.getStart('right')}px` : undefined,
+								zIndex: 1,
+							} : {}
+
+							return (
+								<td
+									key={cell.id}
+									className={`
+										px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-base-content dark:text-base-content/90
+										${pinned ? 'bg-base-100 dark:bg-base-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''}
+									`}
+									style={{ width: cell.column.getSize(), ...pinnedStyles }}
+								>
+									{flexRender(cell.column.columnDef.cell, cell.getContext())}
+								</td>
+							)
+						})}
 					</tr>
 				)
 			})}

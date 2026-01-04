@@ -10,7 +10,7 @@
 'use client'
 
 import { createContext, useContext, type ReactNode } from 'react'
-import type { UseRichDataGridReturn } from '../types'
+import type { UseRichDataGridReturn, FacetData, SelectOption } from '../types'
 
 // ============================================================================
 // CONTEXT TYPE
@@ -119,7 +119,7 @@ export function useRichDataGridSelection() {
  * Hook to access only filter-related state.
  */
 export function useRichDataGridFilters() {
-	const { globalFilter, setGlobalFilter, columnFilters, setColumnFilters, clearColumnFilters, activeFilterCount } =
+	const { globalFilter, setGlobalFilter, columnFilters, setColumnFilters, setColumnFilter, getColumnFilter, clearColumnFilters, activeFilterCount } =
 		useRichDataGridContext()
 
 	return {
@@ -127,6 +127,8 @@ export function useRichDataGridFilters() {
 		setGlobalFilter,
 		columnFilters,
 		setColumnFilters,
+		setColumnFilter,
+		getColumnFilter,
 		clearColumnFilters,
 		activeFilterCount,
 	}
@@ -177,6 +179,74 @@ export function useRichDataGridLoading() {
 		isRefreshing,
 		error,
 		refresh,
+	}
+}
+
+/**
+ * Hook to access only column pinning-related state.
+ */
+export function useRichDataGridPinning() {
+	const { columnPinning, setColumnPinning, pinColumn, unpinColumn, isPinned, table } = useRichDataGridContext()
+
+	return {
+		columnPinning,
+		setColumnPinning,
+		pinColumn,
+		unpinColumn,
+		isPinned,
+		columns: table.getAllLeafColumns(),
+	}
+}
+
+/**
+ * Hook to access facet data for dynamic filter options.
+ *
+ * Facets are server-aggregated unique values with counts for columns
+ * marked with `faceted: true` in their filterOptions.
+ *
+ * @example
+ * const { facets, getFacetOptions } = useRichDataGridFacets()
+ *
+ * // Get options for a specific column with counts
+ * const categoryOptions = getFacetOptions('category')
+ * // Returns: [{ value: 'Electronics', label: 'Electronics (42)' }, ...]
+ */
+export function useRichDataGridFacets() {
+	const { facets } = useRichDataGridContext()
+
+	/**
+	 * Get facet data for a specific column.
+	 */
+	const getFacetData = (columnId: string): FacetData | undefined => {
+		return facets?.[columnId]
+	}
+
+	/**
+	 * Convert facet data to SelectOption array for use in SelectFilterInput.
+	 * Returns options with counts formatted as "Value (count)".
+	 */
+	const getFacetOptions = (columnId: string): SelectOption[] => {
+		const facetData = facets?.[columnId]
+		if (!facetData) return []
+
+		return facetData.values.map((fc) => ({
+			value: fc.value,
+			label: `${fc.value} (${fc.count})`,
+		}))
+	}
+
+	/**
+	 * Check if facet data is available for a column.
+	 */
+	const hasFacets = (columnId: string): boolean => {
+		return !!facets?.[columnId]
+	}
+
+	return {
+		facets,
+		getFacetData,
+		getFacetOptions,
+		hasFacets,
 	}
 }
 

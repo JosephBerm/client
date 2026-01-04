@@ -140,16 +140,41 @@ export interface CreateQuoteResponse {
 /**
  * Standard API response wrapper.
  * All backend endpoints return data in this format.
+ *
+ * **CANONICAL LOCATION**: This is the single source of truth for ApiResponse.
+ * Import from `@_shared` or `@_shared/services/api.types` - do NOT redefine elsewhere.
+ *
+ * @example
+ * ```typescript
+ * // Success response
+ * {
+ *   payload: { id: 1, name: 'Admin' },
+ *   message: 'role_created_successfully',
+ *   statusCode: 200,
+ *   metaData: null
+ * }
+ *
+ * // Error response
+ * {
+ *   payload: null,
+ *   message: 'Role name already exists',
+ *   statusCode: 400,
+ *   metaData: null
+ * }
+ * ```
  */
 export interface ApiResponse<T> {
 	/** The actual data payload (null on error). */
 	payload: T | null
-	
-	/** Success or error message. */
+
+	/** Success or error message from the server. */
 	message: string | null
-	
-	/** HTTP status code. */
+
+	/** HTTP status code (200, 201, 400, 401, 404, 500, etc.). */
 	statusCode: number
+
+	/** Optional metadata (pagination info, debug info, etc.). */
+	metaData?: unknown
 }
 
 /**

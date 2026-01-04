@@ -40,11 +40,12 @@ import { RichDataGridProvider } from './context/RichDataGridContext'
 import { RichDataGridToolbar } from './components/Toolbar/RichDataGridToolbar'
 import { RichDataGridHeader } from './components/Table/RichDataGridHeader'
 import { RichDataGridBody } from './components/Table/RichDataGridBody'
+import { VirtualizedBody } from './components/Table/VirtualizedBody'
 import { RichDataGridPagination } from './components/Table/RichDataGridPagination'
 import { SelectionStatusBar } from './components/Selection/SelectionStatusBar'
 import { SelectAllCheckbox } from './components/Selection/SelectAllCheckbox'
 import { RowSelectionCheckbox } from './components/Selection/RowSelectionCheckbox'
-import { type RichColumnDef, type BulkAction, type RowId, LoadingState } from './types'
+import { type RichColumnDef, type BulkAction, type RowId, type VirtualizationConfig, LoadingState } from './types'
 
 // ============================================================================
 // COLUMN HELPER - Creates selection column
@@ -122,6 +123,10 @@ export interface RichDataGridProps<TData extends { id?: string | number }> exten
 	errorState?: (error: Error, retry: () => void) => React.ReactNode
 	/** Additional container CSS classes */
 	className?: string
+	/** Enable row virtualization for large datasets (default: false) */
+	enableVirtualization?: boolean
+	/** Virtualization configuration (only used when enableVirtualization is true) */
+	virtualizationConfig?: Partial<VirtualizationConfig>
 }
 
 // ============================================================================
@@ -145,12 +150,16 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 	enableGlobalSearch = true,
 	enableColumnFilters = false,
 	enableRowSelection = false,
+	enableColumnResizing = false,
+	enableColumnPinning = false,
+	enableVirtualization = false,
 	// Config
 	persistStateKey,
 	defaultPageSize = 10,
 	defaultSorting,
 	defaultColumnVisibility,
 	searchDebounceMs,
+	virtualizationConfig,
 	// UI props
 	ariaLabel,
 	bulkActions = [],
@@ -181,6 +190,8 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 		enableGlobalSearch,
 		enableColumnFilters,
 		enableRowSelection,
+		enableColumnResizing,
+		enableColumnPinning,
 		persistStateKey,
 		defaultPageSize,
 		defaultSorting,
@@ -234,29 +245,60 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 
 				{/* Table Container - Mobile-first horizontal scroll */}
 				<div className="overflow-x-auto -webkit-overflow-scrolling-touch relative">
-					<table className="table w-full min-w-[320px]">
-						<RichDataGridHeader />
+					{/* Virtualized Mode - Uses div-based virtualization */}
+					{enableVirtualization ? (
+						<>
+							{/* Header as standalone table for virtualized mode */}
+							<table className="table w-full min-w-[320px]">
+								<RichDataGridHeader enableColumnFilters={enableColumnFilters} enableColumnResizing={enableColumnResizing} enableColumnPinning={enableColumnPinning} />
+							</table>
 
-						{/* Loading State - Show skeleton during initial load or when idle with no data */}
-						{(loadingState === LoadingState.Loading || loadingState === LoadingState.Idle) ? (
-							loadingComponent ? (
-								<tbody>
-									<tr>
-										<td colSpan={table.getVisibleLeafColumns().length}>{loadingComponent}</td>
-									</tr>
-								</tbody>
+							{/* Loading State */}
+							{(loadingState === LoadingState.Loading || loadingState === LoadingState.Idle) ? (
+								loadingComponent ? (
+									<div className="p-4">{loadingComponent}</div>
+								) : (
+									<table className="table w-full min-w-[320px]">
+										<LoadingSkeleton rows={defaultPageSize} columns={preparedColumns.length} />
+									</table>
+								)
 							) : (
-								<LoadingSkeleton rows={defaultPageSize} columns={preparedColumns.length} />
-							)
-						) : (
-							<RichDataGridBody
-								onRowClick={onRowClick}
-								onRowDoubleClick={onRowDoubleClick}
-								getRowClassName={getRowClassName}
-								emptyState={emptyState}
-							/>
-						)}
-					</table>
+								<VirtualizedBody
+									onRowClick={onRowClick}
+									onRowDoubleClick={onRowDoubleClick}
+									getRowClassName={getRowClassName}
+									emptyState={emptyState}
+									virtualizationConfig={virtualizationConfig}
+								/>
+							)}
+						</>
+					) : (
+						/* Standard Table Mode - Traditional table rendering */
+						<table className="table w-full min-w-[320px]">
+							<RichDataGridHeader enableColumnFilters={enableColumnFilters} enableColumnResizing={enableColumnResizing} enableColumnPinning={enableColumnPinning} />
+
+							{/* Loading State - Show skeleton during initial load or when idle with no data */}
+							{(loadingState === LoadingState.Loading || loadingState === LoadingState.Idle) ? (
+								loadingComponent ? (
+									<tbody>
+										<tr>
+											<td colSpan={table.getVisibleLeafColumns().length}>{loadingComponent}</td>
+										</tr>
+									</tbody>
+								) : (
+									<LoadingSkeleton rows={defaultPageSize} columns={preparedColumns.length} />
+								)
+							) : (
+								<RichDataGridBody
+									onRowClick={onRowClick}
+									onRowDoubleClick={onRowDoubleClick}
+									getRowClassName={getRowClassName}
+									emptyState={emptyState}
+									enableColumnPinning={enableColumnPinning}
+								/>
+							)}
+						</table>
+					)}
 
 					{/* Loading Overlay for Refreshing - shows spinner over existing data */}
 					{loadingState === LoadingState.Refreshing && (

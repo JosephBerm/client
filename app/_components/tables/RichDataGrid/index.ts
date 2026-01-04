@@ -25,6 +25,15 @@ export type { RichDataGridProps } from './RichDataGrid'
 export { useRichDataGrid } from './hooks/useRichDataGrid'
 export type { UseRichDataGridOptions } from './hooks/useRichDataGrid'
 
+export { useGridUrlState } from './hooks/useGridUrlState'
+export type { GridUrlStateConfig, GridUrlState, UseGridUrlStateReturn } from './hooks/useGridUrlState'
+
+export { useRangeSelection } from './hooks/useRangeSelection'
+export type { UseRangeSelectionOptions, UseRangeSelectionReturn } from './hooks/useRangeSelection'
+
+export { useKeyboardNavigation } from './hooks/useKeyboardNavigation'
+export type { UseKeyboardNavigationOptions, UseKeyboardNavigationReturn } from './hooks/useKeyboardNavigation'
+
 // === CONTEXT ===
 export {
 	RichDataGridProvider,
@@ -34,6 +43,8 @@ export {
 	useRichDataGridPagination,
 	useRichDataGridVisibility,
 	useRichDataGridLoading,
+	useRichDataGridPinning,
+	useRichDataGridFacets,
 } from './context/RichDataGridContext'
 
 // === TOOLBAR COMPONENTS ===
@@ -51,6 +62,8 @@ export { RichDataGridHeader } from './components/Table/RichDataGridHeader'
 export type { RichDataGridHeaderProps } from './components/Table/RichDataGridHeader'
 export { RichDataGridBody } from './components/Table/RichDataGridBody'
 export type { RichDataGridBodyProps } from './components/Table/RichDataGridBody'
+export { VirtualizedBody } from './components/Table/VirtualizedBody'
+export type { VirtualizedBodyProps } from './components/Table/VirtualizedBody'
 export { RichDataGridPagination } from './components/Table/RichDataGridPagination'
 export type { RichDataGridPaginationProps } from './components/Table/RichDataGridPagination'
 
@@ -61,6 +74,46 @@ export { RowSelectionCheckbox } from './components/Selection/RowSelectionCheckbo
 export type { RowSelectionCheckboxProps } from './components/Selection/RowSelectionCheckbox'
 export { SelectionStatusBar } from './components/Selection/SelectionStatusBar'
 export type { SelectionStatusBarProps } from './components/Selection/SelectionStatusBar'
+
+// === HEADER COMPONENTS ===
+export { ResizeHandle } from './components/Header'
+export type { ResizeHandleProps } from './components/Header'
+
+// === FILTER COMPONENTS ===
+export {
+	FilterPopover,
+	TextFilterInput,
+	NumberFilterInput,
+	DateFilterInput,
+	SelectFilterInput,
+	BooleanFilterInput,
+} from './components/Filter'
+export type {
+	FilterPopoverProps,
+	TextFilterInputProps,
+	NumberFilterInputProps,
+	DateFilterInputProps,
+	SelectFilterInputProps,
+	BooleanFilterInputProps,
+} from './components/Filter'
+
+// === EXPORT COMPONENTS ===
+export { ExportButton, ExportModal } from './components/Export'
+export type { ExportButtonProps, ExportModalProps } from './components/Export'
+
+// === EXPORT UTILITIES ===
+export {
+	exportData,
+	exportToCSV,
+	exportToExcel,
+	exportToPDF,
+	quickExport,
+} from './utils/exportUtils'
+export type {
+	ExportConfig,
+	ExportResult,
+	ExportColumnConfig,
+} from './utils/exportUtils'
 
 // === TYPES, ENUMS, TYPE GUARDS, UTILITIES, CONSTANTS ===
 // Explicit named exports following project lint rules
@@ -132,6 +185,10 @@ export type {
 	DeepPartial,
 } from './types'
 
+// Virtualization Types
+export type { VirtualizationConfig } from './types'
+export { DEFAULT_VIRTUALIZATION_CONFIG } from './types'
+
 // Constants
 export {
 	DEFAULT_PAGE_SIZE_OPTIONS,
@@ -165,6 +222,7 @@ export type {
 	VisibilityState,
 	RowSelectionState,
 	PaginationState,
+	ColumnPinningState,
 	Table,
 	Row,
 	Header,

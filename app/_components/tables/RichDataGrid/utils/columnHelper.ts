@@ -92,7 +92,7 @@ export function createRichColumnHelper<TData>() {
 				faceted?: boolean
 			} = {}
 		): RichColumnDefWithAccessor<TData, TValue> => {
-			const { filterType, searchable, faceted, ...rest } = options
+			const { filterType, searchable, faceted, meta, ...rest } = options
 
 			// Build filter options if filter type specified
 			let filterOptions: ColumnFilterOptions<TData> | undefined
@@ -107,6 +107,12 @@ export function createRichColumnHelper<TData>() {
 
 			return {
 				accessorKey,
+				// Place filterOptions in meta for RichDataGridHeader to find
+				meta: {
+					...meta,
+					filterOptions,
+				},
+				// Also keep at top level for backwards compatibility
 				filterOptions,
 				enableSorting: true,
 				...rest,
@@ -125,7 +131,7 @@ export function createRichColumnHelper<TData>() {
 				faceted?: boolean
 			}
 		): RichColumnDefWithFn<TData, TValue> => {
-			const { filterType, searchable, faceted, ...rest } = options
+			const { filterType, searchable, faceted, meta, ...rest } = options
 
 			// Build filter options if filter type specified
 			let filterOptions: ColumnFilterOptions<TData> | undefined
@@ -140,6 +146,12 @@ export function createRichColumnHelper<TData>() {
 
 			return {
 				accessorFn,
+				// Place filterOptions in meta for RichDataGridHeader to find
+				meta: {
+					...meta,
+					filterOptions,
+				},
+				// Also keep at top level for backwards compatibility
 				filterOptions,
 				enableSorting: true,
 				...rest,

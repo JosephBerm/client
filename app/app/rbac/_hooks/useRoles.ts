@@ -33,8 +33,8 @@ const createRolesApiService = () => ({
 	getAll: () => API.RBAC.Roles.getAll(),
 	create: (request: CreateRoleRequest) => API.RBAC.Roles.create(request),
 	update: (id: number, request: UpdateRoleRequest) => API.RBAC.Roles.update(id, request),
-	// Cast to satisfy useCRUDEntity interface - we bypass this for delete anyway
-	delete: (id: number) => API.RBAC.Roles.delete(id) as unknown as Promise<{ data: { statusCode: number } }>,
+	// Cast to satisfy useCRUDEntity interface - we bypass this for delete via deleteRole
+	delete: (id: number) => API.RBAC.Roles.delete(id) as unknown as Promise<{ data: { statusCode: number; payload: unknown; message: string | null } }>,
 })
 
 interface UseRolesOptions {

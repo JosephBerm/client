@@ -17,13 +17,11 @@
 		"check:all": "npm run type-check && npm run lint:all",
 		"check:ci": "npm run type-check:ci && npm run lint:ci",
 		"check:watch": "npm run type-check:watch",
-
 		"test": "vitest",
 		"test:run": "vitest run",
 		"test:watch": "vitest --watch",
 		"test:coverage": "vitest run --coverage",
 		"test:ui": "vitest --ui",
-
 		"test:rbac": "vitest run rbac Permission Role guards",
 		"test:cart": "vitest run cart",
 		"test:validation": "vitest run validation",
@@ -32,11 +30,9 @@
 		"test:core": "vitest run _core",
 		"test:features": "vitest run _features",
 		"test:shared": "vitest run _shared",
-
 		"test:e2e": "playwright test",
 		"test:e2e:ui": "playwright test --ui",
 		"test:e2e:headed": "playwright test --headed",
-
 		"test:all": "npm run test:run && npm run test:e2e",
 		"test:ci": "vitest run --reporter=json --reporter=verbose --outputFile=test-results.json",
 		"test:ci:coverage": "vitest run --coverage --reporter=json --outputFile=test-results.json"
@@ -54,10 +50,14 @@
 		"cookies-next": "^4.1.1",
 		"date-fns": "^3.6.0",
 		"embla-carousel-react": "^8.6.0",
+		"exceljs": "^4.4.0",
 		"framer-motion": "^12.23.24",
+		"jspdf": "^3.0.4",
+		"jspdf-autotable": "^5.0.2",
 		"lodash": "^4.17.21",
 		"lucide-react": "^0.552.0",
 		"next": "^16.0.10",
+		"papaparse": "^5.5.3",
 		"react": "^19.2.3",
 		"react-dom": "^19.2.3",
 		"react-hook-form": "^7.53.2",
@@ -76,6 +76,7 @@
 		"@testing-library/user-event": "^14.6.1",
 		"@types/lodash": "^4.17.0",
 		"@types/node": "^20",
+		"@types/papaparse": "^5.5.2",
 		"@types/react": "^19.2.7",
 		"@types/react-dom": "^19.2.3",
 		"@typescript-eslint/eslint-plugin": "^8.47.0",

@@ -6,6 +6,10 @@
  * KPI metric card for displaying key analytics metrics.
  * Shows value, trend indicator, and optional comparison.
  *
+ * Handles edge cases where percentage changes would be misleading:
+ * - 0 current value with percentage change → Shows "No data" instead
+ * - Undefined/NaN changes → Gracefully hidden or shows "N/A"
+ *
  * @see prd_analytics.md - Section 5.2 Frontend Components
  * @module analytics/components/AnalyticsKPICard
  */
@@ -13,16 +17,20 @@
 import { motion } from 'framer-motion'
 import { TrendingUp, TrendingDown, Minus, type LucideIcon } from 'lucide-react'
 
+import { formatPercentageChange } from '../_utils/formatters'
+
 interface AnalyticsKPICardProps {
 	/** Card title */
 	title: string
 	/** Main value to display */
 	value: string | number
+	/** Raw numeric value for edge case detection (optional, extracted from value if numeric) */
+	rawValue?: number
 	/** Optional subtitle */
 	subtitle?: string
 	/** Change percentage from previous period */
 	change?: number
-	/** Whether change is considered positive */
+	/** Whether change is considered positive (for coloring direction) */
 	changeIsPositive?: boolean
 	/** Icon component */
 	icon?: LucideIcon
@@ -37,17 +45,6 @@ interface AnalyticsKPICardProps {
 }
 
 /**
- * Format change percentage for display
- */
-function formatChange(change: number): string {
-	const abs = Math.abs(change)
-	if (abs >= 1000) {
-		return `${(abs / 1000).toFixed(1)}K`
-	}
-	return abs.toFixed(1)
-}
-
-/**
  * Analytics KPI card for dashboard metrics.
  *
  * @example
@@ -55,6 +52,7 @@ function formatChange(change: number): string {
  * <AnalyticsKPICard
  *   title="Total Revenue"
  *   value="$125,432"
+ *   rawValue={125432}
  *   subtitle="Last 12 months"
  *   change={15.3}
  *   changeIsPositive={true}
@@ -65,6 +63,7 @@ function formatChange(change: number): string {
 export function AnalyticsKPICard({
 	title,
 	value,
+	rawValue,
 	subtitle,
 	change,
 	changeIsPositive = true,
@@ -91,12 +90,19 @@ export function AnalyticsKPICard({
 		)
 	}
 
+	// Extract numeric value for edge case detection
+	// If rawValue is provided, use it; otherwise try to extract from value if it's a number
+	const numericValue = rawValue ?? (typeof value === 'number' ? value : undefined)
+
+	// Format the percentage change with intelligent edge case handling
+	const changeResult = formatPercentageChange(change, numericValue)
+
 	// Determine trend direction and colors
 	let TrendIcon = Minus
 	let trendColor = 'text-base-content/50'
 
-	if (change !== undefined && change !== 0) {
-		if (change > 0) {
+	if (changeResult.shouldShow && !changeResult.isNeutral) {
+		if (changeResult.isPositive) {
 			TrendIcon = TrendingUp
 			trendColor = changeIsPositive ? 'text-success' : 'text-error'
 		} else {
@@ -134,15 +140,17 @@ export function AnalyticsKPICard({
 							<p className="text-xs text-base-content/50 mt-1">{subtitle}</p>
 						)}
 
-						{/* Trend */}
-						{change !== undefined && (
-							<p className={`text-xs mt-2 flex items-center gap-1 ${trendColor}`}>
-								<TrendIcon className="h-3 w-3" />
-								<span className="font-medium">
-									{change >= 0 ? '+' : '-'}
-									{formatChange(change)}%
-								</span>
-								<span className="text-base-content/50">vs prev period</span>
+						{/* Trend - with intelligent edge case handling */}
+						{changeResult.shouldShow && (
+							<p
+								className={`text-xs mt-2 flex items-center gap-1 ${trendColor}`}
+								aria-label={changeResult.ariaLabel}
+							>
+								<TrendIcon className="h-3 w-3" aria-hidden="true" />
+								<span className="font-medium">{changeResult.displayText}</span>
+								{!changeResult.isNeutral && (
+									<span className="text-base-content/50">vs prev period</span>
+								)}
 							</p>
 						)}
 					</div>
@@ -150,7 +158,7 @@ export function AnalyticsKPICard({
 					{/* Icon */}
 					{Icon && (
 						<div className={`p-3 ${iconBgColor} rounded-xl`}>
-							<Icon className={`w-6 h-6 ${iconColor}`} />
+							<Icon className={`w-6 h-6 ${iconColor}`} aria-hidden="true" />
 						</div>
 					)}
 				</div>

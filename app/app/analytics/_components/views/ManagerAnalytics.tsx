@@ -34,6 +34,8 @@ import {
 	Package,
 	Users,
 	Clock,
+	CheckCircle,
+	Loader,
 } from 'lucide-react'
 
 import type { AnalyticsSummary, SalesRepPerformance, RevenueData } from '@_types/analytics.types'
@@ -100,7 +102,7 @@ function ManagerAnalyticsView({
 				<h2 id="manager-primary-kpi-heading" className="sr-only">
 					Business Overview
 				</h2>
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 					<AnalyticsKPICard
 						title="Total Revenue"
 						value="$0"
@@ -111,10 +113,21 @@ function ManagerAnalyticsView({
 						isLoading={isLoading}
 					/>
 					<AnalyticsKPICard
-						title="Total Orders"
+						title="Completed Orders"
 						value={0}
 						subtitle="No data available"
-						icon={ShoppingCart}
+						icon={CheckCircle}
+						iconBgColor="bg-success/10"
+						iconColor="text-success"
+						isLoading={isLoading}
+					/>
+					<AnalyticsKPICard
+						title="Pending Orders"
+						value={0}
+						subtitle="No data available"
+						icon={Loader}
+						iconBgColor="bg-warning/10"
+						iconColor="text-warning"
 						isLoading={isLoading}
 					/>
 					<AnalyticsKPICard
@@ -148,10 +161,11 @@ function ManagerAnalyticsView({
 				<h2 id="manager-primary-kpi-heading" className="sr-only">
 					Business Overview
 				</h2>
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 					<AnalyticsKPICard
 						title="Total Revenue"
 						value={formatCurrencyAbbreviated(summary.totalRevenue)}
+						rawValue={summary.totalRevenue}
 						subtitle="This period"
 						change={summary.revenueGrowthPercent}
 						changeIsPositive={true}
@@ -161,17 +175,31 @@ function ManagerAnalyticsView({
 						isLoading={isLoading}
 					/>
 					<AnalyticsKPICard
-						title="Total Orders"
-						value={summary.totalOrders}
-						subtitle="Completed"
+						title="Completed Orders"
+						value={summary.completedOrders}
+						rawValue={summary.completedOrders}
+						subtitle="Delivered"
 						change={summary.orderGrowthPercent}
 						changeIsPositive={true}
-						icon={ShoppingCart}
+						icon={CheckCircle}
+						iconBgColor="bg-success/10"
+						iconColor="text-success"
+						isLoading={isLoading}
+					/>
+					<AnalyticsKPICard
+						title="Pending Orders"
+						value={summary.pendingOrders}
+						rawValue={summary.pendingOrders}
+						subtitle="In progress"
+						icon={Loader}
+						iconBgColor="bg-warning/10"
+						iconColor="text-warning"
 						isLoading={isLoading}
 					/>
 					<AnalyticsKPICard
 						title="Total Quotes"
 						value={summary.totalQuotes}
+						rawValue={summary.totalQuotes}
 						subtitle="All statuses"
 						icon={FileText}
 						isLoading={isLoading}
@@ -179,6 +207,7 @@ function ManagerAnalyticsView({
 					<AnalyticsKPICard
 						title="Conversion Rate"
 						value={`${summary.overallConversionRate.toFixed(1)}%`}
+						rawValue={summary.overallConversionRate}
 						subtitle="Quotes to orders"
 						icon={TrendingUp}
 						iconBgColor="bg-primary/10"
@@ -197,6 +226,7 @@ function ManagerAnalyticsView({
 					<AnalyticsKPICard
 						title="Average Order Value"
 						value={formatCurrencyAbbreviated(summary.averageOrderValue)}
+						rawValue={summary.averageOrderValue}
 						subtitle="Per order"
 						icon={Package}
 						isLoading={isLoading}
@@ -204,6 +234,7 @@ function ManagerAnalyticsView({
 					<AnalyticsKPICard
 						title="Active Team Members"
 						value={teamData?.length || 0}
+						rawValue={teamData?.length || 0}
 						subtitle="Sales reps"
 						icon={Users}
 						isLoading={teamLoading}

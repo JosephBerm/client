@@ -59,6 +59,7 @@ export interface ProductFilterOptions {
 
 /**
  * Return type for useInternalStorePage hook.
+ * Note: Category filtering is now handled via RichDataGrid's built-in column filters.
  */
 export interface UseInternalStorePageReturn {
 	// State
@@ -67,9 +68,6 @@ export interface UseInternalStorePageReturn {
 	showArchived: boolean
 	isDeleting: boolean
 	isArchiving: boolean
-	// Filters
-	selectedCategoryId: number | null
-	setSelectedCategoryId: (categoryId: number | null) => void
 	// Stats
 	stats: ProductStats | null
 	statsLoading: boolean

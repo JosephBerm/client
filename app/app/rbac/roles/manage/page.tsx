@@ -61,13 +61,17 @@ export default function RBACRoleManagementPage() {
 	}
 
 	const handleSave = async (request: CreateRoleRequest | UpdateRoleRequest) => {
+		let result: { success: boolean }
 		if (editingRole) {
-			await updateRole(editingRole.id, request as UpdateRoleRequest)
+			result = await updateRole(editingRole.id, request as UpdateRoleRequest)
 		} else {
-			await createRole(request as CreateRoleRequest)
+			result = await createRole(request as CreateRoleRequest)
 		}
-		setShowCreateModal(false)
-		setEditingRole(null)
+		// Only close modal on success
+		if (result.success) {
+			setShowCreateModal(false)
+			setEditingRole(null)
+		}
 	}
 
 	// Open delete modal instead of immediate delete
@@ -152,6 +156,7 @@ export default function RBACRoleManagementPage() {
 				onSave={handleSave}
 				role={editingRole}
 				isSaving={isSaving}
+				existingRoles={roles}
 			/>
 
 			<RoleDeleteModal

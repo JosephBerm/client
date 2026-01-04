@@ -31,9 +31,15 @@ export { RBACErrorAlert } from './RBACErrorAlert'
 
 export { RoleHierarchyDiagram } from './RoleHierarchyDiagram'
 export { PermissionMatrix } from './PermissionMatrix'
+export { BulkRoleModal } from './BulkRoleModal'
+
+// RichDataGrid versions (primary - use these)
+export { AuditLogRichDataGrid } from './AuditLogRichDataGrid'
+export { UserRolesRichDataGrid } from './UserRolesRichDataGrid'
+
+// Legacy versions (deprecated - use RichDataGrid versions above)
 export { AuditLogTable } from './AuditLogTable'
 export { AuditLogDataGrid } from './AuditLogDataGrid'
-export { BulkRoleModal } from './BulkRoleModal'
 export { UserRolesTable } from './UserRolesTable'
 export { UserRolesDataGrid } from './UserRolesDataGrid'
 
@@ -49,6 +55,8 @@ export { default as RolePermissionsModal } from './RolePermissionsModal'
 export { default as PermissionItem } from './PermissionItem'
 export { default as PermissionFormModal } from './PermissionFormModal'
 export { default as PermissionSelector } from './PermissionSelector'
+export { default as PermissionGroup } from './PermissionGroup'
+export { default as PermissionBulkBar } from './PermissionBulkBar'
 export { default as FormFooter } from './FormFooter'
 
 // =========================================================================

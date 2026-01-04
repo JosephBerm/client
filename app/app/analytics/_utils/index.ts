@@ -21,4 +21,7 @@ export {
 	formatPercent,
 	formatNumberAbbreviated,
 	formatChartDate,
+	formatPercentageChange,
 } from './formatters'
+
+export type { PercentageChangeResult } from './formatters'

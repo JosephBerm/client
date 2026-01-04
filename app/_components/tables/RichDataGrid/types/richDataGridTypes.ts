@@ -22,6 +22,7 @@ import type {
 	VisibilityState,
 	RowSelectionState,
 	PaginationState,
+	ColumnPinningState,
 	Table,
 	Row,
 } from '@tanstack/react-table'
@@ -473,6 +474,8 @@ export interface RichSearchFilter {
 	columnFilters: BackendColumnFilter[]
 
 	// === FACETED FILTERS ===
+	/** Columns to request facet aggregation for (server returns unique values with counts) */
+	facetColumns?: string[]
 	/** Faceted filter selections (e.g., { category: ['Medical', 'Dental'] }) */
 	facetFilters?: Record<string, string[]>
 
@@ -497,8 +500,10 @@ export interface RichSearchFilter {
  * Facet count for a filter value.
  */
 export interface FacetCount {
-	/** Filter value */
+	/** Filter value (used for filtering, e.g., ID) */
 	value: string
+	/** Display label (optional, e.g., Name). If null, value is used for display. */
+	label?: string
 	/** Count of items matching this value */
 	count: number
 }
@@ -549,6 +554,32 @@ export interface RichPagedResult<TData> {
 }
 
 // ============================================================================
+// VIRTUALIZATION TYPES
+// ============================================================================
+
+/**
+ * Configuration for row virtualization.
+ * Used when enableVirtualization is true to control rendering behavior.
+ */
+export interface VirtualizationConfig {
+	/** Estimated row height in pixels (default: 48) */
+	estimatedRowHeight: number
+	/** Number of rows to render outside visible area (default: 5) */
+	overscan: number
+	/** Maximum height of the virtualized container in pixels */
+	maxHeight?: number
+}
+
+/**
+ * Default virtualization configuration.
+ */
+export const DEFAULT_VIRTUALIZATION_CONFIG: VirtualizationConfig = {
+	estimatedRowHeight: 48,
+	overscan: 5,
+	maxHeight: 600,
+}
+
+// ============================================================================
 // COMPONENT STATE TYPES
 // ============================================================================
 
@@ -584,10 +615,12 @@ export enum ExportFormat {
 export enum ExportScope {
 	/** Current page only */
 	CurrentPage = 'currentPage',
-	/** All pages (server-side export) */
+	/** All pages / all rows */
 	AllPages = 'allPages',
 	/** Selected rows only */
 	SelectedRows = 'selectedRows',
+	/** Filtered rows (respects current filters) */
+	FilteredRows = 'filteredRows',
 }
 
 /**
@@ -772,6 +805,10 @@ export interface UseRichDataGridReturn<TData> {
 	// === COLUMN FILTERS ===
 	columnFilters: ColumnFiltersState
 	setColumnFilters: React.Dispatch<React.SetStateAction<ColumnFiltersState>>
+	/** Set filter for a specific column. Pass null to clear the filter. */
+	setColumnFilter: (columnId: string, value: ColumnFilterValue | null) => void
+	/** Get current filter value for a specific column */
+	getColumnFilter: (columnId: string) => ColumnFilterValue | undefined
 	clearColumnFilters: () => void
 	activeFilterCount: number
 
@@ -801,6 +838,13 @@ export interface UseRichDataGridReturn<TData> {
 	// === SORTING ===
 	sorting: SortingState
 	setSorting: React.Dispatch<React.SetStateAction<SortingState>>
+
+	// === COLUMN PINNING ===
+	columnPinning: ColumnPinningState
+	setColumnPinning: React.Dispatch<React.SetStateAction<ColumnPinningState>>
+	pinColumn: (columnId: string, position: 'left' | 'right' | false) => void
+	unpinColumn: (columnId: string) => void
+	isPinned: (columnId: string) => 'left' | 'right' | false
 
 	// === ACTIONS ===
 	refresh: () => void

@@ -70,14 +70,13 @@ export default function RolePermissionsModal({
 				onToggle={handleToggle}
 				initialPermissionIds={initialPermissionIds}
 			/>
-			<div className="pt-4 border-t border-base-300 mt-4">
-				<FormFooter
-					onCancel={onClose}
-					onSave={handleSave}
-					isSaving={isSaving}
-					saveLabel="Save Permissions"
-				/>
-			</div>
+			<FormFooter
+				onCancel={onClose}
+				onSave={handleSave}
+				isSaving={isSaving}
+				saveLabel="Save Permissions"
+				isSubmitButton={false}
+			/>
 		</Modal>
 	)
 }

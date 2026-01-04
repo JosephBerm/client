@@ -28,7 +28,7 @@ import { useCallback, useState } from 'react'
 
 import Link from 'next/link'
 
-import { Eye, Trash2 } from 'lucide-react'
+import { Download, Eye, Trash2 } from 'lucide-react'
 
 import { logger } from '@_core'
 
@@ -45,6 +45,8 @@ import {
 	createColumnId,
 	FilterType,
 	SortDirection,
+	BulkActionVariant,
+	type BulkAction,
 } from '@_components/tables/RichDataGrid'
 import type { RichSearchFilter, RichPagedResult, RichColumnDef } from '@_components/tables/RichDataGrid'
 import Badge from '@_components/ui/Badge'
@@ -255,12 +257,50 @@ export default function QuotesDataGrid() {
   return (
     <>
       <RichDataGrid<Quote>
-        key={refreshKey}
         columns={columns}
         fetcher={fetcher}
+        filterKey={String(refreshKey)}
         defaultPageSize={10}
         defaultSorting={[{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending }]}
         enableGlobalSearch
+        enableColumnFilters
+        enableRowSelection
+        enableColumnResizing
+        bulkActions={[
+          {
+            id: 'export-csv',
+            label: 'Export CSV',
+            icon: <Download className="w-4 h-4" />,
+            variant: BulkActionVariant.Default,
+            onAction: async (rows: Quote[]) => {
+              const headers = 'Quote ID,Company,Email,Phone,Status,Requested\n'
+              const csv = rows.map(r =>
+                `"${r.id}","${r.companyName ?? ''}","${r.emailAddress ?? ''}","${r.phoneNumber ?? ''}",${r.status === QuoteStatus.Read ? 'Read' : 'Unread'},"${formatDate(r.createdAt)}"`
+              ).join('\n')
+              const blob = new Blob([headers + csv], { type: 'text/csv' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `quotes-export-${new Date().toISOString().split('T')[0]}.csv`
+              a.click()
+              URL.revokeObjectURL(url)
+              notificationService.success(`Exported ${rows.length} quotes`)
+            },
+          },
+          {
+            id: 'delete-selected',
+            label: 'Delete Selected',
+            icon: <Trash2 className="w-4 h-4" />,
+            variant: BulkActionVariant.Danger,
+            confirmMessage: (count) => `Are you sure you want to delete ${count} quote(s)? This action cannot be undone.`,
+            onAction: async (rows: Quote[]) => {
+              const promises = rows.map(r => API.Quotes.delete(r.id ?? ''))
+              await Promise.all(promises)
+              notificationService.success(`Deleted ${rows.length} quotes`)
+              setRefreshKey(prev => prev + 1)
+            },
+          },
+        ] satisfies BulkAction<Quote>[]}
         searchPlaceholder="Search quotes by company or email..."
         persistStateKey="quotes-grid"
         emptyState={

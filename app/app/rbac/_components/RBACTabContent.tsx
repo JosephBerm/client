@@ -15,11 +15,10 @@
 import type { RBACTabId } from './RBACTabNav'
 import { RoleHierarchyDiagram } from './RoleHierarchyDiagram'
 import { PermissionMatrix } from './PermissionMatrix'
-import { AuditLogDataGrid } from './AuditLogDataGrid'
-import { UserRolesTable } from './UserRolesTable'
+import { AuditLogRichDataGrid } from './AuditLogRichDataGrid'
+import { UserRolesRichDataGrid } from './UserRolesRichDataGrid'
 
-import type { RBACOverview, PermissionMatrixEntry, PermissionAuditEntryDto, UserWithRole, AuditLogFilters } from '@_types/rbac-management'
-import type { PagedResult } from '@_classes/Base/PagedResult'
+import type { RBACOverview, PermissionMatrixEntry } from '@_types/rbac-management'
 
 // =========================================================================
 // TYPES
@@ -32,27 +31,12 @@ interface RBACTabContentProps {
 	// Data
 	overview: RBACOverview | null
 	matrix: PermissionMatrixEntry[]
-	auditLog: PagedResult<PermissionAuditEntryDto> | null
-	users: PagedResult<UserWithRole> | null
-
-	// Loading states
-	isLoadingAuditLog: boolean
-	isLoadingUsers: boolean
-
-	// Errors
-	auditLogError: string | null
-	usersError: string | null
 
 	// Permissions
 	canEdit: boolean
 	canViewAuditLogs: boolean
 
-	// Filters
-	auditLogFilters: AuditLogFilters
-
 	// Callbacks
-	onAuditLogFiltersChange: (filters: AuditLogFilters) => void
-	onRefreshAuditLog: () => void
 	onOpenBulkModal: () => void
 }
 
@@ -66,24 +50,15 @@ interface RBACTabContentProps {
  * Renders the appropriate component based on active tab:
  * - hierarchy: RoleHierarchyDiagram
  * - matrix: PermissionMatrix
- * - audit: AuditLogDataGrid (admin only)
- * - users: UserRolesTable (admin only)
+ * - audit: AuditLogRichDataGrid (admin only) - now uses RichDataGrid
+ * - users: UserRolesRichDataGrid (admin only) - now uses RichDataGrid
  */
 export function RBACTabContent({
 	activeTab,
 	overview,
 	matrix,
-	auditLog,
-	users,
-	isLoadingAuditLog,
-	isLoadingUsers,
-	auditLogError,
-	usersError,
 	canEdit,
 	canViewAuditLogs,
-	auditLogFilters,
-	onAuditLogFiltersChange,
-	onRefreshAuditLog,
 	onOpenBulkModal,
 }: RBACTabContentProps) {
 	return (
@@ -102,25 +77,16 @@ export function RBACTabContent({
 				/>
 			)}
 
-			{/* Audit Log Tab (Admin Only) */}
+			{/* Audit Log Tab (Admin Only) - Now using RichDataGrid with server-side filtering */}
 			{activeTab === 'audit' && canViewAuditLogs && (
-				<AuditLogDataGrid
-					data={auditLog}
-					isLoading={isLoadingAuditLog}
-					error={auditLogError}
-					filters={auditLogFilters}
-					onFiltersChange={onAuditLogFiltersChange}
-					onRefresh={onRefreshAuditLog}
-				/>
+				<AuditLogRichDataGrid canView={canViewAuditLogs} />
 			)}
 
-			{/* User Roles Tab (Admin Only) */}
+			{/* User Roles Tab (Admin Only) - Now using RichDataGrid with server-side filtering */}
 			{activeTab === 'users' && canEdit && (
-				<UserRolesTable
-					users={users}
-					isLoading={isLoadingUsers}
-					error={usersError}
+				<UserRolesRichDataGrid
 					onBulkUpdate={onOpenBulkModal}
+					canEdit={canEdit}
 				/>
 			)}
 		</div>

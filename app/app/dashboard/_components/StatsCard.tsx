@@ -6,6 +6,10 @@
  * Displays a single statistic in a card format with icon and optional trend.
  * Used in the dashboard stats row to show role-specific metrics.
  *
+ * Handles edge cases where percentage changes would be misleading:
+ * - 0 current value with percentage change → Shows "No data" instead
+ * - Undefined/NaN changes → Gracefully hidden
+ *
  * @see prd_dashboard.md - Section 5.2 Frontend Components
  * @module dashboard/StatsCard
  */
@@ -14,12 +18,14 @@ import { motion } from 'framer-motion'
 
 import type { LucideIcon } from 'lucide-react'
 
+import { formatPercentageChange } from '../../analytics/_utils/formatters'
+
 interface StatsTrend {
 	/** Trend percentage value */
 	value: number
 	/** Trend description (e.g., "vs last month") */
 	label: string
-	/** Whether the trend is positive */
+	/** Whether the trend is positive (for coloring direction) */
 	isPositive: boolean
 }
 
@@ -28,6 +34,8 @@ interface StatsCardProps {
 	title: string
 	/** Main value to display */
 	value: string | number
+	/** Raw numeric value for edge case detection (optional) */
+	rawValue?: number
 	/** Optional subtitle/description */
 	subtitle?: string
 	/** Lucide icon component */
@@ -48,6 +56,7 @@ interface StatsCardProps {
  * <StatsCard
  *   title="Pending Quotes"
  *   value={5}
+ *   rawValue={5}
  *   subtitle="Awaiting response"
  *   icon={FileText}
  *   onClick={() => router.push('/app/quotes?status=pending')}
@@ -57,6 +66,7 @@ interface StatsCardProps {
 export function StatsCard({
 	title,
 	value,
+	rawValue,
 	subtitle,
 	icon,
 	trend,
@@ -64,6 +74,15 @@ export function StatsCard({
 	className = '',
 }: StatsCardProps) {
 	const IconComponent = icon
+
+	// Extract numeric value for edge case detection
+	const numericValue = rawValue ?? (typeof value === 'number' ? value : undefined)
+
+	// Format the percentage change with intelligent edge case handling
+	const changeResult = trend
+		? formatPercentageChange(trend.value, numericValue)
+		: null
+
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 20 }}
@@ -87,21 +106,30 @@ export function StatsCard({
 						{subtitle && (
 							<p className="text-xs text-base-content/50 mt-1">{subtitle}</p>
 						)}
-						{trend && (
+						{/* Trend - with intelligent edge case handling */}
+						{changeResult?.shouldShow && (
 							<p
 								className={`text-xs mt-2 flex items-center gap-1 ${
-									trend.isPositive ? 'text-success' : 'text-error'
+									changeResult.isNeutral
+										? 'text-base-content/50'
+										: trend?.isPositive
+											? 'text-success'
+											: 'text-error'
 								}`}
+								aria-label={changeResult.ariaLabel}
 							>
 								<span className="font-medium">
-									{trend.isPositive ? '↑' : '↓'} {trend.value}%
+									{!changeResult.isNeutral && (changeResult.isPositive ? '↑' : '↓')}{' '}
+									{changeResult.displayText}
 								</span>
-								<span className="text-base-content/50">{trend.label}</span>
+								{!changeResult.isNeutral && trend?.label && (
+									<span className="text-base-content/50">{trend.label}</span>
+								)}
 							</p>
 						)}
 					</div>
 					<div className="p-3 bg-primary/10 rounded-xl">
-						<IconComponent className="w-6 h-6 text-primary" />
+						<IconComponent className="w-6 h-6 text-primary" aria-hidden="true" />
 					</div>
 				</div>
 			</div>

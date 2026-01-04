@@ -14,3 +14,20 @@ export {
 
 export type { RichColumnDefWithAccessor, RichColumnDefWithFn, RichColumnDefDisplay } from './columnHelper'
 
+// Export utilities
+export {
+	ExportFormat,
+	ExportScope,
+	exportData,
+	exportToCSV,
+	exportToExcel,
+	exportToPDF,
+	quickExport,
+} from './exportUtils'
+
+export type {
+	ExportConfig,
+	ExportResult,
+	ExportColumnConfig,
+} from './exportUtils'
+

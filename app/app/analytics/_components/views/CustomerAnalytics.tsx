@@ -21,7 +21,7 @@
 
 import { memo } from 'react'
 
-import { DollarSign, ShoppingCart, FileText, Package } from 'lucide-react'
+import { DollarSign, FileText, Package, CheckCircle, Loader } from 'lucide-react'
 
 import type { AnalyticsSummary } from '@_types/analytics.types'
 
@@ -63,7 +63,7 @@ function CustomerAnalyticsView({ summary, isLoading }: CustomerAnalyticsProps) {
 				<h2 id="customer-kpi-heading" className="sr-only">
 					Your Key Metrics
 				</h2>
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 					<AnalyticsKPICard
 						title="Total Spent"
 						value="$0"
@@ -74,10 +74,21 @@ function CustomerAnalyticsView({ summary, isLoading }: CustomerAnalyticsProps) {
 						isLoading={isLoading}
 					/>
 					<AnalyticsKPICard
-						title="Total Orders"
+						title="Completed Orders"
 						value={0}
 						subtitle="No data available"
-						icon={ShoppingCart}
+						icon={CheckCircle}
+						iconBgColor="bg-success/10"
+						iconColor="text-success"
+						isLoading={isLoading}
+					/>
+					<AnalyticsKPICard
+						title="Pending Orders"
+						value={0}
+						subtitle="No data available"
+						icon={Loader}
+						iconBgColor="bg-warning/10"
+						iconColor="text-warning"
 						isLoading={isLoading}
 					/>
 					<AnalyticsKPICard
@@ -106,10 +117,11 @@ function CustomerAnalyticsView({ summary, isLoading }: CustomerAnalyticsProps) {
 				<h2 id="customer-kpi-heading" className="sr-only">
 					Your Key Metrics
 				</h2>
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 					<AnalyticsKPICard
 						title="Total Spent"
 						value={formatCurrencyAbbreviated(summary.customerTotalSpent || 0)}
+						rawValue={summary.customerTotalSpent || 0}
 						subtitle="Lifetime value"
 						icon={DollarSign}
 						iconBgColor="bg-success/10"
@@ -117,15 +129,29 @@ function CustomerAnalyticsView({ summary, isLoading }: CustomerAnalyticsProps) {
 						isLoading={isLoading}
 					/>
 					<AnalyticsKPICard
-						title="Total Orders"
-						value={summary.customerOrderCount || 0}
-						subtitle="Completed orders"
-						icon={ShoppingCart}
+						title="Completed Orders"
+						value={summary.completedOrders}
+						rawValue={summary.completedOrders}
+						subtitle="Delivered"
+						icon={CheckCircle}
+						iconBgColor="bg-success/10"
+						iconColor="text-success"
+						isLoading={isLoading}
+					/>
+					<AnalyticsKPICard
+						title="Pending Orders"
+						value={summary.pendingOrders}
+						rawValue={summary.pendingOrders}
+						subtitle="In progress"
+						icon={Loader}
+						iconBgColor="bg-warning/10"
+						iconColor="text-warning"
 						isLoading={isLoading}
 					/>
 					<AnalyticsKPICard
 						title="Quote Requests"
 						value={summary.customerQuoteCount || 0}
+						rawValue={summary.customerQuoteCount || 0}
 						subtitle="Quotes submitted"
 						icon={FileText}
 						isLoading={isLoading}
@@ -133,6 +159,7 @@ function CustomerAnalyticsView({ summary, isLoading }: CustomerAnalyticsProps) {
 					<AnalyticsKPICard
 						title="Avg Order Value"
 						value={formatCurrencyAbbreviated(summary.averageOrderValue || 0)}
+						rawValue={summary.averageOrderValue || 0}
 						subtitle="Per order"
 						icon={Package}
 						isLoading={isLoading}

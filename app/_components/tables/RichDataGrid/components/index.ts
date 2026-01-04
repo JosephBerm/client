@@ -21,3 +21,25 @@ export type { SelectAllCheckboxProps, RowSelectionCheckboxProps, SelectionStatus
 export { RichDataGridHeader, RichDataGridBody, RichDataGridPagination } from './Table'
 export type { RichDataGridHeaderProps, RichDataGridBodyProps, RichDataGridPaginationProps } from './Table'
 
+// Filter components
+export {
+	FilterPopover,
+	TextFilterInput,
+	NumberFilterInput,
+	DateFilterInput,
+	SelectFilterInput,
+	BooleanFilterInput,
+} from './Filter'
+export type {
+	FilterPopoverProps,
+	TextFilterInputProps,
+	NumberFilterInputProps,
+	DateFilterInputProps,
+	SelectFilterInputProps,
+	BooleanFilterInputProps,
+} from './Filter'
+
+// Export components
+export { ExportButton, ExportModal } from './Export'
+export type { ExportButtonProps, ExportModalProps } from './Export'
+

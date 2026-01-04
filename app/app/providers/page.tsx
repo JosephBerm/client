@@ -34,11 +34,12 @@
 
 'use client'
 
-import { useCallback, useMemo } from 'react'
+// Note: React Compiler (enabled in next.config.mjs) auto-memoizes
+// No need for manual useMemo/useCallback
 
 import { useRouter } from 'next/navigation'
 
-import { Archive, Factory, PauseCircle, Plus } from 'lucide-react'
+import { Archive, Download, Factory, PauseCircle, Plus } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
 import {
@@ -49,7 +50,7 @@ import {
 	type ProviderStatusKey,
 } from '@_features/providers'
 
-import { API } from '@_shared'
+import { API, notificationService, formatDate } from '@_shared'
 
 import type Provider from '@_classes/Provider'
 
@@ -58,6 +59,8 @@ import {
 	createColumnId,
 	FilterType,
 	SortDirection,
+	BulkActionVariant,
+	type BulkAction,
 } from '@_components/tables/RichDataGrid'
 import type { RichSearchFilter, RichPagedResult } from '@_components/tables/RichDataGrid'
 import Button from '@_components/ui/Button'
@@ -102,72 +105,68 @@ export default function ProvidersPage() {
 		setStatusFilter,
 	} = useProvidersPage()
 
-	// Column definitions - memoized since they depend on permissions
-	const columns = useMemo(
-		() =>
-			createProviderRichColumns({
-				canDelete,
-				canManageStatus,
-				onDelete: openDeleteModal,
-				onArchive: openArchiveModal,
-				onSuspend: openSuspendModal,
-				onActivate: handleActivate,
-			}),
-		[canDelete, canManageStatus, openDeleteModal, openArchiveModal, openSuspendModal, handleActivate]
-	)
+	// Column definitions - React Compiler auto-memoizes based on dependencies
+	const columns = createProviderRichColumns({
+		canDelete,
+		canManageStatus,
+		onDelete: openDeleteModal,
+		onArchive: openArchiveModal,
+		onSuspend: openSuspendModal,
+		onActivate: handleActivate,
+	})
 
-	// Custom fetcher that includes status filter
-	const fetcher = useCallback(
-		async (filter: RichSearchFilter): Promise<RichPagedResult<Provider>> => {
-			// Build enhanced filter with external status filter
-			const enhancedFilter: RichSearchFilter = {
-				...filter,
-			}
+	/**
+	 * Custom fetcher that includes status filter.
+	 * React Compiler auto-memoizes based on captured variables.
+	 */
+	const fetcher = async (filter: RichSearchFilter): Promise<RichPagedResult<Provider>> => {
+		// Build enhanced filter with external status filter
+		const enhancedFilter: RichSearchFilter = {
+			...filter,
+		}
 
-			// Apply status filter from stats grid
-			if (statusFilter === 'all') {
-				// Show all including archived
-				enhancedFilter.columnFilters = [
-					...(filter.columnFilters || []),
-					{
-						columnId: 'ShowArchived',
-						filterType: FilterType.Boolean,
-						operator: 'Is',
-						value: true,
-					},
-				]
-			} else if (statusFilter !== 'active') {
-				// Filter by specific status
-				enhancedFilter.columnFilters = [
-					...(filter.columnFilters || []),
-					{
-						columnId: 'status',
-						filterType: FilterType.Select,
-						operator: 'Is',
-						value: statusFilter,
-					},
-				]
-			}
+		// Apply status filter from stats grid
+		if (statusFilter === 'all') {
+			// Show all including archived
+			enhancedFilter.columnFilters = [
+				...(filter.columnFilters || []),
+				{
+					columnId: 'ShowArchived',
+					filterType: FilterType.Boolean,
+					operator: 'Is',
+					value: true,
+				},
+			]
+		} else if (statusFilter !== 'active') {
+			// Filter by specific status
+			enhancedFilter.columnFilters = [
+				...(filter.columnFilters || []),
+				{
+					columnId: 'status',
+					filterType: FilterType.Select,
+					operator: 'Is',
+					value: statusFilter,
+				},
+			]
+		}
 
-			const response = await API.Providers.richSearch(enhancedFilter)
+		const response = await API.Providers.richSearch(enhancedFilter)
 
-			if (response.data?.payload) {
-				return response.data.payload as unknown as RichPagedResult<Provider>
-			}
+		if (response.data?.payload) {
+			return response.data.payload as unknown as RichPagedResult<Provider>
+		}
 
-			// Return empty result on error
-			return {
-				data: [],
-				page: 1,
-				pageSize: filter.pageSize,
-				total: 0,
-				totalPages: 0,
-				hasNext: false,
-				hasPrevious: false,
-			}
-		},
-		[statusFilter]
-	)
+		// Return empty result on error
+		return {
+			data: [],
+			page: 1,
+			pageSize: filter.pageSize,
+			total: 0,
+			totalPages: 0,
+			hasNext: false,
+			hasPrevious: false,
+		}
+	}
 
 	return (
 		<>
@@ -199,12 +198,50 @@ export default function ProvidersPage() {
 			<div className="card bg-base-100 shadow-xl">
 				<div className="card-body p-3 sm:p-6">
 					<RichDataGrid<Provider>
-						key={`providers-${refreshKey}-${statusFilter}`}
 						columns={columns}
 						fetcher={fetcher}
+						filterKey={`${refreshKey}-${statusFilter}`}
 						defaultPageSize={10}
 						defaultSorting={[{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending }]}
 						enableGlobalSearch
+						enableColumnFilters
+						enableRowSelection={canManageStatus}
+						enableColumnResizing
+						bulkActions={canManageStatus ? [
+							{
+								id: 'export-csv',
+								label: 'Export CSV',
+								icon: <Download className="w-4 h-4" />,
+								variant: BulkActionVariant.Default,
+								onAction: async (rows: Provider[]) => {
+									const headers = 'ID,Name,Email,Phone,Status,Created\n'
+									const csv = rows.map(r =>
+										`${r.id},"${r.name ?? ''}","${r.email ?? ''}","${r.phone ?? ''}",${r.status},"${formatDate(r.createdAt)}"`
+									).join('\n')
+									const blob = new Blob([headers + csv], { type: 'text/csv' })
+									const url = URL.createObjectURL(blob)
+									const a = document.createElement('a')
+									a.href = url
+									a.download = `providers-export-${new Date().toISOString().split('T')[0]}.csv`
+									a.click()
+									URL.revokeObjectURL(url)
+									notificationService.success(`Exported ${rows.length} providers`)
+								},
+							},
+							{
+								id: 'suspend-selected',
+								label: 'Suspend Selected',
+								icon: <PauseCircle className="w-4 h-4" />,
+								variant: BulkActionVariant.Warning,
+								confirmMessage: (count) => `Are you sure you want to suspend ${count} provider(s)?`,
+								onAction: async (rows: Provider[]) => {
+									const activeProviders = rows.filter(r => r.status === 0) // Active status
+									const promises = activeProviders.map(r => API.Providers.suspend(r.id, 'Bulk suspension'))
+									await Promise.all(promises)
+									notificationService.success(`Suspended ${activeProviders.length} providers`)
+								},
+							},
+						] satisfies BulkAction<Provider>[] : undefined}
 						searchPlaceholder="Search providers by name or email..."
 						persistStateKey="providers-grid"
 						emptyState={

@@ -2,13 +2,17 @@
 
 /**
  * Permission Form Modal Component
- * 
- * Modal for creating and editing permissions.
- * 
+ *
+ * Modal for creating and editing permissions with:
+ * - Live preview of permission string (P2)
+ * - Duplicate detection warning (P2)
+ *
+ * @see PLAN_PERMISSIONS_MANAGEMENT_PAGE.md Phase 2
  * @module RBAC PermissionFormModal
  */
 
 import { useState, useEffect } from 'react'
+import { AlertTriangle, Eye } from 'lucide-react'
 import { Resources, Actions, Contexts } from '@_shared'
 import type { Permission, CreatePermissionRequest, UpdatePermissionRequest } from '@_shared/services/api'
 import Modal from '@_components/ui/Modal'
@@ -22,6 +26,8 @@ interface PermissionFormModalProps {
 	onSave: (request: CreatePermissionRequest | UpdatePermissionRequest) => Promise<void>
 	permission?: Permission | null
 	isSaving: boolean
+	/** Existing permissions for duplicate detection */
+	existingPermissions?: Permission[]
 }
 
 interface PermissionFormData {
@@ -44,8 +50,27 @@ export default function PermissionFormModal({
 	onSave,
 	permission,
 	isSaving,
+	existingPermissions = [],
 }: PermissionFormModalProps) {
 	const [formData, setFormData] = useState<PermissionFormData>(DEFAULT_PERMISSION_FORM_DATA)
+
+	// Live preview of permission string (P2)
+	const permissionPreview = formData.resource && formData.action
+		? formData.context
+			? `${formData.resource}:${formData.action}:${formData.context}`
+			: `${formData.resource}:${formData.action}`
+		: null
+
+	// Duplicate detection (P2)
+	const isDuplicate = permissionPreview
+		? existingPermissions.some((p) => {
+				const existingString = p.context
+					? `${p.resource}:${p.action}:${p.context}`
+					: `${p.resource}:${p.action}`
+				// Don't flag as duplicate if editing the same permission
+				return existingString === permissionPreview && p.id !== permission?.id
+			})
+		: false
 
 	// Reset form when modal opens/closes or permission changes
 	useEffect(() => {
@@ -146,6 +171,30 @@ export default function PermissionFormModal({
 					placeholder="Permission description..."
 					rows={3}
 				/>
+
+				{/* Live Preview (P2) */}
+				{permissionPreview && (
+					<div className="p-3 rounded-lg bg-base-200 border border-base-300">
+						<div className="flex items-center gap-2 text-sm text-base-content/60 mb-1">
+							<Eye className="w-4 h-4" />
+							<span>Preview</span>
+						</div>
+						<code className="block font-mono text-primary font-medium">
+							{permissionPreview}
+						</code>
+					</div>
+				)}
+
+				{/* Duplicate Warning (P2) */}
+				{isDuplicate && (
+					<div className="flex items-center gap-2 p-3 rounded-lg bg-warning/10 border border-warning/30 text-warning">
+						<AlertTriangle className="w-5 h-5 flex-shrink-0" />
+						<span className="text-sm">
+							This permission already exists. Creating it will result in a duplicate.
+						</span>
+					</div>
+				)}
+
 				<FormFooter
 					onCancel={onClose}
 					onSave={handleSave}

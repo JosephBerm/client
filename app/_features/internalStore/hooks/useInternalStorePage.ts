@@ -76,11 +76,11 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 	})
 
 	// UI state
+	// Note: Category filtering is now handled via RichDataGrid's built-in column filters
 	const [refreshKey, setRefreshKey] = useState(0)
 	const [showArchived, setShowArchived] = useState(false)
 	const [isDeleting, setIsDeleting] = useState(false)
 	const [isArchiving, setIsArchiving] = useState(false)
-	const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
 
 	// Stats
 	const { stats, isLoading: statsLoading, refetch: refetchStats } = useProductStats()
@@ -246,9 +246,6 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 		showArchived,
 		isDeleting,
 		isArchiving,
-		// Filters
-		selectedCategoryId,
-		setSelectedCategoryId,
 		// Stats
 		stats,
 		statsLoading,

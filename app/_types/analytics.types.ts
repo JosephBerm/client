@@ -89,8 +89,18 @@ export interface AnalyticsSummary {
 	totalRevenue: number
 	/** Revenue growth percentage vs previous period */
 	revenueGrowthPercent: number
-	/** Total number of orders */
+	/** Total number of orders (all statuses except archived) */
 	totalOrders: number
+	/**
+	 * Completed orders count (Delivered status only).
+	 * Maps to OrderQueryHelpers.CompletedStatuses on backend.
+	 */
+	completedOrders: number
+	/**
+	 * Pending/Active orders count (Placed, Paid, Processing, Shipped).
+	 * Maps to OrderQueryHelpers.ActiveStatuses on backend.
+	 */
+	pendingOrders: number
 	/** Order growth percentage vs previous period */
 	orderGrowthPercent: number
 	/** Total number of quotes */

@@ -21,7 +21,7 @@
 
 import { memo } from 'react'
 
-import { Percent, FileText, DollarSign, ShoppingCart } from 'lucide-react'
+import { Percent, FileText, DollarSign, CheckCircle, Loader } from 'lucide-react'
 
 import type { AnalyticsSummary } from '@_types/analytics.types'
 
@@ -64,7 +64,7 @@ function SalesRepAnalyticsView({ summary, isLoading }: SalesRepAnalyticsProps) {
 				<h2 id="salesrep-kpi-heading" className="sr-only">
 					Your Performance Metrics
 				</h2>
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 					<AnalyticsKPICard
 						title="Conversion Rate"
 						value="0%"
@@ -91,10 +91,21 @@ function SalesRepAnalyticsView({ summary, isLoading }: SalesRepAnalyticsProps) {
 						isLoading={isLoading}
 					/>
 					<AnalyticsKPICard
-						title="Total Orders"
+						title="Completed Orders"
 						value={0}
 						subtitle="No data available"
-						icon={ShoppingCart}
+						icon={CheckCircle}
+						iconBgColor="bg-success/10"
+						iconColor="text-success"
+						isLoading={isLoading}
+					/>
+					<AnalyticsKPICard
+						title="Pending Orders"
+						value={0}
+						subtitle="No data available"
+						icon={Loader}
+						iconBgColor="bg-warning/10"
+						iconColor="text-warning"
 						isLoading={isLoading}
 					/>
 				</div>
@@ -111,10 +122,11 @@ function SalesRepAnalyticsView({ summary, isLoading }: SalesRepAnalyticsProps) {
 				<h2 id="salesrep-kpi-heading" className="sr-only">
 					Your Performance Metrics
 				</h2>
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 					<AnalyticsKPICard
 						title="Conversion Rate"
 						value={`${(summary.personalConversionRate || 0).toFixed(1)}%`}
+						rawValue={summary.personalConversionRate || 0}
 						subtitle="Quotes to orders"
 						change={summary.conversionVsTeamAvg}
 						changeIsPositive={true}
@@ -126,6 +138,7 @@ function SalesRepAnalyticsView({ summary, isLoading }: SalesRepAnalyticsProps) {
 					<AnalyticsKPICard
 						title="Total Quotes"
 						value={summary.totalQuotes}
+						rawValue={summary.totalQuotes}
 						subtitle="This period"
 						icon={FileText}
 						isLoading={isLoading}
@@ -133,6 +146,7 @@ function SalesRepAnalyticsView({ summary, isLoading }: SalesRepAnalyticsProps) {
 					<AnalyticsKPICard
 						title="Revenue Generated"
 						value={formatCurrencyAbbreviated(summary.personalRevenue || 0)}
+						rawValue={summary.personalRevenue || 0}
 						subtitle="Your contribution"
 						icon={DollarSign}
 						iconBgColor="bg-primary/10"
@@ -140,10 +154,23 @@ function SalesRepAnalyticsView({ summary, isLoading }: SalesRepAnalyticsProps) {
 						isLoading={isLoading}
 					/>
 					<AnalyticsKPICard
-						title="Total Orders"
-						value={summary.totalOrders}
-						subtitle="Completed"
-						icon={ShoppingCart}
+						title="Completed Orders"
+						value={summary.completedOrders}
+						rawValue={summary.completedOrders}
+						subtitle="Delivered"
+						icon={CheckCircle}
+						iconBgColor="bg-success/10"
+						iconColor="text-success"
+						isLoading={isLoading}
+					/>
+					<AnalyticsKPICard
+						title="Pending Orders"
+						value={summary.pendingOrders}
+						rawValue={summary.pendingOrders}
+						subtitle="In progress"
+						icon={Loader}
+						iconBgColor="bg-warning/10"
+						iconColor="text-warning"
 						isLoading={isLoading}
 					/>
 				</div>

@@ -49,6 +49,8 @@ export { useCopyToClipboard } from './useCopyToClipboard'
 export { useBreadcrumbs } from './useBreadcrumbs'
 export { useInfiniteScroll } from './useInfiniteScroll'
 export type { UseInfiniteScrollOptions, UseInfiniteScrollReturn } from './useInfiniteScroll'
+export { usePopoverPosition } from './usePopoverPosition'
+export type { PopoverPosition, UsePopoverPositionOptions } from './usePopoverPosition'
 
 // =============================================================================
 // RBAC HOOKS

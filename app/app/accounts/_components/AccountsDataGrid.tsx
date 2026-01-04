@@ -27,7 +27,7 @@ import { useCallback, useState } from 'react'
 
 import Link from 'next/link'
 
-import { Eye, Key, Trash2, UserCog } from 'lucide-react'
+import { Download, Eye, Key, Trash2, UserCog, UserX } from 'lucide-react'
 
 import { PasswordResetModal } from '@_features/accounts'
 import { Routes } from '@_features/navigation'
@@ -53,6 +53,8 @@ import {
 	createColumnId,
 	FilterType,
 	SortDirection,
+	BulkActionVariant,
+	type BulkAction,
 } from '@_components/tables/RichDataGrid'
 import type { RichSearchFilter, RichPagedResult, RichColumnDef } from '@_components/tables/RichDataGrid'
 import Button from '@_components/ui/Button'
@@ -382,12 +384,51 @@ export default function AccountsDataGrid() {
 	return (
 		<>
 			<RichDataGrid<Account>
-				key={refreshKey}
 				columns={columns}
 				fetcher={fetcher}
+				filterKey={String(refreshKey)}
 				defaultPageSize={10}
 				defaultSorting={[{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending }]}
 				enableGlobalSearch
+				enableColumnFilters
+				enableRowSelection={isAdmin}
+				enableColumnResizing
+				bulkActions={isAdmin ? [
+					{
+						id: 'export-csv',
+						label: 'Export CSV',
+						icon: <Download className="w-4 h-4" />,
+						variant: BulkActionVariant.Default,
+						onAction: async (rows: Account[]) => {
+							const headers = 'ID,Username,Email,Role,Status,Created\n'
+							const csv = rows.map(r =>
+								`${r.id},"${r.username ?? ''}","${r.email ?? ''}",${r.role},${r.status},"${formatDate(r.createdAt)}"`
+							).join('\n')
+							const blob = new Blob([headers + csv], { type: 'text/csv' })
+							const url = URL.createObjectURL(blob)
+							const a = document.createElement('a')
+							a.href = url
+							a.download = `accounts-export-${new Date().toISOString().split('T')[0]}.csv`
+							a.click()
+							URL.revokeObjectURL(url)
+							notificationService.success(`Exported ${rows.length} accounts`)
+						},
+					},
+					{
+						id: 'deactivate-selected',
+						label: 'Deactivate Selected',
+						icon: <UserX className="w-4 h-4" />,
+						variant: BulkActionVariant.Danger,
+						confirmMessage: (count) => `Are you sure you want to deactivate ${count} account(s)?`,
+						onAction: async (rows: Account[]) => {
+							const activeAccounts = rows.filter(r => r.status === AccountStatus.Active)
+							const promises = activeAccounts.map(r => API.Accounts.changeStatus(r.id, AccountStatus.Suspended))
+							await Promise.all(promises)
+							notificationService.success(`Deactivated ${activeAccounts.length} accounts`)
+							refreshTable()
+						},
+					},
+				] satisfies BulkAction<Account>[] : undefined}
 				searchPlaceholder="Search accounts by username or email..."
 				persistStateKey="accounts-grid"
 				emptyState={

@@ -765,4 +765,136 @@ export const requestCancellationSchema = z.object({
 /** Type-safe form data inferred from requestCancellationSchema */
 export type RequestCancellationFormData = z.infer<typeof requestCancellationSchema>
 
+// ==========================================
+// RBAC ROLE MANAGEMENT SCHEMAS
+// @see prd_rbac_management.md
+// ==========================================
+
+/**
+ * Role name (identifier) validation.
+ * Must be lowercase, alphanumeric with underscores only.
+ * This becomes the immutable identifier (like AWS IAM role names).
+ *
+ * @example "sales_rep", "regional_manager", "warehouse_staff"
+ */
+export const roleNameSchema = z
+	.string()
+	.min(2, 'Role name must be at least 2 characters')
+	.max(50, 'Role name cannot exceed 50 characters')
+	.regex(
+		/^[a-z][a-z0-9_]*$/,
+		'Role name must start with a letter and contain only lowercase letters, numbers, and underscores'
+	)
+	.refine(
+		(name) => !name.includes('__'),
+		'Role name cannot contain consecutive underscores'
+	)
+
+/**
+ * Role display name validation.
+ * Human-readable name shown in UI.
+ */
+export const roleDisplayNameSchema = z
+	.string()
+	.min(2, 'Display name must be at least 2 characters')
+	.max(100, 'Display name cannot exceed 100 characters')
+	.regex(
+		/^[a-zA-Z][a-zA-Z0-9\s\-&'.()]*$/,
+		'Display name must start with a letter and contain only letters, numbers, spaces, and basic punctuation'
+	)
+
+/**
+ * Role level validation.
+ * Must be a positive integer within safe range.
+ *
+ * **Business Rules:**
+ * - 0 is reserved for "no access" scenarios
+ * - 1-999: Reserved for future expansion
+ * - 1000-9998: Standard role levels
+ * - 9999: Super Admin (typically locked)
+ */
+export const roleLevelSchema = z.coerce
+	.number()
+	.int('Level must be a whole number')
+	.min(1, 'Level must be at least 1')
+	.max(9999, 'Level cannot exceed 9999')
+
+/**
+ * Role badge variant for UI theming.
+ * Maps to DaisyUI/TailwindCSS color schemes.
+ */
+export const roleBadgeVariantSchema = z.enum([
+	'default',
+	'primary',
+	'secondary',
+	'accent',
+	'info',
+	'success',
+	'warning',
+	'error',
+	'neutral',
+])
+
+/**
+ * Role form validation schema.
+ * Complete validation for creating and editing roles.
+ *
+ * **MAANG Patterns Applied:**
+ * - AWS IAM: Immutable role name (identifier)
+ * - Google Cloud IAM: Display name separate from ID
+ * - Okta: Level-based hierarchy with presets
+ * - Azure AD: Badge/color for visual differentiation
+ *
+ * @see prd_rbac_management.md - Role CRUD requirements
+ *
+ * @example
+ * ```typescript
+ * roleSchema.parse({
+ *   name: 'regional_manager',
+ *   displayName: 'Regional Manager',
+ *   level: 3500,
+ *   description: 'Manages sales operations for a geographic region',
+ *   badgeVariant: 'secondary',
+ *   isActive: true,
+ * })
+ * ```
+ */
+export const roleSchema = z.object({
+	/** Immutable identifier (lowercase_snake_case) */
+	name: roleNameSchema,
+
+	/** Human-readable display name */
+	displayName: roleDisplayNameSchema,
+
+	/** Access level (higher = more access) */
+	level: roleLevelSchema,
+
+	/** Description of role purpose and responsibilities */
+	description: z
+		.string()
+		.max(500, 'Description cannot exceed 500 characters')
+		.optional(),
+
+	/** Badge color variant for UI display */
+	badgeVariant: roleBadgeVariantSchema.optional().default('default'),
+
+	/** Whether role is active (inactive roles cannot be assigned) */
+	isActive: z.boolean().optional().default(true),
+})
+
+/** Type-safe form data inferred from roleSchema */
+export type RoleFormData = z.infer<typeof roleSchema>
+
+/**
+ * Role update schema (name is immutable after creation).
+ * Used when editing existing roles.
+ */
+export const roleUpdateSchema = roleSchema.omit({ name: true }).extend({
+	/** Role ID for update target */
+	id: z.number().int().positive('Invalid role ID'),
+})
+
+/** Type-safe form data for role updates */
+export type RoleUpdateFormData = z.infer<typeof roleUpdateSchema>
+
 
