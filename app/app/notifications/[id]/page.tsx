@@ -24,10 +24,10 @@ function Page() {
 		const getNotification = async () => {
 			try {
 				setIsLoading(true)
-				const { data } = await API.Notifications.get<Notification>(notificationId)
+				const { data } = await API.Notifications.get(notificationId)
 
 				if (data.statusCode === 200 && data.payload) {
-					setNotification(data.payload)
+					setNotification(new Notification(data.payload))
 				} else {
 					notificationService.error(data.message || 'Unable to load notification', {
 						metadata: { notificationId },

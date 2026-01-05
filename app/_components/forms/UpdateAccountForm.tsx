@@ -61,10 +61,11 @@
 
 'use client'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useState, useEffect, useRef } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { User as UserIcon, AtSign, Phone } from 'lucide-react'
 
 import { logger, profileUpdateSchema, type ProfileUpdateFormData } from '@_core'
 
@@ -76,8 +77,10 @@ import type { IUser } from '@_classes/User'
 import User from '@_classes/User'
 
 import Button from '@_components/ui/Button'
+import AvatarUpload from '@_components/ui/AvatarUpload'
 
 import FormInput from './FormInput'
+import FormSection from './FormSection'
 
 
 /**
@@ -127,6 +130,31 @@ interface UpdateAccountFormProps {
  * @returns UpdateAccountForm component
  */
 export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountFormProps) {
+	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+	const [avatarError, setAvatarError] = useState<string | undefined>()
+	const [avatarPreviewPath, setAvatarPreviewPath] = useState<string | null>(
+		user.profilePicturePath ?? null
+	)
+
+	// Track blob URLs for cleanup on unmount (memory leak prevention)
+	const blobUrlRef = useRef<string | null>(null)
+
+	// Update ref when preview path changes (only for blob URLs)
+	useEffect(() => {
+		if (avatarPreviewPath?.startsWith('blob:')) {
+			blobUrlRef.current = avatarPreviewPath
+		}
+	}, [avatarPreviewPath])
+
+	// Cleanup blob URL on unmount
+	useEffect(() => {
+		return () => {
+			if (blobUrlRef.current) {
+				URL.revokeObjectURL(blobUrlRef.current)
+			}
+		}
+	}, [])
+
 	const form = useForm<ProfileUpdateFormData>({
 		resolver: zodResolver(profileUpdateSchema),
 		defaultValues: {
@@ -143,6 +171,71 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 			shippingDetails: user.shippingDetails ?? undefined,
 		},
 	})
+
+	/**
+	 * Handle avatar file selection.
+	 * TODO: Connect to avatar upload API endpoint when available.
+	 *
+	 * Note: Dependencies intentionally empty - setState functions are stable,
+	 * and we use the functional form of setAvatarPreviewPath to avoid stale closure.
+	 */
+	const handleAvatarSelect = useCallback(async (file: File) => {
+		setIsUploadingAvatar(true)
+		setAvatarError(undefined)
+
+		try {
+			// Revoke previous preview URL before creating new one (memory leak prevention)
+			setAvatarPreviewPath((prev) => {
+				if (prev && prev.startsWith('blob:')) {
+					URL.revokeObjectURL(prev)
+				}
+				return URL.createObjectURL(file)
+			})
+
+			// TODO: Upload to server when API is available
+			// const formData = new FormData()
+			// formData.append('avatar', file)
+			// await API.Accounts.uploadAvatar(user.id!, formData)
+
+			logger.info('Avatar selected for upload', {
+				component: 'UpdateAccountForm',
+				fileName: file.name,
+				fileSize: file.size,
+			})
+		} catch (error) {
+			setAvatarError('Failed to upload avatar. Please try again.')
+			logger.error('Avatar upload failed', {
+				error,
+				component: 'UpdateAccountForm',
+			})
+		} finally {
+			setIsUploadingAvatar(false)
+		}
+	}, [])
+
+	/**
+	 * Handle avatar removal.
+	 *
+	 * Note: Uses functional state update to access current previewPath
+	 * without adding it to dependency array (avoids stale closure).
+	 */
+	const handleAvatarRemove = useCallback(() => {
+		// Revoke blob URL before clearing to prevent memory leak
+		setAvatarPreviewPath((prev) => {
+			if (prev && prev.startsWith('blob:')) {
+				URL.revokeObjectURL(prev)
+			}
+			return null
+		})
+		setAvatarError(undefined)
+
+		// TODO: Call remove API when available
+		// await API.Accounts.removeAvatar(user.id!)
+
+		logger.info('Avatar removed', {
+			component: 'UpdateAccountForm',
+		})
+	}, [])
 
 	const { submit, isSubmitting } = useFormSubmit(
 		async (data: ProfileUpdateFormData) => {
@@ -220,75 +313,131 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 	}, [form, handleSubmit])
 
 	return (
-		<form onSubmit={onFormSubmit} className="space-y-6">
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<FormInput
-					label="First Name"
-					{...form.register('name.first')}
-					error={form.formState.errors.name?.first}
-					disabled={isSubmitting}
+		<form onSubmit={onFormSubmit} className="space-y-8">
+			{/* Avatar Section */}
+			<div className="flex flex-col items-center sm:flex-row gap-6 pb-6 border-b border-base-200">
+				<AvatarUpload
+					name={user.name}
+					currentImagePath={avatarPreviewPath}
+					onImageSelect={handleAvatarSelect}
+					onImageRemove={handleAvatarRemove}
+					uploading={isUploadingAvatar}
+					error={avatarError}
+					size="xl"
 				/>
-				<FormInput
-					label="Last Name"
-					{...form.register('name.last')}
-					error={form.formState.errors.name?.last}
-					disabled={isSubmitting}
-				/>
+				<div className="text-center sm:text-left flex-1">
+					<h3 className="text-lg font-semibold text-base-content">Profile Photo</h3>
+					<p className="mt-1 text-sm text-base-content/60">
+						Add a photo to personalize your account
+					</p>
+				</div>
 			</div>
 
-			<FormInput
-				label="Middle Name"
-				{...form.register('name.middle')}
-				error={form.formState.errors.name?.middle}
-				disabled={isSubmitting}
-			/>
+			{/* Identity Section */}
+			<FormSection
+				title="Identity"
+				icon={<UserIcon className="h-5 w-5" />}
+				description="Your personal information"
+			>
+				<div className="space-y-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<FormInput
+							label="First Name"
+							{...form.register('name.first')}
+							error={form.formState.errors.name?.first}
+							disabled={isSubmitting}
+						/>
+						<FormInput
+							label="Last Name"
+							{...form.register('name.last')}
+							error={form.formState.errors.name?.last}
+							disabled={isSubmitting}
+						/>
+					</div>
+					<FormInput
+						label="Middle Name"
+						{...form.register('name.middle')}
+						error={form.formState.errors.name?.middle}
+						disabled={isSubmitting}
+						helperText="Optional"
+					/>
+				</div>
+			</FormSection>
 
-			<FormInput
-				label="Username"
-				{...form.register('username')}
-				error={form.formState.errors.username}
-				disabled={true}
-				helperText="Username cannot be changed"
-			/>
+			{/* Account Section */}
+			<FormSection
+				title="Account"
+				icon={<AtSign className="h-5 w-5" />}
+				description="Your account credentials"
+			>
+				<div className="space-y-4">
+					<FormInput
+						label="Username"
+						{...form.register('username')}
+						error={form.formState.errors.username}
+						disabled={true}
+						helperText="Username cannot be changed"
+					/>
+					<FormInput
+						label="Email"
+						type="email"
+						{...form.register('email')}
+						error={form.formState.errors.email}
+						disabled={isSubmitting}
+					/>
+				</div>
+			</FormSection>
 
-			<FormInput
-				label="Email"
-				type="email"
-				{...form.register('email')}
-				error={form.formState.errors.email}
-				disabled={isSubmitting}
-			/>
+			{/* Contact Section */}
+			<FormSection
+				title="Contact"
+				icon={<Phone className="h-5 w-5" />}
+				badge="Optional"
+				description="How we can reach you"
+			>
+				<div className="space-y-4">
+					<FormInput
+						label="Date of Birth"
+						type="date"
+						{...form.register('dateOfBirth', { valueAsDate: true })}
+						error={form.formState.errors.dateOfBirth}
+						disabled={isSubmitting}
+					/>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<FormInput
+							label="Phone"
+							type="tel"
+							{...form.register('phone')}
+							error={form.formState.errors.phone}
+							disabled={isSubmitting}
+						/>
+						<FormInput
+							label="Mobile"
+							type="tel"
+							{...form.register('mobile')}
+							error={form.formState.errors.mobile}
+							disabled={isSubmitting}
+						/>
+					</div>
+				</div>
+			</FormSection>
 
-			<FormInput
-				label="Date of Birth"
-				type="date"
-				{...form.register('dateOfBirth', { valueAsDate: true })}
-				error={form.formState.errors.dateOfBirth}
-				disabled={isSubmitting}
-			/>
-
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<FormInput
-					label="Phone"
-					type="tel"
-					{...form.register('phone')}
-					error={form.formState.errors.phone}
-					disabled={isSubmitting}
-				/>
-				<FormInput
-					label="Mobile"
-					type="tel"
-					{...form.register('mobile')}
-					error={form.formState.errors.mobile}
-					disabled={isSubmitting}
-				/>
-			</div>
-
-			<div className="flex justify-end">
+			{/* Submit Button - Desktop */}
+			<div className="hidden md:flex justify-end pt-4 border-t border-base-200">
 				<Button type="submit" variant="primary" loading={isSubmitting} disabled={isSubmitting}>
-					Update Profile
+					Save Changes
 				</Button>
 			</div>
+
+			{/* Submit Button - Mobile Sticky */}
+			<div className="fixed bottom-0 left-0 right-0 bg-base-100 border-t border-base-300 p-4 md:hidden shadow-lg z-50">
+				<Button type="submit" variant="primary" loading={isSubmitting} disabled={isSubmitting} className="w-full">
+					Save Changes
+				</Button>
+			</div>
+
+			{/* Spacer for mobile sticky button */}
+			<div className="h-20 md:hidden" aria-hidden="true" />
 		</form>
 	)
 }

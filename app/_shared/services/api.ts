@@ -116,6 +116,7 @@ import type Company from '@_classes/Company'
 import type ContactRequest from '@_classes/ContactRequest'
 import type FinanceNumbers from '@_classes/FinanceNumbers'
 import type FinanceSearchFilter from '@_classes/FinanceSearchFilter'
+import type Notification from '@_classes/Notification'
 import type Order from '@_classes/Order'
 import type { PagedData } from '@_classes/PagedData'
 import type { Product } from '@_classes/Product'
@@ -1038,37 +1039,57 @@ const API = {
 	/**
 	 * Notification Management API
 	 * User notifications and alerts.
+	 *
+	 * **Architecture:**
+	 * - All endpoints are user-scoped (users can only access their own notifications)
+	 * - Rich search supports server-side pagination for RichDataGrid
+	 * - Bulk operations (mark all as read) for efficiency
 	 */
 	Notifications: {
 		/**
-		 * Gets notifications (all or by ID).
-		 * @param id - Notification ID (omit for all notifications)
+		 * Gets a single notification by ID.
+		 * @param id - Notification ID (GUID)
 		 */
-		get: async <T>(id: string) => {
-			if (id !== null) {
-				return HttpService.get<T>(`/notifications/${id}`)
-			} else {
-				return HttpService.get<T>('/notifications')
-			}
-		},
-		
+		get: async (id: string) =>
+			HttpService.get<Notification>(`/notifications/${id}`),
+
 		/**
 		 * Creates a new notification.
-		 * @param quote - Notification data
+		 * Typically called by system processes, not end users.
+		 * @param notification - Notification data
 		 */
-		create: async <T>(quote: T) => HttpService.post<T>('/notifications', quote),
-		
-		/**
-		 * Updates a notification.
-		 * @param quote - Notification with updated data
-		 */
-		update: async <T>(quote: T) => HttpService.put<T>('/notifications', quote),
-		
+		create: async (notification: Partial<Notification>) =>
+			HttpService.post<boolean>('/notifications', notification),
+
 		/**
 		 * Deletes a notification.
-		 * @param quoteId - Notification ID to delete
+		 * User can only delete their own notifications.
+		 * @param id - Notification ID (GUID) to delete
 		 */
-		delete: async <T>(quoteId: string) => HttpService.delete<T>(`/notifications/${quoteId}`),
+		delete: async (id: string) =>
+			HttpService.delete<boolean>(`/notifications/${id}`),
+
+		/**
+		 * Rich search for notifications with filtering, sorting, pagination.
+		 * Supports RichDataGrid server-side operations.
+		 * @param filter - RichSearchFilter object
+		 */
+		richSearch: async (filter: RichSearchFilter) =>
+			HttpService.post<RichPagedResult<Notification>>('/notifications/search/rich', filter),
+
+		/**
+		 * Mark a single notification as read.
+		 * @param id - Notification ID (GUID)
+		 */
+		markAsRead: async (id: string) =>
+			HttpService.put<boolean>(`/notifications/${id}/read`, {}),
+
+		/**
+		 * Mark all notifications as read for current user.
+		 * Returns the count of notifications marked as read.
+		 */
+		markAllAsRead: async () =>
+			HttpService.put<number>('/notifications/read-all', {}),
 	},
 	
 	/**

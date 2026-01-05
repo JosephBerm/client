@@ -178,3 +178,26 @@ export const MODAL_ANIMATION = {
 	},
 } as const
 
+/**
+ * Tabs indicator animation configuration
+ * Material Design-inspired sliding indicator with spring physics
+ *
+ * **Design Principles:**
+ * - Reuses modal spring physics for consistency
+ * - Fast, responsive feel (matches user interaction speed)
+ * - Reduced motion fallback for accessibility
+ */
+export const TABS_INDICATOR_ANIMATION = {
+	/** Spring physics for smooth sliding (same as modal for consistency) */
+	spring: {
+		type: 'spring' as const,
+		stiffness: 400,
+		damping: 30,
+		mass: 0.8,
+	},
+	/** Fallback for reduced motion preference */
+	reducedMotion: {
+		duration: 0.001,
+	},
+} as const
+

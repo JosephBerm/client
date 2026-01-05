@@ -25,6 +25,7 @@
 
 import Link from 'next/link'
 
+import classNames from 'classnames'
 import { Download, Eye, FileSpreadsheet, Package, Plus, Truck } from 'lucide-react'
 
 import { useAuthStore } from '@_features/auth'
@@ -370,29 +371,72 @@ export default function OrdersPage() {
 }
 
 /**
- * Quick filter card for common status filters
+ * Quick filter card for common status filters.
+ *
+ * Uses Button component with outline variant and custom color overrides
+ * to create filter chip styling while maintaining consistent UX patterns.
  */
 interface QuickFilterCardProps {
 	label: string
 	icon: React.ReactNode
 	variant?: 'info' | 'warning' | 'success' | 'error'
+	active?: boolean
+	onClick?: () => void
 }
 
-function QuickFilterCard({ label, icon, variant = 'info' }: QuickFilterCardProps) {
-	const variantClasses = {
-		info: 'border-info/30 bg-info/10 text-info hover:bg-info/20',
-		warning: 'border-warning/30 bg-warning/10 text-warning hover:bg-warning/20',
-		success: 'border-success/30 bg-success/10 text-success hover:bg-success/20',
-		error: 'border-error/30 bg-error/10 text-error hover:bg-error/20',
+function QuickFilterCard({
+	label,
+	icon,
+	variant = 'info',
+	active = false,
+	onClick,
+}: QuickFilterCardProps) {
+	/**
+	 * Variant-specific styles for filter chips.
+	 * Uses DaisyUI semantic color tokens with opacity modifiers.
+	 */
+	const variantStyles = {
+		info: classNames(
+			'border-info/30 text-info',
+			active
+				? 'bg-info/20 border-info/60 ring-2 ring-info/20'
+				: 'bg-info/5 hover:bg-info/15 hover:border-info/50'
+		),
+		warning: classNames(
+			'border-warning/30 text-warning',
+			active
+				? 'bg-warning/20 border-warning/60 ring-2 ring-warning/20'
+				: 'bg-warning/5 hover:bg-warning/15 hover:border-warning/50'
+		),
+		success: classNames(
+			'border-success/30 text-success',
+			active
+				? 'bg-success/20 border-success/60 ring-2 ring-success/20'
+				: 'bg-success/5 hover:bg-success/15 hover:border-success/50'
+		),
+		error: classNames(
+			'border-error/30 text-error',
+			active
+				? 'bg-error/20 border-error/60 ring-2 ring-error/20'
+				: 'bg-error/5 hover:bg-error/15 hover:border-error/50'
+		),
 	}
 
 	return (
 		<Button
-			variant="ghost"
-			className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${variantClasses[variant]}`}
+			variant="outline"
+			size="sm"
+			onClick={onClick}
+			leftIcon={icon}
+			aria-pressed={active}
+			className={classNames(
+				// Reset outline variant defaults, apply chip styles
+				'border shadow-none hover:shadow-none',
+				// Variant-specific colors
+				variantStyles[variant]
+			)}
 		>
-			{icon}
-			<span className="font-medium text-sm">{label}</span>
+			{label}
 		</Button>
 	)
 }

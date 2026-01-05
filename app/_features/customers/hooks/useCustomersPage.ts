@@ -26,6 +26,8 @@ import type Company from '@_classes/Company'
 
 import { useAggregateStats } from './useAggregateStats'
 
+import type { CustomerStatusKey } from '../types'
+
 interface DeleteModalState {
 	isOpen: boolean
 	customer: Company | null
@@ -38,22 +40,24 @@ interface UseCustomersPageReturn {
 	showArchived: boolean
 	isDeleting: boolean
 	isArchiving: boolean
-	
+	statusFilter: CustomerStatusKey | 'all'
+
 	// Stats
 	stats: ReturnType<typeof useAggregateStats>['stats']
 	statsLoading: boolean
-	
+
 	// RBAC
 	isAdmin: boolean
 	canDelete: boolean
 	canViewArchived: boolean
-	
+
 	// Actions
 	openDeleteModal: (customer: Company) => void
 	closeDeleteModal: () => void
 	handleDelete: () => void
 	handleArchive: () => void
 	toggleShowArchived: () => void
+	setStatusFilter: (filter: CustomerStatusKey | 'all') => void
 	refreshData: () => void
 }
 
@@ -86,6 +90,7 @@ export function useCustomersPage(): UseCustomersPageReturn {
 	const [showArchived, setShowArchived] = useState(false)
 	const [isDeleting, setIsDeleting] = useState(false)
 	const [isArchiving, setIsArchiving] = useState(false)
+	const [statusFilter, setStatusFilterState] = useState<CustomerStatusKey | 'all'>('Active')
 	
 	// Fetch aggregate stats
 	const { stats, isLoading: statsLoading, refetch: refetchStats } = useAggregateStats({
@@ -120,6 +125,15 @@ export function useCustomersPage(): UseCustomersPageReturn {
 		setShowArchived((prev) => !prev)
 		// Refresh data to fetch archived/non-archived
 		setRefreshKey((prev) => prev + 1)
+	}
+
+	/**
+	 * Set the status filter for stat card filtering.
+	 * Triggers a data refresh to apply the new filter.
+	 */
+	const setStatusFilter = (filter: CustomerStatusKey | 'all') => {
+		setStatusFilterState(filter)
+		// Refresh handled by filterKey dependency in page
 	}
 	
 	/**
@@ -236,22 +250,24 @@ export function useCustomersPage(): UseCustomersPageReturn {
 		showArchived,
 		isDeleting,
 		isArchiving,
-		
+		statusFilter,
+
 		// Stats
 		stats,
 		statsLoading,
-		
+
 		// RBAC
 		isAdmin,
 		canDelete,
 		canViewArchived,
-		
+
 		// Actions
 		openDeleteModal,
 		closeDeleteModal,
 		handleDelete: () => void handleDelete(),
 		handleArchive: () => void handleArchive(),
 		toggleShowArchived,
+		setStatusFilter,
 		refreshData,
 	}
 }

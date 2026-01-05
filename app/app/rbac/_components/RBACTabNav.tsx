@@ -1,11 +1,31 @@
 /**
  * RBACTabNav Component
  *
- * Tab navigation for RBAC management page sections.
- * Supports admin-only tabs with visual indicators.
+ * @deprecated This component is deprecated. Use the generic Tabs component instead.
  *
- * Architecture: Controlled component - tab state managed by parent.
+ * Migration example:
+ * ```tsx
+ * import { Tabs, TabsList, Tab, TabPanel } from '@_components/ui/Tabs'
  *
+ * <Tabs value={activeTab} onValueChange={setActiveTab} variant="bordered">
+ *   <TabsList>
+ *     <Tab value="hierarchy" icon={<Shield />}>Role Hierarchy</Tab>
+ *     <Tab value="audit" badge="Admin" badgeVariant="admin" hidden={!canEdit}>
+ *       Audit Log
+ *     </Tab>
+ *   </TabsList>
+ *   <TabPanel value="hierarchy">Content here</TabPanel>
+ * </Tabs>
+ * ```
+ *
+ * The generic Tabs component provides:
+ * - Animated sliding indicator
+ * - Mobile horizontal scroll with fade indicators
+ * - Admin badge support via `badgeVariant="admin"`
+ * - Hidden tabs via `hidden` prop
+ * - Same accessibility features
+ *
+ * @see @_components/ui/Tabs for the enhanced component
  * @see prd_rbac_management.md
  * @module app/rbac/_components/RBACTabNav
  */

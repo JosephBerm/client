@@ -79,27 +79,32 @@ function EmptyState() {
 // ============================================================================
 
 export default function RBACPermissionsPage() {
-	const { isAdmin } = usePermissions()
+	const { isAdmin, isSalesManagerOrAbove } = usePermissions()
 	const {
 		overview,
 		matrix,
 		isLoadingOverview,
 		overviewError,
 		refreshOverview,
+		handlePermissionToggle,
+		togglingPermission,
+		optimisticUpdates,
+		getOptimisticKey,
 	} = useRBACManagement()
 
-	if (!isAdmin) {
+	// SalesManager+ can view (read-only), Admin can edit
+	if (!isSalesManagerOrAbove) {
 		return (
 			<>
 				<InternalPageHeader
 					title="Access Denied"
-					description="Administrator access required."
+					description="Sales Manager or above access required."
 				/>
 				<Card className="border-error/30 bg-error/5 p-8 text-center">
 					<Shield className="w-12 h-12 text-error mx-auto mb-4" />
 					<h3 className="text-lg font-semibold text-error">Access Restricted</h3>
 					<p className="mt-2 text-base-content/70">
-						This page is only accessible to administrators.
+						This page is only accessible to Sales Managers and above.
 					</p>
 				</Card>
 			</>
@@ -154,7 +159,11 @@ export default function RBACPermissionsPage() {
 				<PermissionMatrix
 					matrix={matrix}
 					roles={overview?.roles ?? []}
-					canEdit={false}
+					canEdit={isAdmin}
+					onPermissionToggle={handlePermissionToggle}
+					togglingPermission={togglingPermission}
+					optimisticUpdates={optimisticUpdates}
+					getOptimisticKey={getOptimisticKey}
 				/>
 			)}
 		</>

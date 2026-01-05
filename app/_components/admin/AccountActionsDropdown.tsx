@@ -1,9 +1,10 @@
 /**
  * AccountActionsDropdown Component
- * 
+ *
  * Admin-only dropdown menu for managing account status (Phase 1).
  * Context-aware actions based on current account status.
- * 
+ * Uses shared Dropdown component with portal rendering.
+ *
  * **Business Logic:**
  * - Shows relevant actions for current status
  * - Active → Suspend, Force Password Change, Archive
@@ -12,44 +13,25 @@
  * - Archived → Restore
  * - PendingVerification → Manually Verify
  * - ForcePasswordChange → Remove Requirement, Suspend
- * 
+ *
  * **UX Pattern:**
  * - Context menu with status-based actions
  * - Loading states during API calls
  * - Confirmation for destructive actions
  * - Success feedback via toasts
  * - Optimistic UI updates via callback
- * 
- * **MAANG Principle:**
- * - Context-aware actions (Google)
- * - Optimistic updates (Facebook)
- * - Clear feedback (Stripe)
- * - Confirmation for dangerous actions (GitHub)
- * 
- * @example
- * ```tsx
- * <AccountActionsDropdown
- *   account={user}
- *   onStatusChange={(accountId, newStatus) => {
- *     // Update local state optimistically
- *     setAccounts(prev =>
- *       prev.map(a => a.id === accountId ? { ...a, status: newStatus } : a)
- *     );
- *   }}
- * />
- * ```
- * 
+ *
  * @module AccountActionsDropdown
  */
 
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { MoreVertical, CheckCircle, AlertTriangle, Archive, RotateCcw, Key, Unlock } from 'lucide-react'
 
 import { AccountStatus } from '@_classes/Enums'
 
-import Button from '@_components/ui/Button'
+import { Dropdown } from '@_components/ui/Dropdown'
 import ConfirmationModal from '@_components/ui/ConfirmationModal'
 import SuspendAccountModal from '@_components/modals/SuspendAccountModal'
 
@@ -86,28 +68,14 @@ interface ActionItem {
 	key: string
 	label: string
 	icon: typeof CheckCircle
-	variant: 'default' | 'success' | 'warning' | 'error' | 'neutral'
-	confirmMessage?: string
+	variant: 'default' | 'success' | 'warning' | 'danger'
 }
 
 /**
  * AccountActionsDropdown Component
- * 
+ *
  * Displays context menu with available admin actions for the account.
  * Actions vary based on current account status.
- * 
- * **Features:**
- * - Status-aware action list
- * - Loading states
- * - Confirmation modals for dangerous actions
- * - Success/error notifications
- * - Optimistic UI updates
- * - Accessibility (keyboard navigation)
- * 
- * **Security:**
- * - Admin-only (parent should check permissions)
- * - API calls authenticated via backend
- * - Confirmation for destructive actions
  */
 export default function AccountActionsDropdown({
 	account,
@@ -117,23 +85,6 @@ export default function AccountActionsDropdown({
 	const [isLoading, setIsLoading] = useState(false)
 	const [showSuspendModal, setShowSuspendModal] = useState(false)
 	const [showArchiveConfirm, setShowArchiveConfirm] = useState(false)
-	const dropdownRef = useRef<HTMLDivElement>(null)
-
-	/**
-	 * Close dropdown when clicking outside
-	 */
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-				setIsOpen(false)
-			}
-		}
-
-		if (isOpen) {
-			document.addEventListener('mousedown', handleClickOutside)
-			return () => document.removeEventListener('mousedown', handleClickOutside)
-		}
-	}, [isOpen])
 
 	/**
 	 * Execute account action
@@ -157,9 +108,9 @@ export default function AccountActionsDropdown({
 						break
 
 					case 'suspend':
-						// Show modal instead of executing directly
 						setShowSuspendModal(true)
 						setIsLoading(false)
+						setIsOpen(false)
 						return
 
 					case 'unlock':
@@ -168,12 +119,11 @@ export default function AccountActionsDropdown({
 						notificationService.success('Account unlocked successfully')
 						break
 
-				case 'archive':
-					// Show confirmation modal for archive action
-					setShowArchiveConfirm(true)
-					setIsLoading(false)
-					setIsOpen(false)
-					return
+					case 'archive':
+						setShowArchiveConfirm(true)
+						setIsLoading(false)
+						setIsOpen(false)
+						return
 
 					case 'restore':
 						await API.Accounts.changeStatus(accountId, AccountStatus.Active)
@@ -183,8 +133,6 @@ export default function AccountActionsDropdown({
 
 					case 'force_password':
 						await API.Accounts.changeStatus(accountId, AccountStatus.ForcePasswordChange)
-						// Status doesn't necessarily change to ForcePasswordChange (just sets flag)
-						// But we can notify the parent if needed
 						notificationService.success(
 							'User will be required to change password on next login'
 						)
@@ -280,7 +228,7 @@ export default function AccountActionsDropdown({
 					key: 'suspend',
 					label: 'Suspend Account',
 					icon: AlertTriangle,
-					variant: 'error',
+					variant: 'danger',
 				})
 				actions.push({
 					key: 'force_password',
@@ -292,7 +240,7 @@ export default function AccountActionsDropdown({
 					key: 'archive',
 					label: 'Archive Account',
 					icon: Archive,
-					variant: 'neutral',
+					variant: 'default',
 				})
 				break
 
@@ -307,7 +255,7 @@ export default function AccountActionsDropdown({
 					key: 'archive',
 					label: 'Archive Account',
 					icon: Archive,
-					variant: 'neutral',
+					variant: 'default',
 				})
 				break
 
@@ -355,7 +303,7 @@ export default function AccountActionsDropdown({
 					key: 'suspend',
 					label: 'Suspend Account',
 					icon: AlertTriangle,
-					variant: 'error',
+					variant: 'danger',
 				})
 				break
 		}
@@ -370,16 +318,17 @@ export default function AccountActionsDropdown({
 		return null
 	}
 
+	const accountDisplayName =
+		`${account.name?.first ?? ''} ${account.name?.last ?? ''}`.trim() || account.username
+
 	return (
 		<>
-			{/* Dropdown */}
-			<div className="relative" ref={dropdownRef}>
-				<Button
+			<Dropdown open={isOpen} onOpenChange={setIsOpen}>
+				<Dropdown.Trigger
 					variant="ghost"
-					size="sm"
-					onClick={() => setIsOpen(!isOpen)}
+					showChevron={false}
+					className="w-8 h-8 p-0 min-h-0 sm:min-h-0"
 					disabled={isLoading}
-					className="w-8 h-8 p-0"
 					aria-label="Account actions"
 				>
 					{isLoading ? (
@@ -387,47 +336,33 @@ export default function AccountActionsDropdown({
 					) : (
 						<MoreVertical className="w-5 h-5" />
 					)}
-				</Button>
+				</Dropdown.Trigger>
 
-				{/* Dropdown Menu */}
-				{isOpen && (
-					<div className="absolute right-0 top-full mt-1 w-56 bg-base-100 rounded-box shadow-lg border border-base-300 z-50 overflow-hidden">
-						<div className="p-2">
-							<div className="text-xs font-semibold text-base-content/50 px-3 py-2">
-								Account Actions
-							</div>
-							{availableActions.map((action) => {
-								const Icon = action.icon
-								return (
-									<button
-										key={action.key}
-										onClick={() => handleAction(action.key)}
-										className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-base-200 transition-colors text-left ${
-											action.variant === 'error'
-												? 'text-error hover:bg-error/10'
-												: action.variant === 'warning'
-													? 'text-warning hover:bg-warning/10'
-													: action.variant === 'success'
-														? 'text-success hover:bg-success/10'
-														: 'text-base-content'
-										}`}
-									>
-										<Icon className="w-4 h-4" />
-										<span className="text-sm">{action.label}</span>
-									</button>
-								)
-							})}
-						</div>
-					</div>
-				)}
-			</div>
+				<Dropdown.Content align="end" width={224}>
+					<Dropdown.Section title="Account Actions">
+						{availableActions.map((action) => {
+							const Icon = action.icon
+							return (
+								<Dropdown.Item
+									key={action.key}
+									icon={<Icon className="w-4 h-4" />}
+									variant={action.variant}
+									onClick={() => handleAction(action.key)}
+								>
+									{action.label}
+								</Dropdown.Item>
+							)
+						})}
+					</Dropdown.Section>
+				</Dropdown.Content>
+			</Dropdown>
 
 			{/* Suspend Modal */}
 			<SuspendAccountModal
 				isOpen={showSuspendModal}
 				onClose={() => setShowSuspendModal(false)}
 				onConfirm={handleSuspendConfirm}
-				accountName={`${account.name?.first ?? ''} ${account.name?.last ?? ''}`.trim() || account.username}
+				accountName={accountDisplayName}
 			/>
 
 			{/* Archive Confirmation Modal (uses existing ConfirmationModal - DRY) */}
@@ -436,7 +371,7 @@ export default function AccountActionsDropdown({
 				onClose={() => setShowArchiveConfirm(false)}
 				onConfirm={handleArchiveConfirm}
 				title="Archive Account"
-				message={`Are you sure you want to archive the account for ${`${account.name?.first ?? ''} ${account.name?.last ?? ''}`.trim() || account.username}?`}
+				message={`Are you sure you want to archive the account for ${accountDisplayName}?`}
 				variant="danger"
 				confirmText="Archive Account"
 				cancelText="Cancel"
@@ -446,4 +381,3 @@ export default function AccountActionsDropdown({
 		</>
 	)
 }
-

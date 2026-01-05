@@ -28,17 +28,15 @@
 
 'use client'
 
-import { useState, useRef, useCallback, Fragment } from 'react'
+import { useState, useRef, useCallback, Fragment, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
 	Check,
-	X,
 	Filter,
 	Search,
-	Info,
-	ChevronDown,
 	ChevronRight,
 	Shield,
+	Loader2,
 } from 'lucide-react'
 
 import Card from '@_components/ui/Card'
@@ -60,6 +58,12 @@ interface PermissionMatrixProps {
 		roleLevel: number,
 		granted: boolean
 	) => void
+	/** Currently toggling permission (for loading state) */
+	togglingPermission?: { roleLevel: number; permissionString: string } | null
+	/** Optimistic updates map: key = `${roleLevel}:${permissionString}` */
+	optimisticUpdates?: Map<string, boolean>
+	/** Helper to generate optimistic key */
+	getOptimisticKey?: (roleLevel: number, permissionString: string) => string
 }
 
 interface GroupedPermissions {
@@ -123,6 +127,8 @@ function capitalize(str: string): string {
  * Permission indicator with MAANG-level visual design.
  * - Granted: Filled circle with check (prominent)
  * - Denied: Empty circle border (subtle, not an X)
+ * - Loading: Spinner during API call
+ * - Supports optimistic updates for instant feedback
  */
 function PermissionIndicator({
 	hasAccess,
@@ -130,40 +136,52 @@ function PermissionIndicator({
 	isHighestRole,
 	roleDisplayName,
 	onClick,
+	isLoading = false,
+	optimisticValue,
 }: {
 	hasAccess: boolean
 	isClickable: boolean
 	isHighestRole: boolean
 	roleDisplayName: string
 	onClick: () => void
+	isLoading?: boolean
+	optimisticValue?: boolean
 }) {
+	// Use optimistic value if present, otherwise actual value
+	const displayAccess = optimisticValue !== undefined ? optimisticValue : hasAccess
+
 	const title = isHighestRole
 		? `${roleDisplayName} always has all permissions`
-		: hasAccess
-			? 'Has access - Click to revoke'
-			: 'No access - Click to grant'
+		: isLoading
+			? 'Updating...'
+			: displayAccess
+				? 'Has access - Click to revoke'
+				: 'No access - Click to grant'
 
 	return (
 		<button
 			onClick={onClick}
-			disabled={!isClickable}
+			disabled={!isClickable || isLoading}
 			className={`
 				group relative inline-flex h-7 w-7 items-center justify-center rounded-full
 				transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
-				${hasAccess
+				${displayAccess
 					? 'bg-success text-success-content shadow-sm'
 					: 'border-2 border-base-300 bg-transparent'
 				}
-				${isClickable
+				${isClickable && !isLoading
 					? 'cursor-pointer hover:ring-2 hover:ring-primary/30 hover:ring-offset-1'
 					: 'cursor-default'
 				}
 				${isHighestRole ? 'opacity-60' : ''}
+				${isLoading ? 'opacity-70' : ''}
 			`}
 			title={title}
 			aria-label={title}
 		>
-			{hasAccess ? (
+			{isLoading ? (
+				<Loader2 className="h-3.5 w-3.5 animate-spin" />
+			) : displayAccess ? (
 				<Check className="h-3.5 w-3.5" strokeWidth={3} />
 			) : (
 				<span className="sr-only">No access</span>
@@ -175,6 +193,7 @@ function PermissionIndicator({
 /**
  * Mobile permission card for responsive view.
  * Shows single permission with all role states.
+ * Supports loading and optimistic states.
  */
 function MobilePermissionCard({
 	entry,
@@ -182,14 +201,29 @@ function MobilePermissionCard({
 	canEdit,
 	highestRoleLevel,
 	onToggle,
+	togglingPermission,
+	optimisticUpdates,
+	getOptimisticKey,
 }: {
 	entry: PermissionMatrixEntry
 	roles: RoleDefinitionDto[]
 	canEdit: boolean
 	highestRoleLevel: number
 	onToggle: (roleLevel: number, currentValue: boolean) => void
+	togglingPermission?: { roleLevel: number; permissionString: string } | null
+	optimisticUpdates?: Map<string, boolean>
+	getOptimisticKey?: (roleLevel: number, permissionString: string) => string
 }) {
-	const grantedCount = roles.filter((r) => entry.roleAccess[r.level]).length
+	const permissionString = entry.context
+		? `${entry.resource}:${entry.action}:${entry.context}`
+		: `${entry.resource}:${entry.action}`
+
+	// Calculate granted count considering optimistic updates
+	const grantedCount = roles.filter((r) => {
+		const optimisticKey = getOptimisticKey?.(r.level, permissionString)
+		const optimisticValue = optimisticKey ? optimisticUpdates?.get(optimisticKey) : undefined
+		return optimisticValue !== undefined ? optimisticValue : entry.roleAccess[r.level]
+	}).length
 
 	return (
 		<div className="rounded-lg border border-base-300 bg-base-100 p-4">
@@ -218,24 +252,39 @@ function MobilePermissionCard({
 					const isHighestRole = role.level === highestRoleLevel
 					const isClickable = canEdit && !isHighestRole
 
+					// Check for optimistic value
+					const optimisticKey = getOptimisticKey?.(role.level, permissionString)
+					const optimisticValue = optimisticKey ? optimisticUpdates?.get(optimisticKey) : undefined
+					const displayAccess = optimisticValue !== undefined ? optimisticValue : hasAccess
+
+					// Check if this cell is loading
+					const isLoading =
+						togglingPermission?.roleLevel === role.level &&
+						togglingPermission?.permissionString.toLowerCase() === permissionString.toLowerCase()
+
 					return (
 						<button
 							key={role.id}
-							onClick={() => isClickable && onToggle(role.level, hasAccess)}
-							disabled={!isClickable}
+							onClick={() => isClickable && !isLoading && onToggle(role.level, hasAccess)}
+							disabled={!isClickable || isLoading}
 							className={`
 								flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium
 								transition-all duration-200
-								${hasAccess
+								${displayAccess
 									? `${config.headerColor} text-white`
 									: 'bg-base-200 text-base-content/50'
 								}
-								${isClickable ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}
+								${isClickable && !isLoading ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}
 								${isHighestRole ? 'opacity-60' : ''}
+								${isLoading ? 'opacity-70' : ''}
 							`}
-							title={`${role.displayName}: ${hasAccess ? 'Has access' : 'No access'}`}
+							title={`${role.displayName}: ${displayAccess ? 'Has access' : 'No access'}`}
 						>
-							{hasAccess && <Check className="h-3 w-3" />}
+							{isLoading ? (
+								<Loader2 className="h-3 w-3 animate-spin" />
+							) : displayAccess ? (
+								<Check className="h-3 w-3" />
+							) : null}
 							<span>{config.abbreviation}</span>
 						</button>
 					)
@@ -308,6 +357,9 @@ export function PermissionMatrix({
 	roles,
 	canEdit = false,
 	onPermissionToggle,
+	togglingPermission,
+	optimisticUpdates,
+	getOptimisticKey,
 }: PermissionMatrixProps) {
 	// State
 	const [searchTerm, setSearchTerm] = useState('')
@@ -352,10 +404,12 @@ export function PermissionMatrix({
 	const groupedPermissions = groupPermissionsByResource(filteredMatrix, roleLevels)
 
 	// Initialize expanded groups (expand all by default on first load)
-	if (expandedGroups.size === 0 && groupedPermissions.length > 0) {
-		const allGroups = new Set(groupedPermissions.map((g) => g.resource))
-		setExpandedGroups(allGroups)
-	}
+	// FIX: Moved to useEffect to avoid setState during render
+	useEffect(() => {
+		if (expandedGroups.size === 0 && groupedPermissions.length > 0) {
+			setExpandedGroups(new Set(groupedPermissions.map((g) => g.resource)))
+		}
+	}, [groupedPermissions.length]) // Only re-run when data loads
 
 	// Find highest role level
 	const highestRoleLevel = sortedRoles.length > 0
@@ -376,15 +430,41 @@ export function PermissionMatrix({
 	// HANDLERS
 	// ---------------------------------------------------------------------------
 
-	const handlePermissionClick = useCallback(
-		(entry: PermissionMatrixEntry, roleLevel: number, currentValue: boolean) => {
-			if (!canEdit || !onPermissionToggle) return
-			if (roleLevel === highestRoleLevel) return
+	/**
+	 * Handle permission toggle click.
+	 * React Compiler auto-memoizes - no useCallback needed.
+	 * This ensures we always have the latest prop values.
+	 */
+	const handlePermissionClick = (
+		entry: PermissionMatrixEntry,
+		roleLevel: number,
+		currentValue: boolean
+	) => {
+		// Debug: Log click attempt (remove in production)
+		console.log('[PermissionMatrix] handlePermissionClick called', {
+			canEdit,
+			hasOnPermissionToggle: !!onPermissionToggle,
+			roleLevel,
+			highestRoleLevel,
+			entry: `${entry.resource}:${entry.action}`,
+		})
 
-			onPermissionToggle(entry.resource, entry.action, entry.context, roleLevel, !currentValue)
-		},
-		[canEdit, onPermissionToggle, highestRoleLevel]
-	)
+		if (!canEdit) {
+			console.warn('[PermissionMatrix] Click ignored: canEdit is false')
+			return
+		}
+		if (!onPermissionToggle) {
+			console.warn('[PermissionMatrix] Click ignored: onPermissionToggle is undefined')
+			return
+		}
+		if (roleLevel === highestRoleLevel) {
+			console.warn('[PermissionMatrix] Click ignored: clicking highest role (admin)')
+			return
+		}
+
+		console.log('[PermissionMatrix] Calling onPermissionToggle...')
+		onPermissionToggle(entry.resource, entry.action, entry.context, roleLevel, !currentValue)
+	}
 
 	const toggleGroup = useCallback((resource: string) => {
 		setExpandedGroups((prev) => {
@@ -620,6 +700,20 @@ export function PermissionMatrix({
 																focusedCell?.row === globalIndex &&
 																focusedCell?.col === colIndex
 
+															// Build permission string for optimistic lookup
+															const permissionString = entry.context
+																? `${entry.resource}:${entry.action}:${entry.context}`
+																: `${entry.resource}:${entry.action}`
+
+															// Check for optimistic value
+															const optimisticKey = getOptimisticKey?.(role.level, permissionString)
+															const optimisticValue = optimisticKey ? optimisticUpdates?.get(optimisticKey) : undefined
+
+															// Check if this cell is loading
+															const isLoading =
+																togglingPermission?.roleLevel === role.level &&
+																togglingPermission?.permissionString.toLowerCase() === permissionString.toLowerCase()
+
 															return (
 																<td
 																	key={role.id}
@@ -634,6 +728,8 @@ export function PermissionMatrix({
 																		isHighestRole={isHighestRole}
 																		roleDisplayName={role.displayName}
 																		onClick={() => handlePermissionClick(entry, role.level, hasAccess)}
+																		isLoading={isLoading}
+																		optimisticValue={optimisticValue}
 																	/>
 																</td>
 															)
@@ -695,6 +791,9 @@ export function PermissionMatrix({
 													onToggle={(roleLevel, currentValue) =>
 														handlePermissionClick(entry, roleLevel, currentValue)
 													}
+													togglingPermission={togglingPermission}
+													optimisticUpdates={optimisticUpdates}
+													getOptimisticKey={getOptimisticKey}
 												/>
 											))}
 										</motion.div>

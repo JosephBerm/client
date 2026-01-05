@@ -654,6 +654,39 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 	}
 
 	// ========================================================================
+	// OPTIMISTIC UPDATE HELPERS
+	// ========================================================================
+
+	/**
+	 * Update a single row optimistically.
+	 * Immediately updates the UI without waiting for server response.
+	 */
+	const updateRow = (rowId: string | number, updater: (row: TData) => TData) => {
+		const rowIdStr = String(rowId)
+		setServerData((prev) =>
+			prev.map((row) => (getRowId(row) === rowIdStr ? updater(row) : row))
+		)
+	}
+
+	/**
+	 * Update multiple rows that match a predicate.
+	 */
+	const updateRows = (predicate: (row: TData) => boolean, updater: (row: TData) => TData) => {
+		setServerData((prev) =>
+			prev.map((row) => (predicate(row) ? updater(row) : row))
+		)
+	}
+
+	/**
+	 * Remove a row optimistically.
+	 */
+	const removeRow = (rowId: string | number) => {
+		const rowIdStr = String(rowId)
+		setServerData((prev) => prev.filter((row) => getRowId(row) !== rowIdStr))
+		setTotalItems((prev) => Math.max(0, prev - 1))
+	}
+
+	// ========================================================================
 	// RETURN
 	// ========================================================================
 
@@ -721,6 +754,11 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 		// Actions
 		refresh,
 		exportData: exportGridData,
+
+		// Optimistic updates
+		updateRow,
+		updateRows,
+		removeRow,
 	}
 }
 

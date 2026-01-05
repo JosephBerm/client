@@ -250,5 +250,25 @@ export function useRichDataGridFacets() {
 	}
 }
 
+/**
+ * Hook to access optimistic update functions.
+ * Use for immediate UI feedback while API calls complete in background.
+ *
+ * @example
+ * const { updateRow, removeRow } = useRichDataGridOptimistic<Notification>()
+ *
+ * // Mark as read optimistically
+ * updateRow(notification.id, (row) => ({ ...row, read: true }))
+ */
+export function useRichDataGridOptimistic<TData = unknown>() {
+	const { updateRow, updateRows, removeRow } = useRichDataGridContext<TData>()
+
+	return {
+		updateRow,
+		updateRows,
+		removeRow,
+	}
+}
+
 export default RichDataGridContext
 

@@ -64,6 +64,7 @@ import type { IUser } from '@_classes/User'
 import Button from '@_components/ui/Button'
 
 import FormInput from './FormInput'
+import PasswordStrengthMeter from './PasswordStrengthMeter'
 
 
 
@@ -175,8 +176,11 @@ export default function ChangePasswordForm({ user }: ChangePasswordFormProps) {
     }
   }, [form, handleSubmit])
 
+  // Watch new password for real-time strength feedback
+  const watchedNewPassword = form.watch('newPassword') || ''
+
   return (
-    <form onSubmit={onFormSubmit} className="space-y-6 max-w-md">
+    <form onSubmit={onFormSubmit} className="space-y-6">
       <FormInput
         label="Current Password"
         type="password"
@@ -186,14 +190,18 @@ export default function ChangePasswordForm({ user }: ChangePasswordFormProps) {
         autoComplete="current-password"
       />
 
-      <FormInput
-        label="New Password"
-        type="password"
-        {...form.register('newPassword')}
-        error={form.formState.errors.newPassword}
-        disabled={isSubmitting}
-        autoComplete="new-password"
-      />
+      {/* New Password with Strength Meter */}
+      <div className="space-y-3">
+        <FormInput
+          label="New Password"
+          type="password"
+          {...form.register('newPassword')}
+          error={form.formState.errors.newPassword}
+          disabled={isSubmitting}
+          autoComplete="new-password"
+        />
+        <PasswordStrengthMeter password={watchedNewPassword} />
+      </div>
 
       <FormInput
         label="Confirm New Password"
@@ -204,7 +212,7 @@ export default function ChangePasswordForm({ user }: ChangePasswordFormProps) {
         autoComplete="new-password"
       />
 
-      <div className="flex justify-end">
+      <div className="flex justify-end pt-2">
         <Button type="submit" variant="primary" loading={isSubmitting} disabled={isSubmitting}>
           Change Password
         </Button>

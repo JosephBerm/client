@@ -10,6 +10,15 @@ import type Company from '@_classes/Company'
 import { TypeOfBusiness, CustomerStatus } from '@_classes/Enums'
 
 /**
+ * Customer status filter keys for stat card filtering.
+ * Maps to CustomerStatus enum values for backend API compatibility.
+ *
+ * Note: These values must match the CustomerStatus enum names (case-insensitive)
+ * as the backend SelectFilterBuilder uses enum.TryParse for conversion.
+ */
+export type CustomerStatusKey = 'Active' | 'PendingVerification' | 'Suspended' | 'Inactive'
+
+/**
  * Customer statistics returned from the API.
  */
 export interface CustomerStats {

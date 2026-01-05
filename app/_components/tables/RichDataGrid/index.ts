@@ -19,7 +19,7 @@
 
 // === MAIN COMPONENT ===
 export { RichDataGrid } from './RichDataGrid'
-export type { RichDataGridProps } from './RichDataGrid'
+export type { RichDataGridProps, RichDataGridApi } from './RichDataGrid'
 
 // === HOOKS ===
 export { useRichDataGrid } from './hooks/useRichDataGrid'
@@ -34,6 +34,8 @@ export type { UseRangeSelectionOptions, UseRangeSelectionReturn } from './hooks/
 export { useKeyboardNavigation } from './hooks/useKeyboardNavigation'
 export type { UseKeyboardNavigationOptions, UseKeyboardNavigationReturn } from './hooks/useKeyboardNavigation'
 
+export { useClickOutside, useEscapeKey } from './hooks/useClickOutside'
+
 // === CONTEXT ===
 export {
 	RichDataGridProvider,
@@ -45,6 +47,7 @@ export {
 	useRichDataGridLoading,
 	useRichDataGridPinning,
 	useRichDataGridFacets,
+	useRichDataGridOptimistic,
 } from './context/RichDataGridContext'
 
 // === TOOLBAR COMPONENTS ===

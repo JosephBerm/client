@@ -15,8 +15,9 @@
 
 import { useState, useEffect } from 'react'
 import { X, Download, FileSpreadsheet, FileText, File, Check } from 'lucide-react'
+import { useEscapeKey } from '@_shared'
+
 import { useRichDataGridContext, useRichDataGridSelection } from '../../context/RichDataGridContext'
-import { useEscapeKey } from '../../hooks/useClickOutside'
 import {
 	ExportFormat,
 	ExportScope,

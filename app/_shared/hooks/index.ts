@@ -1,22 +1,23 @@
 /**
  * Shared Hooks - Barrel Export
- * 
+ *
  * Reusable React hooks used across multiple features.
- * 
+ *
  * @module shared/hooks
  */
 
 export { useDebounce } from './useDebounce'
+export { useClickOutside, useEscapeKey } from './useClickOutside'
 export { useMediaQuery } from './useMediaQuery'
 export { useGridColumns } from './useGridColumns'
 export { useModal } from './useModal'
 export { useFocusTrap } from './useFocusTrap'
 export { useAccordion } from './useAccordion'
 export { useScrollSpy } from './useScrollSpy'
-export { 
-	useFetchWithCache, 
-	prefetch, 
-	invalidateCache, 
+export {
+	useFetchWithCache,
+	prefetch,
+	invalidateCache,
 	getCacheStats,
 	type FetchWithCacheOptions,
 	type FetchWithCacheReturn,
@@ -65,11 +66,11 @@ export type { UsePermissionsReturn } from './usePermissions'
 // because it's development-only and should not be bundled in production.
 // Import directly from '@_shared/hooks' when needed in dev components.
 export { useMcpChat } from './useMcpChat'
-export type { 
-	McpMessage, 
-	McpTool, 
-	McpResource, 
-	McpConnectionStatus, 
+export type {
+	McpMessage,
+	McpTool,
+	McpResource,
+	McpConnectionStatus,
 	UseMcpChatReturn,
 } from './useMcpChat'
 

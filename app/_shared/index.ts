@@ -1,32 +1,32 @@
 /**
  * Shared Module - Main Exports (Optimized for Tree-Shaking)
- * 
+ *
  * Cross-feature utilities, hooks, and services used by 3+ features.
- * 
+ *
  * **Architecture:**
  * - Pure Utilities: Server + Client safe (no directives needed)
  * - Services: Client-only (all have 'use client' directive)
  * - Hooks: Client-only (all have 'use client' directive)
- * 
+ *
  * **Usage Guidelines:**
  * - ✅ Client Components: All exports available
  * - ⚠️  Server Components: Only import utilities (formatters, businessHours, etc.)
  * - 🚫 Never import hooks/services in Server Components without 'use client'
- * 
+ *
  * **Tree-Shaking:**
  * Named exports enable optimal tree-shaking with Turbopack.
  * Only imported exports are bundled.
- * 
+ *
  * @example
  * ```typescript
  * // Client Component
  * 'use client'
  * import { useDebounce, API, notificationService } from '@_shared'
- * 
+ *
  * // Server Component (utilities only)
  * import { formatDate, formatCurrency } from '@_shared'
  * ```
- * 
+ *
  * @module shared
  */
 
@@ -118,8 +118,8 @@ export {
 } from './services/httpService.constants'
 
 // API Client
-export { 
-	default as API, 
+export {
+	default as API,
 	type RoleDistribution,
 	type AdminCreateAccountRequest,
 	type AdminCreateAccountResponse,
@@ -174,9 +174,12 @@ export type {
 
 // Basic Hooks
 export { useDebounce } from './hooks/useDebounce'
+export { useClickOutside, useEscapeKey } from './hooks/useClickOutside'
 export { useMediaQuery } from './hooks/useMediaQuery'
 export { useGridColumns } from './hooks/useGridColumns'
 export { useModal } from './hooks/useModal'
+export { usePopoverPosition } from './hooks/usePopoverPosition'
+export type { PopoverPosition, UsePopoverPositionOptions } from './hooks/usePopoverPosition'
 
 // Interaction Hooks
 export { useFocusTrap } from './hooks/useFocusTrap'

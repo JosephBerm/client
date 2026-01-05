@@ -21,9 +21,7 @@ import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Filter, X, Check } from 'lucide-react'
 
-import { usePopoverPosition } from '@_shared/hooks'
-
-import { useClickOutside, useEscapeKey } from '../../hooks/useClickOutside'
+import { usePopoverPosition, useClickOutside, useEscapeKey } from '@_shared/hooks'
 import {
 	FilterType,
 	type ColumnId,

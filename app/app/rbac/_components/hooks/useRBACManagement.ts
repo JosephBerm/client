@@ -101,6 +101,18 @@ export interface UseRBACManagementReturn {
 	bulkUpdateRoles: (userIds: number[], newRole: AccountRoleType, reason?: string) => Promise<BulkRoleUpdateResult | null>
 	invalidateAll: () => void
 
+	// Permission Toggle (with optimistic updates)
+	handlePermissionToggle: (
+		resource: string,
+		action: string,
+		context: string | null,
+		roleLevel: number,
+		granted: boolean
+	) => Promise<boolean>
+	togglingPermission: { roleLevel: number; permissionString: string } | null
+	optimisticUpdates: Map<string, boolean>
+	getOptimisticKey: (roleLevel: number, permissionString: string) => string
+
 	// Filters
 	auditLogFilters: AuditLogFilters
 	setAuditLogFilters: (filters: AuditLogFilters) => void
@@ -230,6 +242,25 @@ export function useRBACManagement(): UseRBACManagementReturn {
 		page: PAGINATION.DEFAULT_PAGE,
 		pageSize: PAGINATION.DEFAULT_PAGE_SIZE,
 	})
+
+	// =========================================================================
+	// PERMISSION TOGGLE STATE (Optimistic Updates)
+	// =========================================================================
+
+	const [togglingPermission, setTogglingPermission] = useState<{
+		roleLevel: number
+		permissionString: string
+	} | null>(null)
+
+	// Optimistic updates: key = `${roleLevel}:${permissionString}`, value = new granted state
+	const [optimisticUpdates, setOptimisticUpdates] = useState<Map<string, boolean>>(new Map())
+
+	/**
+	 * Generate optimistic key for a permission toggle.
+	 * Used by both hook and components to track optimistic state.
+	 */
+	const getOptimisticKey = (roleLevel: number, permissionString: string) =>
+		`${roleLevel}:${permissionString.toLowerCase()}`
 
 	/**
 	 * Fetch users with roles for bulk management.
@@ -385,6 +416,160 @@ export function useRBACManagement(): UseRBACManagementReturn {
 		setUsers(null)
 	}
 
+	/**
+	 * Handles permission toggle from PermissionMatrix component.
+	 * Implements optimistic updates for instant UI feedback.
+	 *
+	 * Pattern: Facebook/Meta optimistic update with rollback
+	 * 1. Immediately update UI (optimistic)
+	 * 2. Call API
+	 * 3. On success: clear optimistic state, refetch for consistency
+	 * 4. On failure: rollback optimistic state, show error
+	 *
+	 * React Compiler: No useCallback needed - compiler auto-memoizes.
+	 */
+	const handlePermissionToggle = async (
+		resource: string,
+		action: string,
+		context: string | null,
+		roleLevel: number,
+		granted: boolean
+	): Promise<boolean> => {
+		// Debug: Log entry into handler
+		console.log('[useRBACManagement] handlePermissionToggle called', {
+			resource,
+			action,
+			context,
+			roleLevel,
+			granted,
+			canEdit,
+			hasOverview: !!overview,
+		})
+
+		// Permission check
+		if (!canEdit) {
+			console.warn('[useRBACManagement] Permission denied: canEdit is false')
+			notificationService.error(ERROR_MESSAGES.PERMISSION_DENIED, {
+				component: 'useRBACManagement',
+				action: 'togglePermission',
+			})
+			return false
+		}
+
+		// Validate overview data loaded
+		if (!overview) {
+			notificationService.error('RBAC data not loaded', {
+				component: 'useRBACManagement',
+				action: 'togglePermission',
+			})
+			return false
+		}
+
+		// Map roleLevel to roleId
+		const role = overview.roles.find((r) => r.level === roleLevel)
+		if (!role) {
+			notificationService.error(`Role not found for level ${roleLevel}`, {
+				component: 'useRBACManagement',
+				action: 'togglePermission',
+			})
+			return false
+		}
+
+		// Map permission string to permissionId
+		const permissionString = context
+			? `${resource}:${action}:${context}`
+			: `${resource}:${action}`
+
+		const permission = overview.permissions.find(
+			(p) => p.permissionString.toLowerCase() === permissionString.toLowerCase()
+		)
+		if (!permission) {
+			notificationService.error(`Permission not found: ${permissionString}`, {
+				component: 'useRBACManagement',
+				action: 'togglePermission',
+			})
+			return false
+		}
+
+		const optimisticKey = getOptimisticKey(roleLevel, permissionString)
+
+		// OPTIMISTIC UPDATE: Immediately show new state
+		setOptimisticUpdates((prev) => {
+			const next = new Map(prev)
+			next.set(optimisticKey, granted)
+			return next
+		})
+		setTogglingPermission({ roleLevel, permissionString })
+
+		try {
+			logger.info('Toggling permission', {
+				component: 'useRBACManagement',
+				action: 'togglePermission',
+				roleId: role.id,
+				permissionId: permission.id,
+				granted,
+			})
+
+			const { data } = granted
+				? await API.RBAC.Roles.assignPermission(role.id, permission.id)
+				: await API.RBAC.Roles.removePermission(role.id, permission.id)
+
+			if (data.statusCode === 200) {
+				// SUCCESS: Clear optimistic state and refetch for data consistency
+				setOptimisticUpdates((prev) => {
+					const next = new Map(prev)
+					next.delete(optimisticKey)
+					return next
+				})
+
+				notificationService.success(
+					granted ? 'Permission granted' : 'Permission revoked',
+					{ component: 'useRBACManagement', action: 'togglePermission' }
+				)
+
+				// Background refetch for consistency (don't await)
+				invalidateOverview()
+				refetchOverview()
+
+				return true
+			}
+
+			// API returned error - ROLLBACK
+			setOptimisticUpdates((prev) => {
+				const next = new Map(prev)
+				next.delete(optimisticKey)
+				return next
+			})
+
+			notificationService.error(data.message ?? 'Failed to update permission', {
+				component: 'useRBACManagement',
+				action: 'togglePermission',
+			})
+			return false
+		} catch (err) {
+			// Exception - ROLLBACK
+			setOptimisticUpdates((prev) => {
+				const next = new Map(prev)
+				next.delete(optimisticKey)
+				return next
+			})
+
+			const errorMessage = err instanceof Error ? err.message : 'Failed to update permission'
+			notificationService.error(errorMessage, {
+				component: 'useRBACManagement',
+				action: 'togglePermission',
+			})
+			logger.error('Permission toggle failed', {
+				component: 'useRBACManagement',
+				action: 'togglePermission',
+				error: err instanceof Error ? err.message : 'Unknown error',
+			})
+			return false
+		} finally {
+			setTogglingPermission(null)
+		}
+	}
+
 	// =========================================================================
 	// RETURN
 	// =========================================================================
@@ -432,6 +617,12 @@ export function useRBACManagement(): UseRBACManagementReturn {
 		fetchUsers,
 		bulkUpdateRoles,
 		invalidateAll,
+
+		// Permission Toggle (with optimistic updates)
+		handlePermissionToggle,
+		togglingPermission,
+		optimisticUpdates,
+		getOptimisticKey,
 
 		// Filters
 		auditLogFilters,

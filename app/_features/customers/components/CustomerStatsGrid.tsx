@@ -1,75 +1,105 @@
 /**
  * CustomerStatsGrid Component
- * 
+ *
  * Displays aggregate customer statistics in a responsive grid layout.
- * Uses shared StatCard component for DRY code.
- * 
+ * Supports click-to-filter functionality on stat cards.
+ *
+ * **Features:**
+ * - Clickable stat cards that filter the customer table
+ * - Visual selection indicator (ring) on active filter
+ * - Mobile-first responsive grid (2 cols mobile, 4 cols desktop)
+ * - DaisyUI theme integration
+ *
  * @module customers/components
  */
 
 'use client'
 
-import { Archive, Building2, Clock, UserCheck } from 'lucide-react'
+import { Archive, Building2, CheckCircle, Clock } from 'lucide-react'
 
-import StatCard from '@_components/ui/StatCard'
+import FilterableStatCard from '@_components/ui/FilterableStatCard'
 
-import type { AggregateCustomerStats } from '../types'
+import type { AggregateCustomerStats, CustomerStatusKey } from '../types'
 
 interface CustomerStatsGridProps {
+	/** Customer statistics data */
 	stats: AggregateCustomerStats | null
+	/** Whether stats are loading */
 	isLoading: boolean
-	showArchived?: boolean
+	/** Currently selected status filter */
+	selectedFilter?: CustomerStatusKey | 'all'
+	/** Callback when a stat card is clicked */
+	onFilterClick?: (filter: CustomerStatusKey | 'all') => void
 }
 
 /**
  * CustomerStatsGrid Component
- * 
- * Renders a 2x2 (mobile) or 4x1 (desktop) grid of customer statistics.
- * Automatically handles loading states with skeleton animations.
+ *
+ * Renders a responsive grid of customer statistics cards.
+ * Cards are clickable to filter the customer list by status.
+ *
+ * @example
+ * ```tsx
+ * const [filter, setFilter] = useState<CustomerStatusKey | 'all'>('all')
+ *
+ * <CustomerStatsGrid
+ *   stats={stats}
+ *   isLoading={isLoading}
+ *   selectedFilter={filter}
+ *   onFilterClick={setFilter}
+ * />
+ * ```
  */
-function CustomerStatsGrid({ stats, isLoading, showArchived }: CustomerStatsGridProps) {
+function CustomerStatsGrid({
+	stats,
+	isLoading,
+	selectedFilter,
+	onFilterClick,
+}: CustomerStatsGridProps) {
 	return (
 		<div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-6">
-			<StatCard
+			<FilterableStatCard
+				icon={<Building2 className="w-4 h-4 sm:w-5 sm:h-5" />}
 				label="Total"
-				value={stats?.totalCustomers ?? 0}
-				icon={<Building2 size={24} />}
+				value={stats?.totalCustomers ?? null}
 				isLoading={isLoading}
+				color="text-primary"
+				bgColor="bg-primary/10"
+				isSelected={selectedFilter === 'all'}
+				onClick={onFilterClick ? () => onFilterClick('all') : undefined}
 			/>
-			<StatCard
+			<FilterableStatCard
+				icon={<CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />}
 				label="Active"
-				value={stats?.activeCustomers ?? 0}
-				icon={<Building2 size={24} />}
-				colorClass="text-success"
+				value={stats?.activeCustomers ?? null}
 				isLoading={isLoading}
+				color="text-success"
+				bgColor="bg-success/10"
+				isSelected={selectedFilter === 'Active'}
+				onClick={onFilterClick ? () => onFilterClick('Active') : undefined}
 			/>
-			<StatCard
+			<FilterableStatCard
+				icon={<Clock className="w-4 h-4 sm:w-5 sm:h-5" />}
 				label="Pending"
-				value={stats?.pendingVerification ?? 0}
-				icon={<Clock size={24} />}
-				colorClass="text-warning"
+				value={stats?.pendingVerification ?? null}
 				isLoading={isLoading}
+				color="text-warning"
+				bgColor="bg-warning/10"
+				isSelected={selectedFilter === 'PendingVerification'}
+				onClick={onFilterClick ? () => onFilterClick('PendingVerification') : undefined}
 			/>
-			{showArchived ? (
-				<StatCard
-					label="Archived"
-					value={(stats?.totalCustomers ?? 0) - (stats?.activeCustomers ?? 0)}
-					icon={<Archive size={24} />}
-					colorClass="text-base-content/50"
-					isLoading={isLoading}
-				/>
-			) : (
-				<StatCard
-					label="Assigned"
-					value={stats?.assignedToSalesRep ?? 0}
-					icon={<UserCheck size={24} />}
-					colorClass="text-info"
-					isLoading={isLoading}
-				/>
-			)}
+			<FilterableStatCard
+				icon={<Archive className="w-4 h-4 sm:w-5 sm:h-5" />}
+				label="Inactive"
+				value={stats?.inactiveCustomers ?? null}
+				isLoading={isLoading}
+				color="text-error"
+				bgColor="bg-error/10"
+				isSelected={selectedFilter === 'Inactive'}
+				onClick={onFilterClick ? () => onFilterClick('Inactive') : undefined}
+			/>
 		</div>
 	)
 }
 
 export default CustomerStatsGrid
-

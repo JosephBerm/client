@@ -85,5 +85,6 @@ export type {
 	CustomerListItem,
 	CustomerStats,
 	CustomerStatusConfig,
+	CustomerStatusKey,
 } from './types'
 

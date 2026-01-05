@@ -24,14 +24,22 @@
  *    - All UI logic delegated to child components
  *    - Clean separation of concerns
  *
+ * 4. **Generic Tabs Component**:
+ *    - Uses consolidated Tabs component from @_components/ui/Tabs
+ *    - DRY principle - same component used across app
+ *    - Animated sliding indicator and mobile scroll support
+ *
  * Component Hierarchy:
  * - RBACManagementPage (this file)
  *   ├── AccessDenied (if unauthorized)
  *   ├── InternalPageHeader + RBACPageActions
  *   ├── RBACErrorAlert (if error)
  *   ├── RBACStatsCards (overview stats)
- *   ├── RBACTabNav (tab navigation)
- *   ├── RBACTabContent (active tab content)
+ *   ├── Tabs (generic tabs with TabPanel content)
+ *   │   ├── TabPanel: RoleHierarchyDiagram
+ *   │   ├── TabPanel: PermissionMatrix
+ *   │   ├── TabPanel: AuditLogRichDataGrid (admin only)
+ *   │   └── TabPanel: UserRolesRichDataGrid (admin only)
  *   └── BulkRoleModal (modal overlay)
  *
  * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler
@@ -43,20 +51,27 @@
 
 import { useState } from 'react'
 
+import { Shield, Table, History, UserCog } from 'lucide-react'
+
+import { Tabs, TabsList, Tab, TabPanel } from '@_components/ui/Tabs'
+
 import { InternalPageHeader } from '../_components'
 
 import {
 	// Page composition
 	AccessDenied,
 	RBACStatsCards,
-	RBACTabNav,
-	RBACTabContent,
 	RBACPageActions,
 	RBACErrorAlert,
 	BulkRoleModal,
+	// Feature components
+	RoleHierarchyDiagram,
+	PermissionMatrix,
+	AuditLogRichDataGrid,
+	UserRolesRichDataGrid,
 	// Hook
 	useRBACManagement,
-	// Types
+	// Types (keep for type safety)
 	type RBACTabId,
 } from './_components'
 
@@ -122,24 +137,17 @@ export default function RBACManagementPage() {
 	/**
 	 * Handle tab change with lazy loading for admin tabs
 	 */
-	const handleTabChange = (tabId: RBACTabId) => {
-		setActiveTab(tabId)
+	const handleTabChange = (tabId: string) => {
+		const newTab = tabId as RBACTabId
+		setActiveTab(newTab)
 
 		// Lazy load data for admin-only tabs
-		if (tabId === 'audit' && canViewAuditLogs && !auditLog) {
+		if (newTab === 'audit' && canViewAuditLogs && !auditLog) {
 			void fetchAuditLog()
 		}
-		if (tabId === 'users' && canEdit && !users) {
+		if (newTab === 'users' && canEdit && !users) {
 			void fetchUsers()
 		}
-	}
-
-	/**
-	 * Handle audit log filter changes
-	 */
-	const handleAuditLogFiltersChange = (filters: typeof auditLogFilters) => {
-		setAuditLogFilters(filters)
-		void fetchAuditLog(filters)
 	}
 
 	/**
@@ -199,22 +207,55 @@ export default function RBACManagementPage() {
 			{/* Stats Cards */}
 			{overview && <RBACStatsCards overview={overview} />}
 
-			{/* Tab Navigation */}
-			<RBACTabNav
-				activeTab={activeTab}
-				onTabChange={handleTabChange}
-				canEdit={canEdit}
-			/>
+			{/* Tab Navigation - Using Generic Tabs Component */}
+			<Tabs value={activeTab} onValueChange={handleTabChange} variant="bordered">
+				<TabsList className="mb-6">
+					<Tab value="hierarchy" icon={<Shield className="h-4 w-4" />}>
+						Role Hierarchy
+					</Tab>
+					<Tab value="matrix" icon={<Table className="h-4 w-4" />}>
+						Permission Matrix
+					</Tab>
+					<Tab
+						value="audit"
+						icon={<History className="h-4 w-4" />}
+						badge="Admin"
+						badgeVariant="admin"
+						hidden={!canViewAuditLogs}
+					>
+						Audit Log
+					</Tab>
+					<Tab
+						value="users"
+						icon={<UserCog className="h-4 w-4" />}
+						badge="Admin"
+						badgeVariant="admin"
+						hidden={!canEdit}
+					>
+						User Roles
+					</Tab>
+				</TabsList>
 
-			{/* Tab Content - Now uses RichDataGrid internally for server-side filtering */}
-			<RBACTabContent
-				activeTab={activeTab}
-				overview={overview}
-				matrix={matrix}
-				canEdit={canEdit}
-				canViewAuditLogs={canViewAuditLogs}
-				onOpenBulkModal={handleOpenBulkModal}
-			/>
+				{/* Role Hierarchy Tab */}
+				<TabPanel value="hierarchy">
+					{overview && <RoleHierarchyDiagram roles={overview.roles} />}
+				</TabPanel>
+
+				{/* Permission Matrix Tab */}
+				<TabPanel value="matrix">
+					{overview && <PermissionMatrix matrix={matrix} roles={overview.roles} canEdit={canEdit} />}
+				</TabPanel>
+
+				{/* Audit Log Tab (Admin Only) */}
+				<TabPanel value="audit">
+					{canViewAuditLogs && <AuditLogRichDataGrid canView={canViewAuditLogs} />}
+				</TabPanel>
+
+				{/* User Roles Tab (Admin Only) */}
+				<TabPanel value="users">
+					{canEdit && <UserRolesRichDataGrid onBulkUpdate={handleOpenBulkModal} canEdit={canEdit} />}
+				</TabPanel>
+			</Tabs>
 
 			{/* Bulk Role Update Modal */}
 			<BulkRoleModal

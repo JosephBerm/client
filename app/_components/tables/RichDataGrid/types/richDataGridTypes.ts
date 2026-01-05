@@ -849,6 +849,43 @@ export interface UseRichDataGridReturn<TData> {
 	// === ACTIONS ===
 	refresh: () => void
 	exportData: (options: ExportOptions) => Promise<void>
+
+	// === OPTIMISTIC UPDATES ===
+	/**
+	 * Update a single row optimistically without triggering a refetch.
+	 * Use this for immediate UI feedback while API calls complete in the background.
+	 *
+	 * @param rowId - The ID of the row to update (as returned by getRowId)
+	 * @param updater - A function that receives the current row and returns the updated row
+	 *
+	 * @example
+	 * // Mark notification as read optimistically
+	 * updateRow(notification.id, (row) => ({ ...row, read: true }))
+	 */
+	updateRow: (rowId: string | number, updater: (row: TData) => TData) => void
+
+	/**
+	 * Update multiple rows optimistically without triggering a refetch.
+	 *
+	 * @param predicate - Function to determine which rows to update
+	 * @param updater - Function that receives each matching row and returns the updated row
+	 *
+	 * @example
+	 * // Mark all unread notifications as read
+	 * updateRows((row) => !row.read, (row) => ({ ...row, read: true }))
+	 */
+	updateRows: (predicate: (row: TData) => boolean, updater: (row: TData) => TData) => void
+
+	/**
+	 * Remove a row optimistically without triggering a refetch.
+	 *
+	 * @param rowId - The ID of the row to remove
+	 *
+	 * @example
+	 * // Remove deleted notification from grid
+	 * removeRow(notification.id)
+	 */
+	removeRow: (rowId: string | number) => void
 }
 
 // ============================================================================

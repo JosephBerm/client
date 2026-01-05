@@ -1,11 +1,29 @@
 /**
  * RBACTabContent Component
  *
- * Renders the appropriate content based on the active tab.
- * Handles lazy loading of admin-only tab data.
+ * @deprecated This component is deprecated. Use TabPanel components from
+ * @_components/ui/Tabs directly in your page instead.
  *
- * Architecture: Container component that coordinates tab content rendering.
+ * Migration example:
+ * ```tsx
+ * import { Tabs, TabsList, Tab, TabPanel } from '@_components/ui/Tabs'
  *
+ * <Tabs value={activeTab} onValueChange={setActiveTab}>
+ *   <TabsList>
+ *     <Tab value="hierarchy">Role Hierarchy</Tab>
+ *   </TabsList>
+ *   <TabPanel value="hierarchy">
+ *     <RoleHierarchyDiagram roles={overview.roles} />
+ *   </TabPanel>
+ * </Tabs>
+ * ```
+ *
+ * Benefits of using TabPanel directly:
+ * - Cleaner component composition
+ * - Automatic lazy rendering (TabPanel only renders when active)
+ * - Better co-location of tabs with their content
+ *
+ * @see @_components/ui/Tabs for the TabPanel component
  * @see prd_rbac_management.md
  * @module app/rbac/_components/RBACTabContent
  */

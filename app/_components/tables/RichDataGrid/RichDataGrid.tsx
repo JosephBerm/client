@@ -32,6 +32,7 @@
 
 'use client'
 
+import { useEffect } from 'react'
 import { type ColumnDef } from '@tanstack/react-table'
 import { AlertTriangle, FileText } from 'lucide-react'
 
@@ -54,15 +55,21 @@ import { type RichColumnDef, type BulkAction, type RowId, type VirtualizationCon
 /**
  * Creates a selection checkbox column definition.
  * Automatically added when enableRowSelection is true.
+ *
+ * Size is set to 52px to accommodate the 44px touch target
+ * plus padding per mobile-first accessibility best practices.
  */
 function createSelectionColumn<TData>(): ColumnDef<TData, unknown> {
 	return {
 		id: '_selection',
 		header: () => <SelectAllCheckbox />,
 		cell: ({ row }) => <RowSelectionCheckbox row={row} />,
-		size: 40,
+		size: 52, // 44px touch target + 8px padding
+		minSize: 44, // Minimum touch target per WCAG
+		maxSize: 60,
 		enableSorting: false,
 		enableHiding: false,
+		enableResizing: false,
 	}
 }
 
@@ -96,6 +103,23 @@ function LoadingSkeleton({ rows = 5, columns = 5 }: { rows?: number; columns?: n
 // PROPS
 // ============================================================================
 
+/**
+ * Grid API exposed via onGridReady callback.
+ * Provides programmatic access to grid operations.
+ */
+export interface RichDataGridApi<TData> {
+	/** Update a single row optimistically */
+	updateRow: (rowId: string | number, updater: (row: TData) => TData) => void
+	/** Update multiple rows that match a predicate */
+	updateRows: (predicate: (row: TData) => boolean, updater: (row: TData) => TData) => void
+	/** Remove a row optimistically */
+	removeRow: (rowId: string | number) => void
+	/** Trigger a data refresh */
+	refresh: () => void
+	/** Clear all row selections */
+	clearSelection: () => void
+}
+
 export interface RichDataGridProps<TData extends { id?: string | number }> extends Omit<UseRichDataGridOptions<TData>, 'columns'> {
 	/** Column definitions */
 	columns: RichColumnDef<TData, unknown>[]
@@ -127,6 +151,22 @@ export interface RichDataGridProps<TData extends { id?: string | number }> exten
 	enableVirtualization?: boolean
 	/** Virtualization configuration (only used when enableVirtualization is true) */
 	virtualizationConfig?: Partial<VirtualizationConfig>
+	/**
+	 * Callback fired when the grid is ready with its API.
+	 * Use this to get programmatic access to grid operations like optimistic updates.
+	 *
+	 * @example
+	 * const gridApiRef = useRef<RichDataGridApi<Notification>>(null)
+	 *
+	 * <RichDataGrid
+	 *   onGridReady={(api) => { gridApiRef.current = api }}
+	 *   ...
+	 * />
+	 *
+	 * // Later, use optimistic updates:
+	 * gridApiRef.current?.updateRow(notification.id, (row) => ({ ...row, read: true }))
+	 */
+	onGridReady?: (api: RichDataGridApi<TData>) => void
 }
 
 // ============================================================================
@@ -173,6 +213,7 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 	emptyState,
 	errorState,
 	className = '',
+	onGridReady,
 }: RichDataGridProps<TData>) {
 	// Prepare columns with selection column if needed
 	const preparedColumns = enableRowSelection
@@ -199,7 +240,21 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 		searchDebounceMs,
 	})
 
-	const { loadingState, error, refresh, table } = gridState
+	const { loadingState, error, refresh, table, updateRow, updateRows, removeRow, clearSelection } = gridState
+
+	// Call onGridReady callback with the grid API
+	// Using useEffect to ensure this is called after the grid is initialized
+	useEffect(() => {
+		if (onGridReady) {
+			onGridReady({
+				updateRow,
+				updateRows,
+				removeRow,
+				refresh,
+				clearSelection,
+			})
+		}
+	}, [onGridReady, updateRow, updateRows, removeRow, refresh, clearSelection])
 
 	// Render error state
 	if (loadingState === LoadingState.Error && error) {
@@ -269,6 +324,7 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 									getRowClassName={getRowClassName}
 									emptyState={emptyState}
 									virtualizationConfig={virtualizationConfig}
+									enableRowSelection={enableRowSelection}
 								/>
 							)}
 						</>
@@ -295,6 +351,7 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 									getRowClassName={getRowClassName}
 									emptyState={emptyState}
 									enableColumnPinning={enableColumnPinning}
+									enableRowSelection={enableRowSelection}
 								/>
 							)}
 						</table>

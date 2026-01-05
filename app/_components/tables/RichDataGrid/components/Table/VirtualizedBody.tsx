@@ -16,7 +16,8 @@ import { useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { flexRender, type Row } from '@tanstack/react-table'
 import { FileText } from 'lucide-react'
-import { useRichDataGridContext } from '../../context/RichDataGridContext'
+import { useRichDataGridContext, useRichDataGridSelection } from '../../context/RichDataGridContext'
+import { useRangeSelection } from '../../hooks/useRangeSelection'
 import { type VirtualizationConfig, DEFAULT_VIRTUALIZATION_CONFIG } from '../../types'
 
 // ============================================================================
@@ -34,6 +35,8 @@ export interface VirtualizedBodyProps<TData> {
 	emptyState?: React.ReactNode
 	/** Virtualization configuration */
 	virtualizationConfig?: Partial<VirtualizationConfig>
+	/** Enable row selection (enables Shift+Click and Ctrl/Cmd+Click) */
+	enableRowSelection?: boolean
 	/** Additional CSS classes */
 	className?: string
 }
@@ -58,9 +61,11 @@ export function VirtualizedBody<TData>({
 	getRowClassName,
 	emptyState,
 	virtualizationConfig,
+	enableRowSelection = false,
 	className = '',
 }: VirtualizedBodyProps<TData>) {
 	const { table, isLoading } = useRichDataGridContext<TData>()
+	const { rowSelection, setRowSelection } = useRichDataGridSelection()
 	const parentRef = useRef<HTMLDivElement>(null)
 
 	// Merge config with defaults
@@ -70,6 +75,32 @@ export function VirtualizedBody<TData>({
 	}
 
 	const rows = table.getRowModel().rows
+
+	// Range selection hook for Shift+Click and Ctrl/Cmd+Click functionality
+	const { handleRowClick: handleRangeRowClick, handleRowKeyDown } = useRangeSelection({
+		rows,
+		rowSelection,
+		setRowSelection,
+	})
+
+	/**
+	 * Handle row click with range selection support.
+	 */
+	const handleRowClick = (rowIndex: number, event: React.MouseEvent, rowData: TData) => {
+		onRowClick?.(rowData)
+		if (enableRowSelection) {
+			handleRangeRowClick(rowIndex, event)
+		}
+	}
+
+	/**
+	 * Handle row keyboard events for accessibility.
+	 */
+	const handleKeyDown = (rowIndex: number, event: React.KeyboardEvent) => {
+		if (enableRowSelection) {
+			handleRowKeyDown(rowIndex, event)
+		}
+	}
 
 	// Initialize virtualizer
 	const virtualizer = useVirtualizer({
@@ -113,15 +144,20 @@ export function VirtualizedBody<TData>({
 					return (
 						<div
 							key={row.id}
+							role="row"
+							tabIndex={enableRowSelection ? 0 : undefined}
+							aria-selected={enableRowSelection ? isSelected : undefined}
 							data-index={virtualRow.index}
 							ref={virtualizer.measureElement}
-							onClick={() => onRowClick?.(row.original)}
+							onClick={(e) => handleRowClick(virtualRow.index, e, row.original)}
 							onDoubleClick={() => onRowDoubleClick?.(row.original)}
+							onKeyDown={(e) => handleKeyDown(virtualRow.index, e)}
 							className={`
 								absolute left-0 w-full flex
 								border-b border-base-200/50 dark:border-base-content/10
 								${isSelected ? 'bg-primary/5 dark:bg-primary/10' : 'hover:bg-base-200/30 dark:hover:bg-base-content/5'}
-								${onRowClick || onRowDoubleClick ? 'cursor-pointer active:bg-base-200/50 dark:active:bg-base-content/10' : ''}
+								${onRowClick || onRowDoubleClick || enableRowSelection ? 'cursor-pointer active:bg-base-200/50 dark:active:bg-base-content/10' : ''}
+								${enableRowSelection ? 'focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-inset' : ''}
 								transition-colors
 								${customClass}
 							`}
@@ -134,6 +170,7 @@ export function VirtualizedBody<TData>({
 							{row.getVisibleCells().map((cell) => (
 								<div
 									key={cell.id}
+									role="cell"
 									className="px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-base-content dark:text-base-content/90 flex items-center"
 									style={{
 										width: cell.column.getSize(),

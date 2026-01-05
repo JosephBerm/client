@@ -69,17 +69,22 @@ export function useRangeSelection<TData>({
 		const start = Math.min(startIndex, endIndex)
 		const end = Math.max(startIndex, endIndex)
 
-		return rows
-			.slice(start, end + 1)
-			.map((row) => row.id)
+		return rows.slice(start, end + 1).map((row) => row.id)
 	}
 
 	/**
-	 * Handle row click with Shift/Ctrl/Cmd modifier support.
+	 * Handle row click with range selection support.
 	 *
-	 * - Normal click: Select only this row (deselect others)
-	 * - Shift+click: Select range from anchor to clicked row
-	 * - Ctrl/Cmd+click: Toggle selection of clicked row
+	 * Behaviors:
+	 * - Normal click: Only update anchor point (do NOT modify selection)
+	 *   - Selection changes should come from checkbox clicks only
+	 *   - This prevents clicking a row from deselecting other rows
+	 * - Shift+Click: Select range from anchor to clicked row (additive)
+	 * - Ctrl/Cmd+Click: Toggle selection of clicked row
+	 *
+	 * Note: The checkbox uses `row.getToggleSelectedHandler()` with
+	 * `onClick={(e) => e.stopPropagation()}`, so checkbox clicks don't
+	 * trigger this handler.
 	 */
 	const handleRowClick = (rowIndex: number, event: React.MouseEvent) => {
 		const row = rows[rowIndex]
@@ -118,8 +123,8 @@ export function useRangeSelection<TData>({
 			// Update anchor to this row
 			setLastSelectedIndex(rowIndex)
 		} else {
-			// Normal click: select only this row
-			setRowSelection({ [rowId]: true })
+			// Normal click: Only update anchor point for future Shift+Click
+			// Do NOT modify selection state - checkbox handles that
 			setLastSelectedIndex(rowIndex)
 		}
 	}

@@ -33,17 +33,21 @@
 
 import { useCallback, useState } from 'react'
 
-import { User, Shield, Bell, Settings, LogOut } from 'lucide-react'
+import { User, Shield, Bell, Lock, Phone, LogOut, Key } from 'lucide-react'
 
 import { useAuthStore } from '@_features/auth'
 
 import { logger } from '@_core'
+import { formatDate } from '@_shared'
 
 import UpdateAccountForm from '@_components/forms/UpdateAccountForm'
 import ChangePasswordForm from '@_components/forms/ChangePasswordForm'
-import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
 import { Tabs, TabsList, Tab, TabPanel } from '@_components/ui/Tabs'
+import Avatar from '@_components/ui/Avatar'
+import StatusIndicator from '@_components/ui/StatusIndicator'
+import TipItem from '@_components/ui/TipItem'
+import Badge from '@_components/ui/Badge'
 
 import type { IUser } from '@_classes/User'
 import UserClass from '@_classes/User'
@@ -90,57 +94,65 @@ function ProfileInfoTab({ user, onUserUpdate }: ProfileInfoTabProps) {
 
 			{/* Sidebar - Account Summary */}
 			<div className="space-y-4">
-				{/* Account Overview Card */}
+				{/* Account Overview Card - Enhanced with Avatar */}
 				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
-					<h3 className="text-lg font-semibold text-base-content mb-4">Account Overview</h3>
+					<div className="flex flex-col items-center text-center mb-6">
+						<Avatar
+							name={user.name}
+							src={user.profilePicturePath}
+							size="lg"
+							className="mb-3"
+						/>
+						<h3 className="text-lg font-semibold text-base-content">
+							{user.name?.first || user.name?.last
+								? `${user.name?.first ?? ''} ${user.name?.last ?? ''}`.trim()
+								: user.username || 'User'}
+						</h3>
+						<p className="text-sm text-base-content/60 truncate max-w-full">
+							{user.email || 'No email set'}
+						</p>
+						<Badge variant="success" tone="subtle" size="sm" className="mt-2">
+							Active
+						</Badge>
+					</div>
+
+					<div className="divider my-4" />
+
 					<div className="space-y-3 text-sm">
 						<div className="flex items-center justify-between">
 							<span className="text-base-content/70">Username</span>
-							<span className="font-mono font-medium text-base-content">{user.username}</span>
-						</div>
-						<div className="flex items-center justify-between">
-							<span className="text-base-content/70">Email</span>
-							<span className="font-medium text-base-content truncate max-w-[180px]">{user.email}</span>
+							<span className="font-mono font-medium text-base-content">
+								{user.username || '—'}
+							</span>
 						</div>
 						<div className="flex items-center justify-between">
 							<span className="text-base-content/70">Member Since</span>
 							<span className="text-base-content">
-								{user.createdAt 
-									? new Date(user.createdAt).toLocaleDateString('en-US', { 
-											year: 'numeric', 
-											month: 'long', 
-											day: 'numeric' 
-										})
+								{user.createdAt
+									? formatDate(user.createdAt, 'long')
 									: 'Unknown'}
-							</span>
-						</div>
-						<div className="flex items-center justify-between">
-							<span className="text-base-content/70">Account Status</span>
-							<span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/10 text-success text-xs font-medium">
-								<span className="h-1.5 w-1.5 rounded-full bg-success" />
-								Active
 							</span>
 						</div>
 					</div>
 				</Card>
 
-				{/* Quick Tips Card */}
+				{/* Quick Tips Card - Enhanced with TipItem */}
 				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
 					<h3 className="text-lg font-semibold text-base-content mb-4">Profile Tips</h3>
-					<ul className="space-y-3 text-sm text-base-content/70">
-						<li className="flex items-start gap-2">
-							<span className="text-primary mt-1">•</span>
-							<span>Keep your contact information up to date for order notifications</span>
-						</li>
-						<li className="flex items-start gap-2">
-							<span className="text-primary mt-1">•</span>
-							<span>Your username is used for login and cannot be changed</span>
-						</li>
-						<li className="flex items-start gap-2">
-							<span className="text-primary mt-1">•</span>
-							<span>Add a phone number to receive important updates via SMS</span>
-						</li>
-					</ul>
+					<div className="space-y-3">
+						<TipItem
+							icon={<Bell />}
+							text="Keep your contact information up to date for order notifications"
+						/>
+						<TipItem
+							icon={<Lock />}
+							text="Your username is used for login and cannot be changed"
+						/>
+						<TipItem
+							icon={<Phone />}
+							text="Add a phone number to receive important updates via SMS"
+						/>
+					</div>
 				</Card>
 			</div>
 		</div>
@@ -219,67 +231,56 @@ function SecurityTab({ user }: SecurityTabProps) {
 
 			{/* Sidebar - Security Status */}
 			<div className="space-y-4">
-				{/* Security Overview Card */}
+				{/* Security Overview Card - Enhanced with StatusIndicator */}
 				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
 					<div className="flex items-center gap-3 mb-4">
 						<Shield className="h-5 w-5 text-success" />
 						<h3 className="text-lg font-semibold text-base-content">Security Status</h3>
 					</div>
 					<div className="space-y-4">
-						{/* Password Status */}
-						<div className="flex items-center justify-between">
-							<span className="text-sm text-base-content/70">Password</span>
-							<span className="inline-flex items-center gap-1.5 text-sm font-medium text-success">
-								<span className="h-2 w-2 rounded-full bg-success" />
-								Set
-							</span>
-						</div>
-						
-						{/* 2FA Status (Coming Soon) */}
-						<div className="flex items-center justify-between">
-							<span className="text-sm text-base-content/70">Two-Factor Auth</span>
-							<span className="inline-flex items-center gap-1.5 text-sm font-medium text-base-content/50">
-								<span className="h-2 w-2 rounded-full bg-base-300" />
-								Coming Soon
-							</span>
-						</div>
-						
-						{/* Account Status */}
-						<div className="flex items-center justify-between">
-							<span className="text-sm text-base-content/70">Account Status</span>
-							<span className="inline-flex items-center gap-1.5 text-sm font-medium text-success">
-								<span className="h-2 w-2 rounded-full bg-success" />
-								Active
-							</span>
-						</div>
+						<StatusIndicator
+							status="success"
+							label="Password"
+							value="Set"
+						/>
+						<StatusIndicator
+							status="pending"
+							label="Two-Factor Auth"
+							value="Coming Soon"
+						/>
+						<StatusIndicator
+							status="success"
+							label="Account Status"
+							value="Active"
+						/>
 					</div>
 				</Card>
 
-				{/* Security Tips Card */}
+				{/* Security Tips Card - Enhanced with TipItem */}
 				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
 					<h3 className="text-lg font-semibold text-base-content mb-4">Security Best Practices</h3>
-					<ul className="space-y-3 text-sm text-base-content/70">
-						<li className="flex items-start gap-2">
-							<span className="text-primary mt-1">•</span>
-							<span>Use a strong, unique password with at least 8 characters</span>
-						</li>
-						<li className="flex items-start gap-2">
-							<span className="text-primary mt-1">•</span>
-							<span>Include uppercase, lowercase, numbers, and special characters</span>
-						</li>
-						<li className="flex items-start gap-2">
-							<span className="text-primary mt-1">•</span>
-							<span>Never share your password with others</span>
-						</li>
-						<li className="flex items-start gap-2">
-							<span className="text-primary mt-1">•</span>
-							<span>Change your password regularly (every 90 days recommended)</span>
-						</li>
-						<li className="flex items-start gap-2">
-							<span className="text-primary mt-1">•</span>
-							<span>Sign out when using shared or public computers</span>
-						</li>
-					</ul>
+					<div className="space-y-3">
+						<TipItem
+							icon={<Key />}
+							text="Use a strong, unique password with at least 8 characters"
+						/>
+						<TipItem
+							icon={<Shield />}
+							text="Include uppercase, lowercase, numbers, and special characters"
+						/>
+						<TipItem
+							icon={<Lock />}
+							text="Never share your password with others"
+						/>
+						<TipItem
+							icon={<Bell />}
+							text="Change your password regularly (every 90 days recommended)"
+						/>
+						<TipItem
+							icon={<LogOut />}
+							text="Sign out when using shared or public computers"
+						/>
+					</div>
 				</Card>
 			</div>
 		</div>
