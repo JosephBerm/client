@@ -1,17 +1,25 @@
 /**
- * Next.js 16 Configuration - MedSource Pro
+ * Next.js 16.1.1 Configuration - MedSource Pro
  * 
  * @see https://nextjs.org/docs/app/guides/upgrading/version-16
  * @see https://nextjs.org/docs/app/api-reference/config/next-config-js
  *
- * Breaking Changes Applied (Next.js 16):
- * - Turbopack is now the DEFAULT bundler (--turbo flag removed from dev script)
- * - middleware.ts renamed to proxy.ts (runs on Node.js, not Edge)
- * - next lint command removed (using ESLint directly via eslint.config.mjs)
- * - images.minimumCacheTTL default changed from 60 to 14400 (we keep 60)
- * - images.dangerouslyAllowLocalIP now defaults to false
- * - images.qualities default changed to [75] only
- * - images.imageSizes default removed 16
+ * Next.js 16 Features Configured:
+ * ─────────────────────────────────────────────────────────────────────────────
+ * ✅ Turbopack - DEFAULT bundler (no --turbopack flag needed)
+ * ✅ React Compiler - Automatic memoization (babel-plugin-react-compiler)
+ * ✅ Cache Components - "use cache" directive enabled (cacheComponents: true)
+ * ✅ proxy.ts - New middleware convention (renamed from middleware.ts)
+ * ✅ MCP Server - Enabled by default at /_next/mcp (no config needed)
+ * ✅ ESLint - Using eslint.config.mjs (next lint command removed)
+ *
+ * Breaking Changes Applied:
+ * ─────────────────────────────────────────────────────────────────────────────
+ * - middleware.ts → proxy.ts (function export renamed to `proxy`)
+ * - images.minimumCacheTTL: 60 → 14400 default (we keep 60 for fresh catalog)
+ * - images.dangerouslyAllowLocalIP: undefined → false default
+ * - images.qualities: [1..100] → [75] default (we use custom qualities)
+ * - images.imageSizes: removed 16 from default (we keep 16 for small icons)
  *
  * @type {import('next').NextConfig}
  */
@@ -167,8 +175,18 @@ const nextConfig = {
 	 * - Faster cold starts
 	 * - Faster HMR (Hot Module Replacement)
 	 * - Better memory efficiency
+	 * 
+	 * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack
 	 */
 	turbopack: {
+		/**
+		 * Root Directory
+		 * Sets the application root directory for module resolution.
+		 * Explicitly set to this directory to prevent Turbopack from detecting
+		 * the parent directory's lockfile.
+		 */
+		root: process.cwd(),
+
 		/**
 		 * Resolve Extensions
 		 * File extensions Turbopack will resolve, in order of preference.
@@ -273,27 +291,17 @@ const nextConfig = {
 	cacheComponents: true,
 
 	// ---------------------------------------------------------------------------
-	// Experimental Features
+	// Experimental Features (Next.js 16.1.1)
 	// ---------------------------------------------------------------------------
 
 	experimental: {
 		/**
-		 * MCP Server (Model Context Protocol)
-		 * Enables built-in MCP server for AI coding assistants.
-		 * Accessible at http://localhost:3000/_next/mcp when dev server is running.
-		 *
-		 * @see https://nextjs.org/docs/app/api-reference/config/next-config-js
-		 */
-		mcpServer: true,
-
-		/**
-		 * Optimize Package Imports
+		 * Optimize Package Imports (Experimental)
 		 * Improves compilation speed for packages with many named exports (barrel files).
 		 * 
-		 * @see https://nextjs.org/docs/app/guides/package-bundling#packages-with-many-exports
-		 * @see https://vercel.com/docs/conformance/rules/NEXTJS_MISSING_OPTIMIZE_PACKAGE_IMPORTS
+		 * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/optimizePackageImports
 		 * 
-		 * Note: Many common packages (lucide-react, @heroicons/react, etc.) are 
+		 * Note: Many common packages (lucide-react, date-fns, lodash-es, etc.) are 
 		 * already auto-optimized by Next.js. We add less common ones here.
 		 * 
 		 * Benefits for MedSource Pro:
@@ -308,16 +316,31 @@ const nextConfig = {
 		],
 
 		/**
-		 * Turbopack File System Caching Notes:
-		 *
-		 * Next.js 16 Status:
-		 * - turbopackFileSystemCacheForDev: ENABLED BY DEFAULT (no config needed)
-		 * - turbopackFileSystemCacheForBuild: Requires Next.js canary (not stable yet)
-		 *
-		 * When turbopackFileSystemCacheForBuild becomes stable, enable it here:
-		 * turbopackFileSystemCacheForBuild: true,
+		 * Turbopack File System Caching for Development (Beta - Next.js 16.1.1)
+		 * Stores compiler artifacts on disk between dev server restarts.
+		 * 
+		 * @see https://nextjs.org/docs/app/guides/upgrading/version-16#turbopack-file-system-caching-beta
+		 * 
+		 * Benefits:
+		 * - Significantly faster dev server startup after initial compile
+		 * - Cached modules persist across restarts
+		 * - Reduced memory usage on subsequent runs
+		 * 
+		 * Note: This is a beta feature - enable for faster development iteration.
 		 */
+		turbopackFileSystemCacheForDev: true,
 	},
+
+	// ---------------------------------------------------------------------------
+	// MCP Server (Model Context Protocol) - Next.js 16+
+	// ---------------------------------------------------------------------------
+	// 
+	// MCP is ENABLED BY DEFAULT in Next.js 16 - no config flag needed!
+	// Accessible at: http://localhost:3000/_next/mcp when dev server is running.
+	// 
+	// Usage: Install next-devtools-mcp and add .mcp.json to project root.
+	// @see https://nextjs.org/docs/app/guides/mcp
+	//
 }
 
 export default nextConfig
