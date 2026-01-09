@@ -8,7 +8,7 @@ import { Mail } from 'lucide-react'
 import { contactSchema, type ContactFormData } from '@_core'
 import { logger } from '@_core'
 
-import { useZodForm , API } from '@_shared'
+import { useZodForm, API } from '@_shared'
 
 import { useScrollReveal } from '@_shared/hooks'
 
@@ -20,8 +20,7 @@ import FormTextArea from '@_components/forms/FormTextArea'
 import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
 
-
-import { CONTACT_INFO } from './contact.constants'
+import { COMPANY_CONTACT } from '@_lib'
 
 export interface ContactFormProps {
 	onSubmitSuccess: () => void
@@ -29,10 +28,10 @@ export interface ContactFormProps {
 
 /**
  * ContactForm Component
- * 
+ *
  * Contact form for submitting inquiries to MedSource Pro.
  * Includes scroll-triggered reveal animation.
- * 
+ *
  * **Features:**
  * - Scroll-triggered reveal animation
  * - Form validation with Zod schema
@@ -40,7 +39,7 @@ export interface ContactFormProps {
  * - Error handling with logging
  * - Mobile-first responsive design
  * - WCAG 2.1 AA accessibility compliant
- * 
+ *
  * @module contact/ContactForm
  */
 export default function ContactForm({ onSubmitSuccess }: ContactFormProps) {
@@ -145,57 +144,56 @@ export default function ContactForm({ onSubmitSuccess }: ContactFormProps) {
 	return (
 		<div
 			ref={formReveal.ref}
-			className={classNames(
-				'transition-all duration-700 delay-150',
-				{
-					'opacity-0 translate-y-6': !formReveal.hasAnimated,
-					'opacity-100 translate-y-0': formReveal.hasAnimated,
-				}
-			)}
-		>
-			<Card variant="elevated" className="sticky top-[calc(var(--nav-height)+2rem)]">
-				<div className="space-y-6">
+			className={classNames('transition-all duration-700 delay-150', {
+				'opacity-0 translate-y-6': !formReveal.hasAnimated,
+				'opacity-100 translate-y-0': formReveal.hasAnimated,
+			})}>
+			<Card
+				variant='elevated'
+				className='sticky top-[calc(var(--nav-height)+2rem)]'>
+				<div className='space-y-6'>
 					<div>
-						<h2 className="text-2xl md:text-3xl font-semibold text-base-content mb-2">
-							Send Us a Message
-						</h2>
-						<p className="text-sm md:text-base text-base-content/70">
+						<h2 className='text-2xl md:text-3xl font-semibold text-base-content mb-2'>Send Us a Message</h2>
+						<p className='text-sm md:text-base text-base-content/70'>
 							Complete the form below and a staff member will contact you within{' '}
-							<span className="font-medium text-primary">{CONTACT_INFO.responseTime}</span> during business hours.
+							<span className='font-medium text-primary'>{COMPANY_CONTACT.responseTime.standard}</span>{' '}
+							during business hours.
 						</p>
 					</div>
 
-					<form onSubmit={onFormSubmit} className="space-y-5">
+					<form
+						onSubmit={onFormSubmit}
+						className='space-y-5'>
 						<FormInput
-							label="Your Name"
-							type="text"
-							placeholder="John Doe"
+							label='Your Name'
+							type='text'
+							placeholder='John Doe'
 							required
 							{...form.register('name')}
 							error={form.formState.errors.name}
 						/>
 
 						<FormInput
-							label="Email Address"
-							type="email"
-							placeholder="your.email@example.com"
+							label='Email Address'
+							type='email'
+							placeholder='your.email@example.com'
 							required
 							{...form.register('email')}
 							error={form.formState.errors.email}
 						/>
 
 						<FormInput
-							label="Subject"
-							type="text"
-							placeholder="What is this regarding?"
+							label='Subject'
+							type='text'
+							placeholder='What is this regarding?'
 							required
 							{...form.register('subject')}
 							error={form.formState.errors.subject}
 						/>
 
 						<FormTextArea
-							label="Your Message"
-							placeholder="Tell us how we can help you..."
+							label='Your Message'
+							placeholder='Tell us how we can help you...'
 							rows={6}
 							required
 							{...form.register('message')}
@@ -203,14 +201,13 @@ export default function ContactForm({ onSubmitSuccess }: ContactFormProps) {
 						/>
 
 						<Button
-							type="submit"
-							variant="primary"
+							type='submit'
+							variant='primary'
 							fullWidth
 							loading={isLoading}
 							disabled={isLoading || !form.formState.isValid}
-							className="mt-2"
-							rightIcon={!isLoading && <Mail className="w-5 h-5" />}
-						>
+							className='mt-2'
+							rightIcon={!isLoading && <Mail className='w-5 h-5' />}>
 							{isLoading ? 'Sending...' : 'Send Message'}
 						</Button>
 					</form>
@@ -219,4 +216,3 @@ export default function ContactForm({ onSubmitSuccess }: ContactFormProps) {
 		</div>
 	)
 }
-

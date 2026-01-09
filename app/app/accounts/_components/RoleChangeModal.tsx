@@ -2,23 +2,21 @@
 
 /**
  * RoleChangeModal Component
- * 
+ *
  * Two-step modal for changing user roles:
  * 1. Role selection with visual feedback
  * 2. Confirmation with warning messages
- * 
+ *
  * Features:
  * - Visual role comparison
  * - Context-aware warning messages
  * - Admin grant warnings
  * - Loading states
- * 
+ *
  * @module accounts/RoleChangeModal
  */
 
 import { AlertTriangle } from 'lucide-react'
-
-import { AccountRole, type AccountRoleType } from '@_classes/Enums'
 
 import { RoleBadge } from '@_components/common'
 import Button from '@_components/ui/Button'
@@ -28,30 +26,27 @@ import type { AccountInfo } from '@_types'
 
 import { UserInfoDisplay } from '@_features/accounts'
 
-import { ROLE_OPTIONS } from '@_shared'
+import { getRoleDisplayName, RoleLevels } from '@_shared'
 
 import RoleSelector from './RoleSelector'
 
 // ============================================================================
-// TYPES (Re-export for backwards compatibility)
+// TYPES
 // ============================================================================
-
-/** @deprecated Use AccountInfo from @_types instead */
-export type Account = AccountInfo
 
 export interface RoleChangeModalProps {
 	/** Whether the modal is open */
 	isOpen: boolean
 	/** Account to change role for (null when closed) */
-	account: Account | null
+	account: AccountInfo | null
 	/** Currently selected role */
-	selectedRole: AccountRoleType | null
+	selectedRole: number | null
 	/** Whether role update is in progress */
 	isLoading: boolean
 	/** Close the modal */
 	onClose: () => void
 	/** Update the selected role */
-	onSelectRole: (role: AccountRoleType | null) => void
+	onSelectRole: (role: number | null) => void
 	/** Confirm the role change */
 	onConfirm: () => void
 }
@@ -59,26 +54,20 @@ export interface RoleChangeModalProps {
 /**
  * Warning message based on role change type
  */
-function RoleChangeWarning({
-	account,
-	selectedRole
-}: {
-	account: Account
-	selectedRole: AccountRoleType
-}) {
-	const isUpgrade = selectedRole > account.role
-	const isAdmin = selectedRole === AccountRole.Admin
+function RoleChangeWarning({ account, selectedRole }: { account: AccountInfo; selectedRole: number }) {
+	const isUpgrade = selectedRole > account.roleLevel
+	const isAdmin = selectedRole === RoleLevels.Admin
 
 	const message = isAdmin
 		? 'You are granting full system access to this user.'
 		: isUpgrade
-			? 'This user will gain additional permissions.'
-			: 'This user will lose some permissions.'
+		? 'This user will gain additional permissions.'
+		: 'This user will lose some permissions.'
 
 	return (
-		<div className="flex items-center gap-3 p-3 rounded-lg bg-warning/10 border border-warning/20">
-			<AlertTriangle className="w-5 h-5 text-warning shrink-0" />
-			<p className="text-sm text-base-content/80">{message}</p>
+		<div className='flex items-center gap-3 p-3 rounded-lg bg-warning/10 border border-warning/20'>
+			<AlertTriangle className='w-5 h-5 text-warning shrink-0' />
+			<p className='text-sm text-base-content/80'>{message}</p>
 		</div>
 	)
 }
@@ -86,28 +75,18 @@ function RoleChangeWarning({
 /**
  * Side-by-side role comparison
  */
-function RoleComparison({ 
-	currentRole, 
-	newRole 
-}: { 
-	currentRole: number
-	newRole: number 
-}) {
+function RoleComparison({ currentRole, newRole }: { currentRole: number; newRole: number }) {
 	return (
-		<div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-base-200">
+		<div className='grid grid-cols-2 gap-4 p-4 rounded-lg bg-base-200'>
 			<div>
-				<span className="text-xs text-base-content/50 uppercase tracking-wide">
-					Current Role
-				</span>
-				<div className="mt-1">
+				<span className='text-xs text-base-content/50 uppercase tracking-wide'>Current Role</span>
+				<div className='mt-1'>
 					<RoleBadge role={currentRole} />
 				</div>
 			</div>
 			<div>
-				<span className="text-xs text-base-content/50 uppercase tracking-wide">
-					New Role
-				</span>
-				<div className="mt-1">
+				<span className='text-xs text-base-content/50 uppercase tracking-wide'>New Role</span>
+				<div className='mt-1'>
 					<RoleBadge role={newRole} />
 				</div>
 			</div>
@@ -121,7 +100,7 @@ function RoleComparison({
 
 /**
  * RoleChangeModal Component
- * 
+ *
  * Handles the two-step role change flow:
  * - Step 1: Role selection
  * - Step 2: Confirmation with warnings
@@ -136,16 +115,10 @@ export default function RoleChangeModal({
 	onConfirm,
 }: RoleChangeModalProps) {
 	// Determine if we're in confirmation step
-	const isConfirmStep = selectedRole !== null && selectedRole !== account?.role
+	const isConfirmStep = selectedRole !== null && selectedRole !== account?.roleLevel
 
 	// Get the confirm button text
-	const confirmButtonText = selectedRole === AccountRole.Admin 
-		? 'Grant Admin Access' 
-		: 'Confirm Change'
-
-	// Get the role label for messages
-	const getRoleLabel = (role: AccountRoleType) =>
-		ROLE_OPTIONS.find(r => r.value === role)?.label ?? 'Unknown'
+	const confirmButtonText = selectedRole === RoleLevels.Admin ? 'Grant Admin Access' : 'Confirm Change'
 
 	if (!account) return null
 
@@ -154,54 +127,58 @@ export default function RoleChangeModal({
 			isOpen={isOpen}
 			onClose={onClose}
 			title={isConfirmStep ? 'Confirm Role Change' : 'Change User Role'}
-			size="md"
-		>
+			size='md'>
 			{isConfirmStep ? (
 				// STEP 2: Confirmation
-				<div className="space-y-4">
-					<RoleChangeWarning account={account} selectedRole={selectedRole} />
-					
-					<RoleComparison 
-						currentRole={account.role} 
-						newRole={selectedRole} 
+				<div className='space-y-4'>
+					<RoleChangeWarning
+						account={account}
+						selectedRole={selectedRole}
 					/>
 
-					<p className="text-sm text-base-content/70">
-						User <strong>{account.username}</strong> ({account.email}) will be 
-						updated to <strong>{getRoleLabel(selectedRole)}</strong>.
-						This change takes effect immediately.
+				<RoleComparison
+					currentRole={account.roleLevel}
+					newRole={selectedRole}
+				/>
+
+					<p className='text-sm text-base-content/70'>
+						User <strong>{account.username}</strong> ({account.email}) will be updated to{' '}
+						<strong>{getRoleDisplayName(selectedRole)}</strong>. This change takes effect immediately.
 					</p>
 
-					<div className="flex justify-end gap-3 pt-2">
-						<Button 
-							variant="ghost" 
+					<div className='flex justify-end gap-3 pt-2'>
+						<Button
+							variant='ghost'
 							onClick={() => onSelectRole(null)}
-							disabled={isLoading}
-						>
+							disabled={isLoading}>
 							Back
 						</Button>
-						<Button 
-							variant={selectedRole === AccountRole.Admin ? 'error' : 'primary'} 
+						<Button
+							variant={selectedRole === RoleLevels.Admin ? 'error' : 'primary'}
 							onClick={onConfirm}
-							loading={isLoading}
-						>
+							loading={isLoading}>
 							{confirmButtonText}
 						</Button>
 					</div>
 				</div>
 			) : (
 				// STEP 1: Role Selection
-				<div className="space-y-4">
-					<UserInfoDisplay account={account} headerText="Changing role for:" />
+				<div className='space-y-4'>
+					<UserInfoDisplay
+						account={account}
+						headerText='Changing role for:'
+					/>
 
 					<RoleSelector
-						currentRole={account.role}
+						currentRole={account.roleLevel}
 						selectedRole={selectedRole}
 						onSelect={onSelectRole}
 					/>
 
-					<div className="flex justify-end gap-3 pt-2">
-						<Button variant="ghost" onClick={onClose}>
+					<div className='flex justify-end gap-3 pt-2'>
+						<Button
+							variant='ghost'
+							onClick={onClose}>
 							Cancel
 						</Button>
 					</div>
@@ -210,4 +187,3 @@ export default function RoleChangeModal({
 		</Modal>
 	)
 }
-

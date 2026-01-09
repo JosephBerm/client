@@ -51,25 +51,20 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, Controller } from 'react-hook-form'
 
 import { useAuthStore } from '@_features/auth'
-import { 
-	CUSTOMER_STATUS_OPTIONS, 
-	BUSINESS_TYPE_OPTIONS 
-} from '@_features/customers'
+import { CUSTOMER_STATUS_OPTIONS, BUSINESS_TYPE_OPTIONS } from '@_features/customers'
 
 import { customerSchema, logger, type CustomerFormData } from '@_core'
 
-import { useFormSubmit, API } from '@_shared'
+import { useFormSubmit, API, usePermissions } from '@_shared'
 
 import Address from '@_classes/common/Address'
 import Company from '@_classes/Company'
-import { AccountRole, CustomerStatus, TypeOfBusiness } from '@_classes/Enums'
+import { CustomerStatus, TypeOfBusiness } from '@_classes/Enums'
 
 import Button from '@_components/ui/Button'
 
 import FormInput from './FormInput'
 import FormSelect from './FormSelect'
-
-
 
 /**
  * UpdateCustomerForm component props interface.
@@ -88,7 +83,7 @@ interface UpdateCustomerFormProps {
 	 * @param customer - Created or updated company entity
 	 */
 	onUserUpdate?: (customer: Company) => void
-	
+
 	/**
 	 * Whether to show internal-only fields (notes, status changes).
 	 * Default: true for sales reps+, hidden for customers.
@@ -127,26 +122,23 @@ interface UpdateCustomerFormProps {
  * @param props - Component props including customer and onUserUpdate
  * @returns UpdateCustomerForm component
  */
-export default function UpdateCustomerForm({ 
-	customer, 
+export default function UpdateCustomerForm({
+	customer,
 	onUserUpdate,
 	showInternalFields: showInternalFieldsProp,
 }: UpdateCustomerFormProps) {
 	const params = useParams()
 	const isCreateMode = params?.id === 'create'
-	
-	// Get current user for RBAC
-	// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
-	const currentUser = useAuthStore((state) => state.user)
-	const userRole = currentUser?.roleLevel ?? AccountRole.Customer
-	
+
+	// RBAC: Use usePermissions hook for role-based checks
+	const { isSalesRepOrAbove, isSalesManagerOrAbove } = usePermissions()
+
 	// Determine if internal fields should be shown
 	// SalesRep+ can see internal fields, customers cannot
-	const isSalesRepOrAbove = userRole >= AccountRole.SalesRep
 	const showInternalFields = showInternalFieldsProp ?? isSalesRepOrAbove
-	
+
 	// Only SalesManager+ can change status
-	const canChangeStatus = userRole >= AccountRole.SalesManager
+	const canChangeStatus = isSalesManagerOrAbove
 
 	const form = useForm<CustomerFormData>({
 		resolver: zodResolver(customerSchema),
@@ -186,7 +178,7 @@ export default function UpdateCustomerForm({
 			billingAddress: customer.billingAddress || undefined,
 			internalNotes: customer.internalNotes ?? '',
 		})
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [customer.id, customer.name, customer.email])
 
 	/* eslint-disable react-hooks/exhaustive-deps -- useFormSubmit is a custom hook that intentionally captures current closure values */
@@ -202,25 +194,21 @@ export default function UpdateCustomerForm({
 				identifier: data.identifier ?? '',
 				typeOfBusiness: data.typeOfBusiness ?? customer.typeOfBusiness,
 				// Only include status if user has permission to change it
-				status: canChangeStatus ? (data.status ?? customer.status) : customer.status,
+				status: canChangeStatus ? data.status ?? customer.status : customer.status,
 				// Sales rep assignment only changes if user has permission
-				primarySalesRepId: canChangeStatus 
-					? (data.primarySalesRepId ?? customer.primarySalesRepId)
+				primarySalesRepId: canChangeStatus
+					? data.primarySalesRepId ?? customer.primarySalesRepId
 					: customer.primarySalesRepId,
 				address: data.address ? new Address(data.address) : customer.address,
-				shippingAddress: data.shippingAddress 
-					? new Address(data.shippingAddress) 
-					: customer.shippingAddress,
-				billingAddress: data.billingAddress 
-					? new Address(data.billingAddress) 
-					: customer.billingAddress,
+				shippingAddress: data.shippingAddress ? new Address(data.shippingAddress) : customer.shippingAddress,
+				billingAddress: data.billingAddress ? new Address(data.billingAddress) : customer.billingAddress,
 			})
-			
+
 			// Add internal notes if the user can see them
 			if (showInternalFields && data.internalNotes !== undefined) {
 				customerData.internalNotes = data.internalNotes
 			}
-			
+
 			return isCreateMode ? API.Customers.create(customerData) : API.Customers.update(customerData)
 		},
 		{
@@ -239,47 +227,55 @@ export default function UpdateCustomerForm({
 	 * Form submission handler for React Hook Form.
 	 * Wraps async handler to satisfy ESLint's no-misused-promises rule.
 	 * React Hook Form supports async handlers, but we need to handle the Promise explicitly.
-	 * 
+	 *
 	 * FAANG Pattern: Extract event handlers from JSX for separation of concerns.
 	 */
-	const handleSubmit = useCallback((data: CustomerFormData): void => {
-		void submit(data).catch((error) => {
-			// Error already handled in submit function, but catch any unhandled rejections
-			logger.error('Unhandled form submission error', {
-				error,
-				component: 'UpdateCustomerForm',
-				action: 'handleSubmit',
+	const handleSubmit = useCallback(
+		(data: CustomerFormData): void => {
+			void submit(data).catch((error) => {
+				// Error already handled in submit function, but catch any unhandled rejections
+				logger.error('Unhandled form submission error', {
+					error,
+					component: 'UpdateCustomerForm',
+					action: 'handleSubmit',
+				})
 			})
-		})
-	}, [submit])
+		},
+		[submit]
+	)
 
 	/**
 	 * Form onSubmit handler that properly handles React Hook Form's Promise return.
 	 * Extracted from JSX for clean code and separation of concerns.
-	 * 
+	 *
 	 * FAANG Pattern: Use useCallback for stable event handlers to prevent unnecessary re-renders.
 	 */
-	const onFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-		const submitHandler = form.handleSubmit(handleSubmit)
-		const result = submitHandler(e)
-		// React Hook Form's handleSubmit may return a Promise if handler is async
-		// Handle it explicitly to satisfy ESLint's no-misused-promises rule
-		if (result instanceof Promise) {
-			void result.catch((error) => {
-				logger.error('Unhandled form submission error', {
-					error,
-					component: 'UpdateCustomerForm',
-					action: 'onFormSubmit',
+	const onFormSubmit = useCallback(
+		(e: React.FormEvent<HTMLFormElement>) => {
+			const submitHandler = form.handleSubmit(handleSubmit)
+			const result = submitHandler(e)
+			// React Hook Form's handleSubmit may return a Promise if handler is async
+			// Handle it explicitly to satisfy ESLint's no-misused-promises rule
+			if (result instanceof Promise) {
+				void result.catch((error) => {
+					logger.error('Unhandled form submission error', {
+						error,
+						component: 'UpdateCustomerForm',
+						action: 'onFormSubmit',
+					})
 				})
-			})
-		}
-	}, [form, handleSubmit])
+			}
+		},
+		[form, handleSubmit]
+	)
 
 	return (
-		<form onSubmit={onFormSubmit} className="space-y-6">
+		<form
+			onSubmit={onFormSubmit}
+			className='space-y-6'>
 			{/* Company Name */}
 			<FormInput
-				label="Company Name"
+				label='Company Name'
 				{...form.register('name')}
 				error={form.formState.errors.name}
 				disabled={isSubmitting}
@@ -287,18 +283,18 @@ export default function UpdateCustomerForm({
 			/>
 
 			{/* Contact Information */}
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 				<FormInput
-					label="Email"
-					type="email"
+					label='Email'
+					type='email'
 					{...form.register('email')}
 					error={form.formState.errors.email}
 					disabled={isSubmitting}
 					required
 				/>
 				<FormInput
-					label="Phone"
-					type="tel"
+					label='Phone'
+					type='tel'
 					{...form.register('phone')}
 					error={form.formState.errors.phone}
 					disabled={isSubmitting}
@@ -307,32 +303,32 @@ export default function UpdateCustomerForm({
 
 			{/* Business Classification (SalesRep+ only) */}
 			{showInternalFields && (
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 					<Controller
-						name="typeOfBusiness"
+						name='typeOfBusiness'
 						control={form.control}
 						render={({ field }) => (
 							<FormSelect
-								label="Business Type"
+								label='Business Type'
 								options={BUSINESS_TYPE_OPTIONS}
 								value={field.value ?? ''}
 								onChange={(e) => field.onChange(Number(e.target.value))}
 								disabled={isSubmitting}
-								placeholder="Select business type"
+								placeholder='Select business type'
 							/>
 						)}
 					/>
 					<Controller
-						name="status"
+						name='status'
 						control={form.control}
 						render={({ field }) => (
 							<FormSelect
-								label="Status"
+								label='Status'
 								options={CUSTOMER_STATUS_OPTIONS}
 								value={field.value ?? ''}
 								onChange={(e) => field.onChange(Number(e.target.value))}
 								disabled={isSubmitting || !canChangeStatus}
-								placeholder="Select status"
+								placeholder='Select status'
 								helperText={!canChangeStatus ? 'Contact a manager to change status' : undefined}
 							/>
 						)}
@@ -341,69 +337,69 @@ export default function UpdateCustomerForm({
 			)}
 
 			{/* Business Information */}
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 				<FormInput
-					label="Tax ID"
+					label='Tax ID'
 					{...form.register('taxId')}
 					error={form.formState.errors.taxId}
 					disabled={isSubmitting}
-					placeholder="EIN or Tax ID"
+					placeholder='EIN or Tax ID'
 				/>
 				<FormInput
-					label="Website"
-					type="url"
+					label='Website'
+					type='url'
 					{...form.register('website')}
 					error={form.formState.errors.website}
 					disabled={isSubmitting}
-					placeholder="https://example.com"
+					placeholder='https://example.com'
 				/>
 			</div>
 
 			{/* Identifier (optional) */}
 			{showInternalFields && (
 				<FormInput
-					label="Customer Identifier"
+					label='Customer Identifier'
 					{...form.register('identifier')}
 					error={form.formState.errors.identifier}
 					disabled={isSubmitting}
-					placeholder="Internal reference ID (optional)"
-					helperText="Custom identifier for internal tracking"
+					placeholder='Internal reference ID (optional)'
+					helperText='Custom identifier for internal tracking'
 				/>
 			)}
 
 			{/* Primary Address */}
-			<div className="border-t pt-6">
-				<h3 className="text-lg font-semibold mb-4">Primary Address</h3>
-				<div className="space-y-4">
+			<div className='border-t pt-6'>
+				<h3 className='text-lg font-semibold mb-4'>Primary Address</h3>
+				<div className='space-y-4'>
 					<FormInput
-						label="Street"
+						label='Street'
 						{...form.register('address.street')}
 						error={form.formState.errors.address?.street}
 						disabled={isSubmitting}
 					/>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 						<FormInput
-							label="City"
+							label='City'
 							{...form.register('address.city')}
 							error={form.formState.errors.address?.city}
 							disabled={isSubmitting}
 						/>
 						<FormInput
-							label="State/Province"
+							label='State/Province'
 							{...form.register('address.state')}
 							error={form.formState.errors.address?.state}
 							disabled={isSubmitting}
 						/>
 					</div>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 						<FormInput
-							label="ZIP/Postal Code"
+							label='ZIP/Postal Code'
 							{...form.register('address.zipCode')}
 							error={form.formState.errors.address?.zipCode}
 							disabled={isSubmitting}
 						/>
 						<FormInput
-							label="Country"
+							label='Country'
 							{...form.register('address.country')}
 							error={form.formState.errors.address?.country}
 							disabled={isSubmitting}
@@ -414,28 +410,30 @@ export default function UpdateCustomerForm({
 
 			{/* Internal Notes (SalesRep+ only) */}
 			{showInternalFields && (
-				<div className="border-t pt-6">
-					<h3 className="text-lg font-semibold mb-2">Internal Notes</h3>
-					<p className="text-sm text-base-content/60 mb-4">
+				<div className='border-t pt-6'>
+					<h3 className='text-lg font-semibold mb-2'>Internal Notes</h3>
+					<p className='text-sm text-base-content/60 mb-4'>
 						Notes visible only to staff members, not customers.
 					</p>
 					<textarea
 						{...form.register('internalNotes')}
-						className="textarea textarea-bordered w-full h-32"
-						placeholder="Add internal notes about this customer..."
+						className='textarea textarea-bordered w-full h-32'
+						placeholder='Add internal notes about this customer...'
 						disabled={isSubmitting}
 					/>
 					{form.formState.errors.internalNotes && (
-						<p className="text-error text-sm mt-1">
-							{form.formState.errors.internalNotes.message}
-						</p>
+						<p className='text-error text-sm mt-1'>{form.formState.errors.internalNotes.message}</p>
 					)}
 				</div>
 			)}
 
 			{/* Submit Button */}
-			<div className="flex justify-end">
-				<Button type="submit" variant="primary" loading={isSubmitting} disabled={isSubmitting}>
+			<div className='flex justify-end'>
+				<Button
+					type='submit'
+					variant='primary'
+					loading={isSubmitting}
+					disabled={isSubmitting}>
 					{isCreateMode ? 'Create Customer' : 'Update Customer'}
 				</Button>
 			</div>

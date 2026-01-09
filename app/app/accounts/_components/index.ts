@@ -17,7 +17,7 @@ export { default as AccountsDataGrid } from './AccountsDataGrid'
 
 // Role management components (route-specific)
 export { default as RoleChangeModal } from './RoleChangeModal'
-export { default as RoleSelector, ROLE_OPTIONS } from './RoleSelector'
+export { default as RoleSelector } from './RoleSelector'
 
 // Re-export shared components from @_features/accounts (single source of truth)
 export { 
@@ -27,6 +27,5 @@ export {
 	type UserInfoDisplayProps,
 } from '@_features/accounts'
 
-// Types (deprecated - use @_types instead)
-export type { Account } from './RoleChangeModal'
-export type { RoleOption, RoleSelectorProps } from './RoleSelector'
+// Types
+export type { RoleSelectorProps } from './RoleSelector'

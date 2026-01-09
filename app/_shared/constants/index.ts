@@ -1,14 +1,16 @@
 /**
  * Shared Constants Barrel Export
- * 
+ *
  * Centralized exports for all application constants.
  * Import from '@_shared' or '@_shared/constants'.
- * 
+ *
  * @module shared/constants
  */
 
 // RBAC Default Constants (Single Source of Truth for Role Levels)
 export {
+	// Role level constants (use for role comparisons)
+	RoleLevels,
 	// Core constants
 	DEFAULT_ROLE_THRESHOLDS,
 	DEFAULT_ROLE_METADATA,
@@ -17,22 +19,16 @@ export {
 	RBAC_CACHE_CONFIG,
 	// Display helpers
 	getRoleDisplayName,
+	getRoleShortLabel,
 	getRoleBadgeVariant,
+	getRoleSelectOptions,
+	// Validation helpers
+	isValidRoleLevel,
 	// Types
+	type RoleLevelKey,
+	type RoleLevelValue,
 	type RoleThresholds,
 	type RoleMetadataEntry,
 	type RoleBadgeVariant,
-	// Legacy compatibility (deprecated)
-	ROLE_OPTIONS,
-	getRoleOption,
-	getRoleLabel,
-	getRoleColor,
-	roleRequiresConfirmation,
-	getRolesByLevelDescending,
-	getRolesByLevelAscending,
-	getStaffRoles,
-	isStaffRole,
-	getRoleSelectOptions,
-	type RoleOption,
+	type RoleSelectOption,
 } from './rbac-defaults'
-

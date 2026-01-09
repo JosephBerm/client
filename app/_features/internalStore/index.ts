@@ -48,7 +48,7 @@
  *   return (
  *     <>
  *       <ProductStatsGrid stats={stats} isLoading={statsLoading} />
- *       <ServerDataGrid columns={columns} ... />
+ *       <RichDataGrid columns={columns} ... />
  *       <ProductDeleteModal ... />
  *     </>
  *   )

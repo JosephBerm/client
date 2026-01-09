@@ -29,19 +29,8 @@
 // MAIN COMPONENTS
 // ============================================================================
 
-/**
- * @deprecated Use RichDataGrid instead for server-side pagination, sorting, and filtering.
- * ServerDataGrid will be removed in a future release.
- *
- * Migration guide:
- * 1. Replace `ServerDataGrid` with `RichDataGrid`
- * 2. Use `createRichColumnHelper` for column definitions
- * 3. Add `filterType`, `searchable`, `faceted` properties to columns
- * 4. Use `customFetcher` with `/search/rich` endpoints
- *
- * @see RichDataGrid for the recommended MAANG-level table component
- */
-export { default as ServerDataGrid } from './ServerDataGrid'
+// NOTE: ServerDataGrid has been removed. Use RichDataGrid instead.
+// See RICHDATAGRID_MIGRATION_PLAN.md for migration guide.
 
 export { DataGrid } from './DataGrid' // Industry-standard name for div-based tables with virtualization
 export type { DataGridProps } from './DataGrid'
@@ -229,4 +218,3 @@ export type {
 	PartialExcept,
 	DeepPartial,
 } from './RichDataGrid'
-

@@ -29,7 +29,6 @@ import {
 } from '@_shared/hooks/usePermissions'
 import { PermissionGuard, RoleGuard } from '@_components/common/guards'
 import { useAuthStore } from '@_features/auth/stores/useAuthStore'
-import type { RoleLevel } from '@_types/rbac'
 
 // ============================================================================
 // MOCK SETUP
@@ -64,12 +63,12 @@ vi.mock('@_features/auth/stores/useAuthStore', () => ({
 interface TestUser {
   id: number
   email: string
-  role: RoleLevel
+  role: number
   customerId?: number
   name?: { first: string; last: string }
 }
 
-function createTestUser(role: RoleLevel, overrides?: Partial<TestUser>): TestUser {
+function createTestUser(role: number, overrides?: Partial<TestUser>): TestUser {
   return {
     id: 1,
     email: 'test@medsource.com',
@@ -80,7 +79,7 @@ function createTestUser(role: RoleLevel, overrides?: Partial<TestUser>): TestUse
   }
 }
 
-function loginAs(role: RoleLevel, overrides?: Partial<TestUser>) {
+function loginAs(role: number, overrides?: Partial<TestUser>) {
   const user = createTestUser(role, overrides)
   mockStore.setState({ user, isAuthenticated: true })
 }

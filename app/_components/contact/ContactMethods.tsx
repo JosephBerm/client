@@ -11,20 +11,20 @@ import { useScrollReveal } from '@_shared/hooks'
 
 import ContactMethodCard from '@_components/ui/ContactMethodCard'
 
-import { CONTACT_INFO } from './contact.constants'
+import { COMPANY_CONTACT } from '@_lib'
 
 /**
  * ContactMethods Component
- * 
+ *
  * Displays quick contact options (phone, email, live chat).
  * Includes scroll-triggered reveal animation.
- * 
+ *
  * **Features:**
  * - Scroll-triggered reveal animation
  * - Multiple contact methods (phone, email, live chat)
  * - Mobile-first responsive grid layout
  * - WCAG 2.1 AA accessibility compliant
- * 
+ *
  * @module contact/ContactMethods
  */
 export default function ContactMethods() {
@@ -57,9 +57,9 @@ export default function ContactMethods() {
 					<ContactMethodCard
 						type='phone'
 						title='Call Us'
-						mainText={CONTACT_INFO.phone.display}
+						mainText={COMPANY_CONTACT.phone.display}
 						description='Speak directly with a sourcing specialist in real time.'
-						href={CONTACT_INFO.phone.href}
+						href={COMPANY_CONTACT.phone.href}
 						trackingLocation='contact_page_card'
 					/>
 
@@ -67,25 +67,25 @@ export default function ContactMethods() {
 					<ContactMethodCard
 						type='email'
 						title='Email Support'
-						mainText={CONTACT_INFO.email.display}
+						mainText={COMPANY_CONTACT.email.display}
 						description='Share requirements or RFQs and receive a tailored response.'
-						href={CONTACT_INFO.email.href}
+						href={COMPANY_CONTACT.email.href}
 						trackingLocation='contact_page_card'
 					/>
 
 					{/* Members Only Live Chat - Full width on mobile, spans both columns on tablet+ */}
 					<div className={classNames('sm:col-span-2 lg:col-span-1 flex')}>
 						<ContactMethodCard
-							type="chat"
-							title="LIVE CHAT"
-							mainText="Members Only"
-							description="Create a free account to access our live chat support."
-							variant="dark"
+							type='chat'
+							title='LIVE CHAT'
+							mainText='Members Only'
+							description='Create a free account to access our live chat support.'
+							variant='dark'
 							clickableCard
 							customIcon={MessageSquare}
 							onClick={handleMembersOnlyChatClick}
-							trackingLocation="contact_page_card"
-							className="w-full"
+							trackingLocation='contact_page_card'
+							className='w-full'
 						/>
 					</div>
 				</div>
@@ -93,4 +93,3 @@ export default function ContactMethods() {
 		</div>
 	)
 }
-

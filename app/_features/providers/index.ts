@@ -58,7 +58,7 @@
  *   return (
  *     <div>
  *       <ProviderStatsGrid stats={stats} isLoading={statsLoading} />
- *       <ServerDataGrid columns={columns} ... />
+ *       <RichDataGrid columns={columns} ... />
  *       <ProviderDeleteModal ... />
  *     </div>
  *   )

@@ -1,13 +1,13 @@
 /**
  * useCustomersPage Hook
- * 
+ *
  * Encapsulates all business logic for the Customers list page.
  * Manages state, RBAC checks, and CRUD operations.
- * 
+ *
  * **React 19 Optimizations:**
  * - No useCallback for stable functions (React 19 auto-memoizes)
  * - useMemo only for expensive computations
- * 
+ *
  * @module customers/hooks
  */
 
@@ -17,11 +17,9 @@ import { useState } from 'react'
 
 import { useAuthStore } from '@_features/auth'
 
-import { notificationService, API } from '@_shared'
+import { notificationService, API, usePermissions } from '@_shared'
 
 import { logger } from '@/app/_core'
-
-import { AccountRole } from '@_classes/Enums'
 import type Company from '@_classes/Company'
 
 import { useAggregateStats } from './useAggregateStats'
@@ -63,7 +61,7 @@ interface UseCustomersPageReturn {
 
 /**
  * Hook encapsulating all Customers page business logic.
- * 
+ *
  * @example
  * ```tsx
  * const {
@@ -78,49 +76,50 @@ interface UseCustomersPageReturn {
 export function useCustomersPage(): UseCustomersPageReturn {
 	// Auth state for RBAC
 	const user = useAuthStore((state) => state.user)
-	
+
 	// Modal state
 	const [deleteModal, setDeleteModal] = useState<DeleteModalState>({
 		isOpen: false,
 		customer: null,
 	})
-	
+
 	// Page state
 	const [refreshKey, setRefreshKey] = useState(0)
 	const [showArchived, setShowArchived] = useState(false)
 	const [isDeleting, setIsDeleting] = useState(false)
 	const [isArchiving, setIsArchiving] = useState(false)
 	const [statusFilter, setStatusFilterState] = useState<CustomerStatusKey | 'all'>('Active')
-	
+
 	// Fetch aggregate stats
-	const { stats, isLoading: statsLoading, refetch: refetchStats } = useAggregateStats({
+	const {
+		stats,
+		isLoading: statsLoading,
+		refetch: refetchStats,
+	} = useAggregateStats({
 		enabled: true,
 	})
-	
-	// RBAC checks - simple comparisons, no memoization needed
-	// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
-	const userRole = user?.roleLevel ?? AccountRole.Customer
-	// Use >= for admin check to include SuperAdmin (9999) and Admin (5000)
-	const isAdmin = userRole >= AccountRole.Admin
+
+	// RBAC: Use usePermissions hook for role-based checks
+	const { isAdmin } = usePermissions()
 	const canDelete = isAdmin // Only admins can delete
 	const canViewArchived = isAdmin // Only admins can view archived
-	
+
 	// Actions - React 19: No useCallback needed for these
 	const openDeleteModal = (customer: Company) => {
 		setDeleteModal({ isOpen: true, customer })
 	}
-	
+
 	const closeDeleteModal = () => {
 		if (!isDeleting && !isArchiving) {
 			setDeleteModal({ isOpen: false, customer: null })
 		}
 	}
-	
+
 	const refreshData = () => {
 		setRefreshKey((prev) => prev + 1)
 		void refetchStats()
 	}
-	
+
 	const toggleShowArchived = () => {
 		setShowArchived((prev) => !prev)
 		// Refresh data to fetch archived/non-archived
@@ -135,7 +134,7 @@ export function useCustomersPage(): UseCustomersPageReturn {
 		setStatusFilterState(filter)
 		// Refresh handled by filterKey dependency in page
 	}
-	
+
 	/**
 	 * Archive a customer (soft delete).
 	 * Sets isArchived = true, preserves all data.
@@ -144,18 +143,18 @@ export function useCustomersPage(): UseCustomersPageReturn {
 		if (!deleteModal.customer) {
 			return
 		}
-		
+
 		setIsArchiving(true)
-		
+
 		try {
 			// Update customer with isArchived = true
 			const customerToArchive = {
 				...deleteModal.customer,
 				isArchived: true,
 			}
-			
+
 			const { data } = await API.Customers.update(customerToArchive)
-			
+
 			if (data.statusCode !== 200) {
 				notificationService.error(data.message ?? 'Failed to archive customer', {
 					metadata: { customerId: deleteModal.customer.id },
@@ -164,13 +163,13 @@ export function useCustomersPage(): UseCustomersPageReturn {
 				})
 				return
 			}
-			
+
 			notificationService.success('Customer archived successfully', {
 				metadata: { customerId: deleteModal.customer.id },
 				component: 'CustomersPage',
 				action: 'archiveCustomer',
 			})
-			
+
 			closeDeleteModal()
 			refreshData()
 		} catch (error) {
@@ -184,7 +183,7 @@ export function useCustomersPage(): UseCustomersPageReturn {
 			setIsArchiving(false)
 		}
 	}
-	
+
 	/**
 	 * Permanently delete a customer.
 	 * Only admins can perform this action.
@@ -193,16 +192,16 @@ export function useCustomersPage(): UseCustomersPageReturn {
 		if (!deleteModal.customer || !canDelete) {
 			return
 		}
-		
+
 		setIsDeleting(true)
-		
+
 		try {
 			const { data } = await API.Customers.delete(deleteModal.customer.id)
-			
+
 			if (data.statusCode !== 200) {
 				// Check for specific error messages
 				const errorMessage = data.message ?? 'Failed to delete customer'
-				
+
 				// Provide better error messaging for common cases
 				if (data.message?.includes('related_data') || data.message?.includes('has_related')) {
 					notificationService.error(
@@ -222,13 +221,13 @@ export function useCustomersPage(): UseCustomersPageReturn {
 				}
 				return
 			}
-			
+
 			notificationService.success(data.message ?? 'Customer deleted successfully', {
 				metadata: { customerId: deleteModal.customer.id },
 				component: 'CustomersPage',
 				action: 'deleteCustomer',
 			})
-			
+
 			closeDeleteModal()
 			refreshData()
 		} catch (error) {
@@ -242,7 +241,7 @@ export function useCustomersPage(): UseCustomersPageReturn {
 			setIsDeleting(false)
 		}
 	}
-	
+
 	return {
 		// State
 		deleteModal,
@@ -273,4 +272,3 @@ export function useCustomersPage(): UseCustomersPageReturn {
 }
 
 export default useCustomersPage
-

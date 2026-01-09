@@ -1,25 +1,25 @@
 /**
  * Core - Main Barrel Export (Optimized for Tree-Shaking)
- * 
+ *
  * Application-wide foundations used across all features.
  * Pure infrastructure code - no React dependencies, works everywhere.
- * 
+ *
  * **Architecture:**
  * - Logger: FAANG-level structured logging
  * - Validation: Zod schemas for type-safe forms
  * - Server + Client safe (no browser APIs)
- * 
+ *
  * @example
  * ```typescript
  * import { logger, emailSchema, loginSchema } from '@_core'
- * 
+ *
  * // Logging
  * logger.info('User action', { userId: '123' })
- * 
+ *
  * // Validation
  * const result = emailSchema.safeParse(email)
  * ```
- * 
+ *
  * @module core
  */
 
@@ -42,7 +42,6 @@ export {
 	configureRemoteLogging,
 	resetDefaultLogger,
 	loggers,
-	isLogLevel,
 } from './logger'
 
 // Logger types
@@ -100,6 +99,7 @@ export {
 export {
 	loginSchema,
 	signupSchema,
+	adminCreateAccountSchema,
 	changePasswordSchema,
 	profileUpdateSchema,
 	productSchema,
@@ -122,6 +122,7 @@ export {
 export type {
 	LoginFormData,
 	SignupFormData,
+	AdminCreateAccountFormData,
 	ChangePasswordFormData,
 	ProfileUpdateFormData,
 	ProductFormData,
@@ -135,4 +136,3 @@ export type {
 	RoleFormData,
 	RoleUpdateFormData,
 } from './validation/validation-schemas'
-

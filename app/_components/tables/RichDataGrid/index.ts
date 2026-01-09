@@ -34,7 +34,7 @@ export type { UseRangeSelectionOptions, UseRangeSelectionReturn } from './hooks/
 export { useKeyboardNavigation } from './hooks/useKeyboardNavigation'
 export type { UseKeyboardNavigationOptions, UseKeyboardNavigationReturn } from './hooks/useKeyboardNavigation'
 
-export { useClickOutside, useEscapeKey } from './hooks/useClickOutside'
+export { useClickOutside, useEscapeKey } from '@_shared/hooks/useClickOutside'
 
 // === CONTEXT ===
 export {

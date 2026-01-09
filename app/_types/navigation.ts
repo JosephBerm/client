@@ -1,34 +1,34 @@
 /**
  * Navigation Type Definitions
- * 
+ *
  * Provides type-safe interfaces and types for the navigation system.
  * These types define the structure of navigation routes, sections, and
  * configuration, enabling type safety throughout the navigation system.
- * 
+ *
  * **Architecture:**
  * - Icon type for consistent icon usage
  * - Route interface for individual navigation items
  * - Section interface for grouping routes
  * - Role-based access control types
- * 
+ *
  * **Role Management:**
  * - Imports AccountRole from central enum definition
  * - Re-exports for navigation convenience
  * - Single source of truth for role values
- * 
+ *
  * @module NavigationTypes
  */
 
 /**
  * Breadcrumb item interface.
  * Represents a single breadcrumb in the navigation trail.
- * 
+ *
  * **Usage:**
  * - BreadcrumbService (generates breadcrumbs)
  * - Breadcrumb UI component (renders breadcrumbs)
  * - useBreadcrumbs hook (auto-generation)
  * - Manual breadcrumb definitions
- * 
+ *
  * **Architecture:**
  * Lives in types layer (not UI or service layer) to avoid circular dependencies.
  * Follows Dependency Inversion Principle - lower layers depend on abstractions.
@@ -64,10 +64,10 @@ export type NavigationIconType =
 
 /**
  * Navigation route item interface.
- * 
+ *
  * Represents a single navigation item (link) in the navigation system.
  * Routes appear in the sidebar navigation.
- * 
+ *
  * @interface NavigationRoute
  */
 export interface NavigationRoute {
@@ -91,10 +91,10 @@ export interface NavigationRoute {
 
 /**
  * Navigation section interface.
- * 
+ *
  * Represents a group of related navigation routes displayed together.
  * Sections appear in the sidebar navigation and can be collapsible.
- * 
+ *
  * @interface NavigationSection
  */
 export interface NavigationSection {
@@ -114,25 +114,32 @@ export interface NavigationSection {
 
 /**
  * Role Type Definitions
- * 
- * **SINGLE SOURCE OF TRUTH**: AccountRole from @_classes/Enums
- * 
+ *
+ * **SINGLE SOURCE OF TRUTH**: RoleLevels from @_types/rbac
+ *
  * This ensures consistency across:
  * - Navigation system
  * - API requests
  * - Role-based access control
  * - UI components
- * 
+ *
  * **Usage:**
  * ```typescript
- * import { AccountRole } from '@_classes/Enums'
- * 
+ * import { usePermissions } from '@_hooks/usePermissions'
+ *
  * // Check if user is admin
- * if (user.role === AccountRole.Admin) {
+ * const { isAdmin } = usePermissions()
+ * if (isAdmin) {
  *   // Admin-only logic
  * }
  * ```
+ *
+ * For role values (e.g., in navigation config):
+ * ```typescript
+ * import { RoleLevels } from '@_types/rbac'
+ *
+ * const route = { roles: [RoleLevels.Admin] }
+ * ```
  */
-// Re-export AccountRole for convenience (imported directly in re-export)
-export { AccountRole } from '@_classes/Enums'
-
+// Re-export RoleLevels for navigation convenience
+export { RoleLevels } from '@_types/rbac'

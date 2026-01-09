@@ -22,7 +22,6 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { RoleGuard, RoleLevels } from '../RoleGuard'
 import * as usePermissionsModule from '@_shared/hooks/usePermissions'
-import type { RoleLevel } from '@_types/rbac'
 
 // ============================================================================
 // MOCK SETUP
@@ -40,9 +39,9 @@ vi.mock('@_shared/hooks/usePermissions', async () => {
 // TEST HELPERS
 // ============================================================================
 
-function mockUsePermissions(userRoleLevel: RoleLevel | undefined) {
+function mockUsePermissions(userRoleLevel: number | undefined) {
   ;(usePermissionsModule.usePermissions as any).mockReturnValue({
-    hasMinimumRole: (minimumRole: RoleLevel) => {
+    hasMinimumRole: (minimumRole: number) => {
       if (userRoleLevel === undefined) return false
       return userRoleLevel >= minimumRole
     },
@@ -518,7 +517,7 @@ describe('RoleGuard Component', () => {
   describe('Edge Cases and Security', () => {
     it('should handle role level 0 (below Customer) correctly', () => {
       // Role level 0 is below Customer (100) in PRD hierarchy
-      mockUsePermissions(0 as RoleLevel)
+      mockUsePermissions(0)
 
       render(
         <RoleGuard 
@@ -536,7 +535,7 @@ describe('RoleGuard Component', () => {
 
     it('should handle role level between defined roles', () => {
       // Role 350 is between SalesRep (300) and SalesManager (400) per PRD hierarchy
-      mockUsePermissions(350 as RoleLevel)
+      mockUsePermissions(350)
 
       render(
         <>
@@ -554,7 +553,7 @@ describe('RoleGuard Component', () => {
     })
 
     it('should handle extremely high role level', () => {
-      mockUsePermissions(Number.MAX_SAFE_INTEGER as RoleLevel)
+      mockUsePermissions(Number.MAX_SAFE_INTEGER)
 
       render(
         <RoleGuard minimumRole={RoleLevels.Admin}>

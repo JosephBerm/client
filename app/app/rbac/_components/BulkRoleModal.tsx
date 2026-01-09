@@ -22,21 +22,12 @@
 import { useState, useEffect } from 'react'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-	X,
-	Users,
-	Shield,
-	Search,
-	Check,
-	AlertTriangle,
-	Loader2,
-} from 'lucide-react'
+import { X, Users, Shield, Search, Check, AlertTriangle, Loader2 } from 'lucide-react'
 
 import type { PagedResult } from '@_classes/Base/PagedResult'
-import { AccountRole, type AccountRoleType } from '@_classes/Enums'
 import Button from '@_components/ui/Button'
 import Modal from '@_components/ui/Modal'
-import { RoleDisplayNames } from '@_types/rbac'
+import { getRoleSelectOptions } from '@_shared'
 import type { UserWithRole, BulkRoleUpdateResult } from '@_types/rbac-management'
 
 // =========================================================================
@@ -48,21 +39,16 @@ interface BulkRoleModalProps {
 	onClose: () => void
 	users: PagedResult<UserWithRole> | null
 	isLoadingUsers: boolean
-	onBulkUpdate: (userIds: number[], newRole: AccountRoleType, reason?: string) => Promise<BulkRoleUpdateResult | null>
+	onBulkUpdate: (userIds: number[], newRole: number, reason?: string) => Promise<BulkRoleUpdateResult | null>
 	onLoadUsers: () => void
 }
 
 // =========================================================================
 // ROLE OPTIONS
+// DRY: Uses centralized getRoleSelectOptions() from @_shared
 // =========================================================================
 
-const ROLE_OPTIONS = [
-	{ value: AccountRole.Customer, label: RoleDisplayNames[AccountRole.Customer] || 'Customer' },
-	{ value: AccountRole.SalesRep, label: RoleDisplayNames[AccountRole.SalesRep] || 'Sales Representative' },
-	{ value: AccountRole.SalesManager, label: RoleDisplayNames[AccountRole.SalesManager] || 'Sales Manager' },
-	{ value: AccountRole.FulfillmentCoordinator, label: RoleDisplayNames[AccountRole.FulfillmentCoordinator] || 'Fulfillment Coordinator' },
-	{ value: AccountRole.Admin, label: RoleDisplayNames[AccountRole.Admin] || 'Administrator' },
-]
+const ROLE_OPTIONS = getRoleSelectOptions()
 
 // =========================================================================
 // COMPONENT
@@ -77,7 +63,7 @@ export function BulkRoleModal({
 	onLoadUsers,
 }: BulkRoleModalProps) {
 	const [selectedUserIds, setSelectedUserIds] = useState<number[]>([])
-	const [newRole, setNewRole] = useState<AccountRoleType | null>(null)
+	const [newRole, setNewRole] = useState<number | null>(null)
 	const [reason, setReason] = useState('')
 	const [searchTerm, setSearchTerm] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)
@@ -106,9 +92,7 @@ export function BulkRoleModal({
 
 	// Toggle user selection
 	const toggleUser = (userId: number) => {
-		setSelectedUserIds((prev) =>
-			prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
-		)
+		setSelectedUserIds((prev) => (prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]))
 	}
 
 	// Select all visible users
@@ -161,70 +145,67 @@ export function BulkRoleModal({
 	}, [isOpen, users?.data?.length, onLoadUsers])
 
 	// Check if all visible users are selected
-	const allVisibleSelected =
-		filteredUsers.length > 0 && filteredUsers.every((u) => selectedUserIds.includes(u.id))
+	const allVisibleSelected = filteredUsers.length > 0 && filteredUsers.every((u) => selectedUserIds.includes(u.id))
 
 	return (
-		<Modal isOpen={isOpen} onClose={handleClose}>
-			<div className="w-full max-w-3xl rounded-2xl bg-base-100 p-6 shadow-2xl">
+		<Modal
+			isOpen={isOpen}
+			onClose={handleClose}>
+			<div className='w-full max-w-3xl rounded-2xl bg-base-100 p-6 shadow-2xl'>
 				{/* Header */}
-				<div className="mb-6 flex items-center justify-between">
-					<div className="flex items-center gap-3">
-						<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-							<Users className="h-5 w-5 text-primary" />
+				<div className='mb-6 flex items-center justify-between'>
+					<div className='flex items-center gap-3'>
+						<div className='flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10'>
+							<Users className='h-5 w-5 text-primary' />
 						</div>
 						<div>
-							<h2 className="text-lg font-semibold text-base-content">Bulk Role Update</h2>
-							<p className="text-sm text-base-content/60">
-								Select users and assign a new role
-							</p>
+							<h2 className='text-lg font-semibold text-base-content'>Bulk Role Update</h2>
+							<p className='text-sm text-base-content/60'>Select users and assign a new role</p>
 						</div>
 					</div>
 					<button
 						onClick={handleClose}
-						className="rounded-lg p-2 hover:bg-base-200 transition-colors"
-					>
-						<X className="h-5 w-5 text-base-content/60" />
+						className='rounded-lg p-2 hover:bg-base-200 transition-colors'>
+						<X className='h-5 w-5 text-base-content/60' />
 					</button>
 				</div>
 
 				{/* Search */}
-				<div className="relative mb-4">
-					<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/40" />
+				<div className='relative mb-4'>
+					<Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/40' />
 					<input
-						type="text"
-						placeholder="Search users..."
+						type='text'
+						placeholder='Search users...'
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
-						className="w-full rounded-lg border border-base-300 bg-base-100 py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+						className='w-full rounded-lg border border-base-300 bg-base-100 py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary'
 					/>
 				</div>
 
 				{/* Select all / Selection count */}
-				<div className="mb-4 flex items-center justify-between">
+				<div className='mb-4 flex items-center justify-between'>
 					<button
 						onClick={selectAll}
-						className="text-sm text-primary hover:underline"
-					>
+						className='text-sm text-primary hover:underline'>
 						{allVisibleSelected ? 'Deselect all' : 'Select all'}
 					</button>
-					<span className="text-sm text-base-content/60">
+					<span className='text-sm text-base-content/60'>
 						{selectedUserIds.length} user{selectedUserIds.length !== 1 ? 's' : ''} selected
 					</span>
 				</div>
 
 				{/* User list */}
-				<div className="mb-6 max-h-[300px] overflow-y-auto rounded-lg border border-base-300">
+				<div className='mb-6 max-h-[300px] overflow-y-auto rounded-lg border border-base-300'>
 					{isLoadingUsers ? (
-						<div className="flex items-center justify-center py-12">
-							<Loader2 className="h-8 w-8 animate-spin text-primary" />
+						<div className='flex items-center justify-center py-12'>
+							<Loader2 className='h-8 w-8 animate-spin text-primary' />
 						</div>
 					) : filteredUsers.length === 0 ? (
-						<div className="py-12 text-center text-base-content/60">
+						<div className='py-12 text-center text-base-content/60'>
 							{searchTerm ? 'No users match your search' : 'No users found'}
 						</div>
 					) : (
-						<div className="divide-y divide-base-200">
+						<div className='divide-y divide-base-200'>
 							{filteredUsers.map((user) => {
 								const isSelected = selectedUserIds.includes(user.id)
 
@@ -236,27 +217,23 @@ export function BulkRoleModal({
 										className={`flex items-center gap-4 p-4 cursor-pointer transition-colors ${
 											isSelected ? 'bg-primary/5' : 'hover:bg-base-200/50'
 										}`}
-										onClick={() => toggleUser(user.id)}
-									>
+										onClick={() => toggleUser(user.id)}>
 										{/* Checkbox */}
 										<div
 											className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-colors ${
-												isSelected
-													? 'border-primary bg-primary text-white'
-													: 'border-base-300'
-											}`}
-										>
-											{isSelected && <Check className="h-3 w-3" />}
+												isSelected ? 'border-primary bg-primary text-white' : 'border-base-300'
+											}`}>
+											{isSelected && <Check className='h-3 w-3' />}
 										</div>
 
 										{/* User info */}
-										<div className="flex-1">
-											<p className="font-medium text-base-content">{user.fullName}</p>
-											<p className="text-sm text-base-content/60">{user.email}</p>
+										<div className='flex-1'>
+											<p className='font-medium text-base-content'>{user.fullName}</p>
+											<p className='text-sm text-base-content/60'>{user.email}</p>
 										</div>
 
 										{/* Current role */}
-										<span className="rounded-full bg-base-200 px-3 py-1 text-xs text-base-content/70">
+										<span className='rounded-full bg-base-200 px-3 py-1 text-xs text-base-content/70'>
 											{user.roleDisplayName}
 										</span>
 									</motion.div>
@@ -267,11 +244,9 @@ export function BulkRoleModal({
 				</div>
 
 				{/* Role selection */}
-				<div className="mb-4">
-					<label className="mb-2 block text-sm font-medium text-base-content">
-						New Role
-					</label>
-					<div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+				<div className='mb-4'>
+					<label className='mb-2 block text-sm font-medium text-base-content'>New Role</label>
+					<div className='grid grid-cols-2 gap-2 sm:grid-cols-3'>
 						{ROLE_OPTIONS.map((option) => (
 							<button
 								key={option.value}
@@ -280,30 +255,27 @@ export function BulkRoleModal({
 									newRole === option.value
 										? 'border-primary bg-primary/5'
 										: 'border-base-300 hover:border-base-content/30'
-								}`}
-							>
+								}`}>
 								<Shield
 									className={`h-4 w-4 ${
 										newRole === option.value ? 'text-primary' : 'text-base-content/40'
 									}`}
 								/>
-								<span className="text-sm font-medium">{option.label}</span>
+								<span className='text-sm font-medium'>{option.label}</span>
 							</button>
 						))}
 					</div>
 				</div>
 
 				{/* Reason */}
-				<div className="mb-6">
-					<label className="mb-2 block text-sm font-medium text-base-content">
-						Reason (optional)
-					</label>
+				<div className='mb-6'>
+					<label className='mb-2 block text-sm font-medium text-base-content'>Reason (optional)</label>
 					<textarea
 						value={reason}
 						onChange={(e) => setReason(e.target.value)}
-						placeholder="Provide a reason for the role change..."
+						placeholder='Provide a reason for the role change...'
 						rows={2}
-						className="w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+						className='w-full rounded-lg border border-base-300 bg-base-100 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary'
 					/>
 				</div>
 
@@ -315,31 +287,28 @@ export function BulkRoleModal({
 							animate={{ opacity: 1, height: 'auto' }}
 							exit={{ opacity: 0, height: 0 }}
 							className={`mb-4 rounded-lg p-4 ${
-								result.failedCount > 0
-									? 'bg-warning/10 text-warning'
-									: 'bg-success/10 text-success'
-							}`}
-						>
-							<div className="flex items-start gap-3">
+								result.failedCount > 0 ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'
+							}`}>
+							<div className='flex items-start gap-3'>
 								{result.failedCount > 0 ? (
-									<AlertTriangle className="h-5 w-5 flex-shrink-0" />
+									<AlertTriangle className='h-5 w-5 flex-shrink-0' />
 								) : (
-									<Check className="h-5 w-5 flex-shrink-0" />
+									<Check className='h-5 w-5 flex-shrink-0' />
 								)}
 								<div>
-									<p className="font-medium">
+									<p className='font-medium'>
 										{result.updatedCount > 0
 											? `Updated ${result.updatedCount} user${result.updatedCount > 1 ? 's' : ''}`
 											: 'No users were updated'}
 									</p>
 									{result.failedCount > 0 && (
 										<>
-											<p className="text-sm">
+											<p className='text-sm'>
 												Failed to update {result.failedCount} user
 												{result.failedCount > 1 ? 's' : ''}
 											</p>
 											{result.failures.length > 0 && (
-												<ul className="mt-2 text-sm">
+												<ul className='mt-2 text-sm'>
 													{result.failures.map((failure) => (
 														<li key={failure.userId}>
 															User #{failure.userId}: {failure.reason}
@@ -356,23 +325,24 @@ export function BulkRoleModal({
 				</AnimatePresence>
 
 				{/* Actions */}
-				<div className="flex justify-end gap-3">
-					<Button variant="ghost" onClick={handleClose}>
+				<div className='flex justify-end gap-3'>
+					<Button
+						variant='ghost'
+						onClick={handleClose}>
 						Cancel
 					</Button>
 					<Button
-						variant="primary"
+						variant='primary'
 						onClick={handleSubmit}
-						disabled={selectedUserIds.length === 0 || newRole === null || isSubmitting}
-					>
+						disabled={selectedUserIds.length === 0 || newRole === null || isSubmitting}>
 						{isSubmitting ? (
 							<>
-								<Loader2 className="h-4 w-4 animate-spin" />
+								<Loader2 className='h-4 w-4 animate-spin' />
 								Updating...
 							</>
 						) : (
 							<>
-								<Shield className="h-4 w-4" />
+								<Shield className='h-4 w-4' />
 								Update {selectedUserIds.length} User{selectedUserIds.length !== 1 ? 's' : ''}
 							</>
 						)}
@@ -384,4 +354,3 @@ export function BulkRoleModal({
 }
 
 export default BulkRoleModal
-

@@ -1,24 +1,24 @@
 /**
  * useQuoteAssignment Hook
- * 
+ *
  * Custom hook for managing quote assignment to Sales Reps.
  * Uses `useFormSubmit` for DRY form submission handling.
- * 
+ *
  * **Features:**
  * - Fetch Sales Reps (SalesManager+ can select)
  * - Automatic quote refresh after assignment
  * - Loading states and error handling (via useFormSubmit)
  * - Type-safe with full TypeScript support
- * 
+ *
  * **Permission Logic:**
  * - SalesManager+: Can assign/unassign Sales Reps
  * - SalesRep and below: Cannot assign (permissions.canAssign = false)
- * 
+ *
  * **Pattern:**
  * - Follows `useQuoteActions` pattern for consistency
  * - Uses `useFormSubmit` for all API calls (DRY, handles loading/error/success)
  * - Refreshes quote data after successful assignment
- * 
+ *
  * @module app/quotes/[id]/_components/hooks/useQuoteAssignment
  */
 
@@ -30,12 +30,10 @@ import { logger } from '@_core'
 
 import { parseDateOrNow } from '@_lib/dates'
 
-import {
-	useFormSubmit,
-	API,
-} from '@_shared'
+import { useFormSubmit, API } from '@_shared'
 
-import { AccountRole } from '@_classes/Enums'
+import { RoleLevels } from '@_types/rbac'
+
 import Quote from '@_classes/Quote'
 import User from '@_classes/User'
 
@@ -67,24 +65,24 @@ export interface UseQuoteAssignmentReturn {
 
 /**
  * Custom hook for quote assignment management
- * 
+ *
  * Provides functionality to assign/unassign quotes to Sales Reps.
- * 
+ *
  * **Data Fetching:**
  * - Sales team (Sales Managers + Sales Reps) fetched when user can assign
  * - Uses backend role filter endpoint for server-side efficiency
- * 
+ *
  * @param quote - The quote entity
  * @param permissions - Permission flags from useQuotePermissions
  * @param onRefresh - Callback to refresh quote data after successful assignment
  * @returns Assignment handlers, user lists, and processing state
- * 
+ *
  * @example
  * ```tsx
  * const { quote, refresh } = useQuoteDetails()
  * const permissions = useQuotePermissions(quote)
  * const { salesReps, handleAssign } = useQuoteAssignment(quote, permissions, refresh)
- * 
+ *
  * <Select onChange={(e) => handleAssign(e.target.value)}>
  *   {salesReps.map(rep => (
  *     <option key={rep.id} value={rep.id}>{rep.name.getFormattedName()}</option>
@@ -122,17 +120,14 @@ export function useQuoteAssignment(
 				setSalesTeamError(null)
 
 				logger.debug('Fetching sales team...', {
-					roles: [AccountRole.SalesRep, AccountRole.SalesManager],
+					roles: [RoleLevels.SalesRep, RoleLevels.SalesManager],
 					component: 'useQuoteAssignment',
 					action: 'fetchSalesTeam',
 				})
 
 				// Fetch Sales Managers + Sales Reps in one call (server-side role filtering)
-				// Uses backend _accountService.GetByRole([AccountRole.SalesRep, AccountRole.SalesManager])
-				const { data } = await API.Accounts.getByRole([
-					AccountRole.SalesRep,
-					AccountRole.SalesManager,
-				])
+				// Uses backend _accountService.GetByRole([RoleLevels.SalesRep, RoleLevels.SalesManager])
+				const { data } = await API.Accounts.getByRole([RoleLevels.SalesRep, RoleLevels.SalesManager])
 
 				if (!data.payload) {
 					logger.warn('No payload in sales team response', {
@@ -145,7 +140,7 @@ export function useQuoteAssignment(
 					setSalesReps([])
 					return
 				}
-				
+
 				logger.debug('Sales team API response received', {
 					payloadLength: data.payload.length,
 					rawPayload: data.payload,
@@ -154,22 +149,22 @@ export function useQuoteAssignment(
 				})
 
 				const users = data.payload.map((userData: unknown) => new User(userData as Partial<User>))
-				
+
 				// MAANG-Level: Robust type coercion for role comparison
 				// API may return role as string or number depending on serialization
 				// Use Number() to ensure consistent numeric comparison
-				const managers = users.filter((u) => Number(u.role) === Number(AccountRole.SalesManager))
-				const reps = users.filter((u) => Number(u.role) === Number(AccountRole.SalesRep))
-				
+				const managers = users.filter((u) => Number(u.roleLevel) === Number(RoleLevels.SalesManager))
+				const reps = users.filter((u) => Number(u.roleLevel) === Number(RoleLevels.SalesRep))
+
 				logger.debug('Sales team fetched', {
 					totalUsers: users.length,
 					salesManagers: managers.length,
 					salesReps: reps.length,
-					roles: users.map(u => ({ id: u.id, role: u.role, roleType: typeof u.role })),
+					roles: users.map((u) => ({ id: u.id, roleLevel: u.roleLevel, roleType: typeof u.roleLevel })),
 					component: 'useQuoteAssignment',
 					action: 'fetchSalesTeam',
 				})
-				
+
 				setSalesManagers(managers)
 				setSalesReps(reps)
 			} catch (err) {
@@ -196,7 +191,7 @@ export function useQuoteAssignment(
 			if (!quote || !quoteId) {
 				return null
 			}
-			
+
 			return new Quote({
 				...quote,
 				assignedSalesRepId: salesRepId ?? undefined,
@@ -215,7 +210,7 @@ export function useQuoteAssignment(
 			if (!salesRepId) {
 				throw new Error('Sales rep ID is required')
 			}
-			
+
 			const updatedQuote = createUpdatedQuote(salesRepId)
 			if (!updatedQuote) {
 				throw new Error('Failed to create updated quote')
@@ -292,10 +287,7 @@ export function useQuoteAssignment(
 	}, [unassignSubmit, quoteId])
 
 	// Find currently assigned sales rep
-	const salesTeam = useMemo(
-		() => [...salesManagers, ...salesReps],
-		[salesManagers, salesReps]
-	)
+	const salesTeam = useMemo(() => [...salesManagers, ...salesReps], [salesManagers, salesReps])
 
 	const assignedSalesRep = useMemo(() => {
 		if (!quote?.assignedSalesRepId || salesTeam.length === 0) {

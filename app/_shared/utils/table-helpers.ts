@@ -107,10 +107,11 @@ export function convertSortingToApi(sorting: SortingState): {
  *   initialPageSize: 20
  * });
  * 
- * // Or use directly with ServerDataGrid
- * <ServerDataGrid
+ * // Or use directly with RichDataGrid
+ * <RichDataGrid
  *   endpoint="/api/orders/search"
  *   columns={orderColumns}
+ *   ariaLabel="Orders table"
  * />
  * ```
  */

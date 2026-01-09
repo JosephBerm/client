@@ -81,12 +81,7 @@ export {
 } from './utils/toastConfig'
 
 // Error Message Translation (for user feedback)
-export {
-	ERROR_MESSAGES,
-	translateError,
-	tryTranslateError,
-	hasTranslation,
-} from './utils/errorMessages'
+export { ERROR_MESSAGES, translateError, tryTranslateError, hasTranslation } from './utils/errorMessages'
 
 // User Helpers
 export {
@@ -97,11 +92,19 @@ export {
 } from './utils/userHelpers'
 
 // Category Utilities
+export { flattenCategories, formatCategoryLabel, type FlattenedCategory } from './utils/categoryUtils'
+
+// Password Strength Utilities
 export {
-	flattenCategories,
-	formatCategoryLabel,
-	type FlattenedCategory,
-} from './utils/categoryUtils'
+	checkPasswordStrength,
+	checkPasswordCriteria,
+	isPasswordValid,
+	getUnmetRequirements,
+	PASSWORD_MIN_LENGTH,
+	PASSWORD_STRONG_LENGTH,
+	type PasswordStrengthResult,
+	type PasswordCriteria,
+} from './utils/passwordStrength'
 
 // ============================================================================
 // CLIENT SERVICES (All have 'use client' directive)
@@ -111,11 +114,7 @@ export {
 export { HttpService, type ApiResponse, type AxiosResponse } from './services/httpService'
 
 // HTTP Service Constants (public-facing only)
-export {
-	AUTH_COOKIE_NAME,
-	AUTH_HEADER_PREFIX,
-	DEFAULT_API_BASE_URL,
-} from './services/httpService.constants'
+export { AUTH_COOKIE_NAME, AUTH_HEADER_PREFIX, DEFAULT_API_BASE_URL } from './services/httpService.constants'
 
 // API Client
 export {
@@ -161,12 +160,7 @@ export {
 } from './services/tokenService'
 
 // API Types - DTOs for backend contract alignment
-export type {
-	CreateQuoteRequest,
-	QuoteItemRequest,
-	CreateQuoteResponse,
-	PagedResponse,
-} from './services/api.types'
+export type { CreateQuoteRequest, QuoteItemRequest, CreateQuoteResponse, PagedResponse } from './services/api.types'
 
 // ============================================================================
 // CLIENT HOOKS (All have 'use client' directive)
@@ -188,10 +182,7 @@ export { useElementRefs } from './hooks/useElementRefs'
 export { useKeyboardNavigation } from './hooks/useKeyboardNavigation'
 export { useSidebarDrawer } from './hooks/useSidebarDrawer'
 export type { UseSidebarDrawerOptions } from './hooks/useSidebarDrawer'
-export type {
-	UseKeyboardNavigationOptions,
-	UseKeyboardNavigationReturn,
-} from './hooks/useKeyboardNavigation'
+export type { UseKeyboardNavigationOptions, UseKeyboardNavigationReturn } from './hooks/useKeyboardNavigation'
 
 // Scroll Hooks
 export { useScrollSpy } from './hooks/useScrollSpy'
@@ -201,18 +192,11 @@ export type { UseScrollProgressOptions, UseScrollProgressReturn } from './hooks/
 export { useScrollReveal } from './hooks/useScrollReveal'
 export type { UseScrollRevealOptions, UseScrollRevealReturn } from './hooks/useScrollReveal'
 export { useSectionMetrics } from './hooks/useSectionMetrics'
-export type {
-	UseSectionMetricsOptions,
-	UseSectionMetricsReturn,
-	SectionMetric,
-} from './hooks/useSectionMetrics'
+export type { UseSectionMetricsOptions, UseSectionMetricsReturn, SectionMetric } from './hooks/useSectionMetrics'
 
 // Observer Hooks
 export { useSharedIntersectionObserver } from './hooks/useSharedIntersectionObserver'
-export type {
-	SharedObserverOptions,
-	IntersectionCallback,
-} from './hooks/useSharedIntersectionObserver'
+export type { SharedObserverOptions, IntersectionCallback } from './hooks/useSharedIntersectionObserver'
 export {
 	useAdvancedLazyLoad,
 	type ConnectionType,
@@ -247,7 +231,7 @@ export { useBreadcrumbs } from './hooks/useBreadcrumbs'
 export { useCopyToClipboard } from './hooks/useCopyToClipboard'
 
 // RBAC Hooks
-export { usePermissions, Resources, Actions, Contexts, RoleLevels, type UsePermissionsReturn } from './hooks/usePermissions'
+export { usePermissions, Resources, Actions, Contexts, type UsePermissionsReturn } from './hooks/usePermissions'
 
 // ============================================================================
 // CONSTANTS (Single Source of Truth)
@@ -255,6 +239,8 @@ export { usePermissions, Resources, Actions, Contexts, RoleLevels, type UsePermi
 
 // RBAC Constants - Export everything from the barrel
 export {
+	// Role level constants (use for role comparisons)
+	RoleLevels,
 	// Core constants
 	DEFAULT_ROLE_THRESHOLDS,
 	DEFAULT_ROLE_METADATA,
@@ -264,21 +250,12 @@ export {
 	// Display helpers
 	getRoleDisplayName,
 	getRoleBadgeVariant,
+	getRoleSelectOptions,
 	// Types
+	type RoleLevelKey,
+	type RoleLevelValue,
 	type RoleThresholds,
 	type RoleMetadataEntry,
 	type RoleBadgeVariant,
-	// Legacy compatibility (deprecated but maintained for backward compat)
-	ROLE_OPTIONS,
-	getRoleOption,
-	getRoleLabel,
-	getRoleColor,
-	roleRequiresConfirmation,
-	getRolesByLevelDescending,
-	getRolesByLevelAscending,
-	getStaffRoles,
-	isStaffRole,
-	getRoleSelectOptions,
-	type RoleOption,
+	type RoleSelectOption,
 } from './constants'
-

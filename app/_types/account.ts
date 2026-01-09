@@ -37,7 +37,7 @@ export interface AccountInfo {
 	/** Email address */
 	email: string
 	/** Current role level */
-	role: number
+	roleLevel: number
 	/** Account creation timestamp (optional for backward compatibility) */
 	createdAt?: Date | string
 	/** Account status (Phase 1 - optional for backward compatibility) */
@@ -57,7 +57,7 @@ export function toAccountInfo(user: {
 	id?: string | number | null
 	username?: string
 	email?: string
-	role?: number | null
+	roleLevel?: number | null
 	createdAt?: Date | string
 	status?: AccountStatus
 } | null | undefined): AccountInfo | null {
@@ -69,7 +69,7 @@ export function toAccountInfo(user: {
 		id: String(user.id),
 		username: user.username ?? '',
 		email: user.email ?? '',
-		role: user.role ?? 0,
+		roleLevel: user.roleLevel ?? 0,
 		createdAt: user.createdAt,
 		status: user.status,
 	}

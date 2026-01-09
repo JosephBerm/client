@@ -1,21 +1,21 @@
 /**
  * AssignSalesRepModal Component
- * 
+ *
  * Modal dialog for assigning a primary sales representative to a customer.
  * Only accessible to SalesManager+ roles.
- * 
+ *
  * **Features:**
  * - Fetches list of available sales reps
  * - Displays current assignment
  * - Shows sales rep info (name, email, role)
  * - Confirmation dialog before assignment
  * - Success/error notifications
- * 
+ *
  * **RBAC:**
  * - SalesManager+: Can assign any sales rep
  * - SalesRep: Cannot access this modal
  * - Customer: Cannot access this modal
- * 
+ *
  * @see prd_customers.md - US-CUST-004
  * @module customers/components
  */
@@ -30,8 +30,9 @@ import { notificationService, API, getUserDisplayName } from '@_shared'
 
 import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import Company from '@_classes/Company'
-import { AccountRole } from '@_classes/Enums'
 import type UserType from '@_classes/User'
+
+import { RoleLevels } from '@_types/rbac'
 
 import RoleBadge from '@_components/common/RoleBadge'
 import Button from '@_components/ui/Button'
@@ -54,15 +55,10 @@ interface AssignSalesRepModalProps {
 
 /**
  * AssignSalesRepModal Component
- * 
+ *
  * Allows SalesManager+ to assign or reassign a primary sales rep to a customer.
  */
-export default function AssignSalesRepModal({
-	isOpen,
-	customer,
-	onClose,
-	onAssigned,
-}: AssignSalesRepModalProps) {
+export default function AssignSalesRepModal({ isOpen, customer, onClose, onAssigned }: AssignSalesRepModalProps) {
 	// State
 	const [salesReps, setSalesReps] = useState<UserType[]>([])
 	const [filteredReps, setFilteredReps] = useState<UserType[]>([])
@@ -82,13 +78,13 @@ export default function AssignSalesRepModal({
 			try {
 				// Fetch SalesReps and SalesManagers
 				const filter = new GenericSearchFilter()
-				filter.add('Role', `${AccountRole.SalesRep}|${AccountRole.SalesManager}`)
+				filter.add('Role', `${RoleLevels.SalesRep}|${RoleLevels.SalesManager}`)
 				filter.pageSize = 100
 				filter.sortBy = 'Role'
 				filter.sortOrder = 'desc'
 
 				const { data } = await API.Accounts.search(filter)
-				
+
 				if (data.payload?.data) {
 					setSalesReps(data.payload.data)
 					setFilteredReps(data.payload.data)
@@ -130,10 +126,10 @@ export default function AssignSalesRepModal({
 			const fullName = [rep.name?.first, rep.name?.last].filter(Boolean).join(' ').toLowerCase()
 			const email = (rep.email ?? '').toLowerCase()
 			const username = (rep.username ?? '').toLowerCase()
-			
+
 			return fullName.includes(query) || email.includes(query) || username.includes(query)
 		})
-		
+
 		setFilteredReps(filtered)
 	}, [searchQuery, salesReps])
 
@@ -189,17 +185,16 @@ export default function AssignSalesRepModal({
 		<Modal
 			isOpen={isOpen}
 			onClose={onClose}
-			title="Assign Sales Representative"
-			size="md"
-		>
-			<div className="space-y-4">
+			title='Assign Sales Representative'
+			size='md'>
+			<div className='space-y-4'>
 				{/* Current Assignment */}
 				{customer?.primarySalesRepId && customer?.primarySalesRep && (
-					<div className="alert alert-info">
+					<div className='alert alert-info'>
 						<UserCheck size={20} />
 						<div>
-							<p className="font-medium">Current Assignment</p>
-							<p className="text-sm">
+							<p className='font-medium'>Current Assignment</p>
+							<p className='text-sm'>
 								{getDisplayName(customer.primarySalesRep)} ({customer.primarySalesRep.email})
 							</p>
 						</div>
@@ -208,8 +203,8 @@ export default function AssignSalesRepModal({
 
 				{/* Search Input */}
 				<Input
-					type="text"
-					placeholder="Search by name or email..."
+					type='text'
+					placeholder='Search by name or email...'
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
 					disabled={isLoading || isAssigning}
@@ -217,11 +212,10 @@ export default function AssignSalesRepModal({
 					rightIcon={
 						searchQuery ? (
 							<Button
-								variant="ghost"
-								size="xs"
+								variant='ghost'
+								size='xs'
 								onClick={() => setSearchQuery('')}
-								className="p-0 min-h-0 h-auto"
-							>
+								className='p-0 min-h-0 h-auto'>
 								<X size={18} />
 							</Button>
 						) : undefined
@@ -229,58 +223,62 @@ export default function AssignSalesRepModal({
 				/>
 
 				{/* Sales Rep List */}
-				<div className="max-h-80 overflow-y-auto border border-base-300 rounded-lg">
+				<div className='max-h-80 overflow-y-auto border border-base-300 rounded-lg'>
 					{isLoading ? (
-						<div className="flex items-center justify-center py-8">
-							<span className="loading loading-spinner loading-md" />
+						<div className='flex items-center justify-center py-8'>
+							<span className='loading loading-spinner loading-md' />
 						</div>
 					) : filteredReps.length === 0 ? (
-						<div className="flex flex-col items-center justify-center py-8 text-base-content/60">
-							<User size={32} className="mb-2" />
+						<div className='flex flex-col items-center justify-center py-8 text-base-content/60'>
+							<User
+								size={32}
+								className='mb-2'
+							/>
 							<p>No sales representatives found</p>
 						</div>
 					) : (
-						<ul className="divide-y divide-base-300">
+						<ul className='divide-y divide-base-300'>
 							{filteredReps.map((rep) => {
 								const repIdNum = rep.id ? Number(rep.id) : null
 								const isSelected = selectedRepId === repIdNum
 								const isCurrent = customer?.primarySalesRepId === repIdNum
-								
+
 								return (
 									<li key={rep.id}>
 										<Button
-											variant="ghost"
+											variant='ghost'
 											className={`w-full flex items-center gap-3 p-3 justify-start h-auto rounded-none ${
 												isSelected ? 'bg-primary/10' : ''
 											}`}
 											onClick={() => setSelectedRepId(rep.id ? Number(rep.id) : null)}
-											disabled={isAssigning}
-										>
-											<div className="flex-shrink-0">
-												<div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-													isSelected ? 'bg-primary text-primary-content' : 'bg-base-300'
-												}`}>
+											disabled={isAssigning}>
+											<div className='flex-shrink-0'>
+												<div
+													className={`w-10 h-10 rounded-full flex items-center justify-center ${
+														isSelected ? 'bg-primary text-primary-content' : 'bg-base-300'
+													}`}>
 													<User size={20} />
 												</div>
 											</div>
-											<div className="flex-1 min-w-0 text-left">
-												<div className="flex items-center gap-2">
-													<span className="font-medium truncate">
-														{getDisplayName(rep)}
-													</span>
+											<div className='flex-1 min-w-0 text-left'>
+												<div className='flex items-center gap-2'>
+													<span className='font-medium truncate'>{getDisplayName(rep)}</span>
 													{isCurrent && (
-														<span className="badge badge-success badge-sm">Current</span>
+														<span className='badge badge-success badge-sm'>Current</span>
 													)}
 												</div>
-												<div className="flex items-center gap-2 text-sm text-base-content/60">
-													<span className="truncate">{rep.email}</span>
-													<RoleBadge role={rep.role ?? AccountRole.Customer} />
+												<div className='flex items-center gap-2 text-sm text-base-content/60'>
+													<span className='truncate'>{rep.email}</span>
+								<RoleBadge role={rep.roleLevel ?? RoleLevels.Customer} />
 												</div>
 											</div>
 											{isSelected && (
-												<div className="flex-shrink-0">
-													<div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-														<UserCheck size={14} className="text-primary-content" />
+												<div className='flex-shrink-0'>
+													<div className='w-6 h-6 rounded-full bg-primary flex items-center justify-center'>
+														<UserCheck
+															size={14}
+															className='text-primary-content'
+														/>
 													</div>
 												</div>
 											)}
@@ -293,20 +291,18 @@ export default function AssignSalesRepModal({
 				</div>
 
 				{/* Actions */}
-				<div className="flex justify-end gap-2 pt-2">
+				<div className='flex justify-end gap-2 pt-2'>
 					<Button
-						variant="ghost"
+						variant='ghost'
 						onClick={onClose}
-						disabled={isAssigning}
-					>
+						disabled={isAssigning}>
 						Cancel
 					</Button>
 					<Button
-						variant="primary"
+						variant='primary'
 						onClick={() => void handleAssign()}
 						disabled={!hasChanges || isAssigning || selectedRepId === null}
-						loading={isAssigning}
-					>
+						loading={isAssigning}>
 						{isAssigning ? 'Assigning...' : 'Assign Sales Rep'}
 					</Button>
 				</div>
@@ -314,4 +310,3 @@ export default function AssignSalesRepModal({
 		</Modal>
 	)
 }
-

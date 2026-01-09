@@ -34,7 +34,7 @@
  *   username: 'johndoe',
  *   email: 'john@example.com',
  *   name: new Name({ first: 'John', last: 'Doe' }),
- *   role: AccountRole.Customer,
+ *   roleLevel: 100, // Customer
  *   phone: '555-123-4567',
  *   dateOfBirth: new Date('1990-01-15')
  * });
@@ -134,22 +134,6 @@ export default class User {
 	 */
 	public roleLevel: number | null = null
 
-	/**
-	 * @deprecated Use roleLevel property instead.
-	 * Maintained for backward compatibility.
-	 */
-	public get role(): number | null {
-		return this.roleLevel
-	}
-
-	/**
-	 * @deprecated Use roleLevel property instead.
-	 * Maintained for backward compatibility.
-	 */
-	public set role(value: number | null) {
-		this.roleLevel = value
-	}
-
 	/** Associated customer/company ID (foreign key) */
 	public customerId: number = -99
 	
@@ -243,7 +227,7 @@ export default class User {
 	 *   username: 'johndoe',
 	 *   email: 'john@example.com',
 	 *   name: new Name({ first: 'John', last: 'Doe' }),
-	 *   role: 0 // Customer
+	 *   roleLevel: 100 // Customer
 	 * });
 	 * 
 	 * // Admin user with company
@@ -251,7 +235,7 @@ export default class User {
 	 *   username: 'admin',
 	 *   email: 'admin@medsource.com',
 	 *   name: new Name({ first: 'Admin', last: 'User' }),
-	 *   role: 9999999, // Admin
+	 *   roleLevel: 5000, // Admin
 	 *   customer: new Company({ name: 'MedSource Pro' })
 	 * });
 	 * ```

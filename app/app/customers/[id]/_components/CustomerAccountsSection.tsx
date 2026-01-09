@@ -124,7 +124,7 @@ export function CustomerAccountsSection({
 			{
 				accessorKey: 'role',
 				header: 'Role',
-				cell: ({ row }) => <RoleBadge role={row.original.role ?? 0} />,
+			cell: ({ row }) => <RoleBadge role={row.original.roleLevel ?? 0} />,
 			},
 			{
 				accessorKey: 'createdAt',

@@ -23,11 +23,11 @@ import { useState, useRef } from 'react'
 
 import { useAuthStore } from '@_features/auth'
 
-import { notificationService, API } from '@_shared'
+import { notificationService, API, usePermissions } from '@_shared'
 
 import { logger } from '@/app/_core'
 
-import { AccountRole, NotificationType } from '@_classes/Enums'
+import { NotificationType } from '@_classes/Enums'
 import type Notification from '@_classes/Notification'
 
 import {
@@ -112,9 +112,9 @@ export function useNotificationsPage(): UseNotificationsPageReturn {
 	const [stats, setStats] = useState<NotificationStats | null>(null)
 	const [statsLoading, setStatsLoading] = useState(true)
 
-	// RBAC - simple comparison, no memoization needed
-	const userRole = user?.roleLevel ?? AccountRole.Customer
-	const canDelete = userRole >= AccountRole.Admin
+	// RBAC: Use usePermissions hook for role-based checks
+	const { isAdmin } = usePermissions()
+	const canDelete = isAdmin
 
 	/**
 	 * Callback to receive grid API for optimistic updates.
@@ -254,7 +254,7 @@ export function useNotificationsPage(): UseNotificationsPageReturn {
 						...prev,
 						unreadCount: Math.max(0, prev.unreadCount - 1),
 						readCount: prev.readCount + 1,
-					}
+				  }
 				: null
 		)
 
@@ -270,7 +270,7 @@ export function useNotificationsPage(): UseNotificationsPageReturn {
 								...prev,
 								unreadCount: prev.unreadCount + 1,
 								readCount: Math.max(0, prev.readCount - 1),
-							}
+						  }
 						: null
 				)
 
@@ -296,7 +296,7 @@ export function useNotificationsPage(): UseNotificationsPageReturn {
 							...prev,
 							unreadCount: prev.unreadCount + 1,
 							readCount: Math.max(0, prev.readCount - 1),
-						}
+					  }
 					: null
 			)
 
@@ -331,7 +331,7 @@ export function useNotificationsPage(): UseNotificationsPageReturn {
 						...prev,
 						unreadCount: 0,
 						readCount: prev.totalNotifications,
-					}
+				  }
 				: null
 		)
 
@@ -352,7 +352,7 @@ export function useNotificationsPage(): UseNotificationsPageReturn {
 								...prev,
 								unreadCount: previousUnreadCount,
 								readCount: prev.totalNotifications - previousUnreadCount,
-							}
+						  }
 						: null
 				)
 

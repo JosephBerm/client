@@ -2,16 +2,17 @@
  * AuditLogDataGrid Component
  *
  * Modern data grid for displaying permission audit log entries.
- * Migrated from AuditLogTable to use ServerDataGrid for consistency.
+ * **Migration:** Phase 4.1 - Migrated from ServerDataGrid to RichDataGrid
  * Mobile-first responsive design.
  *
  * Features:
- * - Server-side pagination via ServerDataGrid
+ * - Client-side data display via RichDataGrid
  * - Custom cell renderers for complex data
  * - Filter panel for date range, user, and resource filtering
  * - Skeleton loading states
  *
  * @see prd_rbac_management.md - US-RBAC-005
+ * @see RICHDATAGRID_MIGRATION_PLAN.md
  * @module app/rbac/_components/AuditLogDataGrid
  */
 
@@ -30,11 +31,14 @@ import {
 	RefreshCw,
 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
-import type { ColumnDef } from '@tanstack/react-table'
 
 import Card from '@_components/ui/Card'
 import Button from '@_components/ui/Button'
-import { ServerDataGrid } from '@_components/tables'
+import {
+	RichDataGrid,
+	createRichColumnHelper,
+	type RichColumnDef,
+} from '@_components/tables/RichDataGrid'
 
 import type { PermissionAuditEntryDto, AuditLogFilters } from '@_types/rbac-management'
 import type { PagedResult } from '@_classes/Base/PagedResult'
@@ -295,6 +299,73 @@ function FilterPanel({
 }
 
 // =========================================================================
+// COLUMN HELPER
+// =========================================================================
+
+const columnHelper = createRichColumnHelper<PermissionAuditEntryDto>()
+
+/**
+ * Creates column definitions for the audit log grid.
+ * Using createRichColumnHelper for type-safe column definitions.
+ */
+function createAuditLogColumns(): RichColumnDef<PermissionAuditEntryDto, unknown>[] {
+	return [
+		columnHelper.accessor('timestamp', {
+			id: 'timestamp',
+			header: 'Timestamp',
+			cell: ({ row }) => <TimestampCell value={row.original.timestamp} />,
+			size: 180,
+			enableSorting: false,
+		}),
+		columnHelper.accessor('userName', {
+			id: 'user',
+			header: 'User',
+			cell: ({ row }) => (
+				<UserCell
+					userName={row.original.userName}
+					userId={row.original.userId}
+					userEmail={row.original.userEmail}
+				/>
+			),
+			size: 180,
+			enableSorting: false,
+		}),
+		columnHelper.accessor('resource', {
+			id: 'permission',
+			header: 'Permission',
+			cell: ({ row }) => (
+				<PermissionCell
+					resource={row.original.resource}
+					action={row.original.action}
+					resourceId={row.original.resourceId}
+				/>
+			),
+			size: 180,
+			enableSorting: false,
+		}),
+		columnHelper.accessor('allowed', {
+			id: 'result',
+			header: 'Result',
+			cell: ({ row }) => <ResultCell allowed={row.original.allowed} />,
+			size: 90,
+			enableSorting: false,
+		}),
+		columnHelper.accessor('reason', {
+			id: 'details',
+			header: 'Details',
+			cell: ({ row }) => (
+				<DetailsCell
+					reason={row.original.reason}
+					ipAddress={row.original.ipAddress ?? undefined}
+				/>
+			),
+			size: 160,
+			enableSorting: false,
+		}),
+	]
+}
+
+// =========================================================================
 // MAIN COMPONENT
 // =========================================================================
 
@@ -309,64 +380,8 @@ export function AuditLogDataGrid({
 	const [showFilters, setShowFilters] = useState(false)
 	const [localFilters, setLocalFilters] = useState<AuditLogFilters>(filters)
 
-	// Column definitions - useMemo is required for TanStack Table stable reference
-	const columns = useMemo<ColumnDef<PermissionAuditEntryDto>[]>(
-		() => [
-			{
-				id: 'timestamp',
-				accessorKey: 'timestamp',
-				header: 'Timestamp',
-				cell: ({ row }) => <TimestampCell value={row.original.timestamp} />,
-				size: 180,
-			},
-			{
-				id: 'user',
-				accessorKey: 'userName',
-				header: 'User',
-				cell: ({ row }) => (
-					<UserCell
-						userName={row.original.userName}
-						userId={row.original.userId}
-						userEmail={row.original.userEmail}
-					/>
-				),
-				size: 180,
-			},
-			{
-				id: 'permission',
-				accessorKey: 'resource',
-				header: 'Permission',
-				cell: ({ row }) => (
-					<PermissionCell
-						resource={row.original.resource}
-						action={row.original.action}
-						resourceId={row.original.resourceId}
-					/>
-				),
-				size: 180,
-			},
-			{
-				id: 'result',
-				accessorKey: 'allowed',
-				header: 'Result',
-				cell: ({ row }) => <ResultCell allowed={row.original.allowed} />,
-				size: 90,
-			},
-			{
-				id: 'details',
-				accessorKey: 'reason',
-				header: 'Details',
-				cell: ({ row }) => (
-					<DetailsCell
-						reason={row.original.reason}
-						ipAddress={row.original.ipAddress ?? undefined}
-					/>
-				),
-				size: 160,
-			},
-		],
-		[]
-	)
+	// Column definitions - React Compiler auto-memoizes based on dependencies
+	const columns = useMemo(() => createAuditLogColumns(), [])
 
 	// Handlers - no useCallback needed in React 19
 	const handleApplyFilters = () => {
@@ -435,19 +450,16 @@ export function AuditLogDataGrid({
 			{data && (
 				<div className="overflow-x-auto -mx-3 sm:mx-0">
 					<div className="min-w-[640px] px-3 sm:px-0">
-						<ServerDataGrid<PermissionAuditEntryDto>
+						<RichDataGrid<PermissionAuditEntryDto>
 							columns={columns}
-							fetchData={async (params) => ({
-								data: data.data ?? [],
-								page: params.page,
-								pageSize: params.pageSize,
-								total: data.total ?? 0,
-								totalPages: data.totalPages ?? data.pageCount ?? 1,
-								hasNext: params.page < (data.totalPages ?? data.pageCount ?? 1),
-								hasPrevious: params.page > 1,
-							})}
-							initialPageSize={filters.pageSize ?? 20}
-							emptyMessage={
+							data={data.data ?? []}
+							defaultPageSize={filters.pageSize ?? 20}
+							enableGlobalSearch={false}
+							enableColumnFilters={false}
+							enableRowSelection={false}
+							showToolbar={false}
+							showPagination
+							emptyState={
 								<div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
 									<Search className="mb-3 sm:mb-4 h-10 w-10 sm:h-12 sm:w-12 text-base-content/20" />
 									<p className="text-sm text-base-content/60">No audit log entries found</p>
@@ -456,6 +468,7 @@ export function AuditLogDataGrid({
 										filters.userId ||
 										filters.resource) && (
 										<button
+											type="button"
 											onClick={handleClearFilters}
 											className="mt-2 text-sm text-primary hover:underline"
 										>
@@ -465,10 +478,6 @@ export function AuditLogDataGrid({
 								</div>
 							}
 							ariaLabel="Permission audit log table"
-							enableSorting={false}
-							enableFiltering={false}
-							enablePagination
-							enablePageSize
 						/>
 					</div>
 				</div>

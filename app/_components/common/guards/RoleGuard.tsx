@@ -32,11 +32,10 @@
 
 import { ReactNode } from 'react'
 import { usePermissions, RoleLevels } from '@_shared/hooks/usePermissions'
-import type { RoleLevel } from '@_types/rbac'
 
 interface RoleGuardProps {
-	/** Minimum role level required */
-	minimumRole: RoleLevel
+	/** Minimum role level required (use RoleLevels constants) */
+	minimumRole: number
 	/** Content to render if role check fails */
 	fallback?: ReactNode
 	/** Content to render if role check passes */

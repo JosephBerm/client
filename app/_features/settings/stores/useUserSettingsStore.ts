@@ -310,7 +310,7 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 
 		/**
 		 * Sets the default table page size preference.
-		 * Used by ServerDataGrid and DataGrid components.
+		 * Used by RichDataGrid and DataGrid components.
 		 */
 		setTablePageSize: (size) => {
 			set((state) => ({

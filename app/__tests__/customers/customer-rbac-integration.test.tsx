@@ -1,24 +1,24 @@
 /**
  * Customer RBAC Integration Tests
- * 
+ *
  * MAANG-Level: End-to-end customer RBAC system validation.
- * 
+ *
  * **Priority**: 🔴 CRITICAL - SECURITY & DATA ACCESS
- * 
+ *
  * These tests validate the complete customer RBAC system:
  * - Role-based data visibility
  * - Field-level access control (internal notes)
  * - Sales rep assignment permissions
  * - Customer edit permissions
  * - Complete user journey tests
- * 
+ *
  * **Testing Strategy:**
  * 1. Complete customer journey for each role
  * 2. Internal notes visibility by role
  * 3. Sales rep assignment workflow
  * 4. Customer self-service scenarios
  * 5. Security boundary enforcement
- * 
+ *
  * @see prd_customers.md - Full PRD specification
  * @module __tests__/customers/customer-rbac-integration.test
  */
@@ -26,12 +26,11 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { renderHook } from '@testing-library/react'
-import { AccountRole, type AccountRoleType } from '@_classes/Enums'
-import { RoleLevelNames } from '@_types/rbac'
+import { RoleLevels, getRoleDisplayName } from '@_shared'
 
 /** Helper to get role name for test descriptions */
-function getRoleName(role: AccountRoleType): string {
-	return RoleLevelNames[role] ?? `Role ${role}`
+function getRoleName(role: number): string {
+	return getRoleDisplayName(role)
 }
 
 // ============================================================================
@@ -40,7 +39,7 @@ function getRoleName(role: AccountRoleType): string {
 
 // Mock user state
 const mockUser = vi.hoisted(() => ({
-	current: null as { id: number; role: AccountRoleType; customerId?: number } | null,
+	current: null as { id: number; role: number; customerId?: number } | null,
 }))
 
 vi.mock('@_features/auth', () => ({
@@ -95,11 +94,11 @@ vi.mock('next/navigation', () => ({
 
 interface TestUser {
 	id: number
-	role: AccountRoleType
+	role: number
 	customerId?: number
 }
 
-function loginAs(role: AccountRoleType, overrides: Partial<TestUser> = {}) {
+function loginAs(role: number, overrides: Partial<TestUser> = {}) {
 	mockUser.current = {
 		id: 1,
 		role,
@@ -110,7 +109,7 @@ function loginAs(role: AccountRoleType, overrides: Partial<TestUser> = {}) {
 function loginAsCustomerUser(customerId: number) {
 	mockUser.current = {
 		id: 100,
-		role: AccountRole.Customer,
+		role: RoleLevels.Customer,
 		customerId,
 	}
 }
@@ -118,21 +117,21 @@ function loginAsCustomerUser(customerId: number) {
 function loginAsSalesRep(salesRepId: number = 10) {
 	mockUser.current = {
 		id: salesRepId,
-		role: AccountRole.SalesRep,
+		role: RoleLevels.SalesRep,
 	}
 }
 
 function loginAsSalesManager(managerId: number = 20) {
 	mockUser.current = {
 		id: managerId,
-		role: AccountRole.SalesManager,
+		role: RoleLevels.SalesManager,
 	}
 }
 
 function loginAsAdmin(adminId: number = 1) {
 	mockUser.current = {
 		id: adminId,
-		role: AccountRole.Admin,
+		role: RoleLevels.Admin,
 	}
 }
 
@@ -209,17 +208,17 @@ describe('Customer RBAC Integration Tests', () => {
 		describe('View Own Company (US-CUST: Customer can view own profile)', () => {
 			it('Customer can view own company profile', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// Customer role is recognized
-				expect(result.current.userRole).toBe(AccountRole.Customer)
-				
+				expect(result.current.userRole).toBe(RoleLevels.Customer)
+
 				// Basic profile viewing is allowed (backend enforces ownership)
 				// Frontend doesn't block view attempts
 			})
 
 			it('Customer CANNOT see internal notes field', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// PRD: Customer cannot see internal notes
 				expect(result.current.canViewInternalFields).toBe(false)
 			})
@@ -228,20 +227,20 @@ describe('Customer RBAC Integration Tests', () => {
 		describe('Edit Own Company (US-CUST: Customer can edit own info)', () => {
 			it('Customer CANNOT change sales rep assignment', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// PRD: Customer cannot change primary sales rep
 				expect(result.current.canAssignSalesRep).toBe(false)
 			})
 
 			it('Customer CANNOT change company status', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				expect(result.current.canChangeStatus).toBe(false)
 			})
 
 			it('Customer CANNOT delete company', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				expect(result.current.canDelete).toBe(false)
 			})
 		})
@@ -249,13 +248,11 @@ describe('Customer RBAC Integration Tests', () => {
 		describe('Access Control - Other Companies', () => {
 			it('Customer attempting to view other company should be denied', async () => {
 				// API should return 403
-				mockAPI.Customers.get.mockResolvedValue(
-					create403Response('You can only view your own company')
-				)
+				mockAPI.Customers.get.mockResolvedValue(create403Response('You can only view your own company'))
 
 				// Simulate API call (hook would redirect on 403)
 				const response = await mockAPI.Customers.get(999)
-				
+
 				expect(response.data.statusCode).toBe(403)
 			})
 		})
@@ -273,14 +270,14 @@ describe('Customer RBAC Integration Tests', () => {
 		describe('US-CUST-001: View assigned customers', () => {
 			it('SalesRep can see internal notes for assigned customers', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// PRD: SalesRep can add internal notes about customer
 				expect(result.current.canViewInternalFields).toBe(true)
 			})
 
 			it('SalesRep is recognized as SalesRep or above', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				expect(result.current.isSalesRepOrAbove).toBe(true)
 				expect(result.current.isSalesManagerOrAbove).toBe(false)
 			})
@@ -289,20 +286,20 @@ describe('Customer RBAC Integration Tests', () => {
 		describe('US-CUST-003: Update customer info', () => {
 			it('SalesRep CANNOT change sales rep assignment', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// PRD: SalesRep cannot change primary sales rep assignment
 				expect(result.current.canAssignSalesRep).toBe(false)
 			})
 
 			it('SalesRep CANNOT change customer status', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				expect(result.current.canChangeStatus).toBe(false)
 			})
 
 			it('SalesRep CANNOT delete customers', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// PRD: SalesRep cannot delete customers
 				expect(result.current.canDelete).toBe(false)
 			})
@@ -311,12 +308,10 @@ describe('Customer RBAC Integration Tests', () => {
 		describe('Access Control - Unassigned Customers', () => {
 			it('SalesRep attempting to view unassigned customer should be denied', async () => {
 				// API should return 403 for unassigned customer
-				mockAPI.Customers.get.mockResolvedValue(
-					create403Response('You can only view assigned customers')
-				)
+				mockAPI.Customers.get.mockResolvedValue(create403Response('You can only view assigned customers'))
 
 				const response = await mockAPI.Customers.get(999)
-				
+
 				expect(response.data.statusCode).toBe(403)
 				expect(response.data.message).toContain('assigned')
 			})
@@ -337,7 +332,7 @@ describe('Customer RBAC Integration Tests', () => {
 				})
 
 				const response = await mockAPI.Customers.search({})
-				
+
 				// All returned customers are assigned to this rep
 				response.data.payload.data.forEach((customer: any) => {
 					expect(customer.primarySalesRepId).toBe(10)
@@ -358,14 +353,14 @@ describe('Customer RBAC Integration Tests', () => {
 		describe('US-CUST-002: View all customers', () => {
 			it('SalesManager can see internal notes', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// PRD: SalesManager can view all internal notes
 				expect(result.current.canViewInternalFields).toBe(true)
 			})
 
 			it('SalesManager is recognized as SalesManager or above', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				expect(result.current.isSalesManagerOrAbove).toBe(true)
 				expect(result.current.isAdmin).toBe(false)
 			})
@@ -387,7 +382,7 @@ describe('Customer RBAC Integration Tests', () => {
 				})
 
 				const response = await mockAPI.Customers.search({})
-				
+
 				// SalesManager sees customers with different/no sales reps
 				expect(response.data.payload.data.length).toBe(3)
 			})
@@ -396,14 +391,14 @@ describe('Customer RBAC Integration Tests', () => {
 		describe('US-CUST-004: Assign primary sales rep', () => {
 			it('SalesManager CAN assign sales rep', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// PRD: SalesManager can assign/reassign primary sales rep
 				expect(result.current.canAssignSalesRep).toBe(true)
 			})
 
 			it('SalesManager CAN change customer status', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				expect(result.current.canChangeStatus).toBe(true)
 			})
 
@@ -417,7 +412,7 @@ describe('Customer RBAC Integration Tests', () => {
 				})
 
 				const response = await mockAPI.Customers.assignSalesRep(1, 15)
-				
+
 				expect(response.data.statusCode).toBe(200)
 				expect(response.data.payload.primarySalesRepId).toBe(15)
 			})
@@ -425,7 +420,7 @@ describe('Customer RBAC Integration Tests', () => {
 			it('SalesManager can reassign from one rep to another', async () => {
 				// Customer currently assigned to Rep 10
 				const customer = createCustomer({ primarySalesRepId: 10 })
-				
+
 				mockAPI.Customers.assignSalesRep.mockResolvedValue({
 					data: {
 						statusCode: 200,
@@ -435,7 +430,7 @@ describe('Customer RBAC Integration Tests', () => {
 				})
 
 				const response = await mockAPI.Customers.assignSalesRep(1, 11)
-				
+
 				// Rep A (10) -> Rep B (11)
 				expect(response.data.payload.primarySalesRepId).toBe(11)
 			})
@@ -444,7 +439,7 @@ describe('Customer RBAC Integration Tests', () => {
 		describe('Limitations', () => {
 			it('SalesManager CANNOT delete customers', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// PRD: SalesManager cannot delete customers
 				expect(result.current.canDelete).toBe(false)
 			})
@@ -463,7 +458,7 @@ describe('Customer RBAC Integration Tests', () => {
 		describe('Full Customer Management', () => {
 			it('Admin has all permissions', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// PRD: Admin has full customer management
 				expect(result.current.canAssignSalesRep).toBe(true)
 				expect(result.current.canViewInternalFields).toBe(true)
@@ -474,7 +469,7 @@ describe('Customer RBAC Integration Tests', () => {
 
 			it('Admin CAN delete customers', () => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// PRD: Admin can delete customers (soft delete)
 				expect(result.current.canDelete).toBe(true)
 			})
@@ -490,21 +485,21 @@ describe('Customer RBAC Integration Tests', () => {
 			// Start as Customer
 			loginAsCustomerUser(1)
 			let { result, rerender } = renderHook(() => useCustomerPermissions())
-			
+
 			expect(result.current.canViewInternalFields).toBe(false)
 			expect(result.current.canAssignSalesRep).toBe(false)
-			
+
 			// Upgrade to SalesRep (maybe user got promoted)
 			loginAsSalesRep()
 			;({ result } = renderHook(() => useCustomerPermissions()))
-			
+
 			expect(result.current.canViewInternalFields).toBe(true)
 			expect(result.current.canAssignSalesRep).toBe(false)
-			
+
 			// Upgrade to SalesManager
 			loginAsSalesManager()
 			;({ result } = renderHook(() => useCustomerPermissions()))
-			
+
 			expect(result.current.canViewInternalFields).toBe(true)
 			expect(result.current.canAssignSalesRep).toBe(true)
 		})
@@ -512,12 +507,12 @@ describe('Customer RBAC Integration Tests', () => {
 		it('Permissions reset on logout', () => {
 			loginAsAdmin()
 			let { result } = renderHook(() => useCustomerPermissions())
-			
+
 			expect(result.current.canDelete).toBe(true)
-			
+
 			logout()
 			;({ result } = renderHook(() => useCustomerPermissions()))
-			
+
 			// Defaults to Customer (least privilege)
 			expect(result.current.canDelete).toBe(false)
 			expect(result.current.canViewInternalFields).toBe(false)
@@ -532,26 +527,25 @@ describe('Customer RBAC Integration Tests', () => {
 		it('Internal notes should NEVER be visible to Customer role', () => {
 			loginAsCustomerUser(1)
 			const { result } = renderHook(() => useCustomerPermissions())
-			
+
 			expect(result.current.canViewInternalFields).toBe(false)
 		})
 
 		it('Delete permission ONLY available to Admin', () => {
 			const nonAdminRoles = [
-				{ role: AccountRole.Customer, setup: () => loginAsCustomerUser(1) },
-				{ role: AccountRole.SalesRep, setup: () => loginAsSalesRep() },
-				{ role: AccountRole.FulfillmentCoordinator, setup: () => loginAs(AccountRole.FulfillmentCoordinator) },
-				{ role: AccountRole.SalesManager, setup: () => loginAsSalesManager() },
+				{ role: RoleLevels.Customer, setup: () => loginAsCustomerUser(1) },
+				{ role: RoleLevels.SalesRep, setup: () => loginAsSalesRep() },
+				{ role: RoleLevels.FulfillmentCoordinator, setup: () => loginAs(RoleLevels.FulfillmentCoordinator) },
+				{ role: RoleLevels.SalesManager, setup: () => loginAsSalesManager() },
 			]
 
 			for (const { role, setup } of nonAdminRoles) {
 				setup()
 				const { result } = renderHook(() => useCustomerPermissions())
-				
-				expect(
-					result.current.canDelete,
-					`Role ${getRoleName(role)} should NOT have delete permission`
-				).toBe(false)
+
+				expect(result.current.canDelete, `Role ${getRoleName(role)} should NOT have delete permission`).toBe(
+					false
+				)
 			}
 
 			// Only Admin
@@ -563,14 +557,14 @@ describe('Customer RBAC Integration Tests', () => {
 		it('Sales rep assignment ONLY available to SalesManager+ (excludes FC)', () => {
 			// Per PRD: Role hierarchy is Customer(100) < FC(200) < SalesRep(300) < SalesManager(400) < Admin(500)
 			const belowManager = [
-				{ role: AccountRole.Customer, setup: () => loginAsCustomerUser(1) },
-				{ role: AccountRole.SalesRep, setup: () => loginAsSalesRep() },
+				{ role: RoleLevels.Customer, setup: () => loginAsCustomerUser(1) },
+				{ role: RoleLevels.SalesRep, setup: () => loginAsSalesRep() },
 			]
 
 			for (const { role, setup } of belowManager) {
 				setup()
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				expect(
 					result.current.canAssignSalesRep,
 					`Role ${getRoleName(role)} should NOT have assign permission`
@@ -578,7 +572,7 @@ describe('Customer RBAC Integration Tests', () => {
 			}
 
 			// FC (200) is BELOW SalesManager (400), so FC CANNOT assign
-			loginAs(AccountRole.FulfillmentCoordinator)
+			loginAs(RoleLevels.FulfillmentCoordinator)
 			let { result } = renderHook(() => useCustomerPermissions())
 			expect(result.current.canAssignSalesRep).toBe(false)
 
@@ -602,7 +596,7 @@ describe('Customer RBAC Integration Tests', () => {
 			it('New customer without sales rep can be assigned by Manager', async () => {
 				loginAsSalesManager()
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// Manager can assign
 				expect(result.current.canAssignSalesRep).toBe(true)
 
@@ -622,7 +616,7 @@ describe('Customer RBAC Integration Tests', () => {
 		describe('Sales Rep Reassignment Flow', () => {
 			it('Manager can reassign from Rep A to Rep B', async () => {
 				loginAsSalesManager()
-				
+
 				// Current: Assigned to Rep 10
 				mockAPI.Customers.get.mockResolvedValue(
 					createCustomerResponse(createCustomer({ primarySalesRepId: 10 }))
@@ -643,18 +637,16 @@ describe('Customer RBAC Integration Tests', () => {
 			it('Rep A loses access after reassignment to Rep B', async () => {
 				// Before reassignment: Rep A (10) can access
 				loginAsSalesRep(10)
-				
+
 				mockAPI.Customers.get.mockResolvedValue(
 					createCustomerResponse(createCustomer({ primarySalesRepId: 10 }))
 				)
-				
+
 				let response = await mockAPI.Customers.get(1)
 				expect(response.data.statusCode).toBe(200)
 
 				// After reassignment to Rep B (11), Rep A gets 403
-				mockAPI.Customers.get.mockResolvedValue(
-					create403Response('You can only view assigned customers')
-				)
+				mockAPI.Customers.get.mockResolvedValue(create403Response('You can only view assigned customers'))
 
 				response = await mockAPI.Customers.get(1)
 				expect(response.data.statusCode).toBe(403)
@@ -665,15 +657,17 @@ describe('Customer RBAC Integration Tests', () => {
 			it('SalesRep can add notes visible to other staff', async () => {
 				loginAsSalesRep(10)
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// SalesRep can view/add internal notes
 				expect(result.current.canViewInternalFields).toBe(true)
 
 				// Notes in API response
 				mockAPI.Customers.get.mockResolvedValue(
-					createCustomerResponse(createCustomer({
-						internalNotes: 'Added by SalesRep: Follow up on pricing discussion',
-					}))
+					createCustomerResponse(
+						createCustomer({
+							internalNotes: 'Added by SalesRep: Follow up on pricing discussion',
+						})
+					)
 				)
 
 				const response = await mockAPI.Customers.get(1)
@@ -683,7 +677,7 @@ describe('Customer RBAC Integration Tests', () => {
 			it('Customer NEVER sees internal notes even in API response', async () => {
 				loginAsCustomerUser(1)
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// Frontend should hide internal notes
 				expect(result.current.canViewInternalFields).toBe(false)
 
@@ -700,12 +694,12 @@ describe('Customer RBAC Integration Tests', () => {
 	describe('Edge Cases', () => {
 		it('Handles null/undefined user gracefully', () => {
 			logout()
-			
+
 			expect(() => {
 				const { result } = renderHook(() => useCustomerPermissions())
-				
+
 				// Should default to least privilege
-				expect(result.current.userRole).toBe(AccountRole.Customer)
+				expect(result.current.userRole).toBe(RoleLevels.Customer)
 				expect(result.current.canViewInternalFields).toBe(false)
 				expect(result.current.canAssignSalesRep).toBe(false)
 				expect(result.current.canDelete).toBe(false)
@@ -715,13 +709,11 @@ describe('Customer RBAC Integration Tests', () => {
 		it('Customer with null customerId cannot view any company', async () => {
 			mockUser.current = {
 				id: 100,
-				role: AccountRole.Customer,
+				role: RoleLevels.Customer,
 				customerId: undefined, // No company linked
 			}
 
-			mockAPI.Customers.get.mockResolvedValue(
-				create403Response('No company associated with account')
-			)
+			mockAPI.Customers.get.mockResolvedValue(create403Response('No company associated with account'))
 
 			const response = await mockAPI.Customers.get(1)
 			expect(response.data.statusCode).toBe(403)
@@ -745,4 +737,3 @@ describe('Customer RBAC Integration Tests', () => {
 		})
 	})
 })
-

@@ -273,17 +273,6 @@ const API = {
 			HttpService.put<boolean>('/account/admin/reset-password', { userId: parseInt(userId, 10), newPassword }),
 
 		/**
-		 * Gets all sales representatives and sales managers (for quote assignment).
-		 *
-		 * **DEPRECATED:** Use `search()` with Role filter instead for better scalability.
-		 * This method is kept for backward compatibility but will be removed in future versions.
-		 *
-		 * @deprecated Use `API.Accounts.search({ Filters: { Role: '100|200' } })` instead
-		 * @see search - Centralized, scalable solution for all account filtering needs
-		 */
-		getSalesReps: async () => HttpService.get<User[]>('/account/sales-reps'),
-
-		/**
 		 * Gets accounts by role level list (defaults to SalesRep + SalesManager).
 		 * Uses backend AccountService.GetByRoleLevel for server-side filtering.
 		 *

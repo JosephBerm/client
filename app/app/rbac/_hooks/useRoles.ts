@@ -34,7 +34,10 @@ const createRolesApiService = () => ({
 	create: (request: CreateRoleRequest) => API.RBAC.Roles.create(request),
 	update: (id: number, request: UpdateRoleRequest) => API.RBAC.Roles.update(id, request),
 	// Cast to satisfy useCRUDEntity interface - we bypass this for delete via deleteRole
-	delete: (id: number) => API.RBAC.Roles.delete(id) as unknown as Promise<{ data: { statusCode: number; payload: unknown; message: string | null } }>,
+	delete: (id: number) =>
+		API.RBAC.Roles.delete(id) as unknown as Promise<{
+			data: { statusCode: number; payload: unknown; message: string | null }
+		}>,
 })
 
 interface UseRolesOptions {
@@ -48,14 +51,11 @@ export function useRoles(options: UseRolesOptions = {}) {
 	// Use a stable reference - React Compiler will optimize this
 	const apiService = createRolesApiService()
 
-	const crud = useCRUDEntity<Role, CreateRoleRequest, UpdateRoleRequest>(
-		apiService,
-		{
-			componentName,
-			autoFetch,
-			entityName: 'Role',
-		}
-	)
+	const crud = useCRUDEntity<Role, CreateRoleRequest, UpdateRoleRequest>(apiService, {
+		componentName,
+		autoFetch,
+		entityName: 'Role',
+	})
 
 	/**
 	 * Attempts to delete a role.
@@ -117,7 +117,7 @@ export function useRoles(options: UseRolesOptions = {}) {
 			// Get all users with the source role level
 			// roleFilter accepts the level number directly (AccountRoleType)
 			const usersResponse = await API.RBAC.getUsersWithRoles({
-				roleFilter: fromRoleLevel as import('@_classes/Enums').AccountRoleType,
+				roleFilter: fromRoleLevel as number,
 				pageSize: 1000,
 			})
 
@@ -130,7 +130,7 @@ export function useRoles(options: UseRolesOptions = {}) {
 				return false
 			}
 
-			const userIds = usersResponse.data.payload.data.map(u => u.id)
+			const userIds = usersResponse.data.payload.data.map((u) => u.id)
 
 			if (userIds.length === 0) {
 				// No users to migrate - this shouldn't happen but handle gracefully
@@ -141,7 +141,7 @@ export function useRoles(options: UseRolesOptions = {}) {
 			// newRole accepts the level number directly (AccountRoleType)
 			const updateResponse = await API.RBAC.bulkUpdateRoles({
 				userIds,
-				newRole: toRoleLevel as import('@_classes/Enums').AccountRoleType,
+				newRole: toRoleLevel as number,
 				reason: 'Role deletion - users migrated to new role',
 			})
 

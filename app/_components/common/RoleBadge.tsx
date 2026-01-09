@@ -70,7 +70,7 @@
  * @module RoleBadge
  */
 
-import { AccountRole, type AccountRoleType } from '@_classes/Enums'
+import { RoleLevels } from '@_types/rbac'
 
 import Badge from '@_components/ui/Badge'
 
@@ -79,16 +79,16 @@ import Badge from '@_components/ui/Badge'
  */
 interface RoleBadgeProps {
 	/**
-	 * User role value from AccountRole enum or number.
-	 * Should match one of the AccountRole enum values.
-	 * 
+	 * User role value from RoleLevels or number.
+	 * Should match one of the RoleLevels values.
+	 *
 	 * @example
 	 * ```tsx
-	 * <RoleBadge role={AccountRole.Admin} />
+	 * <RoleBadge role={RoleLevels.Admin} />
 	 * <RoleBadge role={user.role} />
 	 * ```
 	 */
-	role: AccountRoleType | number
+	role: number
 
 	/**
 	 * Additional CSS classes to apply to the badge.
@@ -121,22 +121,27 @@ interface RoleBadgeProps {
  */
 /**
  * Role configuration with display properties.
- * Maps AccountRole values to human-readable labels and color variants.
+ * Maps RoleLevels values to human-readable labels and color variants.
  */
-const ROLE_CONFIG: Record<number, { label: string; variant: 'error' | 'primary' | 'secondary' | 'success' | 'warning' | 'neutral' | 'info' }> = {
-	[AccountRole.SuperAdmin]: { label: 'Super Admin', variant: 'error' },
-	[AccountRole.Admin]: { label: 'Admin', variant: 'error' },
-	[AccountRole.FulfillmentCoordinator]: { label: 'Fulfillment', variant: 'info' },
-	[AccountRole.SalesManager]: { label: 'Sales Manager', variant: 'success' },
-	[AccountRole.SalesRep]: { label: 'Sales Rep', variant: 'warning' },
-	[AccountRole.Customer]: { label: 'Customer', variant: 'primary' },
+const ROLE_CONFIG: Record<
+	number,
+	{ label: string; variant: 'error' | 'primary' | 'secondary' | 'success' | 'warning' | 'neutral' | 'info' }
+> = {
+	[RoleLevels.SuperAdmin]: { label: 'Super Admin', variant: 'error' },
+	[RoleLevels.Admin]: { label: 'Admin', variant: 'error' },
+	[RoleLevels.FulfillmentCoordinator]: { label: 'Fulfillment', variant: 'info' },
+	[RoleLevels.SalesManager]: { label: 'Sales Manager', variant: 'success' },
+	[RoleLevels.SalesRep]: { label: 'Sales Rep', variant: 'warning' },
+	[RoleLevels.Customer]: { label: 'Customer', variant: 'primary' },
 }
 
 export default function RoleBadge({ role, className }: RoleBadgeProps) {
 	const config = ROLE_CONFIG[role] ?? { label: 'Unknown', variant: 'neutral' as const }
 
 	return (
-		<Badge variant={config.variant} className={className}>
+		<Badge
+			variant={config.variant}
+			className={className}>
 			{config.label}
 		</Badge>
 	)

@@ -1,31 +1,31 @@
 /**
  * Internal Routes Configuration
- * 
+ *
  * Centralized configuration for internal application routes (/app).
  * Provides metadata for page titles, descriptions, breadcrumbs, and actions.
- * 
+ *
  * **Purpose:**
  * - Single source of truth for internal route metadata
  * - Auto-generate page headers and breadcrumbs
  * - Type-safe route definitions
  * - Role-based route filtering
- * 
+ *
  * **Architecture:**
  * - Extends NavigationService with page-specific metadata
  * - Provides helpers for page layout generation
  * - Supports dynamic routes ([id])
- * 
+ *
  * **Mobile-First:**
  * - Responsive page titles (shorter on mobile)
  * - Contextual descriptions
  * - Action button placement
- * 
+ *
  * @module internalRoutes
  */
 
 import { logger } from '@_core'
 
-import { AccountRole } from '@_classes/Enums'
+import { RoleLevels } from '@_shared/constants'
 
 /**
  * Page metadata interface.
@@ -53,7 +53,7 @@ export interface InternalPageMetadata {
 /**
  * Internal route metadata map.
  * Maps route paths to their metadata.
- * 
+ *
  * **Pattern:**
  * - Key: route segment (e.g., 'orders', 'quotes')
  * - Value: page metadata
@@ -103,7 +103,7 @@ export const INTERNAL_ROUTE_METADATA: Record<string, InternalPageMetadata> = {
 		hasSearch: true,
 		hasCreateAction: true,
 		createActionLabel: 'Add Provider',
-		requiresRole: [AccountRole.Admin],
+		requiresRole: [RoleLevels.Admin],
 	},
 
 	// Account Management
@@ -114,7 +114,7 @@ export const INTERNAL_ROUTE_METADATA: Record<string, InternalPageMetadata> = {
 		hasSearch: true,
 		hasCreateAction: true,
 		createActionLabel: 'Create Account',
-		requiresRole: [AccountRole.Admin],
+		requiresRole: [RoleLevels.Admin],
 	},
 
 	// Customer Management
@@ -125,7 +125,7 @@ export const INTERNAL_ROUTE_METADATA: Record<string, InternalPageMetadata> = {
 		hasSearch: true,
 		hasCreateAction: true,
 		createActionLabel: 'Add Customer',
-		requiresRole: [AccountRole.Admin],
+		requiresRole: [RoleLevels.Admin],
 	},
 
 	// Analytics Dashboard
@@ -133,7 +133,7 @@ export const INTERNAL_ROUTE_METADATA: Record<string, InternalPageMetadata> = {
 		title: 'Analytics',
 		description: 'View reports and business metrics',
 		icon: 'bar-chart',
-		requiresRole: [AccountRole.Admin],
+		requiresRole: [RoleLevels.Admin],
 	},
 
 	// User Profile
@@ -153,24 +153,24 @@ export const INTERNAL_ROUTE_METADATA: Record<string, InternalPageMetadata> = {
 
 /**
  * Gets page metadata for a given pathname.
- * 
+ *
  * Extracts the last segment of the pathname and looks up
  * its metadata. Handles dynamic routes and nested paths.
- * 
+ *
  * **Algorithm:**
  * 1. Parse pathname into segments
  * 2. Find last non-dynamic segment
  * 3. Look up metadata
  * 4. Return with defaults if not found
- * 
+ *
  * @param pathname - Current pathname (e.g., '/app/orders')
  * @returns Page metadata or defaults
- * 
+ *
  * @example
  * ```typescript
  * getPageMetadata('/app/orders')
  * // Returns: { title: 'Orders', description: '...', hasSearch: true, ... }
- * 
+ *
  * getPageMetadata('/app/orders/123')
  * // Returns: { title: 'Order Details', description: '...', ... }
  * ```
@@ -178,12 +178,10 @@ export const INTERNAL_ROUTE_METADATA: Record<string, InternalPageMetadata> = {
 export function getPageMetadata(pathname: string): InternalPageMetadata {
 	try {
 		// Remove leading/trailing slashes and split
-		const segments = pathname
-			.split('/')
-			.filter((s) => s.length > 0)
+		const segments = pathname.split('/').filter((s) => s.length > 0)
 
-	// Remove 'app' prefix
-	const relevantSegments = segments.filter((s) => s !== 'app')
+		// Remove 'app' prefix
+		const relevantSegments = segments.filter((s) => s !== 'app')
 
 		// If no segments, return dashboard metadata
 		if (relevantSegments.length === 0) {
@@ -198,10 +196,8 @@ export function getPageMetadata(pathname: string): InternalPageMetadata {
 			// For detail pages, modify the title
 			const metadata = INTERNAL_ROUTE_METADATA[routeSegment]
 			if (metadata) {
-				const singular = routeSegment.endsWith('s') 
-					? routeSegment.slice(0, -1) 
-					: routeSegment
-				
+				const singular = routeSegment.endsWith('s') ? routeSegment.slice(0, -1) : routeSegment
+
 				return {
 					...metadata,
 					title: `${titleCase(singular)} Details`,
@@ -229,7 +225,7 @@ export function getPageMetadata(pathname: string): InternalPageMetadata {
 			routeSegment,
 			service: 'internalRoutes',
 		})
-		
+
 		return {
 			title: titleCase(routeSegment),
 			description: undefined,
@@ -246,12 +242,12 @@ export function getPageMetadata(pathname: string): InternalPageMetadata {
 
 /**
  * Gets the page title for a pathname.
- * 
+ *
  * Shorthand for getting just the title from metadata.
- * 
+ *
  * @param pathname - Current pathname
  * @returns Page title
- * 
+ *
  * @example
  * ```typescript
  * getPageTitle('/app/orders') // "Orders"
@@ -264,12 +260,12 @@ export function getPageTitle(pathname: string): string {
 
 /**
  * Gets the page description for a pathname.
- * 
+ *
  * Shorthand for getting just the description from metadata.
- * 
+ *
  * @param pathname - Current pathname
  * @returns Page description or undefined
- * 
+ *
  * @example
  * ```typescript
  * getPageDescription('/app/orders')
@@ -282,44 +278,44 @@ export function getPageDescription(pathname: string): string | undefined {
 
 /**
  * Checks if user can access a route based on role requirements.
- * 
+ *
  * Compares user role against route metadata role requirements.
  * Returns true if no role restrictions exist.
- * 
+ *
  * @param pathname - Route pathname
  * @param userRole - User's role number
  * @returns True if user can access route
- * 
+ *
  * @example
  * ```typescript
- * import { AccountRole } from '@_classes/Enums'
- * 
- * canAccessRoute('/app/analytics', AccountRole.Admin) // true
- * canAccessRoute('/app/analytics', AccountRole.Customer) // false
- * canAccessRoute('/app/orders', AccountRole.Customer) // true
+ * import { RoleLevels } from '@_types/rbac'
+ *
+ * canAccessRoute('/app/analytics', RoleLevels.Admin) // true
+ * canAccessRoute('/app/analytics', RoleLevels.Customer) // false
+ * canAccessRoute('/app/orders', RoleLevels.Customer) // true
  * ```
  */
 export function canAccessRoute(pathname: string, userRole?: number | null): boolean {
 	const metadata = getPageMetadata(pathname)
-	
+
 	// If no role requirements, allow access
 	if (!metadata.requiresRole || metadata.requiresRole.length === 0) {
 		return true
 	}
-	
+
 	// Check if user role matches any required role
 	if (userRole === null || userRole === undefined) {
 		return false
 	}
-	
+
 	return metadata.requiresRole.includes(userRole)
 }
 
 /**
  * Checks if a segment is a dynamic route (ID).
- * 
+ *
  * Helper function to detect numeric IDs or UUIDs.
- * 
+ *
  * @param segment - Route segment
  * @returns True if segment is dynamic
  */
@@ -328,20 +324,20 @@ function isDynamicSegment(segment: string): boolean {
 	if (/^\d+$/.test(segment)) {
 		return true
 	}
-	
+
 	// Check if UUID
 	if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(segment)) {
 		return true
 	}
-	
+
 	return false
 }
 
 /**
  * Converts string to title case.
- * 
+ *
  * Helper for formatting segment names.
- * 
+ *
  * @param str - String to convert
  * @returns Title-cased string
  */
@@ -355,9 +351,9 @@ function titleCase(str: string): string {
 
 /**
  * Gets default metadata for unknown routes.
- * 
+ *
  * Fallback when route metadata is not found.
- * 
+ *
  * @returns Default page metadata
  */
 function getDefaultMetadata(): InternalPageMetadata {
@@ -366,4 +362,3 @@ function getDefaultMetadata(): InternalPageMetadata {
 		description: undefined,
 	}
 }
-

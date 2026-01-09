@@ -37,7 +37,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { renderHook } from '@testing-library/react'
-import type { RoleLevel } from '@_types/rbac'
 import { usePermissions, Resources, Actions, Contexts, RoleLevels } from '@_shared/hooks/usePermissions'
 import { PermissionGuard, RoleGuard } from '@_components/common/guards'
 
@@ -88,12 +87,12 @@ vi.mock('@_shared/services/api', () => ({
 interface TestUser {
 	id: number
 	email: string
-	role: RoleLevel
+	role: number
 	customerId?: number
 	name?: { first: string; last: string }
 }
 
-function createTestUser(role: RoleLevel, overrides?: Partial<TestUser>): TestUser {
+function createTestUser(role: number, overrides?: Partial<TestUser>): TestUser {
 	return {
 		id: 1,
 		email: 'test@medsource.com',
@@ -104,7 +103,7 @@ function createTestUser(role: RoleLevel, overrides?: Partial<TestUser>): TestUse
 	}
 }
 
-function loginAs(role: RoleLevel, overrides?: Partial<TestUser>) {
+function loginAs(role: number, overrides?: Partial<TestUser>) {
 	const user = createTestUser(role, overrides)
 	mockStore.setState({ user, isAuthenticated: true, isLoading: false })
 }
@@ -494,7 +493,7 @@ describe('Analytics RBAC Integration Tests', () => {
 
 	describe('Cross-Role Security Tests', () => {
 		it('should NOT expose other customer data to any non-admin role', () => {
-			const roles: RoleLevel[] = [RoleLevels.Customer, RoleLevels.SalesRep]
+			const roles: number[] = [RoleLevels.Customer, RoleLevels.SalesRep]
 
 			for (const role of roles) {
 				logout()

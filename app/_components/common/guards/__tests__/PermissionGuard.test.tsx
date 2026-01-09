@@ -22,7 +22,6 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { PermissionGuard, Resources, Actions, Contexts } from '../PermissionGuard'
 import * as usePermissionsModule from '@_shared/hooks/usePermissions'
-import type { RoleLevel } from '@_types/rbac'
 import { RoleLevels } from '@_types/rbac'
 
 // ============================================================================
@@ -45,7 +44,7 @@ vi.mock('@_shared/hooks/usePermissions', async () => {
 interface MockPermissions {
   hasPermission: (resource: string, action: string, context?: string) => boolean
   isAdmin?: boolean
-  roleLevel?: RoleLevel
+  roleLevel?: number
 }
 
 function mockUsePermissions(permissions: MockPermissions) {

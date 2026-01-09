@@ -1,25 +1,25 @@
 /**
  * useInternalStorePage Hook
- * 
+ *
  * Encapsulates all business logic for the Internal Store page.
  * Follows the same pattern as useProvidersPage and useCustomersPage.
- * 
+ *
  * **Features:**
  * - Delete/Archive modal management
  * - Product stats fetching
  * - RBAC permission checks
  * - Archive toggle state
  * - Refresh key for table re-fetching
- * 
+ *
  * **React 19 / Next.js 16 Optimizations:**
  * - No useCallback needed (React Compiler auto-memoizes)
  * - useMemo only for expensive computations
- * 
+ *
  * **Business Flow:**
  * - Admin-only page for product catalog management
  * - Products are the foundation of the quote-based ordering system
  * - Supports soft delete (archive) and hard delete
- * 
+ *
  * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler
  * @module internalStore/hooks
  */
@@ -32,9 +32,8 @@ import { useAuthStore } from '@_features/auth'
 
 import { logger } from '@_core'
 
-import { notificationService, API } from '@_shared'
+import { notificationService, API, usePermissions } from '@_shared'
 
-import { AccountRole } from '@_classes/Enums'
 import type { Product } from '@_classes/Product'
 
 import type { ProductModalState, UseInternalStorePageReturn } from '../types'
@@ -42,7 +41,7 @@ import { useProductStats } from './useProductStats'
 
 /**
  * Hook for managing internal store page state and actions.
- * 
+ *
  * @example
  * ```tsx
  * const {
@@ -59,14 +58,8 @@ import { useProductStats } from './useProductStats'
  * ```
  */
 export function useInternalStorePage(): UseInternalStorePageReturn {
-	// Auth state for RBAC
-	const user = useAuthStore((state) => state.user)
-	
-	// RBAC checks - simple comparisons, no memoization needed
-	// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
-	const userRole = user?.roleLevel ?? AccountRole.Customer
-	// Use >= for admin check to include SuperAdmin (9999) and Admin (5000)
-	const isAdmin = userRole >= AccountRole.Admin
+	// RBAC: Use usePermissions hook for role-based checks
+	const { isAdmin } = usePermissions()
 
 	// Modal state
 	const [deleteModal, setDeleteModal] = useState<ProductModalState>({
@@ -204,7 +197,7 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 	const handleRestore = async (product: Product) => {
 		try {
 			const { data } = await API.Store.Products.restore(product.id)
-			
+
 			if (data.statusCode !== 200) {
 				notificationService.error(data.message ?? 'Failed to restore product', {
 					metadata: { productId: product.id },
@@ -213,7 +206,7 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 				})
 				return
 			}
-			
+
 			notificationService.success('Product restored successfully', {
 				metadata: { productId: product.id },
 				component: 'InternalStorePage',
@@ -268,4 +261,3 @@ export function useInternalStorePage(): UseInternalStorePageReturn {
 }
 
 export default useInternalStorePage
-

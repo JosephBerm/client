@@ -2,37 +2,38 @@
 
 /**
  * AdminCreateAccountForm Component - MAANG-Level Implementation
- * 
+ *
  * Admin-only form for creating new user accounts with specified roles.
  * Supports staff account creation, role assignment, and invitation emails.
- * 
+ *
  * **MAANG Best Practices:**
- * - Uses centralized ROLE_OPTIONS (DRY principle)
+ * - Uses centralized validation schema (adminCreateAccountSchema from @_core)
+ * - Uses centralized password strength utility (checkPasswordStrength from @_shared)
+ * - Uses React Hook Form with Zod validation (useZodForm)
  * - Permission preview for role selection
  * - Confirmation step for high-privilege roles (Admin)
  * - Keyboard shortcuts (Ctrl/Cmd+Enter to submit)
- * - Comprehensive validation with clear feedback
  * - Success state with copy-to-clipboard
  * - "Create Another Similar" for batch creation efficiency
- * 
+ *
  * **RBAC Integration:**
  * - Only accessible by admins (checked by parent component/page)
  * - Uses centralized role constants
- * 
+ *
  * @module features/accounts/components/AdminCreateAccountForm
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { 
-	Mail, 
-	User, 
-	Shield, 
-	Key, 
-	Send, 
-	CheckCircle2, 
+import {
+	Mail,
+	User,
+	Shield,
+	Key,
+	Send,
+	CheckCircle2,
 	Copy,
 	AlertTriangle,
 	UserPlus,
@@ -43,25 +44,31 @@ import {
 
 import { Routes } from '@_features/navigation'
 
-import { logger } from '@_core'
+import { logger, adminCreateAccountSchema, type AdminCreateAccountFormData } from '@_core'
 
-import { 
-	notificationService, 
+import {
+	notificationService,
 	API,
-	ROLE_OPTIONS,
-	getRoleOption,
-	roleRequiresConfirmation,
+	DEFAULT_ROLE_METADATA,
+	DEFAULT_ROLE_THRESHOLDS,
+	getRoleDisplayName,
 	translateError,
+	useZodForm,
+	useFormSubmit,
+	checkPasswordStrength,
+	type RoleMetadataEntry,
 	type AdminCreateAccountRequest,
 	type AdminCreateAccountResponse,
 } from '@_shared'
 
-import { AccountRole, type AccountRoleType } from '@_classes/Enums'
+import { RoleLevels } from '@_types/rbac'
 
 import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
+import Checkbox from '@_components/ui/Checkbox'
 import Input from '@_components/ui/Input'
 import Modal from '@_components/ui/Modal'
+import FormCheckbox from '@_components/forms/FormCheckbox'
 
 import RoleSelectionCard from './RoleSelectionCard'
 
@@ -70,6 +77,17 @@ import RoleSelectionCard from './RoleSelectionCard'
 // ============================================================================
 
 type FormStep = 'form' | 'confirm' | 'success'
+
+/** Extended form data that maps between schema (string role) and UI (number role) */
+interface FormDataInternal {
+	email: string
+	username: string
+	firstName: string
+	lastName: string
+	role: number
+	temporaryPassword: string
+	sendInvitationEmail: boolean
+}
 
 export interface AdminCreateAccountFormProps {
 	/** Optional callback after successful account creation */
@@ -82,70 +100,106 @@ export interface AdminCreateAccountFormProps {
 // HELPERS
 // ============================================================================
 
-/**
- * Email validation regex (RFC 5322 simplified)
- */
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+/** Convert role name string to number */
+function roleStringToNumber(role: string): number {
+	switch (role) {
+		case 'Admin':
+			return RoleLevels.Admin
+		case 'SalesManager':
+			return RoleLevels.SalesManager
+		case 'SalesRep':
+			return RoleLevels.SalesRep
+		case 'Customer':
+		default:
+			return RoleLevels.Customer
+	}
+}
 
-/**
- * Password strength checker
- */
-function checkPasswordStrength(password: string): {
-	score: number
-	label: string
-	color: string
-} {
-	let score = 0
-	if (password.length >= 8) score++
-	if (password.length >= 12) score++
-	if (/[A-Z]/.test(password)) score++
-	if (/[a-z]/.test(password)) score++
-	if (/[0-9]/.test(password)) score++
-	if (/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) score++
-
-	if (score <= 2) return { score, label: 'Weak', color: 'text-error' }
-	if (score <= 4) return { score, label: 'Moderate', color: 'text-warning' }
-	return { score, label: 'Strong', color: 'text-success' }
+/** Convert role number to role name string */
+function roleNumberToString(role: number): string {
+	switch (role) {
+		case RoleLevels.Admin:
+			return 'Admin'
+		case RoleLevels.SalesManager:
+			return 'SalesManager'
+		case RoleLevels.SalesRep:
+			return 'SalesRep'
+		case RoleLevels.Customer:
+		default:
+			return 'Customer'
+	}
 }
 
 // ============================================================================
 // COMPONENT
 // ============================================================================
 
-export default function AdminCreateAccountForm({
-	onSuccess,
-	onCancel,
-}: AdminCreateAccountFormProps) {
+export default function AdminCreateAccountForm({ onSuccess, onCancel }: AdminCreateAccountFormProps) {
 	const router = useRouter()
 
-	// Form state
-	const [email, setEmail] = useState('')
-	const [username, setUsername] = useState('')
-	const [firstName, setFirstName] = useState('')
-	const [lastName, setLastName] = useState('')
-	const [selectedRole, setSelectedRole] = useState<AccountRoleType>(AccountRole.Customer)
-	const [temporaryPassword, setTemporaryPassword] = useState('')
-	const [showPassword, setShowPassword] = useState(false)
-	const [sendInvitation, setSendInvitation] = useState(true)
-	
+	// Local form state (uses number for role internally)
+	const [formData, setFormData] = useState<FormDataInternal>({
+		email: '',
+		username: '',
+		firstName: '',
+		lastName: '',
+		role: RoleLevels.Customer,
+		temporaryPassword: '',
+		sendInvitationEmail: true,
+	})
+
+	// React Hook Form with Zod validation (for email validation only)
+	const form = useZodForm(adminCreateAccountSchema, {
+		defaultValues: {
+			email: '',
+			username: '',
+			firstName: '',
+			lastName: '',
+			role: 'Customer',
+			temporaryPassword: '',
+			sendInvitationEmail: true,
+		},
+		mode: 'onChange',
+	})
+
+	// Watch form values for UI updates
+	const email = form.watch('email')
+	const temporaryPassword = form.watch('temporaryPassword')
+	const sendInvitation = form.watch('sendInvitationEmail')
+
 	// UI state
 	const [step, setStep] = useState<FormStep>('form')
-	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [showPassword, setShowPassword] = useState(false)
 	const [createdAccount, setCreatedAccount] = useState<AdminCreateAccountResponse | null>(null)
 	const [copiedField, setCopiedField] = useState<string | null>(null)
 	const [confirmChecked, setConfirmChecked] = useState(false)
 
-	// Form validation
-	const isEmailValid = EMAIL_REGEX.test(email)
-	const isFormValid = email.trim() !== '' && isEmailValid
-	const needsConfirmation = roleRequiresConfirmation(selectedRole)
+	// Derived state
+	const isFormValid = form.formState.isValid
+	const needsConfirmation = formData.role >= DEFAULT_ROLE_THRESHOLDS.adminThreshold
 	const passwordStrength = temporaryPassword ? checkPasswordStrength(temporaryPassword) : null
+
+	// Refs to avoid stale closures in useFormSubmit callback (React 19 best practice)
+	const formDataRef = useRef(formData)
+	const confirmCheckedRef = useRef(confirmChecked)
+	const needsConfirmationRef = useRef(needsConfirmation)
+	const emailRef = useRef(email)
+	const onSuccessRef = useRef(onSuccess)
+
+	// Keep refs in sync with state
+	useEffect(() => {
+		formDataRef.current = formData
+		confirmCheckedRef.current = confirmChecked
+		needsConfirmationRef.current = needsConfirmation
+		emailRef.current = email
+		onSuccessRef.current = onSuccess
+	}, [formData, confirmChecked, needsConfirmation, email, onSuccess])
 
 	// Keyboard shortcut: Ctrl/Cmd+Enter to submit
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-				if (isFormValid && !isSubmitting && step === 'form') {
+				if (isFormValid && !form.formState.isSubmitting && step === 'form') {
 					e.preventDefault()
 					handleNext()
 				}
@@ -154,79 +208,93 @@ export default function AdminCreateAccountForm({
 
 		window.addEventListener('keydown', handleKeyDown)
 		return () => window.removeEventListener('keydown', handleKeyDown)
-	}, [isFormValid, isSubmitting, step])
+	}, [isFormValid, form.formState.isSubmitting, step])
 
 	// Handle role selection
-	const handleRoleSelect = useCallback((role: AccountRoleType) => {
-		setSelectedRole(role)
-		// Reset confirmation when role changes
-		setConfirmChecked(false)
-	}, [])
+	const handleRoleSelect = useCallback(
+		(role: number) => {
+			setFormData((prev) => ({ ...prev, role }))
+			form.setValue('role', roleNumberToString(role), { shouldValidate: true })
+			// Reset confirmation when role changes
+			setConfirmChecked(false)
+		},
+		[form]
+	)
 
 	// Handle next step
 	const handleNext = () => {
 		if (needsConfirmation && step === 'form') {
 			setStep('confirm')
 		} else {
-			void handleSubmit()
+			void form.handleSubmit(handleFormSubmit)()
 		}
 	}
 
-	// Handle form submission
-	const handleSubmit = async () => {
-		if (!isFormValid || isSubmitting) return
-		if (needsConfirmation && !confirmChecked) {
-			notificationService.warning('Please confirm the admin role assignment')
-			return
+	// Form submission callback - uses refs to avoid stale closures
+	const submitCallback = useCallback(async (data: AdminCreateAccountFormData) => {
+		if (needsConfirmationRef.current && !confirmCheckedRef.current) {
+			throw new Error('Please confirm the admin role assignment')
 		}
 
-		setIsSubmitting(true)
-		try {
-			const request: AdminCreateAccountRequest = {
-				email: email.trim(),
-				username: username.trim() || undefined,
-				firstName: firstName.trim() || undefined,
-				lastName: lastName.trim() || undefined,
-				role: selectedRole,
-				temporaryPassword: temporaryPassword.trim() || undefined,
-				sendInvitationEmail: sendInvitation,
-			}
+		const request: AdminCreateAccountRequest = {
+			email: data.email.trim(),
+			username: data.username?.trim() || undefined,
+			firstName: data.firstName?.trim() || undefined,
+			lastName: data.lastName?.trim() || undefined,
+			role: formDataRef.current.role,
+			temporaryPassword: data.temporaryPassword?.trim() || undefined,
+			sendInvitationEmail: data.sendInvitationEmail,
+		}
 
-			const { data } = await API.Accounts.adminCreate(request)
+		return API.Accounts.adminCreate(request)
+	}, [])
 
-			// API returns ApiResponse<T> with payload, message, statusCode
-			if (data.statusCode === 200 && data.payload) {
-				setCreatedAccount(data.payload)
-				setStep('success')
-				notificationService.success(
-					`Account created successfully for ${email}`,
-					{ component: 'AdminCreateAccountForm', action: 'create' }
-				)
-				onSuccess?.(data.payload)
-			} else {
-				// Translate backend message keys to user-friendly messages
-				// Provide helpful fallback for password errors
-				const errorMessage = data.message
-				const isPasswordError = errorMessage?.toLowerCase().includes('password')
-				const fallbackMessage = isPasswordError
-					? 'Password does not meet security requirements. Please ensure it has at least 8 characters, includes uppercase and lowercase letters, a number, and a special character.'
-					: 'Failed to create account. Please try again.'
-				
-				notificationService.error(
-					translateError(errorMessage, fallbackMessage),
-					{ component: 'AdminCreateAccountForm', action: 'create' }
-				)
-			}
-		} catch (error) {
+	// Success handler callback
+	const handleSubmitSuccess = useCallback((result: AdminCreateAccountResponse | null) => {
+		// API returns ApiResponse<T> with payload, message, statusCode
+		const data = result as unknown as {
+			statusCode: number
+			payload: AdminCreateAccountResponse
+			message?: string
+		}
+		if (data.statusCode === 200 && data.payload) {
+			setCreatedAccount(data.payload)
+			setStep('success')
+			onSuccessRef.current?.(data.payload)
+		} else {
+			// Translate backend message keys to user-friendly messages
+			const errorMessage = data.message
+			const isPasswordError = errorMessage?.toLowerCase().includes('password')
+			const fallbackMessage = isPasswordError
+				? 'Password does not meet security requirements. Please ensure it has at least 8 characters, includes uppercase and lowercase letters, a number, and a special character.'
+				: 'Failed to create account. Please try again.'
+
+			notificationService.error(translateError(errorMessage, fallbackMessage), {
+				component: 'AdminCreateAccountForm',
+				action: 'create',
+			})
+		}
+	}, [])
+
+	// Form submission with useFormSubmit hook
+	const { submit, isSubmitting } = useFormSubmit(submitCallback, {
+		successMessage: `Account created successfully for ${emailRef.current}`,
+		errorMessage: 'Failed to create account',
+		componentName: 'AdminCreateAccountForm',
+		actionName: 'create',
+		onSuccess: handleSubmitSuccess,
+		onError: (error) => {
 			logger.error('Admin account creation error', { error })
-			notificationService.error(
-				'An error occurred while creating the account',
-				{ component: 'AdminCreateAccountForm', action: 'create' }
-			)
-		} finally {
-			setIsSubmitting(false)
-		}
-	}
+		},
+	})
+
+	// Form submit handler
+	const handleFormSubmit = useCallback(
+		async (data: AdminCreateAccountFormData) => {
+			await submit(data)
+		},
+		[submit]
+	)
 
 	// Handle copy to clipboard
 	const handleCopy = async (text: string, field: string) => {
@@ -251,30 +319,51 @@ export default function AdminCreateAccountForm({
 
 	// Handle create another (same role for efficiency)
 	const handleCreateAnotherSimilar = () => {
-		const previousRole = selectedRole
-		setEmail('')
-		setUsername('')
-		setFirstName('')
-		setLastName('')
-		setTemporaryPassword('')
-		setSendInvitation(true)
+		const previousRole = formData.role
+		form.reset({
+			email: '',
+			username: '',
+			firstName: '',
+			lastName: '',
+			role: roleNumberToString(previousRole),
+			temporaryPassword: '',
+			sendInvitationEmail: true,
+		})
+		setFormData((prev) => ({
+			...prev,
+			email: '',
+			username: '',
+			firstName: '',
+			lastName: '',
+			temporaryPassword: '',
+			sendInvitationEmail: true,
+		}))
 		setCreatedAccount(null)
 		setConfirmChecked(false)
 		setStep('form')
-		// Keep the same role for batch creation efficiency
-		setSelectedRole(previousRole)
-		notificationService.info(`Creating another ${getRoleOption(previousRole)?.label ?? 'account'}`)
+		notificationService.info(`Creating another ${getRoleDisplayName(previousRole)}`)
 	}
 
 	// Handle create another (fresh)
 	const handleCreateAnother = () => {
-		setEmail('')
-		setUsername('')
-		setFirstName('')
-		setLastName('')
-		setSelectedRole(AccountRole.Customer)
-		setTemporaryPassword('')
-		setSendInvitation(true)
+		form.reset({
+			email: '',
+			username: '',
+			firstName: '',
+			lastName: '',
+			role: 'Customer',
+			temporaryPassword: '',
+			sendInvitationEmail: true,
+		})
+		setFormData({
+			email: '',
+			username: '',
+			firstName: '',
+			lastName: '',
+			role: RoleLevels.Customer,
+			temporaryPassword: '',
+			sendInvitationEmail: true,
+		})
 		setCreatedAccount(null)
 		setConfirmChecked(false)
 		setStep('form')
@@ -294,7 +383,11 @@ export default function AdminCreateAccountForm({
 			password += chars[Math.floor(Math.random() * chars.length)]
 		}
 		// Shuffle
-		setTemporaryPassword(password.split('').sort(() => Math.random() - 0.5).join(''))
+		const shuffled = password
+			.split('')
+			.sort(() => Math.random() - 0.5)
+			.join('')
+		form.setValue('temporaryPassword', shuffled, { shouldValidate: true })
 		setShowPassword(true)
 		notificationService.info('Password generated')
 	}
@@ -303,114 +396,117 @@ export default function AdminCreateAccountForm({
 	// RENDER: SUCCESS STATE
 	// ========================================================================
 	if (step === 'success' && createdAccount) {
-		const roleOption = getRoleOption(createdAccount.account.role as AccountRoleType)
-		
+		const roleMetadata = DEFAULT_ROLE_METADATA[createdAccount.account.roleLevel as keyof typeof DEFAULT_ROLE_METADATA]
+
 		return (
-			<Card className="border border-success/30 bg-success/5 p-6">
-				<div className="flex items-start gap-4">
-					<div className="p-3 rounded-full bg-success/10">
-						<CheckCircle2 className="w-8 h-8 text-success" />
+			<Card className='border border-success/30 bg-success/5 p-6'>
+				<div className='flex items-start gap-4'>
+					<div className='rounded-full bg-success/10 p-3'>
+						<CheckCircle2 className='h-8 w-8 text-success' />
 					</div>
-					<div className="flex-1 space-y-4">
+					<div className='flex-1 space-y-4'>
 						<div>
-							<h2 className="text-xl font-semibold text-base-content">
-								Account Created Successfully
-							</h2>
-							<p className="text-base-content/70 mt-1">
+							<h2 className='text-xl font-semibold text-base-content'>Account Created Successfully</h2>
+							<p className='mt-1 text-base-content/70'>
 								The account has been created and is ready to use.
 							</p>
 						</div>
 
 						{/* Account Details */}
-						<div className="grid gap-3 p-4 rounded-lg bg-base-100 border border-base-300">
-							<div className="flex items-center justify-between">
-								<span className="text-sm text-base-content/60">Email</span>
-								<div className="flex items-center gap-2">
-									<span className="font-medium">{createdAccount.account.email}</span>
+						<div className='grid gap-3 rounded-lg border border-base-300 bg-base-100 p-4'>
+							<div className='flex items-center justify-between'>
+								<span className='text-sm text-base-content/60'>Email</span>
+								<div className='flex items-center gap-2'>
+									<span className='font-medium'>{createdAccount.account.email}</span>
 									<Button
-										variant="ghost"
-										size="sm"
+										variant='ghost'
+										size='sm'
 										onClick={() => handleCopy(createdAccount.account.email ?? '', 'email')}
-										className="h-7 w-7 p-0"
-									>
+										className='h-7 w-7 p-0'>
 										{copiedField === 'email' ? (
-											<CheckCircle2 className="w-4 h-4 text-success" />
+											<CheckCircle2 className='h-4 w-4 text-success' />
 										) : (
-											<Copy className="w-4 h-4" />
+											<Copy className='h-4 w-4' />
 										)}
 									</Button>
 								</div>
 							</div>
 
-							<div className="flex items-center justify-between">
-								<span className="text-sm text-base-content/60">Username</span>
-								<span className="font-medium">{createdAccount.account.username}</span>
+							<div className='flex items-center justify-between'>
+								<span className='text-sm text-base-content/60'>Username</span>
+								<span className='font-medium'>{createdAccount.account.username}</span>
 							</div>
 
-							<div className="flex items-center justify-between">
-								<span className="text-sm text-base-content/60">Role</span>
-								<div className="flex items-center gap-2">
-									<span className="text-lg">{roleOption?.icon}</span>
-									<span className="font-medium">{roleOption?.label ?? 'Unknown'}</span>
+							<div className='flex items-center justify-between'>
+								<span className='text-sm text-base-content/60'>Role</span>
+								<div className='flex items-center gap-2'>
+									<span className='font-medium'>{roleMetadata?.display ?? 'Unknown'}</span>
 								</div>
 							</div>
 
 							{createdAccount.temporaryPassword && (
-								<div className="flex items-center justify-between p-2 rounded bg-warning/10 border border-warning/20">
+								<div className='flex items-center justify-between rounded border border-warning/20 bg-warning/10 p-2'>
 									<div>
-										<span className="text-sm text-base-content/60">Temporary Password</span>
-										<p className="font-mono font-medium">{createdAccount.temporaryPassword}</p>
+										<span className='text-sm text-base-content/60'>Temporary Password</span>
+										<p className='font-mono font-medium'>{createdAccount.temporaryPassword}</p>
 									</div>
 									<Button
-										variant="ghost"
-										size="sm"
+										variant='ghost'
+										size='sm'
 										onClick={() => handleCopy(createdAccount.temporaryPassword!, 'password')}
-										className="h-7 w-7 p-0"
-									>
+										className='h-7 w-7 p-0'>
 										{copiedField === 'password' ? (
-											<CheckCircle2 className="w-4 h-4 text-success" />
+											<CheckCircle2 className='h-4 w-4 text-success' />
 										) : (
-											<Copy className="w-4 h-4" />
+											<Copy className='h-4 w-4' />
 										)}
 									</Button>
 								</div>
 							)}
 
-							<div className="flex items-center justify-between">
-								<span className="text-sm text-base-content/60">Invitation Email</span>
-								<span className={createdAccount.invitationEmailSent ? 'text-success' : 'text-base-content/50'}>
+							<div className='flex items-center justify-between'>
+								<span className='text-sm text-base-content/60'>Invitation Email</span>
+								<span
+									className={
+										createdAccount.invitationEmailSent ? 'text-success' : 'text-base-content/50'
+									}>
 									{createdAccount.invitationEmailSent ? '✓ Sent' : 'Not sent'}
 								</span>
 							</div>
 						</div>
 
 						{createdAccount.temporaryPassword && (
-							<div className="flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20">
-								<AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
-								<p className="text-sm text-base-content/80">
-									<strong>Important:</strong> Copy the temporary password now.
-									It will not be shown again. Share it securely with the user.
+							<div className='flex items-start gap-2 rounded-lg border border-warning/20 bg-warning/10 p-3'>
+								<AlertTriangle className='mt-0.5 h-5 w-5 shrink-0 text-warning' />
+								<p className='text-sm text-base-content/80'>
+									<strong>Important:</strong> Copy the temporary password now. It will not be shown
+									again. Share it securely with the user.
 								</p>
 							</div>
 						)}
 
 						{/* Actions */}
-						<div className="flex flex-wrap gap-3 pt-2">
-							<Button variant="primary" onClick={handleCreateAnotherSimilar}>
-								<UserPlus className="w-4 h-4 mr-2" />
-								Create Another {roleOption?.label}
+						<div className='flex flex-wrap gap-3 pt-2'>
+							<Button
+								variant='primary'
+								onClick={handleCreateAnotherSimilar}>
+								<UserPlus className='mr-2 h-4 w-4' />
+								Create Another {roleMetadata?.display}
 							</Button>
-							<Button variant="secondary" onClick={handleCreateAnother}>
-								<Sparkles className="w-4 h-4 mr-2" />
+							<Button
+								variant='secondary'
+								onClick={handleCreateAnother}>
+								<Sparkles className='mr-2 h-4 w-4' />
 								New Account Type
 							</Button>
-							<Button 
-								variant="ghost" 
-								onClick={() => router.push(Routes.Accounts.detail(createdAccount.account.id ?? ''))}
-							>
+							<Button
+								variant='ghost'
+								onClick={() => router.push(Routes.Accounts.detail(createdAccount.account.id ?? ''))}>
 								View Account
 							</Button>
-							<Button variant="ghost" onClick={() => router.push(Routes.Accounts.location)}>
+							<Button
+								variant='ghost'
+								onClick={() => router.push(Routes.Accounts.location)}>
 								Back to Accounts
 							</Button>
 						</div>
@@ -427,21 +523,18 @@ export default function AdminCreateAccountForm({
 		<Modal
 			isOpen={step === 'confirm'}
 			onClose={() => setStep('form')}
-			title="Confirm Administrator Access"
-			size="md"
-		>
-			<div className="space-y-4">
-				<div className="flex items-start gap-3 p-4 rounded-lg bg-error/10 border border-error/20">
-					<AlertTriangle className="w-6 h-6 text-error shrink-0 mt-0.5" />
+			title='Confirm Administrator Access'
+			size='md'>
+			<div className='space-y-4'>
+				<div className='flex items-start gap-3 rounded-lg border border-error/20 bg-error/10 p-4'>
+					<AlertTriangle className='mt-0.5 h-6 w-6 shrink-0 text-error' />
 					<div>
-						<h3 className="font-semibold text-base-content">
-							High-Privilege Role Warning
-						</h3>
-						<p className="text-sm text-base-content/70 mt-1">
-							You are about to create an <strong>Administrator</strong> account.
-							This role has <strong>unrestricted access</strong> to the entire system, including:
+						<h3 className='font-semibold text-base-content'>High-Privilege Role Warning</h3>
+						<p className='mt-1 text-sm text-base-content/70'>
+							You are about to create an <strong>Administrator</strong> account. This role has{' '}
+							<strong>unrestricted access</strong> to the entire system, including:
 						</p>
-						<ul className="mt-2 space-y-1 text-sm text-base-content/70">
+						<ul className='mt-2 space-y-1 text-sm text-base-content/70'>
 							<li>• Full access to all user data</li>
 							<li>• Ability to modify or delete any entity</li>
 							<li>• User role management (including creating other admins)</li>
@@ -450,40 +543,34 @@ export default function AdminCreateAccountForm({
 					</div>
 				</div>
 
-				<div className="p-3 rounded-lg bg-base-200/50 border border-base-300">
-					<p className="text-sm text-base-content/70">
+				<div className='rounded-lg border border-base-300 bg-base-200/50 p-3'>
+					<p className='text-sm text-base-content/70'>
 						Creating admin for: <strong>{email}</strong>
 					</p>
 				</div>
 
-				<label className="flex items-start gap-3 cursor-pointer p-3 rounded-lg border border-base-300 hover:bg-base-200/50 transition-colors">
-					<input
-						type="checkbox"
+				<div className='rounded-lg border border-base-300 p-3 transition-colors hover:bg-base-200/50'>
+					<Checkbox
 						checked={confirmChecked}
 						onChange={(e) => setConfirmChecked(e.target.checked)}
-						className="checkbox checkbox-error mt-0.5"
+						label='I confirm this user should have Administrator access'
+						helperText='I understand the security implications of this action.'
+						className='checkbox-error'
 					/>
-					<div>
-						<span className="font-medium text-base-content">
-							I confirm this user should have Administrator access
-						</span>
-						<p className="text-sm text-base-content/60 mt-0.5">
-							I understand the security implications of this action.
-						</p>
-					</div>
-				</label>
+				</div>
 
-				<div className="flex gap-3 justify-end pt-2">
-					<Button variant="ghost" onClick={() => setStep('form')}>
+				<div className='flex justify-end gap-3 pt-2'>
+					<Button
+						variant='ghost'
+						onClick={() => setStep('form')}>
 						Go Back
 					</Button>
 					<Button
-						variant="error"
-						onClick={() => void handleSubmit()}
+						variant='error'
+						onClick={() => void form.handleSubmit(handleFormSubmit)()}
 						disabled={!confirmChecked}
 						loading={isSubmitting}
-						leftIcon={<Shield className="w-4 h-4" />}
-					>
+						leftIcon={<Shield className='h-4 w-4' />}>
 						Create Administrator
 					</Button>
 				</div>
@@ -497,162 +584,189 @@ export default function AdminCreateAccountForm({
 	return (
 		<>
 			{confirmationModal}
-			
-			<div className="space-y-6">
+
+			<div className='space-y-6'>
 				{/* Email & Username */}
-				<Card className="p-6 border border-base-300">
-					<div className="flex items-center gap-3 mb-6">
-						<div className="p-2.5 rounded-lg bg-primary/10">
-							<Mail className="w-5 h-5 text-primary" />
+				<Card className='border border-base-300 p-6'>
+					<div className='mb-6 flex items-center gap-3'>
+						<div className='rounded-lg bg-primary/10 p-2.5'>
+							<Mail className='h-5 w-5 text-primary' />
 						</div>
 						<div>
-							<h2 className="text-lg font-semibold">Account Information</h2>
-							<p className="text-sm text-base-content/60">
+							<h2 className='text-lg font-semibold'>Account Information</h2>
+							<p className='text-sm text-base-content/60'>
 								Email is required. Username defaults to email if not provided.
 							</p>
 						</div>
 					</div>
 
-					<div className="grid gap-4 sm:grid-cols-2">
-						<div className="space-y-1">
-							<label className="text-sm font-medium text-base-content">Email Address <span className="text-error">*</span></label>
+					<div className='grid gap-4 sm:grid-cols-2'>
+						<div className='space-y-1'>
+							<label
+								htmlFor='admin-create-email'
+								className='text-sm font-medium text-base-content'>
+								Email Address <span className='text-error'>*</span>
+							</label>
 							<Input
-								type="email"
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-								placeholder="user@example.com"
-								leftIcon={<Mail className="w-4 h-4" />}
-								error={email.length > 0 && !isEmailValid}
-								errorMessage="Please enter a valid email address"
+								id='admin-create-email'
+								type='email'
+								{...form.register('email')}
+								placeholder='user@example.com'
+								leftIcon={<Mail className='h-4 w-4' />}
+								error={!!form.formState.errors.email}
+								errorMessage={form.formState.errors.email?.message}
 								required
 							/>
 						</div>
-						<div className="space-y-1">
-							<label className="text-sm font-medium text-base-content">Username (optional)</label>
+						<div className='space-y-1'>
+							<label
+								htmlFor='admin-create-username'
+								className='text-sm font-medium text-base-content'>
+								Username (optional)
+							</label>
 							<Input
-								value={username}
-								onChange={(e) => setUsername(e.target.value)}
-								placeholder="Defaults to email"
-								leftIcon={<User className="w-4 h-4" />}
-								helperText="If empty, email will be used as username"
+								id='admin-create-username'
+								{...form.register('username')}
+								placeholder='Defaults to email'
+								leftIcon={<User className='h-4 w-4' />}
+								helperText='If empty, email will be used as username'
+								error={!!form.formState.errors.username}
+								errorMessage={form.formState.errors.username?.message}
 							/>
 						</div>
 					</div>
 
-					<div className="grid gap-4 sm:grid-cols-2 mt-4">
-						<div className="space-y-1">
-							<label className="text-sm font-medium text-base-content">First Name (optional)</label>
+					<div className='mt-4 grid gap-4 sm:grid-cols-2'>
+						<div className='space-y-1'>
+							<label
+								htmlFor='admin-create-firstname'
+								className='text-sm font-medium text-base-content'>
+								First Name (optional)
+							</label>
 							<Input
-								value={firstName}
-								onChange={(e) => setFirstName(e.target.value)}
-								placeholder="John"
+								id='admin-create-firstname'
+								{...form.register('firstName')}
+								placeholder='John'
+								error={!!form.formState.errors.firstName}
+								errorMessage={form.formState.errors.firstName?.message}
 							/>
 						</div>
-						<div className="space-y-1">
-							<label className="text-sm font-medium text-base-content">Last Name (optional)</label>
+						<div className='space-y-1'>
+							<label
+								htmlFor='admin-create-lastname'
+								className='text-sm font-medium text-base-content'>
+								Last Name (optional)
+							</label>
 							<Input
-								value={lastName}
-								onChange={(e) => setLastName(e.target.value)}
-								placeholder="Doe"
+								id='admin-create-lastname'
+								{...form.register('lastName')}
+								placeholder='Doe'
+								error={!!form.formState.errors.lastName}
+								errorMessage={form.formState.errors.lastName?.message}
 							/>
 						</div>
 					</div>
 				</Card>
 
 				{/* Role Selection */}
-				<Card className="p-6 border border-base-300">
-					<div className="flex items-center gap-3 mb-6">
-						<div className="p-2.5 rounded-lg bg-secondary/10">
-							<Shield className="w-5 h-5 text-secondary" />
+				<Card className='border border-base-300 p-6'>
+					<div className='mb-6 flex items-center gap-3'>
+						<div className='rounded-lg bg-secondary/10 p-2.5'>
+							<Shield className='h-5 w-5 text-secondary' />
 						</div>
 						<div>
-							<h2 className="text-lg font-semibold">Role Assignment</h2>
-							<p className="text-sm text-base-content/60">
+							<h2 className='text-lg font-semibold'>Role Assignment</h2>
+							<p className='text-sm text-base-content/60'>
 								Select the role for this account. Click to expand and view permissions.
 							</p>
 						</div>
 					</div>
 
-					<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-						{ROLE_OPTIONS.map((role) => (
+					<div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
+						{Object.values(DEFAULT_ROLE_METADATA).map((role: RoleMetadataEntry) => (
 							<RoleSelectionCard
-								key={role.value}
+								key={role.level}
 								role={role}
-								isSelected={selectedRole === role.value}
+								isSelected={formData.role === role.level}
 								onSelect={handleRoleSelect}
-								showPermissions
 							/>
 						))}
 					</div>
 				</Card>
 
 				{/* Password & Invitation */}
-				<Card className="p-6 border border-base-300">
-					<div className="flex items-center gap-3 mb-6">
-						<div className="p-2.5 rounded-lg bg-accent/10">
-							<Key className="w-5 h-5 text-accent" />
+				<Card className='border border-base-300 p-6'>
+					<div className='mb-6 flex items-center gap-3'>
+						<div className='rounded-lg bg-accent/10 p-2.5'>
+							<Key className='h-5 w-5 text-accent' />
 						</div>
 						<div>
-							<h2 className="text-lg font-semibold">Password & Invitation</h2>
-							<p className="text-sm text-base-content/60">
+							<h2 className='text-lg font-semibold'>Password & Invitation</h2>
+							<p className='text-sm text-base-content/60'>
 								Set a temporary password or let the system generate one.
 							</p>
 						</div>
 					</div>
 
-					<div className="space-y-4">
-						<div className="flex gap-2">
-							<div className="flex-1 space-y-1">
-								<label className="text-sm font-medium text-base-content">Temporary Password (optional)</label>
+					<div className='space-y-4'>
+						<div className='flex gap-2'>
+							<div className='flex-1 space-y-1'>
+								<label
+									htmlFor='admin-create-password'
+									className='text-sm font-medium text-base-content'>
+									Temporary Password (optional)
+								</label>
 								<Input
+									id='admin-create-password'
 									type={showPassword ? 'text' : 'password'}
-									value={temporaryPassword}
-									onChange={(e) => setTemporaryPassword(e.target.value)}
-									placeholder="Leave empty to auto-generate"
-									leftIcon={<Key className="w-4 h-4" />}
+									{...form.register('temporaryPassword')}
+									placeholder='Leave empty to auto-generate'
+									leftIcon={<Key className='h-4 w-4' />}
+									error={!!form.formState.errors.temporaryPassword}
+									errorMessage={form.formState.errors.temporaryPassword?.message}
 									rightElement={
-										<button
-											type="button"
+										<Button
+											variant='ghost'
+											size='sm'
 											onClick={() => setShowPassword(!showPassword)}
-											className="p-1 hover:bg-base-200 rounded"
-										>
+											className='h-6 w-6 p-0'
+											aria-label={showPassword ? 'Hide password' : 'Show password'}>
 											{showPassword ? (
-												<EyeOff className="w-4 h-4 text-base-content/50" />
+												<EyeOff className='h-4 w-4 text-base-content/50' />
 											) : (
-												<Eye className="w-4 h-4 text-base-content/50" />
+												<Eye className='h-4 w-4 text-base-content/50' />
 											)}
-										</button>
+										</Button>
 									}
 								/>
 							</div>
-							<div className="flex items-end">
+							<div className='flex items-end'>
 								<Button
-									variant="secondary"
-									size="sm"
+									variant='secondary'
+									size='sm'
 									onClick={handleGeneratePassword}
-									className="h-10"
-								>
-									<Sparkles className="w-4 h-4 mr-1" />
+									className='h-10'>
+									<Sparkles className='mr-1 h-4 w-4' />
 									Generate
 								</Button>
 							</div>
 						</div>
 
 						{passwordStrength && (
-							<div className="flex items-center gap-2 text-sm">
-								<span className="text-base-content/60">Password strength:</span>
+							<div className='flex items-center gap-2 text-sm'>
+								<span className='text-base-content/60'>Password strength:</span>
 								<span className={passwordStrength.color}>{passwordStrength.label}</span>
-								<div className="flex gap-1">
+								<div className='flex gap-1'>
 									{[1, 2, 3, 4, 5, 6].map((i) => (
 										<div
 											key={i}
-											className={`w-4 h-1 rounded ${
+											className={`h-1 w-4 rounded ${
 												i <= passwordStrength.score
 													? passwordStrength.score <= 2
 														? 'bg-error'
 														: passwordStrength.score <= 4
-															? 'bg-warning'
-															: 'bg-success'
+														? 'bg-warning'
+														: 'bg-success'
 													: 'bg-base-300'
 											}`}
 										/>
@@ -662,38 +776,31 @@ export default function AdminCreateAccountForm({
 						)}
 
 						{!temporaryPassword && (
-							<p className="text-xs text-base-content/50">
+							<p className='text-xs text-base-content/50'>
 								If empty, a secure password will be generated automatically
 							</p>
 						)}
 
-						<label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-base-300 hover:bg-base-200/50 transition-colors">
-							<input
-								type="checkbox"
-								checked={sendInvitation}
-								onChange={(e) => setSendInvitation(e.target.checked)}
-								className="checkbox checkbox-primary"
+						<div className='rounded-lg border border-base-300 p-3 transition-colors hover:bg-base-200/50'>
+							<FormCheckbox
+								{...form.register('sendInvitationEmail')}
+								label='Send Invitation Email'
+								helperText='User will receive an email with login instructions and temporary password'
 							/>
-							<div className="flex-1">
-								<div className="flex items-center gap-2">
-									<Send className="w-4 h-4 text-primary" />
-									<span className="font-medium">Send Invitation Email</span>
-								</div>
-								<p className="text-sm text-base-content/60 mt-0.5">
-									User will receive an email with login instructions and temporary password
-								</p>
-							</div>
-						</label>
+						</div>
 					</div>
 				</Card>
 
 				{/* Actions */}
-				<div className="flex flex-wrap items-center gap-3 justify-between">
-					<p className="text-xs text-base-content/50">
-						<kbd className="kbd kbd-xs">⌘</kbd> + <kbd className="kbd kbd-xs">Enter</kbd> to submit
+				<div className='flex flex-wrap items-center justify-between gap-3'>
+					<p className='text-xs text-base-content/50'>
+						<kbd className='kbd kbd-xs'>⌘</kbd> + <kbd className='kbd kbd-xs'>Enter</kbd> to submit
 					</p>
-					<div className="flex flex-wrap gap-3">
-						<Button variant="ghost" onClick={handleCancel} disabled={isSubmitting}>
+					<div className='flex flex-wrap gap-3'>
+						<Button
+							variant='ghost'
+							onClick={handleCancel}
+							disabled={isSubmitting}>
 							Cancel
 						</Button>
 						<Button
@@ -701,8 +808,7 @@ export default function AdminCreateAccountForm({
 							onClick={handleNext}
 							loading={isSubmitting}
 							disabled={!isFormValid}
-							leftIcon={<UserPlus className="w-4 h-4" />}
-						>
+							leftIcon={<UserPlus className='h-4 w-4' />}>
 							{needsConfirmation ? 'Review & Create' : 'Create Account'}
 						</Button>
 					</div>

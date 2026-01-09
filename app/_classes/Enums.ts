@@ -1,10 +1,10 @@
 /**
  * Application Enumerations
- * 
+ *
  * Centralized enumerations used throughout the MedSource Pro application.
  * Provides type-safe constants for business types, quote statuses, notification types,
  * user roles, order statuses, and route types.
- * 
+ *
  * **Enumerations:**
  * - **TypeOfBusiness**: Customer business categories
  * - **QuoteStatus**: Quote request statuses
@@ -13,43 +13,43 @@
  * - **OrderStatus**: Order lifecycle statuses with numeric values
  * - **PublicRouteType**: Public-facing page types
  * - **InternalRouteType**: Protected app page types
- * 
+ *
  * **Benefits:**
  * - Type safety across the application
  * - Consistent naming and values
  * - IntelliSense support
  * - Easy refactoring
  * - Single source of truth
- * 
+ *
  * @example
  * ```typescript
  * import { OrderStatus, AccountRole, NotificationType } from '@_classes/Enums';
- * 
+ *
  * // Check order status
  * import { logger } from '@_core';
- * 
+ *
  * if (order.status === OrderStatus.Shipped) {
  *   logger.info('Order is on the way!');
  * }
- * 
+ *
  * // Check user role
  * if (user.role === AccountRole.Admin) {
  *   // Show admin features
  * }
- * 
+ *
  * // Create notification
  * const notification = new Notification({
  *   type: NotificationType.Success,
  *   message: 'Order placed successfully'
  * });
  * ```
- * 
+ *
  * @module Enums
  */
 
 /**
  * TypeOfBusiness Enum
- * 
+ *
  * Categories of customer businesses.
  * Used to classify customer companies by their industry type.
  */
@@ -72,10 +72,10 @@ export enum TypeOfBusiness {
 
 /**
  * QuoteStatus Enum
- * 
+ *
  * Status of quote requests (RFQs) throughout the lifecycle.
  * Per business_flow.md Quote Status Lifecycle.
- * 
+ *
  * **Status Flow:**
  * 1. Unread - Initial state when customer submits quote
  * 2. Read - Staff has reviewed the quote, takes ownership
@@ -83,7 +83,7 @@ export enum TypeOfBusiness {
  * 4. Converted - Customer accepted, quote converted to order
  * 5. Rejected - Quote declined by staff or customer
  * 6. Expired - Quote passed validity period without action
- * 
+ *
  * @see business_flow.md Quote Status Lifecycle
  */
 export enum QuoteStatus {
@@ -103,15 +103,15 @@ export enum QuoteStatus {
 
 /**
  * QuotePriority Enum
- * 
+ *
  * Priority levels for quote processing based on order value
  * and customer relationship. Per business_flow.md.
- * 
+ *
  * **Priority Rules:**
  * - Urgent: Customer marked as urgent, or order value >$10,000 (4hr SLA)
  * - High: Order value $5,000-$10,000, or repeat customer (24hr SLA)
  * - Standard: Order value <$5,000 (48hr SLA)
- * 
+ *
  * @see business_flow.md Quote Priority Levels
  */
 export enum QuotePriority {
@@ -125,10 +125,10 @@ export enum QuotePriority {
 
 /**
  * NotificationType Enum
- * 
+ *
  * Severity levels for user notifications.
  * Determines visual styling and importance of notifications.
- * 
+ *
  * **Types:**
  * - **Info**: General informational messages (blue)
  * - **Warning**: Important warnings requiring attention (yellow/orange)
@@ -143,39 +143,27 @@ export enum NotificationType {
 	Error,
 }
 
-/**
- * @deprecated Use usePermissions() hook for role-based checks instead.
- * Migration:
- * - OLD: if (user.role === AccountRole.Admin)
- * - NEW: const { isAdmin } = usePermissions(); if (isAdmin)
- *
- * These are FALLBACK values - actual values come from API.
- * Maintained for backward compatibility only.
- *
- * ⚠️  DRY EXCEPTION: Values duplicated for backward compatibility.
- * SYNC REQUIRED: If values change, also update:
- *   - @_types/rbac.ts (RoleLevels)
- *   - @_shared/constants/rbac-defaults.ts (DEFAULT_ROLE_THRESHOLDS)
- *   - server/appsettings.json (RBAC:Thresholds)
- */
-export const AccountRole = {
-	Customer: 1000,
-	FulfillmentCoordinator: 2000,
-	SalesRep: 3000,
-	SalesManager: 4000,
-	Admin: 5000,
-	SuperAdmin: 9999,
-} as const
-
-/** @deprecated Use number type directly */
-export type AccountRoleType = (typeof AccountRole)[keyof typeof AccountRole]
+// =========================================================================
+// NOTE: AccountRole has been REMOVED (January 2026)
+// =========================================================================
+//
+// Use usePermissions() hook for role-based checks:
+//   const { isAdmin, isSalesRepOrAbove } = usePermissions()
+//
+// For role level constants, import from @_types/rbac:
+//   import { RoleLevels } from '@_types/rbac'
+//
+// For type annotations, use number directly:
+//   role: number (not AccountRoleType)
+//
+// =========================================================================
 
 /**
  * AccountStatus Enum - UPDATED TO MATCH BACKEND (Phase 1)
- * 
+ *
  * Account lifecycle states that determine login eligibility and user access.
  * Values MUST match server/Entities/Account.cs AccountStatus enum exactly.
- * 
+ *
  * **State Machine:**
  * ```
  * PendingVerification (0) → Active (100) ⟷ Suspended (200)
@@ -184,15 +172,15 @@ export type AccountRoleType = (typeof AccountRole)[keyof typeof AccountRole]
  *                                   ↓
  *                         ForcePasswordChange (150)
  * ```
- * 
+ *
  * **Login Eligibility:**
  * - ✅ Can Login: Active, ForcePasswordChange
  * - ❌ Cannot Login: PendingVerification, Suspended, Locked, Archived
- * 
+ *
  * @example
  * ```typescript
  * import { AccountStatus, canAccountLogin } from '@_classes/Enums';
- * 
+ *
  * if (!canAccountLogin(user.status)) {
  *   // Show appropriate modal based on status
  * }
@@ -259,32 +247,32 @@ export function getAccountStatusSeverity(status: AccountStatus): 'success' | 'wa
 
 /**
  * CustomerStatus Enum
- * 
+ *
  * Customer/Company status levels for B2B customer lifecycle management.
  * Determines whether a customer organization can place orders.
- * 
+ *
  * **Statuses:**
  * - **Active (0)**: Customer is active and can place orders
  * - **Suspended (1)**: Temporarily suspended, cannot place orders
  * - **PendingVerification (2)**: Awaiting business/license verification
  * - **Inactive (3)**: No recent activity, may need re-engagement
  * - **Churned (4)**: Marked as lost customer
- * 
+ *
  * **Business Flow:**
  * - New customers start as PendingVerification until verified
  * - Active customers can place orders and request quotes
  * - Suspended customers retain account but cannot place orders
  * - Inactive customers may receive re-engagement campaigns
  * - Churned customers are archived for historical data
- * 
+ *
  * @example
  * ```typescript
  * import { CustomerStatus } from '@_classes/Enums';
- * 
+ *
  * if (customer.status === CustomerStatus.Active) {
  *   // Allow order placement
  * }
- * 
+ *
  * if (customer.status === CustomerStatus.PendingVerification) {
  *   // Show verification required message
  * }
@@ -305,10 +293,10 @@ export enum CustomerStatus {
 
 /**
  * OrderStatus Enum
- * 
+ *
  * Order lifecycle statuses with numeric values for sorting and filtering.
  * Higher values represent later stages in the order process.
- * 
+ *
  * **Order Lifecycle:**
  * 1. **Pending (100)**: Initial state, awaiting staff review
  * 2. **WaitingCustomerApproval (200)**: Quote sent, awaiting customer approval
@@ -318,12 +306,12 @@ export enum CustomerStatus {
  * 6. **Shipped (500)**: Order in transit to customer
  * 7. **Delivered (600)**: Order received by customer
  * 8. **Cancelled (0)**: Order cancelled (lowest value for filtering)
- * 
+ *
  * **Numeric Values:**
  * - Used for sorting (ascending = oldest to newest stage)
  * - Used for filtering (e.g., "show all orders from Placed to Delivered")
  * - Enables status range queries in FinanceSearchFilter
- * 
+ *
  * @see prd_orders.md - Order Management PRD
  */
 export enum OrderStatus {
@@ -347,7 +335,7 @@ export enum OrderStatus {
 
 /**
  * PublicRouteType Enum
- * 
+ *
  * Public-facing website page types (no authentication required).
  * Used for routing and navigation on the marketing/public site.
  */
@@ -364,7 +352,7 @@ export enum PublicRouteType {
 
 /**
  * InternalRouteType Enum
- * 
+ *
  * Protected application page types (authentication required).
  * Used for routing and navigation in the /app/* protected area.
  */
@@ -392,10 +380,10 @@ export enum InternalRouteType {
 /**
  * Provider/Vendor status enumeration.
  * Follows industry best practices for vendor lifecycle management.
- * 
+ *
  * Status workflow: Active -> Suspended -> Archived
  * (Restore is possible at any step)
- * 
+ *
  * NOTE: Currently only Active and Archived are supported until
  * the database migration adds the Status column.
  */

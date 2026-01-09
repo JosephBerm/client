@@ -21,14 +21,8 @@ export { RBACStatsCards } from './RBACStatsCards'
 export { RBACPageActions } from './RBACPageActions'
 export { RBACErrorAlert } from './RBACErrorAlert'
 
-// DEPRECATED: Use generic Tabs component from @_components/ui/Tabs instead
-// These exports are kept for backward compatibility only
-/** @deprecated Use generic Tabs component from @_components/ui/Tabs */
-export { RBACTabNav, RBAC_TABS } from './RBACTabNav'
-/** @deprecated Use TabPanel from @_components/ui/Tabs */
-export { RBACTabContent } from './RBACTabContent'
-// Types are still useful for type safety
-export type { RBACTabId, RBACTab } from './RBACTabNav'
+// Types for RBAC tab management
+export type { RBACTabId, RBACTab } from './rbac-types'
 
 // =========================================================================
 // FEATURE COMPONENTS

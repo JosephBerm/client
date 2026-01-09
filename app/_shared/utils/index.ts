@@ -1,23 +1,17 @@
 /**
  * Shared Utils - Barrel Export (Optimized for Tree-Shaking)
- * 
+ *
  * Utility functions used across multiple features.
  * Pure functions - no React dependencies, server + client safe.
- * 
+ *
  * **Note:** toastConfig is exported for internal use by notification.service.ts only.
  * External consumers should use notificationService directly.
- * 
+ *
  * @module shared/utils
  */
 
 // Table Helpers
-export {
-	convertSortingToApi,
-	createServerTableFetcher,
-	formatDate,
-	formatCurrency,
-	truncate,
-} from './table-helpers'
+export { convertSortingToApi, createServerTableFetcher, formatDate, formatCurrency, truncate } from './table-helpers'
 
 // Scroll Utilities
 export {
@@ -82,3 +76,14 @@ export {
 	getUserDisplayName,
 } from './userHelpers'
 
+// Password Strength Utilities
+export {
+	checkPasswordStrength,
+	checkPasswordCriteria,
+	isPasswordValid,
+	getUnmetRequirements,
+	PASSWORD_MIN_LENGTH,
+	PASSWORD_STRONG_LENGTH,
+	type PasswordStrengthResult,
+	type PasswordCriteria,
+} from './passwordStrength'

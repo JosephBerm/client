@@ -42,14 +42,7 @@ import { useState } from 'react'
 
 import { logger } from '@_core'
 import type { PagedResult } from '@_classes/Base/PagedResult'
-import type { AccountRoleType } from '@_classes/Enums'
-import {
-	notificationService,
-	API,
-	useFetchWithCache,
-	invalidateCache,
-	usePermissions,
-} from '@_shared'
+import { notificationService, API, useFetchWithCache, invalidateCache, usePermissions } from '@_shared'
 import type {
 	RBACOverview,
 	PermissionMatrixEntry,
@@ -98,7 +91,7 @@ export interface UseRBACManagementReturn {
 	refreshMatrix: () => Promise<void>
 	fetchAuditLog: (filters?: AuditLogFilters) => Promise<void>
 	fetchUsers: (filters?: UsersWithRolesFilters) => Promise<void>
-	bulkUpdateRoles: (userIds: number[], newRole: AccountRoleType, reason?: string) => Promise<BulkRoleUpdateResult | null>
+	bulkUpdateRoles: (userIds: number[], newRole: number, reason?: string) => Promise<BulkRoleUpdateResult | null>
 	invalidateAll: () => void
 
 	// Permission Toggle (with optimistic updates)
@@ -151,25 +144,21 @@ export function useRBACManagement(): UseRBACManagementReturn {
 		refetch: refetchOverview,
 		invalidate: invalidateOverview,
 		isFromCache,
-	} = useFetchWithCache<RBACOverview>(
-		CACHE_KEYS.OVERVIEW,
-		async () => API.RBAC.getOverview(),
-		{
-			staleTime: CACHE_CONFIG.STALE_TIME,
-			cacheTime: CACHE_CONFIG.CACHE_TIME,
-			revalidateOnFocus: true,
-			revalidateOnReconnect: true,
-			enabled: canView,
-			componentName: 'useRBACManagement',
-			onError: (error) => {
-				logger.error(ERROR_MESSAGES.FETCH_OVERVIEW, {
-					component: 'useRBACManagement',
-					action: 'fetchOverview',
-					error: error.message,
-				})
-			},
-		}
-	)
+	} = useFetchWithCache<RBACOverview>(CACHE_KEYS.OVERVIEW, async () => API.RBAC.getOverview(), {
+		staleTime: CACHE_CONFIG.STALE_TIME,
+		cacheTime: CACHE_CONFIG.CACHE_TIME,
+		revalidateOnFocus: true,
+		revalidateOnReconnect: true,
+		enabled: canView,
+		componentName: 'useRBACManagement',
+		onError: (error) => {
+			logger.error(ERROR_MESSAGES.FETCH_OVERVIEW, {
+				component: 'useRBACManagement',
+				action: 'fetchOverview',
+				error: error.message,
+			})
+		},
+	})
 
 	// ---------------------------------------------------------------------------
 	// DERIVED STATE
@@ -322,7 +311,7 @@ export function useRBACManagement(): UseRBACManagementReturn {
 	 */
 	const bulkUpdateRoles = async (
 		userIds: number[],
-		newRole: AccountRoleType,
+		newRole: number,
 		reason?: string
 	): Promise<BulkRoleUpdateResult | null> => {
 		if (!canEdit) {
@@ -476,9 +465,7 @@ export function useRBACManagement(): UseRBACManagementReturn {
 		}
 
 		// Map permission string to permissionId
-		const permissionString = context
-			? `${resource}:${action}:${context}`
-			: `${resource}:${action}`
+		const permissionString = context ? `${resource}:${action}:${context}` : `${resource}:${action}`
 
 		const permission = overview.permissions.find(
 			(p) => p.permissionString.toLowerCase() === permissionString.toLowerCase()
@@ -522,10 +509,10 @@ export function useRBACManagement(): UseRBACManagementReturn {
 					return next
 				})
 
-				notificationService.success(
-					granted ? 'Permission granted' : 'Permission revoked',
-					{ component: 'useRBACManagement', action: 'togglePermission' }
-				)
+				notificationService.success(granted ? 'Permission granted' : 'Permission revoked', {
+					component: 'useRBACManagement',
+					action: 'togglePermission',
+				})
 
 				// Background refetch for consistency (don't await)
 				invalidateOverview()

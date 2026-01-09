@@ -1,25 +1,25 @@
 /**
  * useProvidersPage Hook
- * 
+ *
  * Encapsulates all business logic for the Providers page.
  * Follows the same pattern as useCustomersPage for consistency.
- * 
+ *
  * **Features:**
  * - Delete/Archive/Suspend modal management
  * - Provider stats fetching
  * - RBAC permission checks
  * - Status filter state (All, Active, Suspended, Archived)
  * - Refresh key for table re-fetching
- * 
+ *
  * **React 19 / Next.js 16 Optimizations:**
  * - No useCallback needed (React Compiler auto-memoizes)
  * - useMemo only for expensive computations
- * 
+ *
  * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler
- * 
+ *
  * STATUS WORKFLOW (Industry Best Practice):
  * Active -> Suspended -> Archived (can be restored at each step)
- * 
+ *
  * @module providers/hooks
  */
 
@@ -30,8 +30,7 @@ import { useState } from 'react'
 import { useAuthStore } from '@_features/auth'
 
 import { logger } from '@_core'
-import { API, notificationService } from '@_shared'
-import { AccountRole } from '@_classes/Enums'
+import { API, notificationService, usePermissions } from '@_shared'
 import type Provider from '@_classes/Provider'
 
 import { useProviderStats } from './useProviderStats'
@@ -82,7 +81,7 @@ interface UseProvidersPageReturn {
 
 /**
  * Hook for managing providers page state and actions.
- * 
+ *
  * @example
  * ```tsx
  * const {
@@ -99,12 +98,9 @@ interface UseProvidersPageReturn {
 export function useProvidersPage(): UseProvidersPageReturn {
 	// Auth state for RBAC
 	const user = useAuthStore((state) => state.user)
-	
-	// RBAC checks - simple comparisons, no memoization needed
-	// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
-	const userRole = user?.roleLevel ?? AccountRole.Customer
-	// Use >= for admin check to include SuperAdmin (9999) and Admin (5000)
-	const isAdmin = userRole >= AccountRole.Admin
+
+	// RBAC: Use usePermissions hook for role-based checks
+	const { isAdmin } = usePermissions()
 	const canDelete = isAdmin
 	const canManageStatus = isAdmin
 
@@ -115,7 +111,7 @@ export function useProvidersPage(): UseProvidersPageReturn {
 		mode: 'delete',
 	})
 	const [suspendReason, setSuspendReason] = useState('')
-	
+
 	// UI state
 	const [refreshKey, setRefreshKey] = useState(0)
 	const [statusFilter, setStatusFilter] = useState<ProviderStatusKey | 'all'>('all')
@@ -339,4 +335,3 @@ export function useProvidersPage(): UseProvidersPageReturn {
 }
 
 export default useProvidersPage
-

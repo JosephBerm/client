@@ -41,7 +41,7 @@ import { useEffect, useMemo } from 'react'
 
 import { logger } from '@_core'
 import { useAuthStore } from '@_features/auth'
-import { AccountRole } from '@_classes/Enums'
+import { usePermissions, RoleLevels } from '@_shared'
 
 import { InternalPageHeader } from '../_components'
 
@@ -59,11 +59,7 @@ import {
 	AnalyticsDateRangePicker,
 } from './_components'
 
-import {
-	useAnalyticsSummary,
-	useTeamPerformance,
-	useRevenueTimeline,
-} from './_hooks'
+import { useAnalyticsSummary, useTeamPerformance, useRevenueTimeline } from './_hooks'
 
 // ============================================================================
 // CONSTANTS
@@ -76,10 +72,10 @@ const COMPONENT_NAME = 'AnalyticsPage'
  * Defined outside component to prevent recreation on each render.
  */
 const ROLE_DESCRIPTIONS: Readonly<Record<number, string>> = {
-	[AccountRole.Customer]: 'Track your spending and order history.',
-	[AccountRole.SalesRep]: 'Monitor your performance and compare with team averages.',
-	[AccountRole.SalesManager]: 'Business intelligence and team performance metrics.',
-	[AccountRole.Admin]: 'Complete business analytics and team management.',
+	[RoleLevels.Customer]: 'Track your spending and order history.',
+	[RoleLevels.SalesRep]: 'Monitor your performance and compare with team averages.',
+	[RoleLevels.SalesManager]: 'Business intelligence and team performance metrics.',
+	[RoleLevels.Admin]: 'Complete business analytics and team management.',
 } as const
 
 // ============================================================================
@@ -94,12 +90,15 @@ const ROLE_DESCRIPTIONS: Readonly<Record<number, string>> = {
  */
 export default function AnalyticsPage() {
 	// =========================================================================
-	// AUTH STATE
+	// AUTH STATE & PERMISSIONS
 	// =========================================================================
 	// Zustand selector pattern for optimal re-render behavior
 
 	const user = useAuthStore((state) => state.user)
 	const authLoading = useAuthStore((state) => state.isLoading)
+
+	// RBAC: Use usePermissions hook for role-based checks
+	const { isCustomer, isSalesRepOrAbove, isSalesManagerOrAbove, roleLevel } = usePermissions()
 
 	// =========================================================================
 	// DATA HOOKS
@@ -124,51 +123,42 @@ export default function AnalyticsPage() {
 		isLoading: teamLoading,
 		error: teamError,
 	} = useTeamPerformance({
-		// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
-		autoFetch: (user?.roleLevel ?? -1) >= AccountRole.SalesManager,
+		// RBAC: Use usePermissions() hook for role checks
+		autoFetch: isSalesManagerOrAbove,
 	})
 
 	// Revenue timeline (managers/admins only)
-	const {
-		data: revenueData,
-		isLoading: revenueLoading,
-	} = useRevenueTimeline({
-		// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
-		autoFetch: (user?.roleLevel ?? -1) >= AccountRole.SalesManager,
+	const { data: revenueData, isLoading: revenueLoading } = useRevenueTimeline({
+		// RBAC: Use usePermissions() hook for role checks
+		autoFetch: isSalesManagerOrAbove,
 	})
 
 	// =========================================================================
 	// DERIVED STATE
 	// =========================================================================
 
-	// Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class)
-	const userRole = user?.roleLevel ?? AccountRole.Customer
+	// RBAC: Use roleLevel from usePermissions() hook
+	const userRole = roleLevel ?? RoleLevels.Customer
 
 	/**
 	 * Role flags for conditional rendering.
 	 *
-	 * useMemo() justified here because:
-	 * 1. Object reference changes on each render without memoization
-	 * 2. Used in JSX conditionals which would cause child re-renders
-	 *
-	 * Per React docs: "useMemo is a React Hook that lets you cache the result
-	 * of a calculation between re-renders"
-	 *
-	 * @see https://react.dev/reference/react/useMemo
+	 * RBAC: Now using usePermissions() hook values directly.
+	 * The hook provides memoized boolean flags for role checks.
 	 */
 	const roleFlags = useMemo(
 		() => ({
-			isCustomer: userRole === AccountRole.Customer,
-			isSalesRep: userRole === AccountRole.SalesRep,
-			isManagerOrAdmin: userRole >= AccountRole.SalesManager,
+			isCustomer,
+			isSalesRep: isSalesRepOrAbove && !isSalesManagerOrAbove,
+			isManagerOrAdmin: isSalesManagerOrAbove,
 		}),
-		[userRole]
+		[isCustomer, isSalesRepOrAbove, isSalesManagerOrAbove]
 	)
 
 	// Simple primitives - no useMemo needed (per React docs: "don't add useMemo
 	// for primitives... JavaScript engines are heavily optimized for primitives")
 	const isLoading = authLoading || summaryLoading
-	const pageDescription = ROLE_DESCRIPTIONS[userRole] ?? ROLE_DESCRIPTIONS[AccountRole.SalesManager]
+	const pageDescription = ROLE_DESCRIPTIONS[userRole] ?? ROLE_DESCRIPTIONS[RoleLevels.SalesManager]
 
 	// =========================================================================
 	// EFFECTS
@@ -206,7 +196,7 @@ export default function AnalyticsPage() {
 		<>
 			{/* Page Header */}
 			<InternalPageHeader
-				title="Analytics Dashboard"
+				title='Analytics Dashboard'
 				description={pageDescription}
 				loading={!summaryHasLoaded && isLoading}
 				actions={
@@ -220,13 +210,13 @@ export default function AnalyticsPage() {
 			/>
 
 			{/* Main Content */}
-			<main className="space-y-6">
+			<main className='space-y-6'>
 				{/* Error State */}
 				{summaryError && (
 					<AnalyticsErrorState
 						error={summaryError}
 						onRetry={retrySummary}
-						context="summary"
+						context='summary'
 					/>
 				)}
 
@@ -235,11 +225,17 @@ export default function AnalyticsPage() {
 
 				{/* Role-Based Views - memo() prevents unnecessary re-renders */}
 				{summary && roleFlags.isCustomer && (
-					<CustomerAnalytics summary={summary} isLoading={isLoading} />
+					<CustomerAnalytics
+						summary={summary}
+						isLoading={isLoading}
+					/>
 				)}
 
 				{summary && roleFlags.isSalesRep && (
-					<SalesRepAnalytics summary={summary} isLoading={isLoading} />
+					<SalesRepAnalytics
+						summary={summary}
+						isLoading={isLoading}
+					/>
 				)}
 
 				{summary && roleFlags.isManagerOrAdmin && (

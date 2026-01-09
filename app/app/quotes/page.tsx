@@ -2,7 +2,7 @@
  * Quotes Page
  * 
  * Admin page for managing customer quote requests.
- * Uses ServerDataGrid for server-side pagination.
+ * Uses RichDataGrid for server-side pagination.
  * 
  * **Next.js 16 Optimization:**
  * - Page is a Server Component (no 'use client' directive)

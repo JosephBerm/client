@@ -29,7 +29,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useOrderPermissions } from '../useOrderPermissions'
 import * as usePermissionsModule from '@_shared/hooks/usePermissions'
-import { RoleLevels, Resources, Actions, Contexts, type RoleLevel } from '@_types/rbac'
+import { RoleLevels, Resources, Actions, Contexts } from '@_types/rbac'
 import { OrderStatus } from '@_classes/Enums'
 import type Order from '@_classes/Order'
 
@@ -52,7 +52,7 @@ vi.mock('@_shared/hooks/usePermissions', async () => {
 interface MockUser {
   id: string | null
   email: string
-  role: RoleLevel
+  role: number
   customerId?: number | null
 }
 
@@ -88,7 +88,7 @@ function createMockUser(overrides: Partial<MockUser> = {}): MockUser {
   }
 }
 
-function mockUsePermissions(user: MockUser | null, roleLevel?: RoleLevel) {
+function mockUsePermissions(user: MockUser | null, roleLevel?: number) {
   const role = roleLevel ?? user?.role ?? RoleLevels.Customer
   
   const mockHasPermission = vi.fn((resource: string, action: string, context?: string) => {
@@ -133,7 +133,7 @@ function mockUsePermissions(user: MockUser | null, roleLevel?: RoleLevel) {
     return false
   })
   
-  const mockHasMinimumRole = vi.fn((min: RoleLevel) => role >= min)
+  const mockHasMinimumRole = vi.fn((min: number) => role >= min)
   
   ;(usePermissionsModule.usePermissions as ReturnType<typeof vi.fn>).mockReturnValue({
     user: user ? { ...user, id: user.id ?? null } : null,

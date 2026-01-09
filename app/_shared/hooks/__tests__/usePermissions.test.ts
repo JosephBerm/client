@@ -28,7 +28,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { usePermissions, Resources, Actions, Contexts, RoleLevels } from '../usePermissions'
 import { useAuthStore } from '@_features/auth/stores/useAuthStore'
-import type { Resource, Action, Context, RoleLevel } from '@_types/rbac'
+import type { Resource, Action, Context } from '@_types/rbac'
 
 // ============================================================================
 // MOCK SETUP
@@ -51,7 +51,7 @@ interface MockUser {
   customer?: { name: string }
 }
 
-function createMockUser(roleLevel: RoleLevel, overrides: Partial<MockUser> = {}): MockUser {
+function createMockUser(roleLevel: number, overrides: Partial<MockUser> = {}): MockUser {
   return {
     id: 1,
     email: 'test@example.com',
@@ -1069,7 +1069,7 @@ describe('usePermissions Hook - RBAC Security Tests', () => {
      */
     it('should enforce complete permission matrix as per business_flow.md', () => {
       // Define expected permissions per role
-      const permissionMatrix: Record<RoleLevel, string[]> = {
+      const permissionMatrix: Record<number, string[]> = {
         [RoleLevels.Customer]: [
           'quotes:read:own', 'quotes:create', 'quotes:update:own',
           'orders:read:own', 'orders:update:own',
@@ -1118,7 +1118,7 @@ describe('usePermissions Hook - RBAC Security Tests', () => {
       for (const [roleLevel, expectedPerms] of Object.entries(permissionMatrix)) {
         if (Number(roleLevel) === RoleLevels.Admin) continue // Admin tested separately
         
-        mockAuthStore(createMockUser(Number(roleLevel) as RoleLevel))
+        mockAuthStore(createMockUser(Number(roleLevel)))
         const { result } = renderHook(() => usePermissions())
         
         for (const perm of expectedPerms) {

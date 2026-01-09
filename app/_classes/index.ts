@@ -1,15 +1,15 @@
 /**
  * Domain Classes and Models - Barrel Export (Optimized for Tree-Shaking)
- * 
+ *
  * Centralized export for all domain models, DTOs, and helper classes.
  * These classes represent the core business entities and utilities.
- * 
+ *
  * **Architecture:**
  * - Pure TypeScript classes and interfaces
  * - No React dependencies
  * - Server + Client safe
  * - FAANG-level enum helpers
- * 
+ *
  * @module classes
  */
 
@@ -37,7 +37,7 @@ export {
 	TypeOfBusiness,
 	QuoteStatus,
 	NotificationType,
-	AccountRole,
+	// NOTE: AccountRole removed (January 2026) - use RoleLevels from @_types/rbac
 	AccountStatus,
 	OrderStatus,
 	PublicRouteType,
@@ -46,7 +46,6 @@ export {
 	getAccountStatusLabel,
 	canAccountLogin,
 	getAccountStatusSeverity,
-	type AccountRoleType,
 } from './Enums'
 
 export { Theme } from './SharedEnums'
@@ -62,10 +61,7 @@ export {
 	type OrderStatusCategory,
 } from './Helpers/OrderStatusHelper'
 
-export {
-	default as ThemeHelper,
-	type ThemeMetadata,
-} from './Helpers/ThemeHelper'
+export { default as ThemeHelper, type ThemeMetadata } from './Helpers/ThemeHelper'
 
 export {
 	default as NotificationTypeHelper,
@@ -73,12 +69,6 @@ export {
 	type NotificationVariant,
 	type NotificationPriority,
 } from './Helpers/NotificationTypeHelper'
-
-export {
-	default as AccountRoleHelper,
-	type AccountRoleMetadata,
-	type AccountRoleVariant,
-} from './Helpers/AccountRoleHelper'
 
 export {
 	default as QuoteStatusHelper,
@@ -121,10 +111,4 @@ export { default as LoginCredentials } from './LoginCredentials'
 export { PagedData } from './PagedData'
 
 // Carousel types
-export type {
-	CarouselCTA,
-	CarouselOverlay,
-	CarouselSlideWithOverlay,
-	CarouselContentResponse,
-} from './CarouselTypes'
-
+export type { CarouselCTA, CarouselOverlay, CarouselSlideWithOverlay, CarouselContentResponse } from './CarouselTypes'

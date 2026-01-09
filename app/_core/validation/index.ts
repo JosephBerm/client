@@ -1,9 +1,9 @@
 /**
  * Validation - Core Module (Optimized for Tree-Shaking)
- * 
+ *
  * Application-wide Zod validation schemas.
  * Server + Client safe.
- * 
+ *
  * @module core/validation
  */
 
@@ -16,6 +16,7 @@ export {
 	addressSchema,
 	loginSchema,
 	signupSchema,
+	adminCreateAccountSchema,
 	changePasswordSchema,
 	profileUpdateSchema,
 	productSchema,
@@ -27,6 +28,7 @@ export {
 	searchFilterSchema,
 	type LoginFormData,
 	type SignupFormData,
+	type AdminCreateAccountFormData,
 	type ChangePasswordFormData,
 	type ProfileUpdateFormData,
 	type ProductFormData,
@@ -37,4 +39,3 @@ export {
 	type ContactFormData,
 	type SearchFilterFormData,
 } from './validation-schemas'
-

@@ -105,12 +105,6 @@ export const BREAKPOINTS: ResponsiveBreakpoints = {
 }
 
 /**
- * Default breakpoint for mobile card view (legacy - use CARD_VIEW_BREAKPOINT)
- * @deprecated Use CARD_VIEW_BREAKPOINT for responsive card/table switching
- */
-export const MOBILE_BREAKPOINT = BREAKPOINTS.sm // 640px
-
-/**
  * MAANG-level responsive breakpoint for card vs table view
  * 
  * **Design Philosophy (Linear, Notion, Stripe pattern):**
@@ -396,4 +390,3 @@ export const COVERAGE_TARGETS = {
   INTEGRATION: 70,
   ACCESSIBILITY: 100,
 } as const
-

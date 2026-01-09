@@ -25,7 +25,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useQuotePermissions } from '../useQuotePermissions'
 import * as usePermissionsModule from '@_shared/hooks/usePermissions'
-import { RoleLevels, Resources, Actions, Contexts, type RoleLevel } from '@_types/rbac'
+import { RoleLevels, Resources, Actions, Contexts } from '@_types/rbac'
 import { QuoteStatus } from '@_classes/Enums'
 import type Quote from '@_classes/Quote'
 
@@ -48,7 +48,7 @@ vi.mock('@_shared/hooks/usePermissions', async () => {
 interface MockUser {
   id: number
   email: string
-  role: RoleLevel
+  role: number
   customerId?: number
   customer?: { name: string }
 }
@@ -83,7 +83,7 @@ function createMockUser(overrides: Partial<MockUser> = {}): MockUser {
   }
 }
 
-function mockUsePermissions(user: MockUser | null, roleLevel?: RoleLevel) {
+function mockUsePermissions(user: MockUser | null, roleLevel?: number) {
   const role = roleLevel ?? user?.role ?? RoleLevels.Customer
   
   const mockHasPermission = vi.fn((resource: string, action: string, context?: string) => {
@@ -116,7 +116,7 @@ function mockUsePermissions(user: MockUser | null, roleLevel?: RoleLevel) {
     isSalesManagerOrAbove: role >= RoleLevels.SalesManager,
     isSalesRepOrAbove: role >= RoleLevels.SalesRep,
     isCustomer: role === RoleLevels.Customer,
-    hasMinimumRole: (min: RoleLevel) => role >= min,
+    hasMinimumRole: (min: number) => role >= min,
     hasPermission: mockHasPermission,
   })
 }

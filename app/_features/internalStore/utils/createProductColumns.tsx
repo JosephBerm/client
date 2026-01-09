@@ -55,7 +55,7 @@ import type { ColumnDef } from '@tanstack/react-table'
  *   onRestore: handleRestore,
  * })
  * 
- * return <ServerDataGrid columns={columns} ... />
+ * return <RichDataGrid columns={columns} ... />
  * ```
  */
 export function createProductColumns(
