@@ -7,7 +7,8 @@
 export { useRichDataGrid } from './useRichDataGrid'
 export type { UseRichDataGridOptions } from './useRichDataGrid'
 
-export { useClickOutside, useEscapeKey } from './useClickOutside'
+// Note: useClickOutside and useEscapeKey are shared hooks - import from @_shared
+// They are re-exported from the main RichDataGrid barrel for convenience
 
 export { useGridUrlState } from './useGridUrlState'
 export type { GridUrlStateConfig, GridUrlState, UseGridUrlStateReturn } from './useGridUrlState'
@@ -17,4 +18,3 @@ export type { UseRangeSelectionOptions, UseRangeSelectionReturn } from './useRan
 
 export { useKeyboardNavigation } from './useKeyboardNavigation'
 export type { UseKeyboardNavigationOptions, UseKeyboardNavigationReturn } from './useKeyboardNavigation'
-
