@@ -339,14 +339,62 @@ export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>
  * });
  * ```
  */
+/**
+ * Date field that accepts string input from HTML date inputs (YYYY-MM-DD format).
+ * Coerces to Date for validation while properly typing input as string | Date.
+ *
+ * **MAANG Pattern:** HTML date inputs always provide strings, not Date objects.
+ * Using preprocess ensures TypeScript knows the input can be a string.
+ */
+const dateInputSchema = z.preprocess((val) => {
+	// Handle empty/null/undefined - return null to trigger nullable()
+	if (val === '' || val === null || val === undefined) return null
+	// Pass through Date objects and strings for coercion
+	return val
+}, z.coerce.date().nullable())
+
+/**
+ * Optional address schema for profile updates.
+ * Transforms empty/incomplete objects to undefined to avoid partial validation errors.
+ *
+ * **MAANG Pattern:** Forms often submit empty nested objects `{}` when no values are entered.
+ * This schema handles that gracefully by treating empty objects as "no address provided".
+ */
+const optionalAddressSchema = z.preprocess((val) => {
+	// Handle null/undefined - pass through for .optional() to handle
+	if (val === null || val === undefined) return undefined
+
+	// If it's an object, check if it has any meaningful content
+	if (typeof val === 'object' && val !== null) {
+		const obj = val as Record<string, unknown>
+		// Check if all address fields are empty/missing
+		const hasStreet = obj.street && typeof obj.street === 'string' && obj.street.trim().length > 0
+		const hasCity = obj.city && typeof obj.city === 'string' && obj.city.trim().length > 0
+		const hasState = obj.state && typeof obj.state === 'string' && obj.state.trim().length > 0
+		const hasZipCode = obj.zipCode && typeof obj.zipCode === 'string' && obj.zipCode.trim().length > 0
+		const hasCountry = obj.country && typeof obj.country === 'string' && obj.country.trim().length > 0
+
+		// If none of the fields have content, treat as undefined (no address)
+		if (!hasStreet && !hasCity && !hasState && !hasZipCode && !hasCountry) {
+			return undefined
+		}
+	}
+
+	// Otherwise pass through for normal validation
+	return val
+}, addressSchema.optional())
+
 export const profileUpdateSchema = z.object({
 	username: usernameSchema,
 	email: emailSchema,
 	name: nameSchema,
-	dateOfBirth: z.coerce.date().optional().nullable(),
+	// HTML date inputs provide strings in YYYY-MM-DD format
+	// dateInputSchema accepts string | Date | null and coerces to Date | null
+	dateOfBirth: dateInputSchema.optional(),
 	phone: phoneSchema,
 	mobile: phoneSchema,
-	shippingDetails: addressSchema.optional(),
+	// Uses optionalAddressSchema to handle empty objects gracefully
+	shippingDetails: optionalAddressSchema,
 })
 
 /** Type-safe form data inferred from profileUpdateSchema */

@@ -1,15 +1,15 @@
 /**
  * SignupForm Component
- * 
+ *
  * User registration form with all required fields.
  * Collects username, email, password, and name information.
- * 
+ *
  * **Features:**
  * - Two-column responsive layout
  * - Form validation via react-hook-form
  * - Password confirmation
  * - Accessible with proper labels
- * 
+ *
  * @module LoginModal/SignupForm
  */
 
@@ -18,33 +18,24 @@
 import FormInput from '@_components/forms/FormInput'
 import Button from '@_components/ui/Button'
 
-import {
-	BUTTON_LABELS,
-	FIELD_LABELS,
-	FIELD_PLACEHOLDERS,
-	LINK_TEXT,
-	LAYOUT_CLASSES,
-} from './LoginModal.constants'
+import { BUTTON_LABELS, FIELD_LABELS, FIELD_PLACEHOLDERS, LINK_TEXT, LAYOUT_CLASSES } from './LoginModal.constants'
 
 import type { SignupFormProps } from './LoginModal.types'
 
 /**
  * SignupForm Component
- * 
+ *
  * Renders the signup form with all registration fields.
  * Uses responsive two-column grid for larger screens.
- * 
+ *
  * @param props - Component props
  * @returns Signup form section
  */
-export default function SignupForm({
-	form,
-	isLoading,
-	onSubmit,
-	onSwitchToLogin,
-}: SignupFormProps) {
+export default function SignupForm({ form, isLoading, onSubmit, onSwitchToLogin }: SignupFormProps) {
 	return (
-		<form onSubmit={onSubmit} className={LAYOUT_CLASSES.SIGNUP_FORM}>
+		<form
+			onSubmit={onSubmit}
+			className={LAYOUT_CLASSES.SIGNUP_FORM}>
 			{/* Name fields - side by side for natural grouping */}
 			<div className={LAYOUT_CLASSES.TWO_COLUMN_GRID}>
 				<FormInput
@@ -106,9 +97,8 @@ export default function SignupForm({
 					variant='primary'
 					size='md'
 					loading={isLoading}
-					disabled={isLoading}
-					className={LAYOUT_CLASSES.PRIMARY_BUTTON}
-				>
+					disabled={isLoading || !form.formState.isValid}
+					className={LAYOUT_CLASSES.PRIMARY_BUTTON}>
 					{BUTTON_LABELS.CREATE_ACCOUNT}
 				</Button>
 
@@ -119,8 +109,7 @@ export default function SignupForm({
 						variant='ghost'
 						size='sm'
 						onClick={onSwitchToLogin}
-						className={LAYOUT_CLASSES.INLINE_LINK}
-					>
+						className={LAYOUT_CLASSES.INLINE_LINK}>
 						{BUTTON_LABELS.LOGIN}
 					</Button>
 				</p>
@@ -128,4 +117,3 @@ export default function SignupForm({
 		</form>
 	)
 }
-

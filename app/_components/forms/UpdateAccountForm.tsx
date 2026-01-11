@@ -63,13 +63,12 @@
 
 import React, { useCallback, useState, useEffect, useRef } from 'react'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 import { User as UserIcon, AtSign, Phone } from 'lucide-react'
 
 import { logger, profileUpdateSchema, type ProfileUpdateFormData } from '@_core'
+import { formatDateForInput } from '@_lib'
 
-import { useFormSubmit , API } from '@_shared'
+import { useFormSubmit, API, useZodForm } from '@_shared'
 
 import Address from '@_classes/common/Address'
 import Name from '@_classes/common/Name'
@@ -81,7 +80,6 @@ import AvatarUpload from '@_components/ui/AvatarUpload'
 
 import FormInput from './FormInput'
 import FormSection from './FormSection'
-
 
 /**
  * UpdateAccountForm component props interface.
@@ -132,9 +130,7 @@ interface UpdateAccountFormProps {
 export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountFormProps) {
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
 	const [avatarError, setAvatarError] = useState<string | undefined>()
-	const [avatarPreviewPath, setAvatarPreviewPath] = useState<string | null>(
-		user.profilePicturePath ?? null
-	)
+	const [avatarPreviewPath, setAvatarPreviewPath] = useState<string | null>(user.profilePicturePath ?? null)
 
 	// Track blob URLs for cleanup on unmount (memory leak prevention)
 	const blobUrlRef = useRef<string | null>(null)
@@ -155,8 +151,15 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 		}
 	}, [])
 
-	const form = useForm<ProfileUpdateFormData>({
-		resolver: zodResolver(profileUpdateSchema),
+	// Format date of birth for HTML date input (YYYY-MM-DD format)
+	const defaultDateOfBirth = formatDateForInput(user.dateOfBirth)
+
+	// Mode 'onBlur' validates fields when user leaves them for better UX
+	// Using useZodForm hook for DRY compliance (standardized form setup)
+	// NOTE: dateOfBirth uses string default (YYYY-MM-DD) for HTML input compatibility
+	// The schema's z.preprocess handles string → Date conversion during validation
+	const form = useZodForm(profileUpdateSchema, {
+		mode: 'onBlur',
 		defaultValues: {
 			username: user.username || '',
 			email: user.email || '',
@@ -165,7 +168,10 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 				middle: user.name?.middle ?? '',
 				last: user.name?.last ?? '',
 			},
-			dateOfBirth: user.dateOfBirth,
+			// HTML date inputs require YYYY-MM-DD string format, not Date objects
+			// formatDateForInput handles null/undefined safely, returning empty string
+			// Cast to satisfy TypeScript - z.preprocess handles runtime conversion
+			dateOfBirth: defaultDateOfBirth as unknown as Date | null,
 			phone: user.phone ?? '',
 			mobile: user.mobile ?? '',
 			shippingDetails: user.shippingDetails ?? undefined,
@@ -249,6 +255,7 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 				mobile: data.mobile,
 				shippingDetails: data.shippingDetails ? new Address(data.shippingDetails) : user.shippingDetails,
 			})
+
 			return API.Accounts.update(updatedUser)
 		},
 		{
@@ -262,7 +269,7 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 				if (result) {
 					const updatedUserEntity = new User(result as unknown as Partial<IUser>)
 					onUserUpdate?.(updatedUserEntity)
-					
+
 					logger.info('Profile update synced to parent', {
 						component: 'UpdateAccountForm',
 						userId: updatedUserEntity.id ?? 'unknown',
@@ -276,46 +283,54 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 	 * Form submission handler for React Hook Form.
 	 * Wraps async handler to satisfy ESLint's no-misused-promises rule.
 	 * React Hook Form supports async handlers, but we need to handle the Promise explicitly.
-	 * 
+	 *
 	 * FAANG Pattern: Extract event handlers from JSX for separation of concerns.
 	 */
-	const handleSubmit = useCallback((data: ProfileUpdateFormData): void => {
-		void submit(data).catch((error) => {
-			// Error already handled in submit function, but catch any unhandled rejections
-			logger.error('Unhandled form submission error', {
-				error,
-				component: 'UpdateAccountForm',
-				action: 'handleSubmit',
+	const handleSubmit = useCallback(
+		(data: ProfileUpdateFormData): void => {
+			void submit(data).catch((error) => {
+				// Error already handled in submit function, but catch any unhandled rejections
+				logger.error('Unhandled form submission error', {
+					error,
+					component: 'UpdateAccountForm',
+					action: 'handleSubmit',
+				})
 			})
-		})
-	}, [submit])
+		},
+		[submit]
+	)
 
 	/**
 	 * Form onSubmit handler that properly handles React Hook Form's Promise return.
 	 * Extracted from JSX for clean code and separation of concerns.
-	 * 
+	 *
 	 * FAANG Pattern: Use useCallback for stable event handlers to prevent unnecessary re-renders.
 	 */
-	const onFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-		const submitHandler = form.handleSubmit(handleSubmit)
-		const result = submitHandler(e)
-		// React Hook Form's handleSubmit may return a Promise if handler is async
-		// Handle it explicitly to satisfy ESLint's no-misused-promises rule
-		if (result instanceof Promise) {
-			void result.catch((error) => {
-				logger.error('Unhandled form submission error', {
-					error,
-					component: 'UpdateAccountForm',
-					action: 'onFormSubmit',
+	const onFormSubmit = useCallback(
+		(e: React.FormEvent<HTMLFormElement>) => {
+			const submitHandler = form.handleSubmit(handleSubmit)
+			const result = submitHandler(e)
+			// React Hook Form's handleSubmit may return a Promise if handler is async
+			// Handle it explicitly to satisfy ESLint's no-misused-promises rule
+			if (result instanceof Promise) {
+				void result.catch((error) => {
+					logger.error('Unhandled form submission error', {
+						error,
+						component: 'UpdateAccountForm',
+						action: 'onFormSubmit',
+					})
 				})
-			})
-		}
-	}, [form, handleSubmit])
+			}
+		},
+		[form, handleSubmit]
+	)
 
 	return (
-		<form onSubmit={onFormSubmit} className="space-y-8">
+		<form
+			onSubmit={onFormSubmit}
+			className='space-y-8'>
 			{/* Avatar Section */}
-			<div className="flex flex-col items-center sm:flex-row gap-6 pb-6 border-b border-base-200">
+			<div className='flex flex-col items-center sm:flex-row gap-6 pb-6 border-b border-base-200'>
 				<AvatarUpload
 					name={user.name}
 					currentImagePath={avatarPreviewPath}
@@ -323,64 +338,60 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 					onImageRemove={handleAvatarRemove}
 					uploading={isUploadingAvatar}
 					error={avatarError}
-					size="xl"
+					size='xl'
 				/>
-				<div className="text-center sm:text-left flex-1">
-					<h3 className="text-lg font-semibold text-base-content">Profile Photo</h3>
-					<p className="mt-1 text-sm text-base-content/60">
-						Add a photo to personalize your account
-					</p>
+				<div className='text-center sm:text-left flex-1'>
+					<h3 className='text-lg font-semibold text-base-content'>Profile Photo</h3>
+					<p className='mt-1 text-sm text-base-content/60'>Add a photo to personalize your account</p>
 				</div>
 			</div>
 
 			{/* Identity Section */}
 			<FormSection
-				title="Identity"
-				icon={<UserIcon className="h-5 w-5" />}
-				description="Your personal information"
-			>
-				<div className="space-y-4">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				title='Identity'
+				icon={<UserIcon className='h-5 w-5' />}
+				description='Your personal information'>
+				<div className='space-y-4'>
+					<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 						<FormInput
-							label="First Name"
+							label='First Name'
 							{...form.register('name.first')}
 							error={form.formState.errors.name?.first}
 							disabled={isSubmitting}
 						/>
 						<FormInput
-							label="Last Name"
+							label='Last Name'
 							{...form.register('name.last')}
 							error={form.formState.errors.name?.last}
 							disabled={isSubmitting}
 						/>
 					</div>
 					<FormInput
-						label="Middle Name"
+						label='Middle Name'
 						{...form.register('name.middle')}
 						error={form.formState.errors.name?.middle}
 						disabled={isSubmitting}
-						helperText="Optional"
+						helperText='Optional'
 					/>
 				</div>
 			</FormSection>
 
 			{/* Account Section */}
 			<FormSection
-				title="Account"
-				icon={<AtSign className="h-5 w-5" />}
-				description="Your account credentials"
-			>
-				<div className="space-y-4">
+				title='Account'
+				icon={<AtSign className='h-5 w-5' />}
+				description='Your account credentials'>
+				<div className='space-y-4'>
 					<FormInput
-						label="Username"
+						label='Username'
 						{...form.register('username')}
 						error={form.formState.errors.username}
 						disabled={true}
-						helperText="Username cannot be changed"
+						helperText='Username cannot be changed'
 					/>
 					<FormInput
-						label="Email"
-						type="email"
+						label='Email'
+						type='email'
 						{...form.register('email')}
 						error={form.formState.errors.email}
 						disabled={isSubmitting}
@@ -390,30 +401,29 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 
 			{/* Contact Section */}
 			<FormSection
-				title="Contact"
-				icon={<Phone className="h-5 w-5" />}
-				badge="Optional"
-				description="How we can reach you"
-			>
-				<div className="space-y-4">
+				title='Contact'
+				icon={<Phone className='h-5 w-5' />}
+				badge='Optional'
+				description='How we can reach you'>
+				<div className='space-y-4'>
 					<FormInput
-						label="Date of Birth"
-						type="date"
-						{...form.register('dateOfBirth', { valueAsDate: true })}
+						label='Date of Birth'
+						type='date'
+						{...form.register('dateOfBirth')}
 						error={form.formState.errors.dateOfBirth}
 						disabled={isSubmitting}
 					/>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 						<FormInput
-							label="Phone"
-							type="tel"
+							label='Phone'
+							type='tel'
 							{...form.register('phone')}
 							error={form.formState.errors.phone}
 							disabled={isSubmitting}
 						/>
 						<FormInput
-							label="Mobile"
-							type="tel"
+							label='Mobile'
+							type='tel'
 							{...form.register('mobile')}
 							error={form.formState.errors.mobile}
 							disabled={isSubmitting}
@@ -423,21 +433,33 @@ export default function UpdateAccountForm({ user, onUserUpdate }: UpdateAccountF
 			</FormSection>
 
 			{/* Submit Button - Desktop */}
-			<div className="hidden md:flex justify-end pt-4 border-t border-base-200">
-				<Button type="submit" variant="primary" loading={isSubmitting} disabled={isSubmitting}>
+			<div className='hidden md:flex justify-end pt-4 border-t border-base-200'>
+				<Button
+					type='submit'
+					variant='primary'
+					loading={isSubmitting}
+					disabled={isSubmitting}>
 					Save Changes
 				</Button>
 			</div>
 
 			{/* Submit Button - Mobile Sticky */}
-			<div className="fixed bottom-0 left-0 right-0 bg-base-100 border-t border-base-300 p-4 md:hidden shadow-lg z-50">
-				<Button type="submit" variant="primary" loading={isSubmitting} disabled={isSubmitting} className="w-full">
+			<div className='fixed bottom-0 left-0 right-0 bg-base-100 border-t border-base-300 p-4 md:hidden shadow-lg z-50'>
+				<Button
+					type='submit'
+					variant='primary'
+					loading={isSubmitting}
+					disabled={isSubmitting}
+					className='w-full'>
 					Save Changes
 				</Button>
 			</div>
 
 			{/* Spacer for mobile sticky button */}
-			<div className="h-20 md:hidden" aria-hidden="true" />
+			<div
+				className='h-20 md:hidden'
+				aria-hidden='true'
+			/>
 		</form>
 	)
 }
