@@ -4,9 +4,11 @@
 
 This is the **Master PRD System** for MedSource Pro, aligned with the **ACTUAL** codebase structure.
 
-**Version**: 3.2  
-**Last Updated**: December 19, 2024  
-**Status**: Production-Ready
+**Version**: 4.0
+**Last Updated**: January 13, 2026
+**Status**: ✅ AUDITED - 90%+ Features Complete
+
+> **🎉 Audit Summary (Jan 2026):** Comprehensive codebase analysis revealed that nearly all planned features are COMPLETE. Only Product Admin CRUD page remains partial. See "Current State Assessment" for details.
 
 ---
 
@@ -40,9 +42,13 @@ This is the **Master PRD System** for MedSource Pro, aligned with the **ACTUAL**
 ### Backend
 | Technology | Version | Notes |
 |------------|---------|-------|
-| .NET | 8.0 | LTS version |
-| Entity Framework Core | 8.x | ORM |
+| .NET | **10.0 LTS** | 3-year support to Nov 2028 |
+| C# | **13.0** | Latest language features |
+| Entity Framework Core | **10.0** | ORM with enhanced performance |
 | PostgreSQL | 14+ | Database |
+| MediatR | 12.4.1 | CQRS pattern |
+| Hangfire | 1.8.17 | Background jobs |
+| Stripe.net | 50.1.0 | Payment processing |
 
 ### Development Tools
 | Technology | Version | Notes |
@@ -56,13 +62,17 @@ This is the **Master PRD System** for MedSource Pro, aligned with the **ACTUAL**
 
 | PRD | Priority | Status | File |
 |-----|----------|--------|------|
-| Dashboard | P0 | Defined | `prd_dashboard.md` |
+| Dashboard | P0 | ✅ **Complete** | `prd_dashboard.md` |
 | Quote Pricing | P0 | ✅ **Complete** | `prd_quotes_pricing.md` |
-| Orders Management | P1 | Defined | `prd_orders.md` |
-| Products Management | P2 | Defined | `prd_products.md` |
-| Customers Management | P2 | Defined | `prd_customers.md` |
-| Analytics Dashboard | P3 | Defined | `prd_analytics.md` |
+| Advanced Pricing Engine | P0 | ✅ **Complete** | `prd_pricing_engine.md` |
+| Orders Management | P1 | ✅ **Complete** | `prd_orders.md` |
+| ERP Integration Framework | P1 | ✅ **Complete** | `prd_erp_integration.md` |
+| Products Management | P2 | ⚠️ **Partial** | `prd_products.md` |
+| Customers Management | P2 | ✅ **Complete** | `prd_customers.md` |
+| Analytics Dashboard | P3 | ✅ **Complete** | `prd_analytics.md` |
 | RBAC Management UI | P3 | ✅ **Complete** | `prd_rbac_management.md` |
+| Providers Management | P2 | ✅ **Complete** | (No PRD - implemented) |
+| Accounts Management | P2 | ✅ **Complete** | (No PRD - implemented) |
 
 ---
 
@@ -107,15 +117,142 @@ This is the **Master PRD System** for MedSource Pro, aligned with the **ACTUAL**
    - ✅ Test Utils (`client/test-utils/`)
    - ✅ HttpService with automatic token refresh (`client/app/_shared/services/httpService.ts`)
 
-### ❌ What Needs to Be Built
+5. **Dashboard** (Complete - Jan 2026)
+   - ✅ **Role-Based Dashboard** (`client/app/app/dashboard/page.tsx`)
+     - Role-specific stats sections (Customer, SalesRep, Fulfillment, Manager, Admin)
+     - Role-specific quick actions per role
+     - Task list with urgent/regular priorities
+     - Team workload table (managers+)
+     - Revenue overview (admin only)
+     - Recent activity section (orders & quotes)
+   - Backend: `server/Controllers/DashboardController.cs`, `server/Services/DB/DashboardService.cs`
+   - Hooks: `useDashboardStats`, `useDashboardTasks`, `useRecentItems`
+   - Tests: `StatsCard.test.tsx`, `TaskList.test.tsx`, `RecentItemsTable.test.tsx`
 
-1. ~~**Quote Pricing System** (Priority 1)~~ ✅ **COMPLETE**
-2. **Dashboard** (All roles - Priority 1)
-3. **Order Management** (Full workflow - Priority 2)
-4. **Product Management** (Admin/Sales - Priority 2)
-5. **User/Customer Management** (Priority 3)
-6. **Analytics Dashboard** (Priority 3)
-7. ~~**RBAC Management UI** (Admin tools - Priority 4)~~ ✅ **COMPLETE**
+6. **Advanced Pricing Engine** (Complete - Jan 2026)
+   - ✅ **Full Pricing Waterfall** (`server/Services/Pricing/PricingService.cs` - 1957 lines)
+     - Base Price → Contract Price List → Volume Tier → Margin Protection
+     - Deterministic pricing with decimal precision
+     - Role-based response shaping (customers don't see margins)
+   - ✅ **Price List Management** (`client/app/app/pricing/`)
+     - Price list table with CRUD operations
+     - Volume tier editor (quantity-based pricing)
+     - Customer assignment matrix
+     - Pricing analytics dashboard
+     - Audit log viewer for price changes
+   - Backend: `server/Controllers/PricingController.cs`, DTOs in `server/DTOs/Pricing/`
+   - Frontend: `PriceListTable`, `VolumeTierEditor`, `CustomerAssignmentMatrix`, `PricingAnalytics`
+
+7. **Order Management** (Complete - Jan 2026)
+   - ✅ **Order List** (`client/app/app/orders/page.tsx`)
+     - RichDataGrid with server-side pagination
+     - Role-based column visibility
+     - Status filtering with faceted counts
+     - Bulk export to CSV
+   - ✅ **Order Detail** (`client/app/app/orders/[id]/page.tsx`)
+     - Order header with customer/status info
+     - Order timeline (progress visualization)
+     - Line items table with totals
+     - Delivery details and tracking
+     - Role-based actions (confirm payment, ship, deliver, cancel)
+   - Backend: `server/Controllers/OrdersController.cs`, `server/Services/DB/OrderService.cs`
+   - Hooks: `useOrderDetails`, `useOrderActions`, `useOrderPermissions`
+
+8. **ERP Integration Framework** (Complete - Jan 2026)
+   - ✅ **Integration Dashboard** (`client/app/app/integrations/page.tsx`)
+     - Connection status overview
+     - Integration statistics grid
+     - Sync logs table with filtering
+   - ✅ **QuickBooks Online** (Full OAuth 2.0)
+     - OAuth authorization flow with PKCE
+     - Token exchange and refresh
+     - Customer sync, Invoice sync, Payment sync
+     - Webhook endpoint for real-time updates
+     - Backend: `server/Controllers/QuickBooksController.cs`, `server/Services/Integration/QuickBooks/`
+   - ✅ **NetSuite** (Foundation)
+     - OAuth 2.0 authorization
+     - SuiteQL query support
+     - Backend: `server/Controllers/NetSuiteController.cs`, `server/Services/Integration/NetSuite/`
+   - ✅ **Reliability Infrastructure**
+     - Transactional outbox pattern (`OutboxService`)
+     - Sync orchestration service
+     - Token encryption service
+   - Frontend: `IntegrationConnectionCard`, `QuickBooksConnect`, `SyncLogsTable`, `IntegrationStatsGrid`
+
+9. **Customer Management** (Complete - Jan 2026)
+   - ✅ **Customer List** (`client/app/app/customers/page.tsx`)
+     - RichDataGrid with server-side pagination
+     - Customer stats grid with clickable filters
+     - Status workflow (Active, PendingVerification, Inactive, Suspended)
+     - Bulk export and archive functionality
+   - ✅ **Customer Detail** (`client/app/app/customers/[id]/page.tsx`)
+     - Full customer profile management
+     - Order history and activity
+   - Backend: `server/Controllers/CustomerController.cs`, `server/Services/DB/CustomerService.cs`
+   - Feature: `client/app/_features/customers/`
+
+10. **Account Management** (Complete - Jan 2026)
+    - ✅ **Account List** (`client/app/app/accounts/page.tsx`)
+      - User account data grid
+      - Role change modal
+      - Create account functionality
+    - ✅ **Account Detail** (`client/app/app/accounts/[id]/page.tsx`)
+      - Profile, security, activity tabs
+    - Backend: `server/Controllers/AccountController.cs`, `server/Services/DB/AccountService.cs`
+    - Feature: `client/app/_features/accounts/`
+
+11. **Analytics Dashboard** (Complete - Jan 2026)
+    - ✅ **Role-Based Analytics** (`client/app/app/analytics/page.tsx`)
+      - Customer view: Spending history, order trends
+      - Sales Rep view: Personal performance, team comparison
+      - Manager/Admin view: Business intelligence, team metrics
+    - ✅ **Analytics Features**
+      - Date range picker with presets
+      - Revenue timeline charts
+      - Team leaderboard
+      - Conversion funnel
+    - Backend: `server/Controllers/AnalyticsController.cs`, `server/Services/DB/AnalyticsService.cs`
+    - Hooks: `useAnalyticsSummary`, `useTeamPerformance`, `useRevenueTimeline`
+
+12. **Provider/Vendor Management** (Complete - Jan 2026)
+    - ✅ **Provider List** (`client/app/app/providers/page.tsx`)
+      - RichDataGrid with status filtering
+      - Provider stats grid
+      - Status workflow (Active, Suspended, Archived)
+      - Bulk suspend/export functionality
+    - ✅ **Provider Detail** (`client/app/app/providers/[id]/page.tsx`)
+    - Backend: `server/Controllers/ProvidersController.cs`, `server/Services/DB/ProviderService.cs`
+    - Feature: `client/app/_features/providers/`
+
+### ⚠️ What Needs Enhancement/Completion
+
+1. **Product Management** (Partial - Admin CRUD Page Missing)
+   - ✅ Internal store browsing (`client/app/app/store/`)
+   - ✅ Product detail pages
+   - ❌ **Missing**: Dedicated admin product management page at `/app/products`
+     - Product CRUD operations
+     - Inventory management UI
+     - Product categorization
+   - Backend exists: `server/Controllers/ProductsController.cs`, `server/Services/DB/ProductService.cs`
+
+2. **Notifications System** (Partial)
+   - ✅ Notification list page (`client/app/app/notifications/`)
+   - ⚠️ May need enhancement for real-time notifications
+
+### ✅ All Core Features Complete
+
+The following features from the original "Needs to Be Built" list are now **COMPLETE**:
+
+| Feature | Status | Completed |
+|---------|--------|-----------|
+| Quote Pricing System | ✅ | Dec 2024 |
+| RBAC Management UI | ✅ | Dec 2024 |
+| Dashboard | ✅ | Jan 2026 |
+| Advanced Pricing Engine | ✅ | Jan 2026 |
+| Order Management | ✅ | Jan 2026 |
+| ERP Integration Framework | ✅ | Jan 2026 |
+| User/Customer Management | ✅ | Jan 2026 |
+| Analytics Dashboard | ✅ | Jan 2026 |
 
 ---
 
@@ -351,20 +488,20 @@ public async Task<IResponse<Quote>> UpdateQuote([FromBody] Quote quote)
     // Validation errors
     if (quote == null)
         return BadRequest<Quote>("Invalid quote data");
-    
+
     // Not found errors
     var existing = await _quoteService.Get(quote.Id.Value);
     if (existing == null)
         return NotFound<Quote>($"Quote {quote.Id} not found");
-    
+
     // Authorization errors
     if (!CanEdit(user, existing))
         return Unauthorized<Quote>("You cannot edit this quote");
-    
+
     // Business rule errors
     if (quote.CustomerPrice < quote.VendorCost)
         return BadRequest<Quote>("Customer price must be >= vendor cost");
-    
+
     // Success
     try {
         var updated = await _quoteService.Update(quote);
@@ -723,25 +860,33 @@ client/
 
 ## 🎯 Development Priority Order
 
-### Phase 1: Critical (Weeks 1-2)
-1. ✅ **Dashboard** - All roles need overview
-2. ✅ **Quote Pricing** - Complete quote workflow
-3. ✅ **Profile & Notifications** - User settings
+### ✅ Phase 1: Critical - COMPLETE
+1. ✅ **Dashboard** - Role-based dashboard with stats, tasks, workload
+2. ✅ **Quote Pricing** - Complete quote workflow with margin calculation
+3. ✅ **Profile & Notifications** - User settings and notification management
 
-### Phase 2: Core Management (Weeks 3-4)
-4. **Orders Management** - Full order lifecycle
-5. **Products Management** - Product CRUD
-6. **Quotes Management** - Enhanced quote features
+### ✅ Phase 2: Core Management - COMPLETE
+4. ✅ **Advanced Pricing Engine** - Full waterfall algorithm, price lists, volume tiers
+5. ✅ **Orders Management** - Full order lifecycle with role-based actions
+6. ⚠️ **Products Management** - Internal store exists; admin CRUD page needed
+7. ✅ **Quotes Management** - Quote list, detail, pricing, approval workflow
 
-### Phase 3: User Management (Weeks 5-6)
-7. **Customers Management** - Customer profiles
-8. **Accounts Management** - User accounts
-9. **Providers Management** - Vendor portal
+### ✅ Phase 3: User Management - COMPLETE
+8. ✅ **Customers Management** - Full customer profiles with status workflow
+9. ✅ **Accounts Management** - User account CRUD with role assignment
+10. ✅ **Providers Management** - Vendor management with status workflow
 
-### Phase 4: Advanced (Weeks 7-8)
-10. **Analytics Dashboard** - Business intelligence
-11. ✅ **RBAC Management UI** - Role/permission editor (COMPLETE)
-12. **Performance Optimization**
+### ✅ Phase 4: Integrations - COMPLETE
+11. ✅ **ERP Integration Framework** - QuickBooks OAuth + sync, NetSuite foundation
+
+### ✅ Phase 5: Advanced - COMPLETE
+12. ✅ **Analytics Dashboard** - Role-based business intelligence
+13. ✅ **RBAC Management UI** - Role/permission editor with audit logs
+
+### 🔄 Phase 6: Remaining Work
+14. **Product Admin CRUD Page** - Dedicated `/app/products` management page
+15. **Performance Optimization** - Ongoing
+16. **E2E Testing Coverage** - Playwright tests for critical flows
 
 ---
 
@@ -770,7 +915,7 @@ client/
 - **Prefix patterns**:
   - `use` for hooks
   - Avoid `I` prefix for interfaces (use `type` keyword)
-  
+
 ### Import Aliases (Actual)
 ```typescript
 // These aliases are configured in tsconfig.json
@@ -806,14 +951,27 @@ import { API } from '@_shared/services/api'
 
 ## 🔗 Next Steps
 
-1. Read: `prd_start_here.md` - Quick guide for AI agents
-2. Read: `prd_dashboard.md` - Dashboard PRD (next priority)
-3. Read: `prd_orders.md` - Orders management PRD
+### For New Development
+1. **Product Admin CRUD Page** - Create `/app/products` management page
+2. **E2E Test Coverage** - Add Playwright tests for critical user flows
+3. **Performance Optimization** - Continue optimization efforts
 
-**Recently Completed:**
-- ✅ `prd_quotes_pricing.md` - Quote Pricing (Dec 19, 2024)
-- ✅ `prd_rbac_management.md` - RBAC Management UI (Dec 19, 2024)
-- ✅ **JWT Token System** - MAANG-level authentication (Dec 19, 2024)
+### For Reference
+1. Read: `prd_start_here.md` - Quick guide for AI agents
+2. Read: Individual PRDs for feature specifications
+
+**Completed Features (Jan 2026 Audit):**
+- ✅ Dashboard - Role-based with stats, tasks, workload
+- ✅ Advanced Pricing Engine - Full waterfall algorithm
+- ✅ Order Management - List + detail with role-based actions
+- ✅ ERP Integration - QuickBooks OAuth + NetSuite foundation
+- ✅ Customer Management - Full CRUD with status workflow
+- ✅ Account Management - User CRUD with role assignment
+- ✅ Analytics Dashboard - Role-based business intelligence
+- ✅ Provider Management - Vendor management
+- ✅ Quote Pricing System - Margin calculation, approval gating
+- ✅ RBAC Management UI - Role/permission editor
+- ✅ JWT Token System - MAANG-level authentication
 
 ---
 
@@ -866,11 +1024,11 @@ describe('MyComponent', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
-  
+
   it('should render correctly', () => {
     const mockUser = createMockUserWithRole('SalesRep')
     renderWithProviders(<MyComponent />, { user: mockUser })
-    
+
     expect(screen.getByText('Expected Text')).toBeInTheDocument()
   })
 })
@@ -890,13 +1048,45 @@ npm run test:ui       # With Vitest UI
 
 ---
 
-**Document Version**: 3.2  
-**Last Updated**: December 19, 2024  
-**Status**: Aligned with actual codebase
+**Document Version**: 4.0
+**Last Updated**: January 13, 2026
+**Status**: AUDITED - Aligned with actual codebase
 
 ---
 
 ## 📋 Changelog
+
+### v4.0 (January 13, 2026) - COMPREHENSIVE AUDIT
+- 🔍 **Full codebase audit** to align PRD with actual implementation
+- ✅ **Marked as COMPLETE:**
+  - **Dashboard** - Full role-based dashboard with stats, tasks, workload, revenue overview
+  - **Advanced Pricing Engine** - Full waterfall algorithm (1957 lines), price lists, volume tiers, customer assignments
+  - **Order Management** - RichDataGrid list, comprehensive detail page with timeline, role-based actions
+  - **ERP Integration Framework** - QuickBooks OAuth + sync, NetSuite foundation, outbox pattern
+  - **Customer Management** - Full CRUD with status workflow, stats grid, RichDataGrid
+  - **Account Management** - User account CRUD with role assignment
+  - **Analytics Dashboard** - Role-based views (Customer, SalesRep, Manager/Admin)
+  - **Provider Management** - Vendor management with status workflow (not previously documented)
+- ⚠️ **Marked as PARTIAL:**
+  - **Product Management** - Internal store exists, but dedicated admin CRUD page missing at `/app/products`
+- 📝 **Updated PRD Index** to reflect actual completion status
+- 📝 **Updated Development Priority Order** to show phases complete
+- 📝 **Added Phase 6** for remaining work items
+
+### v3.3 (January 12, 2026)
+- ✅ Updated backend tech stack to **.NET 10.0 LTS** (from .NET 8.0)
+- ✅ Added **Advanced Pricing Engine PRD** (`prd_pricing_engine.md`)
+  - Price lists, volume tiers, contract pricing
+  - Margin protection
+  - Full price waterfall with explainability
+  - Estimated effort: 120-160 hours
+- ✅ Added **ERP Integration Framework PRD** (`prd_erp_integration.md`)
+  - Transactional outbox pattern for reliability
+  - QuickBooks Online integration (OAuth 2.0, customers, invoices, payments)
+  - NetSuite integration (SuiteQL, customers, sales orders)
+  - Estimated effort: 200-280 hours
+- ✅ Updated development priority order to include new PRDs
+- ✅ Added new backend technologies: MediatR, Hangfire, Stripe.net
 
 ### v3.2 (December 19, 2024)
 - ✅ **RBAC Management UI** completed

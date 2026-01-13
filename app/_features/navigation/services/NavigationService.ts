@@ -196,6 +196,29 @@ export class NavigationService {
 					],
 					// Note: Section visibility controlled by isAdmin check (line 80), not roles array
 				},
+				// Pricing Engine (Admin only for management, SalesRep+ for viewing)
+				// PRD Reference: client/md/PRDs/internal-routes/prd_pricing_engine.md
+				{
+					id: 'pricing',
+					title: 'Pricing',
+					routes: [
+						{
+							id: 'pricing-dashboard',
+							label: 'Pricing Dashboard',
+							href: Routes.Pricing.location,
+							icon: 'receipt',
+							description: 'Advanced B2B pricing management',
+						},
+						{
+							id: 'price-lists',
+							label: 'Price Lists',
+							href: Routes.Pricing.priceLists,
+							icon: 'clipboard-list',
+							description: 'Contract and customer pricing',
+						},
+					],
+					// Note: Section visibility controlled by isAdmin check (line 80), not roles array
+				},
 				// Analytics and reporting
 				{
 					id: 'analytics',
@@ -236,6 +259,22 @@ export class NavigationService {
 							href: Routes.RBAC.permissions,
 							icon: 'settings',
 							description: 'Resource permissions by role',
+						},
+					],
+					// Note: Section visibility controlled by isAdmin check (line 80), not roles array
+				},
+				// ERP Integrations (Admin only)
+				// PRD Reference: client/md/PRDs/internal-routes/prd_erp_integration.md
+				{
+					id: 'integrations',
+					title: 'Integrations',
+					routes: [
+						{
+							id: 'integrations-dashboard',
+							label: 'ERP Integrations',
+							href: Routes.Integrations.location,
+							icon: 'plug',
+							description: 'Connect and manage ERP systems',
 						},
 					],
 					// Note: Section visibility controlled by isAdmin check (line 80), not roles array

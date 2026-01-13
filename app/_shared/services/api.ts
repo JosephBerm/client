@@ -155,6 +155,24 @@ import type {
 	TrackingInfo,
 } from '@_features/shipping/types'
 
+// ERP Integration Types
+import type {
+	IntegrationConnectionDTO,
+	IntegrationDashboardSummary,
+	IntegrationEntityMappingDTO,
+	IntegrationProvider,
+	IntegrationSettingsDTO,
+	IntegrationStats,
+	IntegrationSyncCheckpointDTO,
+	IntegrationSyncLogDTO,
+	PagedIntegrationResult,
+	SyncLogSearchFilter,
+	SyncOperationResponse,
+	SyncOperationStatus,
+	TriggerSyncRequest,
+	UpdateConnectionSettingsRequest,
+} from '@_features/integrations/types'
+
 // Inventory Management Types
 import type {
 	AdjustStockRequest,
@@ -184,6 +202,43 @@ import type {
 	ProductExportFilter,
 	StartImportRequest,
 } from '@_features/product-import-export/types'
+
+// Pricing Engine Types
+import type {
+	PriceList,
+	PriceListItem,
+	PricingResult,
+	ProductVolumeTiers,
+	PricingRequest,
+	CreatePriceListRequest,
+	UpdatePriceListRequest,
+	AddPriceListItemRequest,
+	SetVolumeTiersRequest,
+	PriceOverrideHistory,
+	PricingAuditLogResponse,
+	PricingAuditLogFilter,
+	PricingAnalyticsResponse,
+	PricingAnalyticsRequest,
+} from '@_classes/Pricing'
+
+/**
+ * Response type for cart product operations.
+ * Contains the updated cart product data.
+ */
+export interface CartProductResponse {
+	id: string
+	productId: string
+	quantity: number
+	customerPrice: number | null
+	vendorCost: number | null
+	lockedFinalPrice: number | null
+	lockedBasePrice: number | null
+	pricingLockedAt: string | null
+	marginProtected: boolean
+}
+
+/** Alias for API backward compatibility */
+export type PriceOverrideHistoryEntry = PriceOverrideHistory
 
 /**
  * Request DTO for changing account status (unified endpoint).
@@ -2123,6 +2178,593 @@ const API = {
 			 */
 			delete: async (id: number) => HttpService.delete<boolean>(`/rbac/permissions/${id}`),
 		},
+	},
+
+	/**
+	 * Advanced Pricing Engine API
+	 * Handles price calculation, price list management, volume tiers, and customer assignments.
+	 *
+	 * **Business Flow:**
+	 * - Price Calculation: Deterministic waterfall (Base → Contract → Volume → Margin Protection)
+	 * - Price Lists: Named collections of product pricing (fixed price, % discount, $ discount)
+	 * - Volume Tiers: Quantity-based pricing breaks
+	 * - Customer Assignments: Link customers to their contract price lists
+	 *
+	 * **Security:**
+	 * - Customers can only see their own prices (CustomerId resolved from auth)
+	 * - Margin data hidden from customers
+	 * - Admin-only for price list management
+	 *
+	 * @see prd_pricing_engine.md
+	 */
+	Pricing: {
+		// =====================================================================
+		// PRICE CALCULATION
+		// =====================================================================
+
+		/**
+		 * Calculates price for a single product.
+		 *
+		 * **Waterfall Algorithm:**
+		 * 1. Base Price → 2. Contract Price List → 3. Volume Tier → 4. Margin Protection
+		 *
+		 * **Security (PRD 5.1):**
+		 * - Customer role: CustomerId in request is ignored, resolved from auth context
+		 * - Staff roles: Can specify any CustomerId
+		 * - Customers don't see margin data in response
+		 *
+		 * @param request - Pricing request with productId, quantity, customerId
+		 * @returns PricingResult with final price and applied rules
+		 *
+		 * @see prd_pricing_engine.md - US-PRICE-001
+		 */
+		calculate: async (request: PricingRequest) => HttpService.post<PricingResult>('/pricing/calculate', request),
+
+		/**
+		 * Calculates prices for multiple products (cart/product list).
+		 * Optimized for batch queries - avoids N+1 database calls.
+		 *
+		 * **Performance:** Max 100 items per request.
+		 *
+		 * @param items - Array of pricing requests
+		 * @returns Array of PricingResults
+		 */
+		calculateBulk: async (items: PricingRequest[]) =>
+			HttpService.post<PricingResult[]>('/pricing/calculate/bulk', { items }),
+
+		// =====================================================================
+		// PRICE LIST MANAGEMENT
+		// =====================================================================
+
+		/**
+		 * Gets all price lists with pagination.
+		 *
+		 * **Authorization:** PricingView policy (Admin, SalesManager, SalesRep)
+		 *
+		 * @param page - Page number (default: 1)
+		 * @param pageSize - Items per page (default: 20)
+		 */
+		getPriceLists: async (page = 1, pageSize = 20) =>
+			HttpService.get<PagedResult<PriceList>>(`/pricing/price-lists?page=${page}&pageSize=${pageSize}`),
+
+		/**
+		 * Gets a price list by ID with full details (items and customers).
+		 *
+		 * **Authorization:** PricingView policy
+		 *
+		 * @param id - Price list GUID
+		 */
+		getPriceList: async (id: string) => HttpService.get<PriceList>(`/pricing/price-lists/${id}`),
+
+		/**
+		 * Creates a new price list.
+		 *
+		 * **Authorization:** PricingManage policy (Admin only)
+		 *
+		 * @param data - Price list creation data
+		 * @returns Created price list
+		 *
+		 * @see prd_pricing_engine.md - US-PRICE-004
+		 */
+		createPriceList: async (data: CreatePriceListRequest) =>
+			HttpService.post<PriceList>('/pricing/price-lists', data),
+
+		/**
+		 * Updates an existing price list.
+		 *
+		 * **Authorization:** PricingManage policy (Admin only)
+		 *
+		 * @param id - Price list GUID
+		 * @param data - Updated price list data
+		 */
+		updatePriceList: async (id: string, data: UpdatePriceListRequest) =>
+			HttpService.put<PriceList>(`/pricing/price-lists/${id}`, data),
+
+		/**
+		 * Deletes a price list.
+		 * Also removes all items and customer assignments.
+		 *
+		 * **Authorization:** PricingManage policy (Admin only)
+		 *
+		 * @param id - Price list GUID
+		 */
+		deletePriceList: async (id: string) => HttpService.delete<boolean>(`/pricing/price-lists/${id}`),
+
+		// =====================================================================
+		// PRICE LIST ITEMS
+		// =====================================================================
+
+		/**
+		 * Adds a product to a price list with pricing configuration.
+		 *
+		 * **Pricing Methods (exactly one required):**
+		 * - fixedPrice: Customer pays this exact price
+		 * - percentDiscount: Customer gets X% off base price
+		 * - fixedDiscount: Customer gets $X off base price
+		 *
+		 * **Authorization:** PricingManage policy (Admin only)
+		 *
+		 * @param priceListId - Price list GUID
+		 * @param data - Product pricing configuration
+		 *
+		 * @see prd_pricing_engine.md - US-PRICE-005
+		 */
+		addPriceListItem: async (priceListId: string, data: AddPriceListItemRequest) =>
+			HttpService.post<PriceListItem>(`/pricing/price-lists/${priceListId}/items`, data),
+
+		/**
+		 * Updates a price list item's pricing configuration.
+		 *
+		 * **Authorization:** PricingManage policy (Admin only)
+		 *
+		 * @param itemId - Price list item GUID
+		 * @param data - Updated pricing configuration
+		 */
+		updatePriceListItem: async (itemId: string, data: AddPriceListItemRequest) =>
+			HttpService.put<PriceListItem>(`/pricing/price-lists/items/${itemId}`, data),
+
+		/**
+		 * Removes a product from a price list.
+		 *
+		 * **Authorization:** PricingManage policy (Admin only)
+		 *
+		 * @param itemId - Price list item GUID
+		 */
+		removePriceListItem: async (itemId: string) =>
+			HttpService.delete<boolean>(`/pricing/price-lists/items/${itemId}`),
+
+		// =====================================================================
+		// CUSTOMER ASSIGNMENTS
+		// =====================================================================
+
+		/**
+		 * Gets all price lists assigned to a customer.
+		 *
+		 * **Authorization:** CustomersRead policy
+		 *
+		 * @param customerId - Customer ID
+		 */
+		getCustomerPriceLists: async (customerId: number) =>
+			HttpService.get<PriceList[]>(`/pricing/customers/${customerId}/price-lists`),
+
+		/**
+		 * Assigns a price list to a customer.
+		 *
+		 * **Authorization:** PricingManage policy (Admin only)
+		 *
+		 * @param customerId - Customer ID
+		 * @param priceListId - Price list GUID to assign
+		 *
+		 * @see prd_pricing_engine.md - US-PRICE-006
+		 */
+		assignCustomerToPriceList: async (customerId: number, priceListId: string) =>
+			HttpService.post<boolean>(`/pricing/customers/${customerId}/price-lists`, { priceListId }),
+
+		/**
+		 * Removes a price list assignment from a customer.
+		 *
+		 * **Authorization:** PricingManage policy (Admin only)
+		 *
+		 * @param customerId - Customer ID
+		 * @param priceListId - Price list GUID to remove
+		 */
+		removeCustomerFromPriceList: async (customerId: number, priceListId: string) =>
+			HttpService.delete<boolean>(`/pricing/customers/${customerId}/price-lists/${priceListId}`),
+
+		// =====================================================================
+		// VOLUME PRICING
+		// =====================================================================
+
+		/**
+		 * Gets all volume pricing tiers for a product.
+		 * Accessible to all authenticated users (customers can see their volume discounts).
+		 *
+		 * @param productId - Product GUID
+		 *
+		 * @see prd_pricing_engine.md - US-PRICE-008
+		 */
+		getVolumeTiers: async (productId: string) =>
+			HttpService.get<ProductVolumeTiers>(`/pricing/products/${productId}/volume-tiers`),
+
+		/**
+		 * Sets volume pricing tiers for a product.
+		 * Replaces all existing tiers.
+		 *
+		 * **Validation:**
+		 * - No overlapping quantity ranges
+		 * - No duplicate minQuantity values
+		 * - Each tier has exactly one pricing method (unitPrice or percentDiscount)
+		 *
+		 * **Authorization:** PricingManage policy (Admin only)
+		 *
+		 * @param productId - Product GUID
+		 * @param request - New volume tiers
+		 *
+		 * @see prd_pricing_engine.md - US-PRICE-007
+		 */
+		setVolumeTiers: async (productId: string, request: SetVolumeTiersRequest) =>
+			HttpService.post<ProductVolumeTiers>(`/pricing/products/${productId}/volume-tiers`, request),
+
+		/**
+		 * Clears all volume tiers for a product.
+		 *
+		 * **Authorization:** PricingManage policy (Admin only)
+		 *
+		 * @param productId - Product GUID
+		 */
+		clearVolumeTiers: async (productId: string) =>
+			HttpService.delete<boolean>(`/pricing/products/${productId}/volume-tiers`),
+
+		// =====================================================================
+		// PRICE OVERRIDE (Sales Manager)
+		// =====================================================================
+
+		/**
+		 * Overrides the price for a quote item.
+		 * Sales Managers can manually override calculated prices with business justification.
+		 * Creates an audit log entry for compliance.
+		 *
+		 * **Authorization:** PricingManage policy (Admin, SalesManager)
+		 *
+		 * @param quoteId - Quote GUID
+		 * @param cartProductId - Cart product GUID to override
+		 * @param data - Override price and reason
+		 *
+		 * @see prd_pricing_engine.md - US-PRICE-012
+		 */
+		overrideQuoteItemPrice: async (
+			quoteId: string,
+			cartProductId: string,
+			data: { overridePrice: number; overrideReason: string }
+		) => HttpService.put<CartProductResponse>(`/pricing/quotes/${quoteId}/items/${cartProductId}/override`, data),
+
+		/**
+		 * Gets the price override history for a cart product.
+		 *
+		 * **Authorization:** PricingView policy (Admin, SalesManager, SalesRep)
+		 *
+		 * @param cartProductId - Cart product GUID
+		 * @returns Array of price override history entries
+		 */
+		getPriceOverrideHistory: async (cartProductId: string) =>
+			HttpService.get<PriceOverrideHistoryEntry[]>(`/pricing/items/${cartProductId}/override-history`),
+
+		// =====================================================================
+		// AUDIT LOGS
+		// =====================================================================
+
+		/**
+		 * Gets paginated pricing audit logs with filtering.
+		 * Used for compliance, debugging, and pricing analysis.
+		 *
+		 * **Authorization:** PricingView policy (Admin, SalesManager, SalesRep)
+		 *
+		 * @param filter - Filter parameters (productId, customerId, eventType, dateRange, etc.)
+		 * @returns Paginated audit log entries
+		 *
+		 * @see prd_pricing_engine.md - Section 6.3 Audit & Compliance
+		 */
+		getAuditLogs: async (filter: PricingAuditLogFilter) => {
+			const params = new URLSearchParams()
+			if (filter.productId) params.set('productId', filter.productId)
+			if (filter.customerId) params.set('customerId', filter.customerId.toString())
+			if (filter.eventType) params.set('eventType', filter.eventType)
+			if (filter.dateFrom)
+				params.set(
+					'dateFrom',
+					filter.dateFrom instanceof Date ? filter.dateFrom.toISOString() : filter.dateFrom
+				)
+			if (filter.dateTo)
+				params.set('dateTo', filter.dateTo instanceof Date ? filter.dateTo.toISOString() : filter.dateTo)
+			if (filter.quoteId) params.set('quoteId', filter.quoteId)
+			if (filter.orderId) params.set('orderId', filter.orderId.toString())
+			if (filter.marginProtectedOnly) params.set('marginProtectedOnly', 'true')
+			if (filter.page) params.set('page', filter.page.toString())
+			if (filter.pageSize) params.set('pageSize', filter.pageSize.toString())
+			const queryString = params.toString()
+			return HttpService.get<PagedResult<PricingAuditLogResponse>>(
+				`/pricing/audit-logs${queryString ? `?${queryString}` : ''}`
+			)
+		},
+
+		// =====================================================================
+		// ANALYTICS
+		// =====================================================================
+
+		/**
+		 * Gets pricing analytics for a specified period.
+		 * Includes average margins, discounts, price list performance, and trends.
+		 *
+		 * **Authorization:** SalesManagerOrAbove policy (SalesManager, Admin)
+		 * Contains sensitive margin data - not accessible to SalesRep or Customer.
+		 *
+		 * @param request - Analytics parameters (period, startDate, endDate)
+		 * @returns PricingAnalyticsResponse with metrics, distributions, and trends
+		 *
+		 * @see prd_pricing_engine.md - Section 4.2 Sales Manager View
+		 */
+		getAnalytics: async (request: PricingAnalyticsRequest) => {
+			const params = new URLSearchParams()
+			if (request.period) params.set('period', request.period)
+			if (request.startDate)
+				params.set(
+					'startDate',
+					request.startDate instanceof Date ? request.startDate.toISOString() : request.startDate
+				)
+			if (request.endDate)
+				params.set('endDate', request.endDate instanceof Date ? request.endDate.toISOString() : request.endDate)
+			const queryString = params.toString()
+			return HttpService.get<PricingAnalyticsResponse>(
+				`/pricing/analytics${queryString ? `?${queryString}` : ''}`
+			)
+		},
+	},
+
+	// =========================================================================
+	// ERP INTEGRATIONS
+	// =========================================================================
+
+	/**
+	 * ERP Integration API (PRD: prd_erp_integration.md)
+	 * Connect to QuickBooks Online, NetSuite, and other accounting systems.
+	 *
+	 * **Features:**
+	 * - OAuth connections to ERP systems
+	 * - Bi-directional data sync (Customers, Invoices, Payments, Products)
+	 * - Transactional outbox for reliable event delivery
+	 * - Entity mapping between Prometheus and ERP IDs
+	 * - Sync logs and audit trail
+	 *
+	 * **Authorization:** IntegrationsView / IntegrationsManage policies
+	 */
+	Integrations: {
+		// =====================================================================
+		// CONNECTIONS
+		// =====================================================================
+
+		/**
+		 * Gets all integration connections for the current tenant.
+		 */
+		getConnections: async () => HttpService.get<IntegrationConnectionDTO[]>('/integration/connections'),
+
+		/**
+		 * Gets a specific connection by ID.
+		 */
+		getConnection: async (connectionId: string) =>
+			HttpService.get<IntegrationConnectionDTO>(`/integration/connections/${connectionId}`),
+
+		/**
+		 * Updates connection settings.
+		 */
+		updateConnectionSettings: async (connectionId: string, request: UpdateConnectionSettingsRequest) =>
+			HttpService.put<IntegrationConnectionDTO>(`/integration/connections/${connectionId}/settings`, request),
+
+		/**
+		 * Disconnects an integration.
+		 */
+		disconnect: async (connectionId: string) =>
+			HttpService.post<boolean>(`/integration/connections/${connectionId}/disconnect`, {}),
+
+		/**
+		 * Tests a connection.
+		 */
+		testConnection: async (connectionId: string) =>
+			HttpService.post<{ success: boolean; message: string }>(
+				`/integration/connections/${connectionId}/test`,
+				{}
+			),
+
+		// =====================================================================
+		// SYNC OPERATIONS
+		// =====================================================================
+
+		/**
+		 * Triggers a manual sync operation.
+		 */
+		triggerSync: async (request: TriggerSyncRequest) =>
+			HttpService.post<SyncOperationResponse>('/integration/sync', request),
+
+		/**
+		 * Gets the status of a sync operation.
+		 */
+		getSyncStatus: async (correlationId: string) =>
+			HttpService.get<SyncOperationStatus>(`/integration/sync/${correlationId}/status`),
+
+		/**
+		 * Gets sync checkpoints for a provider.
+		 */
+		getSyncCheckpoints: async (provider: string) =>
+			HttpService.get<IntegrationSyncCheckpointDTO[]>(`/integration/checkpoints/${provider}`),
+
+		// =====================================================================
+		// ENTITY MAPPINGS
+		// =====================================================================
+
+		/**
+		 * Gets entity mappings with optional filters.
+		 */
+		getEntityMappings: async (
+			provider?: string,
+			entityType?: string,
+			pageNumber = 1,
+			pageSize = 20,
+			prometheusEntityId?: string
+		) => {
+			const params = new URLSearchParams()
+			if (provider) {
+				params.append('provider', provider)
+			}
+			if (entityType) {
+				params.append('entityType', entityType)
+			}
+			if (prometheusEntityId) {
+				params.append('prometheusEntityId', prometheusEntityId)
+			}
+			params.append('pageNumber', pageNumber.toString())
+			params.append('pageSize', pageSize.toString())
+			return HttpService.get<PagedIntegrationResult<IntegrationEntityMappingDTO>>(
+				`/integration/mappings?${params.toString()}`
+			)
+		},
+
+		/**
+		 * Gets the external ID for a Prometheus entity.
+		 */
+		getExternalId: async (provider: string, entityType: string, prometheusId: string) =>
+			HttpService.get<{ externalId: string }>(
+				`/integration/mappings/external-id?provider=${provider}&entityType=${entityType}&prometheusId=${prometheusId}`
+			),
+
+		// =====================================================================
+		// SYNC LOGS
+		// =====================================================================
+
+		/**
+		 * Gets sync logs with filters.
+		 */
+		getSyncLogs: async (filter: SyncLogSearchFilter) => {
+			const params = new URLSearchParams()
+			if (filter.provider) {
+				params.append('provider', filter.provider)
+			}
+			if (filter.entityType) {
+				params.append('entityType', filter.entityType)
+			}
+			if (filter.entityId) {
+				params.append('entityId', filter.entityId)
+			}
+			if (filter.direction !== undefined) {
+				params.append('direction', filter.direction.toString())
+			}
+			if (filter.status !== undefined) {
+				params.append('status', filter.status.toString())
+			}
+			if (filter.fromDate) {
+				params.append('fromDate', filter.fromDate)
+			}
+			if (filter.toDate) {
+				params.append('toDate', filter.toDate)
+			}
+			if (filter.searchTerm) {
+				params.append('searchTerm', filter.searchTerm)
+			}
+			params.append('pageNumber', (filter.pageNumber ?? 1).toString())
+			params.append('pageSize', (filter.pageSize ?? 20).toString())
+			if (filter.sortBy) {
+				params.append('sortBy', filter.sortBy)
+			}
+			if (filter.sortDescending !== undefined) {
+				params.append('sortDescending', filter.sortDescending.toString())
+			}
+			return HttpService.get<PagedIntegrationResult<IntegrationSyncLogDTO>>(
+				`/integration/logs?${params.toString()}`
+			)
+		},
+
+		/**
+		 * Gets a specific sync log entry.
+		 */
+		getSyncLogDetail: async (logId: string) => HttpService.get<IntegrationSyncLogDTO>(`/integration/logs/${logId}`),
+
+		// =====================================================================
+		// DASHBOARD & STATS
+		// =====================================================================
+
+		/**
+		 * Gets integration dashboard summary.
+		 */
+		getDashboardSummary: async () => HttpService.get<IntegrationDashboardSummary>('/integration/dashboard'),
+
+		/**
+		 * Gets integration statistics.
+		 */
+		getStats: async () => HttpService.get<IntegrationStats>('/integration/stats'),
+
+		// =====================================================================
+		// SETTINGS
+		// =====================================================================
+
+		/**
+		 * Gets integration settings for a provider.
+		 */
+		getSettings: async (provider: IntegrationProvider) =>
+			HttpService.get<IntegrationSettingsDTO>(`/integration/settings/${provider}`),
+
+		/**
+		 * Updates integration settings for a provider.
+		 */
+		updateSettings: async (provider: IntegrationProvider, settings: IntegrationSettingsDTO) =>
+			HttpService.put<IntegrationSettingsDTO>(`/integration/settings/${provider}`, settings),
+
+		// =====================================================================
+		// OAUTH (QuickBooks / NetSuite)
+		// =====================================================================
+
+		/**
+		 * Initiates QuickBooks OAuth connection.
+		 */
+		initiateQuickBooksConnection: async () =>
+			HttpService.get<{ authorizationUrl: string; state: string }>('/quickbooks/connect'),
+
+		/**
+		 * Initiates NetSuite OAuth connection.
+		 */
+		initiateNetSuiteConnection: async () =>
+			HttpService.get<{ authorizationUrl: string; state: string }>('/netsuite/connect'),
+
+		/**
+		 * Connects NetSuite using Token-Based Authentication.
+		 */
+		connectNetSuiteTBA: async (credentials: {
+			accountId: string
+			consumerKey: string
+			consumerSecret: string
+			tokenId: string
+			tokenSecret: string
+		}) => HttpService.post<boolean>('/netsuite/connect', credentials),
+
+		// =====================================================================
+		// OUTBOX & INBOX
+		// =====================================================================
+
+		/**
+		 * Gets pending outbox items.
+		 */
+		getOutboxItems: async (pageNumber = 1, pageSize = 20) =>
+			HttpService.get<unknown[]>(`/integration/outbox?pageNumber=${pageNumber}&pageSize=${pageSize}`),
+
+		/**
+		 * Retries a specific outbox item.
+		 */
+		retryOutboxItem: async (itemId: string) => HttpService.post<boolean>(`/integration/outbox/${itemId}/retry`, {}),
+
+		/**
+		 * Gets inbox items (received webhooks).
+		 */
+		getInboxItems: async (pageNumber = 1, pageSize = 20) =>
+			HttpService.get<PagedIntegrationResult<unknown>>(
+				`/integration/inbox?pageNumber=${pageNumber}&pageSize=${pageSize}`
+			),
 	},
 }
 

@@ -1,9 +1,9 @@
 /**
  * Centralized Route Definitions - FAANG-Level Route Management
- * 
+ *
  * Provides type-safe route paths and dynamic route builders for the entire application.
  * Implements industry best practices from Google, Stripe, Airbnb, and Vercel.
- * 
+ *
  * **Benefits:**
  * - Single source of truth for all routes (DRY principle)
  * - Prevents hardcoded URL strings (zero magic strings)
@@ -12,38 +12,38 @@
  * - Dynamic route builders (e.g., `Routes.Orders.detail(id)`)
  * - Query parameter support (FAANG-level pattern)
  * - Zero runtime errors from typos in URLs
- * 
+ *
  * **Route Structure:**
  * - Public routes: Accessible without authentication (/, /store, etc.)
  * - Internal routes: Protected by middleware under /app/* path
  * - Static routes: Use `.location` property
  * - Dynamic routes: Use builder methods (`.detail()`, `.create()`, etc.)
  * - Query parameters: Pass object to builder methods (e.g., `Routes.Accounts.create({ customerId: '123' })`)
- * 
+ *
  * **FAANG-Level Patterns:**
  * - Route Builder Pattern (Stripe, Airbnb)
  * - Namespaced Route Objects (Google)
  * - Type-Safe Path Generation (Vercel)
  * - Query Parameter Builder (Next.js, Vercel)
- * 
+ *
  * @example
  * ```typescript
  * import { Routes } from '@_features/navigation';
- * 
+ *
  * // Static routes
  * router.push(Routes.Dashboard.location); // "/app"
  * router.push(Routes.Orders.location); // "/app/orders"
- * 
+ *
  * // Dynamic routes (RECOMMENDED - prevents hardcoding)
  * router.push(Routes.Orders.detail('123')); // "/app/orders/123"
  * router.push(Routes.Customers.detail('456')); // "/app/customers/456"
- * 
+ *
  * // With query parameters
  * router.push(Routes.Accounts.create({ customerId: '123' })); // "/app/accounts/create?customerId=123"
- * 
+ *
  * // In Link components
  * <Link href={Routes.Orders.detail(orderId)}>View Order</Link>
- * 
+ *
  * // In table cells
  * cell: ({ row }) => (
  *   <Link href={Routes.Orders.detail(row.original.id)}>
@@ -51,18 +51,18 @@
  *   </Link>
  * )
  * ```
- * 
+ *
  * @module Routes
  */
 
 /**
  * Helper function to append query parameters to a URL.
  * Follows FAANG-level patterns for URL construction (Next.js, Vercel).
- * 
+ *
  * @param baseUrl - Base URL without query parameters
  * @param params - Optional object with query parameters
  * @returns URL with query parameters appended
- * 
+ *
  * @example
  * ```typescript
  * appendQueryParams('/app/accounts/create', { customerId: '123' })
@@ -88,7 +88,7 @@ function appendQueryParams(baseUrl: string, params?: Record<string, string | num
 /**
  * Route definitions class with static properties for all application routes.
  * Each route object contains a display name, URL path, and builder methods for dynamic routes.
- * 
+ *
  * **FAANG-Level Architecture:**
  * - Static routes use `.location` property
  * - Dynamic routes use builder methods (`.detail()`, `.create()`, `.edit()`)
@@ -104,15 +104,15 @@ class Routes {
 
 	/**
 	 * Orders management routes (protected)
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * // List page
 	 * router.push(Routes.Orders.location); // "/app/orders"
-	 * 
+	 *
 	 * // Detail page
 	 * router.push(Routes.Orders.detail('123')); // "/app/orders/123"
-	 * 
+	 *
 	 * // Create page
 	 * router.push(Routes.Orders.create()); // "/app/orders/create"
 	 * ```
@@ -131,13 +131,13 @@ class Routes {
 		 * @param params - Optional query parameters
 		 * @returns Order create URL (e.g., "/app/orders/create")
 		 */
-		create: (params?: Record<string, string | number>): string => 
+		create: (params?: Record<string, string | number>): string =>
 			appendQueryParams(`${Routes.InternalAppRoute}/orders/create`, params),
 	}
 
 	/**
 	 * Public product store routes (accessible to all)
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * router.push(Routes.Store.location); // "/store"
@@ -153,8 +153,7 @@ class Routes {
 		 * @param categoryId - Category ID to filter by
 		 * @returns Store URL with category query parameter (e.g., "/store?category=123")
 		 */
-		withCategory: (categoryId: string | number): string => 
-			appendQueryParams('/store', { category: categoryId }),
+		withCategory: (categoryId: string | number): string => appendQueryParams('/store', { category: categoryId }),
 		/**
 		 * Generates URL for public product detail page.
 		 * @param id - Product ID
@@ -171,7 +170,7 @@ class Routes {
 
 	/**
 	 * Internal product management routes for admins (protected)
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * router.push(Routes.InternalStore.location); // "/app/store"
@@ -192,13 +191,13 @@ class Routes {
 		 * @param params - Optional query parameters
 		 * @returns Product create URL (e.g., "/app/store/create")
 		 */
-		create: (params?: Record<string, string | number>): string => 
+		create: (params?: Record<string, string | number>): string =>
 			appendQueryParams(`${Routes.InternalAppRoute}/store/create`, params),
 	}
 
 	/**
 	 * Quote requests management routes (protected)
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * router.push(Routes.Quotes.location); // "/app/quotes"
@@ -219,13 +218,13 @@ class Routes {
 		 * @param params - Optional query parameters
 		 * @returns Quote create URL (e.g., "/app/quotes/create")
 		 */
-		create: (params?: Record<string, string | number>): string => 
+		create: (params?: Record<string, string | number>): string =>
 			appendQueryParams(`${Routes.InternalAppRoute}/quotes/create`, params),
 	}
 
 	/**
 	 * Provider/supplier management routes (protected, admin only)
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * router.push(Routes.Providers.location); // "/app/providers"
@@ -246,13 +245,13 @@ class Routes {
 		 * @param params - Optional query parameters
 		 * @returns Provider create URL (e.g., "/app/providers/create")
 		 */
-		create: (params?: Record<string, string | number>): string => 
+		create: (params?: Record<string, string | number>): string =>
 			appendQueryParams(`${Routes.InternalAppRoute}/providers/create`, params),
 	}
 
 	/**
 	 * User accounts management routes (protected, admin only)
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * router.push(Routes.Accounts.location); // "/app/accounts"
@@ -273,13 +272,13 @@ class Routes {
 		 * @param params - Optional query parameters (e.g., { customerId: '123' })
 		 * @returns Account create URL (e.g., "/app/accounts/create" or "/app/accounts/create?customerId=123")
 		 */
-		create: (params?: { customerId?: string | number }): string => 
+		create: (params?: { customerId?: string | number }): string =>
 			appendQueryParams(`${Routes.InternalAppRoute}/accounts/create`, params),
 	}
 
 	/**
 	 * Customer/company management routes (protected, admin only)
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * router.push(Routes.Customers.location); // "/app/customers"
@@ -300,7 +299,7 @@ class Routes {
 		 * @param params - Optional query parameters
 		 * @returns Customer create URL (e.g., "/app/customers/create")
 		 */
-		create: (params?: Record<string, string | number>): string => 
+		create: (params?: Record<string, string | number>): string =>
 			appendQueryParams(`${Routes.InternalAppRoute}/customers/create`, params),
 	}
 
@@ -312,7 +311,7 @@ class Routes {
 
 	/**
 	 * RBAC (Role-Based Access Control) management routes (protected, admin only)
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * router.push(Routes.RBAC.location); // "/app/rbac"
@@ -346,8 +345,72 @@ class Routes {
 	}
 
 	/**
+	 * Advanced Pricing Engine management routes (protected, admin only for management)
+	 * PRD Reference: client/md/PRDs/internal-routes/prd_pricing_engine.md
+	 *
+	 * **Role-Based Access:**
+	 * - View: Admin, SalesManager, SalesRep
+	 * - Manage: Admin only
+	 *
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Pricing.location); // "/app/pricing"
+	 * router.push(Routes.Pricing.priceLists); // "/app/pricing/price-lists"
+	 * router.push(Routes.Pricing.priceListDetail('abc-123')); // "/app/pricing/price-lists/abc-123"
+	 * router.push(Routes.Pricing.volumeTiers('prod-456')); // "/app/pricing/volume-tiers/prod-456"
+	 * ```
+	 */
+	public static Pricing = {
+		name: 'Pricing',
+		location: `${Routes.InternalAppRoute}/pricing`,
+		/** Price Lists management page */
+		priceLists: `${Routes.InternalAppRoute}/pricing/price-lists`,
+		/**
+		 * Generates URL for price list detail page.
+		 * @param id - Price List ID (GUID)
+		 * @returns Price list detail URL (e.g., "/app/pricing/price-lists/abc-123")
+		 */
+		priceListDetail: (id: string): string => `${Routes.InternalAppRoute}/pricing/price-lists/${id}`,
+		/**
+		 * Generates URL for price list creation page.
+		 * @returns Price list create URL (e.g., "/app/pricing/price-lists/create")
+		 */
+		priceListCreate: `${Routes.InternalAppRoute}/pricing/price-lists/create`,
+		/**
+		 * Generates URL for volume tiers editor for a product.
+		 * @param productId - Product ID (GUID)
+		 * @returns Volume tiers URL (e.g., "/app/pricing/volume-tiers/prod-456")
+		 */
+		volumeTiers: (productId: string): string => `${Routes.InternalAppRoute}/pricing/volume-tiers/${productId}`,
+		/** Customer price list assignments page */
+		customerAssignments: `${Routes.InternalAppRoute}/pricing/customers`,
+	}
+
+	/**
+	 * ERP Integrations management routes (protected, admin only)
+	 * PRD Reference: client/md/PRDs/internal-routes/prd_erp_integration.md
+	 *
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Integrations.location); // "/app/integrations"
+	 * router.push(Routes.Integrations.settings); // "/app/integrations/settings"
+	 * router.push(Routes.Integrations.logs); // "/app/integrations?tab=logs"
+	 * ```
+	 */
+	public static Integrations = {
+		name: 'Integrations',
+		location: `${Routes.InternalAppRoute}/integrations`,
+		/** Integration settings page */
+		settings: `${Routes.InternalAppRoute}/integrations/settings`,
+		/** Integration logs (via tab) */
+		logs: `${Routes.InternalAppRoute}/integrations?tab=logs`,
+		/** QuickBooks OAuth callback */
+		quickbooksCallback: `${Routes.InternalAppRoute}/integrations/quickbooks/callback`,
+	}
+
+	/**
 	 * User profile settings route (protected)
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * router.push(Routes.Profile.location); // "/app/profile"
@@ -360,7 +423,7 @@ class Routes {
 
 	/**
 	 * Notifications management routes (protected)
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * router.push(Routes.Notifications.location); // "/app/notifications"
@@ -392,7 +455,7 @@ class Routes {
 
 	/**
 	 * Contact form page (public)
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * router.push(Routes.Contact.location); // "/contact"
@@ -407,8 +470,7 @@ class Routes {
 		 * @param productId - Product ID to reference in contact form
 		 * @returns Contact URL with product query parameter (e.g., "/contact?product=123")
 		 */
-		withProduct: (productId: string | number): string => 
-			appendQueryParams('/contact', { product: productId }),
+		withProduct: (productId: string | number): string => appendQueryParams('/contact', { product: productId }),
 	}
 
 	/** Shopping cart page (public) */
@@ -419,15 +481,15 @@ class Routes {
 
 	/**
 	 * Authentication routes (public, used for login/password flows)
-	 * 
+	 *
 	 * **Phase 1: Account Status System**
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * // Force password change (required)
 	 * router.push(Routes.Auth.forcePasswordChange({ required: 'true' }));
 	 * // Result: "/auth/force-password-change?required=true"
-	 * 
+	 *
 	 * // Force password change (optional)
 	 * router.push(Routes.Auth.forcePasswordChange());
 	 * // Result: "/auth/force-password-change"
@@ -439,17 +501,17 @@ class Routes {
 		/**
 		 * Generates URL for force password change page.
 		 * Used when admin requires user to change password.
-		 * 
+		 *
 		 * @param params - Optional query parameters
 		 * @param params.required - If 'true', user cannot skip password change
 		 * @returns Force password change URL
-		 * 
+		 *
 		 * @example
 		 * ```typescript
 		 * // Required password change (cannot skip)
 		 * Routes.Auth.forcePasswordChange({ required: 'true' })
 		 * // "/auth/force-password-change?required=true"
-		 * 
+		 *
 		 * // Optional password change
 		 * Routes.Auth.forcePasswordChange()
 		 * // "/auth/force-password-change"
@@ -460,9 +522,9 @@ class Routes {
 		/**
 		 * URL for forgot password page.
 		 * Used when user needs to reset their password.
-		 * 
+		 *
 		 * @returns Forgot password URL
-		 * 
+		 *
 		 * @example
 		 * ```typescript
 		 * router.push(Routes.Auth.forgotPassword)
@@ -474,34 +536,34 @@ class Routes {
 
 	/**
 	 * Generates a URL to open the login modal.
-	 * 
+	 *
 	 * The login modal is opened by navigating to the home page with the `?login=true` query parameter.
 	 * The Navbar component automatically detects this parameter and opens the login modal.
-	 * 
+	 *
 	 * **Usage:**
 	 * - Use this method instead of hardcoding `/?login=true` throughout the application
 	 * - Provides a single source of truth for login modal navigation
 	 * - Maintains consistency if the login modal mechanism changes
 	 * - Works in both client and server components
-	 * 
+	 *
 	 * @param redirectTo - Optional path to redirect to after successful login
 	 * @returns URL string with login modal query parameter
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * import { Routes } from '@_features/navigation';
-	 * 
+	 *
 	 * // Basic usage - open login modal
 	 * router.push(Routes.openLoginModal());
 	 * // Result: "/?login=true"
-	 * 
+	 *
 	 * // With redirect after login
 	 * router.push(Routes.openLoginModal('/cart'));
 	 * // Result: "/?login=true&redirectTo=/cart"
-	 * 
+	 *
 	 * // In a Link component
 	 * <Link href={Routes.openLoginModal()}>Sign In</Link>
-	 * 
+	 *
 	 * // In server component
 	 * return redirect(Routes.openLoginModal());
 	 * ```
@@ -517,5 +579,3 @@ class Routes {
 }
 
 export default Routes
-
-

@@ -1014,3 +1014,230 @@ export const roleUpdateSchema = roleSchema.omit({ name: true }).extend({
 
 /** Type-safe form data for role updates */
 export type RoleUpdateFormData = z.infer<typeof roleUpdateSchema>
+
+// ==========================================
+// ADVANCED PRICING ENGINE SCHEMAS
+// @see prd_pricing_engine.md Section 5.2
+// ==========================================
+
+/**
+ * Base Price List fields schema (used for create and update).
+ */
+const basePriceListFieldsSchema = z.object({
+	name: z.string().min(1, 'Name is required').max(100, 'Name cannot exceed 100 characters'),
+	description: z.string().max(500, 'Description cannot exceed 500 characters').optional().nullable(),
+	priority: z.coerce
+		.number()
+		.int()
+		.min(1, 'Priority must be at least 1')
+		.max(1000, 'Priority cannot exceed 1000')
+		.default(100),
+	isActive: z.boolean().default(true),
+	validFrom: z.coerce.date().optional().nullable(),
+	validUntil: z.coerce.date().optional().nullable(),
+})
+
+/**
+ * Price List validity date refinement.
+ */
+const priceListDateRefinement = (data: { validFrom?: Date | null; validUntil?: Date | null }) => {
+	if (data.validFrom && data.validUntil) {
+		return data.validUntil > data.validFrom
+	}
+	return true
+}
+
+/**
+ * Price List creation validation schema.
+ *
+ * **Validation Rules:**
+ * - Name: required, 1-100 chars
+ * - Priority: 1-1000, default 100 (lower = higher priority)
+ * - Validity dates: validUntil must be after validFrom
+ *
+ * @see prd_pricing_engine.md - US-PRICE-004
+ *
+ * @example
+ * ```typescript
+ * createPriceListSchema.parse({
+ *   name: 'Hospital Contract 2026',
+ *   description: 'Annual pricing for regional hospitals',
+ *   priority: 10,
+ *   isActive: true,
+ *   validFrom: new Date('2026-01-01'),
+ *   validUntil: new Date('2026-12-31'),
+ * })
+ * ```
+ */
+export const createPriceListSchema = basePriceListFieldsSchema.refine(priceListDateRefinement, {
+	message: 'Valid until must be after valid from',
+	path: ['validUntil'],
+})
+
+/** Type-safe form data inferred from createPriceListSchema */
+export type CreatePriceListFormData = z.infer<typeof createPriceListSchema>
+
+/**
+ * Price List update schema (all fields optional).
+ */
+export const updatePriceListSchema = basePriceListFieldsSchema
+	.partial()
+	.refine(priceListDateRefinement, { message: 'Valid until must be after valid from', path: ['validUntil'] })
+
+/** Type-safe form data inferred from updatePriceListSchema */
+export type UpdatePriceListFormData = z.infer<typeof updatePriceListSchema>
+
+/**
+ * Price List Item validation schema.
+ *
+ * **Business Rule:** Exactly one pricing method must be specified:
+ * - fixedPrice: Customer pays this exact price
+ * - percentDiscount: Customer gets X% off base price (0-100)
+ * - fixedDiscount: Customer gets $X off base price
+ *
+ * @see prd_pricing_engine.md - US-PRICE-005
+ *
+ * @example
+ * ```typescript
+ * // Fixed price
+ * priceListItemSchema.parse({
+ *   productId: '123e4567-e89b-12d3-a456-426614174000',
+ *   fixedPrice: 85.00,
+ * })
+ *
+ * // Percent discount
+ * priceListItemSchema.parse({
+ *   productId: '123e4567-e89b-12d3-a456-426614174000',
+ *   percentDiscount: 15,
+ * })
+ * ```
+ */
+export const priceListItemSchema = z
+	.object({
+		productId: z.string().uuid('Invalid product ID'),
+		fixedPrice: z.coerce.number().min(0, 'Fixed price must be non-negative').optional().nullable(),
+		percentDiscount: z.coerce
+			.number()
+			.min(0, 'Discount cannot be negative')
+			.max(100, 'Discount cannot exceed 100%')
+			.optional()
+			.nullable(),
+		fixedDiscount: z.coerce.number().min(0, 'Discount cannot be negative').optional().nullable(),
+		minimumMarginPercent: z.coerce
+			.number()
+			.min(0, 'Minimum margin cannot be negative')
+			.max(100, 'Minimum margin cannot exceed 100%')
+			.optional()
+			.nullable(),
+	})
+	.refine(
+		(data) => {
+			const priceTypes = [data.fixedPrice, data.percentDiscount, data.fixedDiscount].filter((v) => v != null)
+			return priceTypes.length === 1
+		},
+		{
+			message: 'Exactly one pricing method must be specified (fixed price, percent discount, or fixed discount)',
+			path: ['fixedPrice'],
+		}
+	)
+
+/** Type-safe form data inferred from priceListItemSchema */
+export type PriceListItemFormData = z.infer<typeof priceListItemSchema>
+
+/**
+ * Volume Tier validation schema.
+ *
+ * **Business Rules:**
+ * - Exactly one pricing method: unitPrice OR percentDiscount
+ * - minQuantity must be at least 1
+ * - maxQuantity must be >= minQuantity (if set)
+ *
+ * @see prd_pricing_engine.md - US-PRICE-007
+ *
+ * @example
+ * ```typescript
+ * volumeTierSchema.parse({
+ *   minQuantity: 10,
+ *   maxQuantity: 49,
+ *   unitPrice: 90.00,
+ * })
+ * ```
+ */
+export const volumeTierSchema = z
+	.object({
+		minQuantity: z.coerce.number().int().min(1, 'Minimum quantity must be at least 1'),
+		maxQuantity: z.coerce.number().int().min(1, 'Maximum quantity must be at least 1').optional().nullable(),
+		unitPrice: z.coerce.number().min(0, 'Unit price must be non-negative').optional().nullable(),
+		percentDiscount: z.coerce
+			.number()
+			.min(0, 'Discount cannot be negative')
+			.max(100, 'Discount cannot exceed 100%')
+			.optional()
+			.nullable(),
+	})
+	.refine(
+		(data) => {
+			const priceTypes = [data.unitPrice, data.percentDiscount].filter((v) => v != null)
+			return priceTypes.length === 1
+		},
+		{
+			message: 'Exactly one pricing method must be specified (unit price or percent discount)',
+			path: ['unitPrice'],
+		}
+	)
+	.refine(
+		(data) => {
+			if (data.maxQuantity != null) {
+				return data.maxQuantity >= data.minQuantity
+			}
+			return true
+		},
+		{ message: 'Maximum quantity must be greater than or equal to minimum quantity', path: ['maxQuantity'] }
+	)
+
+/** Type-safe form data inferred from volumeTierSchema */
+export type VolumeTierFormData = z.infer<typeof volumeTierSchema>
+
+/**
+ * Set Volume Tiers request schema.
+ * Validates an array of tiers with additional cross-tier validation.
+ *
+ * **Validation:**
+ * - At least one tier required
+ * - No duplicate minQuantity values
+ * - No overlapping tier ranges
+ *
+ * @see prd_pricing_engine.md - Volume Tier Validation Rules
+ */
+export const setVolumeTiersSchema = z
+	.object({
+		tiers: z.array(volumeTierSchema).min(1, 'At least one tier is required'),
+	})
+	.refine(
+		(data) => {
+			// Check for duplicate minQuantity values
+			const minQuantities = data.tiers.map((t) => t.minQuantity)
+			const uniqueMinQuantities = new Set(minQuantities)
+			return minQuantities.length === uniqueMinQuantities.size
+		},
+		{ message: 'Duplicate minimum quantities are not allowed', path: ['tiers'] }
+	)
+
+/** Type-safe form data inferred from setVolumeTiersSchema */
+export type SetVolumeTiersFormData = z.infer<typeof setVolumeTiersSchema>
+
+/**
+ * Pricing Request schema for calculating prices.
+ *
+ * @see prd_pricing_engine.md - Section 5.1 DTOs
+ */
+export const pricingRequestSchema = z.object({
+	productId: z.string().uuid('Invalid product ID'),
+	customerId: z.coerce.number().int().optional().nullable(),
+	quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1').default(1),
+	priceDate: z.coerce.date().optional().nullable(),
+	includeBreakdown: z.boolean().optional().default(false),
+})
+
+/** Type-safe form data inferred from pricingRequestSchema */
+export type PricingRequestFormData = z.infer<typeof pricingRequestSchema>

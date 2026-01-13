@@ -34,10 +34,10 @@ export default function QuoteDetailsPage() {
 	// Use custom hooks for data fetching and permissions (Phase 1)
 	const { quote, isLoading, error, refresh } = useQuoteDetails()
 	const permissions = useQuotePermissions(quote)
-	
+
 	// Get quote actions for auto-mark-as-read functionality
 	const { handleMarkAsRead } = useQuoteActions(quote, permissions, refresh)
-	
+
 	// Auto-mark quote as Read when assigned sales rep opens Unread quote
 	useAutoMarkQuoteAsRead({
 		quote,
@@ -146,10 +146,16 @@ export default function QuoteDetailsPage() {
 						</div>
 					</div>
 
-					{/* Pricing Section - Only visible to Sales Rep+ on quotes with status 'Read' */}
-					{permissions.canUpdate && (
-						<QuotePricingEditor quote={quote} permissions={permissions} onRefresh={refresh} />
-					)}
+				{/* Pricing Section - Only visible to Sales Rep+ on quotes with status 'Read' */}
+				{/* PRD: prd_pricing_engine.md - Advanced Pricing Engine integration */}
+				{permissions.canUpdate && (
+					<QuotePricingEditor
+						quote={quote}
+						permissions={permissions}
+						customerId={'customerId' in quote ? (quote as { customerId?: number }).customerId : undefined}
+						onRefresh={refresh}
+					/>
+				)}
 
 					{/* Products Section */}
 					<QuoteProducts quote={quote} />

@@ -93,6 +93,7 @@ export const Resources = {
 	Settings: 'settings',
 	Providers: 'providers',
 	Rbac: 'rbac',
+	Integrations: 'integrations',
 } as const
 
 export type Resource = (typeof Resources)[keyof typeof Resources]

@@ -1,15 +1,15 @@
 /**
  * Icon Mapping Helper
- * 
+ *
  * Centralized icon mapping system for consistent icon usage throughout the app.
  * Maps string identifiers to Lucide React icon components.
- * 
+ *
  * **Benefits:**
  * - Single source of truth for icon mappings
  * - Type-safe icon selection
  * - Easy to add/modify icons
  * - Prevents import duplication
- * 
+ *
  * @module IconMapping
  */
 
@@ -26,6 +26,7 @@ import {
 	Settings,
 	Store,
 	Bell,
+	Plug,
 	type LucideIcon,
 } from 'lucide-react'
 
@@ -48,14 +49,15 @@ const iconMapping: Record<NavigationIconType, LucideIcon> = {
 	settings: Settings,
 	store: Store,
 	bell: Bell,
+	plug: Plug,
 }
 
 /**
  * Retrieves the Lucide icon component for a given icon identifier.
- * 
+ *
  * @param icon - The icon identifier
  * @returns The corresponding Lucide icon component
- * 
+ *
  * @example
  * ```tsx
  * const Icon = getIconComponent('dashboard')
@@ -68,7 +70,7 @@ export function getIconComponent(icon: NavigationIconType): LucideIcon {
 
 /**
  * Checks if an icon identifier is valid.
- * 
+ *
  * @param icon - The icon identifier to check
  * @returns True if the icon exists in the mapping
  */

@@ -149,6 +149,14 @@ export const INTERNAL_ROUTE_METADATA: Record<string, InternalPageMetadata> = {
 		description: 'Manage your notifications',
 		icon: 'bell',
 	},
+
+	// ERP Integrations (PRD: prd_erp_integration.md)
+	integrations: {
+		title: 'Integrations',
+		description: 'Connect and manage ERP system integrations',
+		icon: 'plug',
+		requiresRole: [RoleLevels.Admin],
+	},
 }
 
 /**

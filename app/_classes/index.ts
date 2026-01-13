@@ -112,3 +112,30 @@ export { PagedData } from './PagedData'
 
 // Carousel types
 export type { CarouselCTA, CarouselOverlay, CarouselSlideWithOverlay, CarouselContentResponse } from './CarouselTypes'
+
+// ============================================================================
+// PRICING ENGINE ENTITIES
+// @see prd_pricing_engine.md
+// ============================================================================
+
+export {
+	PriceList,
+	PriceListItem,
+	CustomerAssignment,
+	VolumeTier,
+	ProductVolumeTiers,
+	PricingResult,
+	PricingRuleApplication,
+} from './Pricing'
+
+// Pricing request/response types
+export type {
+	PricingRequest,
+	BulkPricingRequest,
+	CreatePriceListRequest,
+	UpdatePriceListRequest,
+	AddPriceListItemRequest,
+	AssignPriceListRequest,
+	VolumeTierInput,
+	SetVolumeTiersRequest,
+} from './Pricing'

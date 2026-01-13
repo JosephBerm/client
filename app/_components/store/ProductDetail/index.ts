@@ -1,9 +1,9 @@
 /**
  * Product Detail Components - Barrel Export (Optimized for Tree-Shaking)
- * 
+ *
  * Components for product detail page.
  * All components are server components (no 'use client').
- * 
+ *
  * @example
  * ```typescript
  * import {
@@ -13,7 +13,7 @@
  *   SECTION_LABELS,
  * } from '@_components/store'
  * ```
- * 
+ *
  * @module ProductDetail
  */
 
@@ -28,6 +28,9 @@ export { default as ProductPricingCard } from './ProductPricingCard'
 export { default as ProductTrustSignals } from './ProductTrustSignals'
 export { default as ProductSpecifications } from './ProductSpecifications'
 export { default as ProductHelpSection } from './ProductHelpSection'
+export { default as VolumeTierTable } from './VolumeTierTable'
+export { default as CustomerPricingCard } from './CustomerPricingCard'
+export { default as ProductPricingWrapper } from './ProductPricingWrapper'
 
 // ============================================================================
 // TYPES
@@ -38,6 +41,9 @@ export type { ProductDocumentsSectionProps } from './ProductDocumentsSection'
 export type { ProductHeaderInfoProps } from './ProductHeaderInfo'
 export type { ProductPricingCardProps } from './ProductPricingCard'
 export type { ProductSpecificationsProps } from './ProductSpecifications'
+export type { VolumeTierTableProps } from './VolumeTierTable'
+export type { CustomerPricingCardProps } from './CustomerPricingCard'
+export type { ProductPricingWrapperProps } from './ProductPricingWrapper'
 
 // ============================================================================
 // UTILITIES

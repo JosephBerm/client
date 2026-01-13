@@ -61,6 +61,7 @@ export type NavigationIconType =
 	| 'settings'
 	| 'store'
 	| 'bell'
+	| 'plug'
 
 /**
  * Navigation route item interface.

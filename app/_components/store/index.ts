@@ -1,14 +1,14 @@
 /**
  * Store Components - Barrel Export (Optimized for Tree-Shaking)
- * 
+ *
  * Public store catalog components.
  * Most components are client-side ('use client'), except ProductDetail components which are server components.
- * 
+ *
  * @example
  * ```typescript
  * import { ProductCard, StorePageContainer } from '@_components/store'
  * ```
- * 
+ *
  * @module components/store
  */
 
@@ -47,6 +47,9 @@ export {
 	ProductTrustSignals,
 	ProductSpecifications,
 	ProductHelpSection,
+	VolumeTierTable,
+	CustomerPricingCard,
+	ProductPricingWrapper,
 	filterNonImageDocuments,
 	buildProductBreadcrumbs,
 } from './ProductDetail'
@@ -57,6 +60,9 @@ export type {
 	ProductHeaderInfoProps,
 	ProductPricingCardProps,
 	ProductSpecificationsProps,
+	VolumeTierTableProps,
+	CustomerPricingCardProps,
+	ProductPricingWrapperProps,
 } from './ProductDetail'
 
 // ============================================================================

@@ -1,16 +1,16 @@
 /**
  * OrderHeader Component
- * 
+ *
  * Displays order header information including order number, status badge,
  * customer information, and financial summary.
- * 
+ *
  * **Features:**
  * - Order number and creation date
  * - Status badge with color coding
  * - Customer name and contact
  * - Financial summary (subtotal, tax, shipping, discount, total)
  * - Sales rep assignment (for staff)
- * 
+ *
  * @see prd_orders.md - Order Management PRD
  * @module app/orders/[id]/_components/OrderHeader
  */
@@ -26,7 +26,10 @@ import { formatCurrency, formatDate } from '@_shared'
 import { OrderStatusHelper } from '@_classes/Helpers'
 
 import OrderStatusBadge from '@_components/common/OrderStatusBadge'
+import SyncStatusBadge, { type SyncState } from '@_components/common/SyncStatusBadge'
 import Card from '@_components/ui/Card'
+
+import { useEntitySyncStatus, useIntegrationConnections } from '@_features/integrations'
 
 import type Order from '@_classes/Order'
 
@@ -41,18 +44,18 @@ export interface OrderHeaderProps {
 
 /**
  * Order header component with order info and financial summary.
- * 
+ *
  * @example
  * ```tsx
- * <OrderHeader 
- *   order={order} 
+ * <OrderHeader
+ *   order={order}
  *   showSalesRep={user.role >= AccountRole.SalesRep}
  *   showInternalNotes={user.role >= AccountRole.SalesRep}
  * />
  * ```
  */
-export function OrderHeader({ 
-	order, 
+export function OrderHeader({
+	order,
 	showSalesRep = false,
 	showInternalNotes = false,
 }: OrderHeaderProps) {
@@ -70,6 +73,18 @@ export function OrderHeader({
 	const orderDate = order?.createdAt ? formatDate(order.createdAt) : '-'
 	const statusDescription = OrderStatusHelper.getDescription(order.status)
 
+	// Check if order is synced to ERP (PRD Reference: Customer view - sync status indicators)
+	const { data: connections } = useIntegrationConnections()
+	const { data: syncMapping } = useEntitySyncStatus('Order', order?.id)
+
+	const hasActiveConnection = connections?.some(c => c.isActive) ?? false
+
+	const syncState: SyncState = useMemo(() => {
+		if (!hasActiveConnection) return 'not_synced'
+		if (!syncMapping) return 'pending'
+		return 'synced'
+	}, [hasActiveConnection, syncMapping])
+
 	return (
 		<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
 			{/* Header Row */}
@@ -80,6 +95,14 @@ export function OrderHeader({
 							Order #{order.id}
 						</h2>
 						<OrderStatusBadge status={order.status} />
+						{hasActiveConnection && (
+							<SyncStatusBadge
+								state={syncState}
+								provider={syncMapping?.provider}
+								lastSyncAt={syncMapping?.lastSyncAt}
+								compact
+							/>
+						)}
 					</div>
 					<p className="text-sm text-base-content/60" title={statusDescription}>
 						{statusDescription}

@@ -307,7 +307,7 @@ Why lower:
 | **Shopify B2B** | $1.2M - $2M | More features | Ruby/React |
 | **Magento B2B** | $800K - $1.5M | Similar | PHP/JavaScript |
 | **SAP Commerce** | $3M - $5M | Enterprise | Java/Angular |
-| **MedSource Pro** | **$748,800** | Specialized medical | .NET 9/Next.js 16 ✅ |
+| **MedSource Pro** | **$748,800** | Specialized medical | .NET 10 LTS/Next.js 16.1 ✅ |
 
 **Verdict: MedSource Pro is competitively priced with superior modern architecture.**
 
