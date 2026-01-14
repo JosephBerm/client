@@ -56,7 +56,26 @@ export {
 	buildPermission,
 } from './rbac'
 
-export type { RoleLevelKey, RoleLevelValue, Resource, Action, Context, Permission, Role, RoleThresholds } from './rbac'
+export type {
+	RoleLevelKey,
+	RoleLevelValue,
+	Resource,
+	Action,
+	Context,
+	Permission,
+	// Entity types
+	Role,
+	PermissionEntity,
+	RolePermission,
+	RoleThresholds,
+	// CRUD request/response types
+	CreateRoleRequest,
+	UpdateRoleRequest,
+	RoleDeleteResult,
+	CreatePermissionRequest,
+	UpdatePermissionRequest,
+	UserPermissionsResponse,
+} from './rbac'
 
 // ============================================================================
 // ACCOUNT TYPES

@@ -27,8 +27,10 @@ export {
 	// Types
 	type RoleLevelKey,
 	type RoleLevelValue,
-	type RoleThresholds,
 	type RoleMetadataEntry,
 	type RoleBadgeVariant,
 	type RoleSelectOption,
 } from './rbac-defaults'
+
+// Re-export RoleThresholds from canonical source (@_types/rbac)
+export type { RoleThresholds } from '@_types/rbac'

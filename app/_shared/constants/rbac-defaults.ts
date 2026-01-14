@@ -75,8 +75,8 @@ export const DEFAULT_ROLE_THRESHOLDS = {
 // REMOVED: LEGACY_ROLE_LEVELS
 // Migration: Use DEFAULT_ROLE_THRESHOLDS or usePermissions() hook instead
 
-/** Type for role thresholds */
-export type RoleThresholds = typeof DEFAULT_ROLE_THRESHOLDS
+// Note: RoleThresholds interface is defined in @_types/rbac as the canonical source.
+// This constant provides default values matching that interface.
 
 // ============================================================================
 // CACHE CONFIGURATION - Centralized cache keys and TTL values

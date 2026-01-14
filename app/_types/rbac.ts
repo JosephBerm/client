@@ -34,19 +34,62 @@ export {
 // API RESPONSE TYPES
 // =========================================================================
 
+// =========================================================================
+// ROLE & PERMISSION ENTITIES
+// These are the canonical types for database entities.
+// Matches backend DTOs in RBACManagementDTOs.cs
+// =========================================================================
+
 /**
  * Role entity from database.
  * Fetched via GET /api/rbac/roles
+ *
+ * @remarks
+ * This is the canonical Role type. All RBAC components should import from here.
+ * The API module re-exports this type for convenience.
  */
 export interface Role {
 	id: number
 	name: string
 	displayName: string
 	level: number
-	description: string
+	description?: string
 	isSystemRole: boolean
 	createdAt: string
 	updatedAt: string
+	/** Optional: Populated when fetching role with permissions */
+	rolePermissions?: RolePermission[]
+}
+
+/**
+ * Permission entity from database.
+ * Fetched via GET /api/rbac/permissions
+ *
+ * @remarks
+ * Named `PermissionEntity` to avoid collision with `Permission` string type below.
+ * The `Permission` type is for permission strings like "orders:read:own".
+ */
+export interface PermissionEntity {
+	id: number
+	resource: string
+	action: string
+	context?: string
+	description?: string
+	/** Computed field: "resource:action" or "resource:action:context" */
+	permissionString?: string
+	/** Optional: Populated when fetching permission with roles */
+	rolePermissions?: RolePermission[]
+}
+
+/**
+ * Join table entity for Role-Permission relationship.
+ * Used when fetching roles with their permissions or vice versa.
+ */
+export interface RolePermission {
+	roleId: number
+	permissionId: number
+	role?: Role
+	permission?: PermissionEntity
 }
 
 /**
@@ -55,6 +98,9 @@ export interface Role {
  *
  * WHITE-LABEL: All values are configurable via backend appsettings.json.
  * No code changes needed for custom role structures.
+ *
+ * @remarks
+ * This is the canonical type for role thresholds API response.
  */
 export interface RoleThresholds {
 	/** Level for basic customer role (default: 1000) */
@@ -69,6 +115,81 @@ export interface RoleThresholds {
 	adminThreshold: number
 	/** Minimum level for Super Admin (default: 9999) */
 	superAdminThreshold: number
+}
+
+// =========================================================================
+// ROLE CRUD REQUEST TYPES
+// =========================================================================
+
+/**
+ * Request body for creating a new role.
+ * POST /api/rbac/roles
+ */
+export interface CreateRoleRequest {
+	name: string
+	displayName: string
+	level: number
+	description?: string
+	isSystemRole?: boolean
+}
+
+/**
+ * Request body for updating an existing role.
+ * PUT /api/rbac/roles/:id
+ */
+export interface UpdateRoleRequest {
+	name: string
+	displayName: string
+	level: number
+	description?: string
+	isSystemRole?: boolean
+}
+
+/**
+ * Result of attempting to delete a role.
+ * DELETE /api/rbac/roles/:id
+ */
+export interface RoleDeleteResult {
+	deleted: boolean
+	blockedByUsers: boolean
+	assignedUserCount: number
+	message?: string
+}
+
+// =========================================================================
+// PERMISSION CRUD REQUEST TYPES
+// =========================================================================
+
+/**
+ * Request body for creating a new permission.
+ * POST /api/rbac/permissions
+ */
+export interface CreatePermissionRequest {
+	resource: string
+	action: string
+	context?: string
+	description?: string
+}
+
+/**
+ * Request body for updating an existing permission.
+ * PUT /api/rbac/permissions/:id
+ */
+export interface UpdatePermissionRequest {
+	resource: string
+	action: string
+	context?: string
+	description?: string
+}
+
+/**
+ * User permissions response from GET /api/rbac/my-permissions
+ */
+export interface UserPermissionsResponse {
+	userId: number
+	roleLevel: number
+	roleName: string
+	permissions: string[]
 }
 
 // =========================================================================
