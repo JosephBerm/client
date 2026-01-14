@@ -1,9 +1,9 @@
 /**
  * HTTP Service Constants
- * 
+ *
  * Centralized constants for HTTP service configuration.
  * Eliminates magic strings and ensures consistency across the codebase.
- * 
+ *
  * @module httpService.constants
  */
 
@@ -21,10 +21,10 @@ export const AUTH_HEADER_PREFIX = 'Bearer ' as const
 /**
  * Default API base URL
  * Used as fallback when NEXT_PUBLIC_API_URL is not set
- * 
+ *
  * NOTE: This must match the backend development server port.
  * The backend runs on port 5254 by default.
- * 
+ *
  * IMPORTANT: Backend routes are at root level (e.g., /Products/..., /Accounts/...)
  * The /api prefix was removed because UsePathBase middleware does not work
  * correctly inside UseWhen conditional branches in ASP.NET Core.
@@ -47,6 +47,7 @@ export const HTTP_STATUS = {
 	CREATED: 201,
 	BAD_REQUEST: 400,
 	UNAUTHORIZED: 401,
+	FORBIDDEN: 403,
 	NOT_FOUND: 404,
 	INTERNAL_SERVER_ERROR: 500,
 } as const
@@ -86,4 +87,3 @@ export const ERROR_MESSAGES = {
 	INTERNAL_SERVER_ERROR: 'Internal Server Error',
 	FAILED_TO_GET_TOKEN: 'Failed to get auth token from cookies',
 } as const
-

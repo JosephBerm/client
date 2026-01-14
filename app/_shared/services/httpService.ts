@@ -325,6 +325,57 @@ async function handleRequest<T>(
 			}
 
 			// =====================================================================
+			// STEP-UP AUTHENTICATION CHECK (MAANG-Level Security)
+			// =====================================================================
+			// Check if this 403 is due to step-up MFA requirement
+			// If so, dispatch event for MFA modal and wait for completion
+			if (response.status === HTTP_STATUS.FORBIDDEN && !isRetry) {
+				// Only handle step-up on client-side (requires DOM for events)
+				if (typeof window !== 'undefined') {
+					try {
+						const { checkAndHandleStepUpRequired, waitForStepUpCompletion } = await import(
+							'./stepUpHandler'
+						)
+
+						if (checkAndHandleStepUpRequired(response)) {
+							// Wait for user to complete step-up verification
+							try {
+								const freshToken = await waitForStepUpCompletion()
+								if (freshToken) {
+									// Retry with fresh token from step-up
+									const newHeaders = new Headers(options.headers)
+									newHeaders.set('Authorization', `Bearer ${freshToken}`)
+
+									return handleRequest<T>(
+										url,
+										method,
+										{ ...options, headers: newHeaders },
+										body,
+										true // Mark as retry to prevent infinite loop
+									)
+								}
+							} catch (stepUpError) {
+								// User cancelled or verification failed - return original 403
+								logger.debug('Step-up verification cancelled or failed', {
+									component: 'HttpService',
+									action: 'handleRequest',
+									error: stepUpError instanceof Error ? stepUpError.message : 'Unknown error',
+								})
+							}
+						}
+					} catch (stepUpImportError) {
+						// Log import/SSR errors at debug level
+						logger.debug('Step-up handler import skipped', {
+							component: 'HttpService',
+							action: 'handleRequest',
+							reason:
+								stepUpImportError instanceof Error ? stepUpImportError.message : 'SSR context',
+						})
+					}
+				}
+			}
+
+			// =====================================================================
 			// ACCOUNT STATUS CHECK (MAANG-Level Security)
 			// =====================================================================
 			// Check if this 401 is due to account status (suspended/locked/archived)

@@ -142,6 +142,32 @@ export {
 	type AccountStatusError,
 } from './services/accountStatusHandler'
 
+// Step-Up Handler (MFA re-verification for sensitive actions)
+export {
+	subscribeToStepUpRequired,
+	resolveStepUp,
+	rejectStepUp,
+	checkAndHandleStepUpRequired,
+	hasPendingStepUp,
+	waitForStepUpCompletion,
+	initiateStepUp,
+	type StepUpRequiredEvent,
+} from './services/stepUpHandler'
+
+// Step-Up Constants
+export {
+	STEP_UP_REQUIRED_HEADER,
+	STEP_UP_ACTION_HEADER,
+	STEP_UP_REASON_HEADER,
+	STEP_UP_EVENT,
+	SENSITIVE_ACTIONS,
+	ACTION_MESSAGES,
+	getActionMessage,
+	STEP_UP_ERROR_MESSAGES,
+	type SensitiveAction,
+	type StepUpReason,
+} from './services/stepUpHandler.constants'
+
 // Token Service (MAANG-Level JWT Management)
 export {
 	storeTokens,
@@ -159,7 +185,18 @@ export {
 } from './services/tokenService'
 
 // API Types - DTOs for backend contract alignment
-export type { CreateQuoteRequest, QuoteItemRequest, CreateQuoteResponse, PagedResponse } from './services/api.types'
+export type {
+	CreateQuoteRequest,
+	QuoteItemRequest,
+	CreateQuoteResponse,
+	PagedResponse,
+	// Security Policy Types
+	MfaRequirementLevel,
+	SecurityPolicyResponse,
+	UpdateSecurityPolicyRequest,
+	PolicyTemplate,
+	PolicyTemplatesResponse,
+} from './services/api.types'
 
 // ============================================================================
 // CLIENT HOOKS (All have 'use client' directive)
