@@ -147,7 +147,6 @@ export {
 	storeTokens,
 	clearTokens,
 	getAccessToken,
-	getRefreshToken,
 	isTokenExpired,
 	refreshAccessToken,
 	ensureValidToken,

@@ -1,9 +1,9 @@
 /**
  * Unified HTTP Service Layer - Works in Both Server and Client Contexts
- * 
+ *
  * Modern, unified HTTP client that automatically adapts to runtime environment.
  * Uses native fetch API for optimal performance and compatibility.
- * 
+ *
  * **Features:**
  * - Automatic runtime detection (server vs client)
  * - Automatic JWT token injection from cookies (adapts to environment)
@@ -12,7 +12,7 @@
  * - Type-safe with generic response wrapper
  * - AxiosResponse-compatible interface for backward compatibility
  * - Works in Server Components, Client Components, Route Handlers, and API Routes
- * 
+ *
  * **Architecture:**
  * - Uses native fetch API (works everywhere)
  * - Runtime environment detection (typeof window)
@@ -20,17 +20,17 @@
  * - Consistent ApiResponse<T> format
  * - AxiosResponse-compatible return type
  * - DRY: Shared error handling, header conversion, and response parsing
- * 
+ *
  * **Usage:**
  * ```typescript
  * import { HttpService } from '@_shared';
- * 
+ *
  * // Works in Server Components
  * export default async function ServerPage() {
  *   const response = await HttpService.get<Product>('/products/123');
  *   const product = response.data.payload;
  * }
- * 
+ *
  * // Works in Client Components
  * 'use client'
  * export default function ClientPage() {
@@ -41,7 +41,7 @@
  *   }, []);
  * }
  * ```
- * 
+ *
  * @module httpService
  */
 
@@ -82,7 +82,7 @@ const isServer = typeof window === 'undefined'
 
 /**
  * Gets the authorization token from cookies (adapts to runtime environment)
- * 
+ *
  * @returns Promise resolving to the auth token or null if not found
  */
 async function getAuthToken(): Promise<string | null> {
@@ -106,7 +106,7 @@ async function getAuthToken(): Promise<string | null> {
 
 /**
  * Converts HeadersInit to a plain object, excluding specified headers
- * 
+ *
  * @param headers - Headers to convert
  * @param excludeHeaders - Array of header names to exclude (case-insensitive)
  * @returns Plain object with header key-value pairs
@@ -143,7 +143,7 @@ function headersToObject(
 
 /**
  * Creates headers for the request with authorization token
- * 
+ *
  * @param customHeaders - Additional headers to include
  * @param excludeContentType - Whether to exclude Content-Type header (for FormData)
  * @returns Promise resolving to HeadersInit
@@ -172,7 +172,7 @@ async function getHeaders(
 
 /**
  * Makes a fetch request with timeout and error handling
- * 
+ *
  * @param url - Full URL to fetch
  * @param options - Fetch options
  * @returns Promise resolving to Response
@@ -203,7 +203,7 @@ async function fetchWithTimeout(
 
 /**
  * Parses JSON response with error handling
- * 
+ *
  * @param response - Fetch Response object
  * @returns Promise resolving to parsed JSON or error ApiResponse
  */
@@ -222,7 +222,7 @@ async function parseJsonResponse<T>(response: Response): Promise<ApiResponse<T>>
 
 /**
  * Creates an error ApiResponse
- * 
+ *
  * @param statusCode - HTTP status code
  * @param message - Error message
  * @returns Error ApiResponse
@@ -240,7 +240,7 @@ function createErrorResponse<T>(
 
 /**
  * Converts fetch Response to AxiosResponse-compatible format
- * 
+ *
  * @param response - Fetch Response object
  * @param data - Response data
  * @returns AxiosResponse-compatible object
@@ -257,12 +257,12 @@ function toAxiosResponse<T>(response: Response, data: T): AxiosResponse<T> {
 
 /**
  * Handles HTTP request with standardized error handling
- * 
+ *
  * MAANG-Level Token Management:
  * - Automatic token refresh on 401 (expired token)
  * - Retry original request after successful refresh
  * - Graceful fallback to logout on refresh failure
- * 
+ *
  * @param url - Full URL to request
  * @param method - HTTP method
  * @param options - Fetch options
@@ -282,6 +282,9 @@ async function handleRequest<T>(
 			...options,
 			method,
 			body,
+			// IMPORTANT: Required for HttpOnly refresh token cookie-based sessions (auth best practice).
+			// Without this, browsers will not store Set-Cookie on cross-origin requests (e.g., localhost:3000 -> localhost:5254).
+			credentials: options.credentials ?? 'include',
 		})
 
 		if (!response.ok) {
@@ -296,12 +299,12 @@ async function handleRequest<T>(
 						// Dynamic import to avoid SSR issues
 						const { refreshAccessToken } = await import('./tokenService')
 						const newToken = await refreshAccessToken()
-						
+
 						if (newToken) {
 							// Update headers with new token and retry
 							const newHeaders = new Headers(options.headers)
 							newHeaders.set('Authorization', `Bearer ${newToken}`)
-							
+
 							return handleRequest<T>(
 								url,
 								method,
@@ -372,20 +375,20 @@ async function handleRequest<T>(
 
 /**
  * Unified HTTP Service Class
- * 
+ *
  * Provides type-safe wrappers around native fetch API with standardized ApiResponse format.
  * Automatically adapts to server or client runtime environment.
- * 
+ *
  * **Methods:**
  * - GET: Retrieve data
  * - POST: Create new resources or execute actions
  * - PUT: Update existing resources
  * - DELETE: Remove resources
  * - Download: Special POST for file downloads
- * 
+ *
  * All methods automatically include JWT token and return AxiosResponse<ApiResponse<T>> format
  * for backward compatibility with existing code.
- * 
+ *
  * @example
  * ```typescript
  * // GET request
@@ -393,18 +396,18 @@ async function handleRequest<T>(
  * if (response.data.statusCode === 200) {
  *   const products = response.data.payload; // Product[]
  * }
- * 
+ *
  * // POST request
  * const newProduct = await HttpService.post<Product>('/products', {
  *   name: 'Surgical Mask',
  *   price: 9.99
  * });
- * 
+ *
  * // PUT request
  * const updated = await HttpService.put<Product>('/products/123', {
  *   name: 'Updated Name'
  * });
- * 
+ *
  * // DELETE request
  * await HttpService.delete<void>('/products/123');
  * ```
@@ -414,20 +417,20 @@ export class HttpService {
 
 	/**
 	 * Performs a GET request to retrieve data from the server.
-	 * 
+	 *
 	 * @template T - Expected type of the payload data
 	 * @param {string} url - Endpoint URL (relative to base URL)
 	 * @param {RequestInit} options - Optional fetch options (for query params, use URLSearchParams in url)
 	 * @returns {Promise<AxiosResponse<ApiResponse<T>>>} Promise resolving to the API response
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * // Get all products
 	 * const products = await HttpService.get<Product[]>('/products');
-	 * 
+	 *
 	 * // Get single product by ID
 	 * const product = await HttpService.get<Product>('/products/123');
-	 * 
+	 *
 	 * // With query parameters (build URL manually)
 	 * const url = '/products?category=medical&page=1';
 	 * const filtered = await HttpService.get<Product[]>(url);
@@ -445,13 +448,13 @@ export class HttpService {
 
 	/**
 	 * Performs a POST request to create resources or trigger actions.
-	 * 
+	 *
 	 * @template T - Expected type of the payload data
 	 * @param {string} url - Endpoint URL (relative to base URL)
 	 * @param {any} data - Data to send in the request body
 	 * @param {RequestInit} options - Optional fetch options
 	 * @returns {Promise<AxiosResponse<ApiResponse<T>>>} Promise resolving to the API response
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * // Create new product
@@ -459,14 +462,14 @@ export class HttpService {
 	 *   name: 'Surgical Mask',
 	 *   price: 9.99
 	 * });
-	 * 
+	 *
 	 * // Submit search/filter
 	 * const results = await HttpService.post<PagedResult<Product>>('/products/search', {
 	 *   page: 1,
 	 *   pageSize: 10,
 	 *   filters: { category: 'medical' }
 	 * });
-	 * 
+	 *
 	 * // Upload file with FormData
 	 * const formData = new FormData();
 	 * formData.append('file', file);
@@ -480,14 +483,14 @@ export class HttpService {
 	): Promise<AxiosResponse<ApiResponse<T>>> {
 		const fullUrl = `${HttpService.baseURL}${url}`
 		const customHeaders = (options.headers as Record<string, string>) || {}
-		
+
 		// Don't set Content-Type for FormData (browser will set it with boundary)
 		const isFormData = data instanceof FormData
-		
+
 		// Get headers excluding Content-Type for FormData
 		const baseHeaders = await getHeaders({}, isFormData)
 		const headersObj = headersToObject(baseHeaders, isFormData ? ['Content-Type'] : [])
-		
+
 		// Merge with custom headers
 		const headers: HeadersInit = { ...headersObj, ...customHeaders }
 
@@ -498,13 +501,13 @@ export class HttpService {
 
 	/**
 	 * Performs a PUT request to update existing resources.
-	 * 
+	 *
 	 * @template T - Expected type of the payload data
 	 * @param {string} url - Endpoint URL (relative to base URL)
 	 * @param {any} data - Updated data to send
 	 * @param {RequestInit} options - Optional fetch options
 	 * @returns {Promise<AxiosResponse<ApiResponse<T>>>} Promise resolving to the API response
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * // Update product
@@ -528,18 +531,18 @@ export class HttpService {
 
 	/**
 	 * Performs a DELETE request to remove resources.
-	 * 
+	 *
 	 * @template T - Expected type of the payload data (usually void)
 	 * @param {string} url - Endpoint URL (relative to base URL)
 	 * @param {any} data - Optional data to send (rarely used with DELETE)
 	 * @param {RequestInit} options - Optional fetch options
 	 * @returns {Promise<AxiosResponse<ApiResponse<T>>>} Promise resolving to the API response
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * // Delete product
 	 * await HttpService.delete<void>('/products/123');
-	 * 
+	 *
 	 * // Soft delete with data
 	 * await HttpService.delete<void>('/orders/789', {
 	 *   reason: 'Customer requested cancellation'
@@ -570,13 +573,13 @@ export class HttpService {
 	 * Performs a POST request for file downloads.
 	 * Special method that doesn't expect ApiResponse wrapper.
 	 * Used for binary file downloads (PDFs, Excel, images, etc.)
-	 * 
+	 *
 	 * @template T - Expected response type (usually Blob or ArrayBuffer)
 	 * @param {string} url - Endpoint URL for download
 	 * @param {any} data - Optional filter/search parameters
 	 * @param {RequestInit & { responseType?: 'blob' | 'arraybuffer' }} options - Fetch config with responseType
 	 * @returns {Promise<AxiosResponse<T>>} Promise resolving to the file data
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * // Download PDF report
@@ -586,7 +589,7 @@ export class HttpService {
 	 *   { responseType: 'blob' }
 	 * );
 	 * const blob = pdfResponse.data; // Already a Blob
-	 * 
+	 *
 	 * // Create download link
 	 * const url = window.URL.createObjectURL(blob);
 	 * const link = document.createElement('a');
@@ -633,10 +636,10 @@ export class HttpService {
 	// ============================================================================
 	// PUBLIC (NO-AUTH) METHODS
 	// ============================================================================
-	// 
+	//
 	// These methods do NOT access cookies() or any runtime-only APIs.
 	// They can be used with Next.js 16 "use cache" directive for maximum performance.
-	// 
+	//
 	// Use these for:
 	// - Public product catalog browsing
 	// - Category listings
@@ -654,12 +657,12 @@ export class HttpService {
 	/**
 	 * Performs a GET request WITHOUT authentication.
 	 * Safe to use with "use cache" directive.
-	 * 
+	 *
 	 * @template T - Expected type of the payload data
 	 * @param {string} url - Endpoint URL (relative to base URL)
 	 * @param {RequestInit} options - Optional fetch options
 	 * @returns {Promise<AxiosResponse<ApiResponse<T>>>} Promise resolving to the API response
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * // Inside a "use cache" scope
@@ -685,13 +688,13 @@ export class HttpService {
 	/**
 	 * Performs a POST request WITHOUT authentication.
 	 * Safe to use with "use cache" directive.
-	 * 
+	 *
 	 * @template T - Expected type of the payload data
 	 * @param {string} url - Endpoint URL (relative to base URL)
 	 * @param {any} data - Data to send in the request body
 	 * @param {RequestInit} options - Optional fetch options
 	 * @returns {Promise<AxiosResponse<ApiResponse<T>>>} Promise resolving to the API response
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * // Inside a "use cache" scope
@@ -710,10 +713,10 @@ export class HttpService {
 	): Promise<AxiosResponse<ApiResponse<T>>> {
 		const fullUrl = `${HttpService.baseURL}${url}`
 		const customHeaders = (options.headers as Record<string, string>) || {}
-		
+
 		// Don't set Content-Type for FormData (browser will set it with boundary)
 		const isFormData = data instanceof FormData
-		
+
 		const headers: HeadersInit = isFormData
 			? { ...customHeaders }
 			: { 'Content-Type': CONTENT_TYPE.JSON, ...customHeaders }

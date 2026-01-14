@@ -1,27 +1,27 @@
 /**
  * Token Service - MAANG-Level JWT Token Management
- * 
+ *
  * Handles automatic token refresh, silent renewal, and token storage.
  * Implements industry best practices for secure token management.
- * 
+ *
  * **Features:**
  * - Automatic silent token refresh
  * - Token expiration tracking
  * - Concurrent request handling (queue while refreshing)
  * - Secure token storage (HttpOnly cookie for refresh token)
  * - Graceful degradation on refresh failure
- * 
+ *
  * **Security Best Practices:**
  * - Short-lived access tokens (15 min)
  * - Long-lived refresh tokens (7-30 days)
  * - Token rotation on each refresh
  * - Automatic logout on refresh failure
- * 
+ *
  * **Industry References:**
  * - OAuth 2.0 Token Refresh (RFC 6749)
  * - Auth0 Silent Token Renewal
  * - Microsoft MSAL Token Cache
- * 
+ *
  * @module tokenService
  */
 
@@ -55,7 +55,13 @@ const MIN_REFRESH_INTERVAL_MS = 10 * 1000
 
 export interface TokenPair {
   accessToken: string
-  refreshToken: string
+  /**
+   * Refresh token is intentionally optional.
+   *
+   * Best practice (2024-2026): refresh tokens should be delivered via HttpOnly cookies
+   * set by the backend, and NOT exposed to JavaScript.
+   */
+  refreshToken?: string | null
   accessTokenExpires: string // ISO date string
   refreshTokenExpires: string // ISO date string
 }
@@ -89,12 +95,11 @@ let lastRefreshAttempt = 0
 /**
  * Stores token pair in cookies.
  * Access token goes in regular cookie, refresh token in HttpOnly cookie (server-side).
- * 
+ *
  * @param tokens - Token pair from login/refresh response
  */
 export function storeTokens(tokens: TokenPair): void {
   const accessExpiry = new Date(tokens.accessTokenExpires)
-  const refreshExpiry = new Date(tokens.refreshTokenExpires)
 
   // Store access token
   setCookie(AUTH_COOKIE_NAME, tokens.accessToken, {
@@ -104,13 +109,8 @@ export function storeTokens(tokens: TokenPair): void {
     secure: process.env.NODE_ENV === 'production',
   })
 
-  // Store refresh token (longer lived)
-  setCookie(REFRESH_TOKEN_COOKIE, tokens.refreshToken, {
-    expires: refreshExpiry,
-    path: '/',
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-  })
+  // Refresh token is expected to be set by the backend as an HttpOnly cookie.
+  // If an older backend/client still sends it, we intentionally do NOT persist it here.
 
   // Store expiry time for proactive refresh
   setCookie(TOKEN_EXPIRY_COOKIE, tokens.accessTokenExpires, {
@@ -122,7 +122,6 @@ export function storeTokens(tokens: TokenPair): void {
     component: 'TokenService',
     action: 'storeTokens',
     accessExpiry: accessExpiry.toISOString(),
-    refreshExpiry: refreshExpiry.toISOString(),
   })
 }
 
@@ -131,6 +130,8 @@ export function storeTokens(tokens: TokenPair): void {
  */
 export function clearTokens(): void {
   deleteCookie(AUTH_COOKIE_NAME)
+  // NOTE: If the refresh token cookie is HttpOnly (recommended), JS cannot delete it.
+  // Logout should call the backend to revoke + clear the cookie server-side.
   deleteCookie(REFRESH_TOKEN_COOKIE)
   deleteCookie(TOKEN_EXPIRY_COOKIE)
   logger.debug('Tokens cleared', {
@@ -155,7 +156,7 @@ export function getRefreshToken(): string | undefined {
 
 /**
  * Checks if access token is expired or about to expire.
- * 
+ *
  * @param bufferMs - Time before actual expiration to consider it expired
  * @returns true if token needs refresh
  */
@@ -175,10 +176,10 @@ export function isTokenExpired(bufferMs: number = REFRESH_BUFFER_MS): boolean {
 
 /**
  * Refreshes the access token using the refresh token.
- * 
+ *
  * Handles concurrent requests by queuing them during refresh.
  * Uses token rotation (old refresh token becomes invalid).
- * 
+ *
  * @returns Promise resolving to new access token, or null if refresh failed
  */
 export async function refreshAccessToken(): Promise<string | null> {
@@ -190,15 +191,6 @@ export async function refreshAccessToken(): Promise<string | null> {
       action: 'refreshAccessToken',
     })
     return getAccessToken() ?? null
-  }
-
-  const refreshToken = getRefreshToken()
-  if (!refreshToken) {
-    logger.debug('No refresh token available', {
-      component: 'TokenService',
-      action: 'refreshAccessToken',
-    })
-    return null
   }
 
   // If already refreshing, queue this request
@@ -224,10 +216,13 @@ export async function refreshAccessToken(): Promise<string | null> {
     // 3. The refresh endpoint doesn't need existing auth - it validates the refresh token
     const response = await fetch(`${DEFAULT_API_BASE_URL}/auth/refresh`, {
       method: 'POST',
+      credentials: 'include', // include HttpOnly refresh token cookie
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ refreshToken }),
+      // Refresh token is sent via HttpOnly cookie (preferred).
+      // Back-compat: backend may still accept body token, but we don't send it.
+      body: JSON.stringify({}),
     })
 
     if (!response.ok) {
@@ -238,27 +233,28 @@ export async function refreshAccessToken(): Promise<string | null> {
         status: response.status,
       })
       clearTokens()
-      
+
       // Notify queued requests of failure
       processRefreshQueue(null)
-      
+
       // Dispatch event for forced logout
       dispatchLogoutEvent()
-      
+
       return null
     }
 
     const data: RefreshResponse = await response.json()
-    
+
     if (data.statusCode === 200 && data.payload) {
-      // Store new tokens
+      // Store new access token + expiry.
+      // Refresh token rotation happens server-side via HttpOnly cookie.
       storeTokens(data.payload)
-      
+
       const newAccessToken = data.payload.accessToken
-      
+
       // Notify queued requests of success
       processRefreshQueue(newAccessToken)
-      
+
       logger.info('Token refreshed successfully', {
         component: 'TokenService',
         action: 'refreshAccessToken',
@@ -295,7 +291,7 @@ export async function refreshAccessToken(): Promise<string | null> {
 
 /**
  * Processes queued refresh requests.
- * 
+ *
  * @param token - New access token (null if refresh failed)
  */
 function processRefreshQueue(token: string | null): void {
@@ -328,19 +324,15 @@ function dispatchLogoutEvent(): void {
 /**
  * Checks if token needs refresh and refreshes proactively.
  * Call this before making API requests.
- * 
+ *
  * @returns Promise resolving to current/new access token, or null if not authenticated
  */
 export async function ensureValidToken(): Promise<string | null> {
   const currentToken = getAccessToken()
-  
+
   if (!currentToken) {
-    // No access token - try to refresh if we have refresh token
-    const refreshToken = getRefreshToken()
-    if (refreshToken) {
-      return refreshAccessToken()
-    }
-    return null
+    // No access token - attempt silent refresh (may succeed via HttpOnly refresh cookie)
+    return refreshAccessToken()
   }
 
   // Check if token is about to expire
@@ -360,7 +352,7 @@ let refreshIntervalId: ReturnType<typeof setInterval> | null = null
 /**
  * Starts automatic token refresh timer.
  * Checks token expiry periodically and refreshes proactively.
- * 
+ *
  * Call this once when the app initializes (after login).
  */
 export function startAutoRefresh(): void {
@@ -415,7 +407,7 @@ export function stopAutoRefresh(): void {
 /**
  * Sets up refresh on tab visibility change.
  * When user returns to tab after being away, check and refresh token if needed.
- * 
+ *
  * @returns Cleanup function to remove the event listener
  */
 export function setupVisibilityRefresh(): (() => void) | undefined {
@@ -426,7 +418,7 @@ export function setupVisibilityRefresh(): (() => void) | undefined {
   const handleVisibilityChange = () => {
     if (document.visibilityState === 'visible') {
       // User returned to tab - check token validity
-      if (getRefreshToken() && isTokenExpired()) {
+      if (isTokenExpired()) {
         logger.debug('Tab visible - checking token validity', {
           component: 'TokenService',
           action: 'setupVisibilityRefresh',
