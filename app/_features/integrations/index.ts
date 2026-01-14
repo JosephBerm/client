@@ -15,10 +15,52 @@
 // =========================================================================
 
 // Types
-export * from './types'
+export type {
+	IntegrationProvider,
+	SyncDirectionString,
+	IntegrationConnectionDTO,
+	UpdateConnectionSettingsRequest,
+	IntegrationSettingsDTO,
+	UpdateIntegrationSettingsRequest,
+	IntegrationSyncLogDTO,
+	SyncLogSearchFilter,
+	IntegrationEntityMappingDTO,
+	IntegrationSyncCheckpointDTO,
+	TriggerSyncRequest,
+	SyncOperationResponse,
+	SyncOperationStatus,
+	IntegrationDashboardSummary,
+	IntegrationStats,
+	RecentSyncActivity,
+	PendingOutboxItem,
+	PagedIntegrationResult,
+} from './types'
+export {
+	SyncDirection,
+	SyncStatus,
+	OutboxStatus,
+	ConnectionStatus,
+	getSyncStatusDisplay,
+	getSyncStatusColor,
+	getSyncDirectionDisplay,
+	getProviderLogoUrl,
+	formatDuration,
+} from './types'
 
 // Constants
-export * from './constants'
+export {
+	STALE_TIME_FREQUENT,
+	STALE_TIME_MODERATE,
+	STALE_TIME_RARE,
+	DASHBOARD_REFETCH_INTERVAL,
+	SYNC_STATUS_POLL_INTERVAL,
+	DEFAULT_PAGE_SIZE,
+	DEFAULT_PAGE_NUMBER,
+	MAX_PAGE_SIZE,
+	SYNC_COMPLETE_STATUSES,
+	PROVIDERS,
+	ENTITY_TYPES,
+} from './constants'
 
 // Services
 export { IntegrationService } from './services'
