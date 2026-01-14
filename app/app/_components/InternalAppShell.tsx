@@ -1,15 +1,15 @@
 /**
  * Internal App Shell Component
- * 
+ *
  * FAANG-level internal application layout with permanent sidebar navigation.
  * Industry best practice: Sidebar always visible on desktop (like Notion, Linear, Stripe).
- * 
+ *
  * **Design Philosophy:**
  * - Portal-style navigation (sidebar is part of the layout, not hidden)
  * - Easy access to all sections (reduces clicks, improves UX)
  * - Consistent with industry leaders (Google, LinkedIn, Stripe, Notion, AWS)
  * - Mobile-first responsive (drawer on mobile, permanent on desktop)
- * 
+ *
  * **Features:**
  * - PERMANENT sidebar on desktop (>= 1024px) - NON-COLLAPSIBLE
  * - Drawer sidebar on mobile (< 1024px) - toggleable via hamburger menu
@@ -18,7 +18,7 @@
  * - Auto-generated breadcrumb trail
  * - Responsive layout
  * - Keyboard navigation support
- * 
+ *
  * **Responsive Behavior:**
  * - **Mobile (< 1024px):**
  *   - Fixed header with hamburger menu (top-left)
@@ -31,13 +31,13 @@
  *   - Content area adapts with left margin
  *   - No hamburger menu (not needed)
  *   - Full breadcrumb trail
- * 
+ *
  * **Hamburger Menu Pattern (FAANG Standard):**
  * - Location: Top-left corner (matches Google, LinkedIn, Stripe)
  * - Icon: Traditional 3-bar menu icon
  * - Behavior: Opens/closes sidebar drawer on mobile
  * - Hidden on desktop (sidebar is permanent)
- * 
+ *
  * **Accessibility:**
  * - WCAG AA compliant
  * - Proper landmarks (nav, main)
@@ -46,12 +46,12 @@
  * - Screen reader support
  * - aria-controls connects hamburger to sidebar
  * - aria-expanded indicates drawer state
- * 
+ *
  * @example
  * ```tsx
  * // In app/app/layout.tsx
  * import { InternalAppShell } from './_components'
- * 
+ *
  * export default function Layout({ children }) {
  *   return (
  *     <InternalAppShell user={user}>
@@ -60,7 +60,7 @@
  *   )
  * }
  * ```
- * 
+ *
  * @module InternalAppShell
  */
 
@@ -83,6 +83,7 @@ import type { IUser } from '@_classes/User'
 import Button from '@_components/ui/Button'
 import Logo from '@_components/ui/Logo'
 import AccountStatusListener from '@_components/auth/AccountStatusListener'
+import StepUpListener from '@_components/auth/StepUpListener'
 
 import Breadcrumb from './Breadcrumb'
 import InternalSidebar from './InternalSidebar'
@@ -106,7 +107,7 @@ function useAuthSync(user: IUser | null | undefined): void {
 	// Handle user prop changes after initial mount
 	useEffect(() => {
 		if (!user) return
-		
+
 		const currentUser = useAuthStore.getState().user
 		if (currentUser?.id !== user.id) {
 			useAuthStore.getState().setUser(user)
@@ -129,7 +130,7 @@ interface InternalAppShellProps {
 	/**
 	 * User data from server-side authentication.
 	 * Used to initialize client-side auth store.
-	 * 
+	 *
 	 * **Validation:**
 	 * - Must be a valid User instance
 	 * - Should have a valid id (though null is technically allowed by type)
@@ -140,12 +141,12 @@ interface InternalAppShellProps {
 
 /**
  * Internal App Shell Component
- * 
+ *
  * Portal-style layout with permanent sidebar (industry best practice).
  * Inspired by Google, LinkedIn, Stripe, Notion, and other top-tier applications.
- * 
+ *
  * **Layout Structure (Mobile-First):**
- * 
+ *
  * **Mobile (< 1024px):**
  * ```
  * ┌──────────────────────────────────────┐
@@ -155,10 +156,10 @@ interface InternalAppShellProps {
  * │  Breadcrumb → Page Content           │
  * │                                      │
  * └──────────────────────────────────────┘
- * 
+ *
  * [Sidebar] ← Overlay drawer (when open)
  * ```
- * 
+ *
  * **Desktop (>= 1024px):**
  * ```
  * ┌──────────────────────────────────────────────────┐
@@ -169,12 +170,12 @@ interface InternalAppShellProps {
  * │             │                                    │
  * └──────────────────────────────────────────────────┘
  * ```
- * 
+ *
  * **State Management:**
  * - Sidebar open state (mobile only): Local useState
  * - No desktop state needed (sidebar is always visible)
  * - Responsive breakpoint: useMediaQuery hook
- * 
+ *
  * **Responsive Behavior:**
  * - **Mobile (<1024px)**:
  *   - Fixed header with hamburger menu (top-left)
@@ -183,19 +184,19 @@ interface InternalAppShellProps {
  *   - Backdrop with click-to-close
  *   - Closes on link click
  *   - Body scroll lock when open
- * 
+ *
  * - **Desktop (>=1024px)**:
  *   - Sidebar PERMANENT (always visible)
  *   - Fixed 384px width
  *   - Main content has fixed left margin
  *   - No hamburger menu (not needed)
  *   - No collapse functionality (portal design)
- * 
+ *
  * **Performance:**
  * - Minimal state (mobile only)
  * - No unnecessary re-renders
  * - Sidebar handles own internal logic
- * 
+ *
  * @param props - Component props including children and user
  * @returns Internal app shell layout
  */
@@ -225,18 +226,19 @@ export default function InternalAppShell({ children, user }: InternalAppShellPro
 	const closeSidebar = () => setSidebarOpen(false)
 
 	return (
-		<div className="relative flex min-h-screen w-full bg-base-100">
+		<div className='relative flex min-h-screen w-full bg-base-100'>
 			{/* ============================================================= */}
-			{/* ACCOUNT STATUS LISTENER (MAANG-Level Security)                */}
+			{/* SECURITY EVENT LISTENERS (MAANG-Level Security)               */}
 			{/* ============================================================= */}
-			{/* Listens for account status errors (suspended/locked/archived) */}
-			{/* Forces immediate logout with user notification                */}
+			{/* AccountStatusListener: Handles suspended/locked/archived accounts */}
+			{/* StepUpListener: Handles step-up MFA for sensitive actions         */}
 			<AccountStatusListener />
+			<StepUpListener />
 
 			{/* Internal Sidebar Navigation */}
 			{/* Mobile: Overlay drawer (controlled by sidebarOpen) */}
 			{/* Desktop: Always visible, permanent (isOpen=true) */}
-			{/* 
+			{/*
 				Defensive: InternalSidebar handles its own error boundaries internally
 				If sidebar fails, app continues to function (graceful degradation)
 			*/}
@@ -247,7 +249,7 @@ export default function InternalAppShell({ children, user }: InternalAppShellPro
 
 			{/* Main Content Area */}
 			<main
-				id="main-content"
+				id='main-content'
 				className={classNames(
 					'relative flex-1 bg-base-100',
 					'min-h-screen',
@@ -260,8 +262,7 @@ export default function InternalAppShell({ children, user }: InternalAppShellPro
 					// Mobile: Top padding for fixed header + breathing room
 					// FAANG standard: 64px header + 24px spacing = 88px total
 					'pt-24 sm:pt-24 lg:pt-8'
-				)}
-			>
+				)}>
 				{/* Mobile: Hamburger Menu Header */}
 				{/* Industry standard: Top-left hamburger (Google, LinkedIn, Stripe, Notion) */}
 				{/* Mobile-first approach: Hidden on desktop (lg:hidden) */}
@@ -274,43 +275,41 @@ export default function InternalAppShell({ children, user }: InternalAppShellPro
 							'border-b border-base-300',
 							'flex items-center gap-4',
 							'lg:hidden' // Hide on desktop (permanent sidebar instead)
-						)}
-					>
-					{/* Hamburger Button */}
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={toggleSidebar}
-						aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
-						aria-expanded={sidebarOpen}
-						aria-controls="internal-sidebar"
-						className="w-10 h-10 p-0 min-h-0"
-					>
-						<Menu className="w-6 h-6" aria-hidden="true" />
-					</Button>
+						)}>
+						{/* Hamburger Button */}
+						<Button
+							variant='ghost'
+							size='sm'
+							onClick={toggleSidebar}
+							aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
+							aria-expanded={sidebarOpen}
+							aria-controls='internal-sidebar'
+							className='w-10 h-10 p-0 min-h-0'>
+							<Menu
+								className='w-6 h-6'
+								aria-hidden='true'
+							/>
+						</Button>
 
 						{/* Mobile Header Logo */}
-					<div className="flex-1 min-w-0 flex items-center">
-						<Logo
-							href={Routes.Dashboard.location}
-							showText
-							size="sm"
-							className="min-w-0"
-							textClassName="truncate"
-						/>
-					</div>
+						<div className='flex-1 min-w-0 flex items-center'>
+							<Logo
+								href={Routes.Dashboard.location}
+								showText
+								size='sm'
+								className='min-w-0'
+								textClassName='truncate'
+							/>
+						</div>
 					</div>
 				)}
 
 				{/* Breadcrumb Navigation - FAANG-level spacing (mobile-first) */}
-				<Breadcrumb className="mb-5 sm:mb-6 lg:mb-6" />
+				<Breadcrumb className='mb-5 sm:mb-6 lg:mb-6' />
 
 				{/* Page Content */}
-				<div className="mx-auto max-w-screen-2xl">
-					{children}
-				</div>
+				<div className='mx-auto max-w-screen-2xl'>{children}</div>
 			</main>
 		</div>
 	)
 }
-
