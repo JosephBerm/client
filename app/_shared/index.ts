@@ -151,12 +151,11 @@ export {
 	type AdminCreateAccountResponse,
 	type ChangeAccountStatusRequest,
 	type StatusChangeResult,
-	// Types - RBAC (canonical source: @_types/rbac)
+	// Types - RBAC (canonical source: @_types/rbac, RoleThresholds exported from constants)
 	type Role,
 	type PermissionEntity,
 	type Permission, // @deprecated alias for PermissionEntity
 	type RolePermission,
-	type RoleThresholds,
 	type CreateRoleRequest,
 	type UpdateRoleRequest,
 	type CreatePermissionRequest,
