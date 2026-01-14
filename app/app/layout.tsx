@@ -28,11 +28,7 @@ import { Routes } from '@_features/navigation'
 
 import { logger } from '@_core'
 
-import { 
-	AUTH_COOKIE_NAME, 
-	AUTH_HEADER_PREFIX, 
-	DEFAULT_API_BASE_URL,
-} from '@_shared'
+import { AUTH_COOKIE_NAME, API } from '@_shared'
 
 import { InternalAppShell } from './_components'
 
@@ -47,29 +43,25 @@ export const metadata: Metadata = {
  * Server-side function to validate token and get user info.
  * Used for role-based navigation rendering.
  * 
- * @param token - Authentication token from cookies
- * @returns User data or null if invalid
+ * **Architecture Note:**
+ * Uses centralized API module (HttpService) which:
+ * - Automatically reads token from cookies (server or client)
+ * - Handles authentication headers
+ * - Provides consistent error handling
+ * 
+ * @returns User data response or null if invalid
  */
-async function getUserData(token: string | null) {
-	if (token == null) {return token}
-
+async function getUserData() {
 	try {
-		// Use centralized API URL constant for consistency
-		const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_BASE_URL
-		const response = await fetch(`${apiUrl}/account`, {
-			cache: 'no-store',
-			headers: {
-				Authorization: `${AUTH_HEADER_PREFIX}${token}`,
-			},
-		})
+		// Use centralized API module - HttpService handles auth token automatically
+		const response = await API.Accounts.get(null)
 
-		if (response.ok) {
-			const userData = await response.json()
+		if (response.status === 200 && response.data?.payload) {
 			logger.debug('User data fetched successfully', {
-				hasPayload: !!userData?.payload,
+				hasPayload: !!response.data.payload,
 				component: 'InternalAppLayout',
 			})
-			return userData
+			return response.data
 		}
 
 		logger.warn('Failed to fetch user data - invalid response', {
@@ -119,7 +111,8 @@ export default async function InternalAppLayout({
 	}
 
 	// Validate token and get user data
-	const response = await getUserData(token.value)
+	// HttpService automatically reads token from cookies (via next/headers on server)
+	const response = await getUserData()
 	if (response?.payload == null) {
 		logger.warn('Invalid auth token in internal app layout', {
 			component: 'InternalAppLayout',
