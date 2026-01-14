@@ -214,7 +214,11 @@ export async function refreshAccessToken(): Promise<string | null> {
     // 1. HttpService uses tokenService (would cause circular dependency)
     // 2. This is the standard pattern in OAuth/OIDC libraries (Auth0, MSAL, etc.)
     // 3. The refresh endpoint doesn't need existing auth - it validates the refresh token
-    const response = await fetch(`${DEFAULT_API_BASE_URL}/auth/refresh`, {
+    //
+    // CRITICAL: Must use NEXT_PUBLIC_API_URL for production, not the localhost fallback.
+    // The environment variable is set in next.config.mjs per environment.
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_BASE_URL
+    const response = await fetch(`${apiBaseUrl}/auth/refresh`, {
       method: 'POST',
       credentials: 'include', // include HttpOnly refresh token cookie
       headers: {
