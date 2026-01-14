@@ -25,7 +25,7 @@
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
-import { login, signup, useAuthStore, useAuthRedirect } from '@_features/auth'
+import { login, signup, verifyMfa, useAuthStore, useAuthRedirect } from '@_features/auth'
 import { Routes } from '@_features/navigation'
 
 import type { LoginFormData, SignupFormData } from '@_core'
@@ -100,6 +100,13 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 	const [showSuspendedModal, setShowSuspendedModal] = useState(false)
 	const [showVerificationModal, setShowVerificationModal] = useState(false)
 	const [userEmail, setUserEmail] = useState<string | null>(null)
+
+	// MFA state (PLAN_2FA.md)
+	const [mfaChallengeState, setMfaChallengeState] = useState<{
+		challengeId: string
+		expiresAt: Date
+	} | null>(null)
+	const [mfaError, setMfaError] = useState<string | null>(null)
 
 	// Centralized redirect management (MAANG-level pattern)
 	const { executePostAuthRedirect } = useAuthRedirect()
@@ -243,6 +250,23 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 					password: values.password,
 					rememberUser: values.rememberMe,
 				})
+
+				// Check if MFA is required (PLAN_2FA.md)
+				if (result.mfaRequired && result.mfaChallengeId && result.mfaExpiresAt) {
+					logger.info('MFA required for login', {
+						identifier: values.identifier,
+						challengeId: result.mfaChallengeId,
+						component: COMPONENT_NAME,
+					})
+					setMfaChallengeState({
+						challengeId: result.mfaChallengeId,
+						expiresAt: new Date(result.mfaExpiresAt),
+					})
+					setMfaError(null)
+					setCurrentView('mfa')
+					setIsLoading(false)
+					return
+				}
 
 				if (result.success) {
 					await handleAuthSuccess(result.user, result.accessToken, values.identifier)
@@ -468,11 +492,61 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 	}, [loginForm])
 
 	/**
+	 * Handle MFA verification (PLAN_2FA.md)
+	 */
+	const handleMfaVerify = useCallback(
+		async (code: string, rememberDevice: boolean, isRecoveryCode: boolean) => {
+			if (!mfaChallengeState) {
+				setMfaError('Session expired. Please try logging in again.')
+				return
+			}
+
+			setIsLoading(true)
+			setMfaError(null)
+
+			try {
+				const result = await verifyMfa(mfaChallengeState.challengeId, code, rememberDevice)
+
+				if (result.success) {
+					await handleAuthSuccess(result.user, result.accessToken, '')
+					setMfaChallengeState(null)
+					setMfaError(null)
+				} else {
+					setMfaError(result.message ?? 'Invalid code. Please try again.')
+				}
+			} catch (error) {
+				logger.error('MFA verification error', {
+					error,
+					component: COMPONENT_NAME,
+					action: 'handleMfaVerify',
+				})
+				setMfaError('An error occurred. Please try again.')
+			} finally {
+				setIsLoading(false)
+			}
+		},
+		[mfaChallengeState, handleAuthSuccess]
+	)
+
+	/**
+	 * Cancel MFA and return to login
+	 */
+	const handleMfaCancel = useCallback(() => {
+		setMfaChallengeState(null)
+		setMfaError(null)
+		setCurrentView('login')
+		setShowEmailForm(false)
+		loginForm.reset()
+	}, [loginForm])
+
+	/**
 	 * Reset and close modal.
 	 */
 	const handleClose = useCallback(() => {
 		setShowEmailForm(false)
 		setCurrentView('login')
+		setMfaChallengeState(null)
+		setMfaError(null)
 		loginForm.reset()
 		signupForm.reset()
 		onClose()
@@ -498,5 +572,10 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 		showVerificationModal,
 		setShowVerificationModal,
 		userEmail,
+		// MFA state (PLAN_2FA.md)
+		mfaChallengeState,
+		mfaError,
+		handleMfaVerify,
+		handleMfaCancel,
 	}
 }

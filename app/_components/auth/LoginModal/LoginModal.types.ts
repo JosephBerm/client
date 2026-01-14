@@ -1,15 +1,15 @@
 /**
  * LoginModal Types
- * 
+ *
  * Type definitions for the LoginModal component family.
  * Following FAANG-level type safety and separation of concerns.
- * 
+ *
  * @module LoginModal/types
  */
 
-import type { UseFormReturn } from 'react-hook-form'
-
 import type { LoginFormData, SignupFormData } from '@_core'
+
+import type { UseFormReturn } from 'react-hook-form'
 
 // ============================================================================
 // MODAL TYPES
@@ -19,7 +19,7 @@ import type { LoginFormData, SignupFormData } from '@_core'
  * Modal view state type.
  * Controls which form is displayed in the modal.
  */
-export type AuthModalView = 'login' | 'signup'
+export type AuthModalView = 'login' | 'signup' | 'mfa' | 'mfa-recovery'
 
 /**
  * Social login provider type.
@@ -97,6 +97,24 @@ export interface SignupFormProps {
 	onSwitchToLogin: () => void
 }
 
+/**
+ * MfaChallengeForm component props.
+ */
+export interface MfaChallengeFormProps {
+	/** MFA challenge ID from backend */
+	challengeId: string
+	/** When the challenge expires */
+	expiresAt: Date
+	/** Handler for code verification */
+	onVerify: (code: string, rememberDevice: boolean, isRecoveryCode: boolean) => Promise<void>
+	/** Handler to cancel and go back */
+	onCancel: () => void
+	/** Whether form submission is in progress */
+	isLoading: boolean
+	/** Error message to display */
+	error?: string | null
+}
+
 // ============================================================================
 // HOOK RETURN TYPES
 // ============================================================================
@@ -104,7 +122,7 @@ export interface SignupFormProps {
 /**
  * Return type for useAuthModal hook.
  * Contains all state and handlers for the auth modal.
- * 
+ *
  * **Phase 1 Enhancement**: Includes account status modal states
  */
 export interface UseAuthModalReturn {
@@ -130,7 +148,7 @@ export interface UseAuthModalReturn {
 	handleSwitchToLogin: () => void
 	/** Handler to close modal */
 	handleClose: () => void
-	
+
 	// Phase 1: Account status modal states
 	/** Whether account locked modal is shown */
 	showLockedModal: boolean
@@ -146,5 +164,14 @@ export interface UseAuthModalReturn {
 	setShowVerificationModal: (show: boolean) => void
 	/** User's email for modal display */
 	userEmail: string | null
-}
 
+	// MFA state (PLAN_2FA.md)
+	/** MFA challenge state */
+	mfaChallengeState: { challengeId: string; expiresAt: Date } | null
+	/** MFA error message */
+	mfaError: string | null
+	/** Handler for MFA verification */
+	handleMfaVerify: (code: string, rememberDevice: boolean, isRecoveryCode: boolean) => Promise<void>
+	/** Handler to cancel MFA and return to login */
+	handleMfaCancel: () => void
+}

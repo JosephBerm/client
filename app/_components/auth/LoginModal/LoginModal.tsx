@@ -3,7 +3,7 @@
  *
  * ChatGPT-style authentication modal with social login and email/password options.
  * Composes smaller, focused sub-components for maintainability.
- * 
+ *
  * **Architecture:**
  * - LoginModal (this file) - Orchestrates modal state and layout
  * - useAuthModal - Contains all auth business logic
@@ -25,20 +25,22 @@
 
 'use client'
 
-import Modal from '@_components/ui/Modal'
+import { parseDateOrNow } from '@_lib/dates'
 
 // Phase 1: Account status modals
 import AccountLockedModal from '@_components/modals/AccountLockedModal'
 import AccountSuspendedModal from '@_components/modals/AccountSuspendedModal'
 import EmailVerificationModal from '@_components/modals/EmailVerificationModal'
+import Modal from '@_components/ui/Modal'
 
-import AuthModalHeader from './AuthModalHeader'
-import SocialLoginButtons from './SocialLoginButtons'
 import AuthDivider from './AuthDivider'
+import AuthModalHeader from './AuthModalHeader'
 import LoginForm from './LoginForm'
-import SignupForm from './SignupForm'
-import { useAuthModal } from './useAuthModal'
 import { MODAL_SUBTITLES, LAYOUT_CLASSES } from './LoginModal.constants'
+import MfaChallengeForm from './MfaChallengeForm'
+import SignupForm from './SignupForm'
+import SocialLoginButtons from './SocialLoginButtons'
+import { useAuthModal } from './useAuthModal'
 
 import type { LoginModalProps } from './LoginModal.types'
 
@@ -50,7 +52,7 @@ import type { LoginModalProps } from './LoginModal.types'
  *
  * @param props - Component props
  * @returns LoginModal component
- * 
+ *
  * @example
  * ```tsx
  * <LoginModal
@@ -81,6 +83,11 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 		showVerificationModal,
 		setShowVerificationModal,
 		userEmail,
+		// MFA state
+		mfaChallengeState,
+		mfaError,
+		handleMfaVerify,
+		handleMfaCancel,
 	} = useAuthModal({ onClose, onLoginSuccess })
 
 	return (
@@ -91,8 +98,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 				onClose={handleClose}
 				size='sm'
 				closeOnOverlayClick={true}
-				closeOnEscape={true}
-			>
+				closeOnEscape={true}>
 				<div className={LAYOUT_CLASSES.MODAL_CONTAINER}>
 					{/* Header with navigation controls */}
 					<AuthModalHeader
@@ -102,9 +108,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 					/>
 
 					{/* Subtitle */}
-					<p className={LAYOUT_CLASSES.SUBTITLE}>
-						{MODAL_SUBTITLES[currentView]}
-					</p>
+					<p className={LAYOUT_CLASSES.SUBTITLE}>{MODAL_SUBTITLES[currentView]}</p>
 
 					{/* Login View */}
 					{currentView === 'login' && (
@@ -138,6 +142,18 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 							onSwitchToLogin={handleSwitchToLogin}
 						/>
 					)}
+
+					{/* MFA View */}
+					{(currentView === 'mfa' || currentView === 'mfa-recovery') && (
+						<MfaChallengeForm
+							challengeId={mfaChallengeState?.challengeId ?? ''}
+							expiresAt={mfaChallengeState?.expiresAt ?? parseDateOrNow()}
+							onVerify={handleMfaVerify}
+							onCancel={handleMfaCancel}
+							isLoading={isLoading}
+							error={mfaError}
+						/>
+					)}
 				</div>
 			</Modal>
 
@@ -161,4 +177,3 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 		</>
 	)
 }
-

@@ -458,6 +458,89 @@ const API = {
 			HttpService.post<AdminCreateAccountResponse>('/account/admin/create', request),
 
 		// ========================================================================
+		// MFA (TWO-FACTOR AUTHENTICATION) - PLAN_2FA.md Implementation
+		// ========================================================================
+
+		/**
+		 * MFA namespace for two-factor authentication operations.
+		 * Provides TOTP setup, verification, backup codes, and trusted device management.
+		 */
+		Mfa: {
+			/**
+			 * Starts TOTP setup by generating a new secret.
+			 * Returns QR code URI and base32 secret for manual entry.
+			 * @returns OtpAuthUri and secret for authenticator app setup
+			 */
+			startTotpSetup: async () =>
+				HttpService.post<{ otpAuthUri: string; secret: string }>('/account/mfa/totp/setup/start', {}),
+
+			/**
+			 * Confirms TOTP setup by verifying the first code.
+			 * Returns backup codes on success.
+			 * @param code - 6-digit TOTP code from authenticator app
+			 * @returns Backup codes array on success
+			 */
+			confirmTotpSetup: async (code: string) =>
+				HttpService.post<{ backupCodes: string[] }>('/account/mfa/totp/setup/confirm', { code }),
+
+			/**
+			 * Disables MFA for the current user.
+			 * Requires password and optional MFA code for step-up auth.
+			 * @param password - Current password
+			 * @param mfaCode - Optional TOTP code for verification
+			 */
+			disable: async (password: string, mfaCode?: string) =>
+				HttpService.post<boolean>('/account/mfa/disable', { password, mfaCode }),
+
+			/**
+			 * Regenerates backup codes (invalidates old ones).
+			 * Requires step-up authentication.
+			 * @param password - Current password
+			 * @param mfaCode - Optional TOTP code
+			 * @returns New backup codes array
+			 */
+			regenerateBackupCodes: async (password: string, mfaCode?: string) =>
+				HttpService.post<{ backupCodes: string[] }>('/account/mfa/backup-codes/regenerate', { password, mfaCode }),
+
+			/**
+			 * Gets user's MFA settings status.
+			 * @returns MFA settings including enabled status and methods
+			 */
+			getSettings: async () =>
+				HttpService.get<{ isEnabled: boolean; enabledMethods: number; totpConfirmedAt?: string }>('/account/mfa/settings'),
+
+			/**
+			 * Gets list of trusted devices for current user.
+			 * @returns Array of trusted device info
+			 */
+			getTrustedDevices: async () =>
+				HttpService.get<Array<{
+					id: string
+					createdAt: string
+					lastUsedAt: string
+					expiresAt: string
+					ipFirstSeen?: string
+					userAgentFirstSeen?: string
+				}>>('/account/mfa/trusted-devices'),
+
+			/**
+			 * Revokes a specific trusted device.
+			 * @param deviceId - Device ID to revoke
+			 */
+			revokeDevice: async (deviceId: string) =>
+				HttpService.post<boolean>(`/account/mfa/trusted-devices/${deviceId}/revoke`, {}),
+
+			/**
+			 * Revokes all trusted devices (step-up auth required).
+			 * @param password - Current password
+			 * @param mfaCode - Optional TOTP code
+			 * @returns Number of devices revoked
+			 */
+			revokeAllDevices: async (password: string, mfaCode?: string) =>
+				HttpService.post<{ revokedCount: number }>('/account/mfa/trusted-devices/revoke-all', { password, mfaCode }),
+		},
+
+		// ========================================================================
 		// UNIFIED ACCOUNT STATUS MANAGEMENT (Unified DTO Pattern)
 		// ========================================================================
 

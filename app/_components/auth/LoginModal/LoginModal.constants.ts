@@ -1,11 +1,11 @@
 /**
  * LoginModal Constants
- * 
+ *
  * Centralized constants for LoginModal components.
  * Eliminates magic strings and ensures consistency.
- * 
+ *
  * Following the ProductDetail.constants.ts pattern.
- * 
+ *
  * @module LoginModal/constants
  */
 
@@ -23,6 +23,8 @@ import type { SocialProvider } from './LoginModal.types'
 export const MODAL_TITLES = {
 	login: 'Log in',
 	signup: 'Sign up',
+	mfa: 'Two-Factor Authentication',
+	'mfa-recovery': 'Recovery Code',
 } as const
 
 /**
@@ -31,6 +33,8 @@ export const MODAL_TITLES = {
 export const MODAL_SUBTITLES = {
 	login: 'Access your account to manage orders, quotes, and more.',
 	signup: 'Create an account to get started with MedSource Pro.',
+	mfa: 'Enter the code from your authenticator app.',
+	'mfa-recovery': 'Enter your recovery code.',
 } as const
 
 /**
@@ -42,6 +46,10 @@ export const BUTTON_LABELS = {
 	SIGN_UP: 'Sign up',
 	CREATE_ACCOUNT: 'Create Account',
 	LOGIN: 'Login',
+	VERIFY: 'Verify',
+	CANCEL: 'Cancel',
+	USE_RECOVERY_CODE: 'Use recovery code instead',
+	USE_AUTHENTICATOR: 'Use authenticator code instead',
 } as const
 
 /**
@@ -56,6 +64,10 @@ export const FIELD_LABELS = {
 	EMAIL: 'Email',
 	FIRST_NAME: 'First name',
 	LAST_NAME: 'Last name',
+	// MFA labels
+	MFA_CODE: 'Verification code',
+	MFA_RECOVERY_CODE: 'Recovery code',
+	MFA_REMEMBER_DEVICE: 'Remember this device for 30 days',
 } as const
 
 /**
@@ -70,6 +82,9 @@ export const FIELD_PLACEHOLDERS = {
 	EMAIL: 'Enter your email',
 	FIRST_NAME: 'Enter first name',
 	LAST_NAME: 'Enter last name',
+	// MFA placeholders
+	MFA_CODE: '000000',
+	MFA_RECOVERY_CODE: 'Enter recovery code',
 } as const
 
 /**
@@ -80,6 +95,7 @@ export const ARIA_LABELS = {
 	GO_BACK_LOGIN: 'Go back to login',
 	CREATE_ACCOUNT: 'Create a new account',
 	CONTINUE_WITH: (provider: string) => `Continue with ${provider}`,
+	CANCEL: 'Cancel',
 } as const
 
 /**
@@ -133,7 +149,7 @@ export const ANIMATION_CLASSES = {
 /**
  * Shared CSS class strings for consistent styling
  * Mobile-first approach with responsive breakpoints
- * 
+ *
  * Design Tokens Reference:
  * - min-h-[44px]: WCAG touch target minimum (44x44px)
  * - gap-3: Consistent icon-to-text spacing (12px)
@@ -208,13 +224,18 @@ export const ERROR_MESSAGES = {
 	SIGNUP_FAILED: 'Signup failed. Please try again.',
 	GENERIC_ERROR: 'An error occurred. Please try again.',
 	USER_DATA_LOAD_FAILED: 'Login successful but unable to load user data. Please refresh the page.',
+	// MFA error messages (generic for security)
+	MFA_INVALID_CODE: 'Invalid code. Please try again.',
+	MFA_SESSION_EXPIRED: 'Session expired. Please try logging in again.',
+	MFA_TOO_MANY_ATTEMPTS: 'Too many attempts. Please try again later.',
 } as const
 
 /**
  * Info messages
  */
 export const INFO_MESSAGES = {
-	SOCIAL_COMING_SOON: (provider: string) => `${provider.charAt(0).toUpperCase() + provider.slice(1)} login coming soon!`,
+	SOCIAL_COMING_SOON: (provider: string) =>
+		`${provider.charAt(0).toUpperCase() + provider.slice(1)} login coming soon!`,
 } as const
 
 // ============================================================================
@@ -225,4 +246,3 @@ export const INFO_MESSAGES = {
  * Component name for structured logging
  */
 export const COMPONENT_NAME = 'LoginModal' as const
-

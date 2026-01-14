@@ -1,18 +1,18 @@
 /**
  * Authentication Service
- * 
+ *
  * MAANG-Level JWT Token Management:
  * - Short-lived access tokens (15 min)
  * - Long-lived refresh tokens (7-30 days) with automatic rotation
  * - Silent token refresh on expiration
  * - Automatic logout on refresh failure
  * - Secure cookie-based token storage
- * 
+ *
  * Architecture:
  * - Uses HttpService for ALL API calls (DRY principle)
  * - Uses tokenService for token management
  * - All token operations happen client-side (marked 'use client')
- * 
+ *
  * @module AuthService
  */
 
@@ -22,12 +22,11 @@ import { getCookie, deleteCookie } from 'cookies-next'
 
 import { logger } from '@_core'
 
-import { 
-	HttpService, 
+import {
+	HttpService,
 	AUTH_COOKIE_NAME,
 	storeTokens,
 	clearTokens,
-	getRefreshToken,
 	startAutoRefresh,
 	stopAutoRefresh,
 } from '@_shared'
@@ -44,11 +43,20 @@ import type { IUser, RegisterModel } from '@_classes/User'
  */
 interface TokenPairResponse {
 	accessToken: string
-	refreshToken: string
+	/**
+	 * Refresh token should NOT be exposed to JS in the recommended architecture.
+	 * Backend delivers it via HttpOnly cookie; this field is optional for back-compat.
+	 */
+	refreshToken?: string | null
 	accessTokenExpires: string
 	refreshTokenExpires: string
 	requiresPasswordChange: boolean
 	message?: string
+	// MFA fields (PLAN_2FA.md)
+	mfaRequired?: boolean
+	mfaChallengeId?: string
+	mfaExpiresAt?: string
+	availableMethods?: number
 }
 
 /**
@@ -60,6 +68,11 @@ export interface LoginResult {
 	accessToken?: string
 	requiresPasswordChange?: boolean
 	message?: string
+	// MFA fields (PLAN_2FA.md)
+	mfaRequired?: boolean
+	mfaChallengeId?: string
+	mfaExpiresAt?: string
+	availableMethods?: number
 }
 
 /**
@@ -79,14 +92,23 @@ export interface SignupResult {
 /**
  * Verifies if the user is authenticated by checking token validity.
  * Fetches current user data from the server using the stored auth token.
- * 
+ *
  * @returns User object if authenticated, null otherwise
  */
 export async function checkAuthStatus(): Promise<IUser | null> {
 	const token = getCookie(AUTH_COOKIE_NAME)
 
+	// If access token is missing/expired, attempt silent refresh (may succeed via HttpOnly refresh cookie).
 	if (!token) {
-		return null
+		try {
+			const { refreshAccessToken } = await import('@_shared')
+			const refreshed = await refreshAccessToken()
+			if (!refreshed) {
+				return null
+			}
+		} catch {
+			return null
+		}
 	}
 
 	try {
@@ -115,12 +137,12 @@ export async function checkAuthStatus(): Promise<IUser | null> {
 /**
  * Authenticates a user with email/username and password.
  * Returns token pair (access + refresh) with automatic rotation.
- * 
+ *
  * MAANG-Level Security:
  * - Short-lived access tokens (15 min)
  * - Long-lived refresh tokens (7-30 days)
  * - Token rotation on each refresh
- * 
+ *
  * @param credentials - User's login credentials
  * @returns Login result with user data and tokens
  */
@@ -136,14 +158,14 @@ export async function login(credentials: LoginCredentials): Promise<LoginResult>
 		// Check for error response
 		if (response.status !== 200 || !response.data.payload) {
 			const errorMessage = response.data.message ?? 'Login failed'
-			
+
 			logger.warn('Login failed', {
 				component: 'AuthService',
 				action: 'login',
 				status: response.status,
 				message: errorMessage,
 			})
-			
+
 			return {
 				success: false,
 				message: translateLoginError(errorMessage),
@@ -152,10 +174,27 @@ export async function login(credentials: LoginCredentials): Promise<LoginResult>
 
 		const tokenData = response.data.payload
 
+		// Check if MFA is required (PLAN_2FA.md)
+		if (tokenData.mfaRequired) {
+			logger.info('MFA required for login', {
+				component: 'AuthService',
+				action: 'login',
+				challengeId: tokenData.mfaChallengeId,
+			})
+			return {
+				success: false,
+				mfaRequired: true,
+				mfaChallengeId: tokenData.mfaChallengeId,
+				mfaExpiresAt: tokenData.mfaExpiresAt,
+				availableMethods: tokenData.availableMethods,
+				message: 'MFA verification required',
+			}
+		}
+
 		// Store tokens using token service
 		storeTokens({
 			accessToken: tokenData.accessToken,
-			refreshToken: tokenData.refreshToken,
+			refreshToken: tokenData.refreshToken ?? undefined,
 			accessTokenExpires: tokenData.accessTokenExpires,
 			refreshTokenExpires: tokenData.refreshTokenExpires,
 		})
@@ -180,7 +219,7 @@ export async function login(credentials: LoginCredentials): Promise<LoginResult>
 		// Fetch user data
 		try {
 			const userResponse = await HttpService.get<IUser>('/account')
-			
+
 			if (userResponse.status === 200 && userResponse.data.payload) {
 				logger.info('Login successful', {
 					component: 'AuthService',
@@ -247,7 +286,7 @@ function translateLoginError(errorCode: string): string {
 /**
  * Registers a new user account.
  * On success, automatically logs in the user and returns token pair.
- * 
+ *
  * @param form - Registration form data
  * @returns Signup result with user data and tokens
  */
@@ -269,7 +308,7 @@ export async function signup(form: RegisterModel): Promise<SignupResult> {
 		// Store tokens
 		storeTokens({
 			accessToken: tokenData.accessToken,
-			refreshToken: tokenData.refreshToken,
+			refreshToken: tokenData.refreshToken ?? undefined,
 			accessTokenExpires: tokenData.accessTokenExpires,
 			refreshTokenExpires: tokenData.refreshTokenExpires,
 		})
@@ -280,7 +319,7 @@ export async function signup(form: RegisterModel): Promise<SignupResult> {
 		// Fetch user data
 		try {
 			const userResponse = await HttpService.get<IUser>('/account')
-			
+
 			if (userResponse.status === 200 && userResponse.data.payload) {
 				logger.info('Signup successful', {
 					component: 'AuthService',
@@ -319,20 +358,114 @@ export async function signup(form: RegisterModel): Promise<SignupResult> {
 }
 
 // =========================================================================
+// MFA VERIFICATION (PLAN_2FA.md)
+// =========================================================================
+
+/**
+ * Verifies MFA challenge with TOTP or backup code.
+ *
+ * @param challengeId - MFA challenge ID from login response
+ * @param code - TOTP code or backup code
+ * @param rememberDevice - Whether to trust this device for 30 days
+ * @returns Login result with user data and tokens
+ */
+export async function verifyMfa(
+	challengeId: string,
+	code: string,
+	rememberDevice: boolean = false
+): Promise<LoginResult> {
+	try {
+		const response = await HttpService.postPublic<TokenPairResponse>('/auth/mfa/verify', {
+			challengeId,
+			code,
+			rememberDevice,
+		})
+
+		if (response.status !== 200 || !response.data.payload) {
+			const errorMessage = response.data.message ?? 'MFA verification failed'
+
+			logger.warn('MFA verification failed', {
+				component: 'AuthService',
+				action: 'verifyMfa',
+				status: response.status,
+				message: errorMessage,
+			})
+
+			return {
+				success: false,
+				message: errorMessage,
+			}
+		}
+
+		const tokenData = response.data.payload
+
+		// Store tokens
+		storeTokens({
+			accessToken: tokenData.accessToken,
+			refreshToken: tokenData.refreshToken ?? undefined,
+			accessTokenExpires: tokenData.accessTokenExpires,
+			refreshTokenExpires: tokenData.refreshTokenExpires,
+		})
+
+		// Start automatic token refresh
+		startAutoRefresh()
+
+		// Fetch user data
+		try {
+			const userResponse = await HttpService.get<IUser>('/account')
+
+			if (userResponse.status === 200 && userResponse.data.payload) {
+				logger.info('MFA verification successful', {
+					component: 'AuthService',
+					action: 'verifyMfa',
+					userId: userResponse.data.payload.id ?? undefined,
+				})
+				return {
+					success: true,
+					user: userResponse.data.payload,
+					accessToken: tokenData.accessToken,
+				}
+			}
+		} catch (userError) {
+			logger.warn('MFA verification successful but user fetch failed', {
+				component: 'AuthService',
+				action: 'verifyMfa',
+				error: userError instanceof Error ? userError.message : 'Unknown error',
+			})
+		}
+
+		return {
+			success: true,
+			accessToken: tokenData.accessToken,
+		}
+	} catch (error) {
+		logger.error('MFA verification failed - network error', {
+			component: 'AuthService',
+			action: 'verifyMfa',
+			error: error instanceof Error ? error.message : 'Unknown error',
+		})
+		return {
+			success: false,
+			message: 'Network error occurred. Please try again.',
+		}
+	}
+}
+
+// =========================================================================
 // LOGOUT
 // =========================================================================
 
 /**
  * Logs out the user by revoking tokens and clearing local storage.
- * 
+ *
  * MAANG-Level Logout:
  * - Revokes refresh token on server (prevents session restoration)
  * - Clears all tokens from cookies
  * - Stops automatic token refresh
- * 
+ *
  * Note: Server revocation is fire-and-forget (non-blocking).
  * User logout happens immediately regardless of server response.
- * 
+ *
  * @param revokeOnServer - Whether to call server to revoke refresh token (default: true)
  */
 export function logout(revokeOnServer: boolean = true): void {
@@ -341,33 +474,29 @@ export function logout(revokeOnServer: boolean = true): void {
 
 	// Try to revoke refresh token on server (best effort)
 	if (revokeOnServer) {
-		const refreshToken = getRefreshToken()
-		
-		if (refreshToken) {
-			// Use HttpService.postPublic for server revocation (best effort, don't await)
-			// We don't block on this - user logout should be immediate
-			HttpService.postPublic('/auth/logout', { refreshToken })
-				.then(() => {
-					logger.debug('Server token revocation successful', {
-						component: 'AuthService',
-						action: 'logout',
-					})
+		// Refresh token is stored as HttpOnly cookie by the backend, so we cannot read it here.
+		// Best practice: call backend logout, which revokes token and clears the cookie server-side.
+		HttpService.postPublic('/auth/logout', {})
+			.then(() => {
+				logger.debug('Server token revocation successful', {
+					component: 'AuthService',
+					action: 'logout',
 				})
-				.catch((fetchError) => {
-					// Log but don't block - server revocation is best effort
-					logger.debug('Server token revocation failed (best effort)', {
-						component: 'AuthService',
-						action: 'logout',
-						error: fetchError instanceof Error ? fetchError.message : 'Unknown error',
-					})
+			})
+			.catch((fetchError) => {
+				// Log but don't block - server revocation is best effort
+				logger.debug('Server token revocation failed (best effort)', {
+					component: 'AuthService',
+					action: 'logout',
+					error: fetchError instanceof Error ? fetchError.message : 'Unknown error',
 				})
-		}
+			})
 	}
 
 	// Clear all tokens locally (this happens immediately)
 	clearTokens()
 	deleteCookie(AUTH_COOKIE_NAME)
-	
+
 	logger.info('User logged out', {
 		component: 'AuthService',
 		action: 'logout',
@@ -380,7 +509,7 @@ export function logout(revokeOnServer: boolean = true): void {
 
 /**
  * Gets the current authentication token from cookies.
- * 
+ *
  * @returns JWT token string, or undefined if not logged in
  */
 export function getAuthToken(): string | undefined {

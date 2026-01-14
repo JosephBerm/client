@@ -1,9 +1,9 @@
 /**
  * Profile Settings Page
- * 
+ *
  * Comprehensive user profile management page following MAANG-level best practices.
  * Provides tabbed interface for personal information, security settings, and account preferences.
- * 
+ *
  * **Features (MAANG-Level):**
  * - Tabbed navigation (Profile, Security)
  * - Real-time form validation with Zod
@@ -13,35 +13,36 @@
  * - Profile picture support (future)
  * - Account deletion (soft delete)
  * - Session management
- * 
+ *
  * **Industry Best Practices:**
  * - Password requirements: 8+ chars, uppercase, lowercase, number, special char
  * - Require current password to change password
  * - Email change confirmation workflow
  * - Account audit logging
  * - Rate limiting on sensitive operations
- * 
+ *
  * **Business Flow Alignment:**
  * - Follows B2B platform customer account management patterns
  * - Supports both Customer and Admin role profiles
  * - Integrates with Company/Customer associations
- * 
+ *
  * @module app/profile
  */
 
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { User, Shield, Bell, Lock, Phone, LogOut, Key } from 'lucide-react'
 
 import { useAuthStore } from '@_features/auth'
 
 import { logger } from '@_core'
-import { formatDate } from '@_shared'
+import { formatDate, API } from '@_shared'
 
 import UpdateAccountForm from '@_components/forms/UpdateAccountForm'
 import ChangePasswordForm from '@_components/forms/ChangePasswordForm'
+import TwoFactorSetupCard from '@_components/forms/TwoFactorSetupCard'
 import Card from '@_components/ui/Card'
 import { Tabs, TabsList, Tab, TabPanel } from '@_components/ui/Tabs'
 import Avatar from '@_components/ui/Avatar'
@@ -85,10 +86,10 @@ function ProfileInfoTab({ user, onUserUpdate }: ProfileInfoTabProps) {
 						</p>
 					</div>
 				</div>
-				
-				<UpdateAccountForm 
-					user={user} 
-					onUserUpdate={onUserUpdate} 
+
+				<UpdateAccountForm
+					user={user}
+					onUserUpdate={onUserUpdate}
 				/>
 			</Card>
 
@@ -168,10 +169,56 @@ interface SecurityTabProps {
 }
 
 function SecurityTab({ user }: SecurityTabProps) {
+	// MFA status state - fetched on mount
+	const [isMfaEnabled, setIsMfaEnabled] = useState(false)
+	const [isMfaLoading, setIsMfaLoading] = useState(true)
+
+	// Fetch MFA status on mount
+	useEffect(() => {
+		const fetchMfaStatus = async () => {
+			try {
+				const response = await API.Accounts.Mfa.getSettings()
+				if (response.data.statusCode === 200 && response.data.payload) {
+					setIsMfaEnabled(response.data.payload.isEnabled)
+				}
+			} catch (error) {
+				logger.debug('Failed to fetch MFA status', {
+					component: 'SecurityTab',
+					action: 'fetchMfaStatus',
+					error: error instanceof Error ? error.message : 'Unknown error',
+				})
+			} finally {
+				setIsMfaLoading(false)
+			}
+		}
+
+		void fetchMfaStatus()
+	}, [])
+
+	/**
+	 * Callback when MFA status changes (enable/disable).
+	 * Refetches the MFA status to sync state.
+	 */
+	const handleMfaStatusChange = useCallback(async () => {
+		try {
+			const response = await API.Accounts.Mfa.getSettings()
+			if (response.data.statusCode === 200 && response.data.payload) {
+				setIsMfaEnabled(response.data.payload.isEnabled)
+			}
+		} catch (error) {
+			logger.debug('Failed to refresh MFA status', {
+				component: 'SecurityTab',
+				action: 'handleMfaStatusChange',
+				error: error instanceof Error ? error.message : 'Unknown error',
+			})
+		}
+	}, [])
+
 	return (
 		<div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-			{/* Main Content - Password Change */}
+			{/* Main Content - Password Change & 2FA */}
 			<div className="space-y-6">
+				{/* Password Change Card */}
 				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
 					<div className="flex items-center gap-3 mb-6">
 						<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -186,6 +233,32 @@ function SecurityTab({ user }: SecurityTabProps) {
 					</div>
 
 					<ChangePasswordForm user={user} />
+				</Card>
+
+				{/* Two-Factor Authentication Card */}
+				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+					<div className="flex items-center gap-3 mb-6">
+						<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
+							<Key className="h-5 w-5 text-accent" />
+						</div>
+						<div>
+							<h2 className="text-lg font-semibold text-base-content">Two-Factor Authentication</h2>
+							<p className="text-sm text-base-content/60">
+								Add an extra layer of security to your account
+							</p>
+						</div>
+					</div>
+
+					{isMfaLoading ? (
+						<div className="flex items-center justify-center py-8">
+							<span className="loading loading-spinner loading-md text-primary" />
+						</div>
+					) : (
+						<TwoFactorSetupCard
+							isMfaEnabled={isMfaEnabled}
+							onStatusChange={handleMfaStatusChange}
+						/>
+					)}
 				</Card>
 
 				{/* Active Sessions Card (Future) */}
@@ -207,7 +280,7 @@ function SecurityTab({ user }: SecurityTabProps) {
 							<div>
 								<p className="font-medium text-base-content">Current Session</p>
 								<p className="text-sm text-base-content/60">
-									{typeof navigator !== 'undefined' 
+									{typeof navigator !== 'undefined'
 										? navigator.userAgent.includes('Chrome') ? 'Chrome Browser'
 										: navigator.userAgent.includes('Firefox') ? 'Firefox Browser'
 										: navigator.userAgent.includes('Safari') ? 'Safari Browser'
@@ -244,9 +317,9 @@ function SecurityTab({ user }: SecurityTabProps) {
 							value="Set"
 						/>
 						<StatusIndicator
-							status="pending"
+							status={isMfaLoading ? 'pending' : isMfaEnabled ? 'success' : 'warning'}
 							label="Two-Factor Auth"
-							value="Coming Soon"
+							value={isMfaLoading ? 'Loading...' : isMfaEnabled ? 'Enabled' : 'Not Configured'}
 						/>
 						<StatusIndicator
 							status="success"
@@ -266,11 +339,11 @@ function SecurityTab({ user }: SecurityTabProps) {
 						/>
 						<TipItem
 							icon={<Shield />}
-							text="Include uppercase, lowercase, numbers, and special characters"
+							text="Enable two-factor authentication for enhanced security"
 						/>
 						<TipItem
 							icon={<Lock />}
-							text="Never share your password with others"
+							text="Never share your password or backup codes with others"
 						/>
 						<TipItem
 							icon={<Bell />}
@@ -294,20 +367,20 @@ function SecurityTab({ user }: SecurityTabProps) {
 const ProfilePage = () => {
 	const user = useAuthStore((state) => state.user)
 	const setUser = useAuthStore((state) => state.setUser)
-	
+
 	// Active tab state
 	const [activeTab, setActiveTab] = useState<ProfileTab>('profile')
 
 	/**
 	 * Handle user profile update.
 	 * Updates both the auth store and shows success notification.
-	 * 
+	 *
 	 * MAANG Pattern: Sync local state with global store for optimistic UI
 	 */
 	const handleUserUpdate = useCallback((updatedUser: IUser) => {
 		// Update the auth store with the new user data
 		setUser(new UserClass(updatedUser))
-		
+
 		logger.info('Profile updated and synced to auth store', {
 			component: 'ProfilePage',
 			action: 'handleUserUpdate',
@@ -352,9 +425,9 @@ const ProfilePage = () => {
 				description="Manage your account information and security"
 			/>
 
-			<Tabs 
-				value={activeTab} 
-				onValueChange={(tab) => setActiveTab(tab as ProfileTab)} 
+			<Tabs
+				value={activeTab}
+				onValueChange={(tab) => setActiveTab(tab as ProfileTab)}
 				variant="bordered"
 			>
 				<TabsList className="mb-6">
@@ -368,9 +441,9 @@ const ProfilePage = () => {
 
 				{/* Profile Tab */}
 				<TabPanel value="profile">
-					<ProfileInfoTab 
-						user={user} 
-						onUserUpdate={handleUserUpdate} 
+					<ProfileInfoTab
+						user={user}
+						onUserUpdate={handleUserUpdate}
 					/>
 				</TabPanel>
 
