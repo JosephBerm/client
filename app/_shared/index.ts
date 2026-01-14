@@ -116,12 +116,56 @@ export { HttpService, type ApiResponse, type AxiosResponse } from './services/ht
 // HTTP Service Constants (public-facing only)
 export { AUTH_COOKIE_NAME, AUTH_HEADER_PREFIX, DEFAULT_API_BASE_URL } from './services/httpService.constants'
 
-// API Client
+// API Client - Domain-Specific Modules
 export {
 	default as API,
+	// Domain-specific APIs for direct imports (better tree-shaking)
+	AccountsApi,
+	MfaApi,
+	StoreApi,
+	ProductsApi,
+	QuotesApi,
+	OrdersApi,
+	CustomersApi,
+	ProvidersApi,
+	NotificationsApi,
+	DashboardApi,
+	AnalyticsApi,
+	FinanceApi,
+	PaymentsApi,
+	PaymentMethodsApi,
+	CustomerSettingsApi,
+	ShippingApi,
+	InventoryApi,
+	ProductImportExportApi,
+	RBACApi,
+	RolesApi,
+	PermissionsApi,
+	PricingApi,
+	IntegrationsApi,
+	SecurityPolicyApi,
+	PublicApi,
+	// Types - Accounts
 	type RoleDistribution,
 	type AdminCreateAccountRequest,
 	type AdminCreateAccountResponse,
+	type ChangeAccountStatusRequest,
+	type StatusChangeResult,
+	// Types - RBAC (canonical source: @_types/rbac)
+	type Role,
+	type PermissionEntity,
+	type Permission, // @deprecated alias for PermissionEntity
+	type RolePermission,
+	type RoleThresholds,
+	type CreateRoleRequest,
+	type UpdateRoleRequest,
+	type CreatePermissionRequest,
+	type UpdatePermissionRequest,
+	type UserPermissionsResponse,
+	type RoleDeleteResult,
+	// Types - Pricing
+	type CartProductResponse,
+	type PriceOverrideHistoryEntry,
 } from './services/api'
 
 // Notification Service

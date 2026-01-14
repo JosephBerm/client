@@ -1,0 +1,169 @@
+/**
+ * Orders API Module
+ *
+ * Order processing, approval, fulfillment, and full order lifecycle.
+ * Part of the domain-specific API split for better code organization.
+ *
+ * @module api/orders
+ */
+
+import type { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
+import type { PagedResult } from '@_classes/Base/PagedResult'
+import type Order from '@_classes/Order'
+import type { SubmitOrderRequest } from '@_classes/RequestClasses'
+import type { RichSearchFilter, RichPagedResult } from '@_components/tables/RichDataGrid'
+
+import { HttpService } from '../httpService'
+
+// =========================================================================
+// ORDERS API
+// =========================================================================
+
+/**
+ * Order Management API
+ * Handles order processing, approval, fulfillment, and full order lifecycle.
+ *
+ * @see prd_orders.md - Order Management PRD
+ */
+export const OrdersApi = {
+	/**
+	 * Gets a single order by ID or current user's orders.
+	 */
+	get: async <Order>(orderId?: number | null) => {
+		return HttpService.get<Order>(`/orders${orderId ? `/${orderId}` : ''}`)
+	},
+
+	/**
+	 * Gets all orders for a specific customer.
+	 */
+	getFromCustomer: async (customerId: number) => {
+		return HttpService.get<Order[]>(`/orders/fromcustomer/${customerId}`)
+	},
+
+	/**
+	 * Searches orders with pagination and filtering.
+	 */
+	search: async (search: GenericSearchFilter) => {
+		return HttpService.post<PagedResult<Order>>('/orders/search', search)
+	},
+
+	/**
+	 * Rich search for orders with advanced filtering, sorting, and facets.
+	 */
+	richSearch: async (filter: RichSearchFilter) => {
+		return HttpService.post<RichPagedResult<Order>>('/orders/search/rich', filter)
+	},
+
+	/**
+	 * Creates a new order.
+	 */
+	create: async <Order>(quote: Order) => HttpService.post<Order>('/orders', quote),
+
+	/**
+	 * Creates an order from an existing quote.
+	 */
+	createFromQuote: async <Order>(quoteId: string) => HttpService.post<Order>(`/orders/fromquote/${quoteId}`, null),
+
+	/**
+	 * Updates an existing order.
+	 */
+	update: async <Order>(quote: Order) => HttpService.put<Order>('/orders', quote),
+
+	/**
+	 * Deletes an order.
+	 */
+	delete: async <Boolean>(quoteId: number) => HttpService.delete<Boolean>(`/orders/${quoteId}`),
+
+	/**
+	 * Submits a quote to customer.
+	 */
+	submitQuote: async <Boolean>(req: SubmitOrderRequest) => HttpService.post<Boolean>(`/orders/submit/quote`, req),
+
+	/**
+	 * Submits an invoice to customer.
+	 */
+	submitInvoice: async <Boolean>(req: SubmitOrderRequest) => HttpService.post<Boolean>(`/orders/submit/invoice`, req),
+
+	/**
+	 * Approves an order (moves to processing).
+	 */
+	approveOrder: async (orderId: string) => HttpService.post<boolean>(`/orders/approve/${orderId}`, null),
+
+	/**
+	 * Removes a product from an order.
+	 */
+	deleteProduct: async (orderId: string, productId: number) =>
+		HttpService.delete<boolean>(`/orders/${orderId}/product/${productId}`),
+
+	// =========================================================================
+	// ORDER WORKFLOW METHODS
+	// =========================================================================
+
+	/**
+	 * Confirms payment for an order (Placed → Paid).
+	 */
+	confirmPayment: async (orderId: number, paymentReference?: string, notes?: string) =>
+		HttpService.post<Order>(`/orders/${orderId}/confirm-payment`, {
+			paymentReference,
+			notes,
+		}),
+
+	/**
+	 * Updates order status.
+	 * Used by fulfillment to progress orders through workflow.
+	 */
+	updateStatus: async (
+		orderId: number,
+		newStatus: number,
+		trackingNumber?: string,
+		carrier?: string,
+		cancellationReason?: string,
+		internalNotes?: string
+	) =>
+		HttpService.post<Order>(`/orders/${orderId}/status`, {
+			newStatus,
+			trackingNumber,
+			carrier,
+			cancellationReason,
+			internalNotes,
+		}),
+
+	/**
+	 * Adds tracking number to a specific order item.
+	 */
+	addTracking: async (orderId: number, orderItemId: number, trackingNumber: string, carrier?: string) =>
+		HttpService.post<Order>(`/orders/${orderId}/tracking`, {
+			orderItemId,
+			trackingNumber,
+			carrier,
+		}),
+
+	/**
+	 * Requests order cancellation (customer-facing).
+	 */
+	requestCancellation: async (orderId: number, reason: string) =>
+		HttpService.post<boolean>(`/orders/${orderId}/request-cancellation`, {
+			reason,
+		}),
+
+	/**
+	 * Gets order summary statistics for dashboard.
+	 */
+	getSummary: async () =>
+		HttpService.get<{
+			totalOrders: number
+			placedCount: number
+			paidCount: number
+			processingCount: number
+			shippedCount: number
+			deliveredCount: number
+			cancelledCount: number
+			totalRevenue: number
+			requiresActionCount: number
+		}>('/orders/summary'),
+
+	/**
+	 * Gets orders assigned to current sales rep.
+	 */
+	getAssigned: async () => HttpService.get<Order[]>('/orders/assigned'),
+}
