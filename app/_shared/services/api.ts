@@ -122,7 +122,13 @@ import type { PagedData } from '@_classes/PagedData'
 import type { Product } from '@_classes/Product'
 import type ProductsCategory from '@_classes/ProductsCategory'
 import type Quote from '@_classes/Quote'
-import type { CreateQuoteRequest, CreateQuoteResponse } from './api.types'
+import type {
+	CreateQuoteRequest,
+	CreateQuoteResponse,
+	SecurityPolicyResponse,
+	UpdateSecurityPolicyRequest,
+	PolicyTemplatesResponse,
+} from './api.types'
 import type { QuotePricingSummary } from '@_core/validation/validation-schemas'
 import type { SubmitOrderRequest } from '@_classes/RequestClasses'
 import type UploadedFile from '@_classes/UploadedFile'
@@ -593,6 +599,56 @@ const API = {
 			}
 			return HttpService.put<StatusChangeResult>(`/account/${id}/status`, request)
 		},
+	},
+
+	/**
+	 * Security Policy Management API
+	 * Tenant-configurable security policies for MFA, sessions, trusted devices, and step-up authentication.
+	 *
+	 * **Authorization:** Admin role required for all operations.
+	 *
+	 * **Features:**
+	 * - View current tenant security policy
+	 * - Update policy settings (MFA requirements, session timeouts, etc.)
+	 * - Reset to default policy
+	 * - Quick-setup with policy templates (Relaxed, Balanced, Strict)
+	 *
+	 * @see SECURITY_POLICY_MATRIX.md
+	 */
+	SecurityPolicy: {
+		/**
+		 * Gets the current tenant's security policy.
+		 * Returns default values if no policy has been configured.
+		 *
+		 * @returns Security policy configuration
+		 */
+		get: async () => HttpService.get<SecurityPolicyResponse>('/api/tenant/security-policy'),
+
+		/**
+		 * Updates the tenant's security policy.
+		 * This is a step-up protected endpoint - may require MFA re-verification.
+		 *
+		 * @param policy - Updated policy settings
+		 * @returns Updated security policy
+		 */
+		update: async (policy: UpdateSecurityPolicyRequest) =>
+			HttpService.put<SecurityPolicyResponse>('/api/tenant/security-policy', policy),
+
+		/**
+		 * Resets the tenant's security policy to default values.
+		 * This is a step-up protected endpoint - may require MFA re-verification.
+		 *
+		 * @returns Default security policy
+		 */
+		reset: async () => HttpService.post<SecurityPolicyResponse>('/api/tenant/security-policy/reset', {}),
+
+		/**
+		 * Gets available policy templates.
+		 * Templates provide quick-setup options for common security postures.
+		 *
+		 * @returns Array of policy templates
+		 */
+		getTemplates: async () => HttpService.get<PolicyTemplatesResponse>('/api/tenant/security-policy/templates'),
 	},
 
 	/**
