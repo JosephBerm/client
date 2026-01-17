@@ -94,14 +94,14 @@ export default function ImageServiceInitializer() {
 	useEffect(() => {
 		// Initialize image services on mount
 		// Only run once - empty dependency array ensures this
-		
+
 		const initializeServices = async () => {
 			try {
 				// ImagePreloadService is ready to use without explicit initialization
 				// The service uses static properties with defaults (maxConcurrent: 3)
 				// It will be configured when preload() is called with options
 				// No initialization needed - service is ready to use
-				
+
 				if (process.env.NODE_ENV === 'development') {
 					logger.info('ImageServiceInitializer: ImagePreloadService ready', {
 						note: 'Service uses static defaults (maxConcurrent: 3)',
@@ -115,14 +115,14 @@ export default function ImageServiceInitializer() {
 			try {
 				// Initialize ImageCacheService
 				// Strategy: 'browser' (uses browser HTTP cache)
-				// Max size: 50MB (reasonable limit for image cache)
-				// Service Worker: Not enabled by default (can be enabled later if needed)
-				await ImageCacheService.initialize('browser', 50 * 1024 * 1024)
-				
+				// Max size: 10MB (reduced from 50MB per cache-fix plan)
+				// Service Worker: Not enabled by default (Next.js Data Cache handles API)
+				await ImageCacheService.initialize('browser', 10 * 1024 * 1024)
+
 				if (process.env.NODE_ENV === 'development') {
 					logger.info('ImageServiceInitializer: ImageCacheService initialized', {
 						strategy: 'browser',
-						maxSize: '50MB',
+						maxSize: '10MB',
 					})
 				}
 			} catch (error) {

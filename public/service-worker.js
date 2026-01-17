@@ -26,19 +26,30 @@
 
 // Service Worker version - update to invalidate caches
 // CRITICAL: Increment this after major code refactorings to force cache clear
-const VERSION = 'v1.2.0' // Updated with MAANG-level security improvements
+const VERSION = 'v2.0.0' // Updated with strict cache limits per cache-fix plan
 const CACHE_NAME = `medsource-images-${VERSION}`
-const API_CACHE_NAME = `medsource-api-${VERSION}`
 const STATIC_CACHE_NAME = `medsource-static-${VERSION}`
 
-// Cache size limits (Google Lighthouse recommendations)
-const MAX_IMAGE_CACHE_SIZE = 50 * 1024 * 1024 // 50MB
-const MAX_IMAGE_CACHE_ITEMS = 200 // Maximum number of cached images
-const MAX_API_CACHE_ITEMS = 50 // Maximum number of cached API responses
+// =============================================================================
+// CACHE SIZE LIMITS (MAANG Best Practice: Strict Limits)
+// =============================================================================
+// 
+// **Why strict limits matter:**
+// - Mobile devices have limited storage
+// - Browser quota is shared across all origins
+// - Large caches slow down Service Worker startup
+// - Users noticed 4MB+ cache growth when scrolling
+//
+// **Strategy: Prioritize images over API responses**
+// - Images: Cached (biggest visual impact)
+// - API: NOT cached by SW (Next.js Data Cache handles this better)
+// - Static: Cached (fonts, critical CSS)
+//
+const MAX_IMAGE_CACHE_SIZE = 10 * 1024 * 1024 // 10MB (reduced from 50MB)
+const MAX_IMAGE_CACHE_ITEMS = 30 // Maximum 30 images (reduced from 200)
 
 // Cache duration (milliseconds)
-const IMAGE_CACHE_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days
-const API_CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+const IMAGE_CACHE_DURATION = 2 * 24 * 60 * 60 * 1000 // 2 days (reduced from 7)
 
 // =============================================================================
 // MAANG-LEVEL SECURITY: ALLOWED ORIGINS
@@ -108,9 +119,10 @@ self.addEventListener('activate', (event) => {
 		caches
 			.keys()
 			.then((cacheNames) => {
-				const currentCaches = [CACHE_NAME, API_CACHE_NAME, STATIC_CACHE_NAME]
+				// Only keep image and static caches (API caching removed)
+				const currentCaches = [CACHE_NAME, STATIC_CACHE_NAME]
 				
-				// Delete old caches
+				// Delete old caches (including legacy API caches)
 				return Promise.all(
 					cacheNames.map((cacheName) => {
 						// Keep only current version caches
@@ -197,9 +209,12 @@ self.addEventListener('fetch', (event) => {
 		return
 	}
 
-	// API requests - Network-first strategy
+	// API requests - DO NOT CACHE in Service Worker
+	// MAANG Best Practice: Let Next.js Data Cache handle API caching
+	// This prevents cache growth issues and stale data problems
+	// Service Worker API caching removed in v2.0.0 per cache-fix plan
 	if (isAPIUrl(url)) {
-		event.respondWith(handleAPIRequest(request))
+		// Pass through to network without caching
 		return
 	}
 
@@ -269,47 +284,21 @@ async function handleImageRequest(request) {
 	}
 }
 
-/**
- * Handles API requests with network-first strategy.
- * 
- * **Strategy**: Network-first (FAANG pattern for dynamic data)
- * 1. Try network first (fresh data)
- * 2. If network fails, use cache
- * 3. Store response in cache for offline support
- * 
- * @param {Request} request - Fetch request
- * @returns {Promise<Response>} Response from network or cache
- */
-async function handleAPIRequest(request) {
-	try {
-		// Try network first (fresh data preferred)
-		const networkResponse = await fetch(request)
-
-		// Cache successful responses
-		if (networkResponse.ok) {
-			const cache = await caches.open(API_CACHE_NAME)
-			await cache.put(request, networkResponse.clone())
-
-			// Enforce cache size limits
-			await enforceAPICacheLimit(cache)
-		}
-
-		return networkResponse
-	} catch (error) {
-		// Fallback to cache
-		const cachedResponse = await caches.match(request)
-		if (cachedResponse) {
-			return cachedResponse
-		}
-
-		// Return error if no cache available
-		return new Response(JSON.stringify({ error: 'Network error and no cache available' }), {
-			status: 503,
-			statusText: 'Service Unavailable',
-			headers: { 'Content-Type': 'application/json' },
-		})
-	}
-}
+// =============================================================================
+// API CACHING REMOVED (v2.0.0)
+// =============================================================================
+// 
+// **Why API caching was removed from Service Worker:**
+// 1. Next.js Data Cache handles API caching better (server-side, tag-based)
+// 2. Service Worker API caching caused cache growth issues (4MB+ observed)
+// 3. Stale data problems with offline-first API responses
+// 4. Duplicate caching layer (Next.js + SW = unnecessary complexity)
+//
+// **Current Strategy:**
+// - Images: Service Worker cache (visual impact, fast offline access)
+// - API: Next.js Data Cache with `use cache` directive
+// - Static: Service Worker cache (fonts, critical CSS)
+//
 
 /**
  * Handles static asset requests with cache-first strategy.
@@ -375,24 +364,7 @@ async function enforceImageCacheLimit(cache) {
 	// In production, you'd check actual cache size
 }
 
-/**
- * Enforces API cache size limits.
- * 
- * @param {Cache} cache - Cache object
- */
-async function enforceAPICacheLimit(cache) {
-	const keys = await cache.keys()
-
-	if (keys.length > MAX_API_CACHE_ITEMS) {
-		const deleteCount = keys.length - MAX_API_CACHE_ITEMS
-		console.log(`[ServiceWorker] Deleting ${deleteCount} old cached API responses`)
-
-		// Delete oldest entries
-		for (let i = 0; i < deleteCount; i++) {
-			await cache.delete(keys[i])
-		}
-	}
-}
+// enforceAPICacheLimit removed in v2.0.0 - API caching no longer done by SW
 
 /**
  * MAANG-LEVEL SECURITY: Origin Allowlist Check

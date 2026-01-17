@@ -1,9 +1,9 @@
 /**
  * Image Cache Service
- * 
+ *
  * Enterprise-grade image cache management with Service Worker support.
  * Provides browser cache management, cache invalidation, and offline support.
- * 
+ *
  * **Features:**
  * - Browser cache management
  * - Service Worker integration (optional)
@@ -11,19 +11,19 @@
  * - Cache size management
  * - Offline support
  * - Cache statistics
- * 
+ *
  * **Cache Strategies:**
  * - **browser**: Browser HTTP cache only
  * - **memory**: In-memory cache (Map)
  * - **service-worker**: Service Worker cache (requires registration)
  * - **hybrid**: Combination of all strategies
- * 
+ *
  * **Use Cases:**
  * - Offline image support
  * - Cache size management
  * - Cache invalidation
  * - Performance optimization
- * 
+ *
  * @module ImageCacheService
  */
 
@@ -68,7 +68,7 @@ export interface CacheStats {
 
 /**
  * Image Cache Service Class
- * 
+ *
  * Provides comprehensive cache management for images.
  * Supports multiple caching strategies and Service Worker integration.
  */
@@ -88,24 +88,24 @@ export class ImageCacheService {
 	// Cache strategy
 	private static strategy: CacheStrategy = 'browser'
 
-	// Maximum cache size (bytes)
-	private static maxCacheSize = 50 * 1024 * 1024 // 50MB
+	// Maximum cache size (bytes) - reduced per cache-fix plan
+	private static maxCacheSize = 10 * 1024 * 1024 // 10MB (reduced from 50MB)
 
-	// Default cache TTL (time to live) in milliseconds
-	private static defaultTTL = 7 * 24 * 60 * 60 * 1000 // 7 days
+	// Default cache TTL (time to live) in milliseconds - reduced per cache-fix plan
+	private static defaultTTL = 2 * 24 * 60 * 60 * 1000 // 2 days (reduced from 7)
 
 	/**
 	 * Initializes the cache service.
-	 * 
+	 *
 	 * @param {CacheStrategy} strategy - Cache strategy to use
 	 * @param {number} maxSize - Maximum cache size in bytes
 	 * @returns {Promise<void>} Promise that resolves when initialized
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * // Initialize with browser cache only
 	 * await ImageCacheService.initialize('browser');
-	 * 
+	 *
 	 * // Initialize with Service Worker
 	 * await ImageCacheService.initialize('service-worker', 100 * 1024 * 1024);
 	 * ```
@@ -157,16 +157,16 @@ export class ImageCacheService {
 
 	/**
 	 * Caches an image URL.
-	 * 
+	 *
 	 * @param {string} url - Image URL to cache
 	 * @param {number} ttl - Time to live in milliseconds
 	 * @returns {Promise<void>} Promise that resolves when cached
-	 * 
+	 *
 	 * @example
 	 * ```typescript
 	 * // Cache with default TTL (7 days)
 	 * await ImageCacheService.cache(imageUrl);
-	 * 
+	 *
 	 * // Cache with custom TTL (1 day)
 	 * await ImageCacheService.cache(imageUrl, 24 * 60 * 60 * 1000);
 	 * ```
@@ -213,7 +213,7 @@ export class ImageCacheService {
 
 	/**
 	 * Checks if an image is cached.
-	 * 
+	 *
 	 * @param {string} url - Image URL to check
 	 * @returns {boolean} True if cached and not expired
 	 */
@@ -252,7 +252,7 @@ export class ImageCacheService {
 
 	/**
 	 * Invalidates (removes) a cached image.
-	 * 
+	 *
 	 * @param {string} url - Image URL to invalidate
 	 * @returns {Promise<void>} Promise that resolves when invalidated
 	 */
@@ -287,7 +287,7 @@ export class ImageCacheService {
 
 	/**
 	 * Clears all cached images.
-	 * 
+	 *
 	 * @returns {Promise<void>} Promise that resolves when cleared
 	 */
 	static async clear(): Promise<void> {
@@ -348,7 +348,7 @@ export class ImageCacheService {
 
 	/**
 	 * Gets cache statistics.
-	 * 
+	 *
 	 * @returns {CacheStats} Cache statistics
 	 */
 	static getStats(): CacheStats {
@@ -370,7 +370,7 @@ export class ImageCacheService {
 
 	/**
 	 * Gets all cached URLs.
-	 * 
+	 *
 	 * @returns {string[]} Array of cached URLs
 	 */
 	static getCachedUrls(): string[] {
@@ -379,7 +379,7 @@ export class ImageCacheService {
 
 	/**
 	 * Preloads and caches multiple images.
-	 * 
+	 *
 	 * @param {string[]} urls - Array of image URLs to preload and cache
 	 * @returns {Promise<void[]>} Promise that resolves when all images are cached
 	 */

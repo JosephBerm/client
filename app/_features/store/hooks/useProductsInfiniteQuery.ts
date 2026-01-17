@@ -33,6 +33,8 @@ import type ProductsCategory from '@_classes/ProductsCategory'
 
 import { SORT_OPTIONS } from '@_components/store/ProductsToolbar'
 
+import { ProductCache } from '../cache'
+
 /**
  * Products query page result
  * Contains products array and pagination metadata for each page
@@ -223,6 +225,10 @@ export function useProductsInfiniteQuery(
 				(product) => new Product(product)
 			)
 			const result = new PagedResult<Product>(data.payload)
+			
+			// Cache products for fast lookup during rapid scrolling
+			// This enables O(1) retrieval when user scrolls back up
+			ProductCache.setProducts(products)
 			
 			return {
 				products,

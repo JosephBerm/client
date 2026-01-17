@@ -1,26 +1,27 @@
 /**
  * Service Worker for Image Caching
- * 
+ *
  * Handles image caching for offline support and improved performance.
  * This Service Worker is registered by ImageCacheService when using
  * 'service-worker' or 'hybrid' cache strategies.
- * 
+ *
  * **Features:**
  * - Image caching with TTL support
  * - Cache invalidation
  * - Offline image support
  * - Cache size management
- * 
+ *
  * **Cache Strategy:**
  * - Images are cached with a time-to-live (TTL)
  * - Expired images are automatically removed
  * - Cache size is managed to prevent storage issues
- * 
+ *
  * @module sw-image-cache
  */
 
-const CACHE_NAME = 'image-cache-v1'
-const MAX_CACHE_SIZE = 50 * 1024 * 1024 // 50MB
+const CACHE_NAME = 'image-cache-v2'
+const MAX_CACHE_SIZE = 10 * 1024 * 1024 // 10MB (reduced from 50MB per cache-fix plan)
+const MAX_CACHE_ITEMS = 30 // Maximum 30 images
 
 // Install event - set up cache
 self.addEventListener('install', (event) => {
@@ -122,7 +123,7 @@ async function fetchAndCache(request) {
 			// Add cache metadata headers
 			const headers = new Headers(clonedResponse.headers)
 			headers.set('sw-cache-date', Date.now().toString())
-			headers.set('sw-cache-ttl', (7 * 24 * 60 * 60 * 1000).toString()) // 7 days default
+			headers.set('sw-cache-ttl', (2 * 24 * 60 * 60 * 1000).toString()) // 2 days (reduced from 7)
 
 			const cachedResponse = new Response(clonedResponse.body, {
 				status: clonedResponse.status,
@@ -147,7 +148,7 @@ async function fetchAndCache(request) {
 /**
  * Caches an image with TTL.
  */
-async function cacheImage(url, ttl = 7 * 24 * 60 * 60 * 1000) {
+async function cacheImage(url, ttl = 2 * 24 * 60 * 60 * 1000) {
 	try {
 		const response = await fetch(url)
 		if (response.ok) {

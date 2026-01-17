@@ -50,8 +50,10 @@ import {
 	useProductsInfiniteQuery, 
 	flattenProductPages,
 	getTotalProductCount,
+	INITIAL_PAGE_SIZE,
+	PRIORITY_IMAGE_COUNT,
 	type ProductQueryFilters,
-} from '@_features/store/hooks/useProductsInfiniteQuery'
+} from '@_features/store'
 
 import { useGridColumns } from '@_shared/hooks/useGridColumns'
 import { useInfiniteScroll } from '@_shared/hooks/useInfiniteScroll'
@@ -59,9 +61,8 @@ import { useInfiniteScroll } from '@_shared/hooks/useInfiniteScroll'
 import type { Product } from '@_classes/Product'
 import type ProductsCategory from '@_classes/ProductsCategory'
 
-import ProductCard from './ProductCard'
 import ProductCardSkeleton from './ProductCardSkeleton'
-import ScrollRevealCard from './ScrollRevealCard'
+import ProgressiveProductCard from './ProgressiveProductCard'
 
 // ============================================================================
 // GRID CONFIGURATION CONSTANTS
@@ -172,7 +173,7 @@ export default function VirtualizedProductGrid({
 	selectedCategories = [],
 	sortValue = '',
 	onCategoryFilter,
-	priorityImageCount = 6,
+	priorityImageCount = PRIORITY_IMAGE_COUNT,
 }: VirtualizedProductGridProps) {
 	const listRef = useRef<HTMLDivElement>(null)
 	const [isMounted, setIsMounted] = useState(false)
@@ -187,7 +188,7 @@ export default function VirtualizedProductGrid({
 		searchText: searchText || undefined,
 		categories: selectedCategories.length > 0 ? selectedCategories : undefined,
 		sortValue: sortValue || undefined,
-		pageSize: 20, // Fetch 20 products at a time
+		pageSize: INITIAL_PAGE_SIZE,
 	}), [searchText, selectedCategories, sortValue])
 	
 	// Use infinite query for data fetching
@@ -212,18 +213,21 @@ export default function VirtualizedProductGrid({
 	const estimatedRowHeight = getEstimatedRowHeight(columns) + GRID_GAP
 	const totalRows = Math.ceil(products.length / columns)
 	
+	// Memoized callbacks for virtualizer - React 19 best practice
+	// Define outside of hook call to avoid creating new functions each render
+	const getEstimatedSize = useCallback(() => estimatedRowHeight, [estimatedRowHeight])
+	const measureElement = useCallback((element: Element) => {
+		const { height } = element.getBoundingClientRect()
+		return height + GRID_GAP
+	}, [])
+	
 	// Initialize WINDOW virtualizer with DYNAMIC MEASUREMENT
 	const virtualizer = useWindowVirtualizer({
 		count: totalRows,
-		// Initial estimate - used before measureElement has data
-		estimateSize: useCallback(() => estimatedRowHeight, [estimatedRowHeight]),
+		estimateSize: getEstimatedSize,
 		overscan: OVERSCAN_ROWS,
 		scrollMargin: listRef.current?.offsetTop ?? 0,
-		// Dynamic row measurement - measures actual DOM heights
-		measureElement: useCallback((element: Element) => {
-			const { height } = element.getBoundingClientRect()
-			return height + GRID_GAP
-		}, []),
+		measureElement,
 	})
 	
 	// Setup infinite scroll sentinel
@@ -382,18 +386,13 @@ export default function VirtualizedProductGrid({
 								}}
 							>
 								{rowProducts.map(({ index, product }) => (
-									<ScrollRevealCard
+									<ProgressiveProductCard
 										key={String(product.id)}
+										product={product}
 										index={index}
-										staggerDelay={30}
-										enabled={true}
-									>
-										<ProductCard
-											product={product}
-											priority={index < priorityImageCount}
-											onCategoryFilter={onCategoryFilter}
-										/>
-									</ScrollRevealCard>
+										priorityImageCount={priorityImageCount}
+										onCategoryFilter={onCategoryFilter}
+									/>
 								))}
 							</div>
 						</div>

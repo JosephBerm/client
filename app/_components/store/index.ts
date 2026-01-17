@@ -30,6 +30,7 @@ export { default as ReferralBanner } from './ReferralBanner'
 
 export { default as ProductCard } from './ProductCard'
 export { default as ProductCardSkeleton } from './ProductCardSkeleton'
+export { default as ProgressiveProductCard } from './ProgressiveProductCard'
 export { default as ProductImage } from './ProductImage'
 export { default as ProductImageGallery } from './ProductImageGallery'
 export { default as ImageGallery } from './ImageGallery'
@@ -99,4 +100,5 @@ export type { UnifiedStoreToolbarProps } from './UnifiedStoreToolbar'
 export type { StorePageContainerProps } from './StorePageContainer'
 export type { StoreValuePropositionProps } from './StoreValueProposition'
 export type { ReferralBannerProps } from './ReferralBanner'
+export type { ProgressiveProductCardProps } from './ProgressiveProductCard'
 

@@ -1,14 +1,14 @@
 /**
  * Store Feature Barrel Export (Optimized for Tree-Shaking)
- * 
+ *
  * Public store (e-commerce) feature module.
  * Hooks are client-only, utils are server-safe.
- * 
+ *
  * @example
  * ```typescript
  * import { useProductsState, requestCache } from '@_features/store'
  * ```
- * 
+ *
  * @module store
  */
 
@@ -86,6 +86,29 @@ export {
 	requestCache,
 	createCacheKey,
 } from './utils/requestCache'
+
+// ============================================================================
+// CLIENT-SIDE CACHE (Client-Only)
+// ============================================================================
+
+export {
+	ProductCache,
+	getCachedProduct,
+	cacheProducts,
+	useCacheStats,
+	logCachePerformance,
+	// Cache configuration constants
+	MAX_PRODUCT_CACHE_ENTRIES,
+	MAX_IMAGE_CACHE_ENTRIES,
+	PRODUCT_CACHE_TTL_MS,
+	IMAGE_CACHE_TTL_MS,
+	// Types
+	type CachedProductMetadata,
+	type CachedImageEntry,
+	type ProductCacheConfig,
+	type CacheStatsSnapshot,
+	type UseCacheStatsOptions,
+} from './cache'
 
 // ============================================================================
 // TYPES (Server + Client Safe)
