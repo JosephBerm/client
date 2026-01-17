@@ -1,9 +1,12 @@
 /**
  * Product Pricing Card Component
- * 
+ *
  * Displays pricing information and quote request CTA.
- * Server component - no client-side interactivity needed.
- * 
+ *
+ * **Note:** This component is rendered inside a Client Component tree
+ * (ProductPricingWrapper), so it must receive serialized (plain object)
+ * product data, not class instances.
+ *
  * @module ProductDetail/ProductPricingCard
  */
 
@@ -13,18 +16,18 @@ import { ArrowLeft, Info, CheckCircle2 } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
 
-import { Product } from '@_classes/Product'
+import type { SerializedProduct } from '@_lib/serializers/productSerializer'
 
 import { ANIMATION_DELAYS, PRICING_LABELS, SECTION_LABELS } from './ProductDetail.constants'
 
 export interface ProductPricingCardProps {
-	/** Product instance */
-	product: Product
+	/** Serialized product data (plain object, not class instance) */
+	product: SerializedProduct
 }
 
 /**
  * Product Pricing Card
- * 
+ *
  * Renders pricing card with quote-based pricing info and CTA button.
  */
 export default function ProductPricingCard({ product }: ProductPricingCardProps) {

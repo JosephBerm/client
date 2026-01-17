@@ -1,6 +1,6 @@
 /**
  * Next.js 16.1.1 Configuration - MedSource Pro
- * 
+ *
  * @see https://nextjs.org/docs/app/guides/upgrading/version-16
  * @see https://nextjs.org/docs/app/api-reference/config/next-config-js
  *
@@ -34,7 +34,7 @@ const isDevelopment = process.env.NODE_ENV === 'development'
 /**
  * Environment-specific configuration
  * In production, uses Azure backend. In development, uses localhost.
- * 
+ *
  * NOTE: API URLs do NOT include /api prefix - routes are at root level.
  * This is the MAANG-standard approach where API paths are defined by route
  * attributes (e.g., /Products/..., /Accounts/...), not by a global path prefix.
@@ -69,12 +69,12 @@ const nextConfig = {
 	// ---------------------------------------------------------------------------
 	// React Configuration
 	// ---------------------------------------------------------------------------
-	
+
 	/**
 	 * React Strict Mode
 	 * Enables additional checks and warnings for React 19.
 	 * Recommended for catching potential issues early.
-	 * 
+	 *
 	 * @see https://react.dev/reference/react/StrictMode
 	 */
 	reactStrictMode: true,
@@ -111,7 +111,7 @@ const nextConfig = {
 		 * Image Qualities
 		 * Next.js 16 BREAKING CHANGE: Default is now [75] only.
 		 * We explicitly allow multiple qualities for product images.
-		 * 
+		 *
 		 * Use cases:
 		 * - 75: Thumbnails, listings (good balance)
 		 * - 85: Product detail images (default)
@@ -143,12 +143,12 @@ const nextConfig = {
 		/**
 		 * Minimum Cache TTL
 		 * Next.js 16 BREAKING CHANGE: Default changed from 60 to 14400 (4 hours).
-		 * 
+		 *
 		 * We keep 60 seconds for now because:
 		 * - Product images may be updated by vendors
 		 * - Quote-based business needs fresh pricing/availability indicators
 		 * - Can increase to 3600 or 14400 after stable product catalog
-		 * 
+		 *
 		 * @see business_flow.md - Product catalog performance considerations
 		 */
 		minimumCacheTTL: 60,
@@ -165,18 +165,24 @@ const nextConfig = {
 	// ---------------------------------------------------------------------------
 	// Turbopack Configuration (Next.js 16 Stable)
 	// ---------------------------------------------------------------------------
-	
+
 	/**
 	 * Turbopack
 	 * Next.js 16: Turbopack is now stable and the DEFAULT bundler.
 	 * Moved from experimental to top-level configuration.
-	 * 
+	 *
 	 * Benefits:
 	 * - Faster cold starts
 	 * - Faster HMR (Hot Module Replacement)
 	 * - Better memory efficiency
-	 * 
+	 *
+	 * ⚠️ WINDOWS COMPATIBILITY NOTE:
+	 * Turbopack has known issues on Windows with EPERM file rename errors.
+	 * Use `npm run dev` (uses --webpack flag) for stable Windows development.
+	 * Use `npm run dev:turbo` to test Turbopack when issues are resolved.
+	 *
 	 * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack
+	 * @see https://github.com/vercel/next.js/issues/57581
 	 */
 	turbopack: {
 		/**
@@ -198,12 +204,12 @@ const nextConfig = {
 	// ---------------------------------------------------------------------------
 	// Proxy/Middleware Configuration
 	// ---------------------------------------------------------------------------
-	
+
 	/**
 	 * Skip Proxy URL Normalize
 	 * Prevents Next.js from normalizing URLs in proxy.ts
 	 * Useful if you need to preserve exact URL structure.
-	 * 
+	 *
 	 * Currently disabled - enable if needed for specific routing requirements.
 	 */
 	// skipProxyUrlNormalize: false,
@@ -211,11 +217,11 @@ const nextConfig = {
 	// ---------------------------------------------------------------------------
 	// Build Configuration
 	// ---------------------------------------------------------------------------
-	
+
 	/**
 	 * TypeScript Configuration
 	 * Strict type checking during build.
-	 * 
+	 *
 	 * Note: ESLint configuration is no longer supported in next.config.mjs
 	 * as of Next.js 16. Use eslint.config.mjs instead.
 	 */
@@ -227,7 +233,7 @@ const nextConfig = {
 	// ---------------------------------------------------------------------------
 	// Performance & Security
 	// ---------------------------------------------------------------------------
-	
+
 	/**
 	 * Powered By Header
 	 * Removes X-Powered-By header for security.
@@ -269,23 +275,23 @@ const nextConfig = {
 	/**
 	 * Cache Components
 	 * Enables the "use cache" directive and Partial Prerendering (PPR).
-	 * 
+	 *
 	 * @see https://nextjs.org/docs/app/getting-started/cache-components
 	 * @see https://nextjs.org/docs/app/api-reference/directives/use-cache
-	 * 
+	 *
 	 * Benefits for MedSource Pro:
 	 * - Product Detail pages cached with cacheTag for granular invalidation
 	 * - Static content (FAQ, About) included in static HTML shell
 	 * - Faster Time to First Byte (TTFB) for product catalog
 	 * - Reduced API calls for frequently accessed products
-	 * 
+	 *
 	 * How it works:
 	 * - Routes prerender into a static HTML shell
 	 * - Dynamic content streams in via Suspense boundaries
 	 * - "use cache" directive caches function/component output
 	 * - cacheTag() enables on-demand revalidation
 	 * - cacheLife() sets cache duration ('hours', 'days', 'max')
-	 * 
+	 *
 	 * Note: Requires Node.js runtime (not Edge)
 	 */
 	cacheComponents: true,
@@ -298,12 +304,12 @@ const nextConfig = {
 		/**
 		 * Optimize Package Imports (Experimental)
 		 * Improves compilation speed for packages with many named exports (barrel files).
-		 * 
+		 *
 		 * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/optimizePackageImports
-		 * 
-		 * Note: Many common packages (lucide-react, date-fns, lodash-es, etc.) are 
+		 *
+		 * Note: Many common packages (lucide-react, date-fns, lodash-es, etc.) are
 		 * already auto-optimized by Next.js. We add less common ones here.
-		 * 
+		 *
 		 * Benefits for MedSource Pro:
 		 * - @tanstack/react-table: Used in 24+ files for data grids
 		 * - react-hook-form: Used in 18+ files for form handling
@@ -318,26 +324,31 @@ const nextConfig = {
 		/**
 		 * Turbopack File System Caching for Development (Beta - Next.js 16.1.1)
 		 * Stores compiler artifacts on disk between dev server restarts.
-		 * 
+		 *
 		 * @see https://nextjs.org/docs/app/guides/upgrading/version-16#turbopack-file-system-caching-beta
-		 * 
+		 *
 		 * Benefits:
 		 * - Significantly faster dev server startup after initial compile
 		 * - Cached modules persist across restarts
 		 * - Reduced memory usage on subsequent runs
-		 * 
-		 * Note: This is a beta feature - enable for faster development iteration.
+		 *
+		 * ⚠️ WINDOWS COMPATIBILITY: Disabled due to EPERM file locking issues.
+		 * Turbopack on Windows causes "operation not permitted, rename" errors
+		 * when renaming temp manifest files. Use `npm run dev` (Webpack) instead.
+		 * See: https://github.com/vercel/next.js/issues/57581
+		 *
+		 * Re-enable when Turbopack Windows support improves.
 		 */
-		turbopackFileSystemCacheForDev: true,
+		turbopackFileSystemCacheForDev: false,
 	},
 
 	// ---------------------------------------------------------------------------
 	// MCP Server (Model Context Protocol) - Next.js 16+
 	// ---------------------------------------------------------------------------
-	// 
+	//
 	// MCP is ENABLED BY DEFAULT in Next.js 16 - no config flag needed!
 	// Accessible at: http://localhost:3000/_next/mcp when dev server is running.
-	// 
+	//
 	// Usage: Install next-devtools-mcp and add .mcp.json to project root.
 	// @see https://nextjs.org/docs/app/guides/mcp
 	//

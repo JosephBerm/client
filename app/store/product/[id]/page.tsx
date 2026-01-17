@@ -122,17 +122,17 @@ export default async function ProductDetailPage({ params }: ProductPageParams) {
 					{/* Right Column: Product Info & Sticky Cart */}
 					<div className="relative">
 						<div className="sticky top-28 flex flex-col gap-8">
-							{/* Header Info - Clean & Spacious */}
+							{/* Header Info - Clean & Spacious (Server Component, can use class) */}
 							<ProductHeaderInfo product={product} />
 
-							{/* Pricing Card - Customer-aware (shows contract pricing for authenticated users) */}
-							<ProductPricingWrapper product={product} />
+							{/* Pricing Card - Customer-aware (Client Component, needs serialized) */}
+							<ProductPricingWrapper product={serializedProduct} />
 
 							{/* Trust Signals - Inline & Subtle */}
 							<ProductTrustSignals />
 
-							{/* Specs - Minimal Table */}
-							<ProductSpecifications product={product} />
+							{/* Specs - Minimal Table (Client Component, needs serialized) */}
+							<ProductSpecifications product={serializedProduct} />
 
 							{/* Help Section */}
 							<ProductHelpSection />

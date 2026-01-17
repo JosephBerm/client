@@ -13,11 +13,16 @@
  * This component bridges the gap between server-rendered product pages
  * and client-side customer-specific pricing.
  *
+ * **Note:** This is a Client Component - it must receive serialized (plain object)
+ * product data, not class instances. Next.js cannot serialize class instances
+ * across the Server/Client boundary.
+ *
  * @module ProductDetail/ProductPricingWrapper
  */
 
 import { useAuthStore } from '@_features/auth'
-import { Product } from '@_classes/Product'
+
+import type { SerializedProduct } from '@_lib/serializers/productSerializer'
 
 import ProductPricingCard from './ProductPricingCard'
 import CustomerPricingCard from './CustomerPricingCard'
@@ -27,8 +32,8 @@ import CustomerPricingCard from './CustomerPricingCard'
 // =========================================================================
 
 export interface ProductPricingWrapperProps {
-	/** Product data */
-	product: Product
+	/** Serialized product data (plain object, not class instance) */
+	product: SerializedProduct
 }
 
 // =========================================================================

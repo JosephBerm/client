@@ -4,6 +4,10 @@
  * Displays product specifications in a minimal table format.
  * Uses DataGrid component for consistent table rendering.
  *
+ * **Note:** This is a Client Component - it must receive serialized (plain object)
+ * product data, not class instances. Next.js cannot serialize class instances
+ * across the Server/Client boundary.
+ *
  * @module ProductDetail/ProductSpecifications
  */
 
@@ -12,15 +16,16 @@
 import { useMemo } from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
 
+import type { SerializedProduct } from '@_lib/serializers/productSerializer'
+
 import Guid from '@_classes/Base/Guid'
-import type { Product } from '@_classes/Product'
 import { DataGrid } from '@_components/tables'
 
 import { ANIMATION_DELAYS, PRODUCT_STATUS, SECTION_LABELS, SPEC_LABELS } from './ProductDetail.constants'
 
 export interface ProductSpecificationsProps {
-	/** Product instance */
-	product: Product
+	/** Serialized product data (plain object, not class instance) */
+	product: SerializedProduct
 }
 
 /**
