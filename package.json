@@ -3,8 +3,8 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "start http://localhost:3000 && next dev --webpack",
-		"dev:turbo": "start http://localhost:3000 && next dev",
+		"dev": "start http://localhost:3000 && next dev",
+		"dev:webpack": "start http://localhost:3000 && next dev --webpack",
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint .",

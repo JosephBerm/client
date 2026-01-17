@@ -176,13 +176,13 @@ const nextConfig = {
 	 * - Faster HMR (Hot Module Replacement)
 	 * - Better memory efficiency
 	 *
-	 * ⚠️ WINDOWS COMPATIBILITY NOTE:
-	 * Turbopack has known issues on Windows with EPERM file rename errors.
-	 * Use `npm run dev` (uses --webpack flag) for stable Windows development.
-	 * Use `npm run dev:turbo` to test Turbopack when issues are resolved.
+	 * ⚠️ WINDOWS SETUP REQUIRED:
+	 * Add project folder to Windows Defender exclusions to prevent EPERM errors.
+	 * See: https://nextjs.org/docs/app/guides/local-development#1-check-your-computers-antivirus
+	 *
+	 * Fallback: use `npm run dev:webpack` if issues persist.
 	 *
 	 * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack
-	 * @see https://github.com/vercel/next.js/issues/57581
 	 */
 	turbopack: {
 		/**
@@ -332,14 +332,11 @@ const nextConfig = {
 		 * - Cached modules persist across restarts
 		 * - Reduced memory usage on subsequent runs
 		 *
-		 * ⚠️ WINDOWS COMPATIBILITY: Disabled due to EPERM file locking issues.
-		 * Turbopack on Windows causes "operation not permitted, rename" errors
-		 * when renaming temp manifest files. Use `npm run dev` (Webpack) instead.
-		 * See: https://github.com/vercel/next.js/issues/57581
-		 *
-		 * Re-enable when Turbopack Windows support improves.
+		 * ⚠️ WINDOWS NOTE: If you experience EPERM errors, add project folder
+		 * to Windows Defender exclusions (see local-development docs).
+		 * Fallback: use `npm run dev:webpack` to use Webpack instead.
 		 */
-		turbopackFileSystemCacheForDev: false,
+		turbopackFileSystemCacheForDev: true,
 	},
 
 	// ---------------------------------------------------------------------------
