@@ -1,9 +1,9 @@
 /**
  * QuantitySelector UI Component
- * 
+ *
  * Reusable quantity selector component with increment/decrement controls.
  * Supports both editable (input) and read-only (display) modes for flexible use cases.
- * 
+ *
  * **Features:**
  * - Increment/decrement buttons with icons or text
  * - Editable input mode or read-only display mode
@@ -13,23 +13,23 @@
  * - Mobile-first responsive design
  * - Disabled state handling
  * - Theme-aware (DaisyUI)
- * 
+ *
  * **Use Cases:**
  * - Product cards (AddToCartButton) - editable mode
  * - Cart page - read-only mode with direct updates
  * - Order forms - editable mode
  * - Any quantity selection interface
- * 
+ *
  * **Accessibility:**
  * - Proper ARIA labels and roles
  * - Keyboard navigation support
  * - Screen reader announcements
  * - Focus management
- * 
+ *
  * @example
  * ```tsx
  * import QuantitySelector from '@_components/ui/QuantitySelector';
- * 
+ *
  * // Editable mode (for product cards)
  * <QuantitySelector
  *   value={quantity}
@@ -39,7 +39,7 @@
  *   editable
  *   ariaLabel="Product quantity"
  * />
- * 
+ *
  * // Read-only mode (for cart page)
  * <QuantitySelector
  *   value={item.quantity}
@@ -50,7 +50,7 @@
  *   ariaLabel={`Quantity controls for ${item.name}`}
  * />
  * ```
- * 
+ *
  * @module QuantitySelector
  */
 
@@ -60,6 +60,9 @@ import { useCallback, useState, useEffect } from 'react'
 
 import classNames from 'classnames'
 import { Plus, Minus } from 'lucide-react'
+
+import Input from '@_components/ui/Input'
+import Button from '@_components/ui/Button'
 
 export interface QuantitySelectorProps {
 	/** Current quantity value */
@@ -116,16 +119,16 @@ export interface QuantitySelectorProps {
 
 /**
  * QuantitySelector Component
- * 
+ *
  * Flexible quantity selector that works in both editable and read-only modes.
  * Handles validation, clamping, and accessibility automatically.
- * 
+ *
  * **Design Philosophy:**
  * - Clean, minimal interface
  * - Consistent with DaisyUI design system
  * - Touch-friendly controls (min 44px tap targets)
  * - Smooth transitions and hover states
- * 
+ *
  * @param props - QuantitySelector configuration props
  * @returns QuantitySelector component
  */
@@ -170,7 +173,9 @@ export default function QuantitySelector({
 			e.preventDefault()
 			e.stopPropagation()
 
-			if (disabled) {return}
+			if (disabled) {
+				return
+			}
 
 			if (editable && onChange) {
 				// Editable mode: update via onChange
@@ -190,7 +195,9 @@ export default function QuantitySelector({
 			e.preventDefault()
 			e.stopPropagation()
 
-			if (disabled) {return}
+			if (disabled) {
+				return
+			}
 
 			if (editable && onChange) {
 				// Editable mode: update via onChange
@@ -295,51 +302,51 @@ export default function QuantitySelector({
 	return (
 		<div
 			className={classNames('flex items-center gap-2', align, className)}
-			role="group"
-			aria-label={ariaLabel}
-		>
+			role='group'
+			aria-label={ariaLabel}>
 			{/* Decrement Button */}
-			<button
-				type="button"
+			<Button
+				type='button'
 				onClick={handleDecrement}
 				disabled={isDecrementDisabled}
+				variant={buttonVariant}
+				size={size === 'xs' ? 'xs' : size === 'md' ? 'md' : 'sm'}
 				className={classNames(
-					'btn btn-circle shrink-0 transition-all duration-200',
+					'btn-circle shrink-0 transition-all duration-200',
 					currentSize.button,
-					variantClasses[buttonVariant],
 					{
 						'disabled:opacity-50 disabled:cursor-not-allowed': isDecrementDisabled,
 					},
 					buttonClassName
 				)}
 				aria-label={`Decrease quantity${editable ? '' : ` to ${Math.max(min, value - 1)}`}`}
-			>
-				{useIcons ? (
-					<Minus className={currentSize.icon} aria-hidden="true" />
-				) : (
-					<span aria-hidden="true">-</span>
-				)}
-			</button>
+				leftIcon={
+					useIcons ? (
+						<Minus
+							className={currentSize.icon}
+							aria-hidden='true'
+						/>
+					) : (
+						<span aria-hidden='true'>-</span>
+					)
+				}
+			/>
 
 			{/* Quantity Input/Display */}
 			{editable ? (
-				<input
-					type="number"
+				<Input
+					type='number'
 					min={min}
 					max={max}
 					value={internalValue}
 					onChange={handleInputChange}
 					onBlur={handleInputBlur}
 					disabled={disabled}
-					className={classNames(
-						'input input-bordered text-center font-medium disabled:opacity-50 transition-colors duration-200',
-						currentSize.input,
-						inputWidth,
-						inputClassName
-					)}
+					size={size === 'xs' ? 'sm' : size === 'md' ? 'base' : 'sm'}
+					className={classNames('text-center font-medium', inputWidth, inputClassName)}
 					aria-label={`${ariaLabel} input`}
-					aria-live="polite"
-					aria-atomic="true"
+					aria-live='polite'
+					aria-atomic='true'
 				/>
 			) : (
 				<span
@@ -349,37 +356,40 @@ export default function QuantitySelector({
 						inputWidth,
 						inputClassName
 					)}
-					aria-live="polite"
-					aria-atomic="true"
-					role="status"
-				>
+					aria-live='polite'
+					aria-atomic='true'
+					role='status'>
 					{value}
 				</span>
 			)}
 
 			{/* Increment Button */}
-			<button
-				type="button"
+			<Button
+				type='button'
 				onClick={handleIncrement}
 				disabled={isIncrementDisabled}
+				variant={buttonVariant}
+				size={size === 'xs' ? 'xs' : size === 'md' ? 'md' : 'sm'}
 				className={classNames(
-					'btn btn-circle shrink-0 transition-all duration-200',
+					'btn-circle shrink-0 transition-all duration-200',
 					currentSize.button,
-					variantClasses[buttonVariant],
 					{
 						'disabled:opacity-50 disabled:cursor-not-allowed': isIncrementDisabled,
 					},
 					buttonClassName
 				)}
 				aria-label={`Increase quantity${editable ? '' : ` to ${Math.min(max, value + 1)}`}`}
-			>
-				{useIcons ? (
-					<Plus className={currentSize.icon} aria-hidden="true" />
-				) : (
-					<span aria-hidden="true">+</span>
-				)}
-			</button>
+				leftIcon={
+					useIcons ? (
+						<Plus
+							className={currentSize.icon}
+							aria-hidden='true'
+						/>
+					) : (
+						<span aria-hidden='true'>+</span>
+					)
+				}
+			/>
 		</div>
 	)
 }
-

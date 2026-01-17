@@ -13,6 +13,7 @@ import { useState } from 'react'
 import { Columns3 } from 'lucide-react'
 
 import { Dropdown } from '@_components/ui/Dropdown'
+import Button from '@_components/ui/Button'
 import { useRichDataGridVisibility } from '../../context/RichDataGridContext'
 
 // ============================================================================
@@ -83,36 +84,42 @@ export function ColumnVisibilityDropdown({
 	})
 
 	return (
-		<Dropdown open={isOpen} onOpenChange={setIsOpen} className={className}>
+		<Dropdown
+			open={isOpen}
+			onOpenChange={setIsOpen}
+			className={className}>
 			<Dropdown.Trigger
-				variant="ghost"
-				leftIcon={<Columns3 className="h-4 w-4" />}
-				badge={showCounts && hiddenColumnCount > 0 ? `${hiddenColumnCount} hidden` : undefined}
-			>
+				variant='ghost'
+				leftIcon={<Columns3 className='h-4 w-4' />}
+				badge={showCounts && hiddenColumnCount > 0 ? `${hiddenColumnCount} hidden` : undefined}>
 				{label}
 			</Dropdown.Trigger>
 
-			<Dropdown.Content align="end" maxHeight="400px">
+			<Dropdown.Content
+				align='end'
+				maxHeight='400px'>
 				{/* Quick Actions Header */}
-				<Dropdown.Header className="gap-2">
-					<button
-						type="button"
+				<Dropdown.Header className='gap-2'>
+					<Button
+						type='button'
 						onClick={showAll}
-						className="btn btn-ghost btn-xs flex-1 text-primary hover:bg-primary/10"
-					>
+						variant='ghost'
+						size='xs'
+						className='flex-1 text-primary hover:bg-primary/10'>
 						Show All
-					</button>
-					<button
-						type="button"
+					</Button>
+					<Button
+						type='button'
 						onClick={hideAll}
-						className="btn btn-ghost btn-xs flex-1 text-base-content/70 hover:text-base-content"
-					>
+						variant='ghost'
+						size='xs'
+						className='flex-1 text-base-content/70 hover:text-base-content'>
 						Hide All
-					</button>
+					</Button>
 				</Dropdown.Header>
 
 				{/* Column List with Checkboxes */}
-				<div className="py-1 overflow-y-auto max-h-[280px]">
+				<div className='py-1 overflow-y-auto max-h-[280px]'>
 					{toggleableColumns.map((column) => {
 						const isVisible = columnVisibility[column.id] !== false
 						const header = column.columnDef.header
@@ -122,8 +129,7 @@ export function ColumnVisibilityDropdown({
 							<Dropdown.CheckboxItem
 								key={column.id}
 								checked={isVisible}
-								onCheckedChange={() => toggleColumn(column.id)}
-							>
+								onCheckedChange={() => toggleColumn(column.id)}>
 								{displayName}
 							</Dropdown.CheckboxItem>
 						)
@@ -132,7 +138,7 @@ export function ColumnVisibilityDropdown({
 
 				{/* Footer with counts */}
 				{showCounts && (
-					<Dropdown.Footer className="py-2">
+					<Dropdown.Footer className='py-2'>
 						<Dropdown.Label>
 							{visibleColumnCount} of {columns.length} columns visible
 						</Dropdown.Label>

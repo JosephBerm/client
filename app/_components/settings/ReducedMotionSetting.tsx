@@ -29,6 +29,8 @@
 
 import { useUserSettingsStore } from '@_features/settings'
 
+import Toggle from '@_components/ui/Toggle'
+
 /**
  * Reduced Motion Setting Component
  * 
@@ -64,10 +66,11 @@ export default function ReducedMotionSetting() {
 				</p>
 			</div>
 			<div className="shrink-0">
-				<input
+				<Toggle
 					id="reduced-motion-toggle"
-					type="checkbox"
-					className="toggle toggle-primary toggle-sm sm:toggle-md"
+					variant="primary"
+					size="sm"
+					className="sm:toggle-md"
 					checked={prefersReducedMotion}
 					onChange={(e) => handleToggleChange(e.target.checked)}
 					aria-label="Enable reduced motion"

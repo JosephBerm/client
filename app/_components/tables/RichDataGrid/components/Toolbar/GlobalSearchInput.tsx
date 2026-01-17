@@ -13,6 +13,9 @@ import { useState, useEffect, useRef } from 'react'
 import { Search, X } from 'lucide-react'
 import { useRichDataGridFilters } from '../../context/RichDataGridContext'
 
+import Input from '@_components/ui/Input'
+import Button from '@_components/ui/Button'
+
 // ============================================================================
 // PROPS
 // ============================================================================
@@ -100,57 +103,38 @@ export function GlobalSearchInput({
 		lg: 'right-4',
 	}
 
+	const inputSize = size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'base'
+
 	return (
 		<div className={`relative ${className}`}>
-			{/* Search Icon */}
-			<div className={`absolute ${iconLeftClasses[size]} top-1/2 -translate-y-1/2 text-base-content/50 dark:text-base-content/40 pointer-events-none`}>
-				<Search className={iconSizeClasses[size]} />
-			</div>
-
-			{/* Input */}
-			<input
+			<Input
 				ref={inputRef}
-				type="text"
+				type='text'
+				size={inputSize}
 				value={localValue}
 				onChange={handleChange}
 				onKeyDown={handleKeyDown}
 				placeholder={placeholder}
 				autoFocus={autoFocus}
-				className={`
-					input input-bordered w-full
-					${sizeClasses[size]}
-					focus:input-primary
-					dark:bg-base-200 dark:border-base-content/20
-					dark:focus:border-primary
-					dark:placeholder:text-base-content/40
-					transition-all duration-200
-				`}
-				aria-label="Search table"
-				role="searchbox"
+				leftIcon={<Search className={iconSizeClasses[size]} />}
+				rightElement={
+					localValue ? (
+						<Button
+							type='button'
+							variant='ghost'
+							size='xs'
+							onClick={handleClear}
+							className='h-auto p-1.5 sm:p-1 rounded-full touch-manipulation'
+							aria-label='Clear search'>
+							<X className={iconSizeClasses[size]} />
+						</Button>
+					) : undefined
+				}
+				aria-label='Search table'
+				role='searchbox'
 			/>
-
-			{/* Clear Button - Touch-friendly */}
-			{localValue && (
-				<button
-					type="button"
-					onClick={handleClear}
-					className={`
-						absolute ${iconRightClasses[size]} top-1/2 -translate-y-1/2
-						text-base-content/50 hover:text-base-content
-						dark:text-base-content/40 dark:hover:text-base-content/70
-						transition-colors duration-200
-						p-1.5 sm:p-1 rounded-full 
-						hover:bg-base-200 dark:hover:bg-base-content/10
-						touch-manipulation
-					`}
-					aria-label="Clear search"
-				>
-					<X className={iconSizeClasses[size]} />
-				</button>
-			)}
 		</div>
 	)
 }
 
 export default GlobalSearchInput
-

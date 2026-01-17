@@ -14,6 +14,9 @@ import { Calendar, ChevronDown } from 'lucide-react'
 
 import type { TimeRangePreset } from '@_types/analytics.types'
 
+import Input from '@_components/ui/Input'
+import Button from '@_components/ui/Button'
+
 import { TIME_RANGE_PRESETS, TIME_RANGE_LABELS } from '../_constants'
 
 interface AnalyticsDateRangePickerProps {
@@ -64,30 +67,30 @@ export function AnalyticsDateRangePicker({
 	}
 
 	return (
-		<div className="flex flex-wrap items-center gap-3">
+		<div className='flex flex-wrap items-center gap-3'>
 			{/* Preset Dropdown */}
-			<div className="dropdown dropdown-end">
+			<div className='dropdown dropdown-end'>
 				<label
 					tabIndex={0}
-					className={`btn btn-outline btn-sm gap-2 ${disabled ? 'btn-disabled' : ''}`}
-				>
-					<Calendar className="h-4 w-4" />
+					className={`btn btn-outline btn-sm gap-2 ${disabled ? 'btn-disabled' : ''}`}>
+					<Calendar className='h-4 w-4' />
 					{TIME_RANGE_LABELS[timeRange] || 'Select Range'}
-					<ChevronDown className="h-4 w-4" />
+					<ChevronDown className='h-4 w-4' />
 				</label>
 				<ul
 					tabIndex={0}
-					className="dropdown-content menu bg-base-100 rounded-box z-50 mt-1 w-52 p-2 shadow-lg border border-base-300"
-				>
+					className='dropdown-content menu bg-base-100 rounded-box z-50 mt-1 w-52 p-2 shadow-lg border border-base-300'>
 					{TIME_RANGE_PRESETS.map((option) => (
 						<li key={option.value}>
-							<button
-								type="button"
+							<Button
+								type='button'
+								variant={timeRange === option.value ? 'primary' : 'ghost'}
+								size='sm'
 								className={timeRange === option.value ? 'active' : ''}
 								onClick={() => onPresetChange(option.value)}
-							>
+								contentDrivenHeight>
 								{option.label}
-							</button>
+							</Button>
 						</li>
 					))}
 				</ul>
@@ -95,23 +98,23 @@ export function AnalyticsDateRangePicker({
 
 			{/* Custom Date Inputs (shown when 'custom' is selected) */}
 			{timeRange === 'custom' && (
-				<div className="flex items-center gap-2">
-					<input
-						type="date"
-						className="input input-bordered input-sm"
+				<div className='flex items-center gap-2'>
+					<Input
+						type='date'
+						size='sm'
 						value={startDate || ''}
 						onChange={handleStartDateChange}
 						disabled={disabled}
-						aria-label="Start date"
+						aria-label='Start date'
 					/>
-					<span className="text-base-content/60">to</span>
-					<input
-						type="date"
-						className="input input-bordered input-sm"
+					<span className='text-base-content/60'>to</span>
+					<Input
+						type='date'
+						size='sm'
 						value={endDate || ''}
 						onChange={handleEndDateChange}
 						disabled={disabled}
-						aria-label="End date"
+						aria-label='End date'
 					/>
 				</div>
 			)}

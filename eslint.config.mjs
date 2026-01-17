@@ -340,7 +340,9 @@ const eslintConfig = defineConfig([
 			'react/no-danger': 'warn',
 			'react/no-unused-prop-types': ['warn', { customValidators: [], skipShapeProps: true }],
 			'react-hooks/rules-of-hooks': 'error',
-			'react-hooks/exhaustive-deps': ['warn', { additionalHooks: '(useFormSubmit|useCRUDSubmit|useServerTable)' }],
+			// Note: useFormSubmit and useCRUDSubmit use refs internally - no stale closure issues
+			// Only useServerTable needs exhaustive-deps tracking
+			'react-hooks/exhaustive-deps': ['warn', { additionalHooks: '(useServerTable)' }],
 			'react/no-direct-mutation-state': 'warn',
 			'react/no-deprecated': 'warn',
 			'react/no-find-dom-node': 'warn',

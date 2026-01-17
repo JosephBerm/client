@@ -20,6 +20,9 @@ import {
 	operatorRequiresNoValue,
 } from '../../types'
 
+import Input from '@_components/ui/Input'
+import Checkbox from '@_components/ui/Checkbox'
+
 // ============================================================================
 // PROPS
 // ============================================================================
@@ -136,27 +139,27 @@ export function TextFilterInput({ value, onChange }: TextFilterInputProps) {
 					<label className="block text-xs font-medium text-base-content/70 mb-1">
 						Value
 					</label>
-					<input
+					<Input
 						type="text"
+						size="sm"
 						value={textValue}
 						onChange={handleValueChange}
 						placeholder="Enter text..."
-						className="input input-bordered input-sm w-full dark:bg-base-300 dark:border-base-content/20"
+						className="w-full"
 					/>
 				</div>
 			)}
 
 			{/* Case Sensitive Toggle */}
 			{requiresValue && (
-				<label className="flex items-center gap-2 cursor-pointer">
-					<input
-						type="checkbox"
+				<div className="flex items-center gap-2">
+					<Checkbox
 						checked={caseSensitive}
 						onChange={handleCaseSensitiveChange}
-						className="checkbox checkbox-sm checkbox-primary"
+						className="checkbox-sm checkbox-primary"
 					/>
 					<span className="text-xs text-base-content/70">Case sensitive</span>
-				</label>
+				</div>
 			)}
 		</div>
 	)

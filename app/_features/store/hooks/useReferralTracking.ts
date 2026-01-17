@@ -149,10 +149,12 @@ export interface UseReferralTrackingReturn {
  * 
  * @example
  * ```tsx
+ * import Input from '@_components/ui/Input';
+ * 
  * const { referredBy, hasReferral } = useReferralTracking()
  * 
  * // In quote form
- * <input 
+ * <Input 
  *   value={referredBy || ''} 
  *   disabled={hasReferral}
  *   placeholder="Who referred you?"

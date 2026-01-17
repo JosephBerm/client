@@ -354,23 +354,27 @@ const CarouselSlideComponent = memo(function CarouselSlide({
 				</video>
 
 				{/* Mute Button - Top Right - Mobile-first sizing */}
-				<button
+				<Button
 					onClick={handleMuteToggle}
-					className='absolute top-3 right-3 sm:top-3.5 sm:right-3.5 md:top-4 md:right-4 z-30 btn btn-circle btn-sm sm:btn-sm md:btn-md min-h-[44px] min-w-[44px] bg-black/30 hover:bg-black/50 active:bg-black/60 border border-white/20 text-white backdrop-blur-sm transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 hover:scale-110 active:scale-95'
+					variant='ghost'
+					size='sm'
+					className='absolute top-3 right-3 sm:top-3.5 sm:right-3.5 md:top-4 md:right-4 z-30 btn-circle md:btn-md min-h-[44px] min-w-[44px] bg-black/30 hover:bg-black/50 active:bg-black/60 border border-white/20 text-white backdrop-blur-sm transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 hover:scale-110 active:scale-95'
 					aria-label={isMuted ? 'Unmute video' : 'Mute video'}
-					type='button'>
-					{isMuted ? <VolumeX size={16} className='sm:w-4 sm:h-4 md:w-5 md:h-5' /> : <Volume2 size={16} className='sm:w-4 sm:h-4 md:w-5 md:h-5' />}
-				</button>
+					type='button'
+					leftIcon={isMuted ? <VolumeX size={16} className='sm:w-4 sm:h-4 md:w-5 md:h-5' /> : <Volume2 size={16} className='sm:w-4 sm:h-4 md:w-5 md:h-5' />}
+				/>
 
 				{/* Centered Play/Pause Button Overlay - Only show when paused - Mobile-first sizing */}
 				{!isPlaying && (
-					<button
+					<Button
 						onClick={handlePlayPause}
-						className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 btn btn-circle btn-md sm:btn-md md:btn-lg min-h-[44px] min-w-[44px] bg-white/10 hover:bg-white/20 active:bg-white/30 border border-white/40 text-white backdrop-blur-sm transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 hover:scale-110 active:scale-95'
+						variant='ghost'
+						size='md'
+						className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 btn-circle md:btn-lg min-h-[44px] min-w-[44px] bg-white/10 hover:bg-white/20 active:bg-white/30 border border-white/40 text-white backdrop-blur-sm transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 hover:scale-110 active:scale-95'
 						aria-label='Play video'
-						type='button'>
-						<Play size={28} fill='white' className='ml-0.5 sm:ml-1 sm:w-8 sm:h-8 md:w-10 md:h-10' />
-					</button>
+						type='button'
+						leftIcon={<Play size={28} fill='white' className='ml-0.5 sm:ml-1 sm:w-8 sm:h-8 md:w-10 md:h-10' />}
+					/>
 				)}
 			</>
 		)

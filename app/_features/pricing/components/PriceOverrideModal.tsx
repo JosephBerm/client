@@ -126,80 +126,78 @@ export default function PriceOverrideModal({
 	if (!isOpen) return null
 
 	return (
-		<div className="modal modal-open">
-			<div className="modal-box max-w-lg">
+		<div className='modal modal-open'>
+			<div className='modal-box max-w-lg'>
 				{/* Header */}
-				<div className="flex items-center justify-between mb-6">
-					<div className="flex items-center gap-3">
-						<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
-							<DollarSign className="h-5 w-5 text-warning" />
+				<div className='flex items-center justify-between mb-6'>
+					<div className='flex items-center gap-3'>
+						<div className='flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10'>
+							<DollarSign className='h-5 w-5 text-warning' />
 						</div>
 						<div>
-							<h3 className="font-bold text-lg">Override Price</h3>
-							<p className="text-sm text-base-content/60">Requires business justification</p>
+							<h3 className='font-bold text-lg'>Override Price</h3>
+							<p className='text-sm text-base-content/60'>Requires business justification</p>
 						</div>
 					</div>
-					<button
-						type="button"
+					<Button
+						type='button'
 						onClick={handleClose}
-						className="btn btn-ghost btn-sm btn-circle"
-						aria-label="Close"
-					>
-						<X className="h-5 w-5" />
-					</button>
+						variant='ghost'
+						size='sm'
+						className='btn-circle'
+						aria-label='Close'
+						leftIcon={<X className='h-5 w-5' />}
+					/>
 				</div>
 
 				{/* Product Info */}
-				<div className="rounded-lg bg-base-200/50 p-4 mb-6">
-					<p className="font-medium text-base-content">{productName}</p>
-					<div className="flex items-center gap-4 mt-2 text-sm">
+				<div className='rounded-lg bg-base-200/50 p-4 mb-6'>
+					<p className='font-medium text-base-content'>{productName}</p>
+					<div className='flex items-center gap-4 mt-2 text-sm'>
 						<div>
-							<span className="text-base-content/60">Current Price:</span>{' '}
-							<span className="font-semibold">{formatCurrency(currentPrice)}</span>
+							<span className='text-base-content/60'>Current Price:</span>{' '}
+							<span className='font-semibold'>{formatCurrency(currentPrice)}</span>
 						</div>
 						{calculatedPrice !== undefined && calculatedPrice !== currentPrice && (
 							<div>
-								<span className="text-base-content/60">Calculated:</span>{' '}
-								<span className="font-semibold text-primary">{formatCurrency(calculatedPrice)}</span>
+								<span className='text-base-content/60'>Calculated:</span>{' '}
+								<span className='font-semibold text-primary'>{formatCurrency(calculatedPrice)}</span>
 							</div>
 						)}
 					</div>
 				</div>
 
 				{/* Warning */}
-				<div className="alert alert-warning mb-6">
-					<AlertTriangle className="h-5 w-5" />
-					<span className="text-sm">
-						Price overrides are logged for audit purposes. Please provide a clear business
-						justification.
+				<div className='alert alert-warning mb-6'>
+					<AlertTriangle className='h-5 w-5' />
+					<span className='text-sm'>
+						Price overrides are logged for audit purposes. Please provide a clear business justification.
 					</span>
 				</div>
 
 				{/* Form */}
-				<div className="space-y-4">
+				<div className='space-y-4'>
 					<FormSection
-						title="New Price"
+						title='New Price'
 						icon={<DollarSign />}
-						description="Enter the override price"
-					>
-						<div className="flex items-center gap-4">
-							<div className="flex-1">
+						description='Enter the override price'>
+						<div className='flex items-center gap-4'>
+							<div className='flex-1'>
 								<FormInput
-									type="number"
-									step="0.01"
-									min="0.01"
+									type='number'
+									step='0.01'
+									min='0.01'
 									value={overridePrice}
 									onChange={(e) => setOverridePrice(e.target.value)}
 									error={errors.price ? { type: 'manual', message: errors.price } : undefined}
-									className="input-lg font-bold"
+									className='input-lg font-bold'
 								/>
 							</div>
 							{difference !== 0 && (
 								<Badge
 									variant={difference > 0 ? 'error' : 'success'}
-									size="lg"
-									className="whitespace-nowrap"
-								>
+									size='lg'
+									className='whitespace-nowrap'>
 									{difference > 0 ? '+' : ''}
 									{formatCurrency(difference)} ({differencePercent > 0 ? '+' : ''}
 									{differencePercent.toFixed(1)}%)
@@ -209,12 +207,11 @@ export default function PriceOverrideModal({
 					</FormSection>
 
 					<FormSection
-						title="Business Justification"
+						title='Business Justification'
 						icon={<FileText />}
-						description="Required for audit compliance"
-					>
+						description='Required for audit compliance'>
 						<FormTextArea
-							placeholder="Explain why this price override is necessary (e.g., competitor match, long-term customer, volume commitment, etc.)"
+							placeholder='Explain why this price override is necessary (e.g., competitor match, long-term customer, volume commitment, etc.)'
 							value={overrideReason}
 							onChange={(e) => setOverrideReason(e.target.value)}
 							rows={3}
@@ -224,23 +221,25 @@ export default function PriceOverrideModal({
 				</div>
 
 				{/* Actions */}
-				<div className="modal-action">
-					<Button variant="ghost" onClick={handleClose} disabled={overrideMutation.isPending}>
+				<div className='modal-action'>
+					<Button
+						variant='ghost'
+						onClick={handleClose}
+						disabled={overrideMutation.isPending}>
 						Cancel
 					</Button>
-				<Button
-					variant="accent"
-					onClick={handleSubmit}
-					disabled={overrideMutation.isPending || !overrideReason.trim()}
-				>
+					<Button
+						variant='accent'
+						onClick={handleSubmit}
+						disabled={overrideMutation.isPending || !overrideReason.trim()}>
 						{overrideMutation.isPending ? (
 							<>
-								<span className="loading loading-spinner loading-sm mr-2" />
+								<span className='loading loading-spinner loading-sm mr-2' />
 								Applying...
 							</>
 						) : (
 							<>
-								<Save className="h-4 w-4 mr-2" />
+								<Save className='h-4 w-4 mr-2' />
 								Apply Override
 							</>
 						)}
@@ -249,12 +248,15 @@ export default function PriceOverrideModal({
 
 				{/* Error */}
 				{overrideMutation.isError && (
-					<div className="alert alert-error mt-4">
+					<div className='alert alert-error mt-4'>
 						<span>Failed to apply override. Please try again.</span>
 					</div>
 				)}
 			</div>
-			<div className="modal-backdrop" onClick={handleClose} />
+			<div
+				className='modal-backdrop'
+				onClick={handleClose}
+			/>
 		</div>
 	)
 }

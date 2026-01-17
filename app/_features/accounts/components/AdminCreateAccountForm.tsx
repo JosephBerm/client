@@ -52,7 +52,6 @@ import {
 	DEFAULT_ROLE_METADATA,
 	DEFAULT_ROLE_THRESHOLDS,
 	getRoleDisplayName,
-	translateError,
 	useZodForm,
 	useFormSubmit,
 	checkPasswordStrength,
@@ -250,29 +249,14 @@ export default function AdminCreateAccountForm({ onSuccess, onCancel }: AdminCre
 	}, [])
 
 	// Success handler callback
+	// NOTE: useFormSubmit ONLY calls onSuccess when statusCode is 200/201,
+	// and it passes the PAYLOAD directly (not the full response).
+	// Error handling is done by useFormSubmit itself via the errorMessage option.
 	const handleSubmitSuccess = useCallback((result: AdminCreateAccountResponse | null) => {
-		// API returns ApiResponse<T> with payload, message, statusCode
-		const data = result as unknown as {
-			statusCode: number
-			payload: AdminCreateAccountResponse
-			message?: string
-		}
-		if (data.statusCode === 200 && data.payload) {
-			setCreatedAccount(data.payload)
+		if (result) {
+			setCreatedAccount(result)
 			setStep('success')
-			onSuccessRef.current?.(data.payload)
-		} else {
-			// Translate backend message keys to user-friendly messages
-			const errorMessage = data.message
-			const isPasswordError = errorMessage?.toLowerCase().includes('password')
-			const fallbackMessage = isPasswordError
-				? 'Password does not meet security requirements. Please ensure it has at least 8 characters, includes uppercase and lowercase letters, a number, and a special character.'
-				: 'Failed to create account. Please try again.'
-
-			notificationService.error(translateError(errorMessage, fallbackMessage), {
-				component: 'AdminCreateAccountForm',
-				action: 'create',
-			})
+			onSuccessRef.current?.(result)
 		}
 	}, [])
 
@@ -396,7 +380,8 @@ export default function AdminCreateAccountForm({ onSuccess, onCancel }: AdminCre
 	// RENDER: SUCCESS STATE
 	// ========================================================================
 	if (step === 'success' && createdAccount) {
-		const roleMetadata = DEFAULT_ROLE_METADATA[createdAccount.account.roleLevel as keyof typeof DEFAULT_ROLE_METADATA]
+		const roleMetadata =
+			DEFAULT_ROLE_METADATA[createdAccount.account.roleLevel as keyof typeof DEFAULT_ROLE_METADATA]
 
 		return (
 			<Card className='border border-success/30 bg-success/5 p-6'>

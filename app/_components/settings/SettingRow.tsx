@@ -17,6 +17,7 @@
 
 import Button from '@_components/ui/Button'
 import Select from '@_components/ui/Select'
+import Toggle from '@_components/ui/Toggle'
 
 import type { SettingItem } from '@_types/settings'
 
@@ -93,9 +94,10 @@ export default function SettingRow({ setting }: SettingRowProps) {
 							)}
 						</div>
 						<div className="shrink-0">
-							<input
-								type="checkbox"
-								className="toggle toggle-primary toggle-sm sm:toggle-md"
+							<Toggle
+								variant="primary"
+								size="sm"
+								className="sm:toggle-md"
 								checked={toggleSetting.checked}
 								onChange={(e) => toggleSetting.onChange(e.target.checked)}
 								aria-label={toggleSetting.label}

@@ -1,13 +1,30 @@
 /**
  * Export Utilities for RichDataGrid
  *
- * Provides CSV, Excel, and PDF export functionality using industry-standard libraries:
+ * IMPORTANT: This module contains heavy library dependencies (~1.2MB combined).
+ * It should ONLY be imported dynamically using `await import('./exportUtils')`.
+ *
+ * Libraries included:
  * - CSV: papaparse (1.2M+ weekly downloads)
  * - Excel: ExcelJS (2.9M weekly downloads, better security than xlsx)
  * - PDF: jsPDF + jspdf-autotable (2.6M+ weekly downloads)
  *
- * Uses native Blob API for file downloads (no external dependency needed).
+ * MAANG Pattern: Dynamic Import for Code Splitting
+ * - Types are defined in ./exportTypes.ts (zero-cost, static import safe)
+ * - This module is loaded on-demand when user triggers export
+ * - Reduces initial page load by ~1.2MB for data grid routes
  *
+ * @example
+ * // CORRECT: Dynamic import (lazy loading)
+ * const handleExport = async () => {
+ *   const { quickExport } = await import('./exportUtils')
+ *   await quickExport(table, ExportFormat.Excel, 'filename')
+ * }
+ *
+ * // WRONG: Static import (bundles with page)
+ * import { quickExport } from './exportUtils' // Don't do this!
+ *
+ * @see ./exportTypes.ts for lightweight type definitions
  * @module exportUtils
  */
 
@@ -18,68 +35,13 @@ import autoTable from 'jspdf-autotable'
 
 import type { Table, Row, Column } from '@tanstack/react-table'
 
+// Import types from the lightweight types module
 import { ExportFormat, ExportScope } from '../types'
+import type { ExportColumnConfig, ExportConfig, ExportResult } from './exportTypes'
 
-// Re-export for convenience
+// Re-export types for consumers who dynamic-import this module
 export { ExportFormat, ExportScope }
-
-/**
- * Column configuration for export.
- */
-export interface ExportColumnConfig {
-	/** Column ID */
-	id: string
-	/** Display header */
-	header: string
-	/** Optional accessor function to get cell value */
-	accessor?: (row: unknown) => unknown
-	/** Optional formatter for display value */
-	formatter?: (value: unknown) => string
-	/** Column width for Excel/PDF (in characters or points) */
-	width?: number
-	/** Text alignment */
-	align?: 'left' | 'center' | 'right'
-}
-
-/**
- * Export options configuration.
- */
-export interface ExportConfig<TData = unknown> {
-	/** Export format */
-	format: ExportFormat
-	/** Export scope */
-	scope: ExportScope
-	/** Filename (without extension) */
-	filename: string
-	/** Column configurations (if not provided, uses all visible columns) */
-	columns?: ExportColumnConfig[]
-	/** Sheet name for Excel export */
-	sheetName?: string
-	/** Title for PDF export */
-	title?: string
-	/** Include timestamp in filename */
-	includeTimestamp?: boolean
-	/** Custom row transformer */
-	transformRow?: (row: TData) => Record<string, unknown>
-	/** PDF orientation */
-	pdfOrientation?: 'portrait' | 'landscape'
-	/** PDF page size */
-	pdfPageSize?: 'a4' | 'letter' | 'legal'
-}
-
-/**
- * Export result with metadata.
- */
-export interface ExportResult {
-	/** Whether export was successful */
-	success: boolean
-	/** Number of rows exported */
-	rowCount: number
-	/** Filename with extension */
-	filename: string
-	/** Error message if failed */
-	error?: string
-}
+export type { ExportColumnConfig, ExportConfig, ExportResult }
 
 // ============================================================================
 // HELPER FUNCTIONS

@@ -1,25 +1,47 @@
 /**
- * Internal App Layout
+ * Internal App Layout - Authenticated Routes
  * 
- * Server Component layout for /app routes.
- * Provides authentication check and wraps pages with InternalAppShell.
+ * Async Server Component layout for /app/* routes.
+ * Provides server-side authentication and wraps pages with InternalAppShell.
  * 
- * **Features:**
- * - Server-side authentication validation
- * - User data fetching
- * - Redirect unauthenticated users
- * - Wraps with InternalAppShell (client component)
+ * ## Next.js 16.1.1 Architecture (cacheComponents: true)
  * 
- * **Architecture:**
- * - Server Component (async)
- * - Auth check with token validation
- * - Fetches user data for role-based navigation
- * - Passes children to InternalAppShell
+ * This layout is **dynamic** because it uses `cookies()` to check authentication.
+ * With Partial Prerendering (PPR) enabled, this affects rendering behavior:
+ * 
+ * ### How It Works:
+ * 1. **Static Shell**: The root layout's static parts are pre-rendered at build time
+ * 2. **Dynamic Layout**: This layout executes at request time (due to cookies())
+ * 3. **Streaming**: Content streams in while loading.tsx shows fallback UI
+ * 4. **State Preservation**: React's Activity component preserves layout state
+ *    across navigations - InternalAppShell doesn't unmount between page changes
+ * 
+ * ### Why cookies() Makes This Dynamic:
+ * Per Next.js 16 docs, accessing runtime request APIs (cookies, headers, searchParams)
+ * opts the component out of static rendering. The entire subtree becomes dynamic
+ * and is rendered fresh on each request.
+ * 
+ * ### Navigation Behavior:
+ * With cacheComponents enabled, Next.js uses the Router Cache for navigation:
+ * - First visit to a route: Full server render, loading.tsx shows
+ * - Subsequent visits: Cached RSC payload used (faster)
+ * - Layout persists via Activity component (state preserved)
+ * 
+ * ### Performance Optimizations:
+ * - React.cache() wraps getUserData to deduplicate within same request
+ * - proxy.ts (middleware) handles primary auth redirects before layout runs
+ * - InternalAppShell syncs user data to client Zustand store once
+ * 
+ * @see https://nextjs.org/docs/app/getting-started/partial-prerendering
+ * @see https://nextjs.org/docs/app/getting-started/cache-components
+ * @see https://nextjs.org/docs/app/building-your-application/caching#router-cache
  * 
  * @module app/layout
  */
 
 import type { Metadata } from 'next'
+
+import { cache } from 'react'
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -44,14 +66,20 @@ export const metadata: Metadata = {
  * Used for role-based navigation rendering.
  * 
  * **Architecture Note:**
- * Uses centralized API module (HttpService) which:
- * - Automatically reads token from cookies (server or client)
- * - Handles authentication headers
- * - Provides consistent error handling
+ * - Wrapped in React.cache() to deduplicate calls within the same request
+ * - Uses centralized API module (HttpService) which:
+ *   - Automatically reads token from cookies (server or client)
+ *   - Handles authentication headers
+ *   - Provides consistent error handling
+ * 
+ * **Performance:**
+ * React's cache() ensures this function is only called once per request,
+ * even if multiple components need user data. The cache is automatically
+ * invalidated between requests.
  * 
  * @returns User data response or null if invalid
  */
-async function getUserData() {
+const getUserData = cache(async () => {
 	try {
 		// Use centralized API module - HttpService handles auth token automatically
 		const response = await API.Accounts.get(null)
@@ -76,7 +104,7 @@ async function getUserData() {
 	}
 
 	return null
-}
+})
 
 /**
  * Internal App Layout Component

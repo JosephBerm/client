@@ -73,6 +73,7 @@ import classNames from 'classnames'
 import { motion } from 'framer-motion'
 
 import { checkReducedMotion, MODAL_ANIMATION } from '@_components/common/animations'
+import Button from '@_components/ui/Button'
 
 // ============================================================================
 // TYPES
@@ -405,18 +406,18 @@ export function TabsList({ children, className }: TabsListProps) {
 	}
 
 	return (
-		<div className="relative">
+		<div className='relative'>
 			{/* Left fade indicator */}
 			{canScrollLeft && (
 				<div
-					className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-8 bg-gradient-to-r from-base-100 to-transparent"
-					aria-hidden="true"
+					className='pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-8 bg-gradient-to-r from-base-100 to-transparent'
+					aria-hidden='true'
 				/>
 			)}
 
 			<div
 				ref={containerRef as RefObject<HTMLDivElement>}
-				role="tablist"
+				role='tablist'
 				className={classNames(
 					'tabs relative flex gap-1',
 					// Mobile: horizontal scroll, hide scrollbar
@@ -425,15 +426,14 @@ export function TabsList({ children, className }: TabsListProps) {
 					variantClasses[variant],
 					className
 				)}
-				onKeyDown={handleKeyDown}
-			>
+				onKeyDown={handleKeyDown}>
 				{children}
 
 				{/* Sliding indicator for bordered variant */}
 				{slidingIndicator && indicatorStyle && (
 					<motion.div
-						layoutId="tabs-active-indicator"
-						className="pointer-events-none absolute bottom-0 h-0.5 rounded-full bg-primary"
+						layoutId='tabs-active-indicator'
+						className='pointer-events-none absolute bottom-0 h-0.5 rounded-full bg-primary'
 						style={{
 							width: indicatorStyle.width,
 							left: indicatorStyle.left,
@@ -446,7 +446,7 @@ export function TabsList({ children, className }: TabsListProps) {
 										stiffness: MODAL_ANIMATION.content.spring.stiffness,
 										damping: MODAL_ANIMATION.content.spring.damping,
 										mass: MODAL_ANIMATION.content.spring.mass,
-									}
+								  }
 						}
 					/>
 				)}
@@ -455,8 +455,8 @@ export function TabsList({ children, className }: TabsListProps) {
 			{/* Right fade indicator */}
 			{canScrollRight && (
 				<div
-					className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-8 bg-gradient-to-l from-base-100 to-transparent"
-					aria-hidden="true"
+					className='pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-8 bg-gradient-to-l from-base-100 to-transparent'
+					aria-hidden='true'
 				/>
 			)}
 		</div>
@@ -509,18 +509,22 @@ export function Tab({
 	const disabledClasses = 'opacity-50 cursor-not-allowed'
 
 	// Badge classes based on variant
+	// Active tabs use primary colors, inactive tabs use muted colors
 	const badgeClasses =
 		badgeVariant === 'admin'
 			? 'bg-base-200 text-base-content/70' // Subtle admin badge
 			: isActive
-				? 'bg-primary-content/20 text-primary-content'
-				: 'bg-base-300 text-base-content/70'
+				? 'bg-primary/15 text-primary' // Active: primary-tinted badge
+				: 'bg-base-300 text-base-content/70' // Inactive: muted badge
 
 	return (
-		<button
+		<Button
 			ref={buttonRef}
-			type="button"
-			role="tab"
+			type='button'
+			role='tab'
+			// Always use ghost variant - active styling handled via className
+			// This prevents the filled button background on active tabs
+			variant='ghost'
 			aria-selected={isActive}
 			aria-controls={`tabpanel-${value}`}
 			id={`tab-${value}`}
@@ -532,22 +536,22 @@ export function Tab({
 				baseClasses,
 				isActive ? activeClasses[variant] : inactiveClasses,
 				disabled && disabledClasses,
+				'h-auto',
 				className
 			)}
-		>
-			{icon && <span className="shrink-0">{icon}</span>}
-			<span className="whitespace-nowrap">{children}</span>
+			leftIcon={icon}
+			contentDrivenHeight>
+			<span className='whitespace-nowrap'>{children}</span>
 			{badge !== undefined && (
 				<span
 					className={classNames(
 						'ml-1 inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold',
 						badgeClasses
-					)}
-				>
+					)}>
 					{badge}
 				</span>
 			)}
-		</button>
+		</Button>
 	)
 }
 
@@ -567,7 +571,7 @@ export function TabPanel({ value, children, className }: TabPanelProps) {
 
 	return (
 		<div
-			role="tabpanel"
+			role='tabpanel'
 			id={`tabpanel-${value}`}
 			aria-labelledby={`tab-${value}`}
 			tabIndex={0}
@@ -576,8 +580,7 @@ export function TabPanel({ value, children, className }: TabPanelProps) {
 				// Animation
 				'animate-fade-in',
 				className
-			)}
-		>
+			)}>
 			{children}
 		</div>
 	)

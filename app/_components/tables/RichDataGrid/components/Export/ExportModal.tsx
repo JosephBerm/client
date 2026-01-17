@@ -7,6 +7,12 @@
  * - Column selection
  * - Filename customization
  *
+ * PERFORMANCE OPTIMIZATION (MAANG Pattern):
+ * Export libraries (ExcelJS ~800KB, jsPDF ~350KB, papaparse ~47KB) are
+ * loaded dynamically only when the user clicks "Export".
+ * This reduces initial bundle size by ~1.2MB for all data grid pages.
+ *
+ * @see https://nextjs.org/docs/app/building-your-application/optimizing/lazy-loading
  * @module ExportModal
  */
 
@@ -17,15 +23,16 @@ import { useState, useEffect } from 'react'
 import { X, Download, FileSpreadsheet, FileText, File, Check } from 'lucide-react'
 import { useEscapeKey } from '@_shared'
 
+import Input from '@_components/ui/Input'
+import Radio from '@_components/ui/Radio'
+import Checkbox from '@_components/ui/Checkbox'
+import Button from '@_components/ui/Button'
+
 import { useRichDataGridContext, useRichDataGridSelection } from '../../context/RichDataGridContext'
-import {
-	ExportFormat,
-	ExportScope,
-	exportData,
-	type ExportConfig,
-	type ExportResult,
-	type ExportColumnConfig,
-} from '../../utils/exportUtils'
+
+// Import ONLY lightweight types (no library code bundled)
+import { ExportFormat, ExportScope } from '../../utils/exportTypes'
+import type { ExportConfig, ExportResult, ExportColumnConfig } from '../../utils/exportTypes'
 
 // ============================================================================
 // PROPS
@@ -142,7 +149,16 @@ export function ExportModal({
 		}
 	}
 
-	// Handle export
+	/**
+	 * Handle export with dynamic import.
+	 *
+	 * MAANG Pattern: Lazy Loading Heavy Dependencies
+	 * The export utilities module (~1.2MB) is only loaded when user
+	 * actually clicks the Export button. This follows Google's PRPL pattern
+	 * and Netflix's approach to progressive loading.
+	 *
+	 * @see https://web.dev/apply-instant-loading-with-prpl/
+	 */
 	const handleExport = async () => {
 		if (selectedColumns.size === 0) {
 			onExportError?.('Please select at least one column to export')
@@ -152,7 +168,7 @@ export function ExportModal({
 		setIsExporting(true)
 
 		try {
-			// Prepare column config
+			// Prepare column config (lightweight operation, no heavy imports)
 			const columns: ExportColumnConfig[] = allColumns
 				.filter((col) => selectedColumns.has(col.id))
 				.map((col) => ({
@@ -169,6 +185,10 @@ export function ExportModal({
 				pdfOrientation,
 				title: format === ExportFormat.PDF ? customFilename : undefined,
 			}
+
+			// Dynamic import: Load export utilities only when needed
+			// This code-splits ExcelJS, jsPDF, and papaparse into a separate chunk
+			const { exportData } = await import('../../utils/exportUtils')
 
 			const result = await exportData(
 				table,
@@ -193,101 +213,117 @@ export function ExportModal({
 
 	return (
 		<div
-			className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
-			onClick={(e) => e.target === e.currentTarget && onClose()}
-		>
+			className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50'
+			onClick={(e) => e.target === e.currentTarget && onClose()}>
 			<div
-				className="
+				className='
 					bg-base-100 dark:bg-base-200
 					rounded-xl shadow-2xl
 					w-full max-w-lg max-h-[90vh] overflow-hidden
 					animate-in fade-in-0 zoom-in-95 duration-200
-				"
-				role="dialog"
-				aria-modal="true"
-				aria-labelledby="export-modal-title"
-			>
+				'
+				role='dialog'
+				aria-modal='true'
+				aria-labelledby='export-modal-title'>
 				{/* Header */}
-				<div className="flex items-center justify-between px-6 py-4 border-b border-base-200 dark:border-base-content/10">
-					<h2 id="export-modal-title" className="text-lg font-semibold text-base-content">
+				<div className='flex items-center justify-between px-6 py-4 border-b border-base-200 dark:border-base-content/10'>
+					<h2
+						id='export-modal-title'
+						className='text-lg font-semibold text-base-content'>
 						Export Data
 					</h2>
-					<button
-						type="button"
+					<Button
+						type='button'
 						onClick={onClose}
-						className="btn btn-ghost btn-sm btn-circle"
-						aria-label="Close"
-					>
-						<X className="h-5 w-5" />
-					</button>
+						variant='ghost'
+						size='sm'
+						className='btn-circle'
+						aria-label='Close'>
+						<X className='h-5 w-5' />
+					</Button>
 				</div>
 
 				{/* Content */}
-				<div className="px-6 py-4 overflow-y-auto max-h-[60vh] space-y-6">
+				<div className='px-6 py-4 overflow-y-auto max-h-[60vh] space-y-6'>
 					{/* Format Selection */}
 					<div>
-						<label className="block text-sm font-medium text-base-content mb-2">
-							Export Format
-						</label>
-						<div className="grid grid-cols-3 gap-2">
+						<label className='block text-sm font-medium text-base-content mb-2'>Export Format</label>
+						<div className='grid grid-cols-3 gap-2'>
 							{[
 								{ value: ExportFormat.CSV, label: 'CSV', icon: FileText },
 								{ value: ExportFormat.Excel, label: 'Excel', icon: FileSpreadsheet },
 								{ value: ExportFormat.PDF, label: 'PDF', icon: File },
 							].map((option) => (
-								<button
+								<Button
 									key={option.value}
-									type="button"
+									type='button'
 									onClick={() => setFormat(option.value)}
+									variant={format === option.value ? 'primary' : 'outline'}
+									size='sm'
 									className={`
 										flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-colors
-										${format === option.value
-											? 'border-primary bg-primary/10'
-											: 'border-base-300 dark:border-base-content/20 hover:border-primary/50'
+										${
+											format === option.value
+												? 'border-primary bg-primary/10'
+												: 'border-base-300 dark:border-base-content/20 hover:border-primary/50'
 										}
-									`}
-								>
-									<option.icon className="h-6 w-6" />
-									<span className="text-sm font-medium">{option.label}</span>
-								</button>
+									`}>
+									<option.icon className='h-6 w-6' />
+									<span className='text-sm font-medium'>{option.label}</span>
+								</Button>
 							))}
 						</div>
 					</div>
 
 					{/* Scope Selection */}
 					<div>
-						<label className="block text-sm font-medium text-base-content mb-2">
-							Export Scope
-						</label>
-						<div className="space-y-2">
+						<label className='block text-sm font-medium text-base-content mb-2'>Export Scope</label>
+						<div className='space-y-2'>
 							{[
-								{ value: ExportScope.FilteredRows, label: 'Filtered Rows', count: getRowCount(ExportScope.FilteredRows) },
-								{ value: ExportScope.CurrentPage, label: 'Current Page', count: getRowCount(ExportScope.CurrentPage) },
-								{ value: ExportScope.AllPages, label: 'All Rows', count: getRowCount(ExportScope.AllPages) },
-								{ value: ExportScope.SelectedRows, label: 'Selected Rows', count: getRowCount(ExportScope.SelectedRows), disabled: selectedCount === 0 },
+								{
+									value: ExportScope.FilteredRows,
+									label: 'Filtered Rows',
+									count: getRowCount(ExportScope.FilteredRows),
+								},
+								{
+									value: ExportScope.CurrentPage,
+									label: 'Current Page',
+									count: getRowCount(ExportScope.CurrentPage),
+								},
+								{
+									value: ExportScope.AllPages,
+									label: 'All Rows',
+									count: getRowCount(ExportScope.AllPages),
+								},
+								{
+									value: ExportScope.SelectedRows,
+									label: 'Selected Rows',
+									count: getRowCount(ExportScope.SelectedRows),
+									disabled: selectedCount === 0,
+								},
 							].map((option) => (
 								<label
 									key={option.value}
 									className={`
 										flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors
-										${scope === option.value
-											? 'border-primary bg-primary/10'
-											: 'border-base-300 dark:border-base-content/20 hover:border-primary/50'
+										${
+											scope === option.value
+												? 'border-primary bg-primary/10'
+												: 'border-base-300 dark:border-base-content/20 hover:border-primary/50'
 										}
 										${option.disabled ? 'opacity-50 cursor-not-allowed' : ''}
-									`}
-								>
-									<input
-										type="radio"
-										name="scope"
+									`}>
+									<Radio
+										name='scope'
 										value={option.value}
+										size='sm'
+										variant='primary'
 										checked={scope === option.value}
 										onChange={() => setScope(option.value)}
 										disabled={option.disabled}
-										className="radio radio-primary radio-sm"
 									/>
-									<span className="flex-1">{option.label}</span>
-									<span className="badge badge-ghost badge-sm">{option.count} rows</span>
+									<span className='flex-1'>{option.label}</span>
+									<span className='badge badge-ghost badge-sm'>{option.count} rows</span>
 								</label>
 							))}
 						</div>
@@ -295,89 +331,77 @@ export function ExportModal({
 
 					{/* Column Selection */}
 					<div>
-						<div className="flex items-center justify-between mb-2">
-							<label className="text-sm font-medium text-base-content">
-								Columns to Export
-							</label>
-							<button
-								type="button"
+						<div className='flex items-center justify-between mb-2'>
+							<label className='text-sm font-medium text-base-content'>Columns to Export</label>
+							<Button
+								type='button'
 								onClick={toggleAllColumns}
-								className="btn btn-ghost btn-xs"
-							>
+								variant='ghost'
+								size='xs'>
 								{selectedColumns.size === allColumns.length ? 'Deselect All' : 'Select All'}
-							</button>
+							</Button>
 						</div>
-						<div className="max-h-40 overflow-y-auto border border-base-300 dark:border-base-content/20 rounded-lg p-2 space-y-1">
+						<div className='max-h-40 overflow-y-auto border border-base-300 dark:border-base-content/20 rounded-lg p-2 space-y-1'>
 							{allColumns.map((col) => (
 								<label
 									key={col.id}
-									className="flex items-center gap-2 p-2 rounded hover:bg-base-200 dark:hover:bg-base-content/10 cursor-pointer"
-								>
-									<input
-										type="checkbox"
+									className='flex items-center gap-2 p-2 rounded hover:bg-base-200 dark:hover:bg-base-content/10 cursor-pointer'>
+									<Checkbox
 										checked={selectedColumns.has(col.id)}
 										onChange={() => toggleColumn(col.id)}
-										className="checkbox checkbox-primary checkbox-sm"
+										className='checkbox-primary checkbox-sm'
 									/>
-									<span className="text-sm">{col.header}</span>
+									<span className='text-sm'>{col.header}</span>
 								</label>
 							))}
 						</div>
-						<p className="text-xs text-base-content/50 mt-1">
+						<p className='text-xs text-base-content/50 mt-1'>
 							{selectedColumns.size} of {allColumns.length} columns selected
 						</p>
 					</div>
 
 					{/* Filename */}
 					<div>
-						<label className="block text-sm font-medium text-base-content mb-2">
-							Filename
-						</label>
-						<div className="flex gap-2">
-							<input
-								type="text"
+						<label className='block text-sm font-medium text-base-content mb-2'>Filename</label>
+						<div className='flex gap-2'>
+							<Input
+								type='text'
+								size='sm'
 								value={customFilename}
 								onChange={(e) => setCustomFilename(e.target.value)}
-								placeholder="Enter filename"
-								className="input input-bordered input-sm flex-1 dark:bg-base-300 dark:border-base-content/20"
+								placeholder='Enter filename'
+								className='flex-1'
 							/>
-							<span className="self-center text-sm text-base-content/50">
-								.{format}
-							</span>
+							<span className='self-center text-sm text-base-content/50'>.{format}</span>
 						</div>
-						<label className="flex items-center gap-2 mt-2 cursor-pointer">
-							<input
-								type="checkbox"
+						<div className='flex items-center gap-2 mt-2'>
+							<Checkbox
 								checked={includeTimestamp}
 								onChange={(e) => setIncludeTimestamp(e.target.checked)}
-								className="checkbox checkbox-primary checkbox-xs"
+								className='checkbox-primary checkbox-xs'
 							/>
-							<span className="text-xs text-base-content/70">Include timestamp in filename</span>
-						</label>
+							<span className='text-xs text-base-content/70'>Include timestamp in filename</span>
+						</div>
 					</div>
 
 					{/* PDF Options */}
 					{format === ExportFormat.PDF && (
 						<div>
-							<label className="block text-sm font-medium text-base-content mb-2">
-								PDF Orientation
-							</label>
-							<div className="flex gap-2">
+							<label className='block text-sm font-medium text-base-content mb-2'>PDF Orientation</label>
+							<div className='flex gap-2'>
 								{[
 									{ value: 'portrait' as const, label: 'Portrait' },
 									{ value: 'landscape' as const, label: 'Landscape' },
 								].map((option) => (
-									<button
+									<Button
 										key={option.value}
-										type="button"
+										type='button'
 										onClick={() => setPdfOrientation(option.value)}
-										className={`
-											btn btn-sm flex-1
-											${pdfOrientation === option.value ? 'btn-primary' : 'btn-ghost'}
-										`}
-									>
+										variant={pdfOrientation === option.value ? 'primary' : 'ghost'}
+										size='sm'
+										className='flex-1'>
 										{option.label}
-									</button>
+									</Button>
 								))}
 							</div>
 						</div>
@@ -385,28 +409,25 @@ export function ExportModal({
 				</div>
 
 				{/* Footer */}
-				<div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-base-200 dark:border-base-content/10 bg-base-50 dark:bg-base-content/5">
-					<button
-						type="button"
+				<div className='flex items-center justify-end gap-2 px-6 py-4 border-t border-base-200 dark:border-base-content/10 bg-base-50 dark:bg-base-content/5'>
+					<Button
+						type='button'
 						onClick={onClose}
-						className="btn btn-ghost btn-sm"
-						disabled={isExporting}
-					>
+						variant='ghost'
+						size='sm'
+						disabled={isExporting}>
 						Cancel
-					</button>
-					<button
-						type="button"
+					</Button>
+					<Button
+						type='button'
 						onClick={handleExport}
-						disabled={isExporting || selectedColumns.size === 0}
-						className="btn btn-primary btn-sm gap-2"
-					>
-						{isExporting ? (
-							<span className="loading loading-spinner loading-sm" />
-						) : (
-							<Download className="h-4 w-4" />
-						)}
+						variant='primary'
+						size='sm'
+						loading={isExporting}
+						leftIcon={!isExporting ? <Download className='h-4 w-4' /> : undefined}
+						disabled={isExporting || selectedColumns.size === 0}>
 						Export {getRowCount(scope)} Rows
-					</button>
+					</Button>
 				</div>
 			</div>
 		</div>

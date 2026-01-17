@@ -17,16 +17,16 @@ const Page = () => {
 			{/* Dashboard Content - FAANG-level mobile-first spacing */}
 			<div className="space-y-5 sm:space-y-6 md:space-y-8 w-full min-w-0">
 				{/* Account Overview Section */}
-				<div className="w-full min-w-0 overflow-hidden">
+				<div className="w-full min-w-0 overflow-hidden" data-testid="stats-section">
 					<AccountOverview />
 				</div>
 
 				{/* Tables Section - Responsive grid layout */}
 				<div className="grid grid-cols-1 gap-6 sm:gap-6 lg:grid-cols-2 w-full min-w-0 overflow-hidden">
-					<div className="w-full min-w-0 overflow-hidden">
+					<div className="w-full min-w-0 overflow-hidden" data-testid="recent-quotes">
 						<AccountQuotesTable />
 					</div>
-					<div className="w-full min-w-0 overflow-hidden">
+					<div className="w-full min-w-0 overflow-hidden" data-testid="recent-orders">
 						<AccountOrdersTable />
 					</div>
 				</div>

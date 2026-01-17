@@ -75,6 +75,7 @@ import { NavigationService, Routes } from '@_features/navigation'
 import { useMediaQuery, useSidebarDrawer } from '@_shared'
 
 import SettingsModal from '@_components/settings/SettingsModal'
+import Button from '@_components/ui/Button'
 
 import NavigationIcon from './NavigationIcon'
 
@@ -160,13 +161,13 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 
 	/**
 	 * Shared sidebar drawer behavior (MAANG DRY principle)
-	 * 
+	 *
 	 * Handles all common mobile drawer logic in one place:
 	 * - Outside click detection (modal-aware)
 	 * - Escape key handling (modal-aware)
 	 * - Body scroll lock
 	 * - Child state reset on close
-	 * 
+	 *
 	 * @see useSidebarDrawer for implementation details
 	 */
 	useSidebarDrawer({
@@ -221,13 +222,13 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 			{/* Overlay - visible on all screen sizes when sidebar is open */}
 			{isOpen && (
 				<div
-					className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
+					className='fixed inset-0 bg-black/50 z-40 transition-opacity duration-300'
 					onClick={onClose}
 					onKeyDown={handleOverlayKeyDown}
-					role="button"
+					role='button'
 					tabIndex={-1}
-					aria-label="Close sidebar"
-					aria-hidden="false"
+					aria-label='Close sidebar'
+					aria-hidden='false'
 				/>
 			)}
 
@@ -237,7 +238,7 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 			    The <aside> element is semantic HTML for navigation, and the click handler is for event propagation control, not interaction. */}
 			{/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */}
 			<aside
-				id="app-sidebar"
+				id='app-sidebar'
 				ref={sidebarRef}
 				aria-label={ariaLabel}
 				className={classNames(
@@ -252,38 +253,43 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 				)}
 				onClick={handleSidebarClick}
 				style={{
-					boxShadow: isOpen
-						? '4px 0 24px rgba(0, 0, 0, 0.15), 2px 0 8px rgba(0, 0, 0, 0.1)'
-						: 'none',
-				}}
-			>
-				<div className="flex flex-col h-full max-h-dvh">
+					boxShadow: isOpen ? '4px 0 24px rgba(0, 0, 0, 0.15), 2px 0 8px rgba(0, 0, 0, 0.1)' : 'none',
+				}}>
+				<div className='flex flex-col h-full max-h-dvh'>
 					{/* Header */}
-					<div className="flex items-center justify-between p-4 md:p-6 border-b border-base-300">
-						<h2 className="text-xl md:text-2xl font-semibold text-base-content">MedSource</h2>
+					<div className='flex items-center justify-between p-4 md:p-6 border-b border-base-300'>
+						<h2 className='text-xl md:text-2xl font-semibold text-base-content'>MedSource</h2>
 						{/* Settings Button */}
-						<button
+						<Button
 							onClick={() => setSettingsModalOpen(true)}
-							className="btn-circle ghost"
-							aria-label="Settings"
-							title="Settings"
-						>
-							<Settings size={20} className="text-base-content" />
-						</button>
+							variant='ghost'
+							size='sm'
+							className='btn-circle'
+							aria-label='Settings'
+							title='Settings'
+							leftIcon={
+								<Settings
+									size={20}
+									className='text-base-content'
+								/>
+							}
+						/>
 					</div>
 
 					{/* Navigation Content - Scrollable with proper mobile handling */}
-					<nav className="flex-1 overflow-y-auto p-4 overscroll-contain">
+					<nav className='flex-1 overflow-y-auto p-4 overscroll-contain'>
 						{sections.map((section) => (
-							<div key={section.id} className="mb-4 md:mb-8">
+							<div
+								key={section.id}
+								className='mb-4 md:mb-8'>
 								{/* Section Header */}
-								<div className="mb-3 md:mb-4">
+								<div className='mb-3 md:mb-4'>
 									{section.collapsible ? (
-										<button
+										<Button
 											onClick={() => toggleSection(section.id)}
-											className="flex items-center justify-between w-full text-left"
-										>
-											<h3 className="text-lg font-semibold text-base-content">{section.title}</h3>
+											variant='ghost'
+											className='flex items-center justify-between w-full text-left p-0 h-auto'>
+											<h3 className='text-lg font-semibold text-base-content'>{section.title}</h3>
 											<ChevronDown
 												size={20}
 												className={classNames('transition-transform', {
@@ -291,15 +297,15 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 													'rotate-180': !collapsedSections.has(section.id),
 												})}
 											/>
-										</button>
+										</Button>
 									) : (
-										<h3 className="text-lg font-bold text-base-content">{section.title}</h3>
+										<h3 className='text-lg font-bold text-base-content'>{section.title}</h3>
 									)}
 								</div>
 
 								{/* Section Routes */}
 								{!collapsedSections.has(section.id) && (
-									<ul className="space-y-2">
+									<ul className='space-y-2'>
 										{section.routes.map((route) => {
 											const _isActive = pathname === route.href
 
@@ -308,37 +314,41 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 													<Link
 														href={route.href}
 														onClick={handleLinkClick}
-														className="flex items-start gap-3 p-3 rounded-lg hover:bg-base-300 transition-colors group"
+														className='flex items-start gap-3 p-3 rounded-lg hover:bg-base-300 transition-colors group'
 														target={route.isExternal ? '_blank' : undefined}
-														rel={route.isExternal ? 'noopener noreferrer' : undefined}
-													>
+														rel={route.isExternal ? 'noopener noreferrer' : undefined}>
 														{/* Icon */}
-														<div className="shrink-0 mt-0.5">
+														<div className='shrink-0 mt-0.5'>
 															<NavigationIcon
 																icon={route.icon}
 																size={24}
-																className="text-base-content"
+																className='text-base-content'
 															/>
 														</div>
 
 														{/* Content */}
-														<div className="flex-1 min-w-0">
-															<div className="flex items-center gap-2">
-																<span className="font-medium text-base-content group-hover:text-primary">
+														<div className='flex-1 min-w-0'>
+															<div className='flex items-center gap-2'>
+																<span className='font-medium text-base-content group-hover:text-primary'>
 																	{route.label}
 																</span>
 																{route.isExternal && (
-																	<ExternalLink size={16} className="text-base-content/60" />
+																	<ExternalLink
+																		size={16}
+																		className='text-base-content/60'
+																	/>
 																)}
 															</div>
 															{route.description && (
-																<p className="text-sm text-base-content/70 mt-1">{route.description}</p>
+																<p className='text-sm text-base-content/70 mt-1'>
+																	{route.description}
+																</p>
 															)}
 														</div>
 
 														{/* Badge */}
 														{route.badge && (
-															<div className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-content">
+															<div className='shrink-0 rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-content'>
 																{route.badge}
 															</div>
 														)}
@@ -353,12 +363,11 @@ export default function Sidebar({ isOpen, onClose, ariaLabel }: SidebarProps) {
 					</nav>
 
 					{/* Footer - Safe area padding for mobile browsers */}
-				<div className="p-4 pb-safe border-t border-base-300 shrink-0 bg-base-200">
-					<Link
-						href={Routes.Contact.location}
-						onClick={handleLinkClick}
-							className="text-sm text-base-content/70 hover:text-base-content transition-colors"
-						>
+					<div className='p-4 pb-safe border-t border-base-300 shrink-0 bg-base-200'>
+						<Link
+							href={Routes.Contact.location}
+							onClick={handleLinkClick}
+							className='text-sm text-base-content/70 hover:text-base-content transition-colors'>
 							Report an Issue
 						</Link>
 					</div>

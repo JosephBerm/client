@@ -130,10 +130,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 		.map((section) => ({
 			...section,
 			routes: section.routes.filter(
-				(route) =>
-					route.href.startsWith('/app') ||
-					route.id === 'profile' ||
-					route.id === 'notifications'
+				(route) => route.href.startsWith('/app') || route.id === 'profile' || route.id === 'notifications'
 			),
 		}))
 		.filter((section) => section.routes.length > 0)
@@ -156,13 +153,13 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 
 	/**
 	 * Shared sidebar drawer behavior (MAANG DRY principle)
-	 * 
+	 *
 	 * Handles all common mobile drawer logic in one place:
 	 * - Outside click detection (modal-aware)
 	 * - Escape key handling (modal-aware)
 	 * - Body scroll lock
 	 * - Child state reset on close
-	 * 
+	 *
 	 * @see useSidebarDrawer for implementation details
 	 */
 	useSidebarDrawer({
@@ -198,7 +195,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 
 	/**
 	 * Handle user logout with FAANG-level cleanup.
-	 * 
+	 *
 	 * **Logout Flow (Industry Best Practice):**
 	 * 1. Prevent double-logout (check if already logging out)
 	 * 2. Set loading state (show user feedback)
@@ -208,7 +205,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 	 * 6. Log the action for monitoring/analytics
 	 * 7. Navigate to home page (SPA-style, no full reload)
 	 * 8. Handle errors gracefully (don't leave user in broken state)
-	 * 
+	 *
 	 * **Why This Approach:**
 	 * - Cookie deletion ensures token can't be reused
 	 * - State clearing prevents stale data in UI
@@ -216,12 +213,12 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 	 * - Router navigation maintains SPA experience
 	 * - Error handling prevents broken logout states
 	 * - Logging enables monitoring and debugging
-	 * 
+	 *
 	 * **Security Considerations:**
 	 * - Token deleted from cookies (can't be accessed by JS or sent to server)
 	 * - All sensitive data cleared from memory and storage
 	 * - User redirected to public page (no lingering in protected routes)
-	 * 
+	 *
 	 * Used by: Google, Facebook, Stripe, Airbnb, LinkedIn
 	 */
 	// React Compiler automatically optimizes this async callback
@@ -237,7 +234,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 		try {
 			// Step 1: Set loading state
 			setIsLoggingOut(true)
-			
+
 			logger.info('User logout initiated', {
 				userId: user?.id ?? undefined,
 				userName: user?.name?.getFullName?.() ?? user?.username,
@@ -247,7 +244,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 			// Step 2: Delete auth token cookie (server-side session invalidation)
 			// This removes the 'at' cookie that stores the JWT token
 			logoutService()
-			
+
 			// Step 3: Clear Zustand auth state (client-side state)
 			// This sets user to null and isAuthenticated to false
 			clearAuthState()
@@ -276,7 +273,6 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 			// Use router.push instead of window.location for smooth transition
 			// This maintains the SPA experience without full page reload
 			router.push(Routes.Home.location)
-			
 		} catch (error) {
 			// Error handling: Don't leave user in broken state
 			logger.error('Logout error occurred', {
@@ -333,18 +329,18 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 			{/* Mobile Backdrop */}
 			{isMobile && isOpen && (
 				<div
-					className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 lg:hidden"
+					className='fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 lg:hidden'
 					onClick={onClose}
-					aria-hidden="true"
+					aria-hidden='true'
 				/>
 			)}
 
-		{/* Sidebar */}
-		<aside
-			id="internal-sidebar"
-			ref={sidebarRef}
-			aria-label="Internal application navigation"
-			className={classNames(
+			{/* Sidebar */}
+			<aside
+				id='internal-sidebar'
+				ref={sidebarRef}
+				aria-label='Internal application navigation'
+				className={classNames(
 					'bg-base-200 border-r border-base-300',
 					// Desktop: Fixed position, always visible
 					'lg:fixed lg:top-0 lg:left-0 lg:h-screen lg:w-96',
@@ -357,59 +353,62 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 						'translate-x-0': isOpen || !isMobile,
 						'-translate-x-full': !isOpen && isMobile,
 					}
-				)}
-			>
-				<div className="flex flex-col h-full max-h-dvh">
+				)}>
+				<div className='flex flex-col h-full max-h-dvh'>
 					{/* Header */}
-					<div className="flex items-center justify-between p-6 border-b border-base-300 shrink-0">
+					<div className='flex items-center justify-between p-6 border-b border-base-300 shrink-0'>
 						<Logo
 							href={Routes.Home.location}
 							showText
-							size="sm"
+							size='sm'
 							onClick={handleLinkClick}
-							className="group"
+							className='group'
 						/>
 
-					{/* Mobile: Close button */}
-					{isMobile && (
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={onClose}
-							aria-label="Close navigation"
-							className="btn-circle w-8 h-8 p-0 min-h-0"
-						>
-							<X size={20} aria-hidden="true" />
-						</Button>
-					)}
+						{/* Mobile: Close button */}
+						{isMobile && (
+							<Button
+								variant='ghost'
+								size='sm'
+								onClick={onClose}
+								aria-label='Close navigation'
+								className='btn-circle w-8 h-8 p-0 min-h-0'>
+								<X
+									size={20}
+									aria-hidden='true'
+								/>
+							</Button>
+						)}
 					</div>
 
 					{/* Navigation Content - Scrollable with safe area for mobile */}
-					<nav className="flex-1 overflow-y-auto p-4 overscroll-contain">
+					<nav className='flex-1 overflow-y-auto p-4 overscroll-contain'>
 						{sections.map((section) => (
-							<div key={section.id} className="mb-6">
+							<div
+								key={section.id}
+								className='mb-6'>
 								{/* Section Header */}
-								<div className="mb-3">
+								<div className='mb-3'>
 									{section.collapsible ? (
-										<button
+										<Button
 											onClick={() => toggleSection(section.id)}
-											className="flex items-center justify-between w-full text-left group"
-										>
-											<h3 className="text-xs font-semibold uppercase tracking-wider text-base-content/60 group-hover:text-base-content transition-colors">
+											variant='ghost'
+											className='flex items-center justify-between w-full text-left group h-auto p-0'
+											rightIcon={
+												<ChevronDown
+													size={16}
+													className={classNames('text-base-content/40 transition-transform', {
+														'rotate-180': !collapsedSections.has(section.id),
+													})}
+												/>
+											}
+											contentDrivenHeight>
+											<h3 className='text-xs font-semibold uppercase tracking-wider text-base-content/60 group-hover:text-base-content transition-colors'>
 												{section.title}
 											</h3>
-											<ChevronDown
-												size={16}
-												className={classNames(
-													'text-base-content/40 transition-transform',
-													{
-														'rotate-180': !collapsedSections.has(section.id),
-													}
-												)}
-											/>
-										</button>
+										</Button>
 									) : (
-										<h3 className="text-xs font-semibold uppercase tracking-wider text-base-content/60">
+										<h3 className='text-xs font-semibold uppercase tracking-wider text-base-content/60'>
 											{section.title}
 										</h3>
 									)}
@@ -417,40 +416,42 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 
 								{/* Section Routes */}
 								{!collapsedSections.has(section.id) && (
-									<ul className="space-y-1">
+									<ul className='space-y-1'>
 										{section.routes.map((route) => {
 											/**
 											 * FAANG-Level Active Route Detection
-											 * 
+											 *
 											 * **Problem:** Simple startsWith() causes multiple routes to be active
 											 * Example: "/app" matches both "/app" and "/app/profile"
-											 * 
+											 *
 											 * **Solution:** Intelligent matching based on route depth
 											 * - Root route (/app) → Exact match ONLY
 											 * - Nested routes (/app/orders) → Exact OR prefix match for children
-											 * 
+											 *
 											 * **Test Cases:**
 											 * ✅ Dashboard (/app) active only on /app, NOT on /app/profile
 											 * ✅ Orders (/app/orders) active on /app/orders AND /app/orders/123
 											 * ✅ Profile (/app/profile) active only on /app/profile
-											 * 
+											 *
 											 * **Edge Cases Handled:**
 											 * - Root route collision (Dashboard vs other /app/* routes)
 											 * - Nested route children (/app/orders/123 activates /app/orders)
 											 * - Exact path matching with trailing slashes
-											 * 
+											 *
 											 * **Industry Standard:** Used by Vercel, Stripe, Linear, Notion
 											 */
 											const isActive = (() => {
 												// Exact match always wins
-												if (pathname === route.href) {return true}
-												
+												if (pathname === route.href) {
+													return true
+												}
+
 												// Dashboard (/app) is a special case - EXACT MATCH ONLY
 												// This prevents /app from matching /app/profile, /app/orders, etc.
 												if (route.href === Routes.Dashboard.location) {
 													return false
 												}
-												
+
 												// For all other routes, check if current path is a child route
 												// Example: /app/orders/123 should activate /app/orders
 												// But /app/profile should NOT activate /app
@@ -471,8 +472,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 																'text-base-content': !isActive,
 															}
 														)}
-														aria-current={isActive ? 'page' : undefined}
-													>
+														aria-current={isActive ? 'page' : undefined}>
 														<NavigationIcon
 															icon={route.icon}
 															className={classNames('w-5 h-5 shrink-0', {
@@ -480,9 +480,9 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 																'text-base-content/70': !isActive,
 															})}
 														/>
-														<span className="text-sm">{route.label}</span>
+														<span className='text-sm'>{route.label}</span>
 														{route.badge && (
-															<span className="ml-auto badge badge-sm badge-primary">
+															<span className='ml-auto badge badge-sm badge-primary'>
 																{route.badge}
 															</span>
 														)}
@@ -496,34 +496,32 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 						))}
 					</nav>
 
-				{/* Footer - Always visible with safe area padding for mobile browsers */}
-				<div className="p-4 pb-safe border-t border-base-300 space-y-2 shrink-0 bg-base-200">
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => setSettingsModalOpen(true)}
-						disabled={isLoggingOut}
-						leftIcon={<Settings className="w-5 h-5" />}
-						className="w-full justify-start px-3"
-					>
-						Settings
-					</Button>
+					{/* Footer - Always visible with safe area padding for mobile browsers */}
+					<div className='p-4 pb-safe border-t border-base-300 space-y-2 shrink-0 bg-base-200'>
+						<Button
+							variant='ghost'
+							size='sm'
+							onClick={() => setSettingsModalOpen(true)}
+							disabled={isLoggingOut}
+							leftIcon={<Settings className='w-5 h-5' />}
+							className='w-full justify-start px-3'>
+							Settings
+						</Button>
 
-					<Button
-						variant={isLoggingOut ? 'error' : 'ghost'}
-						size="sm"
-						onClick={handleLogoutClick}
-						disabled={isLoggingOut}
-						loading={isLoggingOut}
-						leftIcon={!isLoggingOut ? <LogOut className="w-5 h-5" /> : undefined}
-						className={classNames('w-full justify-start px-3', {
-							'hover:bg-error/10 hover:text-error': !isLoggingOut,
-						})}
-						aria-busy={isLoggingOut}
-					>
-						{isLoggingOut ? 'Signing Out...' : 'Sign Out'}
-					</Button>
-				</div>
+						<Button
+							variant={isLoggingOut ? 'error' : 'ghost'}
+							size='sm'
+							onClick={handleLogoutClick}
+							disabled={isLoggingOut}
+							loading={isLoggingOut}
+							leftIcon={!isLoggingOut ? <LogOut className='w-5 h-5' /> : undefined}
+							className={classNames('w-full justify-start px-3', {
+								'hover:bg-error/10 hover:text-error': !isLoggingOut,
+							})}
+							aria-busy={isLoggingOut}>
+							{isLoggingOut ? 'Signing Out...' : 'Sign Out'}
+						</Button>
+					</div>
 				</div>
 			</aside>
 
@@ -535,4 +533,3 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 		</>
 	)
 }
-

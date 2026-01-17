@@ -1,21 +1,21 @@
 /**
  * useQuoteActions Hook - Workflow Actions Pattern
- * 
+ *
  * Custom hook for managing quote workflow actions (status transitions, convert to order).
  * Uses `useFormSubmit` for DRY form submission handling.
- * 
+ *
  * **Features:**
  * - Status transitions (Mark as Read, Approve, Reject)
  * - Convert to Order functionality
  * - Automatic quote refresh after actions
  * - Loading states and error handling (via useFormSubmit)
  * - Type-safe with full TypeScript support
- * 
+ *
  * **Pattern:**
  * - Follows `useAccountDetailLogic` pattern for action handlers
  * - Uses `useFormSubmit` for all API calls (DRY, handles loading/error/success)
  * - Refreshes quote data after successful actions
- * 
+ *
  * @module app/quotes/[id]/_components/hooks/useQuoteActions
  */
 
@@ -46,6 +46,8 @@ export interface UseQuoteActionsReturn {
 	handleApprove: () => Promise<void>
 	/** Handler for rejecting quote */
 	handleReject: () => Promise<void>
+	/** Handler for submitting quote for manager approval */
+	handleSubmitForApproval: () => Promise<void>
 	/** Handler for sending quote to customer */
 	handleSendToCustomer: () => Promise<void>
 	/** Handler for converting quote to order */
@@ -56,28 +58,28 @@ export interface UseQuoteActionsReturn {
 
 /**
  * Custom hook for quote workflow actions
- * 
+ *
  * Provides handlers for all quote workflow actions using `useFormSubmit` for DRY.
  * Each action updates the quote status via `API.Quotes.update` and refreshes the quote data.
- * 
+ *
  * **Actions:**
  * - Mark as Read: Updates status to Read
  * - Approve: Updates status to Approved
  * - Reject: Updates status to Rejected
  * - Send to Customer: Updates status to Approved (if not already)
  * - Convert to Order: Creates order from quote, navigates to order detail
- * 
+ *
  * @param quote - The quote entity
  * @param permissions - Permission flags from useQuotePermissions
  * @param onRefresh - Callback to refresh quote data after successful action
  * @returns Action handlers and processing state
- * 
+ *
  * @example
  * ```tsx
  * const { quote, refresh } = useQuoteDetails()
  * const permissions = useQuotePermissions(quote)
  * const { handleApprove, isProcessing } = useQuoteActions(quote, permissions, refresh)
- * 
+ *
  * <Button onClick={handleApprove} disabled={isProcessing}>
  *   Approve Quote
  * </Button>
@@ -107,7 +109,6 @@ export function useQuoteActions(
 	)
 
 	// Mark as Read action (Unread → Read)
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const markAsReadSubmit = useFormSubmit(
 		async (_data: Record<string, never>) => {
 			if (!quoteId) {
@@ -131,7 +132,6 @@ export function useQuoteActions(
 	)
 
 	// Approve action (Read → Approved)
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const approveSubmit = useFormSubmit(
 		async (_data: Record<string, never>) => {
 			if (!quoteId) {
@@ -155,7 +155,6 @@ export function useQuoteActions(
 	)
 
 	// Reject action (Unread/Read → Rejected)
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const rejectSubmit = useFormSubmit(
 		async (_data: Record<string, never>) => {
 			if (!quoteId) {
@@ -179,7 +178,6 @@ export function useQuoteActions(
 	)
 
 	// Send to Customer action (ensures status is Approved)
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const sendToCustomerSubmit = useFormSubmit(
 		async (_data: Record<string, never>) => {
 			if (!quoteId) {
@@ -202,8 +200,33 @@ export function useQuoteActions(
 		}
 	)
 
+	// Submit for Approval action (Read → Read, but marked for manager review)
+	// Keeps quote in Read status so it appears in approval queue
+	const submitForApprovalSubmit = useFormSubmit(
+		async (_data: Record<string, never>) => {
+			if (!quoteId) {
+				throw new Error('Quote ID is required')
+			}
+			// Keep status as Read - approval queue filters by Read status
+			// This makes the quote visible to managers in the approval queue
+			const updatedQuote = createUpdatedQuote(QuoteStatus.Read)
+			if (!updatedQuote) {
+				throw new Error('Failed to create updated quote')
+			}
+			return API.Quotes.update<Quote>(updatedQuote)
+		},
+		{
+			successMessage: 'Quote submitted for approval',
+			errorMessage: 'Failed to submit quote for approval',
+			componentName: 'useQuoteActions',
+			actionName: 'submitForApproval',
+			onSuccess: async () => {
+				await onRefresh?.()
+			},
+		}
+	)
+
 	// Convert to Order action
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const convertToOrderSubmit = useFormSubmit(
 		async (_data: Record<string, never>) => {
 			if (!quoteId) {
@@ -272,6 +295,17 @@ export function useQuoteActions(
 		}
 	}, [sendToCustomerSubmit, quoteId])
 
+	const handleSubmitForApproval = useCallback(async () => {
+		const result = await submitForApprovalSubmit.submit({})
+		if (!result.success) {
+			logger.error('Submit for approval failed', {
+				quoteId,
+				component: 'useQuoteActions',
+				action: 'handleSubmitForApproval',
+			})
+		}
+	}, [submitForApprovalSubmit, quoteId])
+
 	const handleConvertToOrder = useCallback(async () => {
 		const result = await convertToOrderSubmit.submit({})
 		if (!result.success) {
@@ -288,6 +322,7 @@ export function useQuoteActions(
 		markAsReadSubmit.isSubmitting ||
 		approveSubmit.isSubmitting ||
 		rejectSubmit.isSubmitting ||
+		submitForApprovalSubmit.isSubmitting ||
 		sendToCustomerSubmit.isSubmitting ||
 		convertToOrderSubmit.isSubmitting
 
@@ -295,6 +330,7 @@ export function useQuoteActions(
 		handleMarkAsRead,
 		handleApprove,
 		handleReject,
+		handleSubmitForApproval,
 		handleSendToCustomer,
 		handleConvertToOrder,
 		isProcessing,

@@ -65,11 +65,15 @@ import type { z } from 'zod'
  * };
  * 
  * // Use in component
+ * import FormInput from '@_components/forms/FormInput';
+ * 
  * <form onSubmit={form.handleSubmit(handleSubmit)}>
- *   <input {...form.register('email')} />
- *   {form.formState.errors.email && (
- *     <span>{form.formState.errors.email.message}</span>
- *   )}
+ *   <FormInput
+ *     label="Email"
+ *     type="email"
+ *     {...form.register('email')}
+ *     error={form.formState.errors.email}
+ *   />
  * </form>
  * ```
  * 

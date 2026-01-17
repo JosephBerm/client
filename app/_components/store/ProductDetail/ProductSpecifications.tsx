@@ -1,14 +1,20 @@
 /**
  * Product Specifications Component
- * 
+ *
  * Displays product specifications in a minimal table format.
- * Server component - no client-side interactivity needed.
- * 
+ * Uses DataGrid component for consistent table rendering.
+ *
  * @module ProductDetail/ProductSpecifications
  */
 
+'use client'
+
+import { useMemo } from 'react'
+import type { ColumnDef } from '@tanstack/react-table'
+
 import Guid from '@_classes/Base/Guid'
 import type { Product } from '@_classes/Product'
+import { DataGrid } from '@_components/tables'
 
 import { ANIMATION_DELAYS, PRODUCT_STATUS, SECTION_LABELS, SPEC_LABELS } from './ProductDetail.constants'
 
@@ -18,62 +24,92 @@ export interface ProductSpecificationsProps {
 }
 
 /**
+ * Specification row data type
+ */
+interface SpecificationRow {
+	label: string
+	value: string | React.ReactNode
+}
+
+/**
  * Product Specifications
- * 
+ *
  * Renders product specifications table with category, product ID, SKU, and manufacturer.
+ * Uses DataGrid component for consistent styling and accessibility.
  */
 export default function ProductSpecifications({ product }: ProductSpecificationsProps) {
+	// Prepare data rows for the table
+	const specificationData = useMemo<SpecificationRow[]>(() => {
+		const rows: SpecificationRow[] = []
+
+		if (product.categories.length > 0) {
+			rows.push({
+				label: SPEC_LABELS.CATEGORY,
+				value: product.categories.map((c) => c.name).join(', '),
+			})
+		}
+
+		rows.push({
+			label: SPEC_LABELS.PRODUCT_ID,
+			value: <span className='break-all font-mono text-xs'>{Guid.formatForDisplay(product.id)}</span>,
+		})
+
+		rows.push({
+			label: SPEC_LABELS.SKU,
+			value: <span className='font-mono'>{product.sku ?? PRODUCT_STATUS.SKU_NA}</span>,
+		})
+
+		if (product.manufacturer) {
+			rows.push({
+				label: SPEC_LABELS.MANUFACTURER,
+				value: product.manufacturer,
+			})
+		}
+
+		return rows
+	}, [product])
+
+	// Column definitions - mobile-first responsive
+	const columns = useMemo<ColumnDef<SpecificationRow>[]>(
+		() => [
+			{
+				accessorKey: 'label',
+				header: '',
+				cell: ({ row }) => (
+					<span className='text-xs sm:text-sm font-medium text-base-content/60 bg-base-200/30 px-3 sm:px-4 py-2 sm:py-3 block'>
+						{row.original.label}
+					</span>
+				),
+				size: 120,
+			},
+			{
+				accessorKey: 'value',
+				header: '',
+				cell: ({ row }) => (
+					<span className='text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-3 text-base-content block'>
+						{row.original.value}
+					</span>
+				),
+			},
+		],
+		[]
+	)
+
 	return (
 		<div
-			className="animate-elegant-reveal pt-4"
-			style={{ animationDelay: ANIMATION_DELAYS.SPECIFICATIONS }}
-		>
-			<h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-base-content/40">
+			className='animate-elegant-reveal pt-4'
+			style={{ animationDelay: ANIMATION_DELAYS.SPECIFICATIONS }}>
+			<h3 className='mb-4 text-sm font-bold uppercase tracking-widest text-base-content/40'>
 				{SECTION_LABELS.SPECIFICATIONS}
 			</h3>
-			<div className="overflow-hidden rounded-xl border border-base-200 shadow-sm">
-				{/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-				{/* @ts-ignore - Simple key-value specifications table; native table is most semantic for this use case */}
-				<table className="w-full text-sm">
-					<tbody className="divide-y divide-base-200 bg-base-100">
-						{product.categories.length > 0 && (
-							<tr className="divide-x divide-base-200 transition-colors hover:bg-base-50">
-								<td className="w-1/3 bg-base-200/30 px-4 py-3 font-medium text-base-content/60">
-									{SPEC_LABELS.CATEGORY}
-								</td>
-								<td className="px-4 py-3 text-base-content">
-									{product.categories.map((c) => c.name).join(', ')}
-								</td>
-							</tr>
-						)}
-						<tr className="divide-x divide-base-200 transition-colors hover:bg-base-50">
-							<td className="w-1/3 bg-base-200/30 px-4 py-3 font-medium text-base-content/60">
-								{SPEC_LABELS.PRODUCT_ID}
-							</td>
-							<td className="px-4 py-3 font-mono text-base-content/80 text-xs">
-								<span className="break-all">{Guid.formatForDisplay(product.id)}</span>
-							</td>
-						</tr>
-						<tr className="divide-x divide-base-200 transition-colors hover:bg-base-50">
-							<td className="w-1/3 bg-base-200/30 px-4 py-3 font-medium text-base-content/60">
-								{SPEC_LABELS.SKU}
-							</td>
-							<td className="px-4 py-3 font-mono text-base-content">
-								{product.sku ?? PRODUCT_STATUS.SKU_NA}
-							</td>
-						</tr>
-						{product.manufacturer && (
-							<tr className="divide-x divide-base-200 transition-colors hover:bg-base-50">
-								<td className="w-1/3 bg-base-200/30 px-4 py-3 font-medium text-base-content/60">
-									{SPEC_LABELS.MANUFACTURER}
-								</td>
-								<td className="px-4 py-3 text-base-content">{product.manufacturer}</td>
-							</tr>
-						)}
-					</tbody>
-				</table>
+			<div className='overflow-hidden rounded-xl border border-base-200 shadow-sm'>
+				<DataGrid
+					columns={columns}
+					data={specificationData}
+					ariaLabel='Product specifications'
+					className='text-sm'
+				/>
 			</div>
 		</div>
 	)
 }
-

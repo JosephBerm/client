@@ -38,11 +38,7 @@ interface PolicyTemplateSelectorProps {
 // COMPONENT
 // =========================================================================
 
-export default function PolicyTemplateSelector({
-	templates,
-	isSaving,
-	onApply,
-}: PolicyTemplateSelectorProps) {
+export default function PolicyTemplateSelector({ templates, isSaving, onApply }: PolicyTemplateSelectorProps) {
 	const [confirmTemplate, setConfirmTemplate] = useState<PolicyTemplate | null>(null)
 
 	/**
@@ -88,9 +84,7 @@ export default function PolicyTemplateSelector({
 					</div>
 					<div>
 						<h3 className='text-lg font-semibold text-base-content'>Quick Setup</h3>
-						<p className='text-sm text-base-content/60'>
-							Apply a pre-configured security policy template
-						</p>
+						<p className='text-sm text-base-content/60'>Apply a pre-configured security policy template</p>
 					</div>
 				</div>
 
@@ -98,25 +92,27 @@ export default function PolicyTemplateSelector({
 					{templates.map((template) => {
 						const info = getTemplateInfo(template.name)
 						return (
-							<button
+							<Button
 								key={template.name}
 								type='button'
 								onClick={() => handleTemplateClick(template)}
 								disabled={isSaving}
+								variant='outline'
 								className='
 									flex flex-col items-center p-4 rounded-lg
 									border border-base-300 bg-base-200/50
 									hover:bg-base-200 hover:border-primary/30
 									transition-colors duration-200
 									disabled:opacity-50 disabled:cursor-not-allowed
+									h-auto
 								'
-							>
+								contentDrivenHeight>
 								<span className='text-2xl mb-2'>{info.icon}</span>
 								<span className='font-semibold text-base-content'>{template.displayName}</span>
 								<span className='text-xs text-base-content/60 text-center mt-1'>
 									{info.description}
 								</span>
-							</button>
+							</Button>
 						)
 					})}
 				</div>
@@ -127,8 +123,7 @@ export default function PolicyTemplateSelector({
 				isOpen={confirmTemplate !== null}
 				onClose={handleCancelApply}
 				title='Apply Security Template'
-				size='sm'
-			>
+				size='sm'>
 				<div className='space-y-4'>
 					<div className='flex items-start gap-3 p-3 rounded-lg bg-warning/10'>
 						<AlertTriangle className='h-5 w-5 text-warning shrink-0 mt-0.5' />
@@ -149,10 +144,16 @@ export default function PolicyTemplateSelector({
 					)}
 
 					<div className='flex gap-3 justify-end pt-2'>
-						<Button variant='ghost' onClick={handleCancelApply} disabled={isSaving}>
+						<Button
+							variant='ghost'
+							onClick={handleCancelApply}
+							disabled={isSaving}>
 							Cancel
 						</Button>
-						<Button variant='primary' onClick={handleConfirmApply} loading={isSaving}>
+						<Button
+							variant='primary'
+							onClick={handleConfirmApply}
+							loading={isSaving}>
 							Apply Template
 						</Button>
 					</div>

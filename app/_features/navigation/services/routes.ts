@@ -223,6 +223,64 @@ class Routes {
 	}
 
 	/**
+	 * Fulfillment Queue routes (protected, FulfillmentCoordinator+ only)
+	 *
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Fulfillment.location); // "/app/fulfillment"
+	 * ```
+	 */
+	public static Fulfillment = {
+		name: 'Fulfillment Queue',
+		location: `${Routes.InternalAppRoute}/fulfillment`,
+	}
+
+	/**
+	 * Approval Queue routes (protected, SalesManager+ only)
+	 *
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Approvals.location); // "/app/approvals"
+	 * router.push(Routes.Approvals.detail('789')); // "/app/approvals/789"
+	 * ```
+	 */
+	public static Approvals = {
+		name: 'Approval Queue',
+		location: `${Routes.InternalAppRoute}/approvals`,
+		/**
+		 * Generates URL for approval detail page.
+		 * @param id - Approval ID
+		 * @returns Approval detail URL (e.g., "/app/approvals/789")
+		 */
+		detail: (id: string | number): string => `${Routes.InternalAppRoute}/approvals/${id}`,
+	}
+
+	/**
+	 * Tenant Management routes (protected, Super Admin only)
+	 *
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Tenants.location); // "/app/admin/tenants"
+	 * router.push(Routes.Tenants.detail('abc-123')); // "/app/admin/tenants/abc-123"
+	 * ```
+	 */
+	public static Tenants = {
+		name: 'Tenants',
+		location: `${Routes.InternalAppRoute}/admin/tenants`,
+		/**
+		 * Generates URL for tenant detail page.
+		 * @param id - Tenant ID
+		 * @returns Tenant detail URL (e.g., "/app/admin/tenants/abc-123")
+		 */
+		detail: (id: string | number): string => `${Routes.InternalAppRoute}/admin/tenants/${id}`,
+		/**
+		 * Generates URL for tenant creation page.
+		 * @returns Tenant create URL (e.g., "/app/admin/tenants/create")
+		 */
+		create: (): string => `${Routes.InternalAppRoute}/admin/tenants/create`,
+	}
+
+	/**
 	 * Provider/supplier management routes (protected, admin only)
 	 *
 	 * @example
@@ -307,6 +365,19 @@ class Routes {
 	public static Analytics = {
 		name: 'Analytics',
 		location: `${Routes.InternalAppRoute}/analytics`,
+	}
+
+	/**
+	 * Inventory Management routes (protected, admin/manager/fulfillment)
+	 *
+	 * @example
+	 * ```typescript
+	 * router.push(Routes.Inventory.location); // "/app/inventory"
+	 * ```
+	 */
+	public static Inventory = {
+		name: 'Inventory',
+		location: `${Routes.InternalAppRoute}/inventory`,
 	}
 
 	/**

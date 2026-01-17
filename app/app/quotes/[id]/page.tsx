@@ -4,11 +4,9 @@ import React from 'react'
 
 import { useRouter } from 'next/navigation'
 
-
 import { Routes } from '@_features/navigation'
 
 import { formatDate } from '@_lib/dates'
-
 
 import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
@@ -26,6 +24,7 @@ import {
 	QuoteActions,
 	QuoteAssignment,
 	QuotePricingEditor,
+	QuoteApprovalHistory,
 } from './_components'
 
 export default function QuoteDetailsPage() {
@@ -51,15 +50,19 @@ export default function QuoteDetailsPage() {
 		return (
 			<>
 				<InternalPageHeader
-					title="Access Denied"
-					description="You do not have permission to view this quote."
+					title='Access Denied'
+					description='You do not have permission to view this quote.'
 					loading={false}
 				/>
-				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
-					<p className="text-base-content/70">
-						You do not have permission to view this quote. Please contact your administrator if you believe this is an error.
+				<Card className='border border-base-300 bg-base-100 p-6 shadow-sm'>
+					<p className='text-base-content/70'>
+						You do not have permission to view this quote. Please contact your administrator if you believe
+						this is an error.
 					</p>
-					<Button variant="ghost" onClick={() => router.push(Routes.Quotes.location)} className="mt-4">
+					<Button
+						variant='ghost'
+						onClick={() => router.push(Routes.Quotes.location)}
+						className='mt-4'>
 						Back to Quotes
 					</Button>
 				</Card>
@@ -72,13 +75,16 @@ export default function QuoteDetailsPage() {
 		return (
 			<>
 				<InternalPageHeader
-					title="Error Loading Quote"
+					title='Error Loading Quote'
 					description={error}
 					loading={false}
 				/>
-				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
-					<p className="text-base-content/70">{error}</p>
-					<Button variant="ghost" onClick={() => router.push(Routes.Quotes.location)} className="mt-4">
+				<Card className='border border-base-300 bg-base-100 p-6 shadow-sm'>
+					<p className='text-base-content/70'>{error}</p>
+					<Button
+						variant='ghost'
+						onClick={() => router.push(Routes.Quotes.location)}
+						className='mt-4'>
 						Back to Quotes
 					</Button>
 				</Card>
@@ -103,30 +109,30 @@ export default function QuoteDetailsPage() {
 	// Format address for QuoteContactInfo component
 	const address = quote?.transitDetails
 	const formattedAddress = address
-		? [address.addressOne, address.city, address.state, address.zipCode, address.country]
-				.filter(Boolean)
-				.join(', ')
+		? [address.addressOne, address.city, address.state, address.zipCode, address.country].filter(Boolean).join(', ')
 		: 'No address provided'
 
 	return (
 		<>
 			<InternalPageHeader
-				title="Quote Details"
-				description="Review quote request details and convert to an order when ready."
+				title='Quote Details'
+				description='Review quote request details and convert to an order when ready.'
 				loading={isLoading}
 				actions={
-					<Button variant="ghost" onClick={() => router.back()}>
+					<Button
+						variant='ghost'
+						onClick={() => router.back()}>
 						Back
 					</Button>
 				}
 			/>
 
 			{quote && (
-				<div className="space-y-8">
+				<div className='space-y-8'>
 					{/* Phase 2: Core Components - Composed Layout */}
-					<div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+					<div className='grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]'>
 						{/* Left Column: Quote Info */}
-						<div className="space-y-6">
+						<div className='space-y-6'>
 							<QuoteHeader
 								quote={quote}
 								permissions={permissions}
@@ -140,25 +146,43 @@ export default function QuoteDetailsPage() {
 						</div>
 
 						{/* Right Column: Actions & Assignment (Phases 3 & 4) */}
-						<div className="space-y-6">
-							<QuoteActions quote={quote} permissions={permissions} onRefresh={refresh} />
-							<QuoteAssignment quote={quote} permissions={permissions} onRefresh={refresh} />
+						<div className='space-y-6'>
+							<QuoteActions
+								quote={quote}
+								permissions={permissions}
+								onRefresh={refresh}
+							/>
+							<QuoteAssignment
+								quote={quote}
+								permissions={permissions}
+								onRefresh={refresh}
+							/>
 						</div>
 					</div>
 
-				{/* Pricing Section - Only visible to Sales Rep+ on quotes with status 'Read' */}
-				{/* PRD: prd_pricing_engine.md - Advanced Pricing Engine integration */}
-				{permissions.canUpdate && (
-					<QuotePricingEditor
-						quote={quote}
-						permissions={permissions}
-						customerId={'customerId' in quote ? (quote as { customerId?: number }).customerId : undefined}
-						onRefresh={refresh}
-					/>
-				)}
+					{/* Pricing Section - Only visible to Sales Rep+ on quotes with status 'Read' */}
+					{/* PRD: prd_pricing_engine.md - Advanced Pricing Engine integration */}
+					{permissions.canUpdate && (
+						<QuotePricingEditor
+							quote={quote}
+							permissions={permissions}
+							customerId={
+								'customerId' in quote ? (quote as { customerId?: number }).customerId : undefined
+							}
+							onRefresh={refresh}
+						/>
+					)}
 
 					{/* Products Section */}
 					<QuoteProducts quote={quote} />
+
+					{/* Approval History Section - Phase 4 */}
+					{permissions.canUpdate && (
+						<QuoteApprovalHistory
+							quote={quote}
+							permissions={permissions}
+						/>
+					)}
 				</div>
 			)}
 		</>

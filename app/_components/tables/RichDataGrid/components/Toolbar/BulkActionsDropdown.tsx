@@ -12,6 +12,7 @@
 import { useState } from 'react'
 
 import { Dropdown } from '@_components/ui/Dropdown'
+import Button from '@_components/ui/Button'
 import { useRichDataGridSelection } from '../../context/RichDataGridContext'
 import { type BulkAction, BulkActionVariant } from '../../types'
 
@@ -126,41 +127,43 @@ export function BulkActionsDropdown<TData>({ actions, className = '' }: BulkActi
 	}
 
 	return (
-		<Dropdown open={isOpen} onOpenChange={setIsOpen} className={className}>
-			<Dropdown.Trigger variant="primary" badge={selectedCount}>
+		<Dropdown
+			open={isOpen}
+			onOpenChange={setIsOpen}
+			className={className}>
+			<Dropdown.Trigger
+				variant='primary'
+				badge={selectedCount}>
 				Actions
 			</Dropdown.Trigger>
 
-			<Dropdown.Content align="start">
+			<Dropdown.Content align='start'>
 				{/* Confirmation Dialog State */}
 				{confirmAction ? (
-					<div className="p-4">
-						<p className="text-sm mb-4 text-base-content/90 leading-relaxed">
+					<div className='p-4'>
+						<p className='text-sm mb-4 text-base-content/90 leading-relaxed'>
 							{getConfirmMessage(confirmAction)}
 						</p>
-						<div className="flex gap-2 justify-end">
-							<button
-								type="button"
+						<div className='flex gap-2 justify-end'>
+							<Button
+								type='button'
 								onClick={() => setConfirmAction(null)}
-								className="btn btn-ghost btn-sm min-h-[40px] sm:min-h-[36px] touch-manipulation"
-								disabled={isExecuting}
-							>
+								variant='ghost'
+								size='sm'
+								className='min-h-[40px] sm:min-h-[36px] touch-manipulation'
+								disabled={isExecuting}>
 								Cancel
-							</button>
-							<button
-								type="button"
+							</Button>
+							<Button
+								type='button'
 								onClick={() => executeAction(confirmAction)}
-								className={`btn btn-sm min-h-[40px] sm:min-h-[36px] touch-manipulation ${
-									confirmAction.variant === BulkActionVariant.Danger ? 'btn-error' : 'btn-primary'
-								}`}
-								disabled={isExecuting}
-							>
-								{isExecuting ? (
-									<span className="loading loading-spinner loading-xs" />
-								) : (
-									confirmAction.label
-								)}
-							</button>
+								variant={confirmAction.variant === BulkActionVariant.Danger ? 'error' : 'primary'}
+								size='sm'
+								loading={isExecuting}
+								className='min-h-[40px] sm:min-h-[36px] touch-manipulation'
+								disabled={isExecuting}>
+								{confirmAction.label}
+							</Button>
 						</div>
 					</div>
 				) : (
@@ -175,8 +178,7 @@ export function BulkActionsDropdown<TData>({ actions, className = '' }: BulkActi
 										icon={action.icon}
 										variant={getItemVariant(action.variant)}
 										disabled={disabled}
-										onClick={() => executeAction(action)}
-									>
+										onClick={() => executeAction(action)}>
 										{action.label}
 									</Dropdown.Item>
 								)
@@ -186,14 +188,15 @@ export function BulkActionsDropdown<TData>({ actions, className = '' }: BulkActi
 						<Dropdown.Divider />
 
 						{/* Clear Selection */}
-						<Dropdown.Footer className="py-2">
-							<button
-								type="button"
+						<Dropdown.Footer className='py-2'>
+							<Button
+								type='button'
 								onClick={handleClearSelection}
-								className="btn btn-ghost btn-xs w-full text-base-content/70 hover:text-base-content"
-							>
+								variant='ghost'
+								size='xs'
+								className='w-full text-base-content/70 hover:text-base-content'>
 								Clear Selection
-							</button>
+							</Button>
 						</Dropdown.Footer>
 					</>
 				)}

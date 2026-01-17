@@ -15,10 +15,11 @@
  * @module RBAC PermissionGroup
  */
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import type { Permission } from '@_shared/services/api'
 import Card from '@_components/ui/Card'
+import Checkbox from '@_components/ui/Checkbox'
 import PermissionItem from './PermissionItem'
 
 interface PermissionGroupProps {
@@ -45,11 +46,19 @@ export default function PermissionGroup({
 	onDelete,
 }: PermissionGroupProps) {
 	const [isExpanded, setIsExpanded] = useState(true)
+	const checkboxRef = useRef<HTMLInputElement>(null)
 
 	// Calculate selection state for category
 	const selectedInGroup = permissions.filter((p) => selectedIds.includes(p.id)).length
 	const allSelected = selectedInGroup === permissions.length && permissions.length > 0
 	const someSelected = selectedInGroup > 0 && selectedInGroup < permissions.length
+
+	// Set indeterminate state on checkbox
+	useEffect(() => {
+		if (checkboxRef.current) {
+			checkboxRef.current.indeterminate = someSelected
+		}
+	}, [someSelected])
 
 	// Toggle all permissions in this group
 	const handleToggleAll = (e: React.MouseEvent) => {
@@ -90,21 +99,20 @@ export default function PermissionGroup({
 						)}
 					</div>
 
-					{/* Select All Checkbox - Using DaisyUI checkbox for consistency */}
-					<input
-						type="checkbox"
-						checked={allSelected}
-						ref={(el) => {
-							if (el) el.indeterminate = someSelected
-						}}
-						onChange={(e) => {
-							e.stopPropagation()
-							handleToggleAll(e as unknown as React.MouseEvent)
-						}}
-						onClick={(e) => e.stopPropagation()}
-						className="checkbox checkbox-sm checkbox-primary"
-						aria-label={allSelected ? 'Deselect all in group' : 'Select all in group'}
-					/>
+					{/* Select All Checkbox - Using Checkbox component */}
+					<div onClick={(e) => e.stopPropagation()}>
+						<Checkbox
+							ref={checkboxRef}
+							checked={allSelected}
+							onChange={(e) => {
+								e.stopPropagation()
+								handleToggleAll(e as unknown as React.MouseEvent)
+							}}
+							onClick={(e) => e.stopPropagation()}
+							className="checkbox-sm checkbox-primary"
+							aria-label={allSelected ? 'Deselect all in group' : 'Select all in group'}
+						/>
+					</div>
 
 					{/* Resource Name - More prominent */}
 					<h3 className="text-base sm:text-lg font-semibold capitalize">{resource}</h3>
@@ -139,11 +147,10 @@ export default function PermissionGroup({
 								}`}
 							>
 								{/* Selection Checkbox - Consistent with header */}
-								<input
-									type="checkbox"
+								<Checkbox
 									checked={isSelected}
 									onChange={() => onToggleSelection(permission.id)}
-									className="checkbox checkbox-sm checkbox-primary flex-shrink-0"
+									className="checkbox-sm checkbox-primary flex-shrink-0"
 									aria-label={`Select ${permission.resource}:${permission.action}`}
 								/>
 

@@ -36,6 +36,7 @@ import classNames from 'classnames'
 import { trackPhoneClick, trackEmailClick, trackContactCTA } from '@_shared/utils/analytics'
 
 import { PhoneIcon, MailIcon, MessageIcon, iconSizes } from '@_components/ui/ContactIcons'
+import Button from '@_components/ui/Button'
 
 /**
  * Soft hyphen character (invisible unless word breaks)
@@ -47,10 +48,10 @@ const SOFT_HYPHEN = '\u00AD'
  * Adds soft hyphens to an email address for elegant line breaking.
  * Inserts soft hyphens at strategic points: before @, before dots, and in longer segments.
  * Soft hyphens are invisible unless the word breaks, showing a hyphen when wrapping occurs.
- * 
+ *
  * @param email - The email address to hyphenate
  * @returns The email address with soft hyphens inserted
- * 
+ *
  * @example
  * ```typescript
  * hyphenateEmail('support@medsourcepro.com')
@@ -183,7 +184,7 @@ const CONTACT_METHOD_CONFIG: Record<
  * @example
  * ```tsx
  * import { COMPANY_CONTACT } from '@_lib'
- * 
+ *
  * // Phone contact
  * <ContactMethodCard
  *   type="phone"
@@ -280,8 +281,8 @@ export default function ContactMethodCard({
 		(type === 'phone'
 			? `Call us at ${mainText.split('').join(' ')}`
 			: type === 'email'
-				? `Send email to ${mainText}`
-				: 'Open live chat')
+			? `Send email to ${mainText}`
+			: 'Open live chat')
 
 	// Base styles - mobile-first responsive
 	const baseStyles = classNames(
@@ -315,14 +316,17 @@ export default function ContactMethodCard({
 
 	// Render as link (email, phone) or button (chat)
 	const content = (
-		<div className="flex items-start gap-4 flex-1">
-			<div className={iconContainerStyles} aria-hidden="true">
-				<Icon className={iconSizes.md} strokeWidth={customIcon ? 1.5 : undefined} />
+		<div className='flex items-start gap-4 flex-1'>
+			<div
+				className={iconContainerStyles}
+				aria-hidden='true'>
+				<Icon
+					className={iconSizes.md}
+					strokeWidth={customIcon ? 1.5 : undefined}
+				/>
 			</div>
 			<div className={classNames('flex-1 min-w-0 flex flex-col', isDark ? 'gap-2' : 'gap-1')}>
-				<p className="text-xs font-semibold uppercase tracking-wider text-base-content/60">
-					{title}
-				</p>
+				<p className='text-xs font-semibold uppercase tracking-wider text-base-content/60'>{title}</p>
 				<p
 					className={classNames(
 						'text-lg font-semibold text-base-content md:text-xl',
@@ -330,11 +334,10 @@ export default function ContactMethodCard({
 						// Soft hyphens will automatically show when line breaks occur
 						'wrap-break-word'
 					)}
-					style={type === 'email' ? { wordBreak: 'break-word', overflowWrap: 'break-word' } : undefined}
-				>
+					style={type === 'email' ? { wordBreak: 'break-word', overflowWrap: 'break-word' } : undefined}>
 					{displayText}
 				</p>
-				<p className="text-sm text-base-content/60">{description}</p>
+				<p className='text-sm text-base-content/60'>{description}</p>
 			</div>
 		</div>
 	)
@@ -345,11 +348,10 @@ export default function ContactMethodCard({
 			<div
 				className={baseStyles}
 				aria-label={generatedAriaLabel}
-				role="button"
+				role='button'
 				tabIndex={0}
 				onClick={handleClick}
-				onKeyDown={handleKeyDown}
-			>
+				onKeyDown={handleKeyDown}>
 				{content}
 			</div>
 		)
@@ -363,22 +365,21 @@ export default function ContactMethodCard({
 				onClick={handleClick}
 				className={baseStyles}
 				aria-label={generatedAriaLabel}
-				itemProp={itemProp}
-			>
+				itemProp={itemProp}>
 				{content}
 			</a>
 		)
 	}
 
 	return (
-		<button
-			type="button"
+		<Button
+			type='button'
 			onClick={handleClick}
+			variant='ghost'
 			className={baseStyles}
 			aria-label={generatedAriaLabel}
-		>
+			contentDrivenHeight>
 			{content}
-		</button>
+		</Button>
 	)
 }
-

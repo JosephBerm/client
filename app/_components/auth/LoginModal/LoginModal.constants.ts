@@ -64,6 +64,8 @@ export const FIELD_LABELS = {
 	EMAIL: 'Email',
 	FIRST_NAME: 'First name',
 	LAST_NAME: 'Last name',
+	// Session labels
+	REMEMBER_ME: 'Keep me signed in',
 	// MFA labels
 	MFA_CODE: 'Verification code',
 	MFA_RECOVERY_CODE: 'Recovery code',

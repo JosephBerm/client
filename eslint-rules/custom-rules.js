@@ -1,6 +1,6 @@
 /**
  * Custom ESLint Rules for MedSource Pro
- * 
+ *
  * Enforces project-specific coding standards:
  * - No <img> tags (use Next.js Image component)
  * - No new Date() (use date utils)
@@ -23,7 +23,8 @@ module.exports = {
 					recommended: true,
 				},
 				messages: {
-					noImgTag: '❌ Do not use <img> tag.\n✅ Use Next.js Image component instead:\n  import Image from "next/image";\n  <Image src={...} alt={...} />',
+					noImgTag:
+						'❌ Do not use <img> tag.\n✅ Use Next.js Image component instead:\n  import Image from "next/image";\n  <Image src={...} alt={...} />',
 				},
 				fixable: null,
 			},
@@ -53,7 +54,8 @@ module.exports = {
 					recommended: true,
 				},
 				messages: {
-					noNewDate: '❌ Do not use new Date().\n✅ Use date utils from @_lib/dates instead:\n  import { parseDate, parseDateOrNow } from "@_lib/dates";\n  const date = parseDateOrNow(); // or parseDate(input)',
+					noNewDate:
+						'❌ Do not use new Date().\n✅ Use date utils from @_lib/dates instead:\n  import { parseDate, parseDateOrNow } from "@_lib/dates";\n  const date = parseDateOrNow(); // or parseDate(input)',
 				},
 				fixable: null,
 			},
@@ -87,7 +89,8 @@ module.exports = {
 					recommended: true,
 				},
 				messages: {
-					noConsoleLog: '❌ Do not use console.log().\n✅ Use logger service instead:\n  import { logger } from "@_core/logger";\n  logger.info("message", { data });\n  logger.error("error", { error });\n  logger.debug("debug", { data });',
+					noConsoleLog:
+						'❌ Do not use console.log().\n✅ Use logger service instead:\n  import { logger } from "@_core/logger";\n  logger.info("message", { data });\n  logger.error("error", { error });\n  logger.debug("debug", { data });',
 				},
 				fixable: null,
 			},
@@ -118,31 +121,35 @@ module.exports = {
 			meta: {
 				type: 'problem',
 				docs: {
-					description: 'Disallow custom button/select/table elements. Use built components from @_components/ui instead.',
+					description:
+						'Disallow custom button/select/table elements. Use built components from @_components/ui instead.',
 					category: 'Best Practices',
 					recommended: true,
 				},
 				messages: {
-					noCustomButton: '❌ Do not create custom <button> elements.\n✅ Use Button component from @_components/ui:\n  import Button from "@_components/ui/Button";\n  <Button onClick={...}>Click me</Button>',
-					noCustomSelect: '❌ Do not create custom <select> elements.\n✅ Use Select component from @_components/ui:\n  import Select from "@_components/ui/Select";\n  <Select options={...} value={...} onChange={...} />',
-					noCustomTable: '❌ Do not create custom <table> elements.\n✅ Use Table components from @_components/tables:\n  import { DivTable } from "@_components/tables/DivTable";\n  <DivTable data={...} columns={...} />',
+					noCustomButton:
+						'❌ Do not create custom <button> elements.\n✅ Use Button component from @_components/ui:\n  import Button from "@_components/ui/Button";\n  <Button onClick={...}>Click me</Button>',
+					noCustomSelect:
+						'❌ Do not create custom <select> elements.\n✅ Use Select component from @_components/ui:\n  import Select from "@_components/ui/Select";\n  <Select options={...} value={...} onChange={...} />',
+					noCustomTable:
+						'❌ Do not create custom <table> elements.\n✅ Use Table components from @_components/tables:\n  import { RichDataGrid } from "@_components/tables/RichDataGrid";\n  <RichDataGrid data={...} columns={...} />',
 				},
 				fixable: null,
 			},
 			create(context) {
 				const restrictedElements = ['button', 'select', 'table']
-				
+
 				return {
 					JSXOpeningElement(node) {
 						const elementName = node.name.name
-						
+
 						if (restrictedElements.includes(elementName)) {
 							// Check if it's imported from our UI components
 							const sourceCode = context.getSourceCode()
 							const importDeclarations = sourceCode.ast.body.filter(
 								(node) => node.type === 'ImportDeclaration'
 							)
-							
+
 							// Check if the element is imported from our component library
 							const isImported = importDeclarations.some((importDecl) => {
 								if (importDecl.source.value.includes('@_components/ui')) {
@@ -155,7 +162,7 @@ module.exports = {
 								}
 								return false
 							})
-							
+
 							if (!isImported) {
 								let messageId
 								if (elementName === 'button') {
@@ -165,7 +172,7 @@ module.exports = {
 								} else if (elementName === 'table') {
 									messageId = 'noCustomTable'
 								}
-								
+
 								context.report({
 									node,
 									messageId,
@@ -184,12 +191,14 @@ module.exports = {
 			meta: {
 				type: 'problem',
 				docs: {
-					description: 'Disallow hardcoded string routes. Use Routes system from @_features/navigation instead.',
+					description:
+						'Disallow hardcoded string routes. Use Routes system from @_features/navigation instead.',
 					category: 'Best Practices',
 					recommended: true,
 				},
 				messages: {
-					noMagicStringRoute: '❌ Do not use hardcoded string routes.\n✅ Use Routes system instead:\n  import { Routes } from "@_features/navigation";\n  router.push(Routes.Quotes.detail("456"));\n  router.push(Routes.Orders.location);\n  <Link href={Routes.Store.product("123")}>Product</Link>',
+					noMagicStringRoute:
+						'❌ Do not use hardcoded string routes.\n✅ Use Routes system instead:\n  import { Routes } from "@_features/navigation";\n  router.push(Routes.Quotes.detail("456"));\n  router.push(Routes.Orders.location);\n  <Link href={Routes.Store.product("123")}>Product</Link>',
 				},
 				fixable: null,
 			},
@@ -206,8 +215,7 @@ module.exports = {
 								node.arguments.length > 0 &&
 								node.arguments[0].type === 'Literal' &&
 								typeof node.arguments[0].value === 'string' &&
-								(node.arguments[0].value.startsWith('/') ||
-									node.arguments[0].value.startsWith('?'))
+								(node.arguments[0].value.startsWith('/') || node.arguments[0].value.startsWith('?'))
 							)
 						},
 					},
@@ -221,8 +229,7 @@ module.exports = {
 								node.arguments.length > 0 &&
 								node.arguments[0].type === 'Literal' &&
 								typeof node.arguments[0].value === 'string' &&
-								(node.arguments[0].value.startsWith('/') ||
-									node.arguments[0].value.startsWith('?'))
+								(node.arguments[0].value.startsWith('/') || node.arguments[0].value.startsWith('?'))
 							)
 						},
 					},
@@ -235,8 +242,7 @@ module.exports = {
 									value &&
 									value.type === 'Literal' &&
 									typeof value.value === 'string' &&
-									(value.value.startsWith('/') ||
-										value.value.startsWith('?'))
+									(value.value.startsWith('/') || value.value.startsWith('?'))
 								) {
 									return true
 								}
@@ -254,8 +260,7 @@ module.exports = {
 								node.arguments.length > 0 &&
 								node.arguments[0].type === 'Literal' &&
 								typeof node.arguments[0].value === 'string' &&
-								(node.arguments[0].value.startsWith('/') ||
-									node.arguments[0].value.startsWith('?'))
+								(node.arguments[0].value.startsWith('/') || node.arguments[0].value.startsWith('?'))
 							)
 						},
 					},
@@ -293,4 +298,3 @@ module.exports = {
 		},
 	},
 }
-

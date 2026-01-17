@@ -35,6 +35,7 @@ import { createPortal } from 'react-dom'
 import { ChevronDown, Check } from 'lucide-react'
 import classNames from 'classnames'
 import { usePopoverPosition, useClickOutside, useEscapeKey } from '@_shared'
+import Button from '@_components/ui/Button'
 
 // ============================================================================
 // CONTEXT
@@ -77,13 +78,7 @@ export interface DropdownProps {
 	className?: string
 }
 
-function DropdownRoot({
-	open: controlledOpen,
-	onOpenChange,
-	defaultOpen = false,
-	children,
-	className,
-}: DropdownProps) {
+function DropdownRoot({ open: controlledOpen, onOpenChange, defaultOpen = false, children, className }: DropdownProps) {
 	const [internalOpen, setInternalOpen] = useState(defaultOpen)
 	const isControlled = controlledOpen !== undefined
 	const isOpen = isControlled ? controlledOpen : internalOpen
@@ -106,9 +101,7 @@ function DropdownRoot({
 	const close = useCallback(() => setIsOpen(false), [setIsOpen])
 
 	return (
-		<DropdownContext.Provider
-			value={{ isOpen, setIsOpen, toggle, close, triggerId, contentId, triggerRef }}
-		>
+		<DropdownContext.Provider value={{ isOpen, setIsOpen, toggle, close, triggerId, contentId, triggerRef }}>
 			<div className={classNames('relative inline-block', className)}>{children}</div>
 		</DropdownContext.Provider>
 	)
@@ -156,44 +149,44 @@ function DropdownTrigger({
 	}
 
 	return (
-		<button
+		<Button
 			ref={triggerRef}
-			type="button"
+			type='button'
 			id={triggerId}
 			onClick={toggle}
+			variant={variant}
+			size={size}
 			aria-expanded={isOpen}
-			aria-haspopup="menu"
+			aria-haspopup='menu'
 			aria-controls={isOpen ? contentId : undefined}
 			className={classNames(
-				'btn gap-2 min-h-[44px] sm:min-h-[36px] touch-manipulation',
+				'gap-2 min-h-[44px] sm:min-h-[36px] touch-manipulation',
 				'transition-all duration-200',
-				variantClasses[variant],
-				sizeClasses[size],
 				className
 			)}
-			{...props}
-		>
-			{leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
-			<span className="font-medium">{children}</span>
+			leftIcon={leftIcon}
+			rightIcon={
+				showChevron ? (
+					<ChevronDown
+						className={classNames(
+							'h-4 w-4 flex-shrink-0 transition-transform duration-200',
+							isOpen && 'rotate-180'
+						)}
+					/>
+				) : undefined
+			}
+			{...props}>
+			<span className='font-medium'>{children}</span>
 			{badge && (
 				<span
 					className={classNames(
 						'badge badge-sm font-semibold tabular-nums',
 						variant === 'primary' ? 'badge-primary-content bg-white/20' : 'badge-primary'
-					)}
-				>
+					)}>
 					{badge}
 				</span>
 			)}
-			{showChevron && (
-				<ChevronDown
-					className={classNames(
-						'h-4 w-4 flex-shrink-0 transition-transform duration-200',
-						isOpen && 'rotate-180'
-					)}
-				/>
-			)}
-		</button>
+		</Button>
 	)
 }
 
@@ -244,9 +237,9 @@ function DropdownContent({
 		<div
 			ref={contentRef}
 			id={contentId}
-			role="menu"
+			role='menu'
 			aria-labelledby={triggerId}
-			aria-orientation="vertical"
+			aria-orientation='vertical'
 			className={classNames(
 				// Fixed positioning for portal rendering
 				'fixed z-[9999]',
@@ -268,8 +261,7 @@ function DropdownContent({
 				width: `${width}px`,
 				maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
 			}}
-			{...props}
-		>
+			{...props}>
 			{children}
 		</div>
 	)
@@ -289,9 +281,12 @@ export interface DropdownSectionProps extends HTMLAttributes<HTMLDivElement> {
 
 function DropdownSection({ children, title, className, ...props }: DropdownSectionProps) {
 	return (
-		<div className={classNames('py-1', className)} role="group" {...props}>
+		<div
+			className={classNames('py-1', className)}
+			role='group'
+			{...props}>
 			{title && (
-				<div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-base-content/50">
+				<div className='px-3 py-2 text-xs font-semibold uppercase tracking-wider text-base-content/50'>
 					{title}
 				</div>
 			)}
@@ -341,15 +336,19 @@ function DropdownItem({
 	}
 
 	return (
-		<button
-			type="button"
-			role="menuitem"
+		<Button
+			type='button'
+			role='menuitem'
 			disabled={disabled}
 			onClick={handleClick}
+			variant='ghost'
+			size='sm'
 			className={classNames(
 				// Layout
 				'w-full flex items-center gap-3 px-3 py-2.5 sm:py-2',
 				'text-left text-sm',
+				'justify-start',
+				'h-auto',
 				// Transitions
 				'transition-colors duration-150',
 				// Touch friendly
@@ -362,14 +361,12 @@ function DropdownItem({
 				disabled && 'opacity-50 cursor-not-allowed pointer-events-none',
 				className
 			)}
-			{...props}
-		>
-			{icon && <span className="flex-shrink-0 w-5 flex items-center justify-center">{icon}</span>}
-			<span className="flex-1 truncate">{children}</span>
-			{description && (
-				<span className="text-xs text-base-content/50 truncate">{description}</span>
-			)}
-		</button>
+			leftIcon={icon}
+			contentDrivenHeight
+			{...props}>
+			<span className='flex-1 truncate'>{children}</span>
+			{description && <span className='text-xs text-base-content/50 truncate'>{description}</span>}
+		</Button>
 	)
 }
 
@@ -389,6 +386,8 @@ function DropdownCheckboxItem({
 	checked = false,
 	onCheckedChange,
 	className,
+	// Exclude variant from props - DropdownItem variant doesn't match Button variant
+	variant: _variant,
 	...props
 }: DropdownCheckboxItemProps) {
 	const handleClick = () => {
@@ -396,15 +395,19 @@ function DropdownCheckboxItem({
 	}
 
 	return (
-		<button
-			type="button"
-			role="menuitemcheckbox"
+		<Button
+			type='button'
+			role='menuitemcheckbox'
 			aria-checked={checked}
 			onClick={handleClick}
+			variant='ghost'
+			size='sm'
 			className={classNames(
 				// Layout
 				'w-full flex items-center gap-3 px-3 py-2.5 sm:py-2',
 				'text-left text-sm',
+				'justify-start',
+				'h-auto',
 				// Hover/Active states
 				'hover:bg-base-200 dark:hover:bg-base-content/10',
 				'active:bg-base-300 dark:active:bg-base-content/15',
@@ -414,30 +417,36 @@ function DropdownCheckboxItem({
 				'touch-manipulation',
 				className
 			)}
-			{...props}
-		>
-			<span
-				className={classNames(
-					// Size
-					'w-5 h-5 flex-shrink-0',
-					// Shape
-					'rounded-md',
-					// Border
-					'border-2',
-					// Flexbox for centering
-					'flex items-center justify-center',
-					// Transition
-					'transition-all duration-200',
-					// Checked/Unchecked states
-					checked
-						? 'bg-primary border-primary text-primary-content'
-						: 'border-base-300 dark:border-base-content/30 bg-transparent'
-				)}
-			>
-				{checked && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
-			</span>
-			<span className="flex-1 truncate text-base-content">{children}</span>
-		</button>
+			leftIcon={
+				<span
+					className={classNames(
+						// Size
+						'w-5 h-5 flex-shrink-0',
+						// Shape
+						'rounded-md',
+						// Border
+						'border-2',
+						// Flexbox for centering
+						'flex items-center justify-center',
+						// Transition
+						'transition-all duration-200',
+						// Checked/Unchecked states
+						checked
+							? 'bg-primary border-primary text-primary-content'
+							: 'border-base-300 dark:border-base-content/30 bg-transparent'
+					)}>
+					{checked && (
+						<Check
+							className='h-3.5 w-3.5'
+							strokeWidth={3}
+						/>
+					)}
+				</span>
+			}
+			contentDrivenHeight
+			{...props}>
+			<span className='flex-1 truncate text-base-content'>{children}</span>
+		</Button>
 	)
 }
 
@@ -449,7 +458,7 @@ function DropdownDivider({ className }: { className?: string }) {
 	return (
 		<div
 			className={classNames('my-1 border-t border-base-300/50 dark:border-base-content/10', className)}
-			role="separator"
+			role='separator'
 		/>
 	)
 }
@@ -469,8 +478,7 @@ function DropdownHeader({ children, className, ...props }: DropdownHeaderFooterP
 				'bg-base-200/50 dark:bg-base-content/5',
 				className
 			)}
-			{...props}
-		>
+			{...props}>
 			{children}
 		</div>
 	)
@@ -485,8 +493,7 @@ function DropdownFooter({ children, className, ...props }: DropdownHeaderFooterP
 				'bg-base-200/30 dark:bg-base-content/5',
 				className
 			)}
-			{...props}
-		>
+			{...props}>
 			{children}
 		</div>
 	)
@@ -503,8 +510,7 @@ function DropdownLabel({ children, className }: { children: ReactNode; className
 				'text-xs text-base-content/60 dark:text-base-content/50',
 				'text-center block',
 				className
-			)}
-		>
+			)}>
 			{children}
 		</span>
 	)

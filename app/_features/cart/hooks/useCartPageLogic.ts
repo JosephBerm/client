@@ -286,11 +286,8 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 	 * - Only required fields for quote creation
 	 * - Type-safe with backend contract
 	 * 
-	 * ESLint: useFormSubmit is a custom hook that takes an async function and options object (not a dependency array).
-	 * The async function intentionally captures cart and user from closure.
-	 * These are not React hook dependencies - they're closure variables used in the submit function.
-	 * The function is recreated on each render, which is acceptable for this use case.
-	 * The second parameter is an options object, not a dependency array, so ESLint's warning is a false positive.
+	 * useFormSubmit uses refs internally - dependencies (cart, user, form) are always current.
+	 * No stale closure issues as refs are read at execution time.
 	 */
 	const { submit: submitQuote, isSubmitting: isLoading } = useFormSubmit(
 		async (values: QuoteFormData) => {
@@ -347,7 +344,6 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 
 			return API.Public.sendQuote(quoteRequest)
 		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 		{
 			successMessage: 'Quote request submitted successfully!',
 			errorMessage: 'Failed to submit quote request. Please try again.',

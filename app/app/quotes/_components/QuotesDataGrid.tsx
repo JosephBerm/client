@@ -256,6 +256,7 @@ export default function QuotesDataGrid() {
 
   return (
     <>
+      <div data-testid="quotes-table">
       <RichDataGrid<Quote>
         columns={columns}
         fetcher={fetcher}
@@ -313,6 +314,7 @@ export default function QuotesDataGrid() {
         }
         ariaLabel="Quotes table"
       />
+      </div>
 
       <ConfirmationModal
         isOpen={deleteModal.isOpen}

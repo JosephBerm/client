@@ -220,8 +220,7 @@ export function useQuoteAssignment(
 		[createUpdatedQuote, quoteId]
 	)
 
-	// useFormSubmit stores the function and calls it later - dependencies are captured in closure
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+	// useFormSubmit uses refs internally - dependencies are always current
 	const assignSubmit = useFormSubmit(assignSubmitFn, {
 		successMessage: 'Quote assigned successfully',
 		errorMessage: 'Failed to assign quote',
@@ -247,8 +246,7 @@ export function useQuoteAssignment(
 		[createUpdatedQuote, quoteId]
 	)
 
-	// useFormSubmit stores the function and calls it later - dependencies are captured in closure
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+	// useFormSubmit uses refs internally - dependencies are always current
 	const unassignSubmit = useFormSubmit(unassignSubmitFn, {
 		successMessage: 'Quote unassigned successfully',
 		errorMessage: 'Failed to unassign quote',

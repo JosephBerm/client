@@ -110,3 +110,17 @@ export type {
 	TeamLeaderboardProps,
 	AnalyticsMetricProps,
 } from './analytics.types'
+
+// ============================================================================
+// INVENTORY TYPES
+// ============================================================================
+
+export type {
+	InventoryItem,
+	InventoryTransaction,
+	InventoryTransactionType,
+	InventoryStats,
+	StockStatusFilter,
+	InventoryFilters,
+	InventoryTabId,
+} from './inventory.types'

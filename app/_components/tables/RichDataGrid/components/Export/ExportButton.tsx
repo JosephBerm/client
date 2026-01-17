@@ -4,6 +4,12 @@
  * Provides quick export options for CSV, Excel, and PDF formats.
  * Uses shared Dropdown component with portal rendering.
  *
+ * PERFORMANCE OPTIMIZATION (MAANG Pattern):
+ * Export libraries (ExcelJS ~800KB, jsPDF ~350KB, papaparse ~47KB) are
+ * loaded dynamically only when the user clicks an export option.
+ * This reduces initial bundle size by ~1.2MB for all data grid pages.
+ *
+ * @see https://nextjs.org/docs/app/building-your-application/optimizing/lazy-loading
  * @module ExportButton
  */
 
@@ -13,8 +19,12 @@ import { useState } from 'react'
 import { Download, FileSpreadsheet, FileText, File } from 'lucide-react'
 
 import { Dropdown } from '@_components/ui/Dropdown'
+import Button from '@_components/ui/Button'
 import { useRichDataGridContext, useRichDataGridSelection } from '../../context/RichDataGridContext'
-import { ExportFormat, quickExport, type ExportResult } from '../../utils/exportUtils'
+
+// Import ONLY lightweight types (no library code bundled)
+import { ExportFormat } from '../../utils/exportTypes'
+import type { ExportResult } from '../../utils/exportTypes'
 
 // ============================================================================
 // PROPS
@@ -59,18 +69,26 @@ export function ExportButton({
 	const [isExporting, setIsExporting] = useState(false)
 	const [exportingFormat, setExportingFormat] = useState<ExportFormat | null>(null)
 
-	// Handle export action
+	/**
+	 * Handle export action with dynamic import.
+	 *
+	 * MAANG Pattern: Lazy Loading Heavy Dependencies
+	 * The export utilities module (~1.2MB) is only loaded when user
+	 * actually clicks an export option. This follows Google's PRPL pattern
+	 * and Netflix's approach to progressive loading.
+	 *
+	 * @see https://web.dev/apply-instant-loading-with-prpl/
+	 */
 	const handleExport = async (format: ExportFormat) => {
 		setIsExporting(true)
 		setExportingFormat(format)
 
 		try {
-			const result = await quickExport(
-				table,
-				format,
-				filename,
-				selectedCount > 0 ? selectedRows : undefined
-			)
+			// Dynamic import: Load export utilities only when needed
+			// This code-splits ExcelJS, jsPDF, and papaparse into a separate chunk
+			const { quickExport } = await import('../../utils/exportUtils')
+
+			const result = await quickExport(table, format, filename, selectedCount > 0 ? selectedRows : undefined)
 
 			if (result.success) {
 				onExportComplete?.(result)
@@ -116,29 +134,31 @@ export function ExportButton({
 	]
 
 	return (
-		<Dropdown open={isOpen} onOpenChange={setIsOpen} className={className}>
+		<Dropdown
+			open={isOpen}
+			onOpenChange={setIsOpen}
+			className={className}>
 			<Dropdown.Trigger
-				variant="outline"
+				variant='outline'
 				leftIcon={
 					isExporting ? (
-						<span className="loading loading-spinner loading-sm" />
+						<span className='loading loading-spinner loading-sm' />
 					) : (
 						<Download className={iconSizeClasses[size]} />
 					)
 				}
 				badge={selectedCount > 0 ? selectedCount : undefined}
-				disabled={isExporting}
-			>
-				<span className="hidden sm:inline">Export</span>
+				disabled={isExporting}>
+				<span className='hidden sm:inline'>Export</span>
 			</Dropdown.Trigger>
 
-			<Dropdown.Content align="end" width={240}>
+			<Dropdown.Content
+				align='end'
+				width={240}>
 				{/* Export Scope Info */}
 				<Dropdown.Header>
-					<span className="text-xs text-base-content/60">
-						{selectedCount > 0
-							? `Export ${selectedCount} selected rows`
-							: 'Export all filtered rows'}
+					<span className='text-xs text-base-content/60'>
+						{selectedCount > 0 ? `Export ${selectedCount} selected rows` : 'Export all filtered rows'}
 					</span>
 				</Dropdown.Header>
 
@@ -149,15 +169,14 @@ export function ExportButton({
 							key={option.format}
 							icon={
 								isExporting && exportingFormat === option.format ? (
-									<span className="loading loading-spinner loading-sm" />
+									<span className='loading loading-spinner loading-sm' />
 								) : (
 									option.icon
 								)
 							}
 							description={option.description}
 							disabled={isExporting}
-							onClick={() => handleExport(option.format)}
-						>
+							onClick={() => handleExport(option.format)}>
 							{option.label}
 						</Dropdown.Item>
 					))}
@@ -167,17 +186,18 @@ export function ExportButton({
 				{showAdvanced && (
 					<>
 						<Dropdown.Divider />
-						<Dropdown.Footer className="py-2">
-							<button
-								type="button"
+						<Dropdown.Footer className='py-2'>
+							<Button
+								type='button'
 								onClick={() => {
 									setIsOpen(false)
 									// TODO: Open advanced export modal
 								}}
-								className="btn btn-ghost btn-xs w-full text-base-content/70 hover:text-base-content"
-							>
+								variant='ghost'
+								size='xs'
+								className='w-full text-base-content/70 hover:text-base-content'>
 								Advanced Export Options...
-							</button>
+							</Button>
 						</Dropdown.Footer>
 					</>
 				)}

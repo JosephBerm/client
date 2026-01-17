@@ -18,6 +18,8 @@ import {
 	isBooleanFilter,
 } from '../../types'
 
+import Radio from '@_components/ui/Radio'
+
 // ============================================================================
 // PROPS
 // ============================================================================
@@ -40,18 +42,11 @@ export interface BooleanFilterInputProps {
 /**
  * Boolean filter input with radio button options.
  */
-export function BooleanFilterInput({
-	value,
-	onChange,
-	trueLabel = 'Yes',
-	falseLabel = 'No',
-}: BooleanFilterInputProps) {
+export function BooleanFilterInput({ value, onChange, trueLabel = 'Yes', falseLabel = 'No' }: BooleanFilterInputProps) {
 	// Parse current value or use defaults
 	const currentFilter = value && isBooleanFilter(value) ? value : null
 
-	const [boolValue, setBoolValue] = useState<boolean | null>(
-		currentFilter?.value ?? null
-	)
+	const [boolValue, setBoolValue] = useState<boolean | null>(currentFilter?.value ?? null)
 
 	// Sync with external value
 	useEffect(() => {
@@ -74,45 +69,43 @@ export function BooleanFilterInput({
 	}
 
 	return (
-		<div className="space-y-2">
-			<label className="block text-xs font-medium text-base-content/70 mb-2">
-				Value
-			</label>
+		<div className='space-y-2'>
+			<label className='block text-xs font-medium text-base-content/70 mb-2'>Value</label>
 
 			{/* All Option */}
-			<label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-base-200/50 dark:hover:bg-base-content/5 transition-colors">
-				<input
-					type="radio"
-					name="boolean-filter"
+			<label className='flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-base-200/50 dark:hover:bg-base-content/5 transition-colors'>
+				<Radio
+					name='boolean-filter'
+					size='sm'
+					variant='primary'
 					checked={boolValue === null}
 					onChange={() => updateFilter(null)}
-					className="radio radio-primary radio-sm"
 				/>
-				<span className="text-sm text-base-content">All</span>
+				<span className='text-sm text-base-content'>All</span>
 			</label>
 
 			{/* True Option */}
-			<label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-base-200/50 dark:hover:bg-base-content/5 transition-colors">
-				<input
-					type="radio"
-					name="boolean-filter"
+			<label className='flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-base-200/50 dark:hover:bg-base-content/5 transition-colors'>
+				<Radio
+					name='boolean-filter'
+					size='sm'
+					variant='primary'
 					checked={boolValue === true}
 					onChange={() => updateFilter(true)}
-					className="radio radio-primary radio-sm"
 				/>
-				<span className="text-sm text-base-content">{trueLabel}</span>
+				<span className='text-sm text-base-content'>{trueLabel}</span>
 			</label>
 
 			{/* False Option */}
-			<label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-base-200/50 dark:hover:bg-base-content/5 transition-colors">
-				<input
-					type="radio"
-					name="boolean-filter"
+			<label className='flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-base-200/50 dark:hover:bg-base-content/5 transition-colors'>
+				<Radio
+					name='boolean-filter'
+					size='sm'
+					variant='primary'
 					checked={boolValue === false}
 					onChange={() => updateFilter(false)}
-					className="radio radio-primary radio-sm"
 				/>
-				<span className="text-sm text-base-content">{falseLabel}</span>
+				<span className='text-sm text-base-content'>{falseLabel}</span>
 			</label>
 		</div>
 	)

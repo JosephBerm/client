@@ -44,6 +44,7 @@ import { Camera, X, Upload, Loader2 } from 'lucide-react'
 import classNames from 'classnames'
 
 import Avatar, { type AvatarProps } from './Avatar'
+import Button from '@_components/ui/Button'
 
 // ============================================================================
 // TYPES
@@ -125,81 +126,93 @@ export default function AvatarUpload({
 	/**
 	 * Validate file before accepting
 	 */
-	const validateFile = useCallback((file: File): string | null => {
-		// Check file type
-		if (!acceptedTypes.includes(file.type)) {
-			return 'Please upload a JPEG, PNG, or WebP image'
-		}
+	const validateFile = useCallback(
+		(file: File): string | null => {
+			// Check file type
+			if (!acceptedTypes.includes(file.type)) {
+				return 'Please upload a JPEG, PNG, or WebP image'
+			}
 
-		// Check file size
-		const maxBytes = maxSizeMB * 1024 * 1024
-		if (file.size > maxBytes) {
-			return `Image must be smaller than ${maxSizeMB}MB`
-		}
+			// Check file size
+			const maxBytes = maxSizeMB * 1024 * 1024
+			if (file.size > maxBytes) {
+				return `Image must be smaller than ${maxSizeMB}MB`
+			}
 
-		return null
-	}, [acceptedTypes, maxSizeMB])
+			return null
+		},
+		[acceptedTypes, maxSizeMB]
+	)
 
 	/**
 	 * Handle file selection
 	 */
-	const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0]
-		if (!file) return
+	const handleFileChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			const file = e.target.files?.[0]
+			if (!file) return
 
-		// Validate
-		const validationErr = validateFile(file)
-		if (validationErr) {
-			setValidationError(validationErr)
-			return
-		}
-
-		// Clear any previous errors
-		setValidationError(null)
-
-		// Revoke previous preview URL to prevent memory leak
-		setPreviewUrl((prev) => {
-			if (prev) {
-				URL.revokeObjectURL(prev)
+			// Validate
+			const validationErr = validateFile(file)
+			if (validationErr) {
+				setValidationError(validationErr)
+				return
 			}
-			return URL.createObjectURL(file)
-		})
 
-		// Notify parent
-		onImageSelect?.(file)
+			// Clear any previous errors
+			setValidationError(null)
 
-		// Reset input so same file can be selected again
-		e.target.value = ''
-	}, [validateFile, onImageSelect])
+			// Revoke previous preview URL to prevent memory leak
+			setPreviewUrl((prev) => {
+				if (prev) {
+					URL.revokeObjectURL(prev)
+				}
+				return URL.createObjectURL(file)
+			})
+
+			// Notify parent
+			onImageSelect?.(file)
+
+			// Reset input so same file can be selected again
+			e.target.value = ''
+		},
+		[validateFile, onImageSelect]
+	)
 
 	/**
 	 * Handle image removal
 	 */
-	const handleRemove = useCallback((e: React.MouseEvent) => {
-		e.stopPropagation()
+	const handleRemove = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation()
 
-		// Revoke preview URL if exists
-		if (previewUrl) {
-			URL.revokeObjectURL(previewUrl)
-			setPreviewUrl(null)
-		}
+			// Revoke preview URL if exists
+			if (previewUrl) {
+				URL.revokeObjectURL(previewUrl)
+				setPreviewUrl(null)
+			}
 
-		// Clear errors
-		setValidationError(null)
+			// Clear errors
+			setValidationError(null)
 
-		// Notify parent
-		onImageRemove?.()
-	}, [previewUrl, onImageRemove])
+			// Notify parent
+			onImageRemove?.()
+		},
+		[previewUrl, onImageRemove]
+	)
 
 	/**
 	 * Handle keyboard interaction
 	 */
-	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-		if ((e.key === 'Enter' || e.key === ' ') && !uploading) {
-			e.preventDefault()
-			inputRef.current?.click()
-		}
-	}, [uploading])
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if ((e.key === 'Enter' || e.key === ' ') && !uploading) {
+				e.preventDefault()
+				inputRef.current?.click()
+			}
+		},
+		[uploading]
+	)
 
 	// Combined error message
 	const displayError = validationError || error
@@ -208,16 +221,12 @@ export default function AvatarUpload({
 		<div className={classNames('relative inline-flex flex-col items-center gap-3', className)}>
 			{/* Avatar with overlay */}
 			<div
-				className={classNames(
-					'relative cursor-pointer',
-					uploading && 'pointer-events-none'
-				)}
+				className={classNames('relative cursor-pointer', uploading && 'pointer-events-none')}
 				onClick={handleClick}
 				onKeyDown={handleKeyDown}
-				role="button"
+				role='button'
 				tabIndex={0}
-				aria-label="Upload profile picture"
-			>
+				aria-label='Upload profile picture'>
 				{/* Avatar base */}
 				<Avatar
 					name={name}
@@ -232,58 +241,61 @@ export default function AvatarUpload({
 						'absolute inset-0 flex items-center justify-center rounded-full',
 						'bg-black/50 transition-opacity duration-200',
 						uploading ? 'opacity-100' : 'opacity-0 hover:opacity-100'
-					)}
-				>
+					)}>
 					{uploading ? (
-						<Loader2 className="h-1/3 w-1/3 animate-spin text-white" />
+						<Loader2 className='h-1/3 w-1/3 animate-spin text-white' />
 					) : (
-						<Camera className="h-1/3 w-1/3 text-white" />
+						<Camera className='h-1/3 w-1/3 text-white' />
 					)}
 				</div>
 
 				{/* Remove button (only show if has image and not uploading) */}
 				{hasImage && !uploading && (
-					<button
-						type="button"
+					<Button
+						type='button'
 						onClick={handleRemove}
+						variant='error'
+						size='xs'
 						className={classNames(
 							'absolute -right-1 -top-1 z-10',
 							'flex h-6 w-6 items-center justify-center rounded-full',
-							'bg-error text-error-content shadow-md',
+							'shadow-md',
 							'transition-transform duration-150 hover:scale-110',
-							'focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-2'
+							'focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-2',
+							'p-0'
 						)}
-						aria-label="Remove profile picture"
-					>
-						<X className="h-3.5 w-3.5" />
-					</button>
+						aria-label='Remove profile picture'
+						leftIcon={<X className='h-3.5 w-3.5' />}
+					/>
 				)}
 			</div>
 
 			{/* Helper text */}
-			<div className="text-center">
-				<button
-					type="button"
+			<div className='text-center'>
+				<Button
+					type='button'
 					onClick={handleClick}
 					disabled={uploading}
+					variant='ghost'
+					size='sm'
 					className={classNames(
 						'inline-flex items-center gap-1.5 text-sm font-medium',
 						'text-primary hover:text-primary/80 transition-colors',
 						'focus:outline-none focus:underline',
-						uploading && 'pointer-events-none opacity-50'
+						uploading && 'pointer-events-none opacity-50',
+						'h-auto p-0'
 					)}
-				>
-					<Upload className="h-4 w-4" />
+					leftIcon={<Upload className='h-4 w-4' />}>
 					{hasImage ? 'Change photo' : 'Upload photo'}
-				</button>
-				<p className="mt-1 text-xs text-base-content/50">
-					JPEG, PNG, or WebP. Max {maxSizeMB}MB.
-				</p>
+				</Button>
+				<p className='mt-1 text-xs text-base-content/50'>JPEG, PNG, or WebP. Max {maxSizeMB}MB.</p>
 			</div>
 
 			{/* Error message */}
 			{displayError && (
-				<p className="text-xs text-error" role="alert">
+				<p
+					className='text-xs text-error'
+					role='alert'>
 					{displayError}
 				</p>
 			)}
@@ -291,11 +303,11 @@ export default function AvatarUpload({
 			{/* Hidden file input */}
 			<input
 				ref={inputRef}
-				type="file"
+				type='file'
 				accept={acceptedTypes.join(',')}
 				onChange={handleFileChange}
-				className="hidden"
-				aria-hidden="true"
+				className='hidden'
+				aria-hidden='true'
 			/>
 		</div>
 	)

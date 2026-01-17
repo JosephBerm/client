@@ -93,7 +93,9 @@ export function serializeDate(date: DateInput): string | null {
  * serializeDateOnly(null)  // Returns: null
  *
  * // In HTML date inputs
- * <input
+ * import Input from '@_components/ui/Input';
+ * 
+ * <Input
  *   type="date"
  *   value={serializeDateOnly(filter.fromDate) ?? ''}
  * />

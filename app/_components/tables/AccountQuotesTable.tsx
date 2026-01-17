@@ -225,7 +225,7 @@ export default function AccountQuotesTable() {
 				<h2 className="card-title text-lg sm:text-xl md:text-2xl font-semibold mb-4 sm:mb-6 text-base-content">
 					Recent Quotes
 				</h2>
-				<div className="min-w-0 overflow-hidden">
+				<div className="min-w-0 overflow-hidden" data-testid="quotes-table">
 				<DataGrid
 					columns={columns}
 					data={quotes}

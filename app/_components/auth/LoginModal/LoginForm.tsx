@@ -1,20 +1,21 @@
 /**
  * LoginForm Component
- * 
+ *
  * Email/password login form with progressive disclosure.
  * First shows email input, then reveals password field.
- * 
+ *
  * **Features:**
  * - Two-step form (email → password)
  * - Smooth animated transitions
  * - Form validation via react-hook-form
  * - Accessible with proper labels
- * 
+ *
  * @module LoginModal/LoginForm
  */
 
 'use client'
 
+import FormCheckbox from '@_components/forms/FormCheckbox'
 import FormInput from '@_components/forms/FormInput'
 import Button from '@_components/ui/Button'
 
@@ -31,22 +32,18 @@ import type { LoginFormProps } from './LoginModal.types'
 
 /**
  * LoginForm Component
- * 
+ *
  * Renders the login form with email/username and password inputs.
  * Uses progressive disclosure - password field appears after email entry.
- * 
+ *
  * @param props - Component props
  * @returns Login form section
  */
-export default function LoginForm({
-	form,
-	isLoading,
-	showPasswordField,
-	onSubmit,
-	onSwitchToSignup,
-}: LoginFormProps) {
+export default function LoginForm({ form, isLoading, showPasswordField, onSubmit, onSwitchToSignup }: LoginFormProps) {
 	return (
-		<form onSubmit={onSubmit} className={LAYOUT_CLASSES.FORM_SPACING}>
+		<form
+			onSubmit={onSubmit}
+			className={LAYOUT_CLASSES.FORM_SPACING}>
 			{/* Email/Username Input */}
 			<div className='transition-all duration-300 ease-out'>
 				<FormInput
@@ -63,11 +60,8 @@ export default function LoginForm({
 			{/* Password Input - revealed after email entry */}
 			<div
 				className={`${ANIMATION_CLASSES.TRANSITION} ${
-					showPasswordField
-						? 'max-h-40 opacity-100 translate-y-0'
-						: 'max-h-0 opacity-0 -translate-y-2'
-				}`}
-			>
+					showPasswordField ? 'max-h-40 opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-2'
+				}`}>
 				<FormInput
 					label={FIELD_LABELS.PASSWORD}
 					type='password'
@@ -76,6 +70,17 @@ export default function LoginForm({
 					autoFocus={showPasswordField}
 					{...form.register('password')}
 					error={form.formState.errors.password}
+				/>
+			</div>
+
+			{/* Remember Me Checkbox - shown when password field is visible */}
+			<div
+				className={`${ANIMATION_CLASSES.TRANSITION} ${
+					showPasswordField ? 'max-h-12 opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-2'
+				}`}>
+				<FormCheckbox
+					label={FIELD_LABELS.REMEMBER_ME}
+					{...form.register('rememberMe')}
 				/>
 			</div>
 
@@ -88,8 +93,7 @@ export default function LoginForm({
 					size='md'
 					loading={isLoading}
 					disabled={isLoading}
-					className={LAYOUT_CLASSES.PRIMARY_BUTTON}
-				>
+					className={LAYOUT_CLASSES.PRIMARY_BUTTON}>
 					<span className='transition-opacity duration-300'>
 						{showPasswordField ? BUTTON_LABELS.SIGN_IN : BUTTON_LABELS.CONTINUE}
 					</span>
@@ -102,12 +106,10 @@ export default function LoginForm({
 					size='sm'
 					onClick={onSwitchToSignup}
 					className={LAYOUT_CLASSES.LINK_BUTTON}
-					aria-label={ARIA_LABELS.CREATE_ACCOUNT}
-				>
+					aria-label={ARIA_LABELS.CREATE_ACCOUNT}>
 					{BUTTON_LABELS.SIGN_UP}
 				</Button>
 			</div>
 		</form>
 	)
 }
-

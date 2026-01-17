@@ -19,6 +19,7 @@ import {
 	type SelectOption,
 	isSelectFilter,
 } from '../../types'
+import Button from '@_components/ui/Button'
 
 // ============================================================================
 // PROPS
@@ -70,12 +71,8 @@ export function SelectFilterInput({ value, onChange, options }: SelectFilterInpu
 	// Parse current value or use defaults
 	const currentFilter = value && isSelectFilter(value) ? value : null
 
-	const [operator, setOperator] = useState<SelectFilterOperator>(
-		currentFilter?.operator ?? SelectFilterOperator.Is
-	)
-	const [selectedValues, setSelectedValues] = useState<string[]>(
-		currentFilter?.values ?? []
-	)
+	const [operator, setOperator] = useState<SelectFilterOperator>(currentFilter?.operator ?? SelectFilterOperator.Is)
+	const [selectedValues, setSelectedValues] = useState<string[]>(currentFilter?.values ?? [])
 
 	// Sync with external value
 	useEffect(() => {
@@ -93,10 +90,7 @@ export function SelectFilterInput({ value, onChange, options }: SelectFilterInpu
 	const isMultiSelect = currentOperator?.isMulti ?? false
 
 	// Update parent when values change
-	const updateFilter = (
-		newOperator: SelectFilterOperator = operator,
-		newValues: string[] = selectedValues
-	) => {
+	const updateFilter = (newOperator: SelectFilterOperator = operator, newValues: string[] = selectedValues) => {
 		const filter: SelectFilterValue = {
 			filterType: FilterType.Select,
 			operator: newOperator,
@@ -136,19 +130,18 @@ export function SelectFilterInput({ value, onChange, options }: SelectFilterInpu
 	}
 
 	return (
-		<div className="space-y-3">
+		<div className='space-y-3'>
 			{/* Operator Select */}
 			<div>
-				<label className="block text-xs font-medium text-base-content/70 mb-1">
-					Condition
-				</label>
+				<label className='block text-xs font-medium text-base-content/70 mb-1'>Condition</label>
 				<select
 					value={operator}
 					onChange={handleOperatorChange}
-					className="select select-bordered select-sm w-full dark:bg-base-300 dark:border-base-content/20"
-				>
+					className='select select-bordered select-sm w-full dark:bg-base-300 dark:border-base-content/20'>
 					{SELECT_OPERATORS.map((op) => (
-						<option key={op.value} value={op.value}>
+						<option
+							key={op.value}
+							value={op.value}>
 							{op.label}
 						</option>
 					))}
@@ -158,17 +151,16 @@ export function SelectFilterInput({ value, onChange, options }: SelectFilterInpu
 			{/* Single Select Mode */}
 			{!isMultiSelect && (
 				<div>
-					<label className="block text-xs font-medium text-base-content/70 mb-1">
-						Value
-					</label>
+					<label className='block text-xs font-medium text-base-content/70 mb-1'>Value</label>
 					<select
 						value={selectedValues[0] ?? ''}
 						onChange={handleSingleValueChange}
-						className="select select-bordered select-sm w-full dark:bg-base-300 dark:border-base-content/20"
-					>
-						<option value="">Select a value...</option>
+						className='select select-bordered select-sm w-full dark:bg-base-300 dark:border-base-content/20'>
+						<option value=''>Select a value...</option>
 						{options.map((option) => (
-							<option key={option.value} value={option.value}>
+							<option
+								key={option.value}
+								value={option.value}>
 								{option.label}
 							</option>
 						))}
@@ -179,46 +171,41 @@ export function SelectFilterInput({ value, onChange, options }: SelectFilterInpu
 			{/* Multi-Select Mode */}
 			{isMultiSelect && (
 				<div>
-					<label className="block text-xs font-medium text-base-content/70 mb-1">
+					<label className='block text-xs font-medium text-base-content/70 mb-1'>
 						Values ({selectedValues.length} selected)
 					</label>
-					<div className="border border-base-300 dark:border-base-content/20 rounded-lg max-h-48 overflow-y-auto">
+					<div className='border border-base-300 dark:border-base-content/20 rounded-lg max-h-48 overflow-y-auto'>
 						{options.length === 0 ? (
-							<p className="px-3 py-2 text-sm text-base-content/50 italic">
-								No options available
-							</p>
+							<p className='px-3 py-2 text-sm text-base-content/50 italic'>No options available</p>
 						) : (
 							options.map((option) => {
 								const isSelected = selectedValues.includes(option.value)
 								const { text, count } = parseOptionLabel(option.label)
 								return (
-									<button
+									<Button
 										key={option.value}
-										type="button"
+										type='button'
 										onClick={() => handleMultiValueToggle(option.value)}
+										variant='ghost'
 										className={`
 											w-full flex items-center justify-between px-3 py-2 text-sm text-left
 											hover:bg-base-200 dark:hover:bg-base-content/10
 											${isSelected ? 'bg-primary/10 dark:bg-primary/20' : ''}
-											transition-colors
+											transition-colors h-auto
 										`}
 										aria-selected={isSelected}
-									>
-										<span className={isSelected ? 'text-primary font-medium' : ''}>
-											{text}
-										</span>
-										<div className="flex items-center gap-2">
+										contentDrivenHeight>
+										<span className={isSelected ? 'text-primary font-medium' : ''}>{text}</span>
+										<div className='flex items-center gap-2'>
 											{/* Facet count badge */}
 											{count !== null && (
-												<span className="text-xs text-base-content/50 tabular-nums bg-base-200 dark:bg-base-content/10 px-1.5 py-0.5 rounded">
+												<span className='text-xs text-base-content/50 tabular-nums bg-base-200 dark:bg-base-content/10 px-1.5 py-0.5 rounded'>
 													{count}
 												</span>
 											)}
-											{isSelected && (
-												<Check className="h-4 w-4 text-primary flex-shrink-0" />
-											)}
+											{isSelected && <Check className='h-4 w-4 text-primary flex-shrink-0' />}
 										</div>
-									</button>
+									</Button>
 								)
 							})
 						)}

@@ -1,19 +1,43 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, useRef } from 'react'
 
 import { notificationService } from '../services/notification.service'
+
+/**
+ * Options for useFormSubmit hook
+ */
+export interface UseFormSubmitOptions<TResult> {
+  /** Message to display on successful submission */
+  successMessage?: string
+  /** Default error message if API doesn't provide one */
+  errorMessage?: string
+  /** Component name for logging/notifications */
+  componentName?: string
+  /** Action name for logging/notifications */
+  actionName?: string
+  /** Callback executed after successful submission */
+  onSuccess?: (result: TResult | null) => void | Promise<void>
+  /** Callback executed after failed submission */
+  onError?: (error: Error) => void | Promise<void>
+}
 
 /**
  * Generic form submission hook following DRY (Don't Repeat Yourself) principles.
  * Eliminates boilerplate code by centralizing loading state management, error handling,
  * and success notifications across all forms.
  * 
+ * **Next.js 16.1.1 / React 19 Best Practices:**
+ * - Uses useRef to capture latest submitFn and options without stale closures
+ * - Returns stable submit function via useCallback (no dependencies needed)
+ * - Properly handles async operations without exhaustive-deps warnings
+ * 
  * **Benefits:**
  * - Automatic loading state management
  * - Consistent error handling with toast notifications
  * - Success callbacks for navigation or data refresh
  * - Reduces form code by ~70%
+ * - No stale closure issues - always uses latest values
  * 
  * @template TData - The type of data being submitted (form data)
  * @template TResult - The type of data returned from the API (defaults to any)
@@ -60,76 +84,86 @@ import { notificationService } from '../services/notification.service'
  * };
  * ```
  */
-export function useFormSubmit<TData, TResult = any>(
+export function useFormSubmit<TData, TResult = unknown>(
   submitFn: (data: TData) => Promise<{ data: { statusCode: number; message?: string | null; payload?: TResult | null } }>,
-  options?: {
-    successMessage?: string
-    errorMessage?: string
-    componentName?: string
-    actionName?: string
-    onSuccess?: (result: TResult | null) => void | Promise<void>
-    onError?: (error: Error) => void | Promise<void>
-  }
+  options?: UseFormSubmitOptions<TResult>
 ) {
   // Track submission state
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
+  // Use refs to always access the latest submitFn and options
+  // This prevents stale closure issues without needing dependency arrays
+  const submitFnRef = useRef(submitFn)
+  const optionsRef = useRef(options)
+
+  // Update refs on every render to capture latest values
+  submitFnRef.current = submitFn
+  optionsRef.current = options
+
   /**
    * Submit function that handles the entire submission lifecycle.
    * Manages loading state, calls the API, handles success/error, and shows toast notifications.
    * 
+   * Uses refs to access latest submitFn and options, avoiding stale closure issues.
+   * The empty dependency array is intentional - refs provide access to current values.
+   * 
    * @param {TData} data - The form data to submit
    * @returns {Promise<Object>} Object indicating success status and optional result data
    */
-  const submit = async (data: TData): Promise<{ success: boolean; data?: TResult | null }> => {
+  const submit = useCallback(async (data: TData): Promise<{ success: boolean; data?: TResult | null }> => {
+    // Access current values from refs
+    const currentSubmitFn = submitFnRef.current
+    const currentOptions = optionsRef.current
+
     try {
       // Start loading state
       setIsSubmitting(true)
       setError(null)
 
       // Call the provided submit function (API call)
-      const response = await submitFn(data)
+      const response = await currentSubmitFn(data)
 
       // Check if API returned success status code (200 or 201)
       if (response.data.statusCode === 200 || response.data.statusCode === 201) {
-      // Success path: show success toast if message provided
-      if (options?.successMessage) {
-        notificationService.success(options.successMessage, {
-          component: options?.componentName || 'FormSubmit',
-          action: options?.actionName || 'submit',
-        })
-      }
+        // Success path: show success toast if message provided
+        if (currentOptions?.successMessage) {
+          notificationService.success(currentOptions.successMessage, {
+            component: currentOptions?.componentName || 'FormSubmit',
+            action: currentOptions?.actionName || 'submit',
+          })
+        }
 
         // Execute success callback (e.g., navigation, data refresh)
-        if (options?.onSuccess) {
-          await options.onSuccess(response.data.payload ?? null)
+        if (currentOptions?.onSuccess) {
+          await currentOptions.onSuccess(response.data.payload ?? null)
         }
 
         return { success: true, data: response.data.payload ?? null }
       } else {
-      // API returned error status code
-      const errorMsg = response.data.message || options?.errorMessage || 'An error occurred'
-      notificationService.error(errorMsg, {
-        metadata: { statusCode: response.data.statusCode },
-        component: options?.componentName || 'FormSubmit',
-        action: options?.actionName || 'submit',
-      })
-      return { success: false }
+        // API returned error status code
+        const errorMsg = response.data.message || currentOptions?.errorMessage || 'An error occurred'
+        notificationService.error(errorMsg, {
+          metadata: { statusCode: response.data.statusCode },
+          component: currentOptions?.componentName || 'FormSubmit',
+          action: currentOptions?.actionName || 'submit',
+        })
+        return { success: false }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Network error or unexpected exception
-      const errorMsg = err.message || options?.errorMessage || 'An unexpected error occurred'
+      const errorInstance = err instanceof Error ? err : new Error(String(err))
+      const errorMsg = errorInstance.message || currentOptions?.errorMessage || 'An unexpected error occurred'
       notificationService.error(errorMsg, {
         metadata: { error: err, context: 'form_submit' },
-        component: options?.componentName || 'FormSubmit',
-        action: options?.actionName || 'submit',
+        component: currentOptions?.componentName || 'FormSubmit',
+        action: currentOptions?.actionName || 'submit',
       })
-      setError(err)
+      setError(errorInstance)
 
       // Execute error callback if provided
-      if (options?.onError) {
-        await options.onError(err)
+      if (currentOptions?.onError) {
+        await currentOptions.onError(errorInstance)
       }
 
       return { success: false }
@@ -137,10 +171,10 @@ export function useFormSubmit<TData, TResult = any>(
       // Always reset loading state when done
       setIsSubmitting(false)
     }
-  }
+  }, []) // Empty deps is intentional - refs provide access to current values
 
   return {
-    submit,        // Function to call when submitting the form
+    submit,        // Stable function reference to call when submitting the form
     isSubmitting,  // Boolean indicating if submission is in progress
     error,         // Error object if submission failed
   }
@@ -236,9 +270,9 @@ export function useFormSubmit<TData, TResult = any>(
  */
 export function useCRUDSubmit<TEntity>(
   apiService: {
-    create: (entity: TEntity) => Promise<any>
-    update: (entity: TEntity) => Promise<any>
-    delete: (id: string | number) => Promise<any>
+    create: (entity: TEntity) => Promise<{ data: { statusCode: number; message?: string | null; payload?: TEntity | null } }>
+    update: (entity: TEntity) => Promise<{ data: { statusCode: number; message?: string | null; payload?: TEntity | null } }>
+    delete: (id: string | number) => Promise<{ data: { statusCode: number; message?: string | null; payload?: unknown } }>
   },
   options?: {
     entityName?: string
@@ -251,7 +285,7 @@ export function useCRUDSubmit<TEntity>(
   const entityName = options?.entityName || 'Item'
 
   // Create submission handler with automatic success message
-  const createSubmit = useFormSubmit(
+  const createSubmit = useFormSubmit<TEntity, TEntity>(
     apiService.create,
     {
       successMessage: `${entityName} created successfully`,
@@ -260,7 +294,7 @@ export function useCRUDSubmit<TEntity>(
   )
 
   // Update submission handler with automatic success message
-  const updateSubmit = useFormSubmit(
+  const updateSubmit = useFormSubmit<TEntity, TEntity>(
     apiService.update,
     {
       successMessage: `${entityName} updated successfully`,
@@ -269,7 +303,7 @@ export function useCRUDSubmit<TEntity>(
   )
 
   // Delete submission handler with automatic success message
-  const deleteSubmit = useFormSubmit(
+  const deleteSubmit = useFormSubmit<string | number, unknown>(
     apiService.delete,
     {
       successMessage: `${entityName} deleted successfully`,
@@ -284,5 +318,3 @@ export function useCRUDSubmit<TEntity>(
     isLoading: createSubmit.isSubmitting || updateSubmit.isSubmitting || deleteSubmit.isSubmitting, // Combined loading state
   }
 }
-
-

@@ -35,14 +35,10 @@ import { pricingKeys, usePriceLists, useAssignCustomerPriceList, useRemoveCustom
 import Badge from '@_components/ui/Badge'
 import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
+import Checkbox from '@_components/ui/Checkbox'
 import FormInput from '@_components/forms/FormInput'
 import ConfirmationModal from '@_components/ui/ConfirmationModal'
-import {
-	RichDataGrid,
-	createRichColumnHelper,
-	FilterType,
-	type RichColumnDef,
-} from '@_components/tables/RichDataGrid'
+import { RichDataGrid, createRichColumnHelper, FilterType, type RichColumnDef } from '@_components/tables/RichDataGrid'
 
 // =========================================================================
 // TYPES
@@ -197,19 +193,17 @@ export default function CustomerAssignmentMatrix() {
 		columnHelper.display({
 			id: 'select',
 			header: () => (
-				<input
-					type="checkbox"
-					className="checkbox checkbox-sm"
+				<Checkbox
+					className='checkbox-sm'
 					checked={selectedCustomers.size === filteredCustomers.length && filteredCustomers.length > 0}
 					onChange={selectAllCustomers}
-					aria-label="Select all customers"
+					aria-label='Select all customers'
 				/>
 			),
 			size: 40,
 			cell: ({ row }) => (
-				<input
-					type="checkbox"
-					className="checkbox checkbox-sm"
+				<Checkbox
+					className='checkbox-sm'
 					checked={selectedCustomers.has(row.original.id)}
 					onChange={() => toggleCustomerSelection(row.original.id)}
 					aria-label={`Select ${row.original.name}`}
@@ -221,14 +215,14 @@ export default function CustomerAssignmentMatrix() {
 			filterType: FilterType.Text,
 			searchable: true,
 			cell: ({ row }) => (
-				<div className="flex items-center gap-3">
-					<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-						<Building2 className="h-5 w-5 text-primary" />
+				<div className='flex items-center gap-3'>
+					<div className='flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10'>
+						<Building2 className='h-5 w-5 text-primary' />
 					</div>
-					<div className="flex flex-col">
-						<span className="font-medium text-base-content">{row.original.name}</span>
+					<div className='flex flex-col'>
+						<span className='font-medium text-base-content'>{row.original.name}</span>
 						{row.original.email && (
-							<span className="text-xs text-base-content/60">{row.original.email}</span>
+							<span className='text-xs text-base-content/60'>{row.original.email}</span>
 						)}
 					</div>
 				</div>
@@ -237,18 +231,21 @@ export default function CustomerAssignmentMatrix() {
 		columnHelper.accessor('id', {
 			header: 'ID',
 			size: 80,
-			cell: ({ row }) => (
-				<span className="font-mono text-sm text-base-content/60">#{row.original.id}</span>
-			),
+			cell: ({ row }) => <span className='font-mono text-sm text-base-content/60'>#{row.original.id}</span>,
 		}),
 		// Dynamic columns for each price list
 		...activePriceLists.map((pl) =>
 			columnHelper.display({
 				id: `pl-${pl.id}`,
 				header: () => (
-					<div className="flex flex-col items-center" title={pl.name}>
-						<span className="text-xs truncate max-w-[80px]">{pl.name}</span>
-						<Badge variant="neutral" size="sm" className="mt-1">
+					<div
+						className='flex flex-col items-center'
+						title={pl.name}>
+						<span className='text-xs truncate max-w-[80px]'>{pl.name}</span>
+						<Badge
+							variant='neutral'
+							size='sm'
+							className='mt-1'>
 							P{pl.priority}
 						</Badge>
 					</div>
@@ -259,30 +256,33 @@ export default function CustomerAssignmentMatrix() {
 					const isPending = assignMutation.isPending || unassignMutation.isPending
 
 					return (
-						<div className="flex justify-center">
-							<button
-								type="button"
+						<div className='flex justify-center'>
+							<Button
+								type='button'
 								onClick={() =>
 									isAssigned
 										? handleUnassign(row.original.id, pl.id)
 										: handleAssign(row.original.id, pl.id)
 								}
 								disabled={isPending}
-								className={`btn btn-circle btn-sm ${
+								variant={isAssigned ? 'success' : 'ghost'}
+								size='sm'
+								loading={isPending}
+								className={`btn-circle ${
 									isAssigned
-										? 'btn-success hover:btn-error'
-										: 'btn-ghost border border-dashed border-base-300 hover:btn-primary'
+										? 'hover:btn-error'
+										: 'border border-dashed border-base-300 hover:btn-primary'
 								}`}
 								title={isAssigned ? `Remove from ${pl.name}` : `Add to ${pl.name}`}
-							>
-								{isPending ? (
-									<span className="loading loading-spinner loading-xs" />
-								) : isAssigned ? (
-									<CheckCircle className="h-4 w-4" />
-								) : (
-									<Plus className="h-4 w-4" />
-								)}
-							</button>
+								leftIcon={
+									isPending ? undefined : isAssigned ? (
+										<CheckCircle className='h-4 w-4' />
+									) : (
+										<Plus className='h-4 w-4' />
+									)
+								}
+								contentDrivenHeight
+							/>
 						</div>
 					)
 				},
@@ -294,43 +294,42 @@ export default function CustomerAssignmentMatrix() {
 	const hasSelection = selectedCustomers.size > 0
 
 	return (
-		<div className="space-y-6">
+		<div className='space-y-6'>
 			{/* Header */}
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-3">
-					<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
-						<Users className="h-5 w-5 text-success" />
+			<div className='flex items-center justify-between'>
+				<div className='flex items-center gap-3'>
+					<div className='flex h-10 w-10 items-center justify-center rounded-lg bg-success/10'>
+						<Users className='h-5 w-5 text-success' />
 					</div>
 					<div>
-						<h3 className="font-semibold text-base-content">Customer Assignment Matrix</h3>
-						<p className="text-sm text-base-content/60">
+						<h3 className='font-semibold text-base-content'>Customer Assignment Matrix</h3>
+						<p className='text-sm text-base-content/60'>
 							Assign price lists to customers for contract pricing
 						</p>
 					</div>
 				</div>
 				<Button
-					variant="secondary"
-					size="sm"
-					onClick={() => queryClient.invalidateQueries({ queryKey: ['customers'] })}
-				>
-					<RefreshCw className="h-4 w-4 mr-2" />
+					variant='secondary'
+					size='sm'
+					onClick={() => queryClient.invalidateQueries({ queryKey: ['customers'] })}>
+					<RefreshCw className='h-4 w-4 mr-2' />
 					Refresh
 				</Button>
 			</div>
 
 			{/* Search and Bulk Actions */}
-			<Card className="border border-base-300 bg-base-100 p-4 shadow-sm">
-				<div className="flex flex-wrap items-center gap-4">
+			<Card className='border border-base-300 bg-base-100 p-4 shadow-sm'>
+				<div className='flex flex-wrap items-center gap-4'>
 					{/* Search */}
-					<div className="flex-1 min-w-[200px]">
-						<div className="relative">
-							<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-base-content/40" />
+					<div className='flex-1 min-w-[200px]'>
+						<div className='relative'>
+							<Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-base-content/40' />
 							<FormInput
-								type="text"
-								placeholder="Search customers..."
+								type='text'
+								placeholder='Search customers...'
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
-								className="pl-10"
+								className='pl-10'
 							/>
 						</div>
 					</div>
@@ -338,42 +337,43 @@ export default function CustomerAssignmentMatrix() {
 					{/* Bulk Actions */}
 					{hasSelection && (
 						<>
-							<div className="flex items-center gap-2">
-								<Badge variant="info" size="md">
+							<div className='flex items-center gap-2'>
+								<Badge
+									variant='info'
+									size='md'>
 									{selectedCustomers.size} selected
 								</Badge>
 							</div>
 
 							<select
-								className="select select-bordered select-sm"
+								className='select select-bordered select-sm'
 								value={bulkPriceListId}
-								onChange={(e) => setBulkPriceListId(e.target.value)}
-							>
-								<option value="">Select Price List</option>
+								onChange={(e) => setBulkPriceListId(e.target.value)}>
+								<option value=''>Select Price List</option>
 								{activePriceLists.map((pl) => (
-									<option key={pl.id} value={pl.id}>
+									<option
+										key={pl.id}
+										value={pl.id}>
 										{pl.name}
 									</option>
 								))}
 							</select>
 
 							<Button
-								variant="primary"
-								size="sm"
+								variant='primary'
+								size='sm'
 								onClick={handleBulkAssign}
-								disabled={!bulkPriceListId || assignMutation.isPending}
-							>
-								<Plus className="h-4 w-4 mr-1" />
+								disabled={!bulkPriceListId || assignMutation.isPending}>
+								<Plus className='h-4 w-4 mr-1' />
 								Assign
 							</Button>
 
 							<Button
-								variant="error"
-								size="sm"
+								variant='error'
+								size='sm'
 								onClick={handleBulkUnassign}
-								disabled={!bulkPriceListId || unassignMutation.isPending}
-							>
-								<Trash2 className="h-4 w-4 mr-1" />
+								disabled={!bulkPriceListId || unassignMutation.isPending}>
+								<Trash2 className='h-4 w-4 mr-1' />
 								Remove
 							</Button>
 						</>
@@ -383,13 +383,13 @@ export default function CustomerAssignmentMatrix() {
 
 			{/* Matrix Grid */}
 			{activePriceLists.length === 0 ? (
-				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
-					<div className="text-center py-12">
-						<div className="flex h-16 w-16 items-center justify-center rounded-full bg-warning/10 mx-auto mb-4">
-							<AlertCircle className="h-8 w-8 text-warning" />
+				<Card className='border border-base-300 bg-base-100 p-6 shadow-sm'>
+					<div className='text-center py-12'>
+						<div className='flex h-16 w-16 items-center justify-center rounded-full bg-warning/10 mx-auto mb-4'>
+							<AlertCircle className='h-8 w-8 text-warning' />
 						</div>
-						<h3 className="text-lg font-semibold text-base-content mb-2">No Active Price Lists</h3>
-						<p className="text-base-content/60 mb-4 max-w-md mx-auto">
+						<h3 className='text-lg font-semibold text-base-content mb-2'>No Active Price Lists</h3>
+						<p className='text-base-content/60 mb-4 max-w-md mx-auto'>
 							Create and activate price lists before assigning them to customers.
 						</p>
 					</div>
@@ -400,45 +400,55 @@ export default function CustomerAssignmentMatrix() {
 					data={filteredCustomers}
 					defaultPageSize={20}
 					enableGlobalSearch={false} // We have custom search
-					searchPlaceholder="Search customers..."
+					searchPlaceholder='Search customers...'
 					emptyState={
-						<div className="flex flex-col items-center gap-3 py-12">
-							<div className="flex h-16 w-16 items-center justify-center rounded-full bg-base-200">
-								<Users className="h-8 w-8 text-base-content/40" />
+						<div className='flex flex-col items-center gap-3 py-12'>
+							<div className='flex h-16 w-16 items-center justify-center rounded-full bg-base-200'>
+								<Users className='h-8 w-8 text-base-content/40' />
 							</div>
-							<h3 className="text-lg font-semibold text-base-content">No Customers Found</h3>
-							<p className="text-base-content/60 max-w-md text-center">
+							<h3 className='text-lg font-semibold text-base-content'>No Customers Found</h3>
+							<p className='text-base-content/60 max-w-md text-center'>
 								{searchTerm
 									? `No customers match "${searchTerm}"`
 									: 'No customers available for price list assignment.'}
 							</p>
 						</div>
 					}
-					ariaLabel="Customer price list assignment matrix"
+					ariaLabel='Customer price list assignment matrix'
 				/>
 			)}
 
 			{/* Legend */}
-			<Card className="border border-base-300 bg-base-100 p-4 shadow-sm">
-				<div className="flex items-center gap-6 text-sm">
-					<span className="font-medium text-base-content">Legend:</span>
-					<div className="flex items-center gap-2">
-						<button className="btn btn-circle btn-xs btn-success">
-							<CheckCircle className="h-3 w-3" />
-						</button>
-						<span className="text-base-content/70">Assigned</span>
+			<Card className='border border-base-300 bg-base-100 p-4 shadow-sm'>
+				<div className='flex items-center gap-6 text-sm'>
+					<span className='font-medium text-base-content'>Legend:</span>
+					<div className='flex items-center gap-2'>
+						<Button
+							variant='success'
+							size='xs'
+							className='btn-circle'
+							leftIcon={<CheckCircle className='h-3 w-3' />}
+							contentDrivenHeight
+						/>
+						<span className='text-base-content/70'>Assigned</span>
 					</div>
-					<div className="flex items-center gap-2">
-						<button className="btn btn-circle btn-xs btn-ghost border border-dashed border-base-300">
-							<Plus className="h-3 w-3" />
-						</button>
-						<span className="text-base-content/70">Not Assigned</span>
+					<div className='flex items-center gap-2'>
+						<Button
+							variant='ghost'
+							size='xs'
+							className='btn-circle border border-dashed border-base-300'
+							leftIcon={<Plus className='h-3 w-3' />}
+							contentDrivenHeight
+						/>
+						<span className='text-base-content/70'>Not Assigned</span>
 					</div>
-					<div className="flex items-center gap-2">
-						<Badge variant="neutral" size="sm">
+					<div className='flex items-center gap-2'>
+						<Badge
+							variant='neutral'
+							size='sm'>
 							P10
 						</Badge>
-						<span className="text-base-content/70">Priority (lower = higher priority)</span>
+						<span className='text-base-content/70'>Priority (lower = higher priority)</span>
 					</div>
 				</div>
 			</Card>

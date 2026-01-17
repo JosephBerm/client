@@ -104,19 +104,19 @@ export type {
 export { ExportButton, ExportModal } from './components/Export'
 export type { ExportButtonProps, ExportModalProps } from './components/Export'
 
-// === EXPORT UTILITIES ===
-export {
-	exportData,
-	exportToCSV,
-	exportToExcel,
-	exportToPDF,
-	quickExport,
-} from './utils/exportUtils'
+// === EXPORT TYPES (Lightweight - Safe for Static Import) ===
+// These are type-only exports with zero runtime cost.
+// For implementation functions, use dynamic import:
+//   const { quickExport } = await import('@_components/tables/RichDataGrid/utils/exportUtils')
 export type {
 	ExportConfig,
 	ExportResult,
 	ExportColumnConfig,
-} from './utils/exportUtils'
+	ExportDataFn,
+	QuickExportFn,
+	FormatExportFn,
+	ExportUtilsModule,
+} from './utils/exportTypes'
 
 // === TYPES, ENUMS, TYPE GUARDS, UTILITIES, CONSTANTS ===
 // Explicit named exports following project lint rules

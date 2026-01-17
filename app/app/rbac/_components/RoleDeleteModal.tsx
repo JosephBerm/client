@@ -22,16 +22,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-	AlertTriangle,
-	Trash2,
-	Users,
-	ArrowRight,
-	Check,
-	Loader2,
-	X,
-	Shield,
-} from 'lucide-react'
+import { AlertTriangle, Trash2, Users, ArrowRight, Check, Loader2, X, Shield } from 'lucide-react'
 
 import type { Role, RoleDeleteResult } from '@_shared/services/api'
 import Button from '@_components/ui/Button'
@@ -56,23 +47,14 @@ interface RoleDeleteModalProps {
 // COMPONENT
 // =========================================================================
 
-export function RoleDeleteModal({
-	isOpen,
-	onClose,
-	role,
-	roles,
-	onDelete,
-	onMigrateUsers,
-}: RoleDeleteModalProps) {
+export function RoleDeleteModal({ isOpen, onClose, role, roles, onDelete, onMigrateUsers }: RoleDeleteModalProps) {
 	const [state, setState] = useState<DeleteModalState>('idle')
 	const [deleteResult, setDeleteResult] = useState<RoleDeleteResult | null>(null)
 	const [targetRoleLevel, setTargetRoleLevel] = useState<number | null>(null)
 	const [error, setError] = useState<string | null>(null)
 
 	// Available target roles (excluding the role being deleted and system roles)
-	const availableTargetRoles = roles.filter(
-		(r) => role && r.id !== role.id && r.level !== role.level
-	)
+	const availableTargetRoles = roles.filter((r) => role && r.id !== role.id && r.level !== role.level)
 
 	// Reset state when modal opens/closes or role changes
 	useEffect(() => {
@@ -168,83 +150,85 @@ export function RoleDeleteModal({
 	const isProcessing = state === 'checking' || state === 'migrating' || state === 'deleting'
 
 	return (
-		<Modal isOpen={isOpen} onClose={handleClose}>
-			<div className="w-full max-w-md rounded-2xl bg-base-100 p-6 shadow-2xl">
+		<Modal
+			isOpen={isOpen}
+			onClose={handleClose}>
+			<div className='w-full max-w-md rounded-2xl bg-base-100 p-6 shadow-2xl'>
 				{/* Header */}
-				<div className="mb-6 flex items-center justify-between">
-					<div className="flex items-center gap-3">
-						<div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-							state === 'success' ? 'bg-success/10' : 'bg-error/10'
-						}`}>
+				<div className='mb-6 flex items-center justify-between'>
+					<div className='flex items-center gap-3'>
+						<div
+							className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+								state === 'success' ? 'bg-success/10' : 'bg-error/10'
+							}`}>
 							{state === 'success' ? (
-								<Check className="h-5 w-5 text-success" />
+								<Check className='h-5 w-5 text-success' />
 							) : (
-								<Trash2 className="h-5 w-5 text-error" />
+								<Trash2 className='h-5 w-5 text-error' />
 							)}
 						</div>
 						<div>
-							<h2 className="text-lg font-semibold text-base-content">
+							<h2 className='text-lg font-semibold text-base-content'>
 								{state === 'success' ? 'Role Deleted' : 'Delete Role'}
 							</h2>
-							<p className="text-sm text-base-content/60">{role.displayName}</p>
+							<p className='text-sm text-base-content/60'>{role.displayName}</p>
 						</div>
 					</div>
 					{!isProcessing && state !== 'success' && (
-						<button
+						<Button
 							onClick={handleClose}
-							className="rounded-lg p-2 hover:bg-base-200 transition-colors"
-						>
-							<X className="h-5 w-5 text-base-content/60" />
-						</button>
+							variant='ghost'
+							size='sm'
+							className='rounded-lg p-2 hover:bg-base-200 transition-colors h-auto'
+							leftIcon={<X className='h-5 w-5 text-base-content/60' />}
+							contentDrivenHeight
+						/>
 					)}
 				</div>
 
 				{/* Content based on state */}
-				<AnimatePresence mode="wait">
+				<AnimatePresence mode='wait'>
 					{/* Idle / Checking State - Initial confirmation */}
 					{(state === 'idle' || state === 'checking') && (
 						<motion.div
-							key="idle"
+							key='idle'
 							initial={{ opacity: 0, y: 10 }}
 							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -10 }}
-						>
-							<div className="mb-6 rounded-lg bg-warning/10 p-4">
-								<div className="flex items-start gap-3">
-									<AlertTriangle className="h-5 w-5 flex-shrink-0 text-warning" />
+							exit={{ opacity: 0, y: -10 }}>
+							<div className='mb-6 rounded-lg bg-warning/10 p-4'>
+								<div className='flex items-start gap-3'>
+									<AlertTriangle className='h-5 w-5 flex-shrink-0 text-warning' />
 									<div>
-										<p className="font-medium text-warning">Are you sure?</p>
-										<p className="text-sm text-warning/80">
-											This will permanently delete the role &quot;{role.displayName}&quot;.
-											This action cannot be undone.
+										<p className='font-medium text-warning'>Are you sure?</p>
+										<p className='text-sm text-warning/80'>
+											This will permanently delete the role &quot;{role.displayName}&quot;. This
+											action cannot be undone.
 										</p>
 									</div>
 								</div>
 							</div>
 
-							{error && (
-								<div className="mb-4 rounded-lg bg-error/10 p-3 text-sm text-error">
-									{error}
-								</div>
-							)}
+							{error && <div className='mb-4 rounded-lg bg-error/10 p-3 text-sm text-error'>{error}</div>}
 
-							<div className="flex justify-end gap-3">
-								<Button variant="ghost" onClick={handleClose} disabled={isProcessing}>
+							<div className='flex justify-end gap-3'>
+								<Button
+									variant='ghost'
+									onClick={handleClose}
+									disabled={isProcessing}>
 									Cancel
 								</Button>
 								<Button
-									variant="error"
+									variant='error'
 									onClick={handleDelete}
-									disabled={isProcessing}
-								>
+									disabled={isProcessing}>
 									{state === 'checking' ? (
 										<>
-											<Loader2 className="h-4 w-4 animate-spin" />
+											<Loader2 className='h-4 w-4 animate-spin' />
 											Checking...
 										</>
 									) : (
 										<>
-											<Trash2 className="h-4 w-4" />
+											<Trash2 className='h-4 w-4' />
 											Delete Role
 										</>
 									)}
@@ -254,139 +238,149 @@ export function RoleDeleteModal({
 					)}
 
 					{/* Migrate State - Users need to be migrated */}
-					{(state === 'migrate' || state === 'migrating' || state === 'deleting') && deleteResult?.blockedByUsers && (
-						<motion.div
-							key="migrate"
-							initial={{ opacity: 0, y: 10 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -10 }}
-						>
-							{/* Warning banner */}
-							<div className="mb-4 rounded-lg bg-warning/10 p-4">
-								<div className="flex items-start gap-3">
-									<Users className="h-5 w-5 flex-shrink-0 text-warning" />
-									<div>
-										<p className="font-medium text-warning">
-											{deleteResult.assignedUserCount} user{deleteResult.assignedUserCount !== 1 ? 's' : ''} assigned
-										</p>
-										<p className="text-sm text-warning/80">
-											You must migrate these users to another role before deleting.
-										</p>
+					{(state === 'migrate' || state === 'migrating' || state === 'deleting') &&
+						deleteResult?.blockedByUsers && (
+							<motion.div
+								key='migrate'
+								initial={{ opacity: 0, y: 10 }}
+								animate={{ opacity: 1, y: 0 }}
+								exit={{ opacity: 0, y: -10 }}>
+								{/* Warning banner */}
+								<div className='mb-4 rounded-lg bg-warning/10 p-4'>
+									<div className='flex items-start gap-3'>
+										<Users className='h-5 w-5 flex-shrink-0 text-warning' />
+										<div>
+											<p className='font-medium text-warning'>
+												{deleteResult.assignedUserCount} user
+												{deleteResult.assignedUserCount !== 1 ? 's' : ''} assigned
+											</p>
+											<p className='text-sm text-warning/80'>
+												You must migrate these users to another role before deleting.
+											</p>
+										</div>
 									</div>
 								</div>
-							</div>
 
-							{/* Target role selection */}
-							<div className="mb-4">
-								<label className="mb-2 block text-sm font-medium text-base-content">
-									Migrate users to:
-								</label>
-								<div className="grid gap-2">
-									{availableTargetRoles.length === 0 ? (
-										<p className="text-sm text-base-content/60">
-											No other roles available. Create a new role first.
-										</p>
-									) : (
-										availableTargetRoles.map((targetRole) => (
-											<button
-												key={targetRole.id}
-												onClick={() => setTargetRoleLevel(targetRole.level)}
-												disabled={isProcessing}
-												className={`flex items-center gap-3 rounded-lg border-2 p-3 text-left transition-all ${
-													targetRoleLevel === targetRole.level
-														? 'border-primary bg-primary/5'
-														: 'border-base-300 hover:border-base-content/30'
-												} ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-											>
-												<Shield
-													className={`h-4 w-4 ${
+								{/* Target role selection */}
+								<div className='mb-4'>
+									<label className='mb-2 block text-sm font-medium text-base-content'>
+										Migrate users to:
+									</label>
+									<div className='grid gap-2'>
+										{availableTargetRoles.length === 0 ? (
+											<p className='text-sm text-base-content/60'>
+												No other roles available. Create a new role first.
+											</p>
+										) : (
+											availableTargetRoles.map((targetRole) => (
+												<Button
+													key={targetRole.id}
+													onClick={() => setTargetRoleLevel(targetRole.level)}
+													disabled={isProcessing}
+													variant={
+														targetRoleLevel === targetRole.level ? 'primary' : 'outline'
+													}
+													size='sm'
+													className={`flex items-center gap-3 rounded-lg border-2 p-3 text-left transition-all h-auto ${
 														targetRoleLevel === targetRole.level
-															? 'text-primary'
-															: 'text-base-content/40'
-													}`}
-												/>
-												<div className="flex-1">
-													<span className="text-sm font-medium">{targetRole.displayName}</span>
-													<span className="ml-2 text-xs text-base-content/50">
-														Level {targetRole.level}
-													</span>
-												</div>
-												{targetRoleLevel === targetRole.level && (
-													<Check className="h-4 w-4 text-primary" />
-												)}
-											</button>
-										))
-									)}
+															? 'border-primary bg-primary/5'
+															: 'border-base-300 hover:border-base-content/30'
+													} ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+													leftIcon={
+														<Shield
+															className={`h-4 w-4 ${
+																targetRoleLevel === targetRole.level
+																	? 'text-primary'
+																	: 'text-base-content/40'
+															}`}
+														/>
+													}
+													rightIcon={
+														targetRoleLevel === targetRole.level ? (
+															<Check className='h-4 w-4 text-primary' />
+														) : undefined
+													}
+													contentDrivenHeight>
+													<div className='flex-1'>
+														<span className='text-sm font-medium'>
+															{targetRole.displayName}
+														</span>
+														<span className='ml-2 text-xs text-base-content/50'>
+															Level {targetRole.level}
+														</span>
+													</div>
+												</Button>
+											))
+										)}
+									</div>
 								</div>
-							</div>
 
-							{/* Migration info */}
-							{targetRoleLevel !== null && (
-								<div className="mb-4 flex items-center gap-2 text-sm text-base-content/60">
-									<span>{deleteResult.assignedUserCount} users</span>
-									<ArrowRight className="h-4 w-4" />
-									<span className="font-medium text-base-content">
-										{availableTargetRoles.find((r) => r.level === targetRoleLevel)?.displayName}
-									</span>
+								{/* Migration info */}
+								{targetRoleLevel !== null && (
+									<div className='mb-4 flex items-center gap-2 text-sm text-base-content/60'>
+										<span>{deleteResult.assignedUserCount} users</span>
+										<ArrowRight className='h-4 w-4' />
+										<span className='font-medium text-base-content'>
+											{availableTargetRoles.find((r) => r.level === targetRoleLevel)?.displayName}
+										</span>
+									</div>
+								)}
+
+								{error && (
+									<div className='mb-4 rounded-lg bg-error/10 p-3 text-sm text-error'>{error}</div>
+								)}
+
+								<div className='flex justify-end gap-3'>
+									<Button
+										variant='ghost'
+										onClick={handleClose}
+										disabled={isProcessing}>
+										Cancel
+									</Button>
+									<Button
+										variant='error'
+										onClick={handleMigrateAndDelete}
+										disabled={
+											targetRoleLevel === null ||
+											isProcessing ||
+											availableTargetRoles.length === 0
+										}>
+										{state === 'migrating' ? (
+											<>
+												<Loader2 className='h-4 w-4 animate-spin' />
+												Migrating...
+											</>
+										) : state === 'deleting' ? (
+											<>
+												<Loader2 className='h-4 w-4 animate-spin' />
+												Deleting...
+											</>
+										) : (
+											<>
+												<ArrowRight className='h-4 w-4' />
+												Migrate &amp; Delete
+											</>
+										)}
+									</Button>
 								</div>
-							)}
-
-							{error && (
-								<div className="mb-4 rounded-lg bg-error/10 p-3 text-sm text-error">
-									{error}
-								</div>
-							)}
-
-							<div className="flex justify-end gap-3">
-								<Button variant="ghost" onClick={handleClose} disabled={isProcessing}>
-									Cancel
-								</Button>
-								<Button
-									variant="error"
-									onClick={handleMigrateAndDelete}
-									disabled={targetRoleLevel === null || isProcessing || availableTargetRoles.length === 0}
-								>
-									{state === 'migrating' ? (
-										<>
-											<Loader2 className="h-4 w-4 animate-spin" />
-											Migrating...
-										</>
-									) : state === 'deleting' ? (
-										<>
-											<Loader2 className="h-4 w-4 animate-spin" />
-											Deleting...
-										</>
-									) : (
-										<>
-											<ArrowRight className="h-4 w-4" />
-											Migrate &amp; Delete
-										</>
-									)}
-								</Button>
-							</div>
-						</motion.div>
-					)}
+							</motion.div>
+						)}
 
 					{/* Success State */}
 					{state === 'success' && (
 						<motion.div
-							key="success"
+							key='success'
 							initial={{ opacity: 0, scale: 0.95 }}
 							animate={{ opacity: 1, scale: 1 }}
 							exit={{ opacity: 0 }}
-							className="text-center py-4"
-						>
-							<div className="mb-4 flex justify-center">
-								<div className="flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
-									<Check className="h-8 w-8 text-success" />
+							className='text-center py-4'>
+							<div className='mb-4 flex justify-center'>
+								<div className='flex h-16 w-16 items-center justify-center rounded-full bg-success/10'>
+									<Check className='h-8 w-8 text-success' />
 								</div>
 							</div>
-							<p className="text-lg font-medium text-base-content">
-								Role deleted successfully
-							</p>
-							<p className="text-sm text-base-content/60">
-								Closing automatically...
-							</p>
+							<p className='text-lg font-medium text-base-content'>Role deleted successfully</p>
+							<p className='text-sm text-base-content/60'>Closing automatically...</p>
 						</motion.div>
 					)}
 				</AnimatePresence>

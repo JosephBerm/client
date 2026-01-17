@@ -19,13 +19,14 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
+import type { ColumnDef } from '@tanstack/react-table'
 
 import { formatDistanceToNow } from 'date-fns'
-import { motion } from 'framer-motion'
 import { ExternalLink, FileText, Package } from 'lucide-react'
 
 import EmptyState from '@_components/common/EmptyState'
 import Card from '@_components/ui/Card'
+import { DataGrid } from '@_components/tables'
 
 import { logger } from '@_core'
 
@@ -158,10 +159,10 @@ export function RecentItemsTable({ items, title, type }: RecentItemsTableProps) 
 	// Empty state - uses centralized EmptyState component
 	if (items.length === 0) {
 		return (
-			<Card className="h-full">
-				<h3 className="font-semibold text-lg text-base-content mb-4">{title}</h3>
+			<Card className='h-full'>
+				<h3 className='font-semibold text-lg text-base-content mb-4'>{title}</h3>
 				<EmptyState
-					icon={<Icon className="w-12 h-12" />}
+					icon={<Icon className='w-12 h-12' />}
 					title={`No recent ${type}s`}
 					description={`Your recent ${type}s will appear here once you have some activity.`}
 				/>
@@ -170,59 +171,105 @@ export function RecentItemsTable({ items, title, type }: RecentItemsTableProps) 
 	}
 
 	return (
-		<Card className="h-full">
-			<h3 className="font-semibold text-lg text-base-content mb-4">{title}</h3>
-			<div className="overflow-x-auto -mx-2">
-				<table className="table table-sm">
-					<thead>
-						<tr className="text-base-content/60">
-							<th>{type === 'order' ? 'Order #' : 'Quote #'}</th>
-							<th>Date</th>
-							<th>Status</th>
-							{type === 'order' && <th className="text-right">Amount</th>}
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						{items.map((item, index) => (
-							<motion.tr
-								key={item.orderId ?? item.quoteId ?? index}
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ delay: index * 0.05 }}
-								className="hover:bg-base-200/50 transition-colors"
-							>
-								<td className="font-medium">{item.number}</td>
-								<td className="text-base-content/60 text-sm">
-									{formatRelativeDate(item.date)}
-								</td>
-								<td>
-									<span
-										className={`badge badge-sm ${getStatusBadgeClass(item.status, type)}`}
-									>
-										{formatStatus(item.status)}
-									</span>
-								</td>
-								{type === 'order' && (
-									<td className="text-right font-medium">
-										{formatCurrency(item.amount)}
-									</td>
-								)}
-								<td className="text-right">
-									<Link
-										href={getItemUrl(item)}
-										className="btn btn-ghost btn-xs gap-1"
-									>
-										<ExternalLink className="w-3 h-3" />
-										View
-									</Link>
-								</td>
-							</motion.tr>
-						))}
-					</tbody>
-				</table>
+		<Card className='h-full'>
+			<h3 className='font-semibold text-lg text-base-content mb-4'>{title}</h3>
+			<div className='overflow-x-auto -mx-2'>
+				<RecentItemsDataGrid
+					items={items}
+					type={type}
+					getItemUrl={getItemUrl}
+				/>
 			</div>
 		</Card>
+	)
+}
+
+// =============================================================================
+// DATA GRID COMPONENT
+// =============================================================================
+
+interface RecentItemsDataGridProps {
+	items: RecentItem[]
+	type: 'order' | 'quote'
+	getItemUrl: (item: RecentItem) => string
+}
+
+/**
+ * DataGrid component for displaying recent items - mobile-first responsive
+ */
+function RecentItemsDataGrid({ items, type, getItemUrl }: RecentItemsDataGridProps) {
+	const columns = useMemo<ColumnDef<RecentItem>[]>(() => {
+		const baseColumns: ColumnDef<RecentItem>[] = [
+			{
+				accessorKey: 'number',
+				header: type === 'order' ? 'Order #' : 'Quote #',
+				cell: ({ row }) => (
+					<span className='text-xs sm:text-sm font-medium text-base-content'>
+						{row.original.number}
+					</span>
+				),
+				size: 100,
+			},
+			{
+				accessorKey: 'date',
+				header: 'Date',
+				cell: ({ row }) => (
+					<span className='text-xs sm:text-sm text-base-content/60'>
+						{formatRelativeDate(row.original.date)}
+					</span>
+				),
+				size: 120,
+			},
+			{
+				accessorKey: 'status',
+				header: 'Status',
+				cell: ({ row }) => (
+					<span className={`badge badge-xs sm:badge-sm ${getStatusBadgeClass(row.original.status, type)}`}>
+						{formatStatus(row.original.status)}
+					</span>
+				),
+				size: 100,
+			},
+		]
+
+		if (type === 'order') {
+			baseColumns.push({
+				accessorKey: 'amount',
+				header: 'Amount',
+				cell: ({ row }) => (
+					<span className='text-xs sm:text-sm font-medium text-base-content text-right block'>
+						{formatCurrency(row.original.amount)}
+					</span>
+				),
+				size: 90,
+			})
+		}
+
+		baseColumns.push({
+			id: 'actions',
+			header: '',
+			cell: ({ row }) => (
+				<Link
+					href={getItemUrl(row.original)}
+					className='btn btn-ghost btn-xs gap-1 text-xs'>
+					<ExternalLink className='w-3 h-3' />
+					<span className='hidden sm:inline'>View</span>
+				</Link>
+			),
+			size: 70,
+		})
+
+		return baseColumns
+	}, [type, getItemUrl])
+
+	return (
+		<div className='min-w-[320px] px-2 sm:px-0'>
+			<DataGrid
+				columns={columns}
+				data={items}
+				ariaLabel={`Recent ${type}s table`}
+			/>
+		</div>
 	)
 }
 

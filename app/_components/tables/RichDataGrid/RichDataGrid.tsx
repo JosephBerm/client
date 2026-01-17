@@ -36,6 +36,8 @@ import { useEffect } from 'react'
 import { type ColumnDef } from '@tanstack/react-table'
 import { AlertTriangle, FileText } from 'lucide-react'
 
+import Button from '@_components/ui/Button'
+
 import { useRichDataGrid, type UseRichDataGridOptions } from './hooks/useRichDataGrid'
 import { RichDataGridProvider } from './context/RichDataGridContext'
 import { RichDataGridToolbar } from './components/Toolbar/RichDataGridToolbar'
@@ -81,11 +83,15 @@ function LoadingSkeleton({ rows = 5, columns = 5 }: { rows?: number; columns?: n
 	return (
 		<tbody>
 			{Array.from({ length: rows }).map((_, rowIndex) => (
-				<tr key={rowIndex} className="border-b border-base-200/50 dark:border-base-content/10">
+				<tr
+					key={rowIndex}
+					className='border-b border-base-200/50 dark:border-base-content/10'>
 					{Array.from({ length: columns }).map((_, colIndex) => (
-						<td key={colIndex} className="px-3 py-2.5 sm:px-4 sm:py-3">
+						<td
+							key={colIndex}
+							className='px-3 py-2.5 sm:px-4 sm:py-3'>
 							<div
-								className="h-4 bg-base-300 dark:bg-base-content/10 rounded animate-pulse"
+								className='h-4 bg-base-300 dark:bg-base-content/10 rounded animate-pulse'
 								style={{
 									width: `${60 + Math.random() * 30}%`,
 									animationDelay: `${rowIndex * 50}ms`,
@@ -120,7 +126,8 @@ export interface RichDataGridApi<TData> {
 	clearSelection: () => void
 }
 
-export interface RichDataGridProps<TData extends { id?: string | number }> extends Omit<UseRichDataGridOptions<TData>, 'columns'> {
+export interface RichDataGridProps<TData extends { id?: string | number | null }>
+	extends Omit<UseRichDataGridOptions<TData>, 'columns'> {
 	/** Column definitions */
 	columns: RichColumnDef<TData, unknown>[]
 	/** ARIA label for accessibility */
@@ -176,9 +183,9 @@ export interface RichDataGridProps<TData extends { id?: string | number }> exten
 /**
  * RichDataGrid component - Enterprise-grade data grid.
  *
- * @template TData - Row data type (must have id property)
+ * @template TData - Row data type (must have id property, can be null for unsaved entities)
  */
-export function RichDataGrid<TData extends { id?: string | number }>({
+export function RichDataGrid<TData extends { id?: string | number | null }>({
 	// Data props
 	endpoint,
 	data,
@@ -264,14 +271,18 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 
 		return (
 			<div className={`border border-error/20 rounded-lg p-8 text-center ${className}`}>
-				<div className="text-error mb-4">
-					<AlertTriangle className="h-12 w-12 mx-auto" />
+				<div className='text-error mb-4'>
+					<AlertTriangle className='h-12 w-12 mx-auto' />
 				</div>
-				<h3 className="text-lg font-semibold text-error mb-2">Failed to load data</h3>
-				<p className="text-sm text-base-content/60 mb-4">{error.message}</p>
-				<button type="button" onClick={refresh} className="btn btn-error btn-sm">
+				<h3 className='text-lg font-semibold text-error mb-2'>Failed to load data</h3>
+				<p className='text-sm text-base-content/60 mb-4'>{error.message}</p>
+				<Button
+					type='button'
+					onClick={refresh}
+					variant='error'
+					size='sm'>
 					Try Again
-				</button>
+				</Button>
 			</div>
 		)
 	}
@@ -284,9 +295,8 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 					rounded-lg overflow-hidden shadow-sm
 					${className}
 				`}
-				role="region"
-				aria-label={ariaLabel}
-			>
+				role='region'
+				aria-label={ariaLabel}>
 				{/* Toolbar */}
 				{showToolbar && (
 					<RichDataGridToolbar
@@ -299,22 +309,29 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 				)}
 
 				{/* Table Container - Mobile-first horizontal scroll */}
-				<div className="overflow-x-auto -webkit-overflow-scrolling-touch relative">
+				<div className='overflow-x-auto -webkit-overflow-scrolling-touch relative'>
 					{/* Virtualized Mode - Uses div-based virtualization */}
 					{enableVirtualization ? (
 						<>
 							{/* Header as standalone table for virtualized mode */}
-							<table className="table w-full min-w-[320px]">
-								<RichDataGridHeader enableColumnFilters={enableColumnFilters} enableColumnResizing={enableColumnResizing} enableColumnPinning={enableColumnPinning} />
+							<table className='table w-full min-w-[320px]'>
+								<RichDataGridHeader
+									enableColumnFilters={enableColumnFilters}
+									enableColumnResizing={enableColumnResizing}
+									enableColumnPinning={enableColumnPinning}
+								/>
 							</table>
 
 							{/* Loading State */}
-							{(loadingState === LoadingState.Loading || loadingState === LoadingState.Idle) ? (
+							{loadingState === LoadingState.Loading || loadingState === LoadingState.Idle ? (
 								loadingComponent ? (
-									<div className="p-4">{loadingComponent}</div>
+									<div className='p-4'>{loadingComponent}</div>
 								) : (
-									<table className="table w-full min-w-[320px]">
-										<LoadingSkeleton rows={defaultPageSize} columns={preparedColumns.length} />
+									<table className='table w-full min-w-[320px]'>
+										<LoadingSkeleton
+											rows={defaultPageSize}
+											columns={preparedColumns.length}
+										/>
 									</table>
 								)
 							) : (
@@ -330,11 +347,15 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 						</>
 					) : (
 						/* Standard Table Mode - Traditional table rendering */
-						<table className="table w-full min-w-[320px]">
-							<RichDataGridHeader enableColumnFilters={enableColumnFilters} enableColumnResizing={enableColumnResizing} enableColumnPinning={enableColumnPinning} />
+						<table className='table w-full min-w-[320px]'>
+							<RichDataGridHeader
+								enableColumnFilters={enableColumnFilters}
+								enableColumnResizing={enableColumnResizing}
+								enableColumnPinning={enableColumnPinning}
+							/>
 
 							{/* Loading State - Show skeleton during initial load or when idle with no data */}
-							{(loadingState === LoadingState.Loading || loadingState === LoadingState.Idle) ? (
+							{loadingState === LoadingState.Loading || loadingState === LoadingState.Idle ? (
 								loadingComponent ? (
 									<tbody>
 										<tr>
@@ -342,7 +363,10 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 										</tr>
 									</tbody>
 								) : (
-									<LoadingSkeleton rows={defaultPageSize} columns={preparedColumns.length} />
+									<LoadingSkeleton
+										rows={defaultPageSize}
+										columns={preparedColumns.length}
+									/>
 								)
 							) : (
 								<RichDataGridBody
@@ -359,8 +383,8 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 
 					{/* Loading Overlay for Refreshing - shows spinner over existing data */}
 					{loadingState === LoadingState.Refreshing && (
-						<div className="absolute inset-0 bg-base-100/50 dark:bg-base-100/70 backdrop-blur-sm flex items-center justify-center">
-							<span className="loading loading-spinner loading-lg text-primary" />
+						<div className='absolute inset-0 bg-base-100/50 dark:bg-base-100/70 backdrop-blur-sm flex items-center justify-center'>
+							<span className='loading loading-spinner loading-lg text-primary' />
 						</div>
 					)}
 				</div>
@@ -376,4 +400,3 @@ export function RichDataGrid<TData extends { id?: string | number }>({
 }
 
 export default RichDataGrid
-

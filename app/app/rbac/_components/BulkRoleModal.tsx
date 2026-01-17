@@ -26,6 +26,7 @@ import { X, Users, Shield, Search, Check, AlertTriangle, Loader2 } from 'lucide-
 
 import type { PagedResult } from '@_classes/Base/PagedResult'
 import Button from '@_components/ui/Button'
+import Input from '@_components/ui/Input'
 import Modal from '@_components/ui/Modal'
 import { getRoleSelectOptions } from '@_shared'
 import type { UserWithRole, BulkRoleUpdateResult } from '@_types/rbac-management'
@@ -163,32 +164,37 @@ export function BulkRoleModal({
 							<p className='text-sm text-base-content/60'>Select users and assign a new role</p>
 						</div>
 					</div>
-					<button
+					<Button
 						onClick={handleClose}
-						className='rounded-lg p-2 hover:bg-base-200 transition-colors'>
-						<X className='h-5 w-5 text-base-content/60' />
-					</button>
+						variant='ghost'
+						size='sm'
+						className='rounded-lg p-2 hover:bg-base-200 transition-colors h-auto'
+						leftIcon={<X className='h-5 w-5 text-base-content/60' />}
+						contentDrivenHeight
+					/>
 				</div>
 
 				{/* Search */}
 				<div className='relative mb-4'>
-					<Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/40' />
-					<input
+					<Input
 						type='text'
+						size='sm'
 						placeholder='Search users...'
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
-						className='w-full rounded-lg border border-base-300 bg-base-100 py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary'
+						leftIcon={<Search className='h-4 w-4' />}
 					/>
 				</div>
 
 				{/* Select all / Selection count */}
 				<div className='mb-4 flex items-center justify-between'>
-					<button
+					<Button
 						onClick={selectAll}
-						className='text-sm text-primary hover:underline'>
+						variant='ghost'
+						size='xs'
+						className='text-sm text-primary hover:underline h-auto p-0'>
 						{allVisibleSelected ? 'Deselect all' : 'Select all'}
-					</button>
+					</Button>
 					<span className='text-sm text-base-content/60'>
 						{selectedUserIds.length} user{selectedUserIds.length !== 1 ? 's' : ''} selected
 					</span>
@@ -248,21 +254,26 @@ export function BulkRoleModal({
 					<label className='mb-2 block text-sm font-medium text-base-content'>New Role</label>
 					<div className='grid grid-cols-2 gap-2 sm:grid-cols-3'>
 						{ROLE_OPTIONS.map((option) => (
-							<button
+							<Button
 								key={option.value}
 								onClick={() => setNewRole(option.value)}
-								className={`flex items-center gap-2 rounded-lg border-2 p-3 text-left transition-all ${
+								variant={newRole === option.value ? 'primary' : 'outline'}
+								size='sm'
+								className={`flex items-center gap-2 rounded-lg border-2 p-3 text-left transition-all h-auto ${
 									newRole === option.value
 										? 'border-primary bg-primary/5'
 										: 'border-base-300 hover:border-base-content/30'
-								}`}>
-								<Shield
-									className={`h-4 w-4 ${
-										newRole === option.value ? 'text-primary' : 'text-base-content/40'
-									}`}
-								/>
+								}`}
+								leftIcon={
+									<Shield
+										className={`h-4 w-4 ${
+											newRole === option.value ? 'text-primary' : 'text-base-content/40'
+										}`}
+									/>
+								}
+								contentDrivenHeight>
 								<span className='text-sm font-medium'>{option.label}</span>
-							</button>
+							</Button>
 						))}
 					</div>
 				</div>

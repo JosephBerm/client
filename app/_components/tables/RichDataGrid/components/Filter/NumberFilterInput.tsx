@@ -22,6 +22,8 @@ import {
 	operatorRequiresSecondValue,
 } from '../../types'
 
+import Input from '@_components/ui/Input'
+
 // ============================================================================
 // PROPS
 // ============================================================================
@@ -169,12 +171,13 @@ export function NumberFilterInput({ value, onChange, isRange = false }: NumberFi
 					<label className="block text-xs font-medium text-base-content/70 mb-1">
 						{requiresSecondValue ? (isRange ? 'Minimum' : 'From') : 'Value'}
 					</label>
-					<input
+					<Input
 						type="number"
+						size="sm"
 						value={numberValue}
 						onChange={handleValueChange}
 						placeholder={requiresSecondValue ? 'Min...' : 'Enter number...'}
-						className="input input-bordered input-sm w-full dark:bg-base-300 dark:border-base-content/20"
+						className="w-full"
 						step="any"
 					/>
 				</div>
@@ -186,12 +189,13 @@ export function NumberFilterInput({ value, onChange, isRange = false }: NumberFi
 					<label className="block text-xs font-medium text-base-content/70 mb-1">
 						{isRange ? 'Maximum' : 'To'}
 					</label>
-					<input
+					<Input
 						type="number"
+						size="sm"
 						value={numberValueTo}
 						onChange={handleValueToChange}
 						placeholder="Max..."
-						className="input input-bordered input-sm w-full dark:bg-base-300 dark:border-base-content/20"
+						className="w-full"
 						step="any"
 					/>
 				</div>

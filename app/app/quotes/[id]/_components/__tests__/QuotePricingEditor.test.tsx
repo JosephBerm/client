@@ -1,10 +1,10 @@
 /**
  * QuotePricingEditor Component Unit Tests
- * 
+ *
  * MAANG-Level: Comprehensive component testing for quote pricing UI.
- * 
+ *
  * **Priority**: 🔴 CRITICAL - REVENUE & USER EXPERIENCE
- * 
+ *
  * This component enables sales reps to input vendor cost and customer price
  * for products in a quote. Tests cover:
  * 1. Rendering based on role/permissions
@@ -13,16 +13,16 @@
  * 4. Margin calculations and display
  * 5. "Ready to send" status indicator
  * 6. RBAC enforcement at UI level
- * 
+ *
  * **PRD Reference**: prd_quotes_pricing.md
- * 
+ *
  * **Testing Strategy:**
  * 1. Render conditions (permissions, status, data availability)
  * 2. User interactions (input, blur, validation errors)
  * 3. Calculations display (line totals, margins, percentages)
  * 4. Visual feedback (ready indicator, error states)
  * 5. RBAC: Customer cannot see, Sales Rep can edit assigned
- * 
+ *
  * @module Quotes/QuotePricingEditor.test
  */
 
@@ -107,6 +107,7 @@ function createMockPermissions(overrides: Partial<UseQuotePermissionsReturn> = {
 		canMarkAsRead: false,
 		canAddInternalNotes: true,
 		canViewCustomerHistory: true,
+		canSubmitForApproval: false,
 		context: {
 			isOwnQuote: false,
 			isAssignedQuote: true,
@@ -120,7 +121,9 @@ function createMockPermissions(overrides: Partial<UseQuotePermissionsReturn> = {
 /**
  * Creates products with various pricing states
  */
-function createProductsWithPricing(scenario: 'all-priced' | 'partial' | 'none' | 'zero-price' | 'negative-margin'): CartProduct[] {
+function createProductsWithPricing(
+	scenario: 'all-priced' | 'partial' | 'none' | 'zero-price' | 'negative-margin'
+): CartProduct[] {
 	switch (scenario) {
 		case 'all-priced':
 			return [
@@ -220,26 +223,41 @@ describe('QuotePricingEditor Component', () => {
 		it('should render when quote has products and user has permissions', () => {
 			const quote = createMockQuote()
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText('Quote Pricing')).toBeInTheDocument()
 		})
 
 		it('should NOT render when quote is null', () => {
 			const permissions = createMockPermissions()
-			
-			const { container } = render(<QuotePricingEditor quote={null} permissions={permissions} />)
-			
+
+			const { container } = render(
+				<QuotePricingEditor
+					quote={null}
+					permissions={permissions}
+				/>
+			)
+
 			expect(container.firstChild).toBeNull()
 		})
 
 		it('should NOT render when quote has no products', () => {
 			const quote = createMockQuote({ products: [] })
 			const permissions = createMockPermissions()
-			
-			const { container } = render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			const { container } = render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(container.firstChild).toBeNull()
 		})
 
@@ -249,9 +267,14 @@ describe('QuotePricingEditor Component', () => {
 				canView: false,
 				canUpdate: false,
 			})
-			
-			const { container } = render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			const { container } = render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(container.firstChild).toBeNull()
 		})
 
@@ -261,9 +284,14 @@ describe('QuotePricingEditor Component', () => {
 				canView: true,
 				canUpdate: false,
 			})
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			// Should render but without editable inputs
 			expect(screen.getByText('Quote Pricing')).toBeInTheDocument()
 			expect(screen.queryByRole('spinbutton')).toBeNull() // No number inputs
@@ -278,9 +306,14 @@ describe('QuotePricingEditor Component', () => {
 		it('should show editable inputs when status is Read and user has permission', () => {
 			const quote = createMockQuote({ status: QuoteStatus.Read })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			// Should have number input fields
 			const inputs = screen.getAllByRole('spinbutton')
 			expect(inputs.length).toBeGreaterThan(0)
@@ -289,9 +322,14 @@ describe('QuotePricingEditor Component', () => {
 		it('should show read-only values when status is Approved (cannot edit after approval)', () => {
 			const quote = createMockQuote({ status: QuoteStatus.Approved })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			// Should NOT have editable inputs
 			expect(screen.queryByRole('spinbutton')).toBeNull()
 		})
@@ -299,18 +337,28 @@ describe('QuotePricingEditor Component', () => {
 		it('should show read-only values when status is Rejected', () => {
 			const quote = createMockQuote({ status: QuoteStatus.Rejected })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.queryByRole('spinbutton')).toBeNull()
 		})
 
 		it('should show read-only values when status is Unread', () => {
 			const quote = createMockQuote({ status: QuoteStatus.Unread })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			// Unread quotes should not be editable (need to mark as Read first)
 			expect(screen.queryByRole('spinbutton')).toBeNull()
 		})
@@ -324,27 +372,42 @@ describe('QuotePricingEditor Component', () => {
 		it('should display product name', () => {
 			const quote = createMockQuote()
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText('Surgical Gloves')).toBeInTheDocument()
 		})
 
 		it('should display product SKU', () => {
 			const quote = createMockQuote()
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText(/SKU: SG-001/)).toBeInTheDocument()
 		})
 
 		it('should display product quantity', () => {
 			const quote = createMockQuote()
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText('10')).toBeInTheDocument()
 		})
 
@@ -353,9 +416,14 @@ describe('QuotePricingEditor Component', () => {
 				products: createProductsWithPricing('all-priced'),
 			})
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText('Product 1')).toBeInTheDocument()
 			expect(screen.getByText('Product 2')).toBeInTheDocument()
 		})
@@ -374,9 +442,14 @@ describe('QuotePricingEditor Component', () => {
 				],
 			})
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText('Product pending')).toBeInTheDocument()
 		})
 	})
@@ -389,9 +462,14 @@ describe('QuotePricingEditor Component', () => {
 		it('should display vendor cost when set', () => {
 			const quote = createMockQuote()
 			const permissions = createMockPermissions({ canUpdate: false }) // Read-only mode
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText('$100.00')).toBeInTheDocument()
 		})
 
@@ -400,9 +478,14 @@ describe('QuotePricingEditor Component', () => {
 				products: createProductsWithPricing('none'),
 			})
 			const permissions = createMockPermissions({ canUpdate: false })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			// Multiple "—" placeholders expected
 			const dashes = screen.getAllByText('—')
 			expect(dashes.length).toBeGreaterThan(0)
@@ -411,18 +494,28 @@ describe('QuotePricingEditor Component', () => {
 		it('should display customer price when set', () => {
 			const quote = createMockQuote()
 			const permissions = createMockPermissions({ canUpdate: false })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText('$150.00')).toBeInTheDocument()
 		})
 
 		it('should display line total (customerPrice × quantity)', () => {
 			const quote = createMockQuote()
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			// Line total: 150 × 10 = 1500
 			// May appear multiple times (row + totals), so use getAllByText
 			const lineTotals = screen.getAllByText('$1500.00')
@@ -438,9 +531,14 @@ describe('QuotePricingEditor Component', () => {
 		it('should display positive margin correctly', () => {
 			const quote = createMockQuote() // Default: vendorCost=100, customerPrice=150
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			// Margin: 150 - 100 = 50 (50% margin)
 			// May appear multiple times (row + totals), so use getAllByText
 			const marginValues = screen.getAllByText('$50.00')
@@ -455,9 +553,14 @@ describe('QuotePricingEditor Component', () => {
 				products: createProductsWithPricing('negative-margin'),
 			})
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			// Margin: 100 - 150 = -50
 			expect(screen.getByText('$-50.00')).toBeInTheDocument()
 		})
@@ -467,9 +570,14 @@ describe('QuotePricingEditor Component', () => {
 				products: createProductsWithPricing('none'),
 			})
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			// Margin column should show "—"
 			const dashes = screen.getAllByText('—')
 			expect(dashes.length).toBeGreaterThan(0)
@@ -480,13 +588,18 @@ describe('QuotePricingEditor Component', () => {
 				products: createProductsWithPricing('all-priced'),
 			})
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			// Total vendor: (100×10) + (200×5) = 1000 + 1000 = 2000
 			// Total customer: (150×10) + (300×5) = 1500 + 1500 = 3000
 			// Total margin: 3000 - 2000 = 1000
-			
+
 			// Check footer row has totals (may need to be more specific with selectors)
 			const tfoot = screen.getByRole('table').querySelector('tfoot')
 			expect(tfoot).toBeInTheDocument()
@@ -504,9 +617,14 @@ describe('QuotePricingEditor Component', () => {
 				products: createProductsWithPricing('all-priced'),
 			})
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText(/Ready to send/i)).toBeInTheDocument()
 		})
 
@@ -516,9 +634,14 @@ describe('QuotePricingEditor Component', () => {
 				products: createProductsWithPricing('partial'),
 			})
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText(/Set customer prices/i)).toBeInTheDocument()
 		})
 
@@ -528,9 +651,14 @@ describe('QuotePricingEditor Component', () => {
 				products: createProductsWithPricing('all-priced'),
 			})
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			// Margin text appears multiple places - check for badge with percentage
 			const marginElements = screen.getAllByText(/margin/i)
 			expect(marginElements.length).toBeGreaterThan(0)
@@ -545,9 +673,14 @@ describe('QuotePricingEditor Component', () => {
 		it('should have input fields for vendor cost and customer price when editable', () => {
 			const quote = createMockQuote({ status: QuoteStatus.Read })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			const inputs = screen.getAllByRole('spinbutton')
 			expect(inputs.length).toBe(2) // vendor cost + customer price for 1 product
 		})
@@ -556,15 +689,20 @@ describe('QuotePricingEditor Component', () => {
 			const user = userEvent.setup()
 			const quote = createMockQuote({ status: QuoteStatus.Read })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			const inputs = screen.getAllByRole('spinbutton')
 			const vendorCostInput = inputs[0]
-			
+
 			await user.clear(vendorCostInput)
 			await user.type(vendorCostInput, '200')
-			
+
 			expect(vendorCostInput).toHaveValue(200)
 		})
 
@@ -572,16 +710,21 @@ describe('QuotePricingEditor Component', () => {
 			const user = userEvent.setup()
 			const quote = createMockQuote({ status: QuoteStatus.Read })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			const inputs = screen.getAllByRole('spinbutton')
 			const vendorCostInput = inputs[0]
-			
+
 			await user.clear(vendorCostInput)
 			await user.type(vendorCostInput, '200')
 			await user.tab() // Blur
-			
+
 			expect(mockUpdatePricing).toHaveBeenCalled()
 		})
 
@@ -591,19 +734,24 @@ describe('QuotePricingEditor Component', () => {
 				valid: false,
 				errors: ['Customer price must be >= vendor cost'],
 			})
-			
+
 			const quote = createMockQuote({ status: QuoteStatus.Read })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			const inputs = screen.getAllByRole('spinbutton')
 			const customerPriceInput = inputs[1]
-			
+
 			await user.clear(customerPriceInput)
 			await user.type(customerPriceInput, '50')
 			await user.tab() // Blur
-			
+
 			await waitFor(() => {
 				expect(screen.getByText('Customer price must be >= vendor cost')).toBeInTheDocument()
 			})
@@ -615,44 +763,54 @@ describe('QuotePricingEditor Component', () => {
 				valid: false,
 				errors: ['Validation error'],
 			})
-			
+
 			const quote = createMockQuote({ status: QuoteStatus.Read })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			const inputs = screen.getAllByRole('spinbutton')
 			await user.clear(inputs[0])
 			await user.type(inputs[0], '50')
 			await user.tab()
-			
+
 			expect(mockUpdatePricing).not.toHaveBeenCalled()
 		})
 
 		it('should clear error message when user starts typing again', async () => {
 			const user = userEvent.setup()
-			
+
 			// First, simulate validation error
 			mockValidatePricing.mockReturnValueOnce({
 				valid: false,
 				errors: ['Validation error'],
 			})
-			
+
 			const quote = createMockQuote({ status: QuoteStatus.Read })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			const inputs = screen.getAllByRole('spinbutton')
 			await user.clear(inputs[0])
 			await user.type(inputs[0], '50')
 			await user.tab() // Show error
-			
+
 			// Then start typing again (should clear error)
 			mockValidatePricing.mockReturnValue({ valid: true, errors: [] })
 			await user.clear(inputs[0])
 			await user.type(inputs[0], '100')
-			
+
 			await waitFor(() => {
 				expect(screen.queryByText('Validation error')).not.toBeInTheDocument()
 			})
@@ -662,13 +820,18 @@ describe('QuotePricingEditor Component', () => {
 			const user = userEvent.setup()
 			const quote = createMockQuote({ status: QuoteStatus.Read })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			const inputs = screen.getAllByRole('spinbutton')
 			await user.clear(inputs[0])
 			await user.tab()
-			
+
 			// Should call updatePricing with null value
 			expect(mockUpdatePricing).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -680,12 +843,17 @@ describe('QuotePricingEditor Component', () => {
 		it('should have correct input attributes (step, min, placeholder)', () => {
 			const quote = createMockQuote({ status: QuoteStatus.Read })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			const inputs = screen.getAllByRole('spinbutton')
 			const input = inputs[0]
-			
+
 			expect(input).toHaveAttribute('type', 'number')
 			expect(input).toHaveAttribute('step', '0.01')
 			expect(input).toHaveAttribute('min', '0')
@@ -708,7 +876,7 @@ describe('QuotePricingEditor Component', () => {
 					canSendToCustomer: mockCanSendToCustomer,
 				}),
 			}))
-			
+
 			// Note: This test may need adjustment based on actual implementation
 			// The mock setup above may not work as expected in this context
 		})
@@ -725,11 +893,14 @@ describe('QuotePricingEditor Component', () => {
 				canView: false,
 				canUpdate: false,
 			})
-			
+
 			const { container } = render(
-				<QuotePricingEditor quote={quote} permissions={permissions} />
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
 			)
-			
+
 			expect(container.firstChild).toBeNull()
 		})
 
@@ -746,18 +917,28 @@ describe('QuotePricingEditor Component', () => {
 		it('should show help text when in editable mode', () => {
 			const quote = createMockQuote({ status: QuoteStatus.Read })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText(/Changes save automatically/i)).toBeInTheDocument()
 		})
 
 		it('should NOT show help text when in read-only mode', () => {
 			const quote = createMockQuote({ status: QuoteStatus.Approved })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.queryByText(/Changes save automatically/i)).not.toBeInTheDocument()
 		})
 	})
@@ -772,20 +953,20 @@ describe('QuotePricingEditor Component', () => {
 			const user = userEvent.setup()
 			const quote = createMockQuote({ status: QuoteStatus.Read })
 			const permissions = createMockPermissions({ canUpdate: true })
-			
+
 			render(
-				<QuotePricingEditor 
-					quote={quote} 
-					permissions={permissions} 
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
 					onRefresh={mockOnRefresh}
 				/>
 			)
-			
+
 			const inputs = screen.getAllByRole('spinbutton')
 			await user.clear(inputs[0])
 			await user.type(inputs[0], '200')
 			await user.tab()
-			
+
 			// Note: onRefresh is called internally by updatePricing's onSuccess callback
 			// This test verifies the prop is passed correctly
 		})
@@ -799,9 +980,14 @@ describe('QuotePricingEditor Component', () => {
 		it('should have correct table headers', () => {
 			const quote = createMockQuote()
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText('Product')).toBeInTheDocument()
 			expect(screen.getByText('Qty')).toBeInTheDocument()
 			expect(screen.getByText('Vendor Cost')).toBeInTheDocument()
@@ -813,9 +999,14 @@ describe('QuotePricingEditor Component', () => {
 		it('should have totals row in footer', () => {
 			const quote = createMockQuote()
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText('Totals')).toBeInTheDocument()
 		})
 	})
@@ -839,9 +1030,14 @@ describe('QuotePricingEditor Component', () => {
 				],
 			})
 			const permissions = createMockPermissions()
-			
+
 			expect(() => {
-				render(<QuotePricingEditor quote={quote} permissions={permissions} />)
+				render(
+					<QuotePricingEditor
+						quote={quote}
+						permissions={permissions}
+					/>
+				)
 			}).not.toThrow()
 		})
 
@@ -859,9 +1055,14 @@ describe('QuotePricingEditor Component', () => {
 				],
 			})
 			const permissions = createMockPermissions()
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			expect(screen.getByText('999999')).toBeInTheDocument()
 		})
 
@@ -873,15 +1074,20 @@ describe('QuotePricingEditor Component', () => {
 						productId: 'prod-1',
 						quantity: 1,
 						vendorCost: 9999999.99,
-						customerPrice: 10000000.00,
+						customerPrice: 10000000.0,
 						product: new Product({ id: 'prod-1', name: 'Product 1', sku: 'P1', price: 100 }),
 					}),
 				],
 			})
 			const permissions = createMockPermissions({ canUpdate: false })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			// Price may appear multiple times (row + totals)
 			const vendorCosts = screen.getAllByText('$9999999.99')
 			expect(vendorCosts.length).toBeGreaterThan(0)
@@ -901,9 +1107,14 @@ describe('QuotePricingEditor Component', () => {
 				],
 			})
 			const permissions = createMockPermissions({ canUpdate: false })
-			
-			render(<QuotePricingEditor quote={quote} permissions={permissions} />)
-			
+
+			render(
+				<QuotePricingEditor
+					quote={quote}
+					permissions={permissions}
+				/>
+			)
+
 			// Prices may appear multiple times (row + totals)
 			const vendorCosts = screen.getAllByText('$99.99')
 			expect(vendorCosts.length).toBeGreaterThan(0)
@@ -912,4 +1123,3 @@ describe('QuotePricingEditor Component', () => {
 		})
 	})
 })
-

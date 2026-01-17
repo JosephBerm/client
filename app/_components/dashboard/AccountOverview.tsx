@@ -180,6 +180,7 @@ export default function AccountOverview() {
 			<Card
 				variant="elevated"
 				className="flex flex-col justify-between rounded-2xl! overflow-hidden min-h-0 w-full"
+				data-testid="welcome-message"
 			>
 			<div className="flex flex-col gap-5 sm:gap-7 md:gap-8 min-w-0">
 				{/* Header Section with Status */}
@@ -207,7 +208,11 @@ export default function AccountOverview() {
 							{accountStatus}
 						</Badge>
 					</div>
-					<h2 className="text-3xl font-semibold text-base-content sm:text-3xl md:text-4xl leading-tight truncate" title={fullName}>
+					<h2 
+						data-testid="user-name"
+						className="text-3xl font-semibold text-base-content sm:text-3xl md:text-4xl leading-tight truncate" 
+						title={fullName}
+					>
 						{fullName}
 					</h2>
 					<div className="flex items-start sm:items-center gap-2 min-w-0">
@@ -338,7 +343,7 @@ export default function AccountOverview() {
 				<div className="border-t border-base-300" />
 
 				{/* Activity Stats - DRY pattern with reusable ActivityStatCard component */}
-				<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 py-2">
+				<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 py-2" data-testid="quick-actions">
 					<ActivityStatCard
 						icon={BellRing}
 						label="Notifications"

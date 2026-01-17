@@ -90,10 +90,19 @@ interface SectionHeaderProps {
 
 function SectionHeader({ icon, title, description, isExpanded, onToggle }: SectionHeaderProps) {
 	return (
-		<button
+		<Button
 			type='button'
 			onClick={onToggle}
-			className='flex items-center justify-between w-full text-left'>
+			variant='ghost'
+			className='flex items-center justify-between w-full text-left h-auto p-0'
+			rightIcon={
+				isExpanded ? (
+					<ChevronUp className='h-5 w-5 text-base-content/50' />
+				) : (
+					<ChevronDown className='h-5 w-5 text-base-content/50' />
+				)
+			}
+			contentDrivenHeight>
 			<div className='flex items-center gap-3'>
 				<div className='flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10'>{icon}</div>
 				<div>
@@ -101,12 +110,7 @@ function SectionHeader({ icon, title, description, isExpanded, onToggle }: Secti
 					<p className='text-sm text-base-content/60'>{description}</p>
 				</div>
 			</div>
-			{isExpanded ? (
-				<ChevronUp className='h-5 w-5 text-base-content/50' />
-			) : (
-				<ChevronDown className='h-5 w-5 text-base-content/50' />
-			)}
-		</button>
+		</Button>
 	)
 }
 

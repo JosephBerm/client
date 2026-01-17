@@ -11,6 +11,8 @@
 
 import type { Row } from '@tanstack/react-table'
 
+import Checkbox from '@_components/ui/Checkbox'
+
 // ============================================================================
 // PROPS
 // ============================================================================
@@ -34,13 +36,13 @@ export interface RowSelectionCheckboxProps<TData> {
  */
 export function RowSelectionCheckbox<TData>({ row, className = '' }: RowSelectionCheckboxProps<TData>) {
 	return (
-		<div className={`flex items-center justify-center min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 ${className}`}>
-			<input
-				type="checkbox"
+		<div
+			className={`flex items-center justify-center min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 ${className}`}>
+			<Checkbox
 				checked={row.getIsSelected()}
 				disabled={!row.getCanSelect()}
 				onChange={row.getToggleSelectedHandler()}
-				className="checkbox checkbox-sm checkbox-primary touch-manipulation"
+				className='checkbox-sm checkbox-primary touch-manipulation'
 				aria-label={row.getIsSelected() ? 'Deselect row' : 'Select row'}
 				onClick={(e) => e.stopPropagation()}
 			/>
@@ -49,4 +51,3 @@ export function RowSelectionCheckbox<TData>({ row, className = '' }: RowSelectio
 }
 
 export default RowSelectionCheckbox
-

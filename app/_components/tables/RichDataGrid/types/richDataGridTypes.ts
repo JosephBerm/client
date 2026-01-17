@@ -689,7 +689,7 @@ export interface BulkAction<TData> {
  *
  * @template TData - Row data type
  */
-export interface RichDataGridProps<TData extends { id?: string | number }> {
+export interface RichDataGridProps<TData extends { id?: string | number | null }> {
 	// === DATA ===
 	/** API endpoint for data fetching (for server-side mode) */
 	endpoint?: string
@@ -896,8 +896,11 @@ export interface UseRichDataGridReturn<TData> {
  * Extract column IDs from column definitions.
  * Useful for type-safe column references.
  */
-export type ExtractColumnIds<TColumns extends readonly RichColumnDef<unknown>[]> =
-	TColumns[number] extends { accessorKey: infer K } ? K : never
+export type ExtractColumnIds<TColumns extends readonly RichColumnDef<unknown>[]> = TColumns[number] extends {
+	accessorKey: infer K
+}
+	? K
+	: never
 
 /**
  * Make specific properties required.
@@ -1006,4 +1009,3 @@ export function getOperatorLabel(filterType: FilterType, operator: FilterOperato
 	const labels = OPERATOR_LABELS[filterType]
 	return (labels as Record<string, string>)?.[operator] ?? operator
 }
-

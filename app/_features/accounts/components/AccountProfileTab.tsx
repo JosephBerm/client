@@ -73,17 +73,22 @@ function CopyableField({ label, value }: { label: string; value: string | undefi
 			<div className='flex items-center gap-2'>
 				<span className='truncate ml-2 max-w-[180px]'>{value || 'Not provided'}</span>
 				{value && (
-					<button
+					<Button
 						type='button'
 						onClick={() => void handleCopy()}
-						className='opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-base-200'
-						title={`Copy ${label.toLowerCase()}`}>
-						{copied ? (
-							<Check className='h-3.5 w-3.5 text-success' />
-						) : (
-							<Copy className='h-3.5 w-3.5 text-base-content/50' />
-						)}
-					</button>
+						variant='ghost'
+						size='xs'
+						className='opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-base-200 h-auto'
+						title={`Copy ${label.toLowerCase()}`}
+						leftIcon={
+							copied ? (
+								<Check className='h-3.5 w-3.5 text-success' />
+							) : (
+								<Copy className='h-3.5 w-3.5 text-base-content/50' />
+							)
+						}
+						contentDrivenHeight
+					/>
 				)}
 			</div>
 		</div>
@@ -233,9 +238,9 @@ export default function AccountProfileTab({
 			<div className='space-y-6'>
 				<Card className='border border-base-300 bg-base-100 p-6 shadow-sm'>
 					{/* Account Header with Role, Status & ID */}
-				<div className='mb-6 flex flex-wrap items-center gap-3'>
-					<RoleBadge role={account.roleLevel ?? 0} />
-					<AccountStatusBadge
+					<div className='mb-6 flex flex-wrap items-center gap-3'>
+						<RoleBadge role={account.roleLevel ?? 0} />
+						<AccountStatusBadge
 							status={accountStatus}
 							showIcon
 						/>
@@ -319,16 +324,19 @@ export default function AccountProfileTab({
 					<div className='flex items-center justify-between mb-4'>
 						<h2 className='text-lg font-semibold text-base-content'>Account Details</h2>
 						{onRefresh && (
-							<button
+							<Button
 								type='button'
 								onClick={() => void onRefresh()}
 								disabled={isLoading}
-								className='p-1.5 rounded-lg hover:bg-base-200 transition-colors disabled:opacity-50'
-								title='Refresh account data'>
-								<RefreshCw
-									className={`h-4 w-4 text-base-content/60 ${isLoading ? 'animate-spin' : ''}`}
-								/>
-							</button>
+								variant='ghost'
+								size='xs'
+								loading={isLoading}
+								className='p-1.5 rounded-lg hover:bg-base-200 transition-colors disabled:opacity-50 h-auto'
+								title='Refresh account data'
+								leftIcon={
+									!isLoading ? <RefreshCw className='h-4 w-4 text-base-content/60' /> : undefined
+								}
+							/>
 						)}
 					</div>
 					<div className='space-y-3 text-sm text-base-content/70'>
@@ -408,9 +416,9 @@ export default function AccountProfileTab({
 						</p>
 						<div className='mt-4'>
 							<label className='block text-sm font-medium text-base-content mb-2'>Account Role</label>
-					<Select
-						value={account.roleLevel ?? RoleLevels.Customer}
-						onChange={(e) => {
+							<Select
+								value={account.roleLevel ?? RoleLevels.Customer}
+								onChange={(e) => {
 									const newRole = Number(e.target.value)
 									if (onSetPendingRoleChange && useConfirmation) {
 										onSetPendingRoleChange(newRole)
@@ -434,26 +442,30 @@ export default function AccountProfileTab({
 					<h2 className='text-lg font-semibold text-base-content'>Activity Summary</h2>
 					<div className='mt-4 grid grid-cols-2 gap-4'>
 						{/* Orders Count */}
-						<button
+						<Button
 							type='button'
 							onClick={onViewOrders}
-							className='group flex flex-col items-center rounded-lg border border-base-300 bg-base-200/50 p-4 transition-all hover:border-primary/30 hover:bg-primary/5'>
+							variant='ghost'
+							className='group flex flex-col items-center rounded-lg border border-base-300 bg-base-200/50 p-4 transition-all hover:border-primary/30 hover:bg-primary/5 h-auto'
+							contentDrivenHeight>
 							<span className='text-2xl font-bold text-base-content group-hover:text-primary'>
 								{activitySummary.isLoading ? '...' : activitySummary.orderCount}
 							</span>
 							<span className='text-xs text-base-content/60 group-hover:text-primary/80'>Orders</span>
-						</button>
+						</Button>
 
 						{/* Quotes Count */}
-						<button
+						<Button
 							type='button'
 							onClick={onViewQuotes}
-							className='group flex flex-col items-center rounded-lg border border-base-300 bg-base-200/50 p-4 transition-all hover:border-secondary/30 hover:bg-secondary/5'>
+							variant='ghost'
+							className='group flex flex-col items-center rounded-lg border border-base-300 bg-base-200/50 p-4 transition-all hover:border-secondary/30 hover:bg-secondary/5 h-auto'
+							contentDrivenHeight>
 							<span className='text-2xl font-bold text-base-content group-hover:text-secondary'>
 								{activitySummary.isLoading ? '...' : activitySummary.quoteCount}
 							</span>
 							<span className='text-xs text-base-content/60 group-hover:text-secondary/80'>Quotes</span>
-						</button>
+						</Button>
 					</div>
 				</Card>
 

@@ -25,16 +25,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import {
-	ArrowLeft,
-	Info,
-	CheckCircle2,
-	Sparkles,
-	Tag,
-	TrendingUp,
-	ChevronDown,
-	ChevronUp,
-} from 'lucide-react'
+import { ArrowLeft, Info, CheckCircle2, Sparkles, Tag, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'
 
 import { formatCurrency } from '@_lib/formatters'
 
@@ -44,6 +35,7 @@ import { useAuthStore } from '@_features/auth'
 
 import Badge from '@_components/ui/Badge'
 import Card from '@_components/ui/Card'
+import Button from '@_components/ui/Button'
 
 import VolumeTierTable from './VolumeTierTable'
 import { ANIMATION_DELAYS, PRICING_LABELS, SECTION_LABELS } from './ProductDetail.constants'
@@ -89,11 +81,7 @@ export default function CustomerPricingCard({
 	const isAuthenticated = !!user
 
 	// Fetch customer-specific pricing
-	const { pricing, volumeSavings, isLoading } = useCustomerPricing(
-		productId,
-		quantity,
-		isAuthenticated
-	)
+	const { pricing, volumeSavings, isLoading } = useCustomerPricing(productId, quantity, isAuthenticated)
 
 	// Determine display values
 	const hasSpecialPricing = pricing?.hasSpecialPricing ?? false
@@ -106,36 +94,35 @@ export default function CustomerPricingCard({
 
 	return (
 		<Card
-			className="animate-elegant-reveal overflow-hidden border border-base-200 bg-base-100 shadow-xl shadow-base-200/50 transition-all duration-300 hover:shadow-2xl hover:shadow-base-200/70"
-			style={{ animationDelay: ANIMATION_DELAYS.PRICING }}
-		>
+			className='animate-elegant-reveal overflow-hidden border border-base-200 bg-base-100 shadow-xl shadow-base-200/50 transition-all duration-300 hover:shadow-2xl hover:shadow-base-200/70'
+			style={{ animationDelay: ANIMATION_DELAYS.PRICING }}>
 			{/* Main Pricing Section */}
-			<div className="p-6 sm:p-8">
+			<div className='p-6 sm:p-8'>
 				{/* Header */}
-				<div className="mb-6">
-					<div className="flex items-center justify-between">
-						<div className="flex-1">
-							<p className="text-sm font-medium uppercase tracking-wider text-base-content/40">
+				<div className='mb-6'>
+					<div className='flex items-center justify-between'>
+						<div className='flex-1'>
+							<p className='text-sm font-medium uppercase tracking-wider text-base-content/40'>
 								{SECTION_LABELS.PRICING}
 							</p>
 
 							{/* Price Display */}
-							<div className="mt-2 flex items-baseline gap-3 flex-wrap">
+							<div className='mt-2 flex items-baseline gap-3 flex-wrap'>
 								{isLoading ? (
-									<div className="h-10 w-32 animate-pulse rounded bg-base-200" />
+									<div className='h-10 w-32 animate-pulse rounded bg-base-200' />
 								) : hasSpecialPricing ? (
 									<>
-										<span className="text-3xl font-bold text-primary">
+										<span className='text-3xl font-bold text-primary'>
 											{formatCurrency(finalPrice)}
 										</span>
 										{discountPercent > 0 && (
-											<span className="text-lg text-base-content/40 line-through">
+											<span className='text-lg text-base-content/40 line-through'>
 												{formatCurrency(basePrice)}
 											</span>
 										)}
 									</>
 								) : (
-									<span className="text-3xl font-bold text-base-content">
+									<span className='text-3xl font-bold text-base-content'>
 										{PRICING_LABELS.QUOTE_BASED}
 									</span>
 								)}
@@ -143,42 +130,47 @@ export default function CustomerPricingCard({
 
 							{/* Contract Pricing Badge */}
 							{hasSpecialPricing && priceListName && (
-								<div className="mt-3 flex items-center gap-2">
-									<Badge variant="success" size="sm">
-										<Sparkles className="mr-1 h-3 w-3" />
+								<div className='mt-3 flex items-center gap-2'>
+									<Badge
+										variant='success'
+										size='sm'>
+										<Sparkles className='mr-1 h-3 w-3' />
 										Contract Pricing
 									</Badge>
-									<span className="text-xs text-base-content/50">{priceListName}</span>
+									<span className='text-xs text-base-content/50'>{priceListName}</span>
 								</div>
 							)}
 
 							{/* Discount Badge */}
 							{hasSpecialPricing && discountPercent > 0 && (
-								<Badge variant="info" size="md" className="mt-2">
-									<Tag className="mr-1 h-4 w-4" />
+								<Badge
+									variant='info'
+									size='md'
+									className='mt-2'>
+									<Tag className='mr-1 h-4 w-4' />
 									{discountPercent.toFixed(0)}% OFF
 								</Badge>
 							)}
 						</div>
 
 						{/* Info Icon */}
-						<div className="rounded-full bg-base-200/50 p-2 backdrop-blur-sm">
-							<Info className="h-5 w-5 text-base-content/40" />
+						<div className='rounded-full bg-base-200/50 p-2 backdrop-blur-sm'>
+							<Info className='h-5 w-5 text-base-content/40' />
 						</div>
 					</div>
 
 					{/* Description */}
 					{!hasSpecialPricing && (
-						<p className="mt-4 text-sm leading-relaxed text-base-content/60">
+						<p className='mt-4 text-sm leading-relaxed text-base-content/60'>
 							{PRICING_LABELS.DESCRIPTION}
 						</p>
 					)}
 
 					{/* Per-unit for quantities > 1 */}
 					{hasSpecialPricing && quantity > 1 && (
-						<p className="mt-2 text-sm text-base-content/60">
-							{formatCurrency(finalPrice)} × {quantity} = {' '}
-							<span className="font-semibold text-base-content">
+						<p className='mt-2 text-sm text-base-content/60'>
+							{formatCurrency(finalPrice)} × {quantity} ={' '}
+							<span className='font-semibold text-base-content'>
 								{formatCurrency(finalPrice * quantity)}
 							</span>
 						</p>
@@ -187,28 +179,27 @@ export default function CustomerPricingCard({
 
 				{/* Volume Tier Toggle */}
 				{hasVolumeTiers && (
-					<button
-						type="button"
+					<Button
+						type='button'
 						onClick={() => setShowVolumeTiers(!showVolumeTiers)}
-						className="mb-4 flex w-full items-center justify-between rounded-lg bg-success/5 p-3 text-left transition-colors hover:bg-success/10"
-					>
-						<div className="flex items-center gap-2">
-							<TrendingUp className="h-4 w-4 text-success" />
-							<span className="text-sm font-medium text-base-content">
-								Volume Discounts Available
-							</span>
+						variant='ghost'
+						className='mb-4 flex w-full items-center justify-between rounded-lg bg-success/5 p-3 text-left transition-colors hover:bg-success/10 h-auto'
+						contentDrivenHeight>
+						<div className='flex items-center gap-2'>
+							<TrendingUp className='h-4 w-4 text-success' />
+							<span className='text-sm font-medium text-base-content'>Volume Discounts Available</span>
 						</div>
 						{showVolumeTiers ? (
-							<ChevronUp className="h-4 w-4 text-base-content/60" />
+							<ChevronUp className='h-4 w-4 text-base-content/60' />
 						) : (
-							<ChevronDown className="h-4 w-4 text-base-content/60" />
+							<ChevronDown className='h-4 w-4 text-base-content/60' />
 						)}
-					</button>
+					</Button>
 				)}
 
 				{/* Volume Tier Table (Collapsible) */}
 				{showVolumeTiers && hasVolumeTiers && (
-					<div className="mb-4">
+					<div className='mb-4'>
 						<VolumeTierTable
 							productId={productId}
 							basePrice={basePrice}
@@ -220,23 +211,22 @@ export default function CustomerPricingCard({
 
 				{/* Next Tier Savings Message */}
 				{volumeSavings?.savingsMessage && !showVolumeTiers && (
-					<div className="mb-4 flex items-center gap-2 rounded-lg bg-info/10 p-3 text-sm">
-						<Tag className="h-4 w-4 text-info" />
-						<span className="text-base-content/80">{volumeSavings.savingsMessage}</span>
+					<div className='mb-4 flex items-center gap-2 rounded-lg bg-info/10 p-3 text-sm'>
+						<Tag className='h-4 w-4 text-info' />
+						<span className='text-base-content/80'>{volumeSavings.savingsMessage}</span>
 					</div>
 				)}
 
 				{/* CTA Buttons */}
-				<div className="space-y-4">
+				<div className='space-y-4'>
 					<Link
 						href={Routes.Contact.withProduct(productId)}
-						className="btn btn-primary btn-lg w-full gap-3 rounded-xl text-lg font-semibold shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/30"
-					>
+						className='btn btn-primary btn-lg w-full gap-3 rounded-xl text-lg font-semibold shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/30'>
 						{PRICING_LABELS.REQUEST_QUOTE}
-						<ArrowLeft className="h-5 w-5 rotate-180" />
+						<ArrowLeft className='h-5 w-5 rotate-180' />
 					</Link>
-					<div className="flex items-center justify-center gap-2 text-xs text-base-content/40">
-						<CheckCircle2 className="h-3.5 w-3.5" />
+					<div className='flex items-center justify-center gap-2 text-xs text-base-content/40'>
+						<CheckCircle2 className='h-3.5 w-3.5' />
 						<span>{PRICING_LABELS.NO_COMMITMENT}</span>
 					</div>
 				</div>

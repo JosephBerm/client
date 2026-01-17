@@ -30,16 +30,11 @@
 
 import { useState, useRef, useCallback, Fragment, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-	Check,
-	Filter,
-	Search,
-	ChevronRight,
-	Shield,
-	Loader2,
-} from 'lucide-react'
+import { Check, Filter, Search, ChevronRight, Shield, Loader2 } from 'lucide-react'
 
 import Card from '@_components/ui/Card'
+import Input from '@_components/ui/Input'
+import Button from '@_components/ui/Button'
 import type { PermissionMatrixEntry, RoleDefinitionDto } from '@_types/rbac-management'
 import { getRoleConfig } from '../_constants'
 
@@ -81,10 +76,7 @@ interface GroupedPermissions {
  * Groups matrix entries by resource and calculates grant counts.
  * DRY: Single pass grouping with statistics.
  */
-function groupPermissionsByResource(
-	entries: PermissionMatrixEntry[],
-	roleLevels: number[]
-): GroupedPermissions[] {
+function groupPermissionsByResource(entries: PermissionMatrixEntry[], roleLevels: number[]): GroupedPermissions[] {
 	const grouped = new Map<string, PermissionMatrixEntry[]>()
 
 	for (const entry of entries) {
@@ -153,40 +145,46 @@ function PermissionIndicator({
 	const title = isHighestRole
 		? `${roleDisplayName} always has all permissions`
 		: isLoading
-			? 'Updating...'
-			: displayAccess
-				? 'Has access - Click to revoke'
-				: 'No access - Click to grant'
+		? 'Updating...'
+		: displayAccess
+		? 'Has access - Click to revoke'
+		: 'No access - Click to grant'
 
 	return (
-		<button
+		<Button
 			onClick={onClick}
 			disabled={!isClickable || isLoading}
+			variant={displayAccess ? 'success' : 'outline'}
+			size='xs'
+			loading={isLoading}
 			className={`
 				group relative inline-flex h-7 w-7 items-center justify-center rounded-full
 				transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
-				${displayAccess
-					? 'bg-success text-success-content shadow-sm'
-					: 'border-2 border-base-300 bg-transparent'
-				}
-				${isClickable && !isLoading
-					? 'cursor-pointer hover:ring-2 hover:ring-primary/30 hover:ring-offset-1'
-					: 'cursor-default'
+				${displayAccess ? 'bg-success text-success-content shadow-sm' : 'border-2 border-base-300 bg-transparent'}
+				${
+					isClickable && !isLoading
+						? 'cursor-pointer hover:ring-2 hover:ring-primary/30 hover:ring-offset-1'
+						: 'cursor-default'
 				}
 				${isHighestRole ? 'opacity-60' : ''}
 				${isLoading ? 'opacity-70' : ''}
+				p-0
 			`}
 			title={title}
 			aria-label={title}
-		>
-			{isLoading ? (
-				<Loader2 className="h-3.5 w-3.5 animate-spin" />
-			) : displayAccess ? (
-				<Check className="h-3.5 w-3.5" strokeWidth={3} />
-			) : (
-				<span className="sr-only">No access</span>
-			)}
-		</button>
+			leftIcon={
+				isLoading ? (
+					<Loader2 className='h-3.5 w-3.5 animate-spin' />
+				) : displayAccess ? (
+					<Check
+						className='h-3.5 w-3.5'
+						strokeWidth={3}
+					/>
+				) : undefined
+			}
+			contentDrivenHeight>
+			{!isLoading && !displayAccess && <span className='sr-only'>No access</span>}
+		</Button>
 	)
 }
 
@@ -226,26 +224,22 @@ function MobilePermissionCard({
 	}).length
 
 	return (
-		<div className="rounded-lg border border-base-300 bg-base-100 p-4">
+		<div className='rounded-lg border border-base-300 bg-base-100 p-4'>
 			{/* Permission header */}
-			<div className="mb-3">
-				<div className="flex items-center gap-2">
-					<span className="font-mono text-sm font-medium text-base-content">
-						{entry.action}
-					</span>
+			<div className='mb-3'>
+				<div className='flex items-center gap-2'>
+					<span className='font-mono text-sm font-medium text-base-content'>{entry.action}</span>
 					{entry.context && (
-						<span className="rounded bg-base-200 px-1.5 py-0.5 font-mono text-xs text-base-content/60">
+						<span className='rounded bg-base-200 px-1.5 py-0.5 font-mono text-xs text-base-content/60'>
 							:{entry.context}
 						</span>
 					)}
 				</div>
-				{entry.description && (
-					<p className="mt-1 text-xs text-base-content/50">{entry.description}</p>
-				)}
+				{entry.description && <p className='mt-1 text-xs text-base-content/50'>{entry.description}</p>}
 			</div>
 
 			{/* Role permissions grid */}
-			<div className="flex flex-wrap gap-2">
+			<div className='flex flex-wrap gap-2'>
 				{roles.map((role) => {
 					const hasAccess = entry.roleAccess[role.level] ?? false
 					const config = getRoleConfig(role.name)
@@ -263,36 +257,39 @@ function MobilePermissionCard({
 						togglingPermission?.permissionString.toLowerCase() === permissionString.toLowerCase()
 
 					return (
-						<button
+						<Button
 							key={role.id}
 							onClick={() => isClickable && !isLoading && onToggle(role.level, hasAccess)}
 							disabled={!isClickable || isLoading}
+							variant={displayAccess ? 'primary' : 'ghost'}
+							size='xs'
+							loading={isLoading}
 							className={`
 								flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium
 								transition-all duration-200
-								${displayAccess
-									? `${config.headerColor} text-white`
-									: 'bg-base-200 text-base-content/50'
-								}
+								${displayAccess ? `${config.headerColor} text-white` : 'bg-base-200 text-base-content/50'}
 								${isClickable && !isLoading ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}
 								${isHighestRole ? 'opacity-60' : ''}
 								${isLoading ? 'opacity-70' : ''}
+								h-auto
 							`}
 							title={`${role.displayName}: ${displayAccess ? 'Has access' : 'No access'}`}
-						>
-							{isLoading ? (
-								<Loader2 className="h-3 w-3 animate-spin" />
-							) : displayAccess ? (
-								<Check className="h-3 w-3" />
-							) : null}
+							leftIcon={
+								isLoading ? (
+									<Loader2 className='h-3 w-3 animate-spin' />
+								) : displayAccess ? (
+									<Check className='h-3 w-3' />
+								) : undefined
+							}
+							contentDrivenHeight>
 							<span>{config.abbreviation}</span>
-						</button>
+						</Button>
 					)
 				})}
 			</div>
 
 			{/* Summary */}
-			<div className="mt-3 text-xs text-base-content/40">
+			<div className='mt-3 text-xs text-base-content/40'>
 				{grantedCount} of {roles.length} roles have access
 			</div>
 		</div>
@@ -315,32 +312,28 @@ function ResourceGroupHeader({
 	onToggle: () => void
 }) {
 	return (
-		<tr className="group">
+		<tr className='group'>
 			<td
 				colSpan={roles.length + 1}
-				className="cursor-pointer bg-base-200/50 px-3 py-2.5 transition-colors hover:bg-base-200/70"
-				onClick={onToggle}
-			>
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-2">
+				className='cursor-pointer bg-base-200/50 px-3 py-2.5 transition-colors hover:bg-base-200/70'
+				onClick={onToggle}>
+				<div className='flex items-center justify-between'>
+					<div className='flex items-center gap-2'>
 						<motion.div
 							animate={{ rotate: isExpanded ? 90 : 0 }}
-							transition={{ duration: 0.2 }}
-						>
-							<ChevronRight className="h-4 w-4 text-base-content/50" />
+							transition={{ duration: 0.2 }}>
+							<ChevronRight className='h-4 w-4 text-base-content/50' />
 						</motion.div>
-						<span className="text-sm font-semibold text-base-content">
-							{capitalize(group.resource)}
-						</span>
-						<span className="rounded-full bg-base-300/50 px-2 py-0.5 text-xs font-medium text-base-content/60">
+						<span className='text-sm font-semibold text-base-content'>{capitalize(group.resource)}</span>
+						<span className='rounded-full bg-base-300/50 px-2 py-0.5 text-xs font-medium text-base-content/60'>
 							{group.entries.length}
 						</span>
 					</div>
-					<div className="flex items-center gap-1 text-xs text-base-content/50">
-						<span className="text-success">{group.totalGranted}</span>
+					<div className='flex items-center gap-1 text-xs text-base-content/50'>
+						<span className='text-success'>{group.totalGranted}</span>
 						<span>/</span>
 						<span>{group.entries.length * roles.length}</span>
-						<span className="ml-1">granted</span>
+						<span className='ml-1'>granted</span>
 					</div>
 				</div>
 			</td>
@@ -412,9 +405,7 @@ export function PermissionMatrix({
 	}, [groupedPermissions.length]) // Only re-run when data loads
 
 	// Find highest role level
-	const highestRoleLevel = sortedRoles.length > 0
-		? Math.max(...sortedRoles.map((r) => r.level))
-		: 0
+	const highestRoleLevel = sortedRoles.length > 0 ? Math.max(...sortedRoles.map((r) => r.level)) : 0
 
 	// Calculate totals for summary
 	const totalPermissions = matrix.length
@@ -435,11 +426,7 @@ export function PermissionMatrix({
 	 * React Compiler auto-memoizes - no useCallback needed.
 	 * This ensures we always have the latest prop values.
 	 */
-	const handlePermissionClick = (
-		entry: PermissionMatrixEntry,
-		roleLevel: number,
-		currentValue: boolean
-	) => {
+	const handlePermissionClick = (entry: PermissionMatrixEntry, roleLevel: number, currentValue: boolean) => {
 		// Debug: Log click attempt (remove in production)
 		console.log('[PermissionMatrix] handlePermissionClick called', {
 			canEdit,
@@ -524,77 +511,80 @@ export function PermissionMatrix({
 	// ---------------------------------------------------------------------------
 
 	return (
-		<Card className="border border-base-300 bg-base-100 shadow-sm">
+		<Card className='border border-base-300 bg-base-100 shadow-sm'>
 			{/* Header */}
-			<div className="border-b border-base-200 p-4 sm:p-6">
-				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+			<div className='border-b border-base-200 p-4 sm:p-6'>
+				<div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
 					<div>
-						<h3 className="text-lg font-semibold text-base-content">Permission Matrix</h3>
-						<p className="text-sm text-base-content/60">
+						<h3 className='text-lg font-semibold text-base-content'>Permission Matrix</h3>
+						<p className='text-sm text-base-content/60'>
 							View and manage which roles have access to each feature
 						</p>
 					</div>
 
 					{/* Quick actions */}
-					<div className="flex items-center gap-2">
-						<button
+					<div className='flex items-center gap-2'>
+						<Button
 							onClick={expandAll}
-							className="rounded-lg px-3 py-1.5 text-xs font-medium text-base-content/60 transition-colors hover:bg-base-200 hover:text-base-content"
-						>
+							variant='ghost'
+							size='xs'
+							className='rounded-lg px-3 py-1.5 text-xs font-medium text-base-content/60 transition-colors hover:bg-base-200 hover:text-base-content h-auto'>
 							Expand all
-						</button>
-						<button
+						</Button>
+						<Button
 							onClick={collapseAll}
-							className="rounded-lg px-3 py-1.5 text-xs font-medium text-base-content/60 transition-colors hover:bg-base-200 hover:text-base-content"
-						>
+							variant='ghost'
+							size='xs'
+							className='rounded-lg px-3 py-1.5 text-xs font-medium text-base-content/60 transition-colors hover:bg-base-200 hover:text-base-content h-auto'>
 							Collapse all
-						</button>
+						</Button>
 					</div>
 				</div>
 
 				{/* Summary bar */}
-				<div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-base-content/60">
+				<div className='mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-base-content/60'>
 					<span>
-						<span className="font-medium text-base-content">{filteredMatrix.length}</span>
+						<span className='font-medium text-base-content'>{filteredMatrix.length}</span>
 						{hasActiveFilters && ` of ${totalPermissions}`} permissions
 					</span>
-					<span className="hidden sm:inline">•</span>
+					<span className='hidden sm:inline'>•</span>
 					<span>
-						<span className="font-medium text-success">{totalGranted}</span> / {totalPossible} grants
+						<span className='font-medium text-success'>{totalGranted}</span> / {totalPossible} grants
 					</span>
-					<span className="hidden sm:inline">•</span>
+					<span className='hidden sm:inline'>•</span>
 					<span>{resources.length} resources</span>
-					<span className="hidden sm:inline">•</span>
+					<span className='hidden sm:inline'>•</span>
 					<span>{sortedRoles.length} roles</span>
 				</div>
 			</div>
 
 			{/* Filters */}
-			<div className="border-b border-base-200 bg-base-50 p-4 sm:px-6">
-				<div className="flex flex-wrap items-center gap-3">
+			<div className='border-b border-base-200 bg-base-50 p-4 sm:px-6'>
+				<div className='flex flex-wrap items-center gap-3'>
 					{/* Search */}
-					<div className="relative min-w-[200px] flex-1 sm:max-w-xs">
-						<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/40" />
-						<input
-							type="text"
-							placeholder="Search permissions..."
+					<div className='relative min-w-[200px] flex-1 sm:max-w-xs'>
+						<Input
+							type='text'
+							size='sm'
+							placeholder='Search permissions...'
 							value={searchTerm}
 							onChange={(e) => setSearchTerm(e.target.value)}
-							className="w-full rounded-lg border border-base-300 bg-base-100 py-2 pl-10 pr-4 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+							leftIcon={<Search className='h-4 w-4' />}
 						/>
 					</div>
 
 					{/* Resource filter */}
-					<div className="flex items-center gap-2">
-						<Filter className="h-4 w-4 text-base-content/40" />
+					<div className='flex items-center gap-2'>
+						<Filter className='h-4 w-4 text-base-content/40' />
 						<select
 							value={selectedResource ?? ''}
 							onChange={(e) => setSelectedResource(e.target.value || null)}
-							className="rounded-lg border border-base-300 bg-base-100 px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-						>
-							<option value="">All Resources</option>
+							className='rounded-lg border border-base-300 bg-base-100 px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20'>
+							<option value=''>All Resources</option>
 							{resources.map((resource) => (
-								<option key={resource} value={resource}>
+								<option
+									key={resource}
+									value={resource}>
 									{capitalize(resource)}
 								</option>
 							))}
@@ -603,23 +593,26 @@ export function PermissionMatrix({
 
 					{/* Clear filters */}
 					{hasActiveFilters && (
-						<button
+						<Button
 							onClick={clearFilters}
-							className="rounded-lg bg-base-200 px-3 py-2 text-sm font-medium text-base-content/70 transition-colors hover:bg-base-300 hover:text-base-content"
-						>
+							variant='ghost'
+							size='sm'
+							className='rounded-lg bg-base-200 px-3 py-2 text-sm font-medium text-base-content/70 transition-colors hover:bg-base-300 hover:text-base-content h-auto'>
 							Clear filters
-						</button>
+						</Button>
 					)}
 				</div>
 			</div>
 
 			{/* Desktop Matrix View */}
-			<div className="hidden overflow-x-auto lg:block">
-				<table ref={tableRef} className="w-full min-w-[800px] border-collapse">
+			<div className='hidden overflow-x-auto lg:block'>
+				<table
+					ref={tableRef}
+					className='w-full min-w-[800px] border-collapse'>
 					{/* Sticky header */}
-					<thead className="sticky top-0 z-20 bg-base-100">
+					<thead className='sticky top-0 z-20 bg-base-100'>
 						<tr>
-							<th className="sticky left-0 z-30 border-b border-r border-base-300 bg-base-100 p-3 text-left text-sm font-semibold text-base-content">
+							<th className='sticky left-0 z-30 border-b border-r border-base-300 bg-base-100 p-3 text-left text-sm font-semibold text-base-content'>
 								Permission
 							</th>
 							{sortedRoles.map((role) => {
@@ -627,12 +620,10 @@ export function PermissionMatrix({
 								return (
 									<th
 										key={role.id}
-										className="border-b border-base-300 p-2 text-center"
-									>
+										className='border-b border-base-300 p-2 text-center'>
 										<div
 											className={`mx-auto rounded-lg px-3 py-1.5 text-xs font-semibold text-white ${config.headerColor}`}
-											title={role.displayName}
-										>
+											title={role.displayName}>
 											{config.abbreviation}
 										</div>
 									</th>
@@ -660,7 +651,9 @@ export function PermissionMatrix({
 									<AnimatePresence initial={false}>
 										{isExpanded &&
 											group.entries.map((entry, entryIndex) => {
-												const permissionKey = `${entry.resource}:${entry.action}${entry.context ? `:${entry.context}` : ''}`
+												const permissionKey = `${entry.resource}:${entry.action}${
+													entry.context ? `:${entry.context}` : ''
+												}`
 												const globalIndex = filteredMatrix.indexOf(entry)
 
 												return (
@@ -670,21 +663,22 @@ export function PermissionMatrix({
 														animate={{ opacity: 1, height: 'auto' }}
 														exit={{ opacity: 0, height: 0 }}
 														transition={{ duration: 0.2, delay: entryIndex * 0.02 }}
-														className="border-b border-base-200 hover:bg-primary/5"
-													>
+														className='border-b border-base-200 hover:bg-primary/5'>
 														{/* Permission name - sticky */}
-														<td className="sticky left-0 z-10 border-r border-base-200 bg-base-100 p-3">
-															<div className="pl-6">
-																<span className="font-mono text-sm text-base-content">
+														<td className='sticky left-0 z-10 border-r border-base-200 bg-base-100 p-3'>
+															<div className='pl-6'>
+																<span className='font-mono text-sm text-base-content'>
 																	{entry.action}
 																	{entry.context && (
-																		<span className="text-base-content/50">
+																		<span className='text-base-content/50'>
 																			:{entry.context}
 																		</span>
 																	)}
 																</span>
 																{entry.description && (
-																	<p className="mt-0.5 text-xs text-base-content/50 max-w-[200px] truncate" title={entry.description}>
+																	<p
+																		className='mt-0.5 text-xs text-base-content/50 max-w-[200px] truncate'
+																		title={entry.description}>
 																		{entry.description}
 																	</p>
 																)}
@@ -706,28 +700,50 @@ export function PermissionMatrix({
 																: `${entry.resource}:${entry.action}`
 
 															// Check for optimistic value
-															const optimisticKey = getOptimisticKey?.(role.level, permissionString)
-															const optimisticValue = optimisticKey ? optimisticUpdates?.get(optimisticKey) : undefined
+															const optimisticKey = getOptimisticKey?.(
+																role.level,
+																permissionString
+															)
+															const optimisticValue = optimisticKey
+																? optimisticUpdates?.get(optimisticKey)
+																: undefined
 
 															// Check if this cell is loading
 															const isLoading =
 																togglingPermission?.roleLevel === role.level &&
-																togglingPermission?.permissionString.toLowerCase() === permissionString.toLowerCase()
+																togglingPermission?.permissionString.toLowerCase() ===
+																	permissionString.toLowerCase()
 
 															return (
 																<td
 																	key={role.id}
-																	className={`p-2 text-center ${isFocused ? 'ring-2 ring-inset ring-primary' : ''}`}
+																	className={`p-2 text-center ${
+																		isFocused
+																			? 'ring-2 ring-inset ring-primary'
+																			: ''
+																	}`}
 																	tabIndex={isClickable ? 0 : -1}
-																	onKeyDown={(e) => handleKeyDown(e, globalIndex, colIndex)}
-																	onFocus={() => setFocusedCell({ row: globalIndex, col: colIndex })}
-																>
+																	onKeyDown={(e) =>
+																		handleKeyDown(e, globalIndex, colIndex)
+																	}
+																	onFocus={() =>
+																		setFocusedCell({
+																			row: globalIndex,
+																			col: colIndex,
+																		})
+																	}>
 																	<PermissionIndicator
 																		hasAccess={hasAccess}
 																		isClickable={isClickable}
 																		isHighestRole={isHighestRole}
 																		roleDisplayName={role.displayName}
-																		onClick={() => handlePermissionClick(entry, role.level, hasAccess)}
+																		onClick={() =>
+																			handlePermissionClick(
+																				entry,
+																				role.level,
+																				hasAccess
+																			)
+																		}
 																		isLoading={isLoading}
 																		optimisticValue={optimisticValue}
 																	/>
@@ -746,27 +762,25 @@ export function PermissionMatrix({
 			</div>
 
 			{/* Mobile Card View */}
-			<div className="block p-4 lg:hidden">
+			<div className='block p-4 lg:hidden'>
 				{groupedPermissions.length > 0 ? (
-					<div className="space-y-6">
+					<div className='space-y-6'>
 						{groupedPermissions.map((group) => (
 							<div key={group.resource}>
 								{/* Resource header */}
 								<div
-									className="mb-3 flex cursor-pointer items-center justify-between"
-									onClick={() => toggleGroup(group.resource)}
-								>
-									<div className="flex items-center gap-2">
+									className='mb-3 flex cursor-pointer items-center justify-between'
+									onClick={() => toggleGroup(group.resource)}>
+									<div className='flex items-center gap-2'>
 										<motion.div
 											animate={{ rotate: expandedGroups.has(group.resource) ? 90 : 0 }}
-											transition={{ duration: 0.2 }}
-										>
-											<ChevronRight className="h-4 w-4 text-base-content/50" />
+											transition={{ duration: 0.2 }}>
+											<ChevronRight className='h-4 w-4 text-base-content/50' />
 										</motion.div>
-										<h4 className="font-semibold text-base-content">
+										<h4 className='font-semibold text-base-content'>
 											{capitalize(group.resource)}
 										</h4>
-										<span className="rounded-full bg-base-200 px-2 py-0.5 text-xs">
+										<span className='rounded-full bg-base-200 px-2 py-0.5 text-xs'>
 											{group.entries.length}
 										</span>
 									</div>
@@ -779,8 +793,7 @@ export function PermissionMatrix({
 											initial={{ opacity: 0, height: 0 }}
 											animate={{ opacity: 1, height: 'auto' }}
 											exit={{ opacity: 0, height: 0 }}
-											className="space-y-3 overflow-hidden"
-										>
+											className='space-y-3 overflow-hidden'>
 											{group.entries.map((entry) => (
 												<MobilePermissionCard
 													key={`${entry.resource}:${entry.action}:${entry.context ?? ''}`}
@@ -804,32 +817,41 @@ export function PermissionMatrix({
 					</div>
 				) : (
 					/* Empty state for mobile */
-					<EmptyState hasActiveFilters={hasActiveFilters} onClearFilters={clearFilters} />
+					<EmptyState
+						hasActiveFilters={hasActiveFilters}
+						onClearFilters={clearFilters}
+					/>
 				)}
 			</div>
 
 			{/* Desktop Empty state */}
 			{filteredMatrix.length === 0 && (
-				<div className="hidden lg:block">
-					<EmptyState hasActiveFilters={hasActiveFilters} onClearFilters={clearFilters} />
+				<div className='hidden lg:block'>
+					<EmptyState
+						hasActiveFilters={hasActiveFilters}
+						onClearFilters={clearFilters}
+					/>
 				</div>
 			)}
 
 			{/* Legend */}
-			<div className="border-t border-base-200 p-4 sm:px-6">
-				<div className="flex flex-wrap items-center gap-4 text-sm text-base-content/60 sm:gap-6">
-					<div className="flex items-center gap-2">
-						<div className="flex h-6 w-6 items-center justify-center rounded-full bg-success text-success-content">
-							<Check className="h-3 w-3" strokeWidth={3} />
+			<div className='border-t border-base-200 p-4 sm:px-6'>
+				<div className='flex flex-wrap items-center gap-4 text-sm text-base-content/60 sm:gap-6'>
+					<div className='flex items-center gap-2'>
+						<div className='flex h-6 w-6 items-center justify-center rounded-full bg-success text-success-content'>
+							<Check
+								className='h-3 w-3'
+								strokeWidth={3}
+							/>
 						</div>
 						<span>Has access</span>
 					</div>
-					<div className="flex items-center gap-2">
-						<div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-base-300" />
+					<div className='flex items-center gap-2'>
+						<div className='flex h-6 w-6 items-center justify-center rounded-full border-2 border-base-300' />
 						<span>No access</span>
 					</div>
 					{canEdit && (
-						<div className="ml-auto text-xs text-base-content/40">
+						<div className='ml-auto text-xs text-base-content/40'>
 							Click indicators to toggle permissions
 						</div>
 					)}
@@ -843,37 +865,32 @@ export function PermissionMatrix({
  * Empty state component - MAANG-level design.
  * Clear messaging with actionable CTA.
  */
-function EmptyState({
-	hasActiveFilters,
-	onClearFilters,
-}: {
-	hasActiveFilters: boolean
-	onClearFilters: () => void
-}) {
+function EmptyState({ hasActiveFilters, onClearFilters }: { hasActiveFilters: boolean; onClearFilters: () => void }) {
 	return (
-		<div className="flex flex-col items-center justify-center py-16 text-center">
-			<div className="mb-4 rounded-full bg-base-200 p-4">
+		<div className='flex flex-col items-center justify-center py-16 text-center'>
+			<div className='mb-4 rounded-full bg-base-200 p-4'>
 				{hasActiveFilters ? (
-					<Search className="h-8 w-8 text-base-content/30" />
+					<Search className='h-8 w-8 text-base-content/30' />
 				) : (
-					<Shield className="h-8 w-8 text-base-content/30" />
+					<Shield className='h-8 w-8 text-base-content/30' />
 				)}
 			</div>
-			<h4 className="mb-1 font-medium text-base-content">
+			<h4 className='mb-1 font-medium text-base-content'>
 				{hasActiveFilters ? 'No results found' : 'No permissions configured'}
 			</h4>
-			<p className="mb-4 max-w-xs text-sm text-base-content/60">
+			<p className='mb-4 max-w-xs text-sm text-base-content/60'>
 				{hasActiveFilters
-					? 'Try adjusting your search or filter to find what you\'re looking for.'
+					? "Try adjusting your search or filter to find what you're looking for."
 					: 'Permissions will appear here once they are configured in the system.'}
 			</p>
 			{hasActiveFilters && (
-				<button
+				<Button
 					onClick={onClearFilters}
-					className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-content transition-colors hover:bg-primary/90"
-				>
+					variant='primary'
+					size='sm'
+					className='rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-content transition-colors hover:bg-primary/90 h-auto'>
 					Clear filters
-				</button>
+				</Button>
 			)}
 		</div>
 	)

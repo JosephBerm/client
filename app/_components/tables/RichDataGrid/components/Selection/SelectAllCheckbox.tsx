@@ -12,6 +12,8 @@
 import { useRef, useEffect } from 'react'
 import { useRichDataGridContext } from '../../context/RichDataGridContext'
 
+import Checkbox from '@_components/ui/Checkbox'
+
 // ============================================================================
 // PROPS
 // ============================================================================
@@ -47,13 +49,13 @@ export function SelectAllCheckbox({ className = '' }: SelectAllCheckboxProps) {
 	}, [isSomeSelected, isAllSelected])
 
 	return (
-		<div className={`flex items-center justify-center min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 ${className}`}>
-			<input
+		<div
+			className={`flex items-center justify-center min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 ${className}`}>
+			<Checkbox
 				ref={checkboxRef}
-				type="checkbox"
 				checked={isAllSelected}
 				onChange={table.getToggleAllPageRowsSelectedHandler()}
-				className="checkbox checkbox-sm checkbox-primary touch-manipulation"
+				className='checkbox-sm checkbox-primary touch-manipulation'
 				aria-label={isAllSelected ? 'Deselect all rows' : 'Select all rows'}
 			/>
 		</div>
@@ -61,4 +63,3 @@ export function SelectAllCheckbox({ className = '' }: SelectAllCheckboxProps) {
 }
 
 export default SelectAllCheckbox
-

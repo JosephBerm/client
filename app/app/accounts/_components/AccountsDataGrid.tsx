@@ -366,6 +366,7 @@ export default function AccountsDataGrid() {
 
 	return (
 		<>
+			<div data-testid="users-table">
 			<RichDataGrid<AccountInfo>
 				columns={columns}
 				fetcher={fetcher}
@@ -434,6 +435,7 @@ export default function AccountsDataGrid() {
 				}
 				ariaLabel='Accounts table'
 			/>
+			</div>
 
 			{/* Delete Confirmation Modal */}
 			<ConfirmationModal

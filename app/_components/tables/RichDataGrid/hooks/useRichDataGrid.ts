@@ -161,9 +161,9 @@ async function defaultFetcher<TData>(endpoint: string, filter: RichSearchFilter)
  * Master hook for RichDataGrid.
  * Composes all table functionality into a single, cohesive API.
  *
- * @template TData - Row data type (must have id property)
+ * @template TData - Row data type (must have id property, can be null for unsaved entities)
  */
-export function useRichDataGrid<TData extends { id?: string | number }>({
+export function useRichDataGrid<TData extends { id?: string | number | null }>({
 	endpoint,
 	data: staticData,
 	columns,
@@ -382,7 +382,8 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 						backendColumnFilters.push({
 							columnId: cf.id,
 							filterType: typedFilter.filterType,
-							operator: 'operator' in typedFilter ? String(typedFilter.operator) : TextFilterOperator.Contains,
+							operator:
+								'operator' in typedFilter ? String(typedFilter.operator) : TextFilterOperator.Contains,
 							value: 'value' in typedFilter ? typedFilter.value : undefined,
 							valueTo: 'valueTo' in typedFilter ? typedFilter.valueTo : undefined,
 							values: 'values' in typedFilter ? typedFilter.values : undefined,
@@ -416,12 +417,14 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 				}
 
 				// Use custom fetcher or default endpoint fetcher
-				const fetchFn: ServerFetcher<TData> = fetcherRef.current ?? (async (f) => {
-					if (!endpoint) {
-						throw new Error('Endpoint is required when no fetcher is provided')
-					}
-					return defaultFetcher(endpoint, f)
-				})
+				const fetchFn: ServerFetcher<TData> =
+					fetcherRef.current ??
+					(async (f) => {
+						if (!endpoint) {
+							throw new Error('Endpoint is required when no fetcher is provided')
+						}
+						return defaultFetcher(endpoint, f)
+					})
 
 				const result = await fetchFn(filter)
 
@@ -480,12 +483,10 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 
 	// Prepare data source
 	// React Compiler automatically memoizes derived values
-	const tableData = isServerSide ? serverData : (staticData ?? [])
+	const tableData = isServerSide ? serverData : staticData ?? []
 
 	// Calculate page count for client-side mode
-	const clientPageCount = (!isServerSide && staticData)
-		? Math.ceil(staticData.length / pagination.pageSize)
-		: pageCount
+	const clientPageCount = !isServerSide && staticData ? Math.ceil(staticData.length / pagination.pageSize) : pageCount
 
 	// Create table instance
 	const table = useReactTable({
@@ -523,7 +524,7 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 					getPaginationRowModel: getPaginationRowModel(),
 					getSortedRowModel: getSortedRowModel(),
 					getFilteredRowModel: getFilteredRowModel(),
-				}),
+			  }),
 
 		// Row identification
 		getRowId,
@@ -639,12 +640,16 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 
 		logger.info('Export requested', { options })
 
-		const result = await doExport(table, {
-			format: options.format,
-			scope: options.scope,
-			filename: options.filename ?? 'export',
-			includeTimestamp: true,
-		}, selectedRows)
+		const result = await doExport(
+			table,
+			{
+				format: options.format,
+				scope: options.scope,
+				filename: options.filename ?? 'export',
+				includeTimestamp: true,
+			},
+			selectedRows
+		)
 
 		if (!result.success) {
 			throw new Error(result.error ?? 'Export failed')
@@ -663,18 +668,14 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 	 */
 	const updateRow = (rowId: string | number, updater: (row: TData) => TData) => {
 		const rowIdStr = String(rowId)
-		setServerData((prev) =>
-			prev.map((row) => (getRowId(row) === rowIdStr ? updater(row) : row))
-		)
+		setServerData((prev) => prev.map((row) => (getRowId(row) === rowIdStr ? updater(row) : row)))
 	}
 
 	/**
 	 * Update multiple rows that match a predicate.
 	 */
 	const updateRows = (predicate: (row: TData) => boolean, updater: (row: TData) => TData) => {
-		setServerData((prev) =>
-			prev.map((row) => (predicate(row) ? updater(row) : row))
-		)
+		setServerData((prev) => prev.map((row) => (predicate(row) ? updater(row) : row)))
 	}
 
 	/**
@@ -696,7 +697,7 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 
 		// Data
 		data: tableData,
-		totalItems: isServerSide ? totalItems : (staticData?.length ?? 0),
+		totalItems: isServerSide ? totalItems : staticData?.length ?? 0,
 		facets,
 
 		// Loading state
@@ -763,4 +764,3 @@ export function useRichDataGrid<TData extends { id?: string | number }>({
 }
 
 export default useRichDataGrid
-

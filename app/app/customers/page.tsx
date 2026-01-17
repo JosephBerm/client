@@ -216,6 +216,7 @@ export default function CustomersPage() {
 			{/* Data Grid Card */}
 			<div className="card bg-base-100 shadow-xl">
 				<div className="card-body p-3 sm:p-6">
+					<div data-testid="customers-table">
 					<RichDataGrid<Company>
 						columns={columns}
 						fetcher={fetcher}
@@ -258,6 +259,7 @@ export default function CustomersPage() {
 						}
 						ariaLabel="Customers table"
 					/>
+					</div>
 				</div>
 			</div>
 

@@ -88,6 +88,7 @@ export default function StoreProductGrid({
 			{/* Key prop ensures animation state resets when products change (filtering, pagination, search) */}
 			<div 
 				key={`products-grid-${products.length}-${searchCriteria.page}`} 
+				data-testid="product-grid"
 				className="grid gap-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
 			>
 				{isLoading && !hasLoaded ? (
@@ -174,7 +175,10 @@ interface EmptyStateProps {
 function EmptyState({ isFiltered, onClearFilters }: EmptyStateProps) {
 	if (isFiltered) {
 		return (
-			<div className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-8 md:p-12 text-center">
+			<div 
+				data-testid="no-results" 
+				className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-8 md:p-12 text-center"
+			>
 				<div className="mx-auto w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center mb-4">
 					<Search className="w-6 h-6 text-warning" />
 				</div>
@@ -210,7 +214,10 @@ function EmptyState({ isFiltered, onClearFilters }: EmptyStateProps) {
 
 	// No products available at all (initial state)
 	return (
-		<div className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-8 md:p-12 text-center">
+		<div 
+			data-testid="no-results" 
+			className="col-span-full rounded-xl border border-dashed border-base-300 bg-base-100 p-8 md:p-12 text-center"
+		>
 			<div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
 				<PackageSearch className="w-8 h-8 text-primary" />
 			</div>

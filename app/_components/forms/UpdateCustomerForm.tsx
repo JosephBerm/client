@@ -181,7 +181,7 @@ export default function UpdateCustomerForm({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [customer.id, customer.name, customer.email])
 
-	/* eslint-disable react-hooks/exhaustive-deps -- useFormSubmit is a custom hook that intentionally captures current closure values */
+	// useFormSubmit uses refs internally - dependencies are always current (no stale closures)
 	const { submit, isSubmitting } = useFormSubmit(
 		async (data: CustomerFormData) => {
 			const customerData = new Company({
@@ -221,7 +221,6 @@ export default function UpdateCustomerForm({
 			},
 		}
 	)
-	/* eslint-enable react-hooks/exhaustive-deps */
 
 	/**
 	 * Form submission handler for React Hook Form.

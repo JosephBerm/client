@@ -1,8 +1,8 @@
 /**
  * CategoryFilter UI Component - Industry Best Practice Tree View
- * 
+ *
  * Follows design patterns from Material-UI TreeView, Ant Design Tree, and Shopify Polaris.
- * 
+ *
  * **Key Features:**
  * - Separate expand/collapse action from selection
  * - Checkboxes for selection (industry standard)
@@ -11,14 +11,14 @@
  * - Keyboard navigation (Arrow keys, Space, Enter)
  * - Theme-aware styling (DaisyUI)
  * - Parent-child selection logic
- * 
+ *
  * **Design Patterns:**
  * - Expand icon: Separate clickable area (left)
  * - Checkbox: DaisyUI checkbox component (standard)
  * - Label: Clickable to expand/collapse
  * - Indentation: 20px per level
  * - Typography: Parent categories are bolder
- * 
+ *
  * @module CategoryFilter
  */
 
@@ -31,36 +31,38 @@ import { ChevronRight, ChevronDown } from 'lucide-react'
 import type ProductsCategory from '@_classes/ProductsCategory'
 
 import Badge from '@_components/ui/Badge'
+import Checkbox from '@_components/ui/Checkbox'
+import Button from '@_components/ui/Button'
 
 export interface CategoryFilterProps {
 	/** Hierarchical categories array */
 	categories: ProductsCategory[]
-	
+
 	/** Currently selected categories */
 	selectedCategories: ProductsCategory[]
-	
+
 	/** Callback when selection changes */
 	onSelectionChange: (selected: ProductsCategory[]) => void
-	
+
 	/** Optional: Show expand/collapse for parent categories */
 	collapsible?: boolean
-	
+
 	/** Optional: Maximum depth to display */
 	maxDepth?: number
-	
+
 	/** Optional: Show selection count */
 	showCount?: boolean
-	
+
 	/** Optional: Custom className */
 	className?: string
-	
+
 	/** Optional: Empty state message */
 	emptyMessage?: string
 }
 
 /**
  * CategoryFilter Component - Industry Best Practice Implementation
- * 
+ *
  * Uses checkboxes for selection, separate expand/collapse icons, and clear visual hierarchy.
  * Follows patterns from leading design systems.
  */
@@ -76,7 +78,6 @@ export default function CategoryFilter({
 }: CategoryFilterProps) {
 	// Track expanded/collapsed state (default: all collapsed)
 	const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set())
-
 
 	/**
 	 * Toggle expand/collapse for a category
@@ -170,11 +171,11 @@ export default function CategoryFilter({
 			} else {
 				// Select this category AND all its descendants explicitly
 				const allDescendants = getAllDescendants(category)
-				const descendantIds = new Set([...allDescendants.map(c => c.id), category.id])
-				
+				const descendantIds = new Set([...allDescendants.map((c) => c.id), category.id])
+
 				// Remove any existing selections that are descendants (to avoid duplicates)
 				const cleanedSelection = selectedCategories.filter((item) => !descendantIds.has(item.id))
-				
+
 				// Add parent and all children
 				onSelectionChange([...cleanedSelection, category, ...allDescendants])
 			}
@@ -185,7 +186,7 @@ export default function CategoryFilter({
 	/**
 	 * Keyboard handler for treeitem accessibility
 	 * Follows ARIA tree pattern: Enter/Space toggles selection
-	 * 
+	 *
 	 * FAANG Pattern: Extracted handler using useCallback for performance
 	 */
 	const handleCategoryKeyDown = useCallback(
@@ -202,7 +203,7 @@ export default function CategoryFilter({
 
 	/**
 	 * Recursive category node renderer
-	 * 
+	 *
 	 * Layout structure (industry standard):
 	 * [Expand Icon] [Checkbox] [Label] [Count Badge]
 	 */
@@ -222,10 +223,12 @@ export default function CategoryFilter({
 			const indentWidth = depth * 20
 
 			return (
-				<div key={category.id} className="select-none">
+				<div
+					key={category.id}
+					className='select-none'>
 					{/* Category Row - Responsive height, entire row clickable */}
 					<div
-						role="treeitem"
+						role='treeitem'
 						aria-selected={isSelected}
 						tabIndex={0}
 						onClick={() => handleToggle(category)}
@@ -236,25 +239,27 @@ export default function CategoryFilter({
 							rounded-lg px-3 py-2
 							transition-all duration-200 ease-out
 							sm:min-h-[48px] md:min-h-[44px]
-							${isSelected
-								? 'bg-primary/10 shadow-sm ring-1 ring-primary/20'
-								: isPartial
+							${
+								isSelected
+									? 'bg-primary/10 shadow-sm ring-1 ring-primary/20'
+									: isPartial
 									? 'bg-primary/5 ring-1 ring-primary/10'
 									: 'hover:bg-base-200'
 							}
 						`}
-						style={{ paddingLeft: `${indentWidth + 12}px` }}
-					>
-					{/* 1. Expand/Collapse Button - Industry-standard touch target */}
-					<div className="flex shrink-0 grow-0 items-center justify-center">
-						{hasChildren && collapsible ? (
-							<button
-								type="button"
-								onClick={(e) => {
-									e.stopPropagation()
-									toggleExpand(category.id, e)
-								}}
-								className="
+						style={{ paddingLeft: `${indentWidth + 12}px` }}>
+						{/* 1. Expand/Collapse Button - Industry-standard touch target */}
+						<div className='flex shrink-0 grow-0 items-center justify-center'>
+							{hasChildren && collapsible ? (
+								<Button
+									type='button'
+									onClick={(e) => {
+										e.stopPropagation()
+										toggleExpand(category.id, e)
+									}}
+									variant='ghost'
+									size='xs'
+									className='
 									group/expand
 									relative
 									flex h-11 w-11 shrink-0
@@ -267,31 +272,33 @@ export default function CategoryFilter({
 									touch-manipulation
 									sm:h-9 sm:w-9
 									md:h-8 md:w-8
-								"
-								aria-label={isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
-								aria-expanded={isExpanded}
-							>
-								{isExpanded ? (
-									<ChevronDown 
-										className="h-5 w-5 shrink-0 text-base-content transition-transform duration-200 group-hover/expand:scale-110 sm:h-4.5 sm:w-4.5 md:h-4 md:w-4" 
-										strokeWidth={2.5}
-										aria-hidden="true"
-									/>
-								) : (
-									<ChevronRight 
-										className="h-5 w-5 shrink-0 text-base-content transition-transform duration-200 group-hover/expand:scale-110 sm:h-4.5 sm:w-4.5 md:h-4 md:w-4" 
-										strokeWidth={2.5}
-										aria-hidden="true"
-									/>
-								)}
-							</button>
-						) : null}
-					</div>
+									p-0
+								'
+									aria-label={isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
+									aria-expanded={isExpanded}
+									leftIcon={
+										isExpanded ? (
+											<ChevronDown
+												className='h-5 w-5 shrink-0 text-base-content transition-transform duration-200 group-hover/expand:scale-110 sm:h-4.5 sm:w-4.5 md:h-4 md:w-4'
+												strokeWidth={2.5}
+												aria-hidden='true'
+											/>
+										) : (
+											<ChevronRight
+												className='h-5 w-5 shrink-0 text-base-content transition-transform duration-200 group-hover/expand:scale-110 sm:h-4.5 sm:w-4.5 md:h-4 md:w-4'
+												strokeWidth={2.5}
+												aria-hidden='true'
+											/>
+										)
+									}
+									contentDrivenHeight
+								/>
+							) : null}
+						</div>
 
 						{/* 2. Checkbox - Responsive sizing, properly centered */}
-						<div className="flex h-6 w-6 shrink-0 grow-0 items-center justify-center sm:h-5.5 sm:w-5.5 md:h-5 md:w-5">
-							<input
-								type="checkbox"
+						<div className='flex h-6 w-6 shrink-0 grow-0 items-center justify-center sm:h-5.5 sm:w-5.5 md:h-5 md:w-5'>
+							<Checkbox
 								checked={isSelected}
 								ref={(el) => {
 									if (el) {
@@ -302,7 +309,7 @@ export default function CategoryFilter({
 								}}
 								onChange={() => {}} // Controlled by row onClick
 								onClick={(e) => e.stopPropagation()} // Prevent double-toggle
-								className="checkbox checkbox-primary h-6 w-6 shrink-0 pointer-events-none cursor-pointer transition-all sm:checkbox-sm sm:h-5.5 sm:w-5.5 md:h-5 md:w-5"
+								className='checkbox-primary h-6 w-6 shrink-0 pointer-events-none cursor-pointer transition-all sm:checkbox-sm sm:h-5.5 sm:w-5.5 md:h-5 md:w-5'
 								aria-label={`${category.name} is ${isSelected ? 'selected' : 'not selected'}`}
 								tabIndex={-1}
 							/>
@@ -314,60 +321,68 @@ export default function CategoryFilter({
 								min-w-0 flex-1 text-left
 								text-base leading-snug transition-colors
 								sm:text-[15px] md:text-sm
-								${isSelected
-									? 'font-semibold text-primary'
-									: isPartial
+								${
+									isSelected
+										? 'font-semibold text-primary'
+										: isPartial
 										? 'font-medium text-base-content'
 										: depth === 0
-											? 'font-medium text-base-content'
-											: 'font-normal text-base-content/80'
+										? 'font-medium text-base-content'
+										: 'font-normal text-base-content/80'
 								}
-							`}
-						>
+							`}>
 							{category.name ?? 'Untitled category'}
 						</span>
 
-					{/* 4. Subcategory Count Badge - Powered by Badge component */}
-					{hasChildren && showCount && (
-						<Badge
-							variant="primary"
-							tone={isSelected ? 'solid' : isPartial ? 'subtle' : 'default'}
-							size="sm"
-						>
-							{category.subCategories.length}
-						</Badge>
-					)}
-				</div>
-
-		{/* Recursively render subcategories if expanded or if not collapsible */}
-				{hasChildren && (collapsible ? isExpanded : true) && (
-					<div className="mt-1 space-y-1">
-						{category.subCategories.map((subCategory) => 
-							renderCategoryNode(subCategory, depth + 1)
+						{/* 4. Subcategory Count Badge - Powered by Badge component */}
+						{hasChildren && showCount && (
+							<Badge
+								variant='primary'
+								tone={isSelected ? 'solid' : isPartial ? 'subtle' : 'default'}
+								size='sm'>
+								{category.subCategories.length}
+							</Badge>
 						)}
-			</div>
-		)}
+					</div>
+
+					{/* Recursively render subcategories if expanded or if not collapsible */}
+					{hasChildren && (collapsible ? isExpanded : true) && (
+						<div className='mt-1 space-y-1'>
+							{category.subCategories.map((subCategory) => renderCategoryNode(subCategory, depth + 1))}
+						</div>
+					)}
 				</div>
 			)
 		},
-		[expandedCategories, handleToggle, handleCategoryKeyDown, toggleExpand, maxDepth, collapsible, showCount, isFullySelected, isPartiallySelected]
+		[
+			expandedCategories,
+			handleToggle,
+			handleCategoryKeyDown,
+			toggleExpand,
+			maxDepth,
+			collapsible,
+			showCount,
+			isFullySelected,
+			isPartiallySelected,
+		]
 	)
 
 	// Empty state
 	if (categories.length === 0) {
 		return (
 			<div className={className}>
-				<p className="py-4 text-center text-base text-base-content/70">{emptyMessage}</p>
+				<p className='py-4 text-center text-base text-base-content/70'>{emptyMessage}</p>
 			</div>
 		)
 	}
 
 	return (
-		<div className={`${className}`} role="tree" aria-label="Product categories filter">
+		<div
+			className={`${className}`}
+			role='tree'
+			aria-label='Product categories filter'>
 			{/* Tree view */}
-			<div className="space-y-1">
-				{categories.map((category) => renderCategoryNode(category, 0))}
-			</div>
+			<div className='space-y-1'>{categories.map((category) => renderCategoryNode(category, 0))}</div>
 		</div>
 	)
 }

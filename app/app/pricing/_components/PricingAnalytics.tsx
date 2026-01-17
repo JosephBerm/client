@@ -21,6 +21,7 @@
  */
 
 import { useMemo, useState, type ReactNode } from 'react'
+import type { ColumnDef } from '@tanstack/react-table'
 
 import {
 	Activity,
@@ -46,6 +47,7 @@ import Badge from '@_components/ui/Badge'
 import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
 import { Tab, TabPanel, Tabs, TabsList } from '@_components/ui/Tabs'
+import { DataGrid } from '@_components/tables'
 
 // =========================================================================
 // HELPERS
@@ -184,49 +186,110 @@ function PriceListPerformanceTable({ analytics }: { analytics: PriceListAnalytic
 			</div>
 
 			<div className='overflow-x-auto'>
-				<table className='table table-zebra w-full'>
-					<thead>
-						<tr>
-							<th>Price List</th>
-							<th className='text-right'>Avg. Margin</th>
-							<th className='text-right'>Discounts Given</th>
-							<th className='text-right'>Calculations</th>
-							<th className='text-right'>Customers</th>
-						</tr>
-					</thead>
-					<tbody>
-						{sortedAnalytics.map((item) => (
-							<tr key={item.priceListId}>
-								<td>
-									<span className='font-medium text-base-content'>{item.priceListName}</span>
-									<span className='block text-xs text-base-content/60'>
-										{item.itemCount} products
-									</span>
-								</td>
-								<td className='text-right'>
-									<Badge
-										variant={
-											item.averageMargin >= 20
-												? 'success'
-												: item.averageMargin >= 15
-												? 'warning'
-												: 'error'
-										}
-										size='sm'>
-										{formatPercent(item.averageMargin)}
-									</Badge>
-								</td>
-								<td className='text-right font-medium'>{formatCurrency(item.totalDiscountGiven)}</td>
-								<td className='text-right text-base-content/70'>
-									{item.calculationCount.toLocaleString()}
-								</td>
-								<td className='text-right text-base-content/70'>{item.customerCount}</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+				<PriceListPerformanceDataGrid analytics={sortedAnalytics} />
 			</div>
 		</Card>
+	)
+}
+
+// =========================================================================
+// DATA GRID COMPONENT
+// =========================================================================
+
+interface PriceListPerformanceDataGridProps {
+	analytics: PriceListAnalytics[]
+}
+
+/**
+ * DataGrid component for displaying price list performance - mobile-first responsive
+ */
+function PriceListPerformanceDataGrid({ analytics }: PriceListPerformanceDataGridProps) {
+	const columns = useMemo<ColumnDef<PriceListAnalytics>[]>(
+		() => [
+			{
+				accessorKey: 'priceListName',
+				header: 'Price List',
+				cell: ({ row }) => {
+					const item = row.original
+					return (
+						<div className='min-w-0'>
+							<span className='text-xs sm:text-sm font-medium text-base-content block truncate'>
+								{item.priceListName}
+							</span>
+							<span className='text-[10px] sm:text-xs text-base-content/60'>
+								{item.itemCount} products
+							</span>
+						</div>
+					)
+				},
+				size: 140,
+			},
+			{
+				accessorKey: 'averageMargin',
+				header: 'Margin',
+				cell: ({ row }) => {
+					const item = row.original
+					return (
+						<div className='text-right'>
+							<Badge
+								variant={
+									item.averageMargin >= 20
+										? 'success'
+										: item.averageMargin >= 15
+										? 'warning'
+										: 'error'
+								}
+								size='sm'
+								className='text-[10px] sm:text-xs'>
+								{formatPercent(item.averageMargin)}
+							</Badge>
+						</div>
+					)
+				},
+				size: 80,
+			},
+			{
+				accessorKey: 'totalDiscountGiven',
+				header: 'Discounts',
+				cell: ({ row }) => (
+					<span className='text-xs sm:text-sm text-right font-medium block'>
+						{formatCurrency(row.original.totalDiscountGiven)}
+					</span>
+				),
+				size: 90,
+			},
+			{
+				accessorKey: 'calculationCount',
+				header: 'Calcs',
+				cell: ({ row }) => (
+					<span className='text-xs sm:text-sm text-right text-base-content/70 block'>
+						{row.original.calculationCount.toLocaleString()}
+					</span>
+				),
+				size: 70,
+			},
+			{
+				accessorKey: 'customerCount',
+				header: 'Cust.',
+				cell: ({ row }) => (
+					<span className='text-xs sm:text-sm text-right text-base-content/70 block'>
+						{row.original.customerCount}
+					</span>
+				),
+				size: 60,
+			},
+		],
+		[]
+	)
+
+	return (
+		<div className='min-w-[400px]'>
+			<DataGrid
+				columns={columns}
+				data={analytics}
+				ariaLabel='Price list performance'
+			/>
+		</div>
 	)
 }
 

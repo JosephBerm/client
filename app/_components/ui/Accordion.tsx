@@ -1,10 +1,10 @@
 /**
  * Accordion UI Component
- * 
+ *
  * Accessible, flexible accordion component following WAI-ARIA best practices.
  * Supports both compound component pattern and simple items array API.
  * Built with mobile-first responsive design following industry standards.
- * 
+ *
  * **Features:**
  * - Single or multiple open items
  * - Controlled and uncontrolled modes
@@ -13,7 +13,7 @@
  * - Customizable styling
  * - ARIA attributes for accessibility
  * - Mobile-first responsive design
- * 
+ *
  * **Mobile-First Design:**
  * - Touch-friendly tap targets (min 44px height)
  * - Responsive typography (text-base md:text-lg)
@@ -21,14 +21,14 @@
  * - Responsive border radius (rounded-xl md:rounded-2xl)
  * - Responsive icon sizes (h-4 w-4 md:h-5 md:w-5)
  * - Optimized for mobile interactions
- * 
+ *
  * **Accessibility:**
  * - Proper ARIA roles and attributes
  * - Keyboard navigation support
  * - Focus management with visible focus rings
  * - Screen reader announcements
  * - WCAG 2.1 AA compliant
- * 
+ *
  * **Usage (Compound Pattern):**
  * ```tsx
  * <Accordion allowMultiple>
@@ -42,17 +42,17 @@
  *   </AccordionItem>
  * </Accordion>
  * ```
- * 
+ *
  * **Usage (Simple API):**
  * ```tsx
  * const items = [
  *   { id: '1', question: 'Q1', answer: 'A1' },
  *   { id: '2', question: 'Q2', answer: 'A2' },
  * ]
- * 
+ *
  * <Accordion items={items} />
  * ```
- * 
+ *
  * **Usage (Complex Content):**
  * ```tsx
  * // Using compound pattern with complex content
@@ -70,7 +70,7 @@
  *     </AccordionContent>
  *   </AccordionItem>
  * </Accordion>
- * 
+ *
  * // Using simple API with complex content
  * const items = [
  *   {
@@ -86,19 +86,20 @@
  *   }
  * ]
  * ```
- * 
+ *
  * @module Accordion
  */
 
 'use client'
 
-import type { ReactNode, HTMLAttributes} from 'react';
+import type { ReactNode, HTMLAttributes } from 'react'
 import { createContext, useContext, useRef, useEffect } from 'react'
 
 import classNames from 'classnames'
 import { ChevronDown } from 'lucide-react'
 
 import { useAccordion } from '@_shared'
+import Button from '@_components/ui/Button'
 
 /**
  * Accordion context type.
@@ -109,62 +110,62 @@ interface AccordionContextValue {
 	 * Array of currently open item IDs.
 	 */
 	openItems: string[]
-	
+
 	/**
 	 * Toggle an item's open/closed state.
 	 */
 	toggleItem: (itemId: string) => void
-	
+
 	/**
 	 * Open an item.
 	 */
 	openItem: (itemId: string) => void
-	
+
 	/**
 	 * Close an item.
 	 */
 	closeItem: (itemId: string) => void
-	
+
 	/**
 	 * Check if an item is open.
 	 */
 	isItemOpen: (itemId: string) => boolean
-	
+
 	/**
 	 * Register an item ID (for keyboard navigation).
 	 */
 	registerItem: (itemId: string) => void
-	
+
 	/**
 	 * Unregister an item ID.
 	 */
 	unregisterItem: (itemId: string) => void
-	
+
 	/**
 	 * Get all registered item IDs in order.
 	 */
 	getItemIds: () => string[]
-	
+
 	/**
 	 * Focus the next item.
 	 */
 	focusNext: (currentItemId: string) => void
-	
+
 	/**
 	 * Focus the previous item.
 	 */
 	focusPrevious: (currentItemId: string) => void
-	
+
 	/**
 	 * Focus the first item.
 	 */
 	focusFirst: () => void
-	
+
 	/**
 	 * Focus the last item.
 	 */
 	focusLast: () => void
-	
+
 	/**
 	 * Store item ref for keyboard navigation.
 	 * @internal
@@ -202,7 +203,7 @@ export interface AccordionItemData {
 	id: string
 	/** Question/header text - supports ReactNode (text, icons, etc.) */
 	question: ReactNode
-	/** 
+	/**
 	 * Answer/content - supports any ReactNode (text, divs, forms, images, etc.)
 	 * For complex content, use `noDefaultContentStyling` to remove text-specific styles.
 	 */
@@ -213,7 +214,7 @@ export interface AccordionItemData {
 	triggerClassName?: string
 	/** Optional custom className for the content */
 	contentClassName?: string
-	/** 
+	/**
 	 * Remove default text styling from content wrapper.
 	 * Set to true when using complex content (divs, forms, images, etc.)
 	 * @default false
@@ -230,58 +231,58 @@ export interface AccordionProps extends Omit<HTMLAttributes<HTMLDivElement>, 'on
 	 * @default false
 	 */
 	allowMultiple?: boolean
-	
+
 	/**
 	 * Whether accordion is controlled (parent manages state).
 	 * @default false
 	 */
 	controlled?: boolean
-	
+
 	/**
 	 * Controlled value (array of open item IDs).
 	 * Required when controlled is true.
 	 */
 	value?: string[]
-	
+
 	/**
 	 * Callback when open items change.
 	 * Receives array of open item IDs.
 	 */
 	onValueChange?: (value: string[]) => void
-	
+
 	/**
 	 * Default open items (uncontrolled mode).
 	 * Array of item IDs that should be open initially.
 	 */
 	defaultValue?: string[]
-	
+
 	/**
 	 * Simple items array (alternative to compound pattern).
 	 * When provided, renders items automatically.
 	 */
 	items?: AccordionItemData[]
-	
+
 	/**
 	 * Custom className for accordion container.
 	 */
 	className?: string
-	
+
 	/**
 	 * Children (for compound pattern).
 	 */
 	children?: ReactNode
-	
+
 	/**
 	 * Whether to enable keyboard navigation.
 	 * @default true
 	 */
 	keyboardNavigation?: boolean
-	
+
 	/**
 	 * Callback when an item is opened.
 	 */
 	onItemOpen?: (itemId: string) => void
-	
+
 	/**
 	 * Callback when an item is closed.
 	 */
@@ -290,10 +291,10 @@ export interface AccordionProps extends Omit<HTMLAttributes<HTMLDivElement>, 'on
 
 /**
  * Accordion Component
- * 
+ *
  * Main accordion container that provides context to child components.
  * Supports both compound component pattern and simple items array.
- * 
+ *
  * @param props - Accordion configuration props
  * @returns Accordion component
  */
@@ -340,33 +341,26 @@ export default function Accordion({
 		<AccordionContext.Provider value={contextValue}>
 			<div
 				className={classNames('space-y-3 md:space-y-4', className)}
-				role="region"
-				aria-label="Accordion"
-				{...props}
-			>
-				{items ? (
-					// Simple API: render items automatically
-					items.map((item) => (
-						<AccordionItem
-							key={item.id}
-							id={item.id}
-							className={item.itemClassName}
-						>
-							<AccordionTrigger className={item.triggerClassName}>
-								{item.question}
-							</AccordionTrigger>
-							<AccordionContent 
-								className={item.contentClassName}
-								noDefaultStyling={item.noDefaultContentStyling}
-							>
-								{item.answer}
-							</AccordionContent>
-						</AccordionItem>
-					))
-				) : (
-					// Compound pattern: render children
-					children
-				)}
+				role='region'
+				aria-label='Accordion'
+				{...props}>
+				{items
+					? // Simple API: render items automatically
+					  items.map((item) => (
+							<AccordionItem
+								key={item.id}
+								id={item.id}
+								className={item.itemClassName}>
+								<AccordionTrigger className={item.triggerClassName}>{item.question}</AccordionTrigger>
+								<AccordionContent
+									className={item.contentClassName}
+									noDefaultStyling={item.noDefaultContentStyling}>
+									{item.answer}
+								</AccordionContent>
+							</AccordionItem>
+					  ))
+					: // Compound pattern: render children
+					  children}
 			</div>
 		</AccordionContext.Provider>
 	)
@@ -386,10 +380,10 @@ export interface AccordionItemProps extends HTMLAttributes<HTMLDivElement> {
 
 /**
  * AccordionItem Component
- * 
+ *
  * Individual accordion item container.
  * Must contain AccordionTrigger and AccordionContent as children.
- * 
+ *
  * @param props - AccordionItem props
  * @returns AccordionItem component
  */
@@ -428,8 +422,7 @@ export function AccordionItem({ id, children, className, ...props }: AccordionIt
 					className
 				)}
 				data-state={isOpen ? 'open' : 'closed'}
-				{...props}
-			>
+				{...props}>
 				{children}
 			</div>
 		</AccordionItemContext.Provider>
@@ -450,27 +443,21 @@ export interface AccordionTriggerProps extends HTMLAttributes<HTMLButtonElement>
 
 /**
  * AccordionTrigger Component
- * 
+ *
  * Clickable header that toggles the accordion item.
  * Handles keyboard events and ARIA attributes.
- * 
+ *
  * @param props - AccordionTrigger props
  * @returns AccordionTrigger component
  */
-export function AccordionTrigger({
-	children,
-	className,
-	icon,
-	onClick,
-	...props
-}: AccordionTriggerProps) {
+export function AccordionTrigger({ children, className, icon, onClick, ...props }: AccordionTriggerProps) {
 	const accordion = useAccordionContext()
 	const itemContext = useContext(AccordionItemContext)
-	
+
 	if (!itemContext) {
 		throw new Error('AccordionTrigger must be used within an AccordionItem')
 	}
-	
+
 	const { itemId } = itemContext
 	const isOpen = accordion.isItemOpen(itemId)
 	const triggerRef = useRef<HTMLButtonElement>(null)
@@ -509,10 +496,11 @@ export function AccordionTrigger({
 	}
 
 	return (
-		<button
+		<Button
 			ref={triggerRef}
-			type="button"
+			type='button'
 			data-accordion-trigger
+			variant='ghost'
 			aria-expanded={isOpen}
 			aria-controls={`accordion-content-${itemId}`}
 			id={`accordion-trigger-${itemId}`}
@@ -527,27 +515,30 @@ export function AccordionTrigger({
 				'hover:bg-base-200',
 				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
 				'rounded-t-xl md:rounded-t-2xl',
+				'h-auto',
 				className
 			)}
 			onClick={handleClick}
 			onKeyDown={handleKeyDown}
-			{...props}
-		>
-			<span className="flex-1 leading-relaxed">{children}</span>
-			{icon || (
-				<ChevronDown
-					className={classNames(
-						'h-4 w-4 md:h-5 md:w-5 shrink-0',
-						'transition-transform duration-300 ease-out',
-						'text-base-content/70',
-						{
-							'transform rotate-180': isOpen,
-						}
-					)}
-					aria-hidden="true"
-				/>
-			)}
-		</button>
+			rightIcon={
+				icon || (
+					<ChevronDown
+						className={classNames(
+							'h-4 w-4 md:h-5 md:w-5 shrink-0',
+							'transition-transform duration-300 ease-out',
+							'text-base-content/70',
+							{
+								'transform rotate-180': isOpen,
+							}
+						)}
+						aria-hidden='true'
+					/>
+				)
+			}
+			contentDrivenHeight
+			{...props}>
+			<span className='flex-1 leading-relaxed'>{children}</span>
+		</Button>
 	)
 }
 
@@ -555,7 +546,7 @@ export function AccordionTrigger({
  * AccordionContent component props.
  */
 export interface AccordionContentProps extends HTMLAttributes<HTMLDivElement> {
-	/** 
+	/**
 	 * Child content - supports any ReactNode (text, divs, forms, images, etc.)
 	 * For simple text, default styling is applied.
 	 * For complex content, use `noDefaultStyling` prop to remove text-specific styles.
@@ -563,7 +554,7 @@ export interface AccordionContentProps extends HTMLAttributes<HTMLDivElement> {
 	children: ReactNode
 	/** Custom className */
 	className?: string
-	/** 
+	/**
 	 * Remove default text styling wrapper.
 	 * Set to true when using complex content (divs, forms, images, etc.)
 	 * @default false
@@ -573,36 +564,31 @@ export interface AccordionContentProps extends HTMLAttributes<HTMLDivElement> {
 
 /**
  * AccordionContent Component
- * 
+ *
  * Collapsible content area that shows/hides based on item state.
  * Uses CSS transitions for smooth animations.
- * 
+ *
  * **Content Support:**
  * - Simple text: Default styling applied automatically
  * - Complex content (divs, forms, images): Use `noDefaultStyling={true}`
- * 
+ *
  * **Industry Best Practice:**
  * - Supports any ReactNode (React's equivalent of "slots")
  * - Flexible styling via `noDefaultStyling` prop
  * - Maintains padding for consistent spacing
  * - Full control over content structure
- * 
+ *
  * @param props - AccordionContent props
  * @returns AccordionContent component
  */
-export function AccordionContent({ 
-	children, 
-	className, 
-	noDefaultStyling = false,
-	...props 
-}: AccordionContentProps) {
+export function AccordionContent({ children, className, noDefaultStyling = false, ...props }: AccordionContentProps) {
 	const accordion = useAccordionContext()
 	const itemContext = useContext(AccordionItemContext)
-	
+
 	if (!itemContext) {
 		throw new Error('AccordionContent must be used within an AccordionItem')
 	}
-	
+
 	const { itemId } = itemContext
 	const isOpen = accordion.isItemOpen(itemId)
 	const contentRef = useRef<HTMLDivElement>(null)
@@ -610,7 +596,9 @@ export function AccordionContent({
 	// Handle height animation
 	useEffect(() => {
 		const content = contentRef.current
-		if (!content) {return}
+		if (!content) {
+			return
+		}
 
 		if (isOpen) {
 			// Measure natural height and set it
@@ -625,7 +613,7 @@ export function AccordionContent({
 		<div
 			ref={contentRef}
 			id={`accordion-content-${itemId}`}
-			role="region"
+			role='region'
 			aria-labelledby={`accordion-trigger-${itemId}`}
 			className={classNames(
 				'overflow-hidden',
@@ -636,16 +624,13 @@ export function AccordionContent({
 				},
 				className
 			)}
-			{...props}
-		>
+			{...props}>
 			{noDefaultStyling ? (
 				// No wrapper - full control for complex content
-				<div className="px-4 md:px-6 pb-4 md:pb-6 pt-0">
-					{children}
-				</div>
+				<div className='px-4 md:px-6 pb-4 md:pb-6 pt-0'>{children}</div>
 			) : (
 				// Default wrapper with text styling for simple content
-				<div className="px-4 md:px-6 pb-4 md:pb-6 pt-0 text-sm md:text-base leading-relaxed text-base-content/70">
+				<div className='px-4 md:px-6 pb-4 md:pb-6 pt-0 text-sm md:text-base leading-relaxed text-base-content/70'>
 					{children}
 				</div>
 			)}

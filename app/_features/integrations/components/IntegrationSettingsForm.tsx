@@ -9,6 +9,7 @@ import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
 import FormInput from '@_components/forms/FormInput'
 import Select, { type SelectOption } from '@_components/ui/Select'
+import Toggle from '@_components/ui/Toggle'
 
 import { useIntegrationSettings, useUpdateIntegrationSettings } from '../hooks'
 import type { IntegrationProvider, IntegrationSettingsDTO } from '../types'
@@ -122,10 +123,9 @@ export function IntegrationSettingsForm({ provider }: IntegrationSettingsFormPro
 								Automatically synchronize data at the configured interval
 							</p>
 						</div>
-						<input
-							type="checkbox"
+						<Toggle
 							id="auto-sync"
-							className="toggle toggle-primary"
+							variant="primary"
 							checked={formState.autoSyncEnabled}
 							onChange={(e) =>
 								setFormState((prev) => ({ ...prev, autoSyncEnabled: e.target.checked }))
@@ -161,10 +161,10 @@ export function IntegrationSettingsForm({ provider }: IntegrationSettingsFormPro
 							<label htmlFor="sync-customers" className="text-sm font-medium">
 								Customers
 							</label>
-							<input
-								type="checkbox"
+							<Toggle
 								id="sync-customers"
-								className="toggle toggle-primary toggle-sm"
+								variant="primary"
+								size="sm"
 								checked={formState.syncCustomers}
 								onChange={(e) =>
 									setFormState((prev) => ({ ...prev, syncCustomers: e.target.checked }))
@@ -176,10 +176,10 @@ export function IntegrationSettingsForm({ provider }: IntegrationSettingsFormPro
 							<label htmlFor="sync-invoices" className="text-sm font-medium">
 								Invoices
 							</label>
-							<input
-								type="checkbox"
+							<Toggle
 								id="sync-invoices"
-								className="toggle toggle-primary toggle-sm"
+								variant="primary"
+								size="sm"
 								checked={formState.syncInvoices}
 								onChange={(e) =>
 									setFormState((prev) => ({ ...prev, syncInvoices: e.target.checked }))
@@ -191,10 +191,10 @@ export function IntegrationSettingsForm({ provider }: IntegrationSettingsFormPro
 							<label htmlFor="sync-payments" className="text-sm font-medium">
 								Payments
 							</label>
-							<input
-								type="checkbox"
+							<Toggle
 								id="sync-payments"
-								className="toggle toggle-primary toggle-sm"
+								variant="primary"
+								size="sm"
 								checked={formState.syncPayments}
 								onChange={(e) =>
 									setFormState((prev) => ({ ...prev, syncPayments: e.target.checked }))
@@ -206,10 +206,10 @@ export function IntegrationSettingsForm({ provider }: IntegrationSettingsFormPro
 							<label htmlFor="sync-products" className="text-sm font-medium">
 								Products
 							</label>
-							<input
-								type="checkbox"
+							<Toggle
 								id="sync-products"
-								className="toggle toggle-primary toggle-sm"
+								variant="primary"
+								size="sm"
 								checked={formState.syncProducts}
 								onChange={(e) =>
 									setFormState((prev) => ({ ...prev, syncProducts: e.target.checked }))
@@ -232,10 +232,9 @@ export function IntegrationSettingsForm({ provider }: IntegrationSettingsFormPro
 								Receive real-time updates from {provider} when data changes
 							</p>
 						</div>
-						<input
-							type="checkbox"
+						<Toggle
 							id="webhooks"
-							className="toggle toggle-primary"
+							variant="primary"
 							checked={formState.webhooksEnabled}
 							onChange={(e) =>
 								setFormState((prev) => ({ ...prev, webhooksEnabled: e.target.checked }))

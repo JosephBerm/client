@@ -10,6 +10,7 @@
 'use client'
 
 import { useRichDataGridSelection } from '../../context/RichDataGridContext'
+import Button from '@_components/ui/Button'
 
 // ============================================================================
 // PROPS
@@ -43,30 +44,29 @@ export function SelectionStatusBar({ showClear = true, className = '' }: Selecti
 	return (
 		<div
 			className={`
-				flex items-center justify-between gap-3 
+				flex items-center justify-between gap-3
 				px-3 sm:px-4 py-2 sm:py-2.5
 				bg-primary/10 dark:bg-primary/20
 				border-t border-primary/20 dark:border-primary/30
 				text-xs sm:text-sm text-primary dark:text-primary
 				${className}
-			`}
-		>
-			<span className="font-medium">
+			`}>
+			<span className='font-medium'>
 				{selectedCount} row{selectedCount > 1 ? 's' : ''} selected
 			</span>
 
 			{showClear && (
-				<button 
-					type="button" 
-					onClick={clearSelection} 
-					className="text-primary/80 hover:text-primary dark:text-primary/70 dark:hover:text-primary underline text-xs touch-manipulation min-h-[44px] sm:min-h-0 flex items-center"
-				>
+				<Button
+					type='button'
+					onClick={clearSelection}
+					variant='ghost'
+					size='xs'
+					className='text-primary/80 hover:text-primary dark:text-primary/70 dark:hover:text-primary underline text-xs touch-manipulation min-h-[44px] sm:min-h-0 flex items-center h-auto p-0'>
 					Clear selection
-				</button>
+				</Button>
 			)}
 		</div>
 	)
 }
 
 export default SelectionStatusBar
-

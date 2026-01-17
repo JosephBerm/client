@@ -45,8 +45,17 @@ import type Quote from '@_classes/Quote'
 
 import OrderStatusBadge from '@_components/common/OrderStatusBadge'
 import QuoteStatusBadge from '@_components/common/QuoteStatusBadge'
-import PaginationControls from '@_components/store/PaginationControls'
 import Button from '@_components/ui/Button'
+import {
+	RichDataGrid,
+	createRichColumnHelper,
+	createColumnId,
+	FilterType,
+	SortDirection,
+	type RichSearchFilter,
+	type RichPagedResult,
+	type RichColumnDef,
+} from '@_components/tables/RichDataGrid'
 
 /**
  * CustomerHistory props interface.
@@ -77,101 +86,38 @@ export default function CustomerHistory({
 }: CustomerHistoryProps) {
 	// State
 	const [activeTab, setActiveTab] = useState<TabType>(initialTab)
-	const [orders, setOrders] = useState<Order[]>([])
-	const [quotes, setQuotes] = useState<Quote[]>([])
 	const [ordersTotal, setOrdersTotal] = useState(0)
 	const [quotesTotal, setQuotesTotal] = useState(0)
-	const [ordersPage, setOrdersPage] = useState(1)
-	const [quotesPage, setQuotesPage] = useState(1)
-	const [isLoadingOrders, setIsLoadingOrders] = useState(false)
-	const [isLoadingQuotes, setIsLoadingQuotes] = useState(false)
 
-	// Fetch orders
-	const fetchOrders = useCallback(async (page: number) => {
-		setIsLoadingOrders(true)
-		try {
-			const filter = new GenericSearchFilter()
-			filter.add('CustomerId', String(customerId))
-			filter.page = page
-			filter.pageSize = pageSize
-			filter.sortBy = 'CreatedAt'
-			filter.sortOrder = 'desc'
-
-			const { data } = await API.Orders.search(filter)
-			
-			if (data.payload) {
-				setOrders(data.payload.data ?? [])
-				setOrdersTotal(data.payload.total ?? 0)
-			}
-		} catch (error) {
-			notificationService.error('Failed to load orders', {
-				metadata: { error, customerId },
-				component: 'CustomerHistory',
-				action: 'fetchOrders',
-			})
-		} finally {
-			setIsLoadingOrders(false)
-		}
-	}, [customerId, pageSize])
-
-	// Fetch quotes
-	const fetchQuotes = useCallback(async (page: number) => {
-		setIsLoadingQuotes(true)
-		try {
-			const filter = new GenericSearchFilter()
-			filter.add('CustomerId', String(customerId))
-			filter.page = page
-			filter.pageSize = pageSize
-			filter.sortBy = 'CreatedAt'
-			filter.sortOrder = 'desc'
-
-			const { data } = await API.Quotes.search(filter)
-			
-			if (data.payload) {
-				setQuotes(data.payload.data ?? [])
-				setQuotesTotal(data.payload.total ?? 0)
-			}
-		} catch (error) {
-			notificationService.error('Failed to load quotes', {
-				metadata: { error, customerId },
-				component: 'CustomerHistory',
-				action: 'fetchQuotes',
-			})
-		} finally {
-			setIsLoadingQuotes(false)
-		}
-	}, [customerId, pageSize])
-
-	// Fetch data on mount and tab change
+	// Fetch totals for badge display
 	useEffect(() => {
-		if (activeTab === 'orders') {
-			void fetchOrders(ordersPage)
-		} else {
-			void fetchQuotes(quotesPage)
+		const fetchTotals = async () => {
+			try {
+				// Fetch orders total
+				const ordersFilter = new GenericSearchFilter()
+				ordersFilter.add('CustomerId', String(customerId))
+				ordersFilter.page = 1
+				ordersFilter.pageSize = 1
+				const { data: ordersData } = await API.Orders.search(ordersFilter)
+				setOrdersTotal(ordersData.payload?.total ?? 0)
+
+				// Fetch quotes total
+				const quotesFilter = new GenericSearchFilter()
+				quotesFilter.add('CustomerId', String(customerId))
+				quotesFilter.page = 1
+				quotesFilter.pageSize = 1
+				const { data: quotesData } = await API.Quotes.search(quotesFilter)
+				setQuotesTotal(quotesData.payload?.total ?? 0)
+			} catch (error) {
+				notificationService.error('Failed to load history totals', {
+					metadata: { error, customerId },
+					component: 'CustomerHistory',
+					action: 'fetchTotals',
+				})
+			}
 		}
-	}, [activeTab, ordersPage, quotesPage, fetchOrders, fetchQuotes])
-
-	// Handle pagination
-	const handleOrdersPageChange = (newPage: number) => {
-		setOrdersPage(newPage)
-	}
-
-	const handleQuotesPageChange = (newPage: number) => {
-		setQuotesPage(newPage)
-	}
-
-	// Refresh current tab
-	const handleRefresh = () => {
-		if (activeTab === 'orders') {
-			void fetchOrders(ordersPage)
-		} else {
-			void fetchQuotes(quotesPage)
-		}
-	}
-
-	// Calculate total pages
-	const ordersTotalPages = Math.ceil(ordersTotal / pageSize)
-	const quotesTotalPages = Math.ceil(quotesTotal / pageSize)
+		void fetchTotals()
+	}, [customerId])
 
 	return (
 		<div className={`card bg-base-100 border border-base-300 shadow-sm ${className}`}>
@@ -179,16 +125,6 @@ export default function CustomerHistory({
 				{/* Header with tabs */}
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
 					<h3 className="text-lg font-semibold">Customer History</h3>
-					<div className="flex items-center gap-2">
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={handleRefresh}
-							leftIcon={<RefreshCw size={14} />}
-						>
-							Refresh
-						</Button>
-					</div>
 				</div>
 
 				{/* Tabs */}
@@ -215,25 +151,9 @@ export default function CustomerHistory({
 
 			{/* Content */}
 			{activeTab === 'orders' ? (
-				<OrdersTab
-					orders={orders}
-					isLoading={isLoadingOrders}
-					currentPage={ordersPage}
-					totalPages={ordersTotalPages}
-					totalItems={ordersTotal}
-					pageSize={pageSize}
-					onPageChange={handleOrdersPageChange}
-				/>
+				<OrdersTab customerId={customerId} pageSize={pageSize} />
 			) : (
-				<QuotesTab
-					quotes={quotes}
-					isLoading={isLoadingQuotes}
-					currentPage={quotesPage}
-					totalPages={quotesTotalPages}
-					totalItems={quotesTotal}
-					pageSize={pageSize}
-					onPageChange={handleQuotesPageChange}
-				/>
+				<QuotesTab customerId={customerId} pageSize={pageSize} />
 			)}
 			</div>
 		</div>
@@ -242,205 +162,231 @@ export default function CustomerHistory({
 
 /**
  * Orders tab content.
- * Uses existing OrderStatusBadge and PaginationControls components (DRY principle).
+ * Uses RichDataGrid for consistent table display (DRY principle).
  */
 interface OrdersTabProps {
-	orders: Order[]
-	isLoading: boolean
-	currentPage: number
-	totalPages: number
-	totalItems: number
+	customerId: number
 	pageSize: number
-	onPageChange: (page: number) => void
 }
 
-function OrdersTab({
-	orders,
-	isLoading,
-	currentPage,
-	totalPages,
-	totalItems,
-	pageSize,
-	onPageChange,
-}: OrdersTabProps) {
-	if (isLoading) {
-		return (
-			<div className="flex items-center justify-center py-8">
-				<span className="loading loading-spinner loading-md" />
-			</div>
-		)
-	}
+function OrdersTab({ customerId, pageSize }: OrdersTabProps) {
+	const columnHelper = createRichColumnHelper<Order>()
 
-	if (orders.length === 0) {
-		return (
-			<div className="flex flex-col items-center justify-center py-8 text-base-content/60">
-				<Package size={32} className="mb-2" />
-				<p>No orders found</p>
-			</div>
-		)
+	const columns: RichColumnDef<Order, unknown>[] = [
+		columnHelper.accessor('id', {
+			header: 'Order #',
+			filterType: FilterType.Number,
+			cell: ({ row }) => (
+				<span className="font-medium">#{row.original.id}</span>
+			),
+		}),
+		columnHelper.accessor('createdAt', {
+			header: 'Date',
+			filterType: FilterType.Date,
+			cell: ({ row }) => (
+				<span className="text-base-content/70">{formatDate(row.original.createdAt, 'short')}</span>
+			),
+		}),
+		columnHelper.accessor('status', {
+			header: 'Status',
+			filterType: FilterType.Select,
+			cell: ({ row }) => (
+				<OrderStatusBadge 
+					status={(row.original.status ?? 100) as OrderStatus} 
+					className="badge-sm"
+				/>
+			),
+		}),
+		columnHelper.accessor('total', {
+			header: 'Total',
+			filterType: FilterType.Number,
+			cell: ({ row }) => (
+				<span className="font-medium">{formatCurrency(row.original.total ?? 0)}</span>
+			),
+		}),
+		columnHelper.display({
+			id: 'actions',
+			header: '',
+			cell: ({ row }) => (
+				<Link href={Routes.Orders.detail(row.original.id ?? 0)}>
+					<Button variant="ghost" size="sm">
+						<Eye size={14} />
+					</Button>
+				</Link>
+			),
+		}),
+	]
+
+	const fetcher = async (filter: RichSearchFilter): Promise<RichPagedResult<Order>> => {
+		const searchFilter = new GenericSearchFilter()
+		searchFilter.add('CustomerId', String(customerId))
+		searchFilter.page = filter.page
+		searchFilter.pageSize = filter.pageSize
+		searchFilter.sortBy = 'CreatedAt'
+		searchFilter.sortOrder = 'desc'
+
+		const { data } = await API.Orders.search(searchFilter)
+		
+		if (data.payload) {
+			return {
+				data: data.payload.data ?? [],
+				page: filter.page,
+				pageSize: filter.pageSize,
+				total: data.payload.total ?? 0,
+				totalPages: data.payload.totalPages ?? 0,
+				hasNext: (data.payload.totalPages ?? 0) > filter.page,
+				hasPrevious: filter.page > 1,
+			}
+		}
+
+		return {
+			data: [],
+			page: 1,
+			pageSize: filter.pageSize,
+			total: 0,
+			totalPages: 0,
+			hasNext: false,
+			hasPrevious: false,
+		}
 	}
 
 	return (
-		<>
-			<div className="overflow-x-auto">
-				{/* eslint-disable-next-line no-restricted-syntax -- Semantic HTML table for tabular order data */}
-				<table className="table table-sm">
-					<thead>
-						<tr>
-							<th>Order #</th>
-							<th>Date</th>
-							<th>Status</th>
-							<th>Total</th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						{orders.map((order) => (
-							<tr key={order.id}>
-								<td className="font-medium">
-									#{order.id}
-								</td>
-								<td className="text-base-content/70">
-									{formatDate(order.createdAt, 'short')}
-								</td>
-								<td>
-									<OrderStatusBadge 
-										status={(order.status ?? 100) as OrderStatus} 
-										className="badge-sm"
-									/>
-								</td>
-								<td className="font-medium">
-									{formatCurrency(order.total ?? 0)}
-								</td>
-								<td>
-									<Link href={Routes.Orders.detail(order.id ?? 0)}>
-										<Button variant="ghost" size="sm">
-											<Eye size={14} />
-										</Button>
-									</Link>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
-
-			{/* Pagination - Using enterprise PaginationControls component */}
-			{totalPages > 1 && (
-				<div className="mt-4">
-					<PaginationControls
-						currentPage={currentPage}
-						totalPages={totalPages}
-						totalItems={totalItems}
-						displayedItems={orders.length}
-						onPageChange={onPageChange}
-						pageRange={1}
-					/>
+		<RichDataGrid<Order>
+			columns={columns}
+			fetcher={fetcher}
+			filterKey="customer-orders"
+			defaultPageSize={pageSize}
+			defaultSorting={[
+				{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending },
+			]}
+			enableGlobalSearch={false}
+			enableColumnFilters={false}
+			enableRowSelection={false}
+			showToolbar={false}
+			ariaLabel="Customer orders"
+			emptyState={
+				<div className="flex flex-col items-center justify-center py-8 text-base-content/60">
+					<Package size={32} className="mb-2" />
+					<p>No orders found</p>
 				</div>
-			)}
-		</>
+			}
+		/>
 	)
 }
 
 /**
  * Quotes tab content.
- * Uses existing QuoteStatusBadge and PaginationControls components (DRY principle).
+ * Uses RichDataGrid for consistent table display (DRY principle).
  */
 interface QuotesTabProps {
-	quotes: Quote[]
-	isLoading: boolean
-	currentPage: number
-	totalPages: number
-	totalItems: number
+	customerId: number
 	pageSize: number
-	onPageChange: (page: number) => void
 }
 
-function QuotesTab({
-	quotes,
-	isLoading,
-	currentPage,
-	totalPages,
-	totalItems,
-	pageSize,
-	onPageChange,
-}: QuotesTabProps) {
-	if (isLoading) {
-		return (
-			<div className="flex items-center justify-center py-8">
-				<span className="loading loading-spinner loading-md" />
-			</div>
-		)
-	}
+function QuotesTab({ customerId, pageSize }: QuotesTabProps) {
+	const columnHelper = createRichColumnHelper<Quote>()
 
-	if (quotes.length === 0) {
-		return (
-			<div className="flex flex-col items-center justify-center py-8 text-base-content/60">
-				<FileText size={32} className="mb-2" />
-				<p>No quotes found</p>
-			</div>
-		)
+	const columns: RichColumnDef<Quote, unknown>[] = [
+		columnHelper.accessor('id', {
+			header: 'Quote',
+			filterType: FilterType.Text,
+			cell: ({ row }) => (
+				<span className="font-medium truncate max-w-[150px]">
+					{row.original.id?.substring(0, 8) ?? '—'}
+				</span>
+			),
+		}),
+		columnHelper.accessor('createdAt', {
+			header: 'Date',
+			filterType: FilterType.Date,
+			cell: ({ row }) => (
+				<span className="text-base-content/70">{formatDate(row.original.createdAt, 'short')}</span>
+			),
+		}),
+		columnHelper.accessor('status', {
+			header: 'Status',
+			filterType: FilterType.Select,
+			cell: ({ row }) => (
+				<QuoteStatusBadge 
+					status={(row.original.status ?? 0) as QuoteStatus} 
+					className="badge-sm"
+				/>
+			),
+		}),
+		columnHelper.display({
+			id: 'items',
+			header: 'Items',
+			cell: ({ row }) => (
+				<span className="text-center">{row.original.products?.length ?? 0}</span>
+			),
+		}),
+		columnHelper.display({
+			id: 'actions',
+			header: '',
+			cell: ({ row }) => (
+				<Link href={Routes.Quotes.detail(row.original.id ?? '')}>
+					<Button variant="ghost" size="sm">
+						<Eye size={14} />
+					</Button>
+				</Link>
+			),
+		}),
+	]
+
+	const fetcher = async (filter: RichSearchFilter): Promise<RichPagedResult<Quote>> => {
+		const searchFilter = new GenericSearchFilter()
+		searchFilter.add('CustomerId', String(customerId))
+		searchFilter.page = filter.page
+		searchFilter.pageSize = filter.pageSize
+		searchFilter.sortBy = 'CreatedAt'
+		searchFilter.sortOrder = 'desc'
+
+		const { data } = await API.Quotes.search(searchFilter)
+		
+		if (data.payload) {
+			return {
+				data: data.payload.data ?? [],
+				page: filter.page,
+				pageSize: filter.pageSize,
+				total: data.payload.total ?? 0,
+				totalPages: data.payload.totalPages ?? 0,
+				hasNext: (data.payload.totalPages ?? 0) > filter.page,
+				hasPrevious: filter.page > 1,
+			}
+		}
+
+		return {
+			data: [],
+			page: 1,
+			pageSize: filter.pageSize,
+			total: 0,
+			totalPages: 0,
+			hasNext: false,
+			hasPrevious: false,
+		}
 	}
 
 	return (
-		<>
-			<div className="overflow-x-auto">
-				{/* eslint-disable-next-line no-restricted-syntax -- Semantic HTML table for tabular quote data */}
-				<table className="table table-sm">
-					<thead>
-						<tr>
-							<th>Quote</th>
-							<th>Date</th>
-							<th>Status</th>
-							<th>Items</th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						{quotes.map((quote) => (
-							<tr key={quote.id}>
-								<td className="font-medium truncate max-w-[150px]">
-									{quote.id?.substring(0, 8) ?? '—'}
-								</td>
-								<td className="text-base-content/70">
-									{formatDate(quote.createdAt, 'short')}
-								</td>
-								<td>
-									<QuoteStatusBadge 
-										status={(quote.status ?? 0) as QuoteStatus} 
-										className="badge-sm"
-									/>
-								</td>
-								<td className="text-center">
-									{quote.products?.length ?? 0}
-								</td>
-								<td>
-									<Link href={Routes.Quotes.detail(quote.id ?? '')}>
-										<Button variant="ghost" size="sm">
-											<Eye size={14} />
-										</Button>
-									</Link>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
-
-			{/* Pagination - Using enterprise PaginationControls component */}
-			{totalPages > 1 && (
-				<div className="mt-4">
-					<PaginationControls
-						currentPage={currentPage}
-						totalPages={totalPages}
-						totalItems={totalItems}
-						displayedItems={quotes.length}
-						onPageChange={onPageChange}
-						pageRange={1}
-					/>
+		<RichDataGrid<Quote>
+			columns={columns}
+			fetcher={fetcher}
+			filterKey="customer-quotes"
+			defaultPageSize={pageSize}
+			defaultSorting={[
+				{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending },
+			]}
+			enableGlobalSearch={false}
+			enableColumnFilters={false}
+			enableRowSelection={false}
+			showToolbar={false}
+			ariaLabel="Customer quotes"
+			emptyState={
+				<div className="flex flex-col items-center justify-center py-8 text-base-content/60">
+					<FileText size={32} className="mb-2" />
+					<p>No quotes found</p>
 				</div>
-			)}
-		</>
+			}
+		/>
 	)
 }
 

@@ -20,6 +20,8 @@ import {
 	operatorRequiresSecondValue,
 } from '../../types'
 
+import Input from '@_components/ui/Input'
+
 // ============================================================================
 // PROPS
 // ============================================================================
@@ -184,11 +186,12 @@ export function DateFilterInput({ value, onChange }: DateFilterInputProps) {
 					<label className="block text-xs font-medium text-base-content/70 mb-1">
 						{requiresSecondValue ? 'From' : 'Date'}
 					</label>
-					<input
+					<Input
 						type="date"
+						size="sm"
 						value={dateValue}
 						onChange={handleValueChange}
-						className="input input-bordered input-sm w-full dark:bg-base-300 dark:border-base-content/20"
+						className="w-full"
 					/>
 				</div>
 			)}
@@ -199,11 +202,12 @@ export function DateFilterInput({ value, onChange }: DateFilterInputProps) {
 					<label className="block text-xs font-medium text-base-content/70 mb-1">
 						To
 					</label>
-					<input
+					<Input
 						type="date"
+						size="sm"
 						value={dateValueTo}
 						onChange={handleValueToChange}
-						className="input input-bordered input-sm w-full dark:bg-base-300 dark:border-base-content/20"
+						className="w-full"
 					/>
 				</div>
 			)}

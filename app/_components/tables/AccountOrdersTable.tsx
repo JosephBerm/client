@@ -204,7 +204,7 @@ export default function AccountOrdersTable() {
 				<h2 className="card-title text-lg sm:text-xl md:text-2xl font-semibold mb-4 sm:mb-6 text-base-content">
 					Recent Orders
 				</h2>
-				<div className="min-w-0 overflow-hidden">
+				<div className="min-w-0 overflow-hidden" data-testid="orders-table">
 				<DataGrid
 					columns={columns}
 					data={orders}

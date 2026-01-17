@@ -175,7 +175,9 @@ export function formatDateTime(date: DateInput): string {
  * import { formatDateForInput } from '@_lib/dates'
  *
  * // In a form component
- * <input
+ * import Input from '@_components/ui/Input';
+ * 
+ * <Input
  *   type="date"
  *   value={formatDateForInput(order.deliveryDate)}
  * />

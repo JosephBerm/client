@@ -2,6 +2,8 @@
 
 import { memo, useCallback } from 'react'
 
+import Button from '@_components/ui/Button'
+
 import type { EmblaCarouselType } from 'embla-carousel'
 
 interface CarouselDotsProps {
@@ -30,32 +32,42 @@ const CarouselDots = memo(function CarouselDots({
 		[emblaApi]
 	)
 
-	if (!showDots || scrollSnaps.length <= 1) {return null}
+	if (!showDots || scrollSnaps.length <= 1) {
+		return null
+	}
 
 	return (
-		<div className='flex items-center justify-center gap-2 sm:gap-2.5 md:gap-3 py-2' role='tablist' aria-label='Carousel pagination'>
+		<div
+			className='flex items-center justify-center gap-2 sm:gap-2.5 md:gap-3 py-2'
+			role='tablist'
+			aria-label='Carousel pagination'>
 			{scrollSnaps.map((_, index) => {
 				const isSelected = index === selectedIndex
-				
+
 				return (
-					<button
+					<Button
 						key={index}
 						onClick={() => scrollTo(index)}
+						variant='ghost'
 						className={`
 							transition-all duration-300 ease-in-out
 							cursor-pointer
 							rounded-full
-							min-h-[8px] min-w-[8px]
+							min-h-[8px] min-w-[8px] p-0 h-auto
 							focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent
-							${isSelected
-								? 'w-8 sm:w-9 md:w-10 h-2 sm:h-2 md:h-2.5 bg-primary'
-								: 'w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-2.5 md:h-2.5 bg-base-content/30 hover:bg-base-content/50 active:bg-base-content/60 hover:scale-110 active:scale-95'
+							${
+								isSelected
+									? 'w-8 sm:w-9 md:w-10 h-2 sm:h-2 md:h-2.5 bg-primary'
+									: 'w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-2.5 md:h-2.5 bg-base-content/30 hover:bg-base-content/50 active:bg-base-content/60 hover:scale-110 active:scale-95'
 							}
-						`.trim().replace(/\s+/g, ' ')}
+						`
+							.trim()
+							.replace(/\s+/g, ' ')}
 						aria-label={`Go to slide ${index + 1}`}
 						aria-selected={isSelected}
 						role='tab'
 						type='button'
+						contentDrivenHeight
 					/>
 				)
 			})}
@@ -66,4 +78,3 @@ const CarouselDots = memo(function CarouselDots({
 CarouselDots.displayName = 'CarouselDots'
 
 export default CarouselDots
-
