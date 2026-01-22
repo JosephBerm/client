@@ -71,18 +71,14 @@ import QuoteStatusHelper from '@_classes/Helpers/QuoteStatusHelper'
 
 /**
  * QuoteStatusBadge component props interface.
+ * Extends HTMLSpanElement attributes to support data-testid and other HTML attributes.
  */
-interface QuoteStatusBadgeProps {
+interface QuoteStatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 	/**
 	 * Quote status enum value (from central enum)
 	 * Numeric values: Unread=0, Read=1, Approved=2, Converted=3, Rejected=4, Expired=5
 	 */
 	status: QuoteStatus
-
-	/**
-	 * Optional additional CSS classes
-	 */
-	className?: string
 }
 
 /**
@@ -106,7 +102,7 @@ interface QuoteStatusBadgeProps {
  * @param props - Component props including status and className
  * @returns QuoteStatusBadge component
  */
-export default function QuoteStatusBadge({ status, className }: QuoteStatusBadgeProps) {
+export default function QuoteStatusBadge({ status, className, ...rest }: QuoteStatusBadgeProps) {
 	// Get display name and variant from QuoteStatusHelper (zero magic strings!)
 	const displayName = QuoteStatusHelper.getDisplay(status)
 	const variant = QuoteStatusHelper.getVariant(status)
@@ -124,6 +120,7 @@ export default function QuoteStatusBadge({ status, className }: QuoteStatusBadge
 				},
 				className
 			)}
+			{...rest}
 		>
 			{displayName}
 		</span>

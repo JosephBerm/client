@@ -46,3 +46,7 @@ mcp.json
 /playwright-report/
 /test-results/
 test-results*.txt
+
+# Playwright auth state (contains session tokens)
+/.auth/
+.auth/

@@ -24,6 +24,7 @@ import path from 'path'
  */
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000'
 const IS_CI = !!process.env.CI
+const IS_UI_MODE = process.argv.includes('--ui')
 
 // Storage state paths for authenticated sessions
 const AUTH_DIR = path.join(__dirname, '.auth')
@@ -33,8 +34,8 @@ export default defineConfig({
 	testDir: './e2e',
 	testMatch: '**/*.spec.ts',
 
-	// Run tests in files in parallel
-	fullyParallel: true,
+	// Run tests in files in parallel (disabled in UI mode for easier debugging)
+	fullyParallel: !IS_UI_MODE,
 
 	// Fail the build on CI if test.only is left in code
 	forbidOnly: IS_CI,
@@ -42,16 +43,24 @@ export default defineConfig({
 	// Retry configuration
 	retries: IS_CI ? 2 : 0,
 
-	// Limit parallel workers on CI
-	workers: IS_CI ? 1 : undefined,
+	// Worker configuration:
+	// - UI mode: 1 worker (sequential, easier to debug)
+	// - Local: 4 workers (balanced performance/memory)
+	// - CI: 2 workers (consistent, lower memory)
+	workers: IS_UI_MODE ? 1 : IS_CI ? 2 : 4,
 
 	// Reporter configuration
-	// v1.57.0: Speedboard tab for performance analysis
-	reporter: [
-		['html', { open: IS_CI ? 'never' : 'on-failure', outputFolder: 'playwright-report' }],
-		['list'],
-		IS_CI ? ['github'] : ['line'],
+	// Local: Minimal reporters (faster, less memory)
+	// CI: Full reporters for debugging failures
+	reporter: IS_CI ? [
+		['html', { open: 'never', outputFolder: 'playwright-report' }],
+		['github'],
 		['json', { outputFile: 'test-results/results.json' }],
+	] : IS_UI_MODE ? [
+		['html', { open: 'never', outputFolder: 'playwright-report' }],
+	] : [
+		['html', { open: 'on-failure', outputFolder: 'playwright-report' }],
+		['line'],
 	],
 
 	// Global test timeout
@@ -105,15 +114,14 @@ export default defineConfig({
 	globalTeardown: require.resolve('./e2e/global-teardown'),
 
 	// Web server configuration
-	// Starts Next.js dev server before tests if not running
-	webServer: {
+	// CI: Auto-start Next.js dev server
+	// Local: Assume dev server is already running (saves memory, faster startup)
+	webServer: IS_CI ? {
 		command: 'npm run dev',
 		url: BASE_URL,
-		reuseExistingServer: !IS_CI,
-		timeout: 120000, // 2 minutes for Next.js to start
-		// v1.57.0: New wait option for log-based readiness
-		// wait: /ready started server on/i,
-	},
+		reuseExistingServer: false,
+		timeout: 120000,
+	} : undefined,
 
 	// Output directory for test artifacts
 	outputDir: 'test-results',
@@ -317,6 +325,22 @@ export default defineConfig({
 			dependencies: ['setup'],
 			testMatch: /journeys\/accessibility\/.*.spec.ts/,
 			// tag: '@a11y',
+		},
+
+		// =============================================
+		// INTEGRATION TESTS
+		// Cross-role workflows and data integrity tests
+		// These tests switch between multiple role contexts
+		// =============================================
+		{
+			name: 'integration',
+			use: {
+				...devices['Desktop Chrome'],
+				// No storageState - tests create their own contexts per role
+			},
+			dependencies: ['setup'],
+			testMatch: /journeys\/integration\/.*.spec.ts/,
+			// tag: '@integration',
 		},
 	],
 })

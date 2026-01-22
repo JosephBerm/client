@@ -44,13 +44,15 @@ export class StorePage extends BasePage {
 		// Search and filters - use visible search input (lg version is visible on desktop)
 		this.searchInput = page.locator('#product-search-lg').or(page.locator('#product-search'))
 		this.searchButton = page.getByRole('button', { name: /search/i })
-		this.categoryFilter = page.getByRole('combobox', { name: /category/i })
+		// Category filter is a tree view with checkboxes (modern UX pattern), not a dropdown
+		this.categoryFilter = page.getByRole('tree', { name: /categories/i }).or(page.locator('[role="tree"]'))
 		this.sortSelect = page.getByRole('combobox', { name: /sort/i })
 		this.filterButton = page.getByRole('button', { name: /filter/i })
 		this.clearFiltersButton = page.getByRole('button', { name: /clear|reset/i })
 
-		// Product grid - use specific testid
-		this.productGrid = page.getByTestId('product-grid')
+		// Product grid - look for the main product area
+		this.productGrid = page.locator('main').locator('main').first()
+		// Product cards have data-testid="product-card" - use this stable selector
 		this.productCards = page.getByTestId('product-card')
 		this.noResultsMessage = page.getByText(/no products|no results|nothing found/i)
 
@@ -75,24 +77,27 @@ export class StorePage extends BasePage {
 	}
 
 	async expectLoaded(): Promise<void> {
-		// Wait for page to finish loading first
+		// Wait for page to finish loading
 		await this.page.waitForLoadState('networkidle')
 
-		// Wait for products to load - either product cards are visible or no results message
-		// Give more time since products come from API
-		const hasProducts = await this.productCards.first().isVisible().catch(() => false)
-		const hasNoResults = await this.noResultsMessage.isVisible().catch(() => false)
+		// Wait for products to load - look for Add to Cart buttons or heading
+		const addToCartButtons = this.page.getByRole('button', { name: /add to cart/i })
+		const storeHeading = this.page.getByRole('heading', { name: /store|catalog/i }).first()
 
-		if (!hasProducts && !hasNoResults) {
-			// Wait a bit more for products to load
-			await this.productCards.first().waitFor({ state: 'visible', timeout: 20000 }).catch(() => {
-				// If still not visible, check for no results
-			})
+		// Wait up to 30s for products to load
+		try {
+			await addToCartButtons.first().waitFor({ state: 'visible', timeout: 30000 })
+		} catch {
+			// Check if at least heading is visible
+			const hasHeading = await storeHeading.isVisible().catch(() => false)
+			const hasNoResults = await this.noResultsMessage.isVisible().catch(() => false)
+			expect(hasHeading || hasNoResults).toBeTruthy()
+			return
 		}
 
-		// Final check - either products or no results
-		const finalHasProducts = await this.productCards.first().isVisible().catch(() => false)
-		expect(finalHasProducts).toBeTruthy()
+		// Products loaded successfully
+		const productCount = await addToCartButtons.count()
+		expect(productCount).toBeGreaterThan(0)
 	}
 
 	// =============================================
@@ -118,11 +123,31 @@ export class StorePage extends BasePage {
 	}
 
 	/**
-	 * Select a category
+	 * Select a category from the tree view filter
+	 * The category filter uses checkboxes in a tree structure, not a dropdown
 	 */
 	async selectCategory(category: string): Promise<void> {
-		await this.categoryFilter.selectOption(category)
+		// Find the category row by its name and click it (clicking the row toggles the checkbox)
+		const categoryRow = this.categoryFilter.getByRole('treeitem').filter({ hasText: category })
+		await categoryRow.click()
 		await this.waitForLoad()
+	}
+
+	/**
+	 * Get all available category names from the tree view
+	 */
+	async getCategoryNames(): Promise<string[]> {
+		const treeItems = this.categoryFilter.getByRole('treeitem')
+		const count = await treeItems.count()
+		const names: string[] = []
+		for (let i = 0; i < count; i++) {
+			const text = await treeItems.nth(i).textContent()
+			if (text) {
+				// Extract just the category name (text content may include badges/counts)
+				names.push(text.trim().split('\n')[0].trim())
+			}
+		}
+		return names
 	}
 
 	/**

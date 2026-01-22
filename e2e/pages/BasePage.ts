@@ -75,12 +75,18 @@ export abstract class BasePage {
 
 	/**
 	 * Wait for page to finish loading
+	 * Rule 130b-playwright: Prefer element-based waits over networkidle
+	 * This base implementation waits for loading spinners to disappear
 	 */
 	async waitForLoad(): Promise<void> {
-		await this.page.waitForLoadState('networkidle')
+		// Wait for DOM to be ready first
+		await this.page.waitForLoadState('domcontentloaded')
+
 		// Wait for any loading spinners to disappear
-		await this.loadingSpinner.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {
-			// Loading spinner might not exist, that's okay
+		// RichDataGrid uses class "loading loading-spinner" for loading state
+		const anySpinner = this.page.locator('.loading.loading-spinner, [data-testid="loading-spinner"]')
+		await anySpinner.first().waitFor({ state: 'hidden', timeout: 15000 }).catch(() => {
+			// Loading spinner might not exist or already hidden, that's okay
 		})
 	}
 

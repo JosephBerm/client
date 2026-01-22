@@ -37,8 +37,8 @@ export default function AuthModalHeader({
 }: AuthModalHeaderProps) {
 	return (
 		<div className={LAYOUT_CLASSES.HEADER_ROW}>
-			{/* Back button - only shown in signup view */}
-			{currentView === 'signup' ? (
+			{/* Back button - shown in signup and phone views */}
+			{currentView === 'signup' || currentView === 'phone' ? (
 				<Button
 					type='button'
 					variant='ghost'

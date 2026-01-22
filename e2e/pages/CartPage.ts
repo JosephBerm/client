@@ -31,6 +31,15 @@ export class CartPage extends BasePage {
 	readonly promoCodeInput: Locator
 	readonly applyPromoButton: Locator
 
+	// Quote request form (B2B model - quote form is on cart page)
+	readonly quoteForm: Locator
+	readonly firstNameInput: Locator
+	readonly lastNameInput: Locator
+	readonly emailInput: Locator
+	readonly notesInput: Locator
+	readonly submitQuoteButton: Locator
+	readonly quoteSuccessMessage: Locator
+
 	constructor(page: Page) {
 		super(page)
 
@@ -47,13 +56,23 @@ export class CartPage extends BasePage {
 		this.discount = page.getByTestId('cart-discount').or(page.getByText(/discount/i))
 
 		// Actions
-		this.checkoutButton = page.getByRole('button', { name: /checkout|proceed/i })
-		this.continueShoppingButton = page.getByRole('link', { name: /continue shopping/i })
+		// B2B quote-based system: "Submit Quote Request" button instead of traditional checkout
+		this.checkoutButton = page.getByRole('button', { name: /request|submit.*quote|checkout|proceed/i })
+		this.continueShoppingButton = page.getByRole('link', { name: /continue shopping|browse/i })
 		this.clearCartButton = page.getByRole('button', { name: /clear|empty cart/i })
 
 		// Promo code
 		this.promoCodeInput = page.getByPlaceholder(/promo|coupon|discount/i)
 		this.applyPromoButton = page.getByRole('button', { name: /apply/i })
+
+		// Quote request form (embedded in cart page for B2B model)
+		this.quoteForm = page.locator('form[aria-label*="quote" i]').or(page.locator('form').filter({ hasText: /quote request/i }))
+		this.firstNameInput = page.getByLabel(/first name/i)
+		this.lastNameInput = page.getByLabel(/last name/i)
+		this.emailInput = page.getByLabel(/email/i)
+		this.notesInput = page.getByLabel(/notes/i).or(page.getByPlaceholder(/requirements|preferences|questions/i))
+		this.submitQuoteButton = page.getByRole('button', { name: /request|submit/i })
+		this.quoteSuccessMessage = page.getByText(/quote.*submitted|request.*received|thank you|success/i)
 	}
 
 	// =============================================
@@ -85,33 +104,78 @@ export class CartPage extends BasePage {
 	}
 
 	/**
-	 * Update quantity for a cart item
+	 * Update quantity for a cart item using increment/decrement buttons
+	 * The cart uses read-only quantity display with +/- buttons (better UX pattern)
 	 */
 	async updateQuantity(productName: string, quantity: number): Promise<void> {
 		const item = this.getCartItem(productName)
-		const quantityInput = item.getByRole('spinbutton')
-		await quantityInput.fill(quantity.toString())
-		await this.waitForLoad()
+		const currentQty = await this.getQuantity(item)
+
+		if (quantity > currentQty) {
+			// Need to increment
+			for (let i = currentQty; i < quantity; i++) {
+				await this.incrementQuantityForItem(item)
+			}
+		} else if (quantity < currentQty) {
+			// Need to decrement
+			for (let i = currentQty; i > quantity; i--) {
+				await this.decrementQuantityForItem(item)
+			}
+		}
 	}
 
 	/**
-	 * Increment quantity for a cart item
+	 * Get current quantity for a cart item
 	 */
-	async incrementQuantity(productName: string): Promise<void> {
+	private async getQuantity(item: Locator): Promise<number> {
+		// The quantity is displayed in a span with role="status" inside the quantity selector
+		const quantityDisplay = item.locator('[role="status"]').or(item.locator('.input-bordered'))
+		const text = await quantityDisplay.textContent()
+		return parseInt(text?.trim() || '1', 10)
+	}
+
+	/**
+	 * Get current quantity for a cart item by name
+	 */
+	async getItemQuantity(productName: string): Promise<number> {
 		const item = this.getCartItem(productName)
-		const incrementButton = item.getByRole('button', { name: /\+|increase/i })
+		return this.getQuantity(item)
+	}
+
+	/**
+	 * Increment quantity for a specific item locator
+	 */
+	private async incrementQuantityForItem(item: Locator): Promise<void> {
+		// The increment button has aria-label containing "Increase"
+		const incrementButton = item.getByRole('button', { name: /increase/i })
 		await incrementButton.click()
 		await this.waitForLoad()
 	}
 
 	/**
-	 * Decrement quantity for a cart item
+	 * Decrement quantity for a specific item locator
+	 */
+	private async decrementQuantityForItem(item: Locator): Promise<void> {
+		// The decrement button has aria-label containing "Decrease"
+		const decrementButton = item.getByRole('button', { name: /decrease/i })
+		await decrementButton.click()
+		await this.waitForLoad()
+	}
+
+	/**
+	 * Increment quantity for a cart item by name
+	 */
+	async incrementQuantity(productName: string): Promise<void> {
+		const item = this.getCartItem(productName)
+		await this.incrementQuantityForItem(item)
+	}
+
+	/**
+	 * Decrement quantity for a cart item by name
 	 */
 	async decrementQuantity(productName: string): Promise<void> {
 		const item = this.getCartItem(productName)
-		const decrementButton = item.getByRole('button', { name: /-|decrease/i })
-		await decrementButton.click()
-		await this.waitForLoad()
+		await this.decrementQuantityForItem(item)
 	}
 
 	/**
@@ -152,14 +216,51 @@ export class CartPage extends BasePage {
 	}
 
 	// =============================================
-	// CHECKOUT
+	// QUOTE REQUEST (B2B Model)
 	// =============================================
 
 	/**
-	 * Proceed to checkout
+	 * Fill quote request form for non-authenticated users
+	 */
+	async fillQuoteForm(info: { firstName: string; lastName: string; email: string; notes?: string }): Promise<void> {
+		// These fields only appear for non-authenticated users
+		const hasFirstName = await this.firstNameInput.isVisible().catch(() => false)
+		if (hasFirstName) {
+			await this.firstNameInput.fill(info.firstName)
+			await this.lastNameInput.fill(info.lastName)
+			await this.emailInput.fill(info.email)
+		}
+
+		if (info.notes) {
+			const hasNotes = await this.notesInput.isVisible().catch(() => false)
+			if (hasNotes) {
+				await this.notesInput.fill(info.notes)
+			}
+		}
+	}
+
+	/**
+	 * Submit quote request
+	 * This is the B2B equivalent of "checkout" - submitting a quote request
+	 */
+	async submitQuoteRequest(): Promise<void> {
+		await this.submitQuoteButton.click()
+		await this.waitForLoad()
+	}
+
+	/**
+	 * Proceed to checkout (B2B: submits quote request)
+	 * For backwards compatibility with tests that expect a checkout flow
 	 */
 	async proceedToCheckout(): Promise<void> {
 		await this.checkoutButton.click()
+	}
+
+	/**
+	 * Check if quote was submitted successfully
+	 */
+	async expectQuoteSubmitted(): Promise<void> {
+		await expect(this.quoteSuccessMessage).toBeVisible({ timeout: 10000 })
 	}
 
 	/**
@@ -230,11 +331,12 @@ export class CartPage extends BasePage {
 	}
 
 	/**
-	 * Expect quantity for item
+	 * Expect quantity for item (uses read-only display, not spinbutton)
 	 */
 	async expectQuantity(productName: string, quantity: number): Promise<void> {
 		const item = this.getCartItem(productName)
-		const quantityInput = item.getByRole('spinbutton')
-		await expect(quantityInput).toHaveValue(quantity.toString())
+		// Quantity is displayed in a span with role="status", not an input
+		const quantityDisplay = item.locator('[role="status"]').or(item.locator('.input-bordered'))
+		await expect(quantityDisplay).toHaveText(quantity.toString())
 	}
 }

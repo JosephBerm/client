@@ -344,6 +344,20 @@ export function useRichDataGrid<TData extends { id?: string | number | null }>({
 					})
 					.filter((id): id is string => typeof id === 'string')
 
+				// Extract searchable column IDs from column definitions
+				// These columns will be included in global search queries
+				const searchableColumnIds = columns
+					.filter((col) => {
+						const meta = col.meta as { filterOptions?: { searchable?: boolean } } | undefined
+						const filterOptions = meta?.filterOptions ?? col.filterOptions
+						return filterOptions?.searchable === true
+					})
+					.map((col) => {
+						const accessorKey = (col as { accessorKey?: string }).accessorKey
+						return accessorKey ?? col.id
+					})
+					.filter((id): id is string => typeof id === 'string')
+
 				// Build helper to look up column filter options by column ID
 				const getColumnFilterOptions = (columnId: string): ColumnFilterOptions<TData> | undefined => {
 					const col = columns.find((c) => {
@@ -409,6 +423,8 @@ export function useRichDataGrid<TData extends { id?: string | number | null }>({
 						direction: s.desc ? SortDirection.Descending : SortDirection.Ascending,
 					})),
 					globalSearch: debouncedGlobalFilter || undefined,
+					// Specify which columns to include in global search
+					searchableColumns: searchableColumnIds.length > 0 ? searchableColumnIds : undefined,
 					columnFilters: backendColumnFilters,
 					// Request facet aggregation for columns marked as faceted
 					facetColumns: facetedColumnIds.length > 0 ? facetedColumnIds : undefined,

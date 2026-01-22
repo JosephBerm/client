@@ -140,19 +140,167 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 		mode: 'onBlur',
 	})
 
+	// Phone authentication state
+	const [phoneNumber, setPhoneNumber] = useState('')
+	const [phoneCode, setPhoneCode] = useState('')
+	const [phoneCodeSent, setPhoneCodeSent] = useState(false)
+	const [phoneExpiresIn, setPhoneExpiresIn] = useState<number | null>(null)
+
 	/**
 	 * Handle social login button click.
-	 * Placeholder for future OAuth integration.
+	 * Initiates OAuth flow by redirecting to backend challenge endpoint.
+	 * For phone auth, switches to phone verification view.
 	 */
 	const handleSocialLogin = useCallback((provider: SocialProvider) => {
-		logger.info('Social login attempted', { provider, component: COMPONENT_NAME })
+		// Phone authentication - switch to phone view
+		if (provider === 'phone') {
+			logger.info('Switching to phone authentication view', { component: COMPONENT_NAME })
+			setCurrentView('phone')
+			setPhoneCodeSent(false)
+			setPhoneNumber('')
+			setPhoneCode('')
+			setPhoneExpiresIn(null)
+			return
+		}
 
-		// TODO: Implement OAuth flow for each provider
-		notificationService.info(INFO_MESSAGES.SOCIAL_COMING_SOON(provider), {
-			component: COMPONENT_NAME,
-			action: 'socialLogin',
-			metadata: { provider },
+		// Apple and other OAuth providers
+		logger.info('Initiating social login', { provider, component: COMPONENT_NAME })
+
+		// Close the modal before redirecting
+		onClose()
+
+		// Import and use the ExternalAuthApi to initiate login
+		// The API will redirect to the backend which handles OAuth flow
+		import('@_shared/services/api/external-auth.api').then(({ ExternalAuthApi }) => {
+			// Build return URL to the callback page
+			const callbackUrl = `${window.location.origin}/auth/callback`
+			ExternalAuthApi.initiateLogin(provider, callbackUrl)
+		}).catch((error) => {
+			logger.error('Failed to initiate social login', { error, provider, component: COMPONENT_NAME })
+			notificationService.error('Failed to initiate login. Please try again.', {
+				component: COMPONENT_NAME,
+				action: 'socialLogin',
+				metadata: { provider, error },
+			})
 		})
+	}, [onClose])
+
+	/**
+	 * Send verification code to phone number.
+	 */
+	const handleSendPhoneCode = useCallback(async () => {
+		if (!phoneNumber || phoneNumber.trim().length < 10) {
+			notificationService.warning('Please enter a valid phone number', {
+				component: COMPONENT_NAME,
+				action: 'sendPhoneCode',
+			})
+			return
+		}
+
+		setIsLoading(true)
+
+		try {
+			const { PhoneAuthApi } = await import('@_shared/services/api/phone-auth.api')
+			const result = await PhoneAuthApi.sendCode(phoneNumber)
+
+			if (result.success) {
+				setPhoneCodeSent(true)
+				setPhoneExpiresIn(result.expiresInSeconds ?? 600)
+				notificationService.success('Verification code sent!', {
+					component: COMPONENT_NAME,
+					action: 'sendPhoneCode',
+				})
+			} else {
+				notificationService.error(result.error ?? 'Failed to send code', {
+					component: COMPONENT_NAME,
+					action: 'sendPhoneCode',
+				})
+			}
+		} catch (error) {
+			logger.error('Failed to send phone verification code', { error, component: COMPONENT_NAME })
+			notificationService.error('Failed to send verification code. Please try again.', {
+				component: COMPONENT_NAME,
+				action: 'sendPhoneCode',
+			})
+		} finally {
+			setIsLoading(false)
+		}
+	}, [phoneNumber])
+
+	/**
+	 * Verify phone code and authenticate.
+	 */
+	const handleVerifyPhoneCode = useCallback(async () => {
+		if (!phoneCode || phoneCode.length < 4) {
+			notificationService.warning('Please enter the verification code', {
+				component: COMPONENT_NAME,
+				action: 'verifyPhoneCode',
+			})
+			return
+		}
+
+		setIsLoading(true)
+
+		try {
+			const { PhoneAuthApi } = await import('@_shared/services/api/phone-auth.api')
+			const result = await PhoneAuthApi.verify(phoneNumber, phoneCode)
+
+			if (result.success && result.token) {
+				// Store tokens
+				localStorage.setItem('token', result.token)
+				if (result.refreshToken) {
+					localStorage.setItem('refreshToken', result.refreshToken)
+				}
+
+				// Fetch user data and complete login
+				const { checkAuthStatus } = await import('@_features/auth')
+				const user = await checkAuthStatus()
+
+				if (user) {
+					loginUser(user)
+					notificationService.success(
+						result.isNewAccount
+							? 'Account created successfully!'
+							: SUCCESS_MESSAGES.LOGIN,
+						{
+							component: COMPONENT_NAME,
+							action: 'phoneLogin',
+						}
+					)
+					onClose()
+					executePostAuthRedirect()
+				} else {
+					notificationService.warning('Login successful but failed to load user data', {
+						component: COMPONENT_NAME,
+						action: 'phoneLogin',
+					})
+				}
+			} else {
+				notificationService.error(result.error ?? 'Invalid verification code', {
+					component: COMPONENT_NAME,
+					action: 'verifyPhoneCode',
+				})
+			}
+		} catch (error) {
+			logger.error('Failed to verify phone code', { error, component: COMPONENT_NAME })
+			notificationService.error('Verification failed. Please try again.', {
+				component: COMPONENT_NAME,
+				action: 'verifyPhoneCode',
+			})
+		} finally {
+			setIsLoading(false)
+		}
+	}, [phoneNumber, phoneCode, loginUser, onClose, executePostAuthRedirect])
+
+	/**
+	 * Cancel phone authentication and return to login.
+	 */
+	const handlePhoneCancel = useCallback(() => {
+		setCurrentView('login')
+		setPhoneCodeSent(false)
+		setPhoneNumber('')
+		setPhoneCode('')
+		setPhoneExpiresIn(null)
 	}, [])
 
 	/**
@@ -577,5 +725,15 @@ export function useAuthModal({ onClose, onLoginSuccess }: UseAuthModalProps): Us
 		mfaError,
 		handleMfaVerify,
 		handleMfaCancel,
+		// Phone authentication state
+		phoneNumber,
+		setPhoneNumber,
+		phoneCode,
+		setPhoneCode,
+		phoneCodeSent,
+		phoneExpiresIn,
+		handleSendPhoneCode,
+		handleVerifyPhoneCode,
+		handlePhoneCancel,
 	}
 }

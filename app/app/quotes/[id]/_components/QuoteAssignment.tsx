@@ -103,6 +103,9 @@ export default function QuoteAssignment({ quote, permissions, onRefresh }: Quote
 	}
 
 	// Sales Rep: Show read-only assignment info (no controls)
+	// Use permissions.context.isAssignedQuote from useQuotePermissions which
+	// compares quote.assignedSalesRepId directly with user.id (doesn't require
+	// fetching the sales team list)
 	if (!permissions.canAssign) {
 		// Sales Rep can see their assignment but cannot change it
 		return (
@@ -117,7 +120,7 @@ export default function QuoteAssignment({ quote, permissions, onRefresh }: Quote
 					</div>
 				</div>
 
-				{assignedSalesRep?.id === user?.id && (
+				{permissions.context.isAssignedQuote && (
 					<div className="p-4 rounded-lg bg-linear-to-br from-success/10 to-success/5 border border-success/20">
 						<div className="flex items-start gap-3">
 							<div className="flex h-8 w-8 items-center justify-center rounded-full bg-success/20 shrink-0">
@@ -128,7 +131,7 @@ export default function QuoteAssignment({ quote, permissions, onRefresh }: Quote
 									Assigned To You
 								</p>
 								<p className="text-sm font-semibold text-base-content">
-									{getUserDisplayName(assignedSalesRep)}
+									{user?.name?.getFullName?.() ?? user?.email ?? 'You'}
 								</p>
 								{quote.assignedAt && (
 									<div className="flex items-center gap-2 mt-2">
@@ -143,7 +146,7 @@ export default function QuoteAssignment({ quote, permissions, onRefresh }: Quote
 					</div>
 				)}
 
-				{assignedSalesRep?.id !== user?.id && (
+				{!permissions.context.isAssignedQuote && (
 					<div className="p-4 rounded-lg bg-base-200/50 border border-base-200">
 						<p className="text-sm text-base-content/60">This quote is not assigned to you.</p>
 					</div>

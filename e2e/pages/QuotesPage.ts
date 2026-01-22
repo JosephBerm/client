@@ -177,20 +177,28 @@ export class QuotesPage extends BasePage {
 	}
 
 	async expectLoaded(): Promise<void> {
-		// Wait for page to be stable
-		await this.page.waitForLoadState('networkidle')
-		
-		// Primary check: Look for the Quotes heading (most reliable indicator)
-		const hasHeading = await this.page.getByRole('heading', { name: /quotes/i }).first().isVisible().catch(() => false)
-		
-		// Secondary checks for various page states  
-		const hasTable = await this.page.getByTestId('quotes-table').isVisible().catch(() => false)
-		const hasQuoteStatus = await this.page.getByTestId('quote-status').isVisible().catch(() => false)
-		const hasEmptyState = await this.emptyQuotesMessage.isVisible().catch(() => false)
-		const isDetailPage = this.page.url().includes('/quotes/')
-		
-		// Success if any indicator is present
-		expect(hasHeading || hasTable || hasQuoteStatus || hasEmptyState || isDetailPage).toBeTruthy()
+		// Rule 130b-playwright: Use element-based waits, not networkidle
+		// Wait for the Quotes heading first (Server Component renders immediately)
+		await expect(this.page.getByRole('heading', { name: /quotes/i }).first()).toBeVisible({ timeout: 10000 })
+
+		// Wait for loading to complete: either data table rows OR empty state
+		// RichDataGrid shows LoadingSkeleton during loading, then switches to data or empty state
+		// The loading spinner has data-testid="loading-spinner" and class "loading loading-spinner"
+		const loadingSpinner = this.page.locator('.loading.loading-spinner')
+
+		// Wait for loading spinner to disappear (if it appeared)
+		// Use a short timeout since it might not be present if data loads quickly
+		await loadingSpinner.waitFor({ state: 'hidden', timeout: 15000 }).catch(() => {
+			// Spinner may never have appeared if data loaded very fast
+		})
+
+		// Now wait for either the data table (with rows) OR empty state
+		// Use getByRole('table') as per locator hierarchy: getByRole → getByLabel → getByTestId
+		const table = this.page.getByRole('table').first()
+		const emptyState = this.emptyQuotesMessage
+
+		// Use Playwright's web-first assertions to wait for visibility
+		await expect(table.or(emptyState)).toBeVisible({ timeout: 10000 })
 	}
 
 	// =============================================

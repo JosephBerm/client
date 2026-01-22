@@ -1,36 +1,35 @@
 /**
- * useQuoteDetails Hook - Data Fetching Pattern
- * 
+ * useQuoteDetails Hook - TanStack Query Pattern
+ *
  * Custom hook for fetching and managing quote detail data.
- * Follows the same pattern as `useAccountDetailLogic` for consistency.
- * 
+ * Follows the MAANG-level pattern from usePricing.ts and usePayments.ts.
+ *
  * **Features:**
- * - Fetches quote by ID from route params
- * - Loading and error states
- * - Automatic refetch on quoteId change
- * - Error handling with notifications
+ * - Automatic caching with TanStack Query
+ * - Background refetching when quote data becomes stale
  * - Type-safe with Quote entity
- * 
- * **Pattern:**
- * - Similar to `useAccountDetailLogic` hook structure
- * - Uses `useRouteParam` for route parameter extraction
- * - Uses `API.Quotes.get` for data fetching
- * - Uses `notificationService` for error handling
- * 
+ * - Error state returned (no auto-navigation)
+ *
+ * **Best Practices Applied:**
+ * - Rule 120b-tanstack-query: Query key factory pattern
+ * - Rule 110b-react-hooks: No manual memoization (React 19 compiler)
+ * - Shows error UI instead of auto-navigating away (better UX)
+ *
  * @module app/quotes/[id]/_components/hooks/useQuoteDetails
  */
 
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { useRouter } from 'next/navigation'
-
-import { logger } from '@_core'
-
-import { notificationService, useRouteParam, API } from '@_shared'
+import { API, useRouteParam } from '@_shared'
 
 import Quote from '@_classes/Quote'
+
+import { quoteKeys } from './quoteKeys'
+
+/** Stale time for quote details (1 minute - matches QueryProvider default) */
+const QUOTE_STALE_TIME = 60 * 1000
 
 /**
  * Return type for useQuoteDetails hook
@@ -40,115 +39,76 @@ export interface UseQuoteDetailsReturn {
 	quote: Quote | null
 	/** Whether quote data is currently loading */
 	isLoading: boolean
-	/** Error message if fetch failed (null if no error) */
-	error: string | null
+	/** Error object if fetch failed (null if no error) */
+	error: Error | null
 	/** Manually refresh quote data */
 	refresh: () => Promise<void>
+	/** Whether the query is currently fetching (includes background refetches) */
+	isFetching: boolean
 }
 
 /**
- * Custom hook for fetching quote details
- * 
- * Fetches quote data by ID from route params.
- * Handles loading states, errors, and automatic navigation on failure.
- * 
- * **Data Fetching:**
- * - Triggered by useEffect when quoteId is available
- * - Calls API.Quotes.get() to fetch quote
- * - Parses response into Quote entity
- * - Shows error notifications on failure
- * - Navigates back if quote not found
- * 
- * **Error Handling:**
- * - Network errors: Shows error notification
- * - Not found: Shows error notification and navigates back
- * - Invalid ID: Shows error notification and navigates back
- * 
+ * Custom hook for fetching quote details using TanStack Query.
+ *
+ * Returns error state instead of auto-navigating away on errors.
+ * This provides better UX by allowing users to see what went wrong
+ * and manually navigate back.
+ *
  * @returns Quote data, loading state, error, and refresh function
- * 
+ *
  * @example
  * ```tsx
  * const { quote, isLoading, error, refresh } = useQuoteDetails()
- * 
- * if (isLoading) return <LoadingSpinner />
- * if (error) return <ErrorMessage message={error} />
- * if (!quote) return <NotFound />
- * 
- * return <QuoteDetails quote={quote} />
+ *
+ * if (isLoading) return <QuoteDetailSkeleton />
+ * if (error) return <QuoteErrorCard error={error} />
+ * if (!quote) return <QuoteNotFound />
+ *
+ * return <QuoteDetails quote={quote} onRefresh={refresh} />
  * ```
  */
 export function useQuoteDetails(): UseQuoteDetailsReturn {
-	const router = useRouter()
+	const queryClient = useQueryClient()
 	const quoteId = useRouteParam('id')
 
-	const [quote, setQuote] = useState<Quote | null>(null)
-	const [isLoading, setIsLoading] = useState(true)
-	const [error, setError] = useState<string | null>(null)
-
-	/**
-	 * Fetch quote data from API
-	 */
-	const fetchQuote = useCallback(async () => {
-		if (!quoteId) {
-			setIsLoading(false)
-			return
-		}
-
-		try {
-			setIsLoading(true)
-			setError(null)
+	const {
+		data: quote,
+		isLoading,
+		error,
+		isFetching,
+	} = useQuery({
+		queryKey: quoteKeys.detail(quoteId ?? ''),
+		queryFn: async () => {
+			if (!quoteId) {
+				throw new Error('Quote ID is required')
+			}
 
 			const { data } = await API.Quotes.get<Quote>(quoteId)
 
 			if (!data.payload) {
-				const errorMessage = data.message || 'Unable to load quote'
-				setError(errorMessage)
-				notificationService.error(errorMessage, {
-					metadata: { quoteId },
-					component: 'useQuoteDetails',
-					action: 'fetchQuote',
-				})
-				router.back()
-				return
+				throw new Error(data.message || 'Quote not found')
 			}
 
-			setQuote(new Quote(data.payload))
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Unable to load quote'
-			setError(errorMessage)
-			notificationService.error(errorMessage, {
-				metadata: { error: err, quoteId },
-				component: 'useQuoteDetails',
-				action: 'fetchQuote',
-			})
-			router.back()
-		} finally {
-			setIsLoading(false)
-		}
-	}, [quoteId, router])
-
-	// Fetch quote when quoteId changes
-	useEffect(() => {
-		if (!quoteId) {
-			router.back()
-			return
-		}
-
-		void fetchQuote()
-	}, [quoteId, router, fetchQuote])
+			return new Quote(data.payload)
+		},
+		enabled: !!quoteId,
+		staleTime: QUOTE_STALE_TIME,
+	})
 
 	/**
-	 * Manual refresh function
+	 * Manual refresh function - invalidates cache and refetches
 	 */
-	const refresh = useCallback(async () => {
-		await fetchQuote()
-	}, [fetchQuote])
+	const refresh = async () => {
+		if (quoteId) {
+			await queryClient.invalidateQueries({ queryKey: quoteKeys.detail(quoteId) })
+		}
+	}
 
 	return {
-		quote,
+		quote: quote ?? null,
 		isLoading,
-		error,
+		error: error as Error | null,
 		refresh,
+		isFetching,
 	}
 }
-

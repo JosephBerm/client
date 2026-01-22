@@ -76,11 +76,11 @@ export default function QuoteDetailsPage() {
 			<>
 				<InternalPageHeader
 					title='Error Loading Quote'
-					description={error}
+					description={error.message}
 					loading={false}
 				/>
 				<Card className='border border-base-300 bg-base-100 p-6 shadow-sm'>
-					<p className='text-base-content/70'>{error}</p>
+					<p className='text-base-content/70'>{error.message}</p>
 					<Button
 						variant='ghost'
 						onClick={() => router.push(Routes.Quotes.location)}

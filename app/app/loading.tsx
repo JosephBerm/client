@@ -7,27 +7,26 @@
  * Matches the Dashboard page layout:
  * - Page header with title
  * - Account overview (stats grid)
- * - Two tables side by side (quotes & orders)
+ * - Recent activity section (orders & quotes tables)
  *
  * @module app/loading
  */
 
 import { StatsGridSkeleton } from '@_components/skeletons'
+
 import { InternalPageHeader } from './_components'
 
 /**
  * TableCardSkeleton - Mini table card loading skeleton for dashboard tables.
- * Used for AccountQuotesTable and AccountOrdersTable placeholders.
+ * Matches the RecentItemsTable component structure.
  */
-function TableCardSkeleton() {
+function TableCardSkeleton({ title }: { title: string }) {
 	return (
-		<div className="card bg-base-100 border border-base-300 shadow-lg p-6">
-			{/* Table header skeleton */}
-			<div className="h-6 w-32 bg-base-300 rounded motion-safe:animate-pulse mb-4" />
-			{/* Table rows skeleton */}
+		<div className="card bg-base-100 border border-base-300 shadow-lg p-6 h-full">
+			<h3 className="font-semibold text-lg text-base-content mb-4">{title}</h3>
 			<div className="space-y-3">
-				{[1, 2, 3].map((j) => (
-					<div key={j} className="flex items-center gap-4 py-2">
+				{[1, 2, 3].map((i) => (
+					<div key={i} className="flex items-center gap-4 py-2">
 						<div className="h-4 w-20 bg-base-300 rounded motion-safe:animate-pulse" />
 						<div className="h-4 w-24 bg-base-300 rounded motion-safe:animate-pulse" />
 						<div className="h-5 w-16 bg-base-300 rounded-full motion-safe:animate-pulse" />
@@ -51,21 +50,20 @@ export default function DashboardLoading() {
 			{/* Dashboard Content - matches page.tsx layout */}
 			<div className="space-y-5 sm:space-y-6 md:space-y-8 w-full min-w-0">
 				{/* Account Overview Section - reuse StatsGridSkeleton for DRY */}
-				<div className="w-full min-w-0 overflow-hidden">
+				<div className="w-full min-w-0 overflow-hidden" data-testid="stats-section">
 					<StatsGridSkeleton count={4} className="mb-0" />
 				</div>
 
-				{/* Tables Section - 2 tables side by side */}
+				{/* Recent Activity Section - matches RecentActivitySection layout */}
 				<div
-					className="grid grid-cols-1 gap-6 sm:gap-6 lg:grid-cols-2 w-full min-w-0 overflow-hidden"
+					className="w-full min-w-0 overflow-hidden"
+					data-testid="recent-activity"
 					role="status"
-					aria-label="Loading recent activity tables"
+					aria-label="Loading recent activity"
 				>
-					<div className="w-full min-w-0 overflow-hidden">
-						<TableCardSkeleton />
-					</div>
-					<div className="w-full min-w-0 overflow-hidden">
-						<TableCardSkeleton />
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+						<TableCardSkeleton title="Recent Orders" />
+						<TableCardSkeleton title="Recent Quotes" />
 					</div>
 				</div>
 			</div>

@@ -317,7 +317,8 @@ export default function VirtualizedProductGrid({
 	if (!isMounted || (isLoading && products.length === 0)) {
 		return (
 			<main className="flex-1 min-w-0">
-				<div 
+				<div
+					data-testid="product-grid-loading"
 					className="grid gap-8"
 					style={{
 						gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
@@ -333,7 +334,7 @@ export default function VirtualizedProductGrid({
 	if (products.length === 0 && !isLoading) {
 		return (
 			<main className="flex-1 min-w-0">
-				<div className="flex flex-col items-center justify-center py-16 text-center">
+				<div data-testid="no-results" className="flex flex-col items-center justify-center py-16 text-center">
 					<div className="text-base-content/40 text-6xl mb-4">🔍</div>
 					<h3 className="text-xl font-semibold mb-2">No products found</h3>
 					<p className="text-base-content/60">
@@ -349,6 +350,7 @@ export default function VirtualizedProductGrid({
 			{/* Virtualized grid container */}
 			<div
 				ref={listRef}
+				data-testid="product-grid"
 				style={{
 					height: virtualizer.getTotalSize(),
 					width: '100%',

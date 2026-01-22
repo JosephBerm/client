@@ -39,29 +39,66 @@ function generateTestQuoteRef(): string {
 // =============================================
 
 test.describe('Customer Management', () => {
+	/**
+	 * Helper to check if empty state is displayed (no customers found).
+	 * The RichDataGrid renders empty state inside a single <tr> with colspan.
+	 */
+	async function isEmptyStateVisible(page: import('@playwright/test').Page): Promise<boolean> {
+		return page.getByText(/no.*customers found/i).isVisible()
+	}
+
+	/**
+	 * Helper to get actual data rows (excluding empty state row).
+	 * Returns rows that contain customer links (actual data rows have links).
+	 */
+	function getCustomerDataRows(page: import('@playwright/test').Page) {
+		return page.locator('tbody tr').filter({ has: page.getByRole('link') })
+	}
+
+	/**
+	 * US-CUST-001: Sales Rep can view assigned customers
+	 * PRD Requirement: "Given I have assigned customers, when I view customers page, then I see those customers"
+	 *
+	 * This test verifies that:
+	 * 1. The customers page loads correctly
+	 * 2. The data grid displays actual customer data (NOT empty state)
+	 * 3. Customers assigned to this sales rep are visible
+	 */
 	test('should load customer list @critical', async ({ customersPage, page }) => {
 		await customersPage.goto()
 		await customersPage.expectLoaded()
 
-		// Verify customer page is visible
-		const hasHeading = await page
-			.getByRole('heading', { name: /customers/i })
-			.first()
-			.isVisible()
-			.catch(() => false)
-		const hasTable = await page
-			.getByTestId('customers-table')
-			.isVisible()
-			.catch(() => false)
-		const hasDataGrid = await page
-			.getByRole('table')
-			.first()
-			.isVisible()
-			.catch(() => false)
+		// Verify customer page heading is visible
+		const heading = page.getByRole('heading', { name: /customers/i }).first()
+		await expect(heading).toBeVisible()
 
-		expect(hasHeading || hasTable || hasDataGrid).toBeTruthy()
+		// Verify data grid structure exists
+		const table = page.getByRole('table').first()
+		await expect(table).toBeVisible()
+
+		// CRITICAL: Verify NO empty state (actual customer data should exist)
+		// Sales rep should have test customers assigned via server seeding
+		const emptyStateVisible = await isEmptyStateVisible(page)
+		expect(
+			emptyStateVisible,
+			'Empty state visible - test customers may not have been seeded. Restart server to run SeedTestCustomersAsync.'
+		).toBe(false)
+
+		// Verify actual data rows exist
+		const customerRows = getCustomerDataRows(page)
+		const customerCount = await customerRows.count()
+		expect(customerCount).toBeGreaterThan(0)
 	})
 
+	/**
+	 * US-CUST-002: Sales Rep can search customers
+	 * PRD Requirement: Search should filter the customer list to show ONLY matching results
+	 *
+	 * This test verifies:
+	 * 1. Search input accepts a query
+	 * 2. Table filters to show only matching customers
+	 * 3. ALL displayed rows contain the search term (not just the first)
+	 */
 	test('should search for customers @regression', async ({ customersPage, page }) => {
 		await customersPage.goto()
 		await customersPage.expectLoaded()
@@ -69,67 +106,128 @@ test.describe('Customer Management', () => {
 		// Look for search input - it's in the RichDataGrid
 		const searchInput = page.getByPlaceholder(/search customers/i).first()
 		await expect(searchInput).toBeVisible()
-		await searchInput.fill('test')
-		await page.waitForLoadState('networkidle')
 
-		const hasTable = await page
-			.getByRole('table')
-			.first()
-			.isVisible()
-			.catch(() => false)
-		const hasEmpty = await page
-			.getByText(/no.*found|no customers/i)
-			.isVisible()
-			.catch(() => false)
+		// Search for a known test customer name (seeded by server)
+		const searchTerm = 'acme'
 
-		expect(hasTable || hasEmpty).toBeTruthy()
+		// Fill search and wait for the debounced search request to complete
+		// RichDataGrid has 300ms debounce, so we need to wait for the actual API call
+		const searchResponsePromise = page.waitForResponse(
+			(response) =>
+				response.url().includes('/customers/search/rich') && response.status() === 200,
+			{ timeout: 10000 }
+		)
+		await searchInput.fill('Acme')
+		await searchResponsePromise
+
+		// Wait for the table to update with filtered results
+		const table = page.getByRole('table').first()
+		await expect(table).toBeVisible()
+
+		// Wait for the first row to contain the search term (proves filtering is applied to DOM)
+		const filteredRows = page.locator('tbody tr').filter({ hasText: /acme/i })
+		await expect(filteredRows.first()).toBeVisible({ timeout: 5000 })
+
+		// Check if empty state is visible (no matching results)
+		const emptyStateVisible = await isEmptyStateVisible(page)
+
+		if (!emptyStateVisible) {
+			// Get all customer data rows and their text content atomically
+			// This avoids race conditions between count() and nth().textContent()
+			const customerRows = getCustomerDataRows(page)
+			const allRowTexts = await customerRows.allTextContents()
+
+			// Verify ALL rows match the search term
+			expect(allRowTexts.length, 'Should have at least one matching row').toBeGreaterThan(0)
+
+			for (let i = 0; i < allRowTexts.length; i++) {
+				expect(
+					allRowTexts[i]?.toLowerCase(),
+					`Row ${i + 1} should contain search term '${searchTerm}'`
+				).toContain(searchTerm)
+			}
+		}
+		// If empty state is visible after search, test still passes -
+		// search functionality works, just no matching customers found
 	})
 
+	/**
+	 * US-CUST-003: Sales Rep can view customer details
+	 * PRD Requirement: Clicking a customer navigates to their detail page
+	 */
 	test('should view customer details @regression', async ({ customersPage, page }) => {
 		await customersPage.goto()
 		await customersPage.expectLoaded()
 
-		// Look for clickable customer rows
-		const customerRows = page.locator('tbody tr')
-		const customerCount = await customerRows.count()
+		// Verify NO empty state - we need customers to test details view
+		const emptyStateVisible = await isEmptyStateVisible(page)
+		expect(
+			emptyStateVisible,
+			'Empty state visible - cannot test customer details without customers. Ensure test customers are seeded.'
+		).toBe(false)
 
+		// Get actual data rows (with links)
+		const customerRows = getCustomerDataRows(page)
+		const customerCount = await customerRows.count()
 		expect(customerCount).toBeGreaterThan(0)
 
+		// Click on the first customer link
 		const customerLink = customerRows.first().getByRole('link').first()
 		await expect(customerLink).toBeVisible()
+
+		// Get the href before clicking to know where we're navigating
+		const href = await customerLink.getAttribute('href')
+		expect(href).toBeTruthy()
+		expect(href).toContain('/customers/')
+
+		// Click and wait for navigation to complete
+		// Use waitForURL since Next.js uses client-side navigation
 		await customerLink.click()
-		await page.waitForLoadState('networkidle')
+		await page.waitForURL(/\/customers\/[^/]+$/, { timeout: 10000 })
 
-		const isDetailPage = page.url().includes('/customers/')
-		const hasDetailHeading = await page
-			.getByRole('heading')
-			.first()
-			.isVisible()
-			.catch(() => false)
+		// Verify navigation to detail page
+		expect(page.url()).toContain('/customers/')
 
-		expect(isDetailPage || hasDetailHeading).toBeTruthy()
+		// Verify detail page content loaded
+		const detailHeading = page.getByRole('heading').first()
+		await expect(detailHeading).toBeVisible()
 	})
 
+	/**
+	 * US-CUST-004: Customer data grid displays properly
+	 * PRD Requirement: Grid shows company name, status, type, contact, sales rep columns
+	 */
 	test('should display customer data grid @critical', async ({ customersPage, page }) => {
 		await customersPage.goto()
 		await customersPage.expectLoaded()
 
-		// Check the data grid has expected structure
-		const hasTestId = await page
-			.getByTestId('customers-table')
-			.isVisible()
-			.catch(() => false)
-		const hasTable = await page
-			.getByRole('table')
-			.first()
-			.isVisible()
-			.catch(() => false)
-		const hasEmpty = await page
-			.getByText(/no.*customers/i)
-			.isVisible()
-			.catch(() => false)
+		// Verify data grid structure
+		const table = page.getByRole('table').first()
+		await expect(table).toBeVisible()
 
-		expect(hasTestId || hasTable || hasEmpty).toBeTruthy()
+		// Verify expected column headers exist
+		const companyHeader = page.getByRole('columnheader', { name: /company/i })
+		const statusHeader = page.getByRole('columnheader', { name: /status/i })
+
+		await expect(companyHeader).toBeVisible()
+		await expect(statusHeader).toBeVisible()
+
+		// CRITICAL: Verify NO empty state (actual customer data should exist)
+		const emptyStateVisible = await isEmptyStateVisible(page)
+		expect(
+			emptyStateVisible,
+			'Empty state visible - test customers may not have been seeded. Restart server to run SeedTestCustomersAsync.'
+		).toBe(false)
+
+		// Verify actual data rows exist
+		const customerRows = getCustomerDataRows(page)
+		const customerCount = await customerRows.count()
+		expect(customerCount).toBeGreaterThan(0)
+
+		// Verify first row has actual customer content (not empty state text)
+		const firstRowText = await customerRows.first().textContent()
+		expect(firstRowText?.toLowerCase()).not.toContain('no')
+		expect(firstRowText?.toLowerCase()).not.toContain('found')
 	})
 })
 
@@ -185,8 +283,26 @@ test.describe('Quote Management', () => {
 		// Find search input
 		const searchInput = page.getByPlaceholder(/search quotes/i).first()
 		await expect(searchInput).toBeVisible()
-		await searchInput.fill('test')
-		await page.waitForLoadState('networkidle')
+
+		// Search for a known seeded company name - "Metro" uniquely matches "Metro Medical Clinic"
+		// Avoid generic terms like "test" which match multiple rows via email domains (.test)
+		const searchTerm = 'Metro'
+
+		// Fill search and wait for the debounced search request to complete
+		// RichDataGrid has 300ms debounce, so we need to wait for the actual API call
+		const searchResponsePromise = page.waitForResponse(
+			(response) =>
+				response.url().includes('/quotes') && response.status() === 200,
+			{ timeout: 10000 }
+		)
+		await searchInput.fill(searchTerm)
+		await searchResponsePromise
+
+		// Wait for the table to update with filtered results
+		// Using element-based wait instead of networkidle (Rule 130b-playwright)
+		await expect(
+			page.getByRole('table').first().or(page.getByText(/no quotes/i))
+		).toBeVisible({ timeout: 5000 })
 
 		const hasTable = await page
 			.getByRole('table')
@@ -199,26 +315,167 @@ test.describe('Quote Management', () => {
 			.catch(() => false)
 
 		expect(hasTable || hasEmpty).toBeTruthy()
+
+		// If table exists, verify the filtered results contain the search term
+		// Using getByRole('row') as per locator hierarchy: getByRole → getByLabel → getByTestId
+		if (hasTable) {
+			const filteredRows = page.getByRole('row').filter({ hasText: /metro/i })
+			const rowCount = await filteredRows.count()
+			if (rowCount > 0) {
+				// Verify at least one row matches the search term
+				await expect(filteredRows.first()).toBeVisible()
+			}
+		}
 	})
 
+	/**
+	 * US-QUOTE-NAV: Sales Rep can navigate to quote details and view seed data
+	 *
+	 * PRD Requirement: "Given seeded test quotes exist, when I click a quote link,
+	 * then I see the full quote details page with all required sections"
+	 *
+	 * This test verifies:
+	 * 1. Navigation from quotes list to detail page works
+	 * 2. Quote detail page renders with correct structure
+	 * 3. Seeded quote data is properly displayed (company, contact, status)
+	 * 4. All required UI sections are visible (header, contact info, products)
+	 *
+	 * Seeded test quotes from server/Extensions/ApplicationBuilderExtensions.cs:
+	 * - Acme Healthcare Systems (Unread)
+	 * - Metro Medical Clinic (Approved)
+	 * - Sunrise Senior Care (Converted)
+	 * - City Pharmacy Network (Rejected)
+	 * - Test Customer Account (Expired)
+	 *
+	 * TROUBLESHOOTING: If this test fails with "No seeded quotes found":
+	 * 1. Restart the .NET server to trigger SeedTestQuotesAsync()
+	 * 2. Verify Seeding:EnableTestAccounts=true in appsettings.Development.json
+	 * 3. Check server logs for "Seeding test quotes for E2E testing..."
+	 * 4. Verify sales-person-tester@medsource.com account exists
+	 */
 	test('should navigate to quote detail @regression', async ({ quotesPage, page }) => {
+		// Arrange: Navigate to quotes list
 		await quotesPage.goto()
 		await quotesPage.expectLoaded()
 
-		// Look for quote links
-		const quoteLinks = page.locator('tbody tr a').first()
-		await expect(quoteLinks).toBeVisible()
-		await quoteLinks.click()
-		await page.waitForLoadState('networkidle')
+		// Precondition: Verify we have seeded quotes to click
+		// Using getByRole('row') as per locator hierarchy: getByRole → getByLabel → getByTestId
+		const quotesTable = page.getByRole('table').first()
+		await expect(quotesTable, 'Quotes table should be visible').toBeVisible()
 
-		const isDetailPage = page.url().includes('/quotes/')
-		const hasQuoteHeading = await page
-			.getByRole('heading')
-			.first()
-			.isVisible()
-			.catch(() => false)
+		// Get rows with links (data rows, not header)
+		const quoteRows = page.getByRole('row').filter({ has: page.getByRole('link') })
+		const rowCount = await quoteRows.count()
 
-		expect(isDetailPage || hasQuoteHeading).toBeTruthy()
+		// CRITICAL: Test quotes must be seeded for this test to run
+		// If no quotes exist, the server seeding hasn't run - this is a setup issue, not a test skip
+		expect(
+			rowCount,
+			'No seeded quotes found. RESTART THE SERVER to trigger SeedTestQuotesAsync(). ' +
+			'Quotes are seeded on startup when Seeding:EnableTestAccounts=true. ' +
+			'Check server logs for "Seeding test quotes for E2E testing..."'
+		).toBeGreaterThan(0)
+
+		// Act: Click on the first quote link to navigate to detail page
+		// Using getByRole('link') within the row
+		const quoteLink = quoteRows.first().getByRole('link').first()
+		await expect(quoteLink).toBeVisible()
+
+		// Get the quote ID from href for URL verification
+		const href = await quoteLink.getAttribute('href')
+		expect(href, 'Quote link should have valid href').toBeTruthy()
+		expect(href).toContain('/quotes/')
+
+		await quoteLink.click()
+
+		// Wait for navigation to complete with specific URL pattern
+		await page.waitForURL(/\/app\/quotes\/[a-f0-9-]+$/i, { timeout: 10000 })
+		// Wait for quote details heading instead of networkidle (Rule 130b-playwright)
+		await expect(
+			page.getByRole('heading', { name: /quote details/i })
+		).toBeVisible({ timeout: 10000 })
+
+		// Assert 1: URL is correct quote detail page
+		const currentUrl = page.url()
+		expect(currentUrl, 'Should navigate to quote detail URL').toMatch(/\/app\/quotes\/[a-f0-9-]+$/i)
+
+		// Assert 2: Page header indicates quote details
+		const pageHeader = page.getByRole('heading', { name: /quote details/i })
+		await expect(pageHeader, 'Quote Details heading should be visible').toBeVisible()
+
+		// Assert 3: Quote status badge is displayed (critical UI element from QuoteHeader)
+		// The QuoteStatusBadge component has data-testid='quote-status'
+		const statusBadge = page.getByTestId('quote-status')
+		await expect(statusBadge, 'Quote status badge should be visible').toBeVisible()
+
+		// Verify status badge contains a valid status (from QuoteStatus enum)
+		const statusText = await statusBadge.textContent()
+		const validStatuses = ['Unread', 'Read', 'In Progress', 'Pending Approval', 'Approved', 'Sent to Customer', 'Converted', 'Rejected', 'Expired']
+		const hasValidStatus = validStatuses.some(status =>
+			statusText?.toLowerCase().includes(status.toLowerCase())
+		)
+		expect(hasValidStatus, `Status badge should show valid status, got: "${statusText}"`).toBe(true)
+
+		// Assert 4: Contact information section is displayed (QuoteContactInfo component)
+		// Using getByRole('link') as per locator hierarchy: getByRole → getByLabel → getByTestId
+		// Seeded quotes have emails like orders@acmehealthcare.test
+		const emailLink = page.getByRole('link', { name: /@.*\.test|@.*\.com|@.*\.local/i })
+		await expect(emailLink.first(), 'Contact email link should be visible').toBeVisible()
+
+		// Assert 5: Phone contact is displayed (using getByRole for tel links)
+		// Seeded quotes have phone numbers like 555-100-0001
+		const phoneLink = page.getByRole('link', { name: /555-|phone/i })
+		await expect(phoneLink.first(), 'Contact phone link should be visible').toBeVisible()
+
+		// Assert 6: Products section exists (QuoteProducts component)
+		// Using getByRole for heading as per locator hierarchy
+		const productsSection = page.getByRole('heading', { name: /requested products/i })
+		await expect(productsSection, 'Requested Products section should be visible').toBeVisible()
+
+		// Assert 7: Verify product section is displayed
+		// DataGrid uses role="grid" not role="table" (Rule 130b-playwright: use correct ARIA roles)
+		// The grid has aria-label="Quote requested products"
+		const productGrid = page.getByRole('grid', { name: /quote.*products|requested/i })
+		const hasProductGrid = await productGrid.isVisible().catch(() => false)
+
+		// Check for column headers via aria-label (sortable headers have descriptive labels)
+		// aria-label format: "Product, not sorted. Click to sort ascending."
+		const productHeaderButton = page.getByRole('button', { name: /product.*sorted|product.*click/i })
+		const hasProductHeader = await productHeaderButton.first().isVisible().catch(() => false)
+
+		// Check for grid cells (product data cells) - ensures grid is rendering content
+		const gridCells = page.locator('[role="gridcell"]')
+		const hasGridCells = await gridCells.first().isVisible().catch(() => false)
+
+		// Check for empty state message (valid if quote has no products)
+		const emptyMessage = page.getByText(/no products.*included|no items/i)
+		const hasEmptyState = await emptyMessage.isVisible().catch(() => false)
+
+		// Alternative: Check for product names from seed data (Surgical Gloves, N95 Face Masks, etc.)
+		const hasProductContent = await page.getByText(/gloves|masks|bandages|sanitizer|syringes/i).first().isVisible().catch(() => false)
+
+		// Product section should show either: grid with data, grid with empty state, or product content
+		expect(
+			hasProductGrid || hasProductHeader || hasGridCells || hasEmptyState || hasProductContent,
+			'Product section should display grid, headers, content, or empty state'
+		).toBe(true)
+
+		// Assert 8: Verify company name from seed data is displayed somewhere on page
+		// Seeded companies: Acme Healthcare, Metro Medical, Sunrise Senior, City Pharmacy
+		// Using getByText as fallback when no specific role available
+		const companyNames = ['Acme Healthcare', 'Metro Medical', 'Sunrise Senior', 'City Pharmacy', 'Test Customer']
+		let foundCompany = false
+		for (const company of companyNames) {
+			const companyText = page.getByText(new RegExp(company, 'i'))
+			if (await companyText.first().isVisible().catch(() => false)) {
+				foundCompany = true
+				break
+			}
+		}
+		expect(
+			foundCompany,
+			`Page should display a seeded company name. Expected one of: ${companyNames.join(', ')}`
+		).toBe(true)
 	})
 })
 
@@ -227,33 +484,10 @@ test.describe('Quote Management', () => {
 // =============================================
 
 test.describe('Quote Detail View', () => {
-	test('should display quote detail page @regression', async ({ quotesPage, page }) => {
-		await quotesPage.goto()
-		await quotesPage.expectLoaded()
-
-		// Click on first quote if available
-		const quoteLink = page.locator('tbody tr a').first()
-		const hasQuote = await quoteLink.isVisible().catch(() => false)
-
-		if (hasQuote) {
-			await quoteLink.click()
-			await page.waitForLoadState('networkidle')
-
-			// Should be on detail page with quote information
-			const hasStatus = await page
-				.getByTestId('quote-status')
-				.isVisible()
-				.catch(() => false)
-			const hasHeading = await page
-				.getByRole('heading')
-				.first()
-				.isVisible()
-				.catch(() => false)
-			const isDetailUrl = page.url().includes('/quotes/')
-
-			expect(hasStatus || hasHeading || isDetailUrl).toBeTruthy()
-		}
-	})
+	// NOTE: "should display quote detail page" was removed as redundant.
+	// The "should navigate to quote detail" test in Quote Management already
+	// comprehensively validates navigation + page structure + business data
+	// (status, contacts, products, company name) with 8 specific assertions.
 
 	test('should display quote actions @regression', async ({ quotesPage, page }) => {
 		await quotesPage.goto()
@@ -265,7 +499,11 @@ test.describe('Quote Detail View', () => {
 
 		if (hasQuote) {
 			await quoteLink.click()
-			await page.waitForLoadState('networkidle')
+			// Wait for quote details heading instead of networkidle (Rule 130b-playwright)
+			// Use single locator to avoid strict mode violation when multiple elements match .or()
+			await expect(
+				page.getByRole('heading', { name: /quote details/i })
+			).toBeVisible({ timeout: 10000 })
 
 			// Check for action buttons
 			const hasMarkRead = await page
@@ -312,17 +550,21 @@ test.describe('Sales Rep Quote Workflow', () => {
 		await quotesPage.goto()
 		await quotesPage.expectLoaded()
 
-		// Act: Check for quotes table
-		const hasTable = await quotesPage.quotesTable.isVisible().catch(() => false)
-		const hasEmptyState = await quotesPage.emptyQuotesMessage.isVisible().catch(() => false)
-
 		// Assert: Either quotes table or empty state should be visible
-		expect(hasTable || hasEmptyState).toBeTruthy()
+		// Rule 130b-playwright: Use web-first assertions instead of .isVisible().catch()
+		// Using getByRole('table') as per locator hierarchy: getByRole → getByLabel → getByTestId
+		const table = page.getByRole('table').first()
+		const emptyState = quotesPage.emptyQuotesMessage
 
-		// If table exists, verify it has proper structure
-		if (hasTable) {
-			const rowCount = await quotesPage.quoteRows.count()
-			expect(rowCount).toBeGreaterThanOrEqual(0)
+		// Web-first assertion: Playwright will auto-retry until condition is met
+		await expect(table.or(emptyState)).toBeVisible({ timeout: 10000 })
+
+		// Verify table structure if table exists
+		const tableVisible = await table.isVisible()
+		if (tableVisible) {
+			// Verify the table has proper ARIA structure
+			const headers = page.getByRole('columnheader')
+			await expect(headers.first()).toBeVisible()
 		}
 	})
 
@@ -340,7 +582,10 @@ test.describe('Sales Rep Quote Workflow', () => {
 
 		if (hasCreateButton) {
 			await quotesPage.createQuoteButton.click()
-			await page.waitForLoadState('networkidle')
+			// Wait for create page elements instead of networkidle (Rule 130b-playwright)
+			await expect(
+				page.getByRole('heading').first()
+			).toBeVisible({ timeout: 10000 })
 
 			// Check for quote creation form/page
 			const isCreatePage = page.url().includes('/quotes/create') || page.url().includes('/quotes/new')
@@ -353,7 +598,8 @@ test.describe('Sales Rep Quote Workflow', () => {
 		} else {
 			// Try direct navigation to create page
 			await page.goto('/app/quotes/create')
-			await page.waitForLoadState('networkidle')
+			// Wait for page content instead of networkidle (Rule 130b-playwright)
+			await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
 
 			const isCreatePage = page.url().includes('/quotes')
 			expect(isCreatePage).toBeTruthy()
@@ -375,7 +621,11 @@ test.describe('Sales Rep Quote Workflow', () => {
 
 		if (hasQuote) {
 			await quoteLink.click()
-			await page.waitForLoadState('networkidle')
+			// Wait for quote details heading instead of networkidle (Rule 130b-playwright)
+			// Use single locator to avoid strict mode violation when multiple elements match .or()
+			await expect(
+				page.getByRole('heading', { name: /quote details/i })
+			).toBeVisible({ timeout: 10000 })
 
 			// Look for vendor cost input field (typically labeled "Cost", "Vendor Cost", etc.)
 			const vendorCostInput = page.getByLabel(/vendor cost|cost price|unit cost/i).first()
@@ -414,7 +664,11 @@ test.describe('Sales Rep Quote Workflow', () => {
 
 		if (hasQuote) {
 			await quoteLink.click()
-			await page.waitForLoadState('networkidle')
+			// Wait for quote details heading instead of networkidle (Rule 130b-playwright)
+			// Use single locator to avoid strict mode violation when multiple elements match .or()
+			await expect(
+				page.getByRole('heading', { name: /quote details/i })
+			).toBeVisible({ timeout: 10000 })
 
 			// Look for price input field
 			const priceInput = quotesPage.priceInput
@@ -452,7 +706,11 @@ test.describe('Sales Rep Quote Workflow', () => {
 
 		if (hasQuote) {
 			await quoteLink.click()
-			await page.waitForLoadState('networkidle')
+			// Wait for quote details heading instead of networkidle (Rule 130b-playwright)
+			// Use single locator to avoid strict mode violation when multiple elements match .or()
+			await expect(
+				page.getByRole('heading', { name: /quote details/i })
+			).toBeVisible({ timeout: 10000 })
 
 			// Look for margin display elements
 			const marginDisplay = quotesPage.marginDisplay
@@ -501,7 +759,11 @@ test.describe('Sales Rep Quote Workflow', () => {
 
 		if (hasQuote) {
 			await quoteLink.click()
-			await page.waitForLoadState('networkidle')
+			// Wait for quote details heading instead of networkidle (Rule 130b-playwright)
+			// Use single locator to avoid strict mode violation when multiple elements match .or()
+			await expect(
+				page.getByRole('heading', { name: /quote details/i })
+			).toBeVisible({ timeout: 10000 })
 
 			// Look for submit for approval button
 			const submitButton = quotesPage.submitForApprovalButton
@@ -539,7 +801,11 @@ test.describe('Quote Conversion', () => {
 
 		if (hasQuote) {
 			await quoteLink.click()
-			await page.waitForLoadState('networkidle')
+			// Wait for quote details heading instead of networkidle (Rule 130b-playwright)
+			// Use single locator to avoid strict mode violation when multiple elements match .or()
+			await expect(
+				page.getByRole('heading', { name: /quote details/i })
+			).toBeVisible({ timeout: 10000 })
 
 			// Check for convert button - only visible on approved quotes
 			const convertButton = page.getByTestId('convert-order-btn')
@@ -564,7 +830,11 @@ test.describe('Quote Conversion', () => {
 
 		if (hasQuote) {
 			await quoteLink.click()
-			await page.waitForLoadState('networkidle')
+			// Wait for quote details heading instead of networkidle (Rule 130b-playwright)
+			// Use single locator to avoid strict mode violation when multiple elements match .or()
+			await expect(
+				page.getByRole('heading', { name: /quote details/i })
+			).toBeVisible({ timeout: 10000 })
 
 			// Check for pricing table or margin display
 			const hasPricingTable = await page
@@ -590,7 +860,11 @@ test.describe('Sales Rep Permissions', () => {
 	test('should not have access to approval actions @security', async ({ page }) => {
 		// Navigate to approvals page
 		await page.goto('/app/approvals')
-		await page.waitForLoadState('networkidle')
+		// Wait for page content instead of networkidle (Rule 130b-playwright)
+		// Use specific heading locator to avoid strict mode violation when multiple headings exist
+		await expect(
+			page.getByRole('heading', { name: /access denied/i })
+		).toBeVisible({ timeout: 10000 })
 
 		// Sales rep should see access denied or be redirected
 		const accessDenied = await page
@@ -608,11 +882,15 @@ test.describe('Sales Rep Permissions', () => {
 	test('should not have access to user management @security', async ({ page }) => {
 		// Try to access admin pages
 		await page.goto('/app/admin/tenants')
-		await page.waitForLoadState('networkidle')
+		// Wait for page content instead of networkidle (Rule 130b-playwright)
+		// Use specific heading locator to avoid strict mode violation when multiple headings exist
+		await expect(
+			page.getByRole('heading', { name: /access denied/i })
+		).toBeVisible({ timeout: 10000 })
 
 		// Should be redirected or see access denied
 		const accessDenied = await page
-			.getByText(/access denied|unauthorized|forbidden/i)
+			.getByRole('heading', { name: /access denied/i })
 			.isVisible()
 			.catch(() => false)
 		const redirected = !page.url().includes('/admin/')
@@ -682,7 +960,10 @@ test.describe('Sales Rep Order Management', () => {
 
 		if (hasOrder) {
 			await orderLink.click()
-			await page.waitForLoadState('networkidle')
+			// Wait for order detail elements instead of networkidle (Rule 130b-playwright)
+			await expect(
+				page.getByTestId('order-status').or(page.getByRole('heading', { name: /order/i }))
+			).toBeVisible({ timeout: 10000 })
 
 			// Look for payment confirmation button or payment status section
 			const confirmPaymentBtn = page.getByRole('button', { name: /confirm payment|mark.*paid/i })
@@ -719,7 +1000,10 @@ test.describe('Sales Rep Order Management', () => {
 
 		if (hasOrder) {
 			await orderLink.click()
-			await page.waitForLoadState('networkidle')
+			// Wait for order detail elements instead of networkidle (Rule 130b-playwright)
+			await expect(
+				page.getByTestId('order-status').or(page.getByRole('heading', { name: /order/i }))
+			).toBeVisible({ timeout: 10000 })
 
 			// Look for manual payment recording options
 			const recordPaymentBtn = page.getByRole('button', { name: /record payment|manual payment|add payment/i })
@@ -753,7 +1037,10 @@ test.describe('Sales Rep Order Management', () => {
 
 		if (hasOrder) {
 			await orderLink.click()
-			await page.waitForLoadState('networkidle')
+			// Wait for order detail elements instead of networkidle (Rule 130b-playwright)
+			await expect(
+				page.getByTestId('order-status').or(page.getByRole('heading', { name: /order/i }))
+			).toBeVisible({ timeout: 10000 })
 
 			// Look for payment status indicator
 			const paymentStatusBadge = page.getByTestId('payment-status').or(page.locator('[data-payment-status]'))
@@ -793,7 +1080,10 @@ test.describe('Sales Rep Order Management', () => {
 
 		if (hasOrder) {
 			await orderLink.click()
-			await page.waitForLoadState('networkidle')
+			// Wait for order detail elements instead of networkidle (Rule 130b-playwright)
+			await expect(
+				page.getByTestId('order-status').or(page.getByRole('heading', { name: /order/i }))
+			).toBeVisible({ timeout: 10000 })
 
 			// Look for payment method selector
 			const paymentMethodSelect = page.getByRole('combobox', { name: /payment.*method|payment.*type/i })
@@ -863,7 +1153,10 @@ test.describe('Error Handling', () => {
 		if (hasSearch) {
 			// Enter a search term
 			await searchInput.fill('nonexistent-quote-xyz')
-			await page.waitForLoadState('networkidle')
+			// Wait for search results instead of networkidle (Rule 130b-playwright)
+			await expect(
+				page.getByRole('table').first().or(page.getByText(/no.*found|no quotes/i))
+			).toBeVisible({ timeout: 5000 })
 
 			// Page should respond to search
 			const hasResults = await page

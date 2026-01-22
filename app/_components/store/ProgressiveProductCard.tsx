@@ -106,7 +106,7 @@ export default function ProgressiveProductCard({
 	
 	return (
 		<div
-			data-testid="progressive-product-card"
+			data-testid="product-card"
 			className={`${STYLES.CONTAINER} ${STYLES.CONTAINER_HOVER} ${className}`}
 		>
 			{/* Image Container - ProductImage handles its own loading states */}

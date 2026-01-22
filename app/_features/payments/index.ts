@@ -72,3 +72,30 @@ export {
 	useCustomerPaymentSettings,
 	useUpdateCustomerPaymentSettings,
 } from './hooks'
+
+// Components
+export {
+	// Provider
+	StripeProvider,
+	useStripeConfigured,
+	// Form Components
+	PaymentForm,
+	// Modal Components
+	ManualPaymentModal,
+	RefundModal,
+	// Display Components
+	PaymentStatusBadge,
+	PaymentHistoryTable,
+	// Integration Components
+	OrderPaymentSection,
+} from './components'
+
+export type {
+	StripeProviderProps,
+	PaymentFormProps,
+	ManualPaymentModalProps,
+	RefundModalProps,
+	PaymentStatusBadgeProps,
+	PaymentHistoryTableProps,
+	OrderPaymentSectionProps,
+} from './components'

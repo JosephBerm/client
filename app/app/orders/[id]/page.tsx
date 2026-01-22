@@ -1,8 +1,8 @@
 /**
  * Order Detail Page
- * 
+ *
  * Comprehensive order detail view orchestrating specialized components.
- * 
+ *
  * **Page Structure:**
  * ```
  * ┌─────────────────────────────────────────────────────────────┐
@@ -22,12 +22,14 @@
  * │ └───────────────────────────────┘ │ └─────────────────────┘│
  * │                                   │                        │
  * │ ┌───────────────────────────────┐ │ ┌─────────────────────┐│
- * │ │ OrderDeliveryDetails          │ │ │ OrderNotes         ││
- * │ │ (conditional)                 │ │ └─────────────────────┘│
+ * │ │ OrderPaymentSection           │ │ │ OrderNotes         ││
+ * │ │ (payments + refunds)          │ │ └─────────────────────┘│
  * │ └───────────────────────────────┘ │                        │
  * │                                   │ ┌─────────────────────┐│
- * │                                   │ │ OrderQuickInfo     ││
- * │                                   │ └─────────────────────┘│
+ * │ ┌───────────────────────────────┐ │ │ OrderQuickInfo     ││
+ * │ │ OrderDeliveryDetails          │ │ └─────────────────────┘│
+ * │ │ (conditional)                 │ │                        │
+ * │ └───────────────────────────────┘ │                        │
  * └───────────────────────────────────┴─────────────────────────┘
  * ```
  * 
@@ -64,9 +66,11 @@ import Button from '@_components/ui/Button'
 
 import { InternalPageHeader } from '../../_components'
 
-import { 
+import { OrderPaymentSection } from '@_features/payments'
+
+import {
 	// Content Components
-	OrderHeader, 
+	OrderHeader,
 	OrderTimeline,
 	OrderLineItems,
 	OrderDeliveryDetails,
@@ -176,11 +180,11 @@ interface OrderDetailContentProps {
 	isStaff: boolean
 }
 
-function OrderDetailContent({ 
-	order, 
-	actions, 
-	permissions, 
-	isStaff 
+function OrderDetailContent({
+	order,
+	actions,
+	permissions,
+	isStaff,
 }: OrderDetailContentProps) {
 	return (
 		<div className="space-y-6">
@@ -190,14 +194,10 @@ function OrderDetailContent({
 			{/* Main Layout: Content + Sidebar */}
 			<div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
 				{/* Main Content Area */}
-				<OrderMainContent order={order} isStaff={isStaff} />
+				<OrderMainContent order={order} permissions={permissions} isStaff={isStaff} />
 
 				{/* Sidebar - Actions, timeline, notes, quick info */}
-				<OrderSidebar
-					order={order}
-					actions={actions}
-					permissions={permissions}
-				/>
+				<OrderSidebar order={order} actions={actions} permissions={permissions} />
 			</div>
 		</div>
 	)
@@ -205,28 +205,38 @@ function OrderDetailContent({
 
 /**
  * Main content column.
- * Groups header, line items, and delivery details.
+ * Groups header, line items, payments, and delivery details.
  */
 interface OrderMainContentProps {
 	order: NonNullable<ReturnType<typeof useOrderDetails>['order']>
+	permissions: ReturnType<typeof useOrderPermissions>
 	isStaff: boolean
 }
 
-function OrderMainContent({ order, isStaff }: OrderMainContentProps) {
+function OrderMainContent({ order, permissions, isStaff }: OrderMainContentProps) {
+	// Payment permissions - customers can pay, staff can record manual payments and refund
+	const canPayByCard = !isStaff // Customers can pay by card
+	const canRecordPayment = permissions.canConfirmPayment // Staff who can confirm payments can record manual payments
+	const canRefund = permissions.canConfirmPayment && isStaff // Staff only can process refunds
+
 	return (
 		<div className="space-y-6">
 			{/* Order Header - Customer, status, financial summary */}
-			<OrderHeader
-				order={order}
-				showSalesRep={isStaff}
-				showInternalNotes={isStaff}
-			/>
+			<OrderHeader order={order} showSalesRep={isStaff} showInternalNotes={isStaff} />
 
 			{/* Line Items - Products table with totals */}
-			<OrderLineItems
-				order={order}
-				showStaffColumns={isStaff}
-			/>
+			<OrderLineItems order={order} showStaffColumns={isStaff} />
+
+			{/* Payment Section - Card payments, manual payments, history, refunds */}
+			{order.id && (
+				<OrderPaymentSection
+					orderId={order.id}
+					totalAmountCents={Math.round(order.total * 100)}
+					canPayByCard={canPayByCard}
+					canRecordPayment={canRecordPayment}
+					canRefund={canRefund}
+				/>
+			)}
 
 			{/* Delivery Details - Shipping info (conditional) */}
 			<OrderDeliveryDetails order={order} />

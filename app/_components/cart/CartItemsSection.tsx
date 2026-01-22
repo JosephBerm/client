@@ -43,7 +43,7 @@ export default function CartItemsSection({
 	onRemove,
 }: CartItemsSectionProps) {
 	return (
-		<div className="lg:col-span-2 space-y-4">
+		<div data-testid="cart-container" className="lg:col-span-2 space-y-4">
 			{/* Quote Process Info Card */}
 			<QuoteInfoCard />
 

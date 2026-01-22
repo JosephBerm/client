@@ -96,6 +96,17 @@ export { SecurityPolicyApi } from './security-policy.api'
 
 export { PublicApi } from './public.api'
 
+export { ExternalAuthApi } from './external-auth.api'
+export type { ExternalProvider, ProvidersResponse, LinkedAccount } from './external-auth.api'
+
+export { PhoneAuthApi } from './phone-auth.api'
+export type {
+	PhoneAuthAvailability,
+	SendCodeResponse,
+	VerifyCodeResponse,
+	PhoneAuthAccountInfo,
+} from './phone-auth.api'
+
 // =========================================================================
 // UNIFIED API FACADE
 // =========================================================================
@@ -119,6 +130,8 @@ import { PricingApi } from './pricing.api'
 import { IntegrationsApi } from './integrations.api'
 import { SecurityPolicyApi } from './security-policy.api'
 import { PublicApi } from './public.api'
+import { ExternalAuthApi } from './external-auth.api'
+import { PhoneAuthApi } from './phone-auth.api'
 
 /**
  * Main API object with domain-organized endpoints.
@@ -204,6 +217,12 @@ export const API = {
 
 	/** ERP Integration API */
 	Integrations: IntegrationsApi,
+
+	/** External Authentication API (Social Login) */
+	ExternalAuth: ExternalAuthApi,
+
+	/** Phone Authentication API (Twilio) */
+	PhoneAuth: PhoneAuthApi,
 }
 
 export default API

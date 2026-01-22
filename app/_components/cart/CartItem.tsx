@@ -242,6 +242,7 @@ export default function CartItem({
 
 	return (
 		<div
+			data-testid="cart-item"
 			className={classNames(
 				'card bg-base-100 border border-base-300 shadow-sm hover:shadow-md',
 				// Transitions with reduced motion support (Phase 5)

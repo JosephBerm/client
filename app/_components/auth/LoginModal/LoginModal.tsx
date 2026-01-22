@@ -38,6 +38,7 @@ import AuthModalHeader from './AuthModalHeader'
 import LoginForm from './LoginForm'
 import { MODAL_SUBTITLES, LAYOUT_CLASSES } from './LoginModal.constants'
 import MfaChallengeForm from './MfaChallengeForm'
+import PhoneAuthForm from './PhoneAuthForm'
 import SignupForm from './SignupForm'
 import SocialLoginButtons from './SocialLoginButtons'
 import { useAuthModal } from './useAuthModal'
@@ -88,6 +89,16 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 		mfaError,
 		handleMfaVerify,
 		handleMfaCancel,
+		// Phone auth state
+		phoneNumber,
+		setPhoneNumber,
+		phoneCode,
+		setPhoneCode,
+		phoneCodeSent,
+		phoneExpiresIn,
+		handleSendPhoneCode,
+		handleVerifyPhoneCode,
+		handlePhoneCancel,
 	} = useAuthModal({ onClose, onLoginSuccess })
 
 	return (
@@ -152,6 +163,22 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 							onCancel={handleMfaCancel}
 							isLoading={isLoading}
 							error={mfaError}
+						/>
+					)}
+
+					{/* Phone Auth View */}
+					{currentView === 'phone' && (
+						<PhoneAuthForm
+							phoneNumber={phoneNumber}
+							setPhoneNumber={setPhoneNumber}
+							phoneCode={phoneCode}
+							setPhoneCode={setPhoneCode}
+							phoneCodeSent={phoneCodeSent}
+							phoneExpiresIn={phoneExpiresIn}
+							isLoading={isLoading}
+							onSendCode={handleSendPhoneCode}
+							onVerifyCode={handleVerifyPhoneCode}
+							onCancel={handlePhoneCancel}
 						/>
 					)}
 				</div>

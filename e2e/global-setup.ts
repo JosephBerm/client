@@ -178,9 +178,10 @@ function ensureAuthDir(): void {
 
 /**
  * Check if storage state is still valid (not expired)
- * Storage states are valid for 24 hours by default
+ * Storage states are valid for 30 days (720 hours) to match JWT AccessTokenExpirationMinutes in development
+ * @see server/appsettings.Development.json - AccessTokenExpirationMinutes: 43200 (30 days)
  */
-function isStorageStateValid(filePath: string, maxAgeHours = 24): boolean {
+function isStorageStateValid(filePath: string, maxAgeHours = 720): boolean {
 	if (!fs.existsSync(filePath)) {
 		return false
 	}
@@ -250,43 +251,72 @@ async function authenticateAccount(
 		await signInButton.click()
 		console.log(`  ⏳ Clicked Sign In, waiting for login to complete...`)
 
-		// Wait for login to process (URL change or dialog dismissal)
-		await Promise.race([
-			page.waitForURL((url) => !url.toString().includes('/login'), { timeout: 15000 }),
-			page.locator('[role="dialog"]').first().waitFor({ state: 'hidden', timeout: 15000 }),
-		]).catch(() => {})
+		// Wait for login to complete - the dialog should close and URL should change
+		// Use a longer timeout since login can take a few seconds to process
+		const loginTimeout = 30000
 
-		// Check login result - look for navigation away from login modal
-		const currentUrl = page.url()
-		const stillOnLogin = currentUrl.includes('login=true') || currentUrl.includes('/login')
-		const dialogVisible = await page.locator('[role="dialog"]').first().isVisible().catch(() => false)
+		// Wait for the User menu button to appear (indicates successful login)
+		// OR wait for the dialog to close
+		// OR wait for URL to change (remove login=true)
+		const userMenuButton = page.getByRole('button', { name: /user menu/i })
+		const loginDialog = page.locator('[role="dialog"]').first()
 
-		// Check for actual error messages (not success messages!)
-		const errorMessages = page.locator('.text-error, .alert-error')
-		const errorCount = await errorMessages.count()
-
-		for (let i = 0; i < errorCount; i++) {
-			const errorText = await errorMessages.nth(i).textContent().catch(() => '')
-			// Only treat it as an error if it's not a success message
-			if (
-				errorText &&
-				errorText.trim().length > 0 &&
-				!errorText.toLowerCase().includes('success') &&
-				!errorText.toLowerCase().includes('loading') &&
-				!errorText.toLowerCase().includes('logged in')
-			) {
-				throw new Error(`Login failed: ${errorText.trim()}`)
-			}
+		try {
+			await Promise.race([
+				// Best indicator: user menu button appears
+				userMenuButton.waitFor({ state: 'visible', timeout: loginTimeout }),
+				// Alternative: dialog disappears
+				loginDialog.waitFor({ state: 'hidden', timeout: loginTimeout }),
+				// Alternative: URL changes to not include login
+				page.waitForURL((url) => !url.toString().includes('login=true'), { timeout: loginTimeout }),
+			])
+		} catch {
+			// If all waits fail, check the current state
+			console.log(`  ⚠️  Initial wait timed out, checking current state...`)
 		}
 
-		// If modal is still visible after clicking Sign In, check if login succeeded
-		if (dialogVisible && stillOnLogin) {
-			// Wait more and check again
-			await page.waitForLoadState('networkidle')
-			const stillHasDialog = await page.locator('[role="dialog"]').first().isVisible().catch(() => false)
-			if (stillHasDialog) {
-				// Take a screenshot to see what's happening
-				throw new Error('Login modal still visible after Sign In - credentials may be invalid')
+		// Give a small additional wait for state to settle
+		await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {})
+
+		// Check login result
+		const currentUrl = page.url()
+		const stillOnLogin = currentUrl.includes('login=true')
+		const dialogVisible = await loginDialog.isVisible().catch(() => false)
+		const userMenuVisible = await userMenuButton.isVisible().catch(() => false)
+
+		// If user menu is visible, login succeeded
+		if (userMenuVisible) {
+			console.log(`  ✓ User menu detected - login successful`)
+		} else if (dialogVisible) {
+			// Dialog still visible - check for error messages
+			const errorMessages = page.locator('.text-error, .alert-error, [data-error]')
+			const errorCount = await errorMessages.count()
+
+			let hasError = false
+			for (let i = 0; i < errorCount; i++) {
+				const errorText = await errorMessages.nth(i).textContent().catch(() => '')
+				if (
+					errorText &&
+					errorText.trim().length > 0 &&
+					!errorText.toLowerCase().includes('success') &&
+					!errorText.toLowerCase().includes('loading') &&
+					!errorText.toLowerCase().includes('logged in')
+				) {
+					hasError = true
+					throw new Error(`Login failed: ${errorText.trim()}`)
+				}
+			}
+
+			// If no error messages but dialog is still visible, it might still be processing
+			if (!hasError && stillOnLogin) {
+				// Final attempt - wait a bit more
+				await page.waitForTimeout(5000)
+				const finalDialogCheck = await loginDialog.isVisible().catch(() => false)
+				const finalUserMenu = await userMenuButton.isVisible().catch(() => false)
+
+				if (finalDialogCheck && !finalUserMenu) {
+					throw new Error('Login modal still visible after Sign In - credentials may be invalid or server is slow')
+				}
 			}
 		}
 

@@ -25,6 +25,7 @@ export const MODAL_TITLES = {
 	signup: 'Sign up',
 	mfa: 'Two-Factor Authentication',
 	'mfa-recovery': 'Recovery Code',
+	phone: 'Phone Login',
 } as const
 
 /**
@@ -35,6 +36,7 @@ export const MODAL_SUBTITLES = {
 	signup: 'Create an account to get started with MedSource Pro.',
 	mfa: 'Enter the code from your authenticator app.',
 	'mfa-recovery': 'Enter your recovery code.',
+	phone: 'Sign in with your phone number.',
 } as const
 
 /**

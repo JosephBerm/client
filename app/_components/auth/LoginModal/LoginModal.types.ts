@@ -19,7 +19,7 @@ import type { UseFormReturn } from 'react-hook-form'
  * Modal view state type.
  * Controls which form is displayed in the modal.
  */
-export type AuthModalView = 'login' | 'signup' | 'mfa' | 'mfa-recovery'
+export type AuthModalView = 'login' | 'signup' | 'mfa' | 'mfa-recovery' | 'phone'
 
 /**
  * Social login provider type.
@@ -174,4 +174,50 @@ export interface UseAuthModalReturn {
 	handleMfaVerify: (code: string, rememberDevice: boolean, isRecoveryCode: boolean) => Promise<void>
 	/** Handler to cancel MFA and return to login */
 	handleMfaCancel: () => void
+
+	// Phone authentication state
+	/** Phone number input value */
+	phoneNumber: string
+	/** Set phone number */
+	setPhoneNumber: (value: string) => void
+	/** Verification code input value */
+	phoneCode: string
+	/** Set verification code */
+	setPhoneCode: (value: string) => void
+	/** Whether verification code has been sent */
+	phoneCodeSent: boolean
+	/** Seconds until code expires (null if not sent) */
+	phoneExpiresIn: number | null
+	/** Handler to send verification code */
+	handleSendPhoneCode: () => Promise<void>
+	/** Handler to verify code and login */
+	handleVerifyPhoneCode: () => Promise<void>
+	/** Handler to cancel phone auth and return to login */
+	handlePhoneCancel: () => void
+}
+
+/**
+ * PhoneAuthForm component props.
+ */
+export interface PhoneAuthFormProps {
+	/** Phone number input value */
+	phoneNumber: string
+	/** Set phone number */
+	setPhoneNumber: (value: string) => void
+	/** Verification code input value */
+	phoneCode: string
+	/** Set verification code */
+	setPhoneCode: (value: string) => void
+	/** Whether verification code has been sent */
+	phoneCodeSent: boolean
+	/** Seconds until code expires (null if not sent) */
+	phoneExpiresIn: number | null
+	/** Whether form submission is in progress */
+	isLoading: boolean
+	/** Handler to send verification code */
+	onSendCode: () => Promise<void>
+	/** Handler to verify code and login */
+	onVerifyCode: () => Promise<void>
+	/** Handler to cancel and go back */
+	onCancel: () => void
 }

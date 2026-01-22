@@ -32,29 +32,29 @@ export const ShippingApi = {
 	/**
 	 * Gets shipping rates from multiple carriers.
 	 */
-	getRates: async (request: ShippingRateRequest) => HttpService.post<ShippingRate[]>('/shipping/rates', request),
+	getRates: async (request: ShippingRateRequest) => HttpService.post<ShippingRate[]>('/Shipping/rates', request),
 
 	/**
 	 * Creates a shipping label for an order.
 	 */
-	createLabel: async (request: CreateLabelRequest) => HttpService.post<ShipmentLabel>('/shipping/labels', request),
+	createLabel: async (request: CreateLabelRequest) => HttpService.post<ShipmentLabel>('/Shipping/labels', request),
 
 	/**
 	 * Gets a shipping label by ID.
 	 */
-	getLabel: async (labelId: string) => HttpService.get<ShipmentLabel>(`/shipping/labels/${labelId}`),
+	getLabel: async (labelId: string) => HttpService.get<ShipmentLabel>(`/Shipping/labels/${labelId}`),
 
 	/**
 	 * Gets all shipping labels for an order.
 	 */
 	getOrderLabels: async (orderId: number) =>
-		HttpService.get<OrderShipmentsResponse>(`/shipping/orders/${orderId}/labels`),
+		HttpService.get<OrderShipmentsResponse>(`/Shipping/orders/${orderId}/labels`),
 
 	/**
 	 * Voids/cancels a shipping label.
 	 */
 	voidLabel: async (labelId: string) =>
-		HttpService.delete<{ success: boolean; message: string }>(`/shipping/labels/${labelId}`),
+		HttpService.delete<{ success: boolean; message: string }>(`/Shipping/labels/${labelId}`),
 
 	/**
 	 * Gets tracking information for a shipment.
@@ -64,7 +64,7 @@ export const ShippingApi = {
 		if (carrier) params.append('carrier', carrier)
 		const query = params.toString()
 		return HttpService.get<TrackingInfo>(
-			`/shipping/tracking/${encodeURIComponent(trackingNumber)}${query ? `?${query}` : ''}`
+			`/Shipping/tracking/${encodeURIComponent(trackingNumber)}${query ? `?${query}` : ''}`
 		)
 	},
 }
