@@ -15,7 +15,10 @@
 import { useCallback, useMemo, useState } from 'react'
 
 import API from '@_shared/services/api'
-import { useFetchWithCache } from '@_shared/hooks'
+import { useFetchWithCache, useRealtimeSubscription } from '@_shared/hooks'
+import { useTenant } from '@_shared'
+import { useAuthStore } from '@_features/auth'
+import type { AnalyticsRevenueUpdatedEvent } from '@_shared/services/realtime/realtimeEventTypes'
 import { getDateRange, serializeDateOnly } from '@_lib'
 import type { RevenueData, TimelineGranularity } from '@_types/analytics.types'
 
@@ -92,6 +95,11 @@ export function useRevenueTimeline(
 ): UseRevenueTimelineReturn {
 	const { initialGranularity = 'month', initialStartDate, initialEndDate, autoFetch = true } =
 		options
+	const { uiConfig } = useTenant()
+	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+	const isAuthLoading = useAuthStore((state) => state.isLoading)
+	const isRealtimeEnabled = uiConfig?.enabledFeatures?.includes('realtime-sockets') ?? false
+	const shouldSubscribe = !isAuthLoading && isAuthenticated && isRealtimeEnabled
 
 	// Get default dates using @_lib
 	const defaultRange = useMemo(() => getDefaultDateRange(), [])
@@ -164,6 +172,19 @@ export function useRevenueTimeline(
 	const retry = useCallback(async () => {
 		await refetch()
 	}, [refetch])
+
+	const handleRealtimeUpdate = useCallback(
+		async (_payload: AnalyticsRevenueUpdatedEvent) => {
+			await refetch()
+		},
+		[refetch]
+	)
+
+	useRealtimeSubscription<AnalyticsRevenueUpdatedEvent>(
+		'analytics.revenue.updated',
+		handleRealtimeUpdate,
+		shouldSubscribe
+	)
 
 	return {
 		data,

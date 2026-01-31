@@ -348,7 +348,9 @@ export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>
  */
 const dateInputSchema = z.preprocess((val) => {
 	// Handle empty/null/undefined - return null to trigger nullable()
-	if (val === '' || val === null || val === undefined) return null
+	if (val === '' || val === null || val === undefined) {
+		return null
+	}
 	// Pass through Date objects and strings for coercion
 	return val
 }, z.coerce.date().nullable())
@@ -362,7 +364,9 @@ const dateInputSchema = z.preprocess((val) => {
  */
 const optionalAddressSchema = z.preprocess((val) => {
 	// Handle null/undefined - pass through for .optional() to handle
-	if (val === null || val === undefined) return undefined
+	if (val === null || val === undefined) {
+		return undefined
+	}
 
 	// If it's an object, check if it has any meaningful content
 	if (typeof val === 'object' && val !== null) {
@@ -439,12 +443,12 @@ export const productSchema = z.object({
 	name: z.string().min(1, 'Product name is required').max(200, 'Product name is too long'),
 	description: z.string().min(1, 'Description is required'),
 	price: z.coerce.number().nonnegative('Price must be non-negative'),
-	cost: z.coerce.number().nonnegative('Cost must be non-negative').nullable().optional(),
+	cost: z.coerce.number().nonnegative('Cost must be non-negative').nullish(),
 	quantity: z.coerce.number().int().nonnegative('Quantity cannot be negative'),
-	categoryIds: z.array(z.coerce.number().int()).optional().default([]),
+	categoryIds: z.array(z.string()).optional().default([]),
 	sku: z.string().optional(),
 	manufacturer: z.string().optional(),
-	providerId: z.coerce.number().int().nullable().optional(),
+	providerId: z.string().nullish(),
 })
 
 /** Type-safe form data inferred from productSchema */
@@ -457,7 +461,7 @@ export type ProductFormData = z.infer<typeof productSchema>
  * @constant
  */
 export const orderSchema = z.object({
-	customerId: z.coerce.number().positive('Customer is required'),
+	customerId: z.string().min(1, 'Customer is required'),
 	shippingAddress: addressSchema,
 	notes: z.string().optional(),
 })
@@ -511,8 +515,8 @@ export type OrderFormData = z.infer<typeof orderSchema>
  */
 export const quoteSchema = z
 	.object({
-		// Authenticated user fields
-		customerId: z.coerce.number().nonnegative().optional(),
+		// Authenticated user fields - GUID string
+		customerId: z.string().nullish(),
 		// Hidden field to indicate authentication status (set by form)
 		isAuthenticated: z.boolean().optional().default(false),
 
@@ -528,7 +532,7 @@ export const quoteSchema = z
 					productId: z.string().min(1, 'Product is required'),
 					quantity: z.coerce.number().int().positive('Quantity must be positive'),
 					price: z.coerce.number().positive('Price must be positive'),
-				})
+				}),
 			)
 			.min(1, 'At least one item is required'),
 		notes: z.string().optional(),
@@ -537,8 +541,8 @@ export const quoteSchema = z
 	.superRefine((data, ctx) => {
 		// Determine if user is authenticated
 		// Check isAuthenticated flag first (set by form for logged-in users)
-		// Fall back to customerId > 0 for backward compatibility
-		const isAuthenticated = data.isAuthenticated === true || (data.customerId && data.customerId > 0)
+		// Fall back to customerId being a non-empty string (GUID)
+		const isAuthenticated = data.isAuthenticated === true || (data.customerId && data.customerId.length > 0)
 
 		if (isAuthenticated) {
 			// Authenticated users don't need guest fields (even if customerId is 0/null)
@@ -610,8 +614,8 @@ export const customerSchema = z.object({
 	typeOfBusiness: z.number().int().min(0).max(6).optional(), // TypeOfBusiness enum (0-6)
 	status: z.number().int().min(0).max(4).optional(), // CustomerStatus enum (0-4)
 
-	// Sales rep assignment (SalesManager+ only)
-	primarySalesRepId: z.number().int().positive().nullable().optional(),
+	// Sales rep assignment (SalesManager+ only) - GUID string
+	primarySalesRepId: z.string().nullish(),
 
 	// Addresses
 	address: addressSchema.optional(),
@@ -749,7 +753,7 @@ export const productPricingSchema = z
 		{
 			message: 'Customer price must be greater than or equal to vendor cost',
 			path: ['customerPrice'],
-		}
+		},
 	)
 
 /** Type-safe form data inferred from productPricingSchema */
@@ -836,7 +840,7 @@ export const updateOrderStatusSchema = z
 		{
 			message: 'Tracking number is required when marking as Shipped',
 			path: ['trackingNumber'],
-		}
+		},
 	)
 	.refine(
 		(data) => {
@@ -849,7 +853,7 @@ export const updateOrderStatusSchema = z
 		{
 			message: 'Cancellation reason is required',
 			path: ['cancellationReason'],
-		}
+		},
 	)
 
 /** Type-safe form data inferred from updateOrderStatusSchema */
@@ -907,7 +911,7 @@ export const roleNameSchema = z
 	.max(50, 'Role name cannot exceed 50 characters')
 	.regex(
 		/^[a-z][a-z0-9_]*$/,
-		'Role name must start with a letter and contain only lowercase letters, numbers, and underscores'
+		'Role name must start with a letter and contain only lowercase letters, numbers, and underscores',
 	)
 	.refine((name) => !name.includes('__'), 'Role name cannot contain consecutive underscores')
 
@@ -921,7 +925,7 @@ export const roleDisplayNameSchema = z
 	.max(100, 'Display name cannot exceed 100 characters')
 	.regex(
 		/^[a-zA-Z][a-zA-Z0-9\s\-&'.()]*$/,
-		'Display name must start with a letter and contain only letters, numbers, spaces, and basic punctuation'
+		'Display name must start with a letter and contain only letters, numbers, spaces, and basic punctuation',
 	)
 
 /**
@@ -1025,7 +1029,7 @@ export type RoleUpdateFormData = z.infer<typeof roleUpdateSchema>
  */
 const basePriceListFieldsSchema = z.object({
 	name: z.string().min(1, 'Name is required').max(100, 'Name cannot exceed 100 characters'),
-	description: z.string().max(500, 'Description cannot exceed 500 characters').optional().nullable(),
+	description: z.string().max(500, 'Description cannot exceed 500 characters').optional(),
 	priority: z.coerce
 		.number()
 		.int()
@@ -1033,8 +1037,8 @@ const basePriceListFieldsSchema = z.object({
 		.max(1000, 'Priority cannot exceed 1000')
 		.default(100),
 	isActive: z.boolean().default(true),
-	validFrom: z.coerce.date().optional().nullable(),
-	validUntil: z.coerce.date().optional().nullable(),
+	validFrom: z.coerce.date().optional(),
+	validUntil: z.coerce.date().optional(),
 })
 
 /**
@@ -1115,20 +1119,18 @@ export type UpdatePriceListFormData = z.infer<typeof updatePriceListSchema>
 export const priceListItemSchema = z
 	.object({
 		productId: z.string().uuid('Invalid product ID'),
-		fixedPrice: z.coerce.number().min(0, 'Fixed price must be non-negative').optional().nullable(),
+		fixedPrice: z.coerce.number().min(0, 'Fixed price must be non-negative').optional(),
 		percentDiscount: z.coerce
 			.number()
 			.min(0, 'Discount cannot be negative')
 			.max(100, 'Discount cannot exceed 100%')
-			.optional()
-			.nullable(),
-		fixedDiscount: z.coerce.number().min(0, 'Discount cannot be negative').optional().nullable(),
+			.optional(),
+		fixedDiscount: z.coerce.number().min(0, 'Discount cannot be negative').optional(),
 		minimumMarginPercent: z.coerce
 			.number()
 			.min(0, 'Minimum margin cannot be negative')
 			.max(100, 'Minimum margin cannot exceed 100%')
-			.optional()
-			.nullable(),
+			.optional(),
 	})
 	.refine(
 		(data) => {
@@ -1138,7 +1140,7 @@ export const priceListItemSchema = z
 		{
 			message: 'Exactly one pricing method must be specified (fixed price, percent discount, or fixed discount)',
 			path: ['fixedPrice'],
-		}
+		},
 	)
 
 /** Type-safe form data inferred from priceListItemSchema */
@@ -1166,14 +1168,13 @@ export type PriceListItemFormData = z.infer<typeof priceListItemSchema>
 export const volumeTierSchema = z
 	.object({
 		minQuantity: z.coerce.number().int().min(1, 'Minimum quantity must be at least 1'),
-		maxQuantity: z.coerce.number().int().min(1, 'Maximum quantity must be at least 1').optional().nullable(),
-		unitPrice: z.coerce.number().min(0, 'Unit price must be non-negative').optional().nullable(),
+		maxQuantity: z.coerce.number().int().min(1, 'Maximum quantity must be at least 1').optional(),
+		unitPrice: z.coerce.number().min(0, 'Unit price must be non-negative').optional(),
 		percentDiscount: z.coerce
 			.number()
 			.min(0, 'Discount cannot be negative')
 			.max(100, 'Discount cannot exceed 100%')
-			.optional()
-			.nullable(),
+			.optional(),
 	})
 	.refine(
 		(data) => {
@@ -1183,7 +1184,7 @@ export const volumeTierSchema = z
 		{
 			message: 'Exactly one pricing method must be specified (unit price or percent discount)',
 			path: ['unitPrice'],
-		}
+		},
 	)
 	.refine(
 		(data) => {
@@ -1192,7 +1193,7 @@ export const volumeTierSchema = z
 			}
 			return true
 		},
-		{ message: 'Maximum quantity must be greater than or equal to minimum quantity', path: ['maxQuantity'] }
+		{ message: 'Maximum quantity must be greater than or equal to minimum quantity', path: ['maxQuantity'] },
 	)
 
 /** Type-safe form data inferred from volumeTierSchema */
@@ -1220,7 +1221,7 @@ export const setVolumeTiersSchema = z
 			const uniqueMinQuantities = new Set(minQuantities)
 			return minQuantities.length === uniqueMinQuantities.size
 		},
-		{ message: 'Duplicate minimum quantities are not allowed', path: ['tiers'] }
+		{ message: 'Duplicate minimum quantities are not allowed', path: ['tiers'] },
 	)
 
 /** Type-safe form data inferred from setVolumeTiersSchema */
@@ -1233,11 +1234,137 @@ export type SetVolumeTiersFormData = z.infer<typeof setVolumeTiersSchema>
  */
 export const pricingRequestSchema = z.object({
 	productId: z.string().uuid('Invalid product ID'),
-	customerId: z.coerce.number().int().optional().nullable(),
+	customerId: z.string().nullish(),
 	quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1').default(1),
-	priceDate: z.coerce.date().optional().nullable(),
+	priceDate: z.coerce.date().optional(),
 	includeBreakdown: z.boolean().optional().default(false),
 })
 
 /** Type-safe form data inferred from pricingRequestSchema */
 export type PricingRequestFormData = z.infer<typeof pricingRequestSchema>
+
+// ============================================================================
+// TENANT CONFIGURATION
+// ============================================================================
+
+/**
+ * CSS color validation (hex, rgb, rgba, hsl, hsla, named colors).
+ */
+export const cssColorSchema = z
+	.string()
+	.regex(/^(#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})|rgb\(|rgba\(|hsl\(|hsla\(|[a-z]+)$/i, 'Invalid CSS color format')
+
+/**
+ * Chart palette validation.
+ */
+export const chartPaletteSchema = z
+	.array(cssColorSchema)
+	.min(3, 'Chart palette must contain at least 3 colors')
+	.max(20, 'Chart palette cannot exceed 20 colors')
+
+/**
+ * Opacity value validation (0-1 range).
+ */
+export const opacitySchema = z.coerce
+	.number()
+	.min(0, 'Opacity must be between 0 and 1')
+	.max(1, 'Opacity must be between 0 and 1')
+
+/**
+ * DaisyUI theme name validation.
+ */
+export const DAISY_UI_THEME_NAMES = [
+	'light',
+	'dark',
+	'cupcake',
+	'bumblebee',
+	'emerald',
+	'corporate',
+	'synthwave',
+	'retro',
+	'cyberpunk',
+	'valentine',
+	'halloween',
+	'garden',
+	'forest',
+	'aqua',
+	'lofi',
+	'pastel',
+	'fantasy',
+	'wireframe',
+	'black',
+	'luxury',
+	'dracula',
+	'cmyk',
+	'autumn',
+	'business',
+	'acid',
+	'lemonade',
+	'night',
+	'coffee',
+	'winter',
+] as const
+
+export const daisyUIThemeNameSchema = z.enum(DAISY_UI_THEME_NAMES).optional()
+
+/**
+ * Tenant theme configuration schema.
+ *
+ * Backend uses JsonIgnoreCondition.WhenWritingNull - null fields are OMITTED from responses.
+ * Use .optional() since fields will be absent (undefined), not null.
+ */
+export const tenantThemeSchema = z.object({
+	themeName: daisyUIThemeNameSchema,
+	primaryColor: cssColorSchema.optional(),
+	secondaryColor: cssColorSchema.optional(),
+	accentColor: cssColorSchema.optional(),
+	successColor: cssColorSchema.optional(),
+	warningColor: cssColorSchema.optional(),
+	errorColor: cssColorSchema.optional(),
+	infoColor: cssColorSchema.optional(),
+	baseContentColor: cssColorSchema.optional(),
+	base100Color: cssColorSchema.optional(),
+	base200Color: cssColorSchema.optional(),
+	base300Color: cssColorSchema.optional(),
+	chartPalette: chartPaletteSchema.optional(),
+	chartGridOpacity: opacitySchema.optional(),
+	chartAxisOpacity: opacitySchema.optional(),
+})
+
+/**
+ * Tenant UI configuration schema (serialized JSON fields from backend).
+ *
+ * Backend uses JsonIgnoreCondition.WhenWritingNull - null fields are OMITTED from responses.
+ * Use .optional() since fields will be absent (undefined), not null.
+ */
+export const tenantUiConfigSchema = z.object({
+	pages: z.string().optional(),
+	enabledComponents: z.string().optional(),
+	theme: z.string().optional(),
+	enabledFeatures: z.string().optional(),
+	customCss: z.string().optional(),
+})
+
+/**
+ * Complete tenant configuration schema.
+ *
+ * Backend uses JsonIgnoreCondition.WhenWritingNull (.NET 10 best practice):
+ * - Null reference-type fields are OMITTED from JSON responses
+ * - Value-type defaults (0, false) are still included
+ * - Frontend uses .optional() for omitted fields
+ */
+export const tenantConfigSchema = z.object({
+	id: z.string().uuid('Invalid tenant ID'),
+	identifier: z.string().min(1, 'Tenant identifier is required'),
+	name: z.string().min(1, 'Tenant name is required'),
+	logoUrl: z.string().url('Invalid logo URL').optional(),
+	faviconUrl: z.string().url('Invalid favicon URL').optional(),
+	status: z.enum(['PendingSetup', 'Active', 'Suspended', 'Cancelled', 'Archived']),
+	tier: z.enum(['Trial', 'Standard', 'Professional', 'Enterprise']),
+	uiConfig: tenantUiConfigSchema.optional(),
+	...tenantThemeSchema.shape,
+})
+
+export type TenantThemeFormData = z.infer<typeof tenantThemeSchema>
+export type TenantUiConfigFormData = z.infer<typeof tenantUiConfigSchema>
+export type TenantConfigFormData = z.infer<typeof tenantConfigSchema>

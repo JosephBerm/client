@@ -170,7 +170,7 @@ export default function AccountOverview() {
 	const hasActivity = ordersCount > 0 || quotesCount > 0
 	
 	// Online/Offline status based on account setup (customer ID presence)
-	const isOnline = Boolean(user.customerId && user.customerId > 0)
+	const isOnline = Boolean(user.customerId && user.customerId.length > 0)
 	const accountStatus = isOnline ? 'Online' : 'Offline'
 	const accountStatusVariant = isOnline ? 'success' : 'error' as const
 
@@ -401,7 +401,7 @@ export default function AccountOverview() {
 									<span className="relative inline-flex rounded-full h-2 w-2 bg-error"></span>
 								)}
 							</span>
-							{user.customerId && user.customerId > 0 ? 'Assigned' : 'Pending'}
+							{user.customerId && user.customerId.length > 0 ? 'Assigned' : 'Pending'}
 						</Badge>
 				</div>
 
@@ -410,7 +410,7 @@ export default function AccountOverview() {
 				</h3>
 
 				{/* Company Details - Only show if assigned */}
-				{user.customer && user.customerId && user.customerId > 0 && (
+				{user.customer && user.customerId && user.customerId.length > 0 && (
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 						{user.customer.email && (
 							<div className="flex items-center gap-2 min-w-0 w-full">

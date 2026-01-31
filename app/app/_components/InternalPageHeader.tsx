@@ -61,7 +61,7 @@
  * @module InternalPageHeader
  */
 
-import type { ReactNode } from 'react'
+import type { ReactNode, JSX } from 'react'
 
 import classNames from 'classnames'
 
@@ -132,13 +132,16 @@ export default function InternalPageHeader({
 	actions,
 	loading = false,
 	className,
-}: InternalPageHeaderProps) {
+}: InternalPageHeaderProps): JSX.Element {
 	return (
 		<header
 			className={classNames(
 				'flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between',
 				// FAANG-level mobile-first spacing: More generous on mobile, elegant on desktop
 				'mb-6 sm:mb-7 md:mb-8',
+				// Per 2025-2026 Dashboard Design Trends (Section 7.5): Subtle bottom border
+				// Creates horizontal content regions without needing card containers below
+				'pb-4 sm:pb-5 md:pb-6 border-b border-base-200',
 				className
 			)}
 			aria-busy={loading}

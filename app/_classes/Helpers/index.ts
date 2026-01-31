@@ -58,5 +58,8 @@ export type { NotificationTypeMetadata, NotificationVariant, NotificationPriorit
 export { default as QuoteStatusHelper } from './QuoteStatusHelper'
 export type { QuoteStatusMetadata, QuoteStatusVariant } from './QuoteStatusHelper'
 
+export { default as AccountStatusHelper } from './AccountStatusHelper'
+export type { AccountStatusMetadata, AccountStatusVariant } from './AccountStatusHelper'
+
 export { default as TypeOfBusinessHelper } from './TypeOfBusinessHelper'
 export type { TypeOfBusinessMetadata, BusinessIndustryCategory } from './TypeOfBusinessHelper'

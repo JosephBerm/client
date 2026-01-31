@@ -53,20 +53,20 @@ interface MockUser {
   id: string | null
   email: string
   role: number
-  customerId?: number | null
+  customerId?: string | null
 }
 
 // ============================================================================
 // TEST HELPERS
 // ============================================================================
 
-function createMockOrder(overrides: Partial<Order & { customerId?: number; assignedSalesRepId?: string }> = {}): Order {
+function createMockOrder(overrides: Partial<Order & { customerId?: string; assignedSalesRepId?: string }> = {}): Order {
   return {
-    id: 1,
+    id: 'order-001',
     orderNumber: 'ORD-001',
     status: OrderStatus.Placed,
     total: 500.00,
-    customerId: 100,
+    customerId: 'cust-100',
     assignedSalesRepId: undefined,
     products: [],
     createdAt: new Date(),
@@ -75,7 +75,7 @@ function createMockOrder(overrides: Partial<Order & { customerId?: number; assig
     discount: 0,
     notes: '',
     ...overrides,
-  } as Order & { customerId?: number; assignedSalesRepId?: string }
+  } as Order & { customerId?: string; assignedSalesRepId?: string }
 }
 
 function createMockUser(overrides: Partial<MockUser> = {}): MockUser {
@@ -83,7 +83,7 @@ function createMockUser(overrides: Partial<MockUser> = {}): MockUser {
     id: '1',
     email: 'test@medsource.com',
     role: RoleLevels.Customer,
-    customerId: 100,
+    customerId: 'cust-100',
     ...overrides,
   }
 }
@@ -169,8 +169,8 @@ describe('useOrderPermissions Hook', () => {
   describe('Ownership Context', () => {
     describe('Own Order (Customer)', () => {
       it('should recognize order as owned by user via customerId', () => {
-        const mockUser = createMockUser({ id: '100', customerId: 100 })
-        const mockOrder = createMockOrder({ customerId: 100 })
+        const mockUser = createMockUser({ id: '100', customerId: 'cust-100' })
+        const mockOrder = createMockOrder({ customerId: 'cust-100' })
         mockUsePermissions(mockUser, RoleLevels.Customer)
 
         const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -179,8 +179,8 @@ describe('useOrderPermissions Hook', () => {
       })
 
       it('Customer can view own order', () => {
-        const mockUser = createMockUser({ customerId: 100 })
-        const mockOrder = createMockOrder({ customerId: 100 })
+        const mockUser = createMockUser({ customerId: 'cust-100' })
+        const mockOrder = createMockOrder({ customerId: 'cust-100' })
         mockUsePermissions(mockUser, RoleLevels.Customer)
 
         const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -189,8 +189,8 @@ describe('useOrderPermissions Hook', () => {
       })
 
       it('Customer CANNOT confirm payment on own order', () => {
-        const mockUser = createMockUser({ customerId: 100 })
-        const mockOrder = createMockOrder({ customerId: 100, status: OrderStatus.Placed })
+        const mockUser = createMockUser({ customerId: 'cust-100' })
+        const mockOrder = createMockOrder({ customerId: 'cust-100', status: OrderStatus.Placed })
         mockUsePermissions(mockUser, RoleLevels.Customer)
 
         const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -199,8 +199,8 @@ describe('useOrderPermissions Hook', () => {
       })
 
       it('Customer can request cancellation for own Placed order', () => {
-        const mockUser = createMockUser({ customerId: 100 })
-        const mockOrder = createMockOrder({ customerId: 100, status: OrderStatus.Placed })
+        const mockUser = createMockUser({ customerId: 'cust-100' })
+        const mockOrder = createMockOrder({ customerId: 'cust-100', status: OrderStatus.Placed })
         mockUsePermissions(mockUser, RoleLevels.Customer)
 
         const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -209,8 +209,8 @@ describe('useOrderPermissions Hook', () => {
       })
 
       it('Customer can request cancellation for own Paid order', () => {
-        const mockUser = createMockUser({ customerId: 100 })
-        const mockOrder = createMockOrder({ customerId: 100, status: OrderStatus.Paid })
+        const mockUser = createMockUser({ customerId: 'cust-100' })
+        const mockOrder = createMockOrder({ customerId: 'cust-100', status: OrderStatus.Paid })
         mockUsePermissions(mockUser, RoleLevels.Customer)
 
         const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -219,8 +219,8 @@ describe('useOrderPermissions Hook', () => {
       })
 
       it('Customer CANNOT request cancellation for Shipped order', () => {
-        const mockUser = createMockUser({ customerId: 100 })
-        const mockOrder = createMockOrder({ customerId: 100, status: OrderStatus.Shipped })
+        const mockUser = createMockUser({ customerId: 'cust-100' })
+        const mockOrder = createMockOrder({ customerId: 'cust-100', status: OrderStatus.Shipped })
         mockUsePermissions(mockUser, RoleLevels.Customer)
 
         const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -229,8 +229,8 @@ describe('useOrderPermissions Hook', () => {
       })
 
       it('Customer CANNOT cancel order directly', () => {
-        const mockUser = createMockUser({ customerId: 100 })
-        const mockOrder = createMockOrder({ customerId: 100 })
+        const mockUser = createMockUser({ customerId: 'cust-100' })
+        const mockOrder = createMockOrder({ customerId: 'cust-100' })
         mockUsePermissions(mockUser, RoleLevels.Customer)
 
         const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -239,8 +239,8 @@ describe('useOrderPermissions Hook', () => {
       })
 
       it('Customer CANNOT add internal notes', () => {
-        const mockUser = createMockUser({ customerId: 100 })
-        const mockOrder = createMockOrder({ customerId: 100 })
+        const mockUser = createMockUser({ customerId: 'cust-100' })
+        const mockOrder = createMockOrder({ customerId: 'cust-100' })
         mockUsePermissions(mockUser, RoleLevels.Customer)
 
         const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -249,8 +249,8 @@ describe('useOrderPermissions Hook', () => {
       })
 
       it('Customer CANNOT delete order', () => {
-        const mockUser = createMockUser({ customerId: 100 })
-        const mockOrder = createMockOrder({ customerId: 100 })
+        const mockUser = createMockUser({ customerId: 'cust-100' })
+        const mockOrder = createMockOrder({ customerId: 'cust-100' })
         mockUsePermissions(mockUser, RoleLevels.Customer)
 
         const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -261,8 +261,8 @@ describe('useOrderPermissions Hook', () => {
 
     describe('Unrelated Order', () => {
       it('Customer CANNOT view unrelated order', () => {
-        const mockUser = createMockUser({ id: '999', customerId: 999 })
-        const mockOrder = createMockOrder({ customerId: 100 })
+        const mockUser = createMockUser({ id: '999', customerId: 'cust-999' })
+        const mockOrder = createMockOrder({ customerId: 'cust-100' })
         mockUsePermissions(mockUser, RoleLevels.Customer)
 
         const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -272,8 +272,8 @@ describe('useOrderPermissions Hook', () => {
       })
 
       it('Customer CANNOT request cancellation for unrelated order', () => {
-        const mockUser = createMockUser({ id: '999', customerId: 999 })
-        const mockOrder = createMockOrder({ customerId: 100, status: OrderStatus.Placed })
+        const mockUser = createMockUser({ id: '999', customerId: 'cust-999' })
+        const mockOrder = createMockOrder({ customerId: 'cust-100', status: OrderStatus.Placed })
         mockUsePermissions(mockUser, RoleLevels.Customer)
 
         const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -401,7 +401,7 @@ describe('useOrderPermissions Hook', () => {
         // User is SalesRep (not Customer), so customerId should not match order
         const mockUser = createMockUser({ id: '200', customerId: null })
         // Order belongs to a different customer and is assigned to a different sales rep
-        const mockOrder = createMockOrder({ customerId: 999, assignedSalesRepId: '300' })
+        const mockOrder = createMockOrder({ customerId: 'cust-999', assignedSalesRepId: '300' })
         mockUsePermissions(mockUser, RoleLevels.SalesRep)
 
         const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -549,7 +549,7 @@ describe('useOrderPermissions Hook', () => {
   describe('SalesManager Permissions', () => {
     it('Manager can view all orders', () => {
       const mockUser = createMockUser({ id: '400' })
-      const mockOrder = createMockOrder({ customerId: 999, assignedSalesRepId: '888' })
+      const mockOrder = createMockOrder({ customerId: 'cust-999', assignedSalesRepId: '888' })
       mockUsePermissions(mockUser, RoleLevels.SalesManager)
 
       const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -911,7 +911,7 @@ describe('useOrderPermissions Hook', () => {
     })
 
     it('should handle order without customerId', () => {
-      const mockUser = createMockUser({ customerId: 100 })
+      const mockUser = createMockUser({ customerId: 'cust-100' })
       const mockOrder = createMockOrder({ customerId: undefined })
       mockUsePermissions(mockUser, RoleLevels.Customer)
       
@@ -922,7 +922,7 @@ describe('useOrderPermissions Hook', () => {
 
     it('should handle user with null customerId', () => {
       const mockUser = createMockUser({ customerId: null })
-      const mockOrder = createMockOrder({ customerId: 100 })
+      const mockOrder = createMockOrder({ customerId: 'cust-100' })
       mockUsePermissions(mockUser, RoleLevels.Customer)
       
       const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -938,8 +938,8 @@ describe('useOrderPermissions Hook', () => {
   describe('Combined Real-World Scenarios', () => {
     it('Customer owns order but is also staff (SalesRep): should have staff permissions', () => {
       // Edge case: User is both customer and staff
-      const mockUser = createMockUser({ id: '200', customerId: 100 })
-      const mockOrder = createMockOrder({ customerId: 100, assignedSalesRepId: '200' })
+      const mockUser = createMockUser({ id: '200', customerId: 'cust-100' })
+      const mockOrder = createMockOrder({ customerId: 'cust-100', assignedSalesRepId: '200' })
       mockUsePermissions(mockUser, RoleLevels.SalesRep)
       
       const { result } = renderHook(() => useOrderPermissions(mockOrder))
@@ -1013,7 +1013,7 @@ describe('useOrderPermissions Hook', () => {
 
     it('should set isStaff correctly for Customer', () => {
       const mockUser = createMockUser({ id: '100' })
-      const mockOrder = createMockOrder({ customerId: 100 })
+      const mockOrder = createMockOrder({ customerId: 'cust-100' })
       mockUsePermissions(mockUser, RoleLevels.Customer)
       
       const { result } = renderHook(() => useOrderPermissions(mockOrder))

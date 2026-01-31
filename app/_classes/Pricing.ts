@@ -203,8 +203,8 @@ export class PriceListItem {
  * Customer Assignment representing a customer's assignment to a price list.
  */
 export class CustomerAssignment {
-	/** Customer ID */
-	customerId: number
+	/** Customer ID (GUID) */
+	customerId: string
 
 	/** Customer name (for display) */
 	customerName: string
@@ -216,7 +216,7 @@ export class CustomerAssignment {
 	assignedBy?: string
 
 	constructor(data?: Partial<CustomerAssignment>) {
-		this.customerId = data?.customerId ?? 0
+		this.customerId = data?.customerId ?? ''
 		this.customerName = data?.customerName ?? ''
 		this.assignedAt = data?.assignedAt ? parseDateSafe(data.assignedAt) ?? new Date() : new Date()
 		this.assignedBy = data?.assignedBy
@@ -518,7 +518,7 @@ export class PricingRuleApplication {
 /** Request for single price calculation */
 export interface PricingRequest {
 	productId: string
-	customerId?: number | null
+	customerId?: string | null
 	quantity?: number
 	priceDate?: Date | null
 	includeBreakdown?: boolean
@@ -695,8 +695,8 @@ export class PricingAuditLogResponse {
 	/** Product SKU (for display) */
 	productSku: string | null
 
-	/** Customer ID (if customer-specific pricing) */
-	customerId: number | null
+	/** Customer ID (GUID, if customer-specific pricing) */
+	customerId: string | null
 
 	/** Customer name (for display) */
 	customerName: string | null
@@ -728,8 +728,8 @@ export class PricingAuditLogResponse {
 	/** Quote ID (if quote pricing) */
 	quoteId: string | null
 
-	/** Order ID (if order pricing) */
-	orderId: number | null
+	/** Order ID (UUID/GUID if order pricing) */
+	orderId: string | null
 
 	/** User ID who requested pricing */
 	requestedBy: string | null
@@ -789,8 +789,8 @@ export class PricingAuditLogResponse {
 export interface PricingAuditLogFilter {
 	/** Filter by product ID */
 	productId?: string
-	/** Filter by customer ID */
-	customerId?: number
+	/** Filter by customer ID (GUID) */
+	customerId?: string
 	/** Filter by event type */
 	eventType?: string
 	/** Filter from date */
@@ -799,8 +799,8 @@ export interface PricingAuditLogFilter {
 	dateTo?: Date | string
 	/** Filter by quote ID */
 	quoteId?: string
-	/** Filter by order ID */
-	orderId?: number
+	/** Filter by order ID (GUID) */
+	orderId?: string
 	/** Only margin-protected transactions */
 	marginProtectedOnly?: boolean
 	/** Page number */

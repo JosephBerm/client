@@ -47,6 +47,9 @@ import { ConversionFunnel } from '../ConversionFunnel'
 import { TeamLeaderboard } from '../TeamLeaderboard'
 import { formatCurrencyAbbreviated } from '../../_utils/formatters'
 
+// Note: RevenueChart and ConversionFunnel now use visx-based implementations
+// The original CSS-based versions have been replaced as part of Phase 7 cleanup
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -152,7 +155,12 @@ function ManagerAnalyticsView({
 	}
 
 	// Determine which revenue data to display
-	const chartData = revenueData.length > 0 ? revenueData : summary.revenueByMonth
+	const chartData =
+		revenueData.length > 0
+			? revenueData
+			: summary.revenueByMonth?.length
+				? summary.revenueByMonth
+				: []
 
 	return (
 		<>

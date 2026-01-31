@@ -87,7 +87,7 @@ vi.mock('@_shared/services/api', () => ({
 
 const mockRecentOrder: RecentItem = {
 	quoteId: null,
-	orderId: 123,
+	orderId: 'order-guid-123',
 	type: 'order',
 	number: 'ORD-123',
 	date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
@@ -112,7 +112,7 @@ const mockRecentItemsList: RecentItem[] = [
 	mockRecentQuote,
 	{
 		quoteId: null,
-		orderId: 789,
+		orderId: 'order-guid-789',
 		type: 'order',
 		number: 'ORD-789',
 		date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
@@ -121,7 +121,7 @@ const mockRecentItemsList: RecentItem[] = [
 		customerName: 'Delta LLC',
 	},
 	{
-		quoteId: 'guid-101',
+		quoteId: 'quote-guid-101',
 		orderId: null,
 		type: 'quote',
 		number: 'QT-101',
@@ -132,7 +132,7 @@ const mockRecentItemsList: RecentItem[] = [
 	},
 	{
 		quoteId: null,
-		orderId: 202,
+		orderId: 'order-guid-202',
 		type: 'order',
 		number: 'ORD-202',
 		date: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
@@ -312,7 +312,7 @@ describe('useRecentItems Hook', () => {
 		it('should have correct order structure', () => {
 			expect(mockRecentOrder).toEqual({
 				quoteId: null,
-				orderId: 123,
+				orderId: 'order-guid-123',
 				type: 'order',
 				number: 'ORD-123',
 				date: expect.any(String),

@@ -23,20 +23,25 @@ import { HttpService } from '../httpService'
  * Order Management API
  * Handles order processing, approval, fulfillment, and full order lifecycle.
  *
+ * **Note on Order IDs:**
+ * Order IDs are UUIDs (GUIDs) from the backend, represented as strings.
+ * Example: '40000000-0000-0000-0000-000000000005'
+ *
  * @see prd_orders.md - Order Management PRD
  */
 export const OrdersApi = {
 	/**
 	 * Gets a single order by ID or current user's orders.
+	 * @param orderId - UUID string of the order (e.g., '40000000-0000-0000-0000-000000000005')
 	 */
-	get: async <Order>(orderId?: number | null) => {
+	get: async <Order>(orderId?: string | null) => {
 		return HttpService.get<Order>(`/orders${orderId ? `/${orderId}` : ''}`)
 	},
 
 	/**
 	 * Gets all orders for a specific customer.
 	 */
-	getFromCustomer: async (customerId: number) => {
+	getFromCustomer: async (customerId: string) => {
 		return HttpService.get<Order[]>(`/orders/fromcustomer/${customerId}`)
 	},
 
@@ -71,8 +76,9 @@ export const OrdersApi = {
 
 	/**
 	 * Deletes an order.
+	 * @param orderId - UUID string of the order to delete
 	 */
-	delete: async <Boolean>(quoteId: number) => HttpService.delete<Boolean>(`/orders/${quoteId}`),
+	delete: async <Boolean>(orderId: string) => HttpService.delete<Boolean>(`/orders/${orderId}`),
 
 	/**
 	 * Submits a quote to customer.
@@ -101,8 +107,9 @@ export const OrdersApi = {
 
 	/**
 	 * Confirms payment for an order (Placed → Paid).
+	 * @param orderId - UUID string of the order
 	 */
-	confirmPayment: async (orderId: number, paymentReference?: string, notes?: string) =>
+	confirmPayment: async (orderId: string, paymentReference?: string, notes?: string) =>
 		HttpService.post<Order>(`/orders/${orderId}/confirm-payment`, {
 			paymentReference,
 			notes,
@@ -111,9 +118,10 @@ export const OrdersApi = {
 	/**
 	 * Updates order status.
 	 * Used by fulfillment to progress orders through workflow.
+	 * @param orderId - UUID string of the order
 	 */
 	updateStatus: async (
-		orderId: number,
+		orderId: string,
 		newStatus: number,
 		trackingNumber?: string,
 		carrier?: string,
@@ -130,8 +138,10 @@ export const OrdersApi = {
 
 	/**
 	 * Adds tracking number to a specific order item.
+	 * @param orderId - UUID string of the order
+	 * @param orderItemId - UUID string of the order item
 	 */
-	addTracking: async (orderId: number, orderItemId: number, trackingNumber: string, carrier?: string) =>
+	addTracking: async (orderId: string, orderItemId: string, trackingNumber: string, carrier?: string) =>
 		HttpService.post<Order>(`/orders/${orderId}/tracking`, {
 			orderItemId,
 			trackingNumber,
@@ -140,8 +150,9 @@ export const OrdersApi = {
 
 	/**
 	 * Requests order cancellation (customer-facing).
+	 * @param orderId - UUID string of the order
 	 */
-	requestCancellation: async (orderId: number, reason: string) =>
+	requestCancellation: async (orderId: string, reason: string) =>
 		HttpService.post<boolean>(`/orders/${orderId}/request-cancellation`, {
 			reason,
 		}),

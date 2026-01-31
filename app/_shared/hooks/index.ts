@@ -52,6 +52,8 @@ export { useInfiniteScroll } from './useInfiniteScroll'
 export type { UseInfiniteScrollOptions, UseInfiniteScrollReturn } from './useInfiniteScroll'
 export { usePopoverPosition } from './usePopoverPosition'
 export type { PopoverPosition, UsePopoverPositionOptions } from './usePopoverPosition'
+export { useRealtimeEvents } from './useRealtimeEvents'
+export { useRealtimeSubscription } from './useRealtimeSubscription'
 
 // =============================================================================
 // RBAC HOOKS

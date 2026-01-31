@@ -352,7 +352,7 @@ describe('useCartPageLogic - Quote Submission', () => {
 
       const formData: QuoteFormData = new QuoteFormDataBuilder()
         .withIsAuthenticated(true)
-        .withCustomerId(123)
+        .withCustomerId('cust-123')
         .build()
 
       const { result } = renderHook(() => useCartPageLogic())
@@ -621,7 +621,7 @@ describe('useCartPageLogic - Quote Submission', () => {
 
       const formData: QuoteFormData = new QuoteFormDataBuilder()
         .withIsAuthenticated(true)
-        .withCustomerId(0)
+        .withCustomerId('')
         .build()
 
       const { result } = renderHook(() => useCartPageLogic())

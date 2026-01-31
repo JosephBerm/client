@@ -21,9 +21,9 @@ import { HttpService } from '../httpService'
  */
 export const ProvidersApi = {
 	/**
-	 * Gets a single provider by ID.
+	 * Gets a single provider by ID (GUID).
 	 */
-	get: async <Provider>(id: number) => HttpService.get<Provider>(`/provider/${id}`),
+	get: async <Provider>(id: string) => HttpService.get<Provider>(`/provider/${id}`),
 
 	/**
 	 * Gets all providers.
@@ -62,28 +62,28 @@ export const ProvidersApi = {
 	/**
 	 * Archives a provider (final status in workflow).
 	 */
-	archive: async (providerId: number) => HttpService.put<boolean>(`/provider/${providerId}/archive`, {}),
+	archive: async (providerId: string) => HttpService.put<boolean>(`/provider/${providerId}/archive`, {}),
 
 	/**
 	 * Suspends a provider (temporary hold).
 	 */
-	suspend: async (providerId: number, reason: string) =>
+	suspend: async (providerId: string, reason: string) =>
 		HttpService.put<boolean>(`/provider/${providerId}/suspend`, { reason }),
 
 	/**
 	 * Activates a provider (restores from any status).
 	 */
-	activate: async (providerId: number) => HttpService.put<boolean>(`/provider/${providerId}/activate`, {}),
+	activate: async (providerId: string) => HttpService.put<boolean>(`/provider/${providerId}/activate`, {}),
 
 	/**
 	 * Restores an archived provider (alias for activate).
 	 */
-	restore: async (providerId: number) => HttpService.put<boolean>(`/provider/${providerId}/restore`, {}),
+	restore: async (providerId: string) => HttpService.put<boolean>(`/provider/${providerId}/restore`, {}),
 
 	/**
 	 * Deletes a provider (hard delete).
 	 */
-	delete: async (providerId: number) => HttpService.delete<boolean>(`/provider/${providerId}`),
+	delete: async (providerId: string) => HttpService.delete<boolean>(`/provider/${providerId}`),
 
 	/**
 	 * Rich search for providers with advanced filtering, sorting, and facets.

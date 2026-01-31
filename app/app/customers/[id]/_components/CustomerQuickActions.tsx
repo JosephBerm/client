@@ -33,7 +33,7 @@ import Button from '@_components/ui/Button'
 /** Component props */
 interface CustomerQuickActionsProps {
 	/** Customer ID for generating links */
-	customerId: number
+	customerId: string
 }
 
 /** Action configuration type */

@@ -1,20 +1,28 @@
 /**
  * AccountStatusBadge Component
  *
- * Specialized badge component for displaying account status with appropriate colors.
- * Maps account status enum values to human-readable labels and color variants.
- * Provides consistent visual representation of account status throughout the app.
+ * Domain-specific badge for displaying account status.
+ * Uses centralized AccountStatusHelper for display names and variants (FAANG pattern).
+ *
+ * **Architecture (3-Tier Badge System):**
+ * ```
+ * AccountStatusBadge (this - TIER 3)
+ *    ↓ Maps AccountStatus → StatusBadge props via AccountStatusHelper
+ * StatusBadge (TIER 2)
+ *    ↓ Adds icon support, accessibility
+ * Badge (TIER 1 - native DaisyUI 5)
+ * ```
  *
  * **Features:**
- * - Account status enum support (matches backend Phase 1 implementation)
- * - Automatic color mapping based on status severity
- * - Human-readable status labels
- * - DaisyUI Badge integration
- * - Custom className support
- * - Type-safe status handling
- * - Icon support for visual clarity
+ * - Account status enum from central @_classes/Enums
+ * - Automatic color mapping via AccountStatusHelper.getVariant()
+ * - Human-readable labels via AccountStatusHelper.getDisplay()
+ * - Tooltip descriptions via AccountStatusHelper.getDescription()
+ * - Optional icon display
+ * - Full theme support (light/dark/custom themes)
+ * - Zero hardcoded strings or magic values
  *
- * **Status Mapping (Phase 1 - Backend Aligned):**
+ * **Status Mapping (via AccountStatusHelper):**
  * - PendingVerification (0): Info (blue) - Awaiting email verification
  * - Active (100): Success (green) - Account operational
  * - ForcePasswordChange (150): Warning (yellow) - Must change password
@@ -31,8 +39,8 @@
  *
  * @example
  * ```tsx
- * import AccountStatusBadge from '@_components/common/AccountStatusBadge';
- * import { AccountStatus } from '@_classes/Enums';
+ * import { AccountStatusBadge } from '@_components/common'
+ * import { AccountStatus } from '@_classes/Enums'
  *
  * // Basic usage
  * <AccountStatusBadge status={AccountStatus.Active} />
@@ -41,30 +49,31 @@
  * // With numeric value from API
  * <AccountStatusBadge status={user.status} />
  *
- * // With custom className
- * <AccountStatusBadge status={AccountStatus.Active} className="ml-2" />
- *
  * // With icon
  * <AccountStatusBadge status={AccountStatus.Active} showIcon />
  *
+ * // With custom className
+ * <AccountStatusBadge status={AccountStatus.Active} className="ml-2" />
+ *
  * // In a table cell
- * {
- *   accessorKey: 'status',
- *   header: 'Status',
- *   cell: ({ getValue }) => (
- *     <AccountStatusBadge status={getValue() as number} />
- *   )
- * }
+ * cell: ({ row }) => <AccountStatusBadge status={row.original.status} />
  * ```
  *
+ * @see AccountStatusHelper - Status metadata
+ * @see StatusBadge - Intermediate component
  * @module AccountStatusBadge
  */
 
-import { CheckCircle2, AlertTriangle, XCircle, Clock, Lock, Archive, Key } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, Clock, Lock, Archive, Key } from 'lucide-react'
 
 import { AccountStatus } from '@_classes/Enums'
+import AccountStatusHelper from '@_classes/Helpers/AccountStatusHelper'
 
-import Badge from '@_components/ui/Badge'
+import StatusBadge, { type BadgeStyle, type BadgeSize } from '@_components/ui/StatusBadge'
+
+// ============================================================================
+// TYPES
+// ============================================================================
 
 /**
  * AccountStatusBadge component props interface.
@@ -74,19 +83,20 @@ interface AccountStatusBadgeProps {
 	 * Account status value from AccountStatus enum or number.
 	 * Should match one of the AccountStatus enum values.
 	 * Defaults to Active if not provided.
-	 * 
-	 * @example
-	 * ```tsx
-	 * <AccountStatusBadge status={AccountStatus.Active} />
-	 * <AccountStatusBadge status={user.status} />
-	 * ```
 	 */
 	status?: AccountStatus | number | null
 
 	/**
-	 * Additional CSS classes to apply to the badge.
+	 * Badge visual style.
+	 * @default 'solid'
 	 */
-	className?: string
+	badgeStyle?: BadgeStyle
+
+	/**
+	 * Badge size.
+	 * @default 'md'
+	 */
+	size?: BadgeSize
 
 	/**
 	 * Whether to show the status icon.
@@ -95,84 +105,93 @@ interface AccountStatusBadgeProps {
 	showIcon?: boolean
 
 	/**
-	 * Size of the badge.
-	 * @default 'sm'
+	 * Additional CSS classes.
 	 */
-	size?: 'xs' | 'sm' | 'md' | 'lg'
+	className?: string
+
+	/**
+	 * HTML data attribute for testing.
+	 */
+	'data-testid'?: string
 }
 
-/**
- * Status configuration type
- */
-interface StatusConfig {
-	label: string
-	variant: 'success' | 'warning' | 'error' | 'info' | 'neutral'
-	icon: typeof CheckCircle2
-}
+// ============================================================================
+// ICON MAPPING
+// ============================================================================
 
 /**
- * Get status configuration based on status value.
- * Updated to match backend Phase 1 AccountStatus enum.
+ * Maps icon names to Lucide React components
  */
-function getStatusConfig(status: number | null | undefined): StatusConfig {
-	switch (status) {
-		case AccountStatus.Active:
-			return { label: 'Active', variant: 'success', icon: CheckCircle2 }
-		case AccountStatus.PendingVerification:
-			return { label: 'Pending Verification', variant: 'info', icon: Clock }
-		case AccountStatus.ForcePasswordChange:
-			return { label: 'Password Required', variant: 'warning', icon: Key }
-		case AccountStatus.Suspended:
-			return { label: 'Suspended', variant: 'error', icon: AlertTriangle }
-		case AccountStatus.Locked:
-			return { label: 'Locked', variant: 'error', icon: Lock }
-		case AccountStatus.Archived:
-			return { label: 'Archived', variant: 'neutral', icon: Archive }
-		default:
-			// Default to Active for undefined/null (backward compatibility)
-			return { label: 'Active', variant: 'success', icon: CheckCircle2 }
-	}
+const ICON_MAP = {
+	CheckCircle2,
+	AlertTriangle,
+	Clock,
+	Lock,
+	Archive,
+	Key,
+} as const
+
+/**
+ * Get icon component for a status
+ */
+function getIconComponent(iconName: string) {
+	return ICON_MAP[iconName as keyof typeof ICON_MAP] ?? CheckCircle2
 }
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
 
 /**
  * AccountStatusBadge Component
  *
- * Badge component that displays account status with appropriate color and label.
- * Handles status to color/label/icon mapping internally.
+ * Renders a colored badge with the account status label.
+ * Uses AccountStatusHelper for FAANG-level type-safety and DRY compliance.
  *
- * **Status Colors:**
- * - Success (green): Active - normal operation
- * - Warning (yellow): Suspended - temporary restriction
- * - Error (red): Deactivated - permanent restriction
- * - Info (blue): Pending - awaiting action
+ * **Implementation:**
+ * - Display name: AccountStatusHelper.getDisplay(status)
+ * - Badge variant: AccountStatusHelper.getVariant(status)
+ * - Description: AccountStatusHelper.getDescription(status)
+ * - Zero hardcoded strings or magic values
  *
- * **Security Consideration:**
- * Non-active statuses use warning/error colors to make them visually prominent,
- * helping administrators quickly identify accounts that need attention.
- *
- * @param props - Component props including status, className, showIcon, size
+ * @param props - Component props including status and className
  * @returns AccountStatusBadge component
  */
 export default function AccountStatusBadge({
 	status,
-	className,
+	badgeStyle = 'solid',
+	size = 'md',
 	showIcon = false,
-	size = 'sm',
+	className,
+	'data-testid': testId,
 }: AccountStatusBadgeProps) {
-	const config = getStatusConfig(status)
-	const IconComponent = config.icon
+	// Normalize status (handle null/undefined → default to Active)
+	const normalizedStatus: AccountStatus =
+		status != null && AccountStatusHelper.isValid(status) ? status : AccountStatus.Active
+
+	// Get all metadata from AccountStatusHelper (zero magic strings!)
+	const label = AccountStatusHelper.getDisplay(normalizedStatus)
+	const variant = AccountStatusHelper.getVariant(normalizedStatus)
+	const description = AccountStatusHelper.getDescription(normalizedStatus)
+
+	// Get icon if requested
+	let icon = undefined
+	if (showIcon) {
+		const iconName = AccountStatusHelper.getIconName(normalizedStatus)
+		const IconComponent = getIconComponent(iconName)
+		icon = <IconComponent className="size-[1em]" />
+	}
 
 	return (
-		<Badge 
-			variant={config.variant} 
-			tone="subtle"
+		<StatusBadge
+			variant={variant}
+			label={label}
+			description={description}
+			icon={icon}
+			badgeStyle={badgeStyle}
 			size={size}
 			className={className}
-		>
-			{showIcon && (
-				<IconComponent className="mr-1 h-3 w-3" />
-			)}
-			{config.label}
-		</Badge>
+			data-testid={testId}
+		/>
 	)
 }

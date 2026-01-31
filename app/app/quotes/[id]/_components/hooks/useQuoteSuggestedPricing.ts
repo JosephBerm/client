@@ -105,7 +105,7 @@ export interface UseQuoteSuggestedPricingReturn {
  */
 export function useQuoteSuggestedPricing(
 	quote: Quote | null,
-	customerId?: number | null
+	customerId?: string | null
 ): UseQuoteSuggestedPricingReturn {
 	// State
 	const [suggestedPricing, setSuggestedPricing] = useState<Map<string, SuggestedPriceData>>(new Map())

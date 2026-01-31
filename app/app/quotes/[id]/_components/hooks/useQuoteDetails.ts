@@ -26,7 +26,7 @@ import { API, useRouteParam } from '@_shared'
 
 import Quote from '@_classes/Quote'
 
-import { quoteKeys } from './quoteKeys'
+import { quoteKeys } from '@_features/quotes/hooks/quoteKeys'
 
 /** Stale time for quote details (1 minute - matches QueryProvider default) */
 const QUOTE_STALE_TIME = 60 * 1000

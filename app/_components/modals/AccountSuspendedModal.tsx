@@ -39,6 +39,7 @@ import { AlertTriangle } from 'lucide-react'
 
 import Modal from '@_components/ui/Modal'
 import Button from '@_components/ui/Button'
+import Surface from '@_components/ui/Surface'
 
 /**
  * Props for AccountSuspendedModal component
@@ -105,21 +106,21 @@ export default function AccountSuspendedModal({
 
 				{/* Suspension Reason (if available) */}
 				{reason && (
-					<div className="bg-base-200 rounded-lg p-4 mb-6 text-left">
+					<Surface variant='inset' padding='md' className='mb-6 text-left'>
 						<h3 className="font-semibold mb-2">Reason:</h3>
 						<p className="text-sm text-base-content/70">{reason}</p>
-					</div>
+					</Surface>
 				)}
 
 				{/* What to do */}
-				<div className="bg-base-200 rounded-lg p-4 mb-6 text-left">
+				<Surface variant='inset' padding='md' className='mb-6 text-left'>
 					<h3 className="font-semibold mb-2">What can you do?</h3>
 					<ul className="text-sm text-base-content/70 space-y-1">
 						<li>• Contact support to understand why your account was suspended</li>
 						<li>• Review our Terms of Service</li>
 						<li>• Request an account review if you believe this is an error</li>
 					</ul>
-				</div>
+				</Surface>
 
 				{/* Actions */}
 				<div className="flex flex-col gap-2">

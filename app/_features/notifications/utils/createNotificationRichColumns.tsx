@@ -102,7 +102,7 @@ export function createNotificationRichColumns(
 			cell: ({ row }) => {
 				const metadata = NotificationTypeHelper.getMetadata(row.original.type)
 				return (
-					<Badge variant={metadata.variant} size="sm" tone="subtle">
+					<Badge variant={metadata.variant} size="sm" badgeStyle="soft">
 						{metadata.display}
 					</Badge>
 				)
@@ -118,7 +118,7 @@ export function createNotificationRichColumns(
 				<Badge
 					variant={row.original.read ? 'success' : 'warning'}
 					size="sm"
-					tone="subtle"
+					badgeStyle="soft"
 				>
 					{row.original.read ? 'Read' : 'Unread'}
 				</Badge>

@@ -18,8 +18,8 @@ import { logger } from '@/app/_core'
 import type { CustomerStats } from '../types'
 
 interface UseCustomerStatsOptions {
-	/** Customer ID to fetch stats for */
-	customerId: number | null
+	/** Customer ID to fetch stats for (GUID string) */
+	customerId: string | null
 	/** Disable automatic fetching */
 	enabled?: boolean
 }

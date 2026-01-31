@@ -217,6 +217,48 @@
 		 * Testing configuration - will be reverted after testing
 		 */
 		--skeleton-bg: #bbb;
+
+		/* ========================================
+		   Enterprise Shadow System
+
+		   Source: 2025-2026 Dashboard Design Trends
+		   - DesignStudioUIUX: https://www.designstudiouiux.com/blog/dashboard-ui-design-guide/
+		   - Muzli: https://muz.li/blog/best-dashboard-design-examples-inspirations-for-2026/
+
+		   These shadows create professional depth hierarchy:
+		   - Rest: Barely visible, indicates card boundary
+		   - Hover: Subtle lift feedback
+		   - Elevated: For important/interactive cards
+		   ======================================== */
+		--shadow-card-rest: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+		--shadow-card-hover: 0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.06);
+		--shadow-card-elevated: 0 10px 15px rgba(0, 0, 0, 0.04), 0 4px 6px rgba(0, 0, 0, 0.05);
+
+		/* ========================================
+		   Content Surface System
+
+		   Source: 2025-2026 Dashboard Design Trends
+		   Philosophy: Define regions with subtle tints, not heavy borders
+
+		   Usage:
+		   - Surface backgrounds for content grouping
+		   - Subtle borders for region separation
+		   - Dividers for horizontal section breaks
+		   ======================================== */
+
+		/* Surface backgrounds - lighter than card backgrounds */
+		--surface-subtle: oklch(var(--b2) / 0.5);      /* Very light tint */
+		--surface-inset: oklch(var(--b3) / 0.3);       /* Sunken appearance */
+		--surface-elevated: oklch(var(--b1));          /* Raised appearance */
+
+		/* Border tokens for regions (lighter than card borders) */
+		--border-subtle: oklch(var(--bc) / 0.05);      /* Almost invisible */
+		--border-default: oklch(var(--bc) / 0.08);     /* Visible but soft */
+		--border-emphasis: oklch(var(--bc) / 0.12);    /* Clear separation */
+
+		/* Region dividers (horizontal rules between sections) */
+		--divider-subtle: oklch(var(--bc) / 0.06);
+		--divider-default: oklch(var(--bc) / 0.10);
 	}
 
 	/* ========================================
@@ -939,7 +981,29 @@
 	.inline-link:focus-visible::after,
 	.inline-link:hover::after {
 		width: 100%;
-}
+	}
+
+	/* ========================================
+	   Enterprise Typography Utilities
+
+	   Source: Modern SaaS dashboard trends
+	   - Letter-spacing: Tighter tracking for professional density
+	   - Tabular nums: Aligned numbers in data displays
+
+	   Usage:
+	   - .text-heading: For card titles, section headers
+	   - .text-metric: For KPI values, statistics, numbers
+	   ======================================== */
+	.text-heading {
+		letter-spacing: -0.025em;
+		font-weight: 600;
+	}
+
+	.text-metric {
+		letter-spacing: -0.03em;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+	}
 }
 
 /* ============================================================

@@ -25,6 +25,16 @@ const protectedRoutes = [
  */
 const authRoutes = ['/login', '/signup']
 
+/**
+ * Header name for forwarding tenant host to server components.
+ *
+ * This enables PPR (Partial Prerendering) compatibility by allowing
+ * the root layout to read the host without calling headers() directly.
+ * The proxy sets this header on every request, making it available
+ * during static shell generation with cacheComponents enabled.
+ */
+const TENANT_HOST_HEADER = 'x-tenant-host'
+
 export function proxy(request: NextRequest) {
 	const token = request.cookies.get('at')
 	const { pathname } = request.nextUrl
@@ -58,7 +68,20 @@ export function proxy(request: NextRequest) {
 		return NextResponse.redirect(url)
 	}
 
-	return NextResponse.next()
+	// Forward host header for multi-tenant resolution
+	// This allows the root layout to read the host without calling headers()
+	// directly, enabling PPR (Partial Prerendering) with cacheComponents
+	const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host')
+	const requestHeaders = new Headers(request.headers)
+	if (host) {
+		requestHeaders.set(TENANT_HOST_HEADER, host)
+	}
+
+	return NextResponse.next({
+		request: {
+			headers: requestHeaders,
+		},
+	})
 }
 
 export const config = {

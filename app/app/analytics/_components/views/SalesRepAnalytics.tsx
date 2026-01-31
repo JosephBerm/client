@@ -31,6 +31,9 @@ import { PersonalVsTeamCard } from '../PersonalVsTeamCard'
 import { ConversionFunnel } from '../ConversionFunnel'
 import { formatCurrencyAbbreviated } from '../../_utils/formatters'
 
+// Note: ConversionFunnel now uses visx-based implementation
+// The original CSS-based version has been replaced as part of Phase 7 cleanup
+
 // ============================================================================
 // TYPES
 // ============================================================================

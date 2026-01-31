@@ -18,6 +18,8 @@ import { motion } from 'framer-motion'
 
 import type { LucideIcon } from 'lucide-react'
 
+import Card from '@_components/ui/Card'
+
 import { formatPercentageChange } from '../../analytics/_utils/formatters'
 
 interface StatsTrend {
@@ -83,26 +85,36 @@ export function StatsCard({
 		? formatPercentageChange(trend.value, numericValue)
 		: null
 
+	// Trend-based background gradient for visual indication
+	// Positive trends get subtle green tint, negative get subtle red tint
+	const trendBackground = trend?.isPositive
+		? 'bg-gradient-to-br from-success/5 to-transparent'
+		: trend?.isPositive === false
+			? 'bg-gradient-to-br from-error/5 to-transparent'
+			: ''
+
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.3 }}
-			className={`card bg-base-100 border border-base-300 shadow-lg hover:shadow-xl transition-all duration-200 ${
-				onClick ? 'cursor-pointer hover:-translate-y-1' : ''
-			} ${className}`}
-			onClick={onClick}
-			role={onClick ? 'button' : undefined}
-			tabIndex={onClick ? 0 : undefined}
-			onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
 		>
-			<div className="card-body p-5">
+			<Card
+				variant="stat"
+				compact
+				hover={!!onClick}
+				className={`${onClick ? 'cursor-pointer' : ''} ${trendBackground} ${className}`}
+				onClick={onClick}
+				role={onClick ? 'button' : undefined}
+				tabIndex={onClick ? 0 : undefined}
+				onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
+			>
 				<div className="flex items-start justify-between">
 					<div className="flex-1">
 						<p className="text-sm font-medium text-base-content/60 uppercase tracking-wide">
 							{title}
 						</p>
-						<p className="text-3xl font-bold text-base-content mt-1">{value}</p>
+						<p className="text-metric text-3xl text-base-content mt-1">{value}</p>
 						{subtitle && (
 							<p className="text-xs text-base-content/50 mt-1">{subtitle}</p>
 						)}
@@ -132,7 +144,7 @@ export function StatsCard({
 						<IconComponent className="w-6 h-6 text-primary" aria-hidden="true" />
 					</div>
 				</div>
-			</div>
+			</Card>
 		</motion.div>
 	)
 }

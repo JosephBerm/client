@@ -63,7 +63,8 @@ export interface ShippingRateRequest {
  * Request for creating a shipping label.
  */
 export interface CreateLabelRequest {
-	orderId: number
+	/** UUID/GUID of the order */
+	orderId: string
 	carrierCode: string
 	serviceCode: string
 	weightLbs: number
@@ -98,7 +99,8 @@ export interface ShippingRate {
  */
 export interface ShipmentLabel {
 	id: string
-	orderId: number
+	/** UUID/GUID of the order */
+	orderId: string
 	carrier: string
 	serviceType: string
 	trackingNumber?: string
@@ -121,7 +123,8 @@ export interface ShipmentLabel {
  * Response for order shipments query.
  */
 export interface OrderShipmentsResponse {
-	orderId: number
+	/** UUID/GUID of the order */
+	orderId: string
 	shipments: ShipmentLabel[]
 	totalShipments: number
 	totalShippingCost: number

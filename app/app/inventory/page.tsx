@@ -41,6 +41,7 @@ import type { Product } from '@_classes/Product'
 import { RichDataGrid, FilterType, SortDirection, createColumnId } from '@_components/tables/RichDataGrid'
 import type { RichSearchFilter, RichPagedResult, RichColumnDef } from '@_components/tables/RichDataGrid'
 import Card from '@_components/ui/Card'
+import Surface from '@_components/ui/Surface'
 import Button from '@_components/ui/Button'
 import { Tabs, TabsList, Tab, TabPanel } from '@_components/ui/Tabs'
 
@@ -416,7 +417,7 @@ export default function InventoryPage() {
 
 				{/* Stock Levels Tab */}
 				<TabPanel value='overview'>
-					<Card className='border border-base-300 bg-base-100 shadow-sm'>
+					<Surface variant='subtle' padding='none'>
 						{/* Filters */}
 						<div className='p-4 border-b border-base-300'>
 							<div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
@@ -455,19 +456,19 @@ export default function InventoryPage() {
 								ariaLabel='Inventory table'
 							/>
 						</div>
-					</Card>
+					</Surface>
 				</TabPanel>
 
 				{/* Alerts Tab */}
 				<TabPanel value='alerts'>
-					<Card className='border border-base-300 bg-base-100 p-6 shadow-sm'>
+					<Surface variant='subtle' padding='lg'>
 						<LowStockAlerts refreshKey={refreshKey} />
-					</Card>
+					</Surface>
 				</TabPanel>
 
 				{/* Transaction History Tab */}
 				<TabPanel value='transactions'>
-					<Card className='border border-base-300 bg-base-100 p-6 shadow-sm'>
+					<Surface variant='inset' padding='lg'>
 						<div className='text-center py-12'>
 							<History className='h-12 w-12 text-base-content/30 mx-auto mb-4' />
 							<h3 className='text-lg font-semibold text-base-content mb-2'>Transaction History</h3>
@@ -478,7 +479,7 @@ export default function InventoryPage() {
 								Coming soon: Receipt, adjustment, reservation, and shipment tracking.
 							</p>
 						</div>
-					</Card>
+					</Surface>
 				</TabPanel>
 			</Tabs>
 		</>

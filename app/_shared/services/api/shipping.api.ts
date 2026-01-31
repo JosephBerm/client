@@ -46,8 +46,9 @@ export const ShippingApi = {
 
 	/**
 	 * Gets all shipping labels for an order.
+	 * @param orderId - UUID string of the order
 	 */
-	getOrderLabels: async (orderId: number) =>
+	getOrderLabels: async (orderId: string) =>
 		HttpService.get<OrderShipmentsResponse>(`/Shipping/orders/${orderId}/labels`),
 
 	/**

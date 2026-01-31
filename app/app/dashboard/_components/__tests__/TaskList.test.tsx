@@ -48,24 +48,24 @@ const mockUrgentTask: DashboardTask = {
 
 const mockRegularTask: DashboardTask = {
 	quoteId: null,
-	orderId: 456,
+	orderId: 'order-guid-456',
 	type: 'payment',
 	title: 'Confirm payment',
 	description: 'Order #456 pending',
 	createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
 	isUrgent: false,
-	actionUrl: '/app/orders/456',
+	actionUrl: '/app/orders/order-guid-456',
 }
 
 const mockFulfillmentTask: DashboardTask = {
 	quoteId: null,
-	orderId: 789,
+	orderId: 'order-guid-789',
 	type: 'fulfillment',
 	title: 'Ship Order #789',
 	description: 'Ready for shipment',
 	createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
 	isUrgent: true,
-	actionUrl: '/app/orders/789',
+	actionUrl: '/app/orders/order-guid-789',
 }
 
 const mockTaskList: DashboardTask[] = [
@@ -173,7 +173,7 @@ describe('TaskList Component', () => {
 			render(<TaskList tasks={[mockRegularTask]} title="Tasks" />)
 
 			const link = screen.getByRole('link')
-			expect(link).toHaveAttribute('href', '/app/orders/456')
+			expect(link).toHaveAttribute('href', '/app/orders/order-guid-456')
 		})
 
 		it('should render links for all tasks', () => {
@@ -220,13 +220,13 @@ describe('TaskList Component', () => {
 		it('should handle order-type tasks', () => {
 			const orderTask: DashboardTask = {
 				quoteId: null,
-				orderId: 999,
+				orderId: 'order-guid-999',
 				type: 'order',
 				title: 'Process Order',
 				description: 'New order received',
 				createdAt: new Date().toISOString(),
 				isUrgent: false,
-				actionUrl: '/app/orders/999',
+				actionUrl: '/app/orders/order-guid-999',
 			}
 
 			render(<TaskList tasks={[orderTask]} title="Tasks" />)
@@ -261,13 +261,13 @@ describe('TaskList Component', () => {
 		it('should handle many tasks', () => {
 			const manyTasks = Array.from({ length: 20 }, (_, i) => ({
 				quoteId: null,
-				orderId: i + 1,
+				orderId: `order-guid-${i + 1}`,
 				type: 'order' as const,
 				title: `Task ${i + 1}`,
 				description: `Description for task ${i + 1}`,
 				createdAt: new Date().toISOString(),
 				isUrgent: i % 3 === 0,
-				actionUrl: `/app/orders/${i + 1}`,
+				actionUrl: `/app/orders/order-guid-${i + 1}`,
 			}))
 
 			// Per component design: maxItems defaults to 10, so only first 10 tasks are rendered
@@ -288,13 +288,13 @@ describe('TaskList Component', () => {
 		it('should show all tasks when maxItems is increased', () => {
 			const manyTasks = Array.from({ length: 20 }, (_, i) => ({
 				quoteId: null,
-				orderId: i + 1,
+				orderId: `order-guid-${i + 1}`,
 				type: 'order' as const,
 				title: `Task ${i + 1}`,
 				description: `Description for task ${i + 1}`,
 				createdAt: new Date().toISOString(),
 				isUrgent: false,
-				actionUrl: `/app/orders/${i + 1}`,
+				actionUrl: `/app/orders/order-guid-${i + 1}`,
 			}))
 
 			// Override maxItems to show all tasks

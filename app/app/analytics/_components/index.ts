@@ -59,3 +59,13 @@ export { ConversionFunnel } from './ConversionFunnel'
 export { TeamLeaderboard } from './TeamLeaderboard'
 export { TeamLeaderboardDataGrid } from './TeamLeaderboardDataGrid'
 export { PersonalVsTeamCard } from './PersonalVsTeamCard'
+
+// ============================================================================
+// MIGRATION COMPLETE (Phase 7)
+// ============================================================================
+// The following CSS-based components have been migrated to visx:
+// - RevenueChart → Now uses visx AreaChart
+// - ConversionFunnel → Now uses visx FunnelChart
+//
+// See PHASE_7_CLEANUP.md for migration details.
+// All components maintain the same API for backward compatibility.

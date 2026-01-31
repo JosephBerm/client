@@ -108,12 +108,12 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
 			name: product?.name ?? '',
 			description: product?.description ?? '',
 			price: product?.price ?? 0,
-			cost: null,
+			cost: product?.cost ?? undefined,
 			quantity: product?.stock ?? 0,
-			categoryIds: product?.categories?.map((c) => c.id) ?? [],
+			categoryIds: product?.categoryIds ?? [],
 			sku: product?.sku ?? '',
 			manufacturer: product?.manufacturer ?? '',
-			providerId: product?.providerId ?? null,
+			providerId: product?.providerId ?? undefined,
 		},
 	})
 
@@ -182,27 +182,22 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
 
 				return API.Store.Products.create(formData)
 			} else {
-				// Update mode: use Product constructor to preserve methods
-				const productData = new Product({
-					...product!,
+				// Update mode: construct plain object payload for API
+				// Explicitly type the update call to match create's return type
+				const updatePayload = {
+					id: product!.id,
 					name: data.name,
 					description: data.description,
 					price: data.price,
 					stock: data.quantity,
 					sku: data.sku ?? '',
 					manufacturer: data.manufacturer ?? '',
-					providerId: data.providerId ?? null,
-					// Note: Cost field is handled separately since Product class might not have it
-				})
-
-				// Add cost if provided
-				const updatePayload = {
-					...productData,
-					cost: data.cost,
+					providerId: data.providerId ?? undefined,
+					cost: data.cost ?? undefined,
 					categoryIds: data.categoryIds ?? [],
 				}
 
-				return API.Store.Products.update(updatePayload)
+				return API.Store.Products.update<Product>(updatePayload as unknown as Product)
 			}
 		},
 		{
@@ -235,20 +230,18 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
 
 	/**
 	 * Form onSubmit handler
+	 * Uses void to handle the Promise from handleSubmit to satisfy ESLint no-misused-promises
 	 */
 	const onFormSubmit = useCallback(
 		(e: React.FormEvent<HTMLFormElement>) => {
-			const submitHandler = form.handleSubmit(handleSubmit)
-			const result = submitHandler(e)
-			if (result instanceof Promise) {
-				void result.catch((error) => {
-					logger.error('Unhandled form submission error', {
-						error,
-						component: 'ProductForm',
-						action: 'onFormSubmit',
-					})
+			e.preventDefault()
+			void form.handleSubmit(handleSubmit)(e).catch((error) => {
+				logger.error('Unhandled form submission error', {
+					error,
+					component: 'ProductForm',
+					action: 'onFormSubmit',
 				})
-			}
+			})
 		},
 		[form, handleSubmit]
 	)
@@ -382,7 +375,7 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
 									disabled={isSubmitting || isLoadingData}
 								>
 									{flatCategories.map((cat) => (
-										<option key={cat.id} value={cat.id}>
+										<option key={cat.id ?? ''} value={cat.id ?? ''}>
 											{'—'.repeat(cat.depth)} {cat.name}
 										</option>
 									))}
@@ -416,13 +409,13 @@ export default function ProductForm({ product, onUpdate }: ProductFormProps) {
 									value={field.value ?? ''}
 									onChange={(e) => {
 										const val = e.target.value
-										field.onChange(val ? parseInt(val, 10) : null)
+										field.onChange(val || undefined)
 									}}
 									disabled={isSubmitting || isLoadingData}
 								>
 									<option value="">No provider selected</option>
 									{providers.map((provider) => (
-										<option key={provider.id} value={provider.id}>
+										<option key={provider.id ?? ''} value={provider.id ?? ''}>
 											{provider.name}
 										</option>
 									))}

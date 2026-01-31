@@ -311,7 +311,7 @@ export default function RoleFormModal({
 									<span className='font-semibold text-warning'>System Role</span>
 									<Badge
 										variant='warning'
-										tone='subtle'
+										badgeStyle='soft'
 										size='xs'>
 										Protected
 									</Badge>
@@ -545,7 +545,7 @@ export default function RoleFormModal({
 																	variant={mapBadgeVariant(
 																		watchedBadgeVariant || 'primary'
 																	)}
-																	tone='solid'
+																	badgeStyle='solid'
 																	size='xs'>
 																	NEW
 																</Badge>
@@ -558,7 +558,7 @@ export default function RoleFormModal({
 																	? 'error'
 																	: mapBadgeVariant(getRoleBadgeVariant(r.level))
 															}
-															tone={r.id === role?.id ? 'solid' : 'subtle'}
+															badgeStyle={r.id === role?.id ? 'solid' : 'soft'}
 															size='xs'>
 															{r.displayName}
 														</Badge>
@@ -574,7 +574,7 @@ export default function RoleFormModal({
 													<span className='text-base-content/30'>→</span>
 													<Badge
 														variant={mapBadgeVariant(watchedBadgeVariant || 'primary')}
-														tone='solid'
+														badgeStyle='solid'
 														size='xs'>
 														NEW ({safeWatchedLevel})
 													</Badge>
@@ -616,7 +616,7 @@ export default function RoleFormModal({
 									<span className='label-text font-medium'>Badge Color</span>
 									<Badge
 										variant={mapBadgeVariant(watchedBadgeVariant || 'neutral')}
-										tone='solid'
+										badgeStyle='solid'
 										size='sm'>
 										Preview
 									</Badge>
@@ -638,7 +638,7 @@ export default function RoleFormModal({
 											contentDrivenHeight>
 											<Badge
 												variant={variant.value}
-												tone='solid'
+												badgeStyle='solid'
 												size='xs'>
 												{variant.label}
 											</Badge>

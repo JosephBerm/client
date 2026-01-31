@@ -41,13 +41,13 @@ export default function QuoteSummaryCard({
 				<div className="space-y-3">
 					<div className="flex items-center justify-between text-sm">
 						<span className="text-base-content/70">Items in Cart</span>
-						<Badge variant="primary" tone="subtle">
+						<Badge variant="primary" badgeStyle="soft">
 							{totalItems} {totalItems === 1 ? 'item' : 'items'}
 						</Badge>
 					</div>
 					<div className="flex items-center justify-between text-sm">
 						<span className="text-base-content/70">Products</span>
-						<Badge variant="info" tone="subtle">
+						<Badge variant="info" badgeStyle="soft">
 							{totalProducts} {totalProducts === 1 ? 'product' : 'products'}
 						</Badge>
 					</div>

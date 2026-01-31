@@ -416,7 +416,8 @@ export function useAccountDetailLogic(): UseAccountDetailLogicReturn {
 				const [ordersResult, quotesResult] = await Promise.allSettled([
 					// Fetch orders for this account's customer
 					(async () => {
-						const { data } = await API.Orders.getFromCustomer(account.customerId)
+						// Safe: checked !account?.customerId above
+						const { data } = await API.Orders.getFromCustomer(account.customerId!)
 						if (data.payload) {
 							return data.payload
 								.map((o: unknown) => new Order(o as Partial<Order>))

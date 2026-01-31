@@ -1,26 +1,32 @@
 /**
  * RoleBadge Component
  *
- * Specialized badge component for displaying user roles with appropriate colors.
- * Maps user role numeric values to human-readable labels and color variants.
- * Provides consistent visual representation of user roles throughout the app.
+ * Domain-specific badge for displaying user roles.
+ * Uses inline configuration for role metadata (simple enough to not need a separate helper).
+ *
+ * **Architecture (3-Tier Badge System):**
+ * ```
+ * RoleBadge (this - TIER 3)
+ *    ↓ Maps RoleLevels → StatusBadge props
+ * StatusBadge (TIER 2)
+ *    ↓ Adds icon support, accessibility
+ * Badge (TIER 1 - native DaisyUI 5)
+ * ```
  *
  * **Features:**
- * - User role enum with numeric values
+ * - RoleLevels from central @_types/rbac
  * - Automatic color mapping based on role
  * - Human-readable role labels
- * - DaisyUI Badge integration
- * - Custom className support
+ * - Full theme support (light/dark/custom themes)
  * - Type-safe role handling
  *
  * **Role Mapping:**
- * - Customer (0): Primary (brand color) - Regular users
- * - Admin (9999999): Error (red) - Full system access
- * - Unknown: Neutral (gray) - Fallback for unrecognized roles
- *
- * **Note:**
- * This component uses a local UserRole enum for backward compatibility.
- * Consider migrating to use AccountRole from @_classes/Enums instead.
+ * - SuperAdmin: Error (red) - Full system control
+ * - Admin: Error (red) - System administration
+ * - FulfillmentCoordinator: Info (blue) - Order fulfillment
+ * - SalesManager: Success (green) - Sales team lead
+ * - SalesRep: Warning (yellow) - Sales representative
+ * - Customer: Primary (brand) - End customer
  *
  * **Use Cases:**
  * - User list tables
@@ -31,48 +37,43 @@
  *
  * @example
  * ```tsx
- * import RoleBadge, { UserRole } from '@_components/common/RoleBadge';
+ * import { RoleBadge } from '@_components/common'
+ * import { RoleLevels } from '@_types/rbac'
  *
  * // Basic usage
- * <RoleBadge role={UserRole.Customer} />
- * <RoleBadge role={UserRole.Admin} />
+ * <RoleBadge role={RoleLevels.Customer} />
+ * <RoleBadge role={RoleLevels.Admin} />
  *
  * // With numeric value from API
  * <RoleBadge role={user.role} />
  *
  * // With custom className
- * <RoleBadge role={UserRole.Admin} className="ml-2" />
+ * <RoleBadge role={RoleLevels.Admin} className="ml-2" />
  *
  * // In a table cell
- * {
- *   accessorKey: 'role',
- *   header: 'Role',
- *   cell: ({ getValue }) => (
- *     <RoleBadge role={getValue() as number} />
- *   )
- * }
- *
- * // In navigation header
- * <div className="flex items-center gap-2">
- *   <span>{user.name.toString()}</span>
- *   <RoleBadge role={user.role} />
- * </div>
- *
- * // Conditional rendering based on role
- * {user.role === UserRole.Admin && (
- *   <div className="admin-panel">
- *     <RoleBadge role={user.role} />
- *     <span className="ml-2">You have full system access</span>
- *   </div>
- * )}
+ * cell: ({ row }) => <RoleBadge role={row.original.role} />
  * ```
  *
+ * @see StatusBadge - Intermediate component
  * @module RoleBadge
  */
 
 import { RoleLevels } from '@_types/rbac'
 
-import Badge from '@_components/ui/Badge'
+import StatusBadge, { type BadgeVariant, type BadgeStyle, type BadgeSize } from '@_components/ui/StatusBadge'
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+/**
+ * Role metadata configuration
+ */
+interface RoleConfig {
+	label: string
+	variant: BadgeVariant
+	description: string
+}
 
 /**
  * RoleBadge component props interface.
@@ -81,68 +82,121 @@ interface RoleBadgeProps {
 	/**
 	 * User role value from RoleLevels or number.
 	 * Should match one of the RoleLevels values.
-	 *
-	 * @example
-	 * ```tsx
-	 * <RoleBadge role={RoleLevels.Admin} />
-	 * <RoleBadge role={user.role} />
-	 * ```
 	 */
 	role: number
 
 	/**
-	 * Additional CSS classes to apply to the badge.
+	 * Badge visual style.
+	 * @default 'solid'
+	 */
+	badgeStyle?: BadgeStyle
+
+	/**
+	 * Badge size.
+	 * @default 'md'
+	 */
+	size?: BadgeSize
+
+	/**
+	 * Additional CSS classes.
 	 */
 	className?: string
+
+	/**
+	 * HTML data attribute for testing.
+	 */
+	'data-testid'?: string
 }
+
+// ============================================================================
+// ROLE CONFIGURATION
+// ============================================================================
+
+/**
+ * Role configuration with display properties.
+ * Maps RoleLevels values to human-readable labels and color variants.
+ *
+ * **Design Decision:**
+ * Admin roles use 'error' variant (red) to make elevated access visually prominent.
+ * This helps users and administrators quickly identify high-privilege accounts.
+ */
+const ROLE_CONFIG: Record<number, RoleConfig> = {
+	[RoleLevels.SuperAdmin]: {
+		label: 'Super Admin',
+		variant: 'error',
+		description: 'Full system control with all permissions',
+	},
+	[RoleLevels.Admin]: {
+		label: 'Admin',
+		variant: 'error',
+		description: 'System administration and user management',
+	},
+	[RoleLevels.FulfillmentCoordinator]: {
+		label: 'Fulfillment',
+		variant: 'info',
+		description: 'Order fulfillment and shipping coordination',
+	},
+	[RoleLevels.SalesManager]: {
+		label: 'Sales Manager',
+		variant: 'success',
+		description: 'Sales team leadership and quote approval',
+	},
+	[RoleLevels.SalesRep]: {
+		label: 'Sales Rep',
+		variant: 'warning',
+		description: 'Sales representative handling customer quotes',
+	},
+	[RoleLevels.Customer]: {
+		label: 'Customer',
+		variant: 'primary',
+		description: 'End customer with ordering capabilities',
+	},
+}
+
+/**
+ * Default configuration for unknown roles
+ */
+const DEFAULT_ROLE_CONFIG: RoleConfig = {
+	label: 'Unknown',
+	variant: 'neutral',
+	description: 'Unknown or unrecognized role',
+}
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
 
 /**
  * RoleBadge Component
  *
- * Badge component that displays user role with appropriate color and label.
- * Handles role to color/label mapping internally.
+ * Renders a colored badge with the user role label.
  *
- * **Role Configuration:**
- * Each role maps to:
- * - label: Human-readable text
- * - variant: Badge color variant
- *
- * **Color Meanings:**
- * - Primary (brand): Regular user role
- * - Error (red): Administrative/elevated role (stands out for security awareness)
- * - Neutral (gray): Unknown or unrecognized role
- *
- * **Security Consideration:**
- * Admin role uses error (red) variant to make it visually prominent,
- * helping users and administrators quickly identify elevated access accounts.
+ * **Implementation:**
+ * - Uses inline ROLE_CONFIG (simpler than a full helper class)
+ * - Falls back to 'Unknown' for unrecognized roles
+ * - Red variant for admin roles highlights elevated access
  *
  * @param props - Component props including role and className
  * @returns RoleBadge component
  */
-/**
- * Role configuration with display properties.
- * Maps RoleLevels values to human-readable labels and color variants.
- */
-const ROLE_CONFIG: Record<
-	number,
-	{ label: string; variant: 'error' | 'primary' | 'secondary' | 'success' | 'warning' | 'neutral' | 'info' }
-> = {
-	[RoleLevels.SuperAdmin]: { label: 'Super Admin', variant: 'error' },
-	[RoleLevels.Admin]: { label: 'Admin', variant: 'error' },
-	[RoleLevels.FulfillmentCoordinator]: { label: 'Fulfillment', variant: 'info' },
-	[RoleLevels.SalesManager]: { label: 'Sales Manager', variant: 'success' },
-	[RoleLevels.SalesRep]: { label: 'Sales Rep', variant: 'warning' },
-	[RoleLevels.Customer]: { label: 'Customer', variant: 'primary' },
-}
-
-export default function RoleBadge({ role, className }: RoleBadgeProps) {
-	const config = ROLE_CONFIG[role] ?? { label: 'Unknown', variant: 'neutral' as const }
+export default function RoleBadge({
+	role,
+	badgeStyle = 'solid',
+	size = 'md',
+	className,
+	'data-testid': testId,
+}: RoleBadgeProps) {
+	const config = ROLE_CONFIG[role] ?? DEFAULT_ROLE_CONFIG
 
 	return (
-		<Badge
+		<StatusBadge
 			variant={config.variant}
-			className={className}>
-			{config.label}
-		</Badge>
+			label={config.label}
+			description={config.description}
+			badgeStyle={badgeStyle}
+			size={size}
+			className={className}
+			data-testid={testId}
+		/>
 	)
 }

@@ -1,12 +1,12 @@
 /**
  * Product Utilities - Product-Related Utility Functions
- * 
+ *
  * Centralized utility functions for product-related operations.
  * Part of the Products feature module.
- * 
+ *
  * **Functions:**
  * - `getStockStatus()` - Get stock status configuration for Badge component
- * 
+ *
  * @module products/utils
  */
 
@@ -21,32 +21,32 @@ export interface StockStatusConfig {
 	label: string
 	/** Badge variant */
 	variant: BadgeProps['variant']
-	/** Badge tone */
-	tone: BadgeProps['tone']
+	/** Badge style */
+	badgeStyle: BadgeProps['badgeStyle']
 	/** Badge size */
 	size: BadgeProps['size']
 }
 
 /**
  * Get stock status configuration for Badge component.
- * 
+ *
  * Returns Badge-compatible props based on stock quantity.
  * Follows industry standard thresholds:
  * - 0: Out of Stock (error, solid)
  * - 1-9: Low Stock (warning, solid)
  * - 10+: In Stock (success, solid)
- * 
+ *
  * @param {number} stock - Stock quantity
  * @returns {StockStatusConfig} Badge-compatible stock status configuration
- * 
+ *
  * @example
  * ```typescript
  * import { getStockStatus } from '@_features/products';
- * 
+ *
  * const status = getStockStatus(5);
- * // Returns: { label: 'Low Stock', variant: 'warning', tone: 'solid', size: 'sm' }
- * 
- * <Badge variant={status.variant} tone={status.tone} size={status.size}>
+ * // Returns: { label: 'Low Stock', variant: 'warning', badgeStyle: 'solid', size: 'sm' }
+ *
+ * <Badge variant={status.variant} badgeStyle={status.badgeStyle} size={status.size}>
  *   {status.label}
  * </Badge>
  * ```
@@ -56,7 +56,7 @@ export function getStockStatus(stock: number): StockStatusConfig {
 		return {
 			label: 'Out of Stock',
 			variant: 'error' as const,
-			tone: 'solid' as const,
+			badgeStyle: 'solid' as const,
 			size: 'sm' as const,
 		}
 	}
@@ -64,15 +64,14 @@ export function getStockStatus(stock: number): StockStatusConfig {
 		return {
 			label: 'Low Stock',
 			variant: 'warning' as const,
-			tone: 'solid' as const,
+			badgeStyle: 'solid' as const,
 			size: 'sm' as const,
 		}
 	}
 	return {
 		label: 'In Stock',
 		variant: 'success' as const,
-		tone: 'solid' as const,
+		badgeStyle: 'solid' as const,
 		size: 'sm' as const,
 	}
 }
-

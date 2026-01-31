@@ -98,37 +98,37 @@ const mockUrgentTask: DashboardTask = {
 
 const mockRegularTask: DashboardTask = {
 	quoteId: null,
-	orderId: 456,
+	orderId: 'order-guid-456',
 	type: 'payment',
 	title: 'Confirm payment',
 	description: 'Order #456 awaiting payment confirmation',
 	createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
 	isUrgent: false,
-	actionUrl: '/app/orders/456',
+	actionUrl: '/app/orders/order-guid-456',
 }
 
 const mockTaskList: DashboardTask[] = [
 	mockUrgentTask,
 	mockRegularTask,
 	{
-		quoteId: 'guid-789',
+		quoteId: 'quote-guid-789',
 		orderId: null,
 		type: 'quote',
 		title: 'New quote request',
 		description: '5 products requested',
 		createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
 		isUrgent: false,
-		actionUrl: '/app/quotes/guid-789',
+		actionUrl: '/app/quotes/quote-guid-789',
 	},
 	{
 		quoteId: null,
-		orderId: 101,
+		orderId: 'order-guid-101',
 		type: 'fulfillment',
 		title: 'Ship Order #101',
 		description: 'Ready for shipment',
 		createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
 		isUrgent: true,
-		actionUrl: '/app/orders/101',
+		actionUrl: '/app/orders/order-guid-101',
 	},
 ]
 

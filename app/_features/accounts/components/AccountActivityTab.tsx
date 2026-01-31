@@ -28,12 +28,11 @@ import { formatDate, formatCurrency } from '@_shared'
 
 import type Order from '@_classes/Order'
 import type Quote from '@_classes/Quote'
-import { QuoteStatus } from '@_classes/Enums'
 
 import LoadingSpinner from '@_components/common/LoadingSpinner'
 import OrderStatusBadge from '@_components/common/OrderStatusBadge'
+import QuoteStatusBadge from '@_components/common/QuoteStatusBadge'
 import { DataGrid, type ColumnDef } from '@_components/tables'
-import Badge from '@_components/ui/Badge'
 import Button from '@_components/ui/Button'
 import Card from '@_components/ui/Card'
 
@@ -159,12 +158,7 @@ export default function AccountActivityTab({
 			{
 				accessorKey: 'status',
 				header: 'Status',
-				cell: ({ row }) => {
-					const status = row.original.status
-					const variant = status === QuoteStatus.Read ? 'success' : 'warning'
-					const label = status === QuoteStatus.Read ? 'Reviewed' : 'Pending'
-					return <Badge variant={variant} tone="subtle">{label}</Badge>
-				},
+				cell: ({ row }) => <QuoteStatusBadge status={row.original.status} />,
 			},
 			{
 				id: 'actions',

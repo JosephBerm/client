@@ -42,6 +42,7 @@ import { Routes } from '@_features/navigation'
 
 import Modal from '@_components/ui/Modal'
 import Button from '@_components/ui/Button'
+import Surface from '@_components/ui/Surface'
 
 /**
  * Props for AccountLockedModal component
@@ -114,14 +115,14 @@ export default function AccountLockedModal({ isOpen, onClose, lockedUntil }: Acc
 				</p>
 
 				{/* Details Card */}
-				<div className='bg-base-200 rounded-lg p-4 mb-6 text-left'>
+				<Surface variant='inset' padding='md' className='mb-6 text-left'>
 					<h3 className='font-semibold mb-2'>What happened?</h3>
 					<ul className='text-sm text-base-content/70 space-y-1'>
 						<li>• 5 incorrect password attempts detected</li>
 						<li>• Account locked for 30 minutes for security</li>
 						<li>• This protects your account from unauthorized access</li>
 					</ul>
-				</div>
+				</Surface>
 
 				{/* Lockout Duration */}
 				{lockedUntil && (

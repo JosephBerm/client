@@ -95,6 +95,10 @@ import InternalSidebar from './InternalSidebar'
 function useAuthSync(user: IUser | null | undefined): void {
 	const initialized = useRef(false)
 
+	if (typeof window === 'undefined') {
+		return
+	}
+
 	// Run synchronously on first render only (before children mount)
 	if (!initialized.current && user) {
 		const currentUser = useAuthStore.getState().user

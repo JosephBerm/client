@@ -23,7 +23,9 @@ import { useState, useRef } from 'react'
 
 import { useAuthStore } from '@_features/auth'
 
-import { notificationService, API, usePermissions } from '@_shared'
+import { notificationService, API, usePermissions, useTenant } from '@_shared'
+import { useRealtimeSubscription } from '@_shared/hooks'
+import type { NotificationCreatedEvent } from '@_shared/services/realtime/realtimeEventTypes'
 
 import { logger } from '@/app/_core'
 
@@ -92,6 +94,9 @@ interface UseNotificationsPageReturn {
 export function useNotificationsPage(): UseNotificationsPageReturn {
 	// Auth state
 	const user = useAuthStore((state) => state.user)
+	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+	const isAuthLoading = useAuthStore((state) => state.isLoading)
+	const { uiConfig } = useTenant()
 
 	// Grid API ref for optimistic updates
 	const gridApiRef = useRef<RichDataGridApi<Notification> | null>(null)
@@ -115,6 +120,9 @@ export function useNotificationsPage(): UseNotificationsPageReturn {
 	// RBAC: Use usePermissions hook for role-based checks
 	const { isAdmin } = usePermissions()
 	const canDelete = isAdmin
+
+	const isRealtimeEnabled = uiConfig?.enabledFeatures?.includes('realtime-sockets') ?? false
+	const shouldSubscribe = !isAuthLoading && isAuthenticated && isRealtimeEnabled
 
 	/**
 	 * Callback to receive grid API for optimistic updates.
@@ -231,6 +239,16 @@ export function useNotificationsPage(): UseNotificationsPageReturn {
 	const refreshData = () => {
 		setRefreshKey((prev) => prev + 1)
 	}
+
+	useRealtimeSubscription<NotificationCreatedEvent>(
+		'notification.created',
+		(payload) => {
+			if (user?.id && payload.userId === user.id) {
+				refreshData()
+			}
+		},
+		shouldSubscribe
+	)
 
 	const setStatusFilter = (filter: NotificationStatusKey) => {
 		setStatusFilterState(filter)

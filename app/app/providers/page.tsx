@@ -235,8 +235,8 @@ export default function ProvidersPage() {
 								variant: BulkActionVariant.Warning,
 								confirmMessage: (count) => `Are you sure you want to suspend ${count} provider(s)?`,
 								onAction: async (rows: Provider[]) => {
-									const activeProviders = rows.filter(r => r.status === 0) // Active status
-									const promises = activeProviders.map(r => API.Providers.suspend(r.id, 'Bulk suspension'))
+									const activeProviders = rows.filter(r => r.status === 0 && r.id !== null) // Active status with valid ID
+									const promises = activeProviders.map(r => API.Providers.suspend(r.id!, 'Bulk suspension'))
 									await Promise.all(promises)
 									notificationService.success(`Suspended ${activeProviders.length} providers`)
 								},

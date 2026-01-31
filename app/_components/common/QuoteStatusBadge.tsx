@@ -1,26 +1,33 @@
 /**
  * QuoteStatusBadge Component
  *
- * Specialized badge component for displaying quote status with appropriate colors.
+ * Domain-specific badge for displaying quote status.
  * Uses centralized QuoteStatusHelper for display names and variants (FAANG pattern).
- * 
- * **Pattern:** Follows OrderStatusBadge component structure for consistency.
- * 
+ *
+ * **Architecture (3-Tier Badge System):**
+ * ```
+ * QuoteStatusBadge (this - TIER 3)
+ *    ↓ Maps QuoteStatus → StatusBadge props via QuoteStatusHelper
+ * StatusBadge (TIER 2)
+ *    ↓ Adds icon support, accessibility
+ * Badge (TIER 1 - native DaisyUI 5)
+ * ```
+ *
  * **Features:**
  * - Quote status enum from central @_classes/Enums
  * - Automatic color mapping via QuoteStatusHelper.getVariant()
  * - Human-readable labels via QuoteStatusHelper.getDisplay()
- * - DaisyUI Badge integration
- * - Custom className support
- * - Type-safe status handling
+ * - Tooltip descriptions via QuoteStatusHelper.getDescription()
+ * - Full theme support (light/dark/custom themes)
+ * - Zero hardcoded strings or magic values
  *
  * **Status Mapping (via QuoteStatusHelper):**
- * - Unread: Warning (yellow)
- * - Read: Info (blue)
- * - Approved: Success (green)
- * - Converted: Success (green)
- * - Rejected: Error (red)
- * - Expired: Neutral (gray)
+ * - Unread: Warning (yellow) - Needs staff attention
+ * - Read: Info (blue) - Reviewed by staff
+ * - Approved: Success (green) - Pricing sent to customer
+ * - Converted: Success (green) - Converted to order
+ * - Rejected: Error (red) - Quote declined
+ * - Expired: Neutral (gray) - Validity period passed
  *
  * **Use Cases:**
  * - Quote list tables
@@ -30,9 +37,9 @@
  *
  * @example
  * ```tsx
- * import QuoteStatusBadge from '@_components/common/QuoteStatusBadge'
+ * import { QuoteStatusBadge } from '@_components/common'
  * import { QuoteStatus } from '@_classes/Enums'
- * 
+ *
  * // Basic usage
  * <QuoteStatusBadge status={QuoteStatus.Unread} />
  * <QuoteStatusBadge status={QuoteStatus.Approved} />
@@ -44,42 +51,60 @@
  * <QuoteStatusBadge status={QuoteStatus.Read} className="ml-2" />
  *
  * // In a table cell
- * {
- *   accessorKey: 'status',
- *   header: 'Status',
- *   cell: ({ getValue }) => (
- *     <QuoteStatusBadge status={getValue() as QuoteStatus} />
- *   )
- * }
- *
- * // Conditional rendering based on status
- * {quote.status === QuoteStatus.Approved && (
- *   <div>
- *     <QuoteStatusBadge status={quote.status} />
- *     <span>Ready to convert to order!</span>
- *   </div>
- * )}
+ * cell: ({ row }) => <QuoteStatusBadge status={row.original.status} />
  * ```
  *
+ * @see QuoteStatusHelper - Status metadata
+ * @see StatusBadge - Intermediate component
  * @module QuoteStatusBadge
  */
 
-import classNames from 'classnames'
-
 import type { QuoteStatus } from '@_classes/Enums'
 import QuoteStatusHelper from '@_classes/Helpers/QuoteStatusHelper'
+
+import StatusBadge, { type BadgeStyle, type BadgeSize } from '@_components/ui/StatusBadge'
+
+// ============================================================================
+// TYPES
+// ============================================================================
 
 /**
  * QuoteStatusBadge component props interface.
  * Extends HTMLSpanElement attributes to support data-testid and other HTML attributes.
  */
-interface QuoteStatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+interface QuoteStatusBadgeProps {
 	/**
-	 * Quote status enum value (from central enum)
+	 * Quote status enum value (from central enum).
 	 * Numeric values: Unread=0, Read=1, Approved=2, Converted=3, Rejected=4, Expired=5
 	 */
 	status: QuoteStatus
+
+	/**
+	 * Badge visual style.
+	 * @default 'solid'
+	 */
+	badgeStyle?: BadgeStyle
+
+	/**
+	 * Badge size.
+	 * @default 'md'
+	 */
+	size?: BadgeSize
+
+	/**
+	 * Additional CSS classes.
+	 */
+	className?: string
+
+	/**
+	 * HTML data attribute for testing.
+	 */
+	'data-testid'?: string
 }
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
 
 /**
  * QuoteStatusBadge Component
@@ -90,40 +115,33 @@ interface QuoteStatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
  * **Implementation:**
  * - Display name: QuoteStatusHelper.getDisplay(status)
  * - Badge variant: QuoteStatusHelper.getVariant(status)
+ * - Description: QuoteStatusHelper.getDescription(status)
  * - Zero hardcoded strings or magic values
- *
- * **DaisyUI Badge Variants:**
- * - success: Green background (Approved, Converted)
- * - error: Red background (Rejected)
- * - warning: Yellow/orange background (Unread)
- * - info: Blue background (Read)
- * - neutral: Gray background (Expired)
  *
  * @param props - Component props including status and className
  * @returns QuoteStatusBadge component
  */
-export default function QuoteStatusBadge({ status, className, ...rest }: QuoteStatusBadgeProps) {
-	// Get display name and variant from QuoteStatusHelper (zero magic strings!)
-	const displayName = QuoteStatusHelper.getDisplay(status)
+export default function QuoteStatusBadge({
+	status,
+	badgeStyle = 'solid',
+	size = 'md',
+	className,
+	'data-testid': testId,
+}: QuoteStatusBadgeProps) {
+	// Get all metadata from QuoteStatusHelper (zero magic strings!)
+	const label = QuoteStatusHelper.getDisplay(status)
 	const variant = QuoteStatusHelper.getVariant(status)
+	const description = QuoteStatusHelper.getDescription(status)
 
 	return (
-		<span
-			className={classNames(
-				'badge',
-				{
-					'badge-success': variant === 'success',
-					'badge-error': variant === 'error',
-					'badge-warning': variant === 'warning',
-					'badge-info': variant === 'info',
-					'badge-neutral': variant === 'neutral',
-				},
-				className
-			)}
-			{...rest}
-		>
-			{displayName}
-		</span>
+		<StatusBadge
+			variant={variant}
+			label={label}
+			description={description}
+			badgeStyle={badgeStyle}
+			size={size}
+			className={className}
+			data-testid={testId}
+		/>
 	)
 }
-

@@ -62,7 +62,7 @@ export function createCustomerColumns(
 					<div className="flex flex-col gap-0.5 min-w-0">
 						<div className="flex items-center gap-2">
 							<Link
-								href={Routes.Customers.detail(row.original.id)}
+								href={Routes.Customers.detail(row.original.id ?? '')}
 								className={`link link-primary font-semibold truncate ${
 									isArchived ? 'opacity-60' : ''
 								}`}
@@ -169,7 +169,7 @@ export function createCustomerColumns(
 			header: '',
 			cell: ({ row }) => (
 				<div className="flex justify-end gap-1">
-					<Link href={Routes.Customers.detail(row.original.id)}>
+					<Link href={Routes.Customers.detail(row.original.id ?? '')}>
 						<Button
 							variant="ghost"
 							size="sm"

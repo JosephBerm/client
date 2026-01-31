@@ -34,7 +34,7 @@ describe('Quote Validation Schema - quoteSchema', () => {
     it('should validate authenticated user quote without guest fields', () => {
       // Business Rule: Logged-in users don't need to re-enter contact info
       const formData: QuoteFormData = new QuoteFormDataBuilder()
-        .withCustomerId(123)
+        .withCustomerId('cust-123')
         .withIsAuthenticated(true)
         .withItem('prod-1', 2, 99.99)
         .build()
@@ -43,7 +43,7 @@ describe('Quote Validation Schema - quoteSchema', () => {
 
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data.customerId).toBe(123)
+        expect(result.data.customerId).toBe('cust-123')
         expect(result.data.isAuthenticated).toBe(true)
         // Guest fields should not be required
         expect(result.data.firstName).toBeUndefined()
@@ -52,10 +52,10 @@ describe('Quote Validation Schema - quoteSchema', () => {
       }
     })
 
-    it('should validate authenticated user with customerId > 0', () => {
-      // Business Rule: customerId > 0 indicates authenticated user
+    it('should validate authenticated user with customerId', () => {
+      // Business Rule: customerId indicates authenticated user
       const formData: QuoteFormData = new QuoteFormDataBuilder()
-        .withCustomerId(456)
+        .withCustomerId('cust-456')
         .withItem('prod-1', 1, 99.99)
         .build()
 
@@ -63,16 +63,16 @@ describe('Quote Validation Schema - quoteSchema', () => {
 
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data.customerId).toBe(456)
+        expect(result.data.customerId).toBe('cust-456')
         // Should not require guest fields (customerId > 0 means authenticated)
       }
     })
 
-    it('should validate authenticated user with customerId = 0', () => {
-      // Edge: Admin accounts may have customerId = 0
+    it('should validate authenticated user with empty customerId', () => {
+      // Edge: Admin accounts may have empty customerId
       // isAuthenticated flag should override
       const formData: QuoteFormData = new QuoteFormDataBuilder()
-        .withCustomerId(0)
+        .withCustomerId('')
         .withIsAuthenticated(true) // Explicitly set to true
         .withItem('prod-1', 1, 99.99)
         .build()
@@ -607,10 +607,10 @@ describe('Quote Validation Schema - quoteSchema', () => {
 
   describe('Edge Cases', () => {
     it('should handle mixed authentication indicators', () => {
-      // Edge: Both customerId > 0 and isAuthenticated = false
+      // Edge: Both customerId present and isAuthenticated = false
       // isAuthenticated flag should take precedence
       const formData: QuoteFormData = new QuoteFormDataBuilder()
-        .withCustomerId(123)
+        .withCustomerId('cust-123')
         .withIsAuthenticated(false) // Explicitly false
         .withFirstName('John')
         .withLastName('Doe')
@@ -636,7 +636,7 @@ describe('Quote Validation Schema - quoteSchema', () => {
       // So null values in guest fields for authenticated users should be acceptable
       const formData: any = {
         isAuthenticated: true,
-        customerId: 123,
+        customerId: 'cust-123',
         items: [{ productId: 'prod-1', quantity: 1, price: 99.99 }],
         validUntil: new Date(),
         // Don't include guest fields at all (undefined is better than null)

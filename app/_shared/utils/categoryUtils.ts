@@ -13,8 +13,8 @@ import type ProductsCategory from '@_classes/ProductsCategory'
  * Flattened category representation for dropdown displays.
  */
 export interface FlattenedCategory {
-	/** Category ID */
-	id: number
+	/** Category ID (GUID string) */
+	id: string | null
 	/** Category name */
 	name: string
 	/** Nesting depth (0 = root, 1 = child, etc.) */

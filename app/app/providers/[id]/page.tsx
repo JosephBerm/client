@@ -22,6 +22,7 @@ import { Routes } from '@_features/navigation'
 import { API, useRouteParam, notificationService, HttpService } from '@_shared'
 import { logger } from '@_core'
 
+import Guid from '@_classes/Base/Guid'
 import Provider from '@_classes/Provider'
 
 import UpdateProviderForm from '@_components/forms/UpdateProviderForm'
@@ -64,17 +65,22 @@ export default function ProviderDetailPage() {
 				setIsEditing(true)
 				return
 			}
-			
-			const actualProviderId = parseInt(providerId, 10)
-			
-			if (isNaN(actualProviderId)) {
+
+			// Validate GUID format using Guid class (DRY)
+			if (!Guid.isValid(providerId)) {
+				logger.warn('Invalid provider ID format (must be valid GUID)', {
+					component: 'ProviderDetailPage',
+					action: 'fetchProvider',
+					providerId,
+				})
+				notificationService.error('Invalid provider ID format')
 				router.back()
 				return
 			}
-			
+
 			setIsLoading(true)
 			try {
-				const { data } = await API.Providers.get(actualProviderId)
+				const { data } = await API.Providers.get(providerId)
 				if (data.payload) {
 					setProvider(new Provider(data.payload))
 				}
@@ -95,7 +101,7 @@ export default function ProviderDetailPage() {
 	const handleUpdate = useCallback((updatedProvider: Provider) => {
 		setProvider(updatedProvider)
 		setIsEditing(false)
-		if (isCreateMode) {
+		if (isCreateMode && updatedProvider.id) {
 			router.push(Routes.Providers.detail(updatedProvider.id))
 		}
 	}, [isCreateMode, router])

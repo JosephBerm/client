@@ -69,7 +69,7 @@ export default function CartWidget({ items = [], position = 'side', onCheckout, 
 				{totalItems > 0 && (
 					<Badge
 						variant='error'
-						tone='solid'
+						badgeStyle='solid'
 						size='xs'
 						className='absolute -right-1 -top-1'>
 						{totalItems}

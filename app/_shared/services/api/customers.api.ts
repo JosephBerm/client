@@ -24,9 +24,9 @@ import { HttpService } from '../httpService'
  */
 export const CustomersApi = {
 	/**
-	 * Gets a single customer by ID.
+	 * Gets a single customer by ID (GUID).
 	 */
-	get: async <Customer>(id: number) => HttpService.get<Customer>(`/customer/${id}`),
+	get: async <Customer>(id: string) => HttpService.get<Customer>(`/customer/${id}`),
 
 	/**
 	 * Gets all customers.
@@ -48,7 +48,7 @@ export const CustomersApi = {
 	/**
 	 * Deletes a customer (Admin only).
 	 */
-	delete: async (customerId: number) => HttpService.delete<boolean>(`/customer/${customerId}`),
+	delete: async (customerId: string) => HttpService.delete<boolean>(`/customer/${customerId}`),
 
 	/**
 	 * Searches customers with pagination and filtering.
@@ -64,9 +64,9 @@ export const CustomersApi = {
 	/**
 	 * Gets customer statistics (order count, revenue, etc.).
 	 */
-	getStats: async (customerId: number) =>
+	getStats: async (customerId: string) =>
 		HttpService.get<{
-			customerId: number
+			customerId: string
 			totalOrders: number
 			totalQuotes: number
 			totalAccounts: number
@@ -94,6 +94,6 @@ export const CustomersApi = {
 	/**
 	 * Assigns a primary sales rep to a customer.
 	 */
-	assignSalesRep: async (customerId: number, salesRepId: number) =>
+	assignSalesRep: async (customerId: string, salesRepId: string) =>
 		HttpService.put<Company>(`/customer/${customerId}/assign-sales-rep`, { salesRepId }),
 }

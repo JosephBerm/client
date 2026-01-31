@@ -134,6 +134,80 @@ export class NavigationService {
 			})
 		}
 
+		// Check role thresholds for different access levels
+		const isFulfillmentCoordinator = userRole != null && userRole >= RoleLevels.FulfillmentCoordinator
+		const isSalesRep = userRole != null && userRole >= RoleLevels.SalesRep
+		const isSalesManager = userRole != null && userRole >= RoleLevels.SalesManager
+		const isSuperAdmin = userRole != null && userRole >= RoleLevels.SuperAdmin
+
+		// Operations section (FulfillmentCoordinator+ only)
+		// Includes fulfillment queue and approval workflows
+		if (isFulfillmentCoordinator && !isAdmin) {
+			const operationsRoutes: NavigationRoute[] = [
+				{
+					id: 'fulfillment',
+					label: 'Fulfillment Queue',
+					href: Routes.Fulfillment.location,
+					icon: 'truck',
+					description: 'Process and ship orders',
+				},
+			]
+
+			// Add approval queue for SalesManager+
+			if (isSalesManager) {
+				operationsRoutes.push({
+					id: 'approvals',
+					label: 'Approval Queue',
+					href: Routes.Approvals.location,
+					icon: 'check-circle',
+					description: 'Review pending approvals',
+				})
+			}
+
+			// Add inventory view for SalesRep+
+			if (isSalesRep) {
+				operationsRoutes.push({
+					id: 'inventory',
+					label: 'Inventory',
+					href: Routes.Inventory.location,
+					icon: 'archive',
+					description: 'View stock levels',
+				})
+			}
+
+			sections.push({
+				id: 'operations',
+				title: 'Operations',
+				routes: operationsRoutes,
+			})
+		}
+
+		// Pricing Engine section (SalesRep+ for viewing, Admin for management)
+		// PRD Reference: client/md/PRDs/internal-routes/prd_pricing_engine.md
+		// Role-Based Access: View: Admin, SalesManager, SalesRep | Manage: Admin only
+		if (isSalesRep) {
+			sections.push({
+				id: 'pricing',
+				title: 'Pricing',
+				routes: [
+					{
+						id: 'pricing-dashboard',
+						label: 'Pricing Dashboard',
+						href: Routes.Pricing.location,
+						icon: 'receipt',
+						description: 'Advanced B2B pricing management',
+					},
+					{
+						id: 'price-lists',
+						label: 'Price Lists',
+						href: Routes.Pricing.priceLists,
+						icon: 'clipboard-list',
+						description: 'Contract and customer pricing',
+					},
+				],
+			})
+		}
+
 		// Admin-specific sections (product management, user management, analytics)
 		// Only visible to users with Admin role
 		if (isAdmin) {
@@ -148,7 +222,14 @@ export class NavigationService {
 							label: 'Products',
 							href: Routes.InternalStore.location,
 							icon: 'package',
-							description: 'Manage inventory',
+							description: 'Manage product catalog',
+						},
+						{
+							id: 'inventory',
+							label: 'Inventory',
+							href: Routes.Inventory.location,
+							icon: 'archive',
+							description: 'Stock levels and tracking',
 						},
 						{
 							id: 'admin-orders',
@@ -163,6 +244,20 @@ export class NavigationService {
 							href: Routes.Quotes.location,
 							icon: 'receipt',
 							description: 'Review quote requests',
+						},
+						{
+							id: 'fulfillment',
+							label: 'Fulfillment Queue',
+							href: Routes.Fulfillment.location,
+							icon: 'truck',
+							description: 'Process and ship orders',
+						},
+						{
+							id: 'approvals',
+							label: 'Approval Queue',
+							href: Routes.Approvals.location,
+							icon: 'check-circle',
+							description: 'Review pending approvals',
 						},
 					],
 					// Note: Section visibility controlled by isAdmin check (line 80), not roles array
@@ -196,29 +291,7 @@ export class NavigationService {
 					],
 					// Note: Section visibility controlled by isAdmin check (line 80), not roles array
 				},
-				// Pricing Engine (Admin only for management, SalesRep+ for viewing)
-				// PRD Reference: client/md/PRDs/internal-routes/prd_pricing_engine.md
-				{
-					id: 'pricing',
-					title: 'Pricing',
-					routes: [
-						{
-							id: 'pricing-dashboard',
-							label: 'Pricing Dashboard',
-							href: Routes.Pricing.location,
-							icon: 'receipt',
-							description: 'Advanced B2B pricing management',
-						},
-						{
-							id: 'price-lists',
-							label: 'Price Lists',
-							href: Routes.Pricing.priceLists,
-							icon: 'clipboard-list',
-							description: 'Contract and customer pricing',
-						},
-					],
-					// Note: Section visibility controlled by isAdmin check (line 80), not roles array
-				},
+				// Note: Pricing section moved outside admin block - visible to SalesRep+
 				// Analytics and reporting
 				{
 					id: 'analytics',
@@ -260,6 +333,18 @@ export class NavigationService {
 							icon: 'settings',
 							description: 'Resource permissions by role',
 						},
+						// Tenants visible only to SuperAdmin
+						...(isSuperAdmin
+							? [
+									{
+										id: 'tenants',
+										label: 'Tenants',
+										href: Routes.Tenants.location,
+										icon: 'building' as const,
+										description: 'Multi-tenant management',
+									},
+								]
+							: []),
 					],
 					// Note: Section visibility controlled by isAdmin check (line 80), not roles array
 				},

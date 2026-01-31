@@ -83,7 +83,7 @@ export default function CustomerDetailPage() {
 		accounts,
 		stats,
 		loading,
-		customerIdNum,
+		customerIdStr,
 		setCustomer,
 	} = useCustomerDetails({ customerId, isCreateMode })
 
@@ -110,7 +110,7 @@ export default function CustomerDetailPage() {
 
 			setCustomer(updatedCustomer)
 
-			if (isCreateMode) {
+			if (isCreateMode && updatedCustomer.id) {
 				// Redirect to detail page after creation
 				router.push(Routes.Customers.detail(updatedCustomer.id))
 			}
@@ -195,8 +195,8 @@ export default function CustomerDetailPage() {
 						)}
 
 						{/* Quick Action Buttons */}
-						{customerIdNum && (
-							<CustomerQuickActions customerId={customerIdNum} />
+						{customerIdStr && (
+							<CustomerQuickActions customerId={customerIdStr} />
 						)}
 					</>
 				)}
@@ -211,14 +211,14 @@ export default function CustomerDetailPage() {
 				/>
 
 				{/* === EDIT MODE SECTIONS (CONTINUED) === */}
-				{!isCreateMode && customerIdNum && (
+				{!isCreateMode && customerIdStr && (
 					<>
 						{/* Order & Quote History */}
-						<CustomerHistory customerId={customerIdNum} />
+						<CustomerHistory customerId={customerIdStr} />
 
 						{/* Linked User Accounts */}
 						<CustomerAccountsSection
-							customerId={customerIdNum}
+							customerId={customerIdStr}
 							accounts={accounts}
 							isLoading={loading.accounts}
 						/>

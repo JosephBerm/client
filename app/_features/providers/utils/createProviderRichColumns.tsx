@@ -82,7 +82,7 @@ export function createProviderRichColumns(
 					</div>
 					<div className="min-w-0">
 						<Link
-							href={Routes.Providers.detail(row.original.id)}
+							href={Routes.Providers.detail(row.original.id ?? '')}
 							className="font-semibold text-base-content hover:text-primary transition-colors line-clamp-1"
 						>
 							{row.original.name}
@@ -161,7 +161,7 @@ export function createProviderRichColumns(
 				return (
 					<div className="flex justify-end gap-1">
 						{/* View */}
-						<Link href={Routes.Providers.detail(provider.id)}>
+						<Link href={Routes.Providers.detail(provider.id ?? '')}>
 							<Button
 								variant="ghost"
 								size="sm"

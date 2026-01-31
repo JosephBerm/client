@@ -319,11 +319,11 @@ export default function PricingAuditLogViewer() {
 						/>
 						<FormInput
 							label='Customer ID'
-							type='number'
-							placeholder='e.g., 123'
+							type='text'
+							placeholder='e.g., cust-123'
 							value={filters.customerId ?? ''}
 							onChange={(e) =>
-								setFilters({ ...filters, customerId: parseInt(e.target.value) || undefined })
+								setFilters({ ...filters, customerId: e.target.value || undefined })
 							}
 						/>
 						<FormInput

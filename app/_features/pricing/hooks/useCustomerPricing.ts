@@ -120,7 +120,7 @@ export function useCustomerPricing(
 ): UseCustomerPricingReturn {
 	// Get current user from auth store
 	const user = useAuthStore((state) => state.user)
-	const customerId = user?.customerId && user.customerId > 0 ? user.customerId : undefined
+	const customerId = user?.customerId && user.customerId.length > 0 ? user.customerId : undefined
 
 	// Fetch pricing from API
 	const {
@@ -262,7 +262,7 @@ export function useCustomerPricing(
  */
 export function useBulkCustomerPricing(productIds: string[], enabled: boolean = true) {
 	const user = useAuthStore((state) => state.user)
-	const customerId = user?.customerId && user.customerId > 0 ? user.customerId : undefined
+	const customerId = user?.customerId && user.customerId.length > 0 ? user.customerId : undefined
 
 	const { data, isLoading, error, refetch } = useQuery({
 		queryKey: ['pricing', 'bulk', productIds, customerId],

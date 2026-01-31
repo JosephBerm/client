@@ -19,7 +19,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 
 import Button from '@_components/ui/Button'
-import Card from '@_components/ui/Card'
+import Surface from '@_components/ui/Surface'
 
 import type { LucideIcon } from 'lucide-react'
 
@@ -63,7 +63,7 @@ export function QuickActions({ actions, title }: QuickActionsProps) {
 	}
 
 	return (
-		<Card className="h-full">
+		<Surface variant="subtle" padding="lg" className="h-full">
 			{title && (
 				<h3 className="font-semibold text-lg text-base-content mb-4">{title}</h3>
 			)}
@@ -89,7 +89,7 @@ export function QuickActions({ actions, title }: QuickActionsProps) {
 					)
 				})}
 			</div>
-		</Card>
+		</Surface>
 	)
 }
 

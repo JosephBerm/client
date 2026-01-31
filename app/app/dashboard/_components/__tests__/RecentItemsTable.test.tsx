@@ -49,7 +49,7 @@ vi.mock('date-fns', () => ({
 
 const mockRecentOrder: RecentItem = {
 	quoteId: null,
-	orderId: 123,
+	orderId: 'order-guid-123',
 	type: 'order',
 	number: 'ORD-123',
 	date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
@@ -73,7 +73,7 @@ const mockOrdersList: RecentItem[] = [
 	mockRecentOrder,
 	{
 		quoteId: null,
-		orderId: 789,
+		orderId: 'order-guid-789',
 		type: 'order',
 		number: 'ORD-789',
 		date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
@@ -83,7 +83,7 @@ const mockOrdersList: RecentItem[] = [
 	},
 	{
 		quoteId: null,
-		orderId: 202,
+		orderId: 'order-guid-202',
 		type: 'order',
 		number: 'ORD-202',
 		date: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),

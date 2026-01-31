@@ -64,7 +64,7 @@ export function IntegrationConnectionCard({ connection, onSettingsClick }: Integ
 			return (
 				<Badge
 					variant='neutral'
-					tone='subtle'
+					badgeStyle='soft'
 					className='gap-1'>
 					<Clock className='h-3 w-3' />
 					Not Connected
@@ -75,7 +75,7 @@ export function IntegrationConnectionCard({ connection, onSettingsClick }: Integ
 			return (
 				<Badge
 					variant='error'
-					tone='solid'
+					badgeStyle='solid'
 					className='gap-1'>
 					<AlertCircle className='h-3 w-3' />
 					Needs Reauthorization
@@ -86,7 +86,7 @@ export function IntegrationConnectionCard({ connection, onSettingsClick }: Integ
 			return (
 				<Badge
 					variant='warning'
-					tone='solid'
+					badgeStyle='solid'
 					className='gap-1'>
 					<AlertCircle className='h-3 w-3' />
 					Sync Error
@@ -96,7 +96,7 @@ export function IntegrationConnectionCard({ connection, onSettingsClick }: Integ
 		return (
 			<Badge
 				variant='success'
-				tone='solid'
+				badgeStyle='solid'
 				className='gap-1'>
 				<CheckCircle className='h-3 w-3' />
 				Connected

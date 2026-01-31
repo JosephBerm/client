@@ -45,7 +45,7 @@ import { RichDataGrid, createRichColumnHelper, FilterType, type RichColumnDef } 
 // =========================================================================
 
 interface Customer {
-	id: number
+	id: string
 	name: string
 	email?: string
 	assignedPriceLists: string[] // Array of price list IDs
@@ -65,7 +65,7 @@ interface AssignmentModalState {
 export default function CustomerAssignmentMatrix() {
 	const queryClient = useQueryClient()
 	const [searchTerm, setSearchTerm] = useState('')
-	const [selectedCustomers, setSelectedCustomers] = useState<Set<number>>(new Set())
+	const [selectedCustomers, setSelectedCustomers] = useState<Set<string>>(new Set())
 	const [assignmentModal, setAssignmentModal] = useState<AssignmentModalState>({
 		isOpen: false,
 		customer: null,
@@ -121,12 +121,12 @@ export default function CustomerAssignmentMatrix() {
 	}, [customers, searchTerm])
 
 	// Handle individual assignment
-	const handleAssign = async (customerId: number, priceListId: string) => {
+	const handleAssign = async (customerId: string, priceListId: string) => {
 		await assignMutation.mutateAsync({ customerId, priceListId })
 	}
 
 	// Handle individual unassignment
-	const handleUnassign = async (customerId: number, priceListId: string) => {
+	const handleUnassign = async (customerId: string, priceListId: string) => {
 		await unassignMutation.mutateAsync({ customerId, priceListId })
 	}
 
@@ -167,7 +167,7 @@ export default function CustomerAssignmentMatrix() {
 	}
 
 	// Toggle customer selection
-	const toggleCustomerSelection = (customerId: number) => {
+	const toggleCustomerSelection = (customerId: string) => {
 		const newSelected = new Set(selectedCustomers)
 		if (newSelected.has(customerId)) {
 			newSelected.delete(customerId)

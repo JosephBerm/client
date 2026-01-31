@@ -86,8 +86,8 @@ export default function PriceListForm({ priceList, onSuccess, onCancel }: PriceL
 			description: priceList?.description ?? '',
 			priority: priceList?.priority ?? 100,
 			isActive: priceList?.isActive ?? true,
-			validFrom: priceList?.validFrom ?? null,
-			validUntil: priceList?.validUntil ?? null,
+			validFrom: priceList?.validFrom ?? undefined,
+			validUntil: priceList?.validUntil ?? undefined,
 		},
 	})
 

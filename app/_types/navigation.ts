@@ -62,6 +62,10 @@ export type NavigationIconType =
 	| 'store'
 	| 'bell'
 	| 'plug'
+	| 'truck'
+	| 'check-circle'
+	| 'archive'
+	| 'building'
 
 /**
  * Navigation route item interface.

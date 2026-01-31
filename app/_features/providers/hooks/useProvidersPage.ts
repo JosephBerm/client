@@ -155,7 +155,7 @@ export function useProvidersPage(): UseProvidersPageReturn {
 	 * Admin only action.
 	 */
 	const handleDelete = async () => {
-		if (!modal.provider) {
+		if (!modal.provider || !modal.provider.id) {
 			return
 		}
 
@@ -196,7 +196,7 @@ export function useProvidersPage(): UseProvidersPageReturn {
 	 * Sets status to Archived, preserves all data.
 	 */
 	const handleArchive = async () => {
-		if (!modal.provider) {
+		if (!modal.provider || !modal.provider.id) {
 			return
 		}
 
@@ -237,7 +237,7 @@ export function useProvidersPage(): UseProvidersPageReturn {
 	 * Sets status to Suspended, requires reason.
 	 */
 	const handleSuspend = async () => {
-		if (!modal.provider) {
+		if (!modal.provider || !modal.provider.id) {
 			return
 		}
 
@@ -283,6 +283,9 @@ export function useProvidersPage(): UseProvidersPageReturn {
 	 * Sets status back to Active from any other status.
 	 */
 	const handleActivate = async (provider: Provider) => {
+		if (!provider.id) {
+			return
+		}
 		setIsActivating(true)
 		try {
 			const { data } = await API.Providers.activate(provider.id)

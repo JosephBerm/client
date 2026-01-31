@@ -169,7 +169,7 @@ export function ManualSyncModal({
 							<span className="text-sm font-medium">Sync Status</span>
 							<Badge
 								variant={isComplete ? 'success' : isFailed ? 'error' : 'warning'}
-								tone="solid"
+								badgeStyle="solid"
 							>
 								{syncStatus.status}
 							</Badge>

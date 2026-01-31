@@ -52,7 +52,7 @@ export function TaskList({ tasks, title, showUrgent = true, maxItems = 10 }: Tas
 
 	if (tasks.length === 0) {
 		return (
-			<Card className="h-full">
+			<Card variant="ghost" className="shadow-[var(--shadow-card-rest)] border-0 h-full">
 				<h3 className="font-semibold text-lg text-base-content mb-4">{title}</h3>
 				<EmptyState
 					icon={<CheckCircle className="w-12 h-12 text-success" />}
@@ -64,7 +64,7 @@ export function TaskList({ tasks, title, showUrgent = true, maxItems = 10 }: Tas
 	}
 
 	return (
-		<Card className="h-full">
+		<Card variant="ghost" className="shadow-[var(--shadow-card-rest)] border-0 h-full">
 			<div className="flex items-center justify-between mb-4">
 				<h3 className="font-semibold text-lg text-base-content">{title}</h3>
 				{tasks.length > maxItems && (

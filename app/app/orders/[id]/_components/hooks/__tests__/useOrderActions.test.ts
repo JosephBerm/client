@@ -57,11 +57,11 @@ vi.mock('@_shared', async () => {
 
 function createMockOrder(overrides: Partial<Order> = {}): Order {
   return {
-    id: 1,
+    id: 'order-001',
     orderNumber: 'ORD-001',
     status: OrderStatus.Placed,
     total: 500.00,
-    customerId: 100,
+    customerId: 'cust-100',
     products: [],
     createdAt: new Date(),
     isArchived: false,
@@ -172,7 +172,7 @@ describe('useOrderActions Hook', () => {
           .mockReturnValueOnce({ submit: mockSubmit, isSubmitting: false, error: null })
           .mockReturnValue({ submit: vi.fn(), isSubmitting: false, error: null })
         
-        const mockOrder = createMockOrder({ id: 123 })
+        const mockOrder = createMockOrder({ id: 'order-123' })
         const { result } = renderHook(() => useOrderActions(mockOrder))
         
         await act(async () => {
@@ -387,11 +387,11 @@ describe('useOrderActions Hook', () => {
         const { result } = renderHook(() => useOrderActions(mockOrder))
         
         await act(async () => {
-          await result.current.addTracking(42, '1Z999AA10123456784', 'UPS')
+          await result.current.addTracking('item-42', '1Z999AA10123456784', 'UPS')
         })
-        
+
         expect(mockSubmit).toHaveBeenCalledWith({
-          orderItemId: 42,
+          orderItemId: 'item-42',
           trackingNumber: '1Z999AA10123456784',
           carrier: 'UPS',
         })
@@ -409,11 +409,11 @@ describe('useOrderActions Hook', () => {
         const { result } = renderHook(() => useOrderActions(mockOrder))
         
         await act(async () => {
-          await result.current.addTracking(42, '1Z999AA10123456784')
+          await result.current.addTracking('item-42', '1Z999AA10123456784')
         })
-        
+
         expect(mockSubmit).toHaveBeenCalledWith({
-          orderItemId: 42,
+          orderItemId: 'item-42',
           trackingNumber: '1Z999AA10123456784',
           carrier: undefined,
         })
@@ -432,7 +432,7 @@ describe('useOrderActions Hook', () => {
         
         let trackingResult: { success: boolean } | undefined
         await act(async () => {
-          trackingResult = await result.current.addTracking(42, 'TRK123')
+          trackingResult = await result.current.addTracking('item-42', 'TRK123')
         })
         
         expect(trackingResult?.success).toBe(true)
@@ -452,7 +452,7 @@ describe('useOrderActions Hook', () => {
         const { result } = renderHook(() => useOrderActions(mockOrder))
         
         await act(async () => {
-          await result.current.addTracking(1, '1Z12345E0205271688', 'UPS')
+          await result.current.addTracking('item-1', '1Z12345E0205271688', 'UPS')
         })
         
         expect(mockSubmit).toHaveBeenCalled()
@@ -470,7 +470,7 @@ describe('useOrderActions Hook', () => {
         const { result } = renderHook(() => useOrderActions(mockOrder))
         
         await act(async () => {
-          await result.current.addTracking(1, '789912345678901234567890', 'FedEx')
+          await result.current.addTracking('item-1', '789912345678901234567890', 'FedEx')
         })
         
         expect(mockSubmit).toHaveBeenCalled()
@@ -488,7 +488,7 @@ describe('useOrderActions Hook', () => {
         const { result } = renderHook(() => useOrderActions(mockOrder))
         
         await act(async () => {
-          await result.current.addTracking(1, '9400111899223456789012', 'USPS')
+          await result.current.addTracking('item-1', '9400111899223456789012', 'USPS')
         })
         
         expect(mockSubmit).toHaveBeenCalled()
@@ -881,9 +881,9 @@ describe('useOrderActions Hook', () => {
         
         // Add tracking to multiple items
         await act(async () => {
-          await result.current.addTracking(1, 'TRK001', 'UPS')
-          await result.current.addTracking(2, 'TRK002', 'FedEx')
-          await result.current.addTracking(3, 'TRK003', 'USPS')
+          await result.current.addTracking('item-1', 'TRK001', 'UPS')
+          await result.current.addTracking('item-2', 'TRK002', 'FedEx')
+          await result.current.addTracking('item-3', 'TRK003', 'USPS')
         })
         
         expect(mockSubmit).toHaveBeenCalledTimes(3)
@@ -914,8 +914,8 @@ describe('useOrderActions Hook', () => {
     })
 
     it('should handle order change', () => {
-      const mockOrder1 = createMockOrder({ id: 1 })
-      const mockOrder2 = createMockOrder({ id: 2 })
+      const mockOrder1 = createMockOrder({ id: 'order-1' })
+      const mockOrder2 = createMockOrder({ id: 'order-2' })
       
       const { result, rerender } = renderHook(
         ({ order }) => useOrderActions(order),

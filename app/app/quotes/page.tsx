@@ -19,7 +19,7 @@
  * @module app/quotes/page
  */
 
-import Card from '@_components/ui/Card'
+import Surface from '@_components/ui/Surface'
 
 import { InternalPageHeader } from '../_components'
 
@@ -37,11 +37,9 @@ export default function QuotesPage() {
         description="Manage customer quote requests"
       />
 
-      <Card>
-        <div className="card-body">
-          <QuotesDataGrid />
-        </div>
-      </Card>
+      <Surface variant="subtle" padding="lg">
+        <QuotesDataGrid />
+      </Surface>
     </>
   )
 }

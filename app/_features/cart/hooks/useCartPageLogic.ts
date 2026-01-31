@@ -138,8 +138,8 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 	// Form management
 	const form = useZodForm(quoteSchema, {
 		defaultValues: {
-			// Authenticated user fields
-			customerId: user?.customerId ?? 0,
+			// Authenticated user fields - GUID string or null
+			customerId: user?.customerId ?? null,
 			// Set isAuthenticated flag to indicate user is logged in (even if customerId is 0/null)
 			// This allows admin accounts without customerId to submit quotes
 			isAuthenticated: isAuthenticated && !!user,
@@ -255,8 +255,8 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 	// This ensures form reflects current auth state (e.g., user logs in while on cart page)
 	useEffect(() => {
 		if (isAuthenticated && user) {
-			// User logged in: clear guest fields, set customerId and isAuthenticated flag
-			form.setValue('customerId', user.customerId ?? 0)
+			// User logged in: clear guest fields, set customerId (GUID string) and isAuthenticated flag
+			form.setValue('customerId', user.customerId ?? null)
 			form.setValue('isAuthenticated', true) // Set flag to indicate authentication
 			form.setValue('firstName', '')
 			form.setValue('lastName', '')
@@ -266,8 +266,8 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 			form.clearErrors('lastName')
 			form.clearErrors('email')
 		} else {
-			// User logged out: clear customerId and isAuthenticated flag, keep guest fields as-is
-			form.setValue('customerId', 0)
+			// User logged out: clear customerId (GUID string) and isAuthenticated flag, keep guest fields as-is
+			form.setValue('customerId', null)
 			form.setValue('isAuthenticated', false)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -339,7 +339,7 @@ export function useCartPageLogic(): UseCartPageLogicReturn {
 				}),
 				
 				// Authenticated user ID (for linking to existing customer)
-				customerId: userIsAuthenticated ? user?.customerId : undefined,
+				customerId: userIsAuthenticated ? user?.customerId ?? undefined : undefined,
 			}
 
 			return API.Public.sendQuote(quoteRequest)

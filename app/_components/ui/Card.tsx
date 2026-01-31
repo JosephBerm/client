@@ -66,13 +66,13 @@
  * @module Card
  */
 
-import type { HTMLAttributes, ReactNode } from 'react'
+import type { HTMLAttributes, ReactNode, JSX } from 'react'
 
 import Image from 'next/image'
 
 import classNames from 'classnames'
 
-type CardVariant = 'elevated' | 'soft' | 'outline' | 'ghost'
+type CardVariant = 'elevated' | 'soft' | 'outline' | 'ghost' | 'stat' | 'data'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
 	children: ReactNode
@@ -89,10 +89,14 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
 const variantClasses: Record<CardVariant, string> = {
 	elevated:
-		'card bg-base-100 border border-base-300 shadow-xl',
-	soft: 'card bg-base-200 border border-base-300 shadow-lg',
+		'card bg-base-100 border border-base-300 shadow-[var(--shadow-card-elevated)]',
+	soft: 'card bg-base-200 border border-base-300 shadow-[var(--shadow-card-rest)]',
 	outline: 'card bg-base-100 border border-dashed border-base-300',
 	ghost: 'card bg-transparent border border-base-300',
+	// NEW: Stats cards for KPI displays (dashboard metrics)
+	stat: 'card bg-base-100 border border-base-300 shadow-[var(--shadow-card-rest)]',
+	// NEW: Data grid containers (tables, lists)
+	data: 'card bg-base-100 border border-base-200 shadow-[var(--shadow-card-rest)]',
 }
 
 export default function Card({
@@ -108,18 +112,27 @@ export default function Card({
 	variant = 'elevated',
 	hover = true,
 	...props
-}: CardProps) {
-	const bodyPadding = compact ? 'p-6' : 'p-8'
+}: CardProps): JSX.Element {
+	const bodyPadding = compact ? 'p-4' : 'p-6'
+
+	// Stat cards use rounded-xl (12px) to differentiate from main content cards (rounded-2xl/16px)
+	// Per 2025-2026 Dashboard Design Trends - Section 7.1
+	const borderRadiusClass = variant === 'stat' ? 'rounded-xl' : 'rounded-2xl'
 
 	return (
 		<div
 			className={classNames(
-				'relative flex flex-col overflow-hidden rounded-[32px] transition duration-200',
+				'relative flex flex-col overflow-hidden transition duration-200',
+				borderRadiusClass,
 				variantClasses[variant],
 				{
-					'hover:-translate-y-1 hover:shadow-2xl': hover && variant === 'elevated',
-					'hover:-translate-y-1 hover:shadow-xl': hover && variant === 'soft',
-					'hover:-translate-y-1 hover:border-base-content/20': hover && variant === 'outline',
+					'hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)] hover:border-base-content/10':
+						hover && variant === 'elevated',
+					'hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]':
+						hover && (variant === 'soft' || variant === 'stat'),
+					'hover:-translate-y-0.5 hover:border-base-content/20':
+						hover && variant === 'outline',
+					// data variant: no hover lift (static container)
 				},
 				className
 			)}

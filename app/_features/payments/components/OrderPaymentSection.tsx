@@ -54,8 +54,8 @@ import { StripeProvider, useStripeConfigured } from './StripeProvider'
 // =========================================================================
 
 export interface OrderPaymentSectionProps {
-	/** Order ID */
-	orderId: number
+	/** Order ID (UUID/GUID) */
+	orderId: string
 	/** Total order amount in cents */
 	totalAmountCents: number
 	/** Currency code */

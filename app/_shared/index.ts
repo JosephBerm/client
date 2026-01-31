@@ -57,6 +57,36 @@ export {
 	type BusinessHoursConfig,
 } from './utils/businessHours'
 
+// Tenant Theme Utilities
+export { safeJsonParse } from './utils/jsonUtils'
+export {
+	getTenantThemeCacheKey,
+	getTenantThemeCacheMaxAgeMs,
+	isTenantThemeCacheValid,
+	parseTenantThemeCache,
+	serializeTenantThemeCache,
+} from './utils/tenantThemeCache'
+export { buildTenantThemeScript } from './utils/tenantThemeScript'
+export { sanitizeTenantCss, trimTenantCss } from './utils/tenantCss'
+export { applyTenantCustomCss, updateFavicon } from './utils/tenantDomUtils'
+export {
+	applyTenantThemeToRoot,
+	buildTenantThemeStyle,
+	buildTenantThemeTokens,
+	clearTenantChartOverrides,
+	mergeTenantTheme,
+	parseTenantThemeOverrides,
+} from './utils/tenantTheme'
+
+// Tenant Theme Constants
+export {
+	TENANT_CUSTOM_CSS_MAX_LENGTH,
+	TENANT_CUSTOM_CSS_STYLE_ID,
+	TENANT_THEME_CACHE_KEY,
+	TENANT_THEME_CACHE_MAX_AGE_MS,
+	TENANT_THEME_VARS_STYLE_ID,
+} from './constants/tenantTheme'
+
 // Analytics
 export {
 	trackEvent,
@@ -110,11 +140,32 @@ export {
 // CLIENT SERVICES (All have 'use client' directive)
 // ============================================================================
 
+// Context Providers
+export { TenantProvider, useTenant } from './contexts'
+
 // HTTP Service and Types
 export { HttpService, type ApiResponse, type AxiosResponse } from './services/httpService'
 
 // HTTP Service Constants (public-facing only)
 export { AUTH_COOKIE_NAME, AUTH_HEADER_PREFIX, DEFAULT_API_BASE_URL } from './services/httpService.constants'
+
+// Realtime Socket Service
+export { realtimeSocketService } from './services/realtime/realtimeSocketService'
+export type {
+	RealtimeEventBase,
+	QuoteCreatedEvent,
+	QuoteStatusChangedEvent,
+	OrderCreatedEvent,
+	OrderStatusChangedEvent,
+	PaymentConfirmedEvent,
+	ImportProgressEvent,
+	ErpSyncProgressEvent,
+	NotificationCreatedEvent,
+	InventoryAlertEvent,
+	ShippingStatusChangedEvent,
+	AnalyticsKpiUpdatedEvent,
+	AnalyticsRevenueUpdatedEvent,
+} from './services/realtime/realtimeEventTypes'
 
 // API Client - Domain-Specific Modules
 export {
@@ -144,6 +195,7 @@ export {
 	PricingApi,
 	IntegrationsApi,
 	SecurityPolicyApi,
+	TenantApi,
 	PublicApi,
 	// Types - Accounts
 	type RoleDistribution,

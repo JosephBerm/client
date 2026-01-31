@@ -31,8 +31,8 @@ export interface ManualPaymentModalProps {
 	isOpen: boolean
 	/** Callback to close the modal */
 	onClose: () => void
-	/** Order ID to record payment for */
-	orderId: number
+	/** Order ID (UUID/GUID) to record payment for */
+	orderId: string
 	/** Maximum amount allowed (remaining balance in cents) */
 	maxAmountCents: number
 	/** Currency code (default: USD) */

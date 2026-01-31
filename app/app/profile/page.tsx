@@ -44,6 +44,7 @@ import UpdateAccountForm from '@_components/forms/UpdateAccountForm'
 import ChangePasswordForm from '@_components/forms/ChangePasswordForm'
 import TwoFactorSetupCard from '@_components/forms/TwoFactorSetupCard'
 import Card from '@_components/ui/Card'
+import Surface from '@_components/ui/Surface'
 import { Tabs, TabsList, Tab, TabPanel } from '@_components/ui/Tabs'
 import Avatar from '@_components/ui/Avatar'
 import StatusIndicator from '@_components/ui/StatusIndicator'
@@ -74,7 +75,7 @@ function ProfileInfoTab({ user, onUserUpdate }: ProfileInfoTabProps) {
 	return (
 		<div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
 			{/* Main Content - Profile Form */}
-			<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+			<Surface variant="subtle" padding="lg">
 				<div className="flex items-center gap-3 mb-6">
 					<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
 						<User className="h-5 w-5 text-primary" />
@@ -91,12 +92,12 @@ function ProfileInfoTab({ user, onUserUpdate }: ProfileInfoTabProps) {
 					user={user}
 					onUserUpdate={onUserUpdate}
 				/>
-			</Card>
+			</Surface>
 
 			{/* Sidebar - Account Summary */}
 			<div className="space-y-4">
-				{/* Account Overview Card - Enhanced with Avatar */}
-				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+				{/* Account Overview - Static info panel */}
+				<Surface variant="inset" padding="lg">
 					<div className="flex flex-col items-center text-center mb-6">
 						<Avatar
 							name={user.name}
@@ -112,7 +113,7 @@ function ProfileInfoTab({ user, onUserUpdate }: ProfileInfoTabProps) {
 						<p className="text-sm text-base-content/60 truncate max-w-full">
 							{user.email || 'No email set'}
 						</p>
-						<Badge variant="success" tone="subtle" size="sm" className="mt-2">
+						<Badge variant="success" badgeStyle="soft" size="sm" className="mt-2">
 							Active
 						</Badge>
 					</div>
@@ -135,10 +136,10 @@ function ProfileInfoTab({ user, onUserUpdate }: ProfileInfoTabProps) {
 							</span>
 						</div>
 					</div>
-				</Card>
+				</Surface>
 
-				{/* Quick Tips Card - Enhanced with TipItem */}
-				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+				{/* Quick Tips - Static info panel */}
+				<Surface variant="inset" padding="lg">
 					<h3 className="text-lg font-semibold text-base-content mb-4">Profile Tips</h3>
 					<div className="space-y-3">
 						<TipItem
@@ -154,7 +155,7 @@ function ProfileInfoTab({ user, onUserUpdate }: ProfileInfoTabProps) {
 							text="Add a phone number to receive important updates via SMS"
 						/>
 					</div>
-				</Card>
+				</Surface>
 			</div>
 		</div>
 	)
@@ -218,8 +219,8 @@ function SecurityTab({ user }: SecurityTabProps) {
 		<div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
 			{/* Main Content - Password Change & 2FA */}
 			<div className="space-y-6">
-				{/* Password Change Card */}
-				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+				{/* Password Change - Form section */}
+				<Surface variant="subtle" padding="lg">
 					<div className="flex items-center gap-3 mb-6">
 						<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
 							<Shield className="h-5 w-5 text-primary" />
@@ -233,10 +234,10 @@ function SecurityTab({ user }: SecurityTabProps) {
 					</div>
 
 					<ChangePasswordForm user={user} />
-				</Card>
+				</Surface>
 
-				{/* Two-Factor Authentication Card */}
-				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+				{/* Two-Factor Authentication - Form section */}
+				<Surface variant="subtle" padding="lg">
 					<div className="flex items-center gap-3 mb-6">
 						<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
 							<Key className="h-5 w-5 text-accent" />
@@ -259,10 +260,10 @@ function SecurityTab({ user }: SecurityTabProps) {
 							onStatusChange={handleMfaStatusChange}
 						/>
 					)}
-				</Card>
+				</Surface>
 
-				{/* Active Sessions Card (Future) */}
-				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+				{/* Active Sessions - Static info panel */}
+				<Surface variant="subtle" padding="lg">
 					<div className="flex items-center gap-3 mb-4">
 						<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
 							<LogOut className="h-5 w-5 text-warning" />
@@ -299,13 +300,13 @@ function SecurityTab({ user }: SecurityTabProps) {
 					<p className="mt-4 text-xs text-base-content/50 italic">
 						Session management coming soon...
 					</p>
-				</Card>
+				</Surface>
 			</div>
 
 			{/* Sidebar - Security Status */}
 			<div className="space-y-4">
-				{/* Security Overview Card - Enhanced with StatusIndicator */}
-				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+				{/* Security Overview - Static info panel */}
+				<Surface variant="inset" padding="lg">
 					<div className="flex items-center gap-3 mb-4">
 						<Shield className="h-5 w-5 text-success" />
 						<h3 className="text-lg font-semibold text-base-content">Security Status</h3>
@@ -327,10 +328,10 @@ function SecurityTab({ user }: SecurityTabProps) {
 							value="Active"
 						/>
 					</div>
-				</Card>
+				</Surface>
 
-				{/* Security Tips Card - Enhanced with TipItem */}
-				<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+				{/* Security Tips - Static info panel */}
+				<Surface variant="inset" padding="lg">
 					<h3 className="text-lg font-semibold text-base-content mb-4">Security Best Practices</h3>
 					<div className="space-y-3">
 						<TipItem
@@ -354,7 +355,7 @@ function SecurityTab({ user }: SecurityTabProps) {
 							text="Sign out when using shared or public computers"
 						/>
 					</div>
-				</Card>
+				</Surface>
 			</div>
 		</div>
 	)

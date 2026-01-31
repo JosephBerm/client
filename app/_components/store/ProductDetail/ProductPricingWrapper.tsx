@@ -50,7 +50,7 @@ export interface ProductPricingWrapperProps {
 export default function ProductPricingWrapper({ product }: ProductPricingWrapperProps) {
 	// Check authentication state
 	const user = useAuthStore((state) => state.user)
-	const isAuthenticated = !!user && user.customerId > 0
+	const isAuthenticated = !!user && !!user.customerId
 
 	// For authenticated users with a valid customer ID, show personalized pricing
 	if (isAuthenticated) {

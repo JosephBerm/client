@@ -124,7 +124,7 @@ export function useQuotePermissions(quote: Quote | null): UseQuotePermissionsRet
 		// Determine context for the current quote
 		// Check if quote belongs to user's customer account
 		// Priority: customerId match (if backend provides it) > email/company name match
-		const quoteCustomerId = 'customerId' in quote ? (quote as { customerId?: number }).customerId : undefined
+		const quoteCustomerId = 'customerId' in quote ? (quote as { customerId?: string }).customerId : undefined
 		const isOwnQuote =
 			user.customerId && quoteCustomerId
 				? user.customerId === quoteCustomerId

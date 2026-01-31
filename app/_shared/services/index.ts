@@ -75,6 +75,24 @@ export {
 	type NotificationResult,
 } from './notification.service'
 
+// Realtime Socket Service
+export { realtimeSocketService } from './realtime/realtimeSocketService'
+export type {
+	RealtimeEventBase,
+	QuoteCreatedEvent,
+	QuoteStatusChangedEvent,
+	OrderCreatedEvent,
+	OrderStatusChangedEvent,
+	PaymentConfirmedEvent,
+	ImportProgressEvent,
+	ErpSyncProgressEvent,
+	NotificationCreatedEvent,
+	InventoryAlertEvent,
+	ShippingStatusChangedEvent,
+	AnalyticsKpiUpdatedEvent,
+	AnalyticsRevenueUpdatedEvent,
+} from './realtime/realtimeEventTypes'
+
 // Account Status Handler - Forced logout for suspended/locked/archived accounts
 export {
 	subscribeToAccountStatusErrors,

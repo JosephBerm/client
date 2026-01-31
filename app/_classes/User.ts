@@ -134,8 +134,8 @@ export default class User {
 	 */
 	public roleLevel: number | null = null
 
-	/** Associated customer/company ID (foreign key) */
-	public customerId: number = -99
+	/** Associated customer/company ID (GUID foreign key) */
+	public customerId: string | null = null
 	
 	/** Associated customer/company object */
 	public customer?: Company | null

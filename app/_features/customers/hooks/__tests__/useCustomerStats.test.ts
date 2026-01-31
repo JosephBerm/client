@@ -61,7 +61,7 @@ const mockAPI = {
 // TEST DATA
 // ============================================================================
 
-function createSuccessResponse(customerId: number = 1, overrides = {}) {
+function createSuccessResponse(customerId: string = 'cust-1', overrides = {}) {
 	return {
 		data: {
 			statusCode: 200,
@@ -109,10 +109,10 @@ describe('useCustomerStats Hook', () => {
 
 	describe('Successful Fetching', () => {
 		it('should fetch stats successfully', async () => {
-			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse(1))
+			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse('cust-1'))
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 1 })
+				useCustomerStats({ customerId: 'cust-1' })
 			)
 
 			// Initially loading
@@ -125,7 +125,7 @@ describe('useCustomerStats Hook', () => {
 			})
 
 			expect(result.current.stats).not.toBeNull()
-			expect(result.current.stats?.customerId).toBe(1)
+			expect(result.current.stats?.customerId).toBe('cust-1')
 			expect(result.current.stats?.totalOrders).toBe(15)
 			expect(result.current.stats?.totalQuotes).toBe(25)
 			expect(result.current.stats?.totalAccounts).toBe(3)
@@ -134,10 +134,10 @@ describe('useCustomerStats Hook', () => {
 		})
 
 		it('should parse dates correctly', async () => {
-			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse(1))
+			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse('cust-1'))
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 1 })
+				useCustomerStats({ customerId: 'cust-1' })
 			)
 
 			await waitFor(() => {
@@ -149,12 +149,12 @@ describe('useCustomerStats Hook', () => {
 		})
 
 		it('should call API with correct customer ID', async () => {
-			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse(123))
+			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse('cust-123'))
 
-			renderHook(() => useCustomerStats({ customerId: 123 }))
+			renderHook(() => useCustomerStats({ customerId: 'cust-123' }))
 
 			await waitFor(() => {
-				expect(mockAPI.Customers.getStats).toHaveBeenCalledWith(123)
+				expect(mockAPI.Customers.getStats).toHaveBeenCalledWith('cust-123')
 			})
 		})
 	})
@@ -168,7 +168,7 @@ describe('useCustomerStats Hook', () => {
 			mockAPI.Customers.getStats.mockRejectedValue(new Error('Network error'))
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 1 })
+				useCustomerStats({ customerId: 'cust-1' })
 			)
 
 			await waitFor(() => {
@@ -183,7 +183,7 @@ describe('useCustomerStats Hook', () => {
 			mockAPI.Customers.getStats.mockResolvedValue(createErrorResponse('Stats not available'))
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 1 })
+				useCustomerStats({ customerId: 'cust-1' })
 			)
 
 			await waitFor(() => {
@@ -204,7 +204,7 @@ describe('useCustomerStats Hook', () => {
 			})
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 1 })
+				useCustomerStats({ customerId: 'cust-1' })
 			)
 
 			await waitFor(() => {
@@ -224,7 +224,7 @@ describe('useCustomerStats Hook', () => {
 			})
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 999 })
+				useCustomerStats({ customerId: 'cust-999' })
 			)
 
 			await waitFor(() => {
@@ -243,7 +243,7 @@ describe('useCustomerStats Hook', () => {
 	describe('Enabled/Disabled State', () => {
 		it('should NOT fetch when enabled is false', async () => {
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 1, enabled: false })
+				useCustomerStats({ customerId: 'cust-1', enabled: false })
 			)
 
 			// Wait a bit to ensure no fetch happens
@@ -255,10 +255,10 @@ describe('useCustomerStats Hook', () => {
 		})
 
 		it('should fetch when enabled is true (default)', async () => {
-			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse(1))
+			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse('cust-1'))
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 1, enabled: true })
+				useCustomerStats({ customerId: 'cust-1', enabled: true })
 			)
 
 			await waitFor(() => {
@@ -267,10 +267,10 @@ describe('useCustomerStats Hook', () => {
 		})
 
 		it('should fetch when enabled transitions from false to true', async () => {
-			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse(1))
+			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse('cust-1'))
 
 			const { result, rerender } = renderHook(
-				({ enabled }) => useCustomerStats({ customerId: 1, enabled }),
+				({ enabled }) => useCustomerStats({ customerId: 'cust-1', enabled }),
 				{ initialProps: { enabled: false } }
 			)
 
@@ -304,19 +304,19 @@ describe('useCustomerStats Hook', () => {
 		})
 
 		it('should fetch when customerId changes from null to valid', async () => {
-			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse(1))
+			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse('cust-1'))
 
 			const { result, rerender } = renderHook(
 				({ customerId }) => useCustomerStats({ customerId }),
-				{ initialProps: { customerId: null as number | null } }
+				{ initialProps: { customerId: null as string | null } }
 			)
 
 			expect(mockAPI.Customers.getStats).not.toHaveBeenCalled()
 
-			rerender({ customerId: 1 })
+			rerender({ customerId: 'cust-1' })
 
 			await waitFor(() => {
-				expect(mockAPI.Customers.getStats).toHaveBeenCalledWith(1)
+				expect(mockAPI.Customers.getStats).toHaveBeenCalledWith('cust-1')
 			})
 		})
 	})
@@ -327,10 +327,10 @@ describe('useCustomerStats Hook', () => {
 
 	describe('Refetch Functionality', () => {
 		it('should refetch data when refetch is called', async () => {
-			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse(1))
+			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse('cust-1'))
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 1 })
+				useCustomerStats({ customerId: 'cust-1' })
 			)
 
 			await waitFor(() => {
@@ -342,7 +342,7 @@ describe('useCustomerStats Hook', () => {
 			// Clear and setup new response
 			mockAPI.Customers.getStats.mockClear()
 			mockAPI.Customers.getStats.mockResolvedValue(
-				createSuccessResponse(1, { totalOrders: 20 })
+				createSuccessResponse('cust-1', { totalOrders: 20 })
 			)
 
 			await act(async () => {
@@ -358,7 +358,7 @@ describe('useCustomerStats Hook', () => {
 			mockAPI.Customers.getStats.mockRejectedValueOnce(new Error('Failed'))
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 1 })
+				useCustomerStats({ customerId: 'cust-1' })
 			)
 
 			await waitFor(() => {
@@ -366,7 +366,7 @@ describe('useCustomerStats Hook', () => {
 			})
 
 			// Refetch succeeds
-			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse(1))
+			mockAPI.Customers.getStats.mockResolvedValue(createSuccessResponse('cust-1'))
 
 			await act(async () => {
 				await result.current.refetch()
@@ -384,7 +384,7 @@ describe('useCustomerStats Hook', () => {
 	describe('Edge Cases', () => {
 		it('should handle zero stats (new customer)', async () => {
 			mockAPI.Customers.getStats.mockResolvedValue(
-				createSuccessResponse(1, {
+				createSuccessResponse('cust-1', {
 					totalOrders: 0,
 					totalQuotes: 0,
 					totalAccounts: 0,
@@ -394,7 +394,7 @@ describe('useCustomerStats Hook', () => {
 			)
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 1 })
+				useCustomerStats({ customerId: 'cust-1' })
 			)
 
 			await waitFor(() => {
@@ -409,11 +409,11 @@ describe('useCustomerStats Hook', () => {
 
 		it('should handle null lastOrderDate', async () => {
 			mockAPI.Customers.getStats.mockResolvedValue(
-				createSuccessResponse(1, { lastOrderDate: null })
+				createSuccessResponse('cust-1', { lastOrderDate: null })
 			)
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 1 })
+				useCustomerStats({ customerId: 'cust-1' })
 			)
 
 			await waitFor(() => {
@@ -425,11 +425,11 @@ describe('useCustomerStats Hook', () => {
 
 		it('should handle very large revenue values', async () => {
 			mockAPI.Customers.getStats.mockResolvedValue(
-				createSuccessResponse(1, { totalRevenue: 9999999999.99 })
+				createSuccessResponse('cust-1', { totalRevenue: 9999999999.99 })
 			)
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 1 })
+				useCustomerStats({ customerId: 'cust-1' })
 			)
 
 			await waitFor(() => {
@@ -441,19 +441,19 @@ describe('useCustomerStats Hook', () => {
 
 		it('should handle customer ID change', async () => {
 			mockAPI.Customers.getStats
-				.mockResolvedValueOnce(createSuccessResponse(1, { totalOrders: 10 }))
-				.mockResolvedValueOnce(createSuccessResponse(2, { totalOrders: 20 }))
+				.mockResolvedValueOnce(createSuccessResponse('cust-1', { totalOrders: 10 }))
+				.mockResolvedValueOnce(createSuccessResponse('cust-2', { totalOrders: 20 }))
 
 			const { result, rerender } = renderHook(
 				({ customerId }) => useCustomerStats({ customerId }),
-				{ initialProps: { customerId: 1 } }
+				{ initialProps: { customerId: 'cust-1' } }
 			)
 
 			await waitFor(() => {
 				expect(result.current.stats?.totalOrders).toBe(10)
 			})
 
-			rerender({ customerId: 2 })
+			rerender({ customerId: 'cust-2' })
 
 			await waitFor(() => {
 				expect(result.current.stats?.totalOrders).toBe(20)
@@ -472,7 +472,7 @@ describe('useCustomerStats Hook', () => {
 				data: {
 					statusCode: 200,
 					payload: {
-						customerId: 1,
+						customerId: 'cust-1',
 						totalOrders: 25,
 						totalQuotes: 40,
 						totalAccounts: 5,
@@ -484,7 +484,7 @@ describe('useCustomerStats Hook', () => {
 			})
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 1 })
+				useCustomerStats({ customerId: 'cust-1' })
 			)
 
 			await waitFor(() => {
@@ -504,7 +504,7 @@ describe('useCustomerStats Hook', () => {
 				data: {
 					statusCode: 200,
 					payload: {
-						customerId: 999, // Any customer
+						customerId: 'cust-999', // Any customer
 						totalOrders: 50,
 						totalQuotes: 80,
 						totalAccounts: 10,
@@ -516,7 +516,7 @@ describe('useCustomerStats Hook', () => {
 			})
 
 			const { result } = renderHook(() =>
-				useCustomerStats({ customerId: 999 })
+				useCustomerStats({ customerId: 'cust-999' })
 			)
 
 			await waitFor(() => {

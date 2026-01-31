@@ -40,8 +40,10 @@ export const paymentKeys = {
 	list: (filters: PaymentSearchFilter) => [...paymentKeys.lists(), filters] as const,
 	details: () => [...paymentKeys.all, 'detail'] as const,
 	detail: (id: string) => [...paymentKeys.details(), id] as const,
-	order: (orderId: number) => [...paymentKeys.all, 'order', orderId] as const,
-	orderSummary: (orderId: number) => [...paymentKeys.all, 'order-summary', orderId] as const,
+	/** @param orderId - UUID/GUID of the order */
+	order: (orderId: string) => [...paymentKeys.all, 'order', orderId] as const,
+	/** @param orderId - UUID/GUID of the order */
+	orderSummary: (orderId: string) => [...paymentKeys.all, 'order-summary', orderId] as const,
 	customer: (customerId: number) => [...paymentKeys.all, 'customer', customerId] as const,
 	savedMethods: (customerId: number) => [...paymentKeys.all, 'saved-methods', customerId] as const,
 	settings: (customerId: number) => [...paymentKeys.all, 'settings', customerId] as const,
@@ -69,14 +71,15 @@ export function usePayment(
 
 /**
  * Hook to fetch all payments for an order
+ * @param orderId - UUID/GUID of the order
  */
 export function useOrderPayments(
-	orderId: number,
+	orderId: string | undefined,
 	options?: Omit<UseQueryOptions<PaymentDTO[], Error>, 'queryKey' | 'queryFn'>
 ) {
 	return useQuery({
-		queryKey: paymentKeys.order(orderId),
-		queryFn: () => PaymentService.getByOrderId(orderId),
+		queryKey: paymentKeys.order(orderId!),
+		queryFn: () => PaymentService.getByOrderId(orderId!),
 		enabled: !!orderId,
 		staleTime: 30_000,
 		...options,
@@ -85,14 +88,15 @@ export function useOrderPayments(
 
 /**
  * Hook to fetch payment summary for an order
+ * @param orderId - UUID/GUID of the order
  */
 export function useOrderPaymentSummary(
-	orderId: number,
+	orderId: string | undefined,
 	options?: Omit<UseQueryOptions<PaymentSummary, Error>, 'queryKey' | 'queryFn'>
 ) {
 	return useQuery({
-		queryKey: paymentKeys.orderSummary(orderId),
-		queryFn: () => PaymentService.getOrderPaymentSummary(orderId),
+		queryKey: paymentKeys.orderSummary(orderId!),
+		queryFn: () => PaymentService.getOrderPaymentSummary(orderId!),
 		enabled: !!orderId,
 		staleTime: 30_000,
 		...options,
@@ -141,7 +145,7 @@ export function useCreatePaymentIntent() {
 	const queryClient = useQueryClient()
 
 	return useMutation({
-		mutationFn: (orderId: number) => PaymentService.createPaymentIntent(orderId),
+		mutationFn: (orderId: string) => PaymentService.createPaymentIntent(orderId),
 		onSuccess: (_data, orderId) => {
 			queryClient.invalidateQueries({ queryKey: paymentKeys.order(orderId) })
 			queryClient.invalidateQueries({ queryKey: paymentKeys.orderSummary(orderId) })
@@ -174,7 +178,7 @@ export function useRecordManualPayment() {
 	const queryClient = useQueryClient()
 
 	return useMutation({
-		mutationFn: ({ orderId, request }: { orderId: number; request: RecordManualPaymentRequest }) =>
+		mutationFn: ({ orderId, request }: { orderId: string; request: RecordManualPaymentRequest }) =>
 			PaymentService.recordManualPayment(orderId, request),
 		onSuccess: (_data, { orderId }) => {
 			queryClient.invalidateQueries({ queryKey: paymentKeys.order(orderId) })

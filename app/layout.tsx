@@ -1,12 +1,27 @@
+import { Suspense } from 'react'
+
 import type { Metadata, Viewport } from 'next'
 
-import { Suspense } from 'react'
+import { headers } from 'next/headers'
+
+import { fetchTenantConfigServer } from '@_features/tenant/server'
+
+import {
+	buildTenantThemeScript,
+	buildTenantThemeStyle,
+	mergeTenantTheme,
+	parseTenantThemeOverrides,
+	TenantProvider,
+	TENANT_THEME_VARS_STYLE_ID,
+} from '@_shared'
 
 import { themeInitScript } from '@_scripts/theme-init-inline'
 
+import TenantChartProvider from '@_components/charts/TenantChartProvider'
 import AuthInitializer from '@_components/common/AuthInitializer'
 import ImageServiceInitializer from '@_components/common/ImageServiceInitializer'
 import QueryProvider from '@_components/common/QueryProvider'
+import RealtimeInitializer from '@_components/common/RealtimeInitializer'
 import ServiceWorkerRegistration from '@_components/common/ServiceWorkerRegistration'
 import ToastProvider from '@_components/common/ToastProvider'
 import UserSettingsInitializer from '@_components/common/UserSettingsInitializer'
@@ -47,14 +62,18 @@ import '@_scripts/theme-init'
  */
 function NavigationLoadingShell() {
 	return (
-		<div className="min-h-screen w-full bg-base-100">
+		<div className='min-h-screen w-full bg-base-100'>
 			{/*
 				Matches NavigationLayout structure:
 				- Public routes: full-width content area
 				- Internal routes (/app/*): sidebar + content (handled by their own layout)
 			*/}
-			<div className="flex min-h-screen">
-				<main className="flex-1 bg-base-100" aria-busy="true" aria-label="Loading..." />
+			<div className='flex min-h-screen'>
+				<main
+					className='flex-1 bg-base-100'
+					aria-busy='true'
+					aria-label='Loading...'
+				/>
 			</div>
 		</div>
 	)
@@ -110,9 +129,46 @@ export const viewport: Viewport = {
  * Root layout for the entire application
  * Sets up theme, authentication, and navigation
  */
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+async function TenantThemeHead({ pendingHeaders }: { pendingHeaders: ReturnType<typeof headers> }) {
+	const headersList = await pendingHeaders
+	const host = headersList.get('x-forwarded-host') ?? headersList.get('host')
+
+	const tenantConfig = await fetchTenantConfigServer(host)
+	const tenantOverrides = tenantConfig ? parseTenantThemeOverrides(tenantConfig.uiConfig) : undefined
+	const resolvedTenant = tenantConfig ? mergeTenantTheme(tenantConfig, tenantOverrides) : null
+	const tenantThemeStyle = resolvedTenant ? buildTenantThemeStyle(resolvedTenant) : ''
+	const tenantThemeName = resolvedTenant?.themeName
+
+	if (!tenantThemeStyle && !tenantThemeName) {
+		return null
+	}
+
+	const themeScript = tenantThemeName ? buildTenantThemeScript(tenantThemeName) : ''
+
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<>
+			{tenantThemeStyle ? (
+				// eslint-disable-next-line react/no-danger, @typescript-eslint/naming-convention
+				<style
+					id={TENANT_THEME_VARS_STYLE_ID}
+					dangerouslySetInnerHTML={{ __html: tenantThemeStyle }}
+				/>
+			) : null}
+			{themeScript ? (
+				// eslint-disable-next-line react/no-danger, @typescript-eslint/naming-convention
+				<script dangerouslySetInnerHTML={{ __html: themeScript }} />
+			) : null}
+		</>
+	)
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+	const pendingHeaders = headers()
+
+	return (
+		<html
+			lang='en'
+			suppressHydrationWarning>
 			<head>
 				{/* CRITICAL: Inline script to prevent FOUC - MUST run synchronously before any rendering */}
 				{/* This CANNOT use next/script as it needs to run immediately, not async */}
@@ -121,19 +177,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				    2. It's our own trusted code for theme initialization
 				    3. Must be inline to prevent FOUC (Flash of Unstyled Content)
 				    4. Next.js Script component is async and would cause FOUC */}
-				{/* eslint-disable-next-line react/no-danger */}
+				{/* eslint-disable-next-line react/no-danger, @typescript-eslint/naming-convention */}
 				<script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+				<Suspense fallback={null}>
+					<TenantThemeHead pendingHeaders={pendingHeaders} />
+				</Suspense>
 			</head>
-		<body>
-			{/* React Query Provider - Enables caching, deduplication, and infinite queries */}
-			<QueryProvider>
-				{/* Initialize services on app load */}
-				<UserSettingsInitializer />
-				<AuthInitializer />
-				<ImageServiceInitializer />
-				<ServiceWorkerRegistration />
+			<body>
+				{/* React Query Provider - Enables caching, deduplication, and infinite queries */}
+				<QueryProvider>
+					<TenantProvider>
+						<TenantChartProvider>
+							{/* Initialize services on app load */}
+							<UserSettingsInitializer />
+							<AuthInitializer />
+							<RealtimeInitializer />
+							<ImageServiceInitializer />
+							<ServiceWorkerRegistration />
 
-			{/*
+							{/*
 				Main Navigation Wrapper with Suspense Boundary
 
 				Next.js 16.1.1 with cacheComponents: true (PPR enabled):
@@ -159,16 +221,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				@see https://nextjs.org/docs/app/api-reference/file-conventions/loading
 				@see https://nextjs.org/docs/app/building-your-application/routing/loading-ui-and-streaming
 			*/}
-			<Suspense fallback={<NavigationLoadingShell />}>
-				<NavigationLayout>
-					{children}
-				</NavigationLayout>
-			</Suspense>
+							<Suspense fallback={<NavigationLoadingShell />}>
+								<NavigationLayout>{children}</NavigationLayout>
+							</Suspense>
 
-				{/* Theme-aware toast notifications */}
-				<ToastProvider />
+							{/* Theme-aware toast notifications */}
+							<ToastProvider />
 
-				{/*
+							{/*
 					Global Live Chat Bubble - Available on all pages
 
 					Wrapped in Suspense because:
@@ -179,11 +239,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 					@see https://nextjs.org/docs/app/building-your-application/rendering/client-components
 				*/}
-				<Suspense fallback={null}>
-					<LiveChatBubble />
-				</Suspense>
-			</QueryProvider>
-		</body>
+							<Suspense fallback={null}>
+								<LiveChatBubble />
+							</Suspense>
+						</TenantChartProvider>
+					</TenantProvider>
+				</QueryProvider>
+			</body>
 		</html>
 	)
 }

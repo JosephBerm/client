@@ -1,21 +1,57 @@
 /**
  * Utility class for working with GUIDs (Globally Unique Identifiers).
- * Provides methods for generating and validating UUID strings.
- * 
+ * Provides methods for generating, validating, and formatting UUID strings.
+ *
  * @example
  * ```typescript
  * // Generate a new GUID
  * const id = Guid.newGuid();
- * 
+ *
+ * // Validate GUID format
+ * if (Guid.isValid(userInput)) {
+ *   // Safe to use
+ * }
+ *
  * // Check if GUID is empty
  * import { logger } from '@_core';
- * 
+ *
  * if (Guid.isEmpty(id)) {
  *   logger.warn('Empty GUID detected');
  * }
  * ```
  */
 class Guid {
+    /**
+     * Standard UUID v4 regex pattern (RFC 4122).
+     * Matches format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+     * Case-insensitive (accepts both uppercase and lowercase hex).
+     * @private
+     */
+    private static readonly uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+    /**
+     * Validates if a value is a valid UUID/GUID format (RFC 4122).
+     *
+     * @param {unknown} value - Value to validate
+     * @returns {boolean} True if valid UUID format, false otherwise
+     *
+     * @example
+     * ```typescript
+     * Guid.isValid('40000000-0000-0000-0000-000000000005'); // true
+     * Guid.isValid('123e4567-e89b-12d3-a456-426614174000'); // true
+     * Guid.isValid('not-a-uuid'); // false
+     * Guid.isValid(''); // false
+     * Guid.isValid(null); // false
+     * Guid.isValid(123); // false
+     * ```
+     */
+    static isValid(value: unknown): value is string {
+        if (typeof value !== 'string') {
+            return false
+        }
+        return Guid.uuidPattern.test(value)
+    }
+
     /**
      * Generates a new random UUID (v4).
      * Uses the browser's crypto.randomUUID() for cryptographically strong random values.

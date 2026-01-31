@@ -22,7 +22,7 @@ export type CustomerStatusKey = 'Active' | 'PendingVerification' | 'Suspended' |
  * Customer statistics returned from the API.
  */
 export interface CustomerStats {
-	customerId: number
+	customerId: string
 	totalOrders: number
 	totalQuotes: number
 	totalAccounts: number
@@ -38,7 +38,7 @@ export interface CustomerFilterOptions {
 	searchTerm?: string
 	typeOfBusiness?: TypeOfBusiness
 	status?: CustomerStatus
-	primarySalesRepId?: number
+	primarySalesRepId?: string
 	showArchived?: boolean
 }
 
@@ -55,7 +55,7 @@ export interface CustomerListItem extends Omit<Company, 'salesRepName'> {
  * Sales rep assignment request.
  */
 export interface AssignSalesRepRequest {
-	salesRepId: number
+	salesRepId: string
 }
 
 /**

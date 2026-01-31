@@ -77,13 +77,17 @@ export const CustomerSettingsApi = {
  * Payment Processing API
  * Handles payment intents, manual payments, refunds, and saved payment methods.
  *
+ * **Note on Order IDs:**
+ * Order IDs are UUIDs (GUIDs) from the backend, represented as strings.
+ *
  * @see 02_PAYMENT_PROCESSING_PLAN.md
  */
 export const PaymentsApi = {
 	/**
 	 * Creates a PaymentIntent for an order.
+	 * @param orderId - UUID string of the order
 	 */
-	createPaymentIntent: async (orderId: number) =>
+	createPaymentIntent: async (orderId: string) =>
 		HttpService.post<CreatePaymentIntentResponse>(`/payment/orders/${orderId}/intent`, {}),
 
 	/**
@@ -94,8 +98,9 @@ export const PaymentsApi = {
 
 	/**
 	 * Records a manual payment (check, wire, cash).
+	 * @param orderId - UUID string of the order
 	 */
-	recordManualPayment: async (orderId: number, request: RecordManualPaymentRequest) =>
+	recordManualPayment: async (orderId: string, request: RecordManualPaymentRequest) =>
 		HttpService.post<PaymentDTO>(`/payment/orders/${orderId}/manual`, request),
 
 	/**
@@ -105,13 +110,15 @@ export const PaymentsApi = {
 
 	/**
 	 * Gets all payments for an order.
+	 * @param orderId - UUID string of the order
 	 */
-	getByOrderId: async (orderId: number) => HttpService.get<PaymentDTO[]>(`/payment/orders/${orderId}`),
+	getByOrderId: async (orderId: string) => HttpService.get<PaymentDTO[]>(`/payment/orders/${orderId}`),
 
 	/**
 	 * Gets payment summary for an order.
+	 * @param orderId - UUID string of the order
 	 */
-	getOrderSummary: async (orderId: number) => HttpService.get<PaymentSummary>(`/payment/orders/${orderId}/summary`),
+	getOrderSummary: async (orderId: string) => HttpService.get<PaymentSummary>(`/payment/orders/${orderId}/summary`),
 
 	/**
 	 * Gets all payments for a customer.

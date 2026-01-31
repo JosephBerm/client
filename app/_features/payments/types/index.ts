@@ -53,7 +53,8 @@ export enum PaymentTerms {
  * Request to create a payment intent.
  */
 export interface CreatePaymentIntentRequest {
-	orderId: number
+	/** UUID/GUID of the order */
+	orderId: string
 }
 
 /**
@@ -101,7 +102,8 @@ export interface CreatePaymentIntentResponse {
  */
 export interface PaymentDTO {
 	id: string
-	orderId: number
+	/** UUID/GUID of the order */
+	orderId: string
 	orderNumber?: string
 	customerId?: number
 	customerName?: string
@@ -128,7 +130,8 @@ export interface PaymentDTO {
  * Payment summary for an order.
  */
 export interface PaymentSummary {
-	orderId: number
+	/** UUID/GUID of the order */
+	orderId: string
 	totalAmountCents: number
 	paidAmountCents: number
 	refundedAmountCents: number
@@ -186,7 +189,8 @@ export interface CustomerPaymentSettingsDTO {
  * Filter criteria for payment searches.
  */
 export interface PaymentSearchFilter {
-	orderId?: number
+	/** UUID/GUID of the order (optional filter) */
+	orderId?: string
 	customerId?: number
 	status?: PaymentStatus
 	method?: PaymentMethod

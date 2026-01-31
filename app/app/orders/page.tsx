@@ -48,7 +48,7 @@ import {
 } from '@_components/tables/RichDataGrid'
 import type { RichSearchFilter, RichPagedResult, RichColumnDef } from '@_components/tables/RichDataGrid'
 import Button from '@_components/ui/Button'
-import Card from '@_components/ui/Card'
+import Surface from '@_components/ui/Surface'
 
 import { InternalPageHeader } from '../_components'
 
@@ -308,8 +308,7 @@ export default function OrdersPage() {
 				</div>
 			)}
 
-			<Card className='border border-base-300 bg-base-100 shadow-sm'>
-				<div className='p-6'>
+			<Surface variant='subtle' padding='lg'>
 					<RichDataGrid<OrderRow>
 						columns={columns}
 						fetcher={fetcher}
@@ -369,8 +368,7 @@ export default function OrdersPage() {
 						}
 						ariaLabel='Orders table'
 					/>
-				</div>
-			</Card>
+			</Surface>
 		</>
 	)
 }

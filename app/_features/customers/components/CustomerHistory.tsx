@@ -62,7 +62,7 @@ import {
  */
 interface CustomerHistoryProps {
 	/** Customer ID to fetch history for */
-	customerId: number
+	customerId: string
 	/** Initial tab to show */
 	initialTab?: 'orders' | 'quotes'
 	/** Maximum items to show per page */
@@ -165,7 +165,7 @@ export default function CustomerHistory({
  * Uses RichDataGrid for consistent table display (DRY principle).
  */
 interface OrdersTabProps {
-	customerId: number
+	customerId: string
 	pageSize: number
 }
 
@@ -279,7 +279,7 @@ function OrdersTab({ customerId, pageSize }: OrdersTabProps) {
  * Uses RichDataGrid for consistent table display (DRY principle).
  */
 interface QuotesTabProps {
-	customerId: number
+	customerId: string
 	pageSize: number
 }
 

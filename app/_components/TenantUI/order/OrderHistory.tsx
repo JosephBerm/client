@@ -33,14 +33,14 @@ interface OrderHistoryProps {
  * CATEGORY: Order
  */
 export default function OrderHistory({ orders = [], showStatus = true, showTracking = true }: OrderHistoryProps) {
-	// Map order status to Badge variant/tone for DaisyUI semantic colors
-	const getStatusBadgeProps = (status: Order['status']): Pick<BadgeProps, 'variant' | 'tone'> => {
-		const statusMap: Record<Order['status'], Pick<BadgeProps, 'variant' | 'tone'>> = {
-			pending: { variant: 'warning', tone: 'subtle' },
-			processing: { variant: 'info', tone: 'subtle' },
-			shipped: { variant: 'primary', tone: 'solid' },
-			delivered: { variant: 'success', tone: 'solid' },
-			cancelled: { variant: 'error', tone: 'solid' },
+	// Map order status to Badge variant/badgeStyle for DaisyUI semantic colors
+	const getStatusBadgeProps = (status: Order['status']): Pick<BadgeProps, 'variant' | 'badgeStyle'> => {
+		const statusMap: Record<Order['status'], Pick<BadgeProps, 'variant' | 'badgeStyle'>> = {
+			pending: { variant: 'warning', badgeStyle: 'soft' },
+			processing: { variant: 'info', badgeStyle: 'soft' },
+			shipped: { variant: 'primary', badgeStyle: 'solid' },
+			delivered: { variant: 'success', badgeStyle: 'solid' },
+			cancelled: { variant: 'error', badgeStyle: 'solid' },
 		}
 		return statusMap[status]
 	}
@@ -114,7 +114,7 @@ interface OrderHistoryDataGridProps {
 	orders: Order[]
 	showStatus: boolean
 	showTracking: boolean
-	getStatusBadgeProps: (status: Order['status']) => Pick<BadgeProps, 'variant' | 'tone'>
+	getStatusBadgeProps: (status: Order['status']) => Pick<BadgeProps, 'variant' | 'badgeStyle'>
 }
 
 /**

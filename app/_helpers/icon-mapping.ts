@@ -27,6 +27,10 @@ import {
 	Store,
 	Bell,
 	Plug,
+	Truck,
+	CheckCircle,
+	Archive,
+	Building,
 	type LucideIcon,
 } from 'lucide-react'
 
@@ -50,6 +54,10 @@ const iconMapping: Record<NavigationIconType, LucideIcon> = {
 	store: Store,
 	bell: Bell,
 	plug: Plug,
+	truck: Truck,
+	'check-circle': CheckCircle,
+	archive: Archive,
+	building: Building,
 }
 
 /**

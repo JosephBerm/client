@@ -245,7 +245,7 @@ export default function ProductImage({
 				<div className="absolute top-3 right-3 shadow-md">
 					<Badge
 						variant={stockStatus.variant}
-						tone={stockStatus.tone}
+						badgeStyle={stockStatus.badgeStyle}
 						size={stockStatus.size}
 						className="shadow-sm"
 					>

@@ -29,8 +29,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
 
-import { useAuthStore, checkAuthStatus } from '@_features/auth'
-import { Routes } from '@_features/navigation'
+import { useAuthStore, checkAuthStatus, useAuthRedirect } from '@_features/auth'
 import { logger } from '@_core'
 import { notificationService, storeTokens } from '@_shared'
 
@@ -61,6 +60,7 @@ function CallbackContent() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const loginUser = useAuthStore((state) => state.login)
+	const { executePostAuthRedirect } = useAuthRedirect()
 
 	const [status, setStatus] = useState<CallbackStatus>('processing')
 	const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -122,8 +122,10 @@ function CallbackContent() {
 				// Store the access token using storeTokens
 				// OAuth callback only receives the access token, so we create a minimal TokenPair
 				// Backend should also set an HttpOnly refresh token cookie
-				const accessTokenExpires = searchParams.get('expires') ?? new Date(Date.now() + 15 * 60 * 1000).toISOString()
-				const refreshTokenExpires = searchParams.get('refresh_expires') ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+				const accessTokenExpires =
+					searchParams.get('expires') ?? new Date(Date.now() + 15 * 60 * 1000).toISOString()
+				const refreshTokenExpires =
+					searchParams.get('refresh_expires') ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 				storeTokens({
 					accessToken: token,
 					accessTokenExpires,
@@ -150,9 +152,18 @@ function CallbackContent() {
 
 					setStatus('success')
 
-					// Redirect to dashboard after brief delay
+					// Redirect using centralized AuthRedirectService
+					// Priority: Intent → Return URL → Dashboard (default)
 					setTimeout(() => {
-						router.push(Routes.Dashboard.location)
+						executePostAuthRedirect({
+							onRedirect: (result) => {
+								logger.info('OAuth post-auth redirect executed', {
+									component: 'AuthCallbackPage',
+									redirectType: result.type,
+									url: result.url,
+								})
+							},
+						})
 					}, 1500)
 				} else {
 					throw new Error('Failed to fetch user data')
@@ -169,7 +180,7 @@ function CallbackContent() {
 		}
 
 		void processCallback()
-	}, [searchParams, loginUser, router])
+	}, [searchParams, loginUser, router, executePostAuthRedirect])
 
 	/**
 	 * Handle retry - redirect to home with login modal
@@ -186,7 +197,10 @@ function CallbackContent() {
 					{status === 'processing' && (
 						<>
 							<div className='mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4'>
-								<Loader2 className='w-8 h-8 text-primary animate-spin' aria-hidden='true' />
+								<Loader2
+									className='w-8 h-8 text-primary animate-spin'
+									aria-hidden='true'
+								/>
 							</div>
 							<h1 className='text-xl font-bold text-base-content'>Completing Sign In...</h1>
 							<p className='text-base-content/70 mt-2'>
@@ -199,7 +213,10 @@ function CallbackContent() {
 					{status === 'success' && (
 						<>
 							<div className='mx-auto w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mb-4'>
-								<CheckCircle className='w-8 h-8 text-success' aria-hidden='true' />
+								<CheckCircle
+									className='w-8 h-8 text-success'
+									aria-hidden='true'
+								/>
 							</div>
 							<h1 className='text-xl font-bold text-base-content'>
 								{isNewAccount ? 'Welcome!' : 'Welcome Back!'}
@@ -216,7 +233,10 @@ function CallbackContent() {
 					{status === 'linked' && (
 						<>
 							<div className='mx-auto w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mb-4'>
-								<CheckCircle className='w-8 h-8 text-success' aria-hidden='true' />
+								<CheckCircle
+									className='w-8 h-8 text-success'
+									aria-hidden='true'
+								/>
 							</div>
 							<h1 className='text-xl font-bold text-base-content'>Account Linked!</h1>
 							<p className='text-base-content/70 mt-2'>
@@ -229,15 +249,17 @@ function CallbackContent() {
 					{status === 'error' && (
 						<>
 							<div className='mx-auto w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mb-4'>
-								<XCircle className='w-8 h-8 text-error' aria-hidden='true' />
+								<XCircle
+									className='w-8 h-8 text-error'
+									aria-hidden='true'
+								/>
 							</div>
 							<h1 className='text-xl font-bold text-base-content'>Authentication Failed</h1>
 							<p className='text-base-content/70 mt-2'>{errorMessage}</p>
 							<button
 								onClick={handleRetry}
 								className='btn btn-primary mt-4'
-								type='button'
-							>
+								type='button'>
 								Try Again
 							</button>
 						</>
@@ -263,8 +285,7 @@ export default function AuthCallbackPage() {
 						<p className='text-center mt-4'>Loading...</p>
 					</div>
 				</div>
-			}
-		>
+			}>
 			<CallbackContent />
 		</Suspense>
 	)

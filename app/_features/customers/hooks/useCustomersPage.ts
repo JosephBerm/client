@@ -189,7 +189,7 @@ export function useCustomersPage(): UseCustomersPageReturn {
 	 * Only admins can perform this action.
 	 */
 	const handleDelete = async () => {
-		if (!deleteModal.customer || !canDelete) {
+		if (!deleteModal.customer || !canDelete || !deleteModal.customer.id) {
 			return
 		}
 

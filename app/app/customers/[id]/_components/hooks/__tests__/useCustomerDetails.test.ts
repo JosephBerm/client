@@ -104,11 +104,11 @@ function createMockCustomerResponse(overrides: Partial<Company> = {}) {
 			statusCode: 200,
 			message: 'customer_retrieved',
 			payload: {
-				id: 1,
+				id: 'cust-guid-001',
 				name: 'Test Hospital',
 				email: 'contact@testhospital.com',
 				phone: '555-123-4567',
-				primarySalesRepId: 10,
+				primarySalesRepId: 'rep-guid-010',
 				typeOfBusiness: 1,
 				status: 0,
 				createdAt: '2024-01-15T00:00:00Z',
@@ -118,7 +118,7 @@ function createMockCustomerResponse(overrides: Partial<Company> = {}) {
 	}
 }
 
-function createMockStatsResponse(customerId: number = 1) {
+function createMockStatsResponse(customerId: string = 'cust-guid-001') {
 	return {
 		data: {
 			statusCode: 200,
@@ -136,7 +136,7 @@ function createMockStatsResponse(customerId: number = 1) {
 	}
 }
 
-function createMockAccountsResponse(customerId: number = 1) {
+function createMockAccountsResponse(customerId: string = 'cust-guid-001') {
 	return {
 		data: {
 			statusCode: 200,
@@ -144,14 +144,14 @@ function createMockAccountsResponse(customerId: number = 1) {
 			payload: {
 				data: [
 					{
-						id: 100,
+						id: 'acct-guid-100',
 						email: 'john@hospital.com',
 						customerId,
 						name: { first: 'John', last: 'Doe' },
 						role: 0,
 					},
 					{
-						id: 101,
+						id: 'acct-guid-101',
 						email: 'jane@hospital.com',
 						customerId,
 						name: { first: 'Jane', last: 'Smith' },
@@ -219,7 +219,7 @@ describe('useCustomerDetails Hook', () => {
 			mockAPI.Accounts.search.mockResolvedValue(createMockAccountsResponse())
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '1', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 			)
 
 			// Initially loading
@@ -232,7 +232,7 @@ describe('useCustomerDetails Hook', () => {
 			// Customer loaded
 			expect(result.current.customer.name).toBe('Test Hospital')
 			expect(result.current.customer.email).toBe('contact@testhospital.com')
-			expect(result.current.customerIdNum).toBe(1)
+			expect(result.current.customerIdStr).toBe('cust-guid-001')
 		})
 
 		it('should fetch linked accounts successfully', async () => {
@@ -241,7 +241,7 @@ describe('useCustomerDetails Hook', () => {
 			mockAPI.Accounts.search.mockResolvedValue(createMockAccountsResponse())
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '1', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -259,7 +259,7 @@ describe('useCustomerDetails Hook', () => {
 			mockAPI.Accounts.search.mockResolvedValue(createMockAccountsResponse())
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '1', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -278,7 +278,7 @@ describe('useCustomerDetails Hook', () => {
 			mockAPI.Accounts.search.mockResolvedValue(createMockAccountsResponse())
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '1', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -305,9 +305,9 @@ describe('useCustomerDetails Hook', () => {
 			})
 
 			expect(result.current.customer).toBeInstanceOf(Company)
-			expect(result.current.customer.id).toBe(0)
+			expect(result.current.customer.id).toBeNull()
 			expect(result.current.customer.name).toBe('')
-			expect(result.current.customerIdNum).toBeNull()
+			expect(result.current.customerIdStr).toBeNull()
 		})
 
 		it('should NOT fetch accounts in create mode', async () => {
@@ -346,7 +346,7 @@ describe('useCustomerDetails Hook', () => {
 			mockAPI.Customers.get.mockResolvedValue(create404Response())
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '999', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-999', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -358,7 +358,7 @@ describe('useCustomerDetails Hook', () => {
 			mockAPI.Customers.get.mockResolvedValue(create403Response())
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '123', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-123', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -370,7 +370,7 @@ describe('useCustomerDetails Hook', () => {
 			mockAPI.Customers.get.mockRejectedValue(new Error('Network error'))
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '1', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -384,7 +384,7 @@ describe('useCustomerDetails Hook', () => {
 			mockAPI.Accounts.search.mockRejectedValue(new Error('Accounts API error'))
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '1', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -401,7 +401,7 @@ describe('useCustomerDetails Hook', () => {
 			mockAPI.Customers.getStats.mockRejectedValue(new Error('Stats API error'))
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '1', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -459,11 +459,11 @@ describe('useCustomerDetails Hook', () => {
 			})
 		})
 
-		it('should handle extremely large customerId', async () => {
+		it('should handle non-existent customerId GUID', async () => {
 			mockAPI.Customers.get.mockResolvedValue(create404Response())
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '99999999999', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-nonexistent', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -483,7 +483,7 @@ describe('useCustomerDetails Hook', () => {
 			mockAPI.Accounts.search.mockImplementation(() => new Promise(() => {}))
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '1', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 			)
 
 			expect(result.current.loading.customer).toBe(true)
@@ -497,7 +497,7 @@ describe('useCustomerDetails Hook', () => {
 			mockAPI.Accounts.search.mockResolvedValue(createMockAccountsResponse())
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '1', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -519,7 +519,7 @@ describe('useCustomerDetails Hook', () => {
 			mockAPI.Accounts.search.mockResolvedValue(createMockAccountsResponse())
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '1', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -559,7 +559,7 @@ describe('useCustomerDetails Hook', () => {
 			mockAPI.Accounts.search.mockResolvedValue(createMockAccountsResponse())
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '1', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -567,7 +567,7 @@ describe('useCustomerDetails Hook', () => {
 			})
 
 			const updatedCustomer = new Company({
-				id: 1,
+				id: 'cust-guid-001',
 				name: 'Updated Hospital Name',
 				email: 'updated@hospital.com',
 			})
@@ -589,9 +589,9 @@ describe('useCustomerDetails Hook', () => {
 		describe('US-CUST-001: SalesRep viewing assigned customer', () => {
 			it('should load complete customer profile with history', async () => {
 				const customerWithHistory = createMockCustomerResponse({
-					id: 1,
+					id: 'cust-guid-001',
 					name: 'Regional Medical Center',
-					primarySalesRepId: 10,
+					primarySalesRepId: 'rep-guid-010',
 				})
 
 				mockAPI.Customers.get.mockResolvedValue(customerWithHistory)
@@ -599,7 +599,7 @@ describe('useCustomerDetails Hook', () => {
 					data: {
 						statusCode: 200,
 						payload: {
-							customerId: 1,
+							customerId: 'cust-guid-001',
 							totalOrders: 25,
 							totalQuotes: 40,
 							totalAccounts: 5,
@@ -609,10 +609,10 @@ describe('useCustomerDetails Hook', () => {
 						},
 					},
 				})
-				mockAPI.Accounts.search.mockResolvedValue(createMockAccountsResponse(1))
+				mockAPI.Accounts.search.mockResolvedValue(createMockAccountsResponse('cust-guid-001'))
 
 				const { result } = renderHook(() =>
-					useCustomerDetails({ customerId: '1', isCreateMode: false })
+					useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 				)
 
 				await waitFor(() => {
@@ -639,7 +639,7 @@ describe('useCustomerDetails Hook', () => {
 				})
 
 				const { result } = renderHook(() =>
-					useCustomerDetails({ customerId: '999', isCreateMode: false })
+					useCustomerDetails({ customerId: 'cust-guid-999', isCreateMode: false })
 				)
 
 				await waitFor(() => {
@@ -665,7 +665,7 @@ describe('useCustomerDetails Hook', () => {
 			})
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '1', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -682,7 +682,7 @@ describe('useCustomerDetails Hook', () => {
 				data: {
 					statusCode: 200,
 					payload: {
-						customerId: 1,
+						customerId: 'cust-guid-001',
 						totalOrders: 0,
 						totalQuotes: 0,
 						totalAccounts: 0,
@@ -694,7 +694,7 @@ describe('useCustomerDetails Hook', () => {
 			})
 
 			const { result } = renderHook(() =>
-				useCustomerDetails({ customerId: '1', isCreateMode: false })
+				useCustomerDetails({ customerId: 'cust-guid-001', isCreateMode: false })
 			)
 
 			await waitFor(() => {
@@ -706,18 +706,18 @@ describe('useCustomerDetails Hook', () => {
 		})
 
 		it('should handle rapid customerId changes', async () => {
-			mockAPI.Customers.get.mockResolvedValue(createMockCustomerResponse({ id: 1, name: 'First' }))
-			mockAPI.Customers.getStats.mockResolvedValue(createMockStatsResponse(1))
-			mockAPI.Accounts.search.mockResolvedValue(createMockAccountsResponse(1))
+			mockAPI.Customers.get.mockResolvedValue(createMockCustomerResponse({ id: 'cust-guid-001', name: 'First' }))
+			mockAPI.Customers.getStats.mockResolvedValue(createMockStatsResponse('cust-guid-001'))
+			mockAPI.Accounts.search.mockResolvedValue(createMockAccountsResponse('cust-guid-001'))
 
 			const { result, rerender } = renderHook(
 				({ customerId }) => useCustomerDetails({ customerId, isCreateMode: false }),
-				{ initialProps: { customerId: '1' } }
+				{ initialProps: { customerId: 'cust-guid-001' } }
 			)
 
 			// Change to different customer immediately
-			mockAPI.Customers.get.mockResolvedValue(createMockCustomerResponse({ id: 2, name: 'Second' }))
-			rerender({ customerId: '2' })
+			mockAPI.Customers.get.mockResolvedValue(createMockCustomerResponse({ id: 'cust-guid-002', name: 'Second' }))
+			rerender({ customerId: 'cust-guid-002' })
 
 			await waitFor(() => {
 				expect(result.current.loading.customer).toBe(false)

@@ -151,7 +151,7 @@ export default function UpdateCustomerForm({
 			identifier: customer.identifier || '',
 			typeOfBusiness: customer.typeOfBusiness ?? TypeOfBusiness.Other,
 			status: customer.status ?? CustomerStatus.Active,
-			primarySalesRepId: customer.primarySalesRepId ?? null,
+			primarySalesRepId: customer.primarySalesRepId ?? undefined,
 			address: customer.address || undefined,
 			shippingAddress: customer.shippingAddress || undefined,
 			billingAddress: customer.billingAddress || undefined,
@@ -172,7 +172,7 @@ export default function UpdateCustomerForm({
 			identifier: customer.identifier || '',
 			typeOfBusiness: customer.typeOfBusiness ?? TypeOfBusiness.Other,
 			status: customer.status ?? CustomerStatus.Active,
-			primarySalesRepId: customer.primarySalesRepId ?? null,
+			primarySalesRepId: customer.primarySalesRepId ?? undefined,
 			address: customer.address || undefined,
 			shippingAddress: customer.shippingAddress || undefined,
 			billingAddress: customer.billingAddress || undefined,
@@ -251,19 +251,14 @@ export default function UpdateCustomerForm({
 	 */
 	const onFormSubmit = useCallback(
 		(e: React.FormEvent<HTMLFormElement>) => {
-			const submitHandler = form.handleSubmit(handleSubmit)
-			const result = submitHandler(e)
-			// React Hook Form's handleSubmit may return a Promise if handler is async
-			// Handle it explicitly to satisfy ESLint's no-misused-promises rule
-			if (result instanceof Promise) {
-				void result.catch((error) => {
-					logger.error('Unhandled form submission error', {
-						error,
-						component: 'UpdateCustomerForm',
-						action: 'onFormSubmit',
-					})
+			e.preventDefault()
+			void form.handleSubmit(handleSubmit)(e).catch((error) => {
+				logger.error('Unhandled form submission error', {
+					error,
+					component: 'UpdateCustomerForm',
+					action: 'onFormSubmit',
 				})
-			}
+			})
 		},
 		[form, handleSubmit]
 	)

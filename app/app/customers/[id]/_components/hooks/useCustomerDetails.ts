@@ -33,6 +33,7 @@ import { logger } from '@_core'
 import { notificationService, API } from '@_shared'
 
 import { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
+import Guid from '@_classes/Base/Guid'
 import Company from '@_classes/Company'
 import User from '@_classes/User'
 
@@ -58,8 +59,8 @@ interface UseCustomerDetailsReturn {
 		accounts: boolean
 		stats: boolean
 	}
-	/** Parsed numeric customer ID (null if create mode) */
-	customerIdNum: number | null
+	/** Customer ID (GUID string, null if create mode) */
+	customerIdStr: string | null
 	/** Update customer state after form submission */
 	setCustomer: (customer: Company) => void
 	/** Refresh all data */
@@ -84,8 +85,8 @@ export function useCustomerDetails({
 	const [loadingAccounts, setLoadingAccounts] = useState(false)
 	const [loadingStats, setLoadingStats] = useState(false)
 
-	// Parse customer ID
-	const customerIdNum = isCreateMode ? null : Number(customerId)
+	// Validate customer ID (GUID format)
+	const customerIdStr = isCreateMode ? null : customerId
 
 	// Fetch customer data
 	const fetchCustomer = useCallback(async () => {
@@ -103,14 +104,14 @@ export function useCustomerDetails({
 		try {
 			setLoadingCustomer(true)
 
-			// Validate parsed number
-			if (!customerIdNum || !Number.isFinite(customerIdNum) || customerIdNum <= 0) {
-				logger.warn('Invalid customer ID provided', {
+			// Validate GUID format
+			if (!customerIdStr || !Guid.isValid(customerIdStr)) {
+				logger.warn('Invalid customer ID format (must be valid GUID)', {
 					component: 'useCustomerDetails',
 					action: 'fetchCustomer',
 					customerId,
 				})
-				notificationService.error('Invalid customer ID')
+				notificationService.error('Invalid customer ID format')
 				router.back()
 				return
 			}
@@ -118,16 +119,16 @@ export function useCustomerDetails({
 			logger.debug('Fetching customer details', {
 				component: 'useCustomerDetails',
 				action: 'fetchCustomer',
-				customerId: customerIdNum,
+				customerId: customerIdStr,
 			})
 
-			const { data } = await API.Customers.get(customerIdNum)
+			const { data } = await API.Customers.get(customerIdStr)
 
 			if (!data.payload) {
 				logger.warn('Customer not found', {
 					component: 'useCustomerDetails',
 					action: 'fetchCustomer',
-					customerId: customerIdNum,
+					customerId: customerIdStr,
 					message: data.message,
 				})
 				notificationService.error(data.message ?? 'Unable to load customer')
@@ -141,14 +142,14 @@ export function useCustomerDetails({
 			logger.info('Customer loaded successfully', {
 				component: 'useCustomerDetails',
 				action: 'fetchCustomer',
-				customerId: customerIdNum,
+				customerId: customerIdStr,
 				customerName: loadedCustomer.name,
 			})
 		} catch (error) {
 			logger.error('Failed to fetch customer', {
 				component: 'useCustomerDetails',
 				action: 'fetchCustomer',
-				customerId: customerIdNum,
+				customerId: customerIdStr,
 				error,
 			})
 			notificationService.error('Unable to load customer')
@@ -156,25 +157,25 @@ export function useCustomerDetails({
 		} finally {
 			setLoadingCustomer(false)
 		}
-	}, [customerId, customerIdNum, isCreateMode, router])
+	}, [customerId, customerIdStr, isCreateMode, router])
 
 	// Fetch linked accounts
 	const fetchAccounts = useCallback(async () => {
-		if (!customerIdNum || isCreateMode) {
+		if (!customerIdStr || isCreateMode) {
 			return
 		}
 
 		try {
 			setLoadingAccounts(true)
-			
+
 			const filter = new GenericSearchFilter()
-			filter.add('CustomerId', String(customerIdNum))
+			filter.add('CustomerId', customerIdStr)
 			filter.includes.push('Customer')
 
 			logger.debug('Fetching customer accounts', {
 				component: 'useCustomerDetails',
 				action: 'fetchAccounts',
-				customerId: customerIdNum,
+				customerId: customerIdStr,
 			})
 
 			const { data } = await API.Accounts.search(filter)
@@ -188,7 +189,7 @@ export function useCustomerDetails({
 			logger.error('Failed to fetch customer accounts', {
 				component: 'useCustomerDetails',
 				action: 'fetchAccounts',
-				customerId: customerIdNum,
+				customerId: customerIdStr,
 				error,
 			})
 			notificationService.error('Unable to load customer accounts')
@@ -196,11 +197,11 @@ export function useCustomerDetails({
 		} finally {
 			setLoadingAccounts(false)
 		}
-	}, [customerIdNum, isCreateMode])
+	}, [customerIdStr, isCreateMode])
 
 	// Fetch customer stats
 	const fetchStats = useCallback(async () => {
-		if (!customerIdNum || isCreateMode) {
+		if (!customerIdStr || isCreateMode) {
 			return
 		}
 
@@ -210,10 +211,10 @@ export function useCustomerDetails({
 			logger.debug('Fetching customer stats', {
 				component: 'useCustomerDetails',
 				action: 'fetchStats',
-				customerId: customerIdNum,
+				customerId: customerIdStr,
 			})
 
-			const { data } = await API.Customers.getStats(customerIdNum)
+			const { data } = await API.Customers.getStats(customerIdStr)
 
 			if (data.payload) {
 				setStats({
@@ -229,13 +230,13 @@ export function useCustomerDetails({
 			logger.debug('Failed to fetch customer stats (non-critical)', {
 				component: 'useCustomerDetails',
 				action: 'fetchStats',
-				customerId: customerIdNum,
+				customerId: customerIdStr,
 				error,
 			})
 		} finally {
 			setLoadingStats(false)
 		}
-	}, [customerIdNum, isCreateMode])
+	}, [customerIdStr, isCreateMode])
 
 	// Refresh all data
 	const refresh = useCallback(() => {
@@ -268,7 +269,7 @@ export function useCustomerDetails({
 			accounts: loadingAccounts,
 			stats: loadingStats,
 		},
-		customerIdNum,
+		customerIdStr,
 		setCustomer,
 		refresh,
 	}

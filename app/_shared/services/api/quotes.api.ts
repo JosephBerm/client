@@ -10,7 +10,7 @@
 import type { GenericSearchFilter } from '@_classes/Base/GenericSearchFilter'
 import type { PagedResult } from '@_classes/Base/PagedResult'
 import type Quote from '@_classes/Quote'
-import type { QuotePricingSummary } from '@_core/validation/validation-schemas'
+import type { QuotePricingSummary } from '@_core/validation'
 import type { RichSearchFilter, RichPagedResult } from '@_components/tables/RichDataGrid'
 
 import { HttpService } from '../httpService'
@@ -96,7 +96,7 @@ export const QuotesApi = {
 		quoteId: string,
 		productId: string,
 		vendorCost: number | null,
-		customerPrice: number | null
+		customerPrice: number | null,
 	) =>
 		HttpService.put<Quote>(`/quotes/${quoteId}/pricing`, {
 			productId,

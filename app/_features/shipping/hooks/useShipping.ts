@@ -29,7 +29,8 @@ export const shippingKeys = {
 	rates: () => [...shippingKeys.all, 'rates'] as const,
 	labels: () => [...shippingKeys.all, 'labels'] as const,
 	label: (id: string) => [...shippingKeys.labels(), id] as const,
-	orderLabels: (orderId: number) => [...shippingKeys.labels(), 'order', orderId] as const,
+	/** @param orderId - UUID/GUID of the order */
+	orderLabels: (orderId: string) => [...shippingKeys.labels(), 'order', orderId] as const,
 	tracking: (trackingNumber: string) => [...shippingKeys.all, 'tracking', trackingNumber] as const,
 }
 
@@ -70,10 +71,11 @@ export function useShippingLabel(labelId: string | undefined) {
 
 /**
  * Hook for fetching all shipping labels for an order.
+ * @param orderId - UUID/GUID of the order
  */
-export function useOrderShippingLabels(orderId: number | undefined) {
+export function useOrderShippingLabels(orderId: string | undefined) {
 	return useQuery({
-		queryKey: shippingKeys.orderLabels(orderId || 0),
+		queryKey: shippingKeys.orderLabels(orderId || ''),
 		queryFn: async () => {
 			const response = await API.Shipping.getOrderLabels(orderId!)
 			return response.data.payload!

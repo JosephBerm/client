@@ -40,6 +40,7 @@ import { Mail } from 'lucide-react'
 
 import Modal from '@_components/ui/Modal'
 import Button from '@_components/ui/Button'
+import Surface from '@_components/ui/Surface'
 
 import { notificationService } from '@_shared'
 
@@ -130,14 +131,14 @@ export default function EmailVerificationModal({
 				</p>
 
 				{/* Instructions */}
-				<div className="bg-base-200 rounded-lg p-4 mb-6 text-left">
+				<Surface variant='inset' padding='md' className='mb-6 text-left'>
 					<h3 className="font-semibold mb-2">Next Steps:</h3>
 					<ol className="text-sm text-base-content/70 space-y-1 list-decimal list-inside">
 						<li>Check your inbox for a verification email</li>
 						<li>Click the verification link in the email</li>
 						<li>Return here and log in again</li>
 					</ol>
-				</div>
+				</Surface>
 
 				{/* Actions */}
 				<div className="flex flex-col gap-2">

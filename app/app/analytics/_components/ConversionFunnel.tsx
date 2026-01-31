@@ -1,18 +1,27 @@
 'use client'
 
 /**
- * ConversionFunnel Component
+ * ConversionFunnel Component (visx)
  *
- * Visual funnel showing quote pipeline stages.
- * Displays quotes at each stage from request to conversion.
+ * Production-grade quote pipeline visualization using visx FunnelChart.
+ * Full MAANG-grade chart with interactivity, tooltips, and accessibility.
+ *
+ * **Migrated**: Originally CSS-based, now powered by visx FunnelChart.
+ * See PHASE_7_CLEANUP.md for migration details.
  *
  * @see prd_analytics.md - Section 5.2 Frontend Components
  * @module analytics/components/ConversionFunnel
  */
 
+import { useMemo } from 'react'
 import { Filter } from 'lucide-react'
 
 import Card from '@_components/ui/Card'
+import {
+	FunnelChart,
+	type FunnelStage,
+	ChartHeader,
+} from '@_components/charts'
 import type { QuotePipelineData } from '@_types/analytics.types'
 
 interface ConversionFunnelProps {
@@ -22,103 +31,91 @@ interface ConversionFunnelProps {
 	isLoading?: boolean
 }
 
-interface FunnelStage {
+/**
+ * Stage configuration with colors and descriptions.
+ */
+const STAGE_CONFIG: Array<{
 	key: keyof QuotePipelineData
-	label: string
-	color: string
+	name: string
 	description: string
-}
-
-const stages: FunnelStage[] = [
-	{ key: 'unread', label: 'New Requests', color: 'bg-info', description: 'Awaiting review' },
-	{ key: 'read', label: 'In Progress', color: 'bg-warning', description: 'Being processed' },
-	{ key: 'approved', label: 'Approved', color: 'bg-success', description: 'Sent to customer' },
-	{ key: 'converted', label: 'Converted', color: 'bg-primary', description: 'Orders created' },
+	color: string
+}> = [
+	{
+		key: 'unread',
+		name: 'New Requests',
+		description: 'Awaiting review',
+		color: 'oklch(var(--in))', // info
+	},
+	{
+		key: 'read',
+		name: 'In Progress',
+		description: 'Being processed',
+		color: 'oklch(var(--wa))', // warning
+	},
+	{
+		key: 'approved',
+		name: 'Approved',
+		description: 'Sent to customer',
+		color: 'oklch(var(--su))', // success
+	},
+	{
+		key: 'converted',
+		name: 'Converted',
+		description: 'Orders created',
+		color: 'oklch(var(--p))', // primary
+	},
 ]
 
 /**
- * Conversion funnel visualization.
+ * Conversion funnel visualization using visx.
  *
  * @example
  * ```tsx
  * <ConversionFunnel data={quotePipeline} isLoading={isLoading} />
  * ```
  */
-export function ConversionFunnel({ data, isLoading = false }: ConversionFunnelProps) {
-	if (isLoading) {
-		return (
-			<Card title="Quote Pipeline">
-				<div className="flex items-center justify-center h-64">
-					<span className="loading loading-spinner loading-lg text-primary"></span>
-				</div>
-			</Card>
-		)
-	}
+export function ConversionFunnel({
+	data,
+	isLoading = false,
+}: ConversionFunnelProps) {
+	// Transform QuotePipelineData to FunnelStage[]
+	const funnelData = useMemo((): FunnelStage[] => {
+		return STAGE_CONFIG.map((config) => ({
+			id: config.key,
+			name: config.name,
+			value: data[config.key] as number,
+			color: config.color,
+			description: config.description,
+		}))
+	}, [data])
 
-	const total = data.total || 1 // Prevent division by zero
-	const conversionRate =
-		data.unread + data.read + data.approved > 0
-			? ((data.converted / (data.unread + data.read + data.approved + data.converted)) * 100).toFixed(1)
-			: '0'
+	// Calculate conversion rate
+	const conversionRate = useMemo(() => {
+		const totalActive = data.unread + data.read + data.approved + data.converted
+		if (totalActive === 0) return 0
+		return (data.converted / totalActive) * 100
+	}, [data])
 
 	return (
 		<Card>
-			<div className="flex items-center justify-between mb-4">
-				<div className="flex items-center gap-2">
-					<div className="p-2 bg-primary/10 rounded-lg">
-						<Filter className="h-5 w-5 text-primary" />
-					</div>
-					<div>
-						<h3 className="font-semibold text-base-content">Quote Pipeline</h3>
-						<p className="text-sm text-base-content/60">
-							{conversionRate}% conversion rate
-						</p>
-					</div>
-				</div>
-				<div className="badge badge-outline">{total} total</div>
-			</div>
+			<ChartHeader
+				title="Quote Pipeline"
+				subtitle={`${conversionRate.toFixed(1)}% conversion rate`}
+				icon={Filter}
+				actions={
+					<div className="badge badge-outline">{data.total} total</div>
+				}
+			/>
 
-			{/* Funnel Stages */}
-			<div className="space-y-3">
-				{stages.map((stage, index) => {
-					const value = data[stage.key] as number
-					const percentage = total > 0 ? (value / total) * 100 : 0
-					const widthPercent = 100 - index * 15 // Decreasing width for funnel effect
-
-					return (
-						<div key={stage.key} className="relative">
-							{/* Stage bar */}
-							<div
-								className="relative h-12 rounded-lg overflow-hidden transition-all"
-								style={{ width: `${widthPercent}%`, marginLeft: `${index * 7.5}%` }}
-							>
-								{/* Background */}
-								<div className={`absolute inset-0 ${stage.color} opacity-20`} />
-								{/* Fill */}
-								<div
-									className={`absolute inset-y-0 left-0 ${stage.color}`}
-									style={{ width: `${Math.min(percentage * 2, 100)}%` }}
-								/>
-								{/* Content */}
-								<div className="relative h-full flex items-center justify-between px-4">
-									<div>
-										<span className="font-medium text-base-content">{stage.label}</span>
-										<span className="text-xs text-base-content/60 ml-2">
-											{stage.description}
-										</span>
-									</div>
-									<div className="text-right">
-										<span className="font-bold text-base-content">{value}</span>
-										<span className="text-xs text-base-content/60 ml-1">
-											({percentage.toFixed(0)}%)
-										</span>
-									</div>
-								</div>
-							</div>
-						</div>
-					)
-				})}
-			</div>
+			<FunnelChart
+				data={funnelData}
+				height={220}
+				showPercentages
+				showValues
+				percentageMode="absolute"
+				isLoading={isLoading}
+				ariaLabel="Quote pipeline conversion funnel"
+			/>
 
 			{/* Bottom stats */}
 			<div className="mt-4 pt-4 border-t border-base-300 grid grid-cols-2 gap-4 text-sm">
@@ -136,4 +133,3 @@ export function ConversionFunnel({ data, isLoading = false }: ConversionFunnelPr
 }
 
 export default ConversionFunnel
-

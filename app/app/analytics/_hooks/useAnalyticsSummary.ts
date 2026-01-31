@@ -14,7 +14,10 @@
 import { useCallback, useMemo, useState } from 'react'
 
 import API from '@_shared/services/api'
-import { useFetchWithCache } from '@_shared/hooks'
+import { useFetchWithCache, useRealtimeSubscription } from '@_shared/hooks'
+import { useTenant } from '@_shared'
+import { useAuthStore } from '@_features/auth'
+import type { AnalyticsKpiUpdatedEvent } from '@_shared/services/realtime/realtimeEventTypes'
 import type { AnalyticsSummary, TimeRangePreset } from '@_types/analytics.types'
 
 import { getAnalyticsDateRange, getAnalyticsCacheKey } from './analyticsDateUtils'
@@ -79,6 +82,11 @@ export function useAnalyticsSummary(
 	options: UseAnalyticsSummaryOptions = {}
 ): UseAnalyticsSummaryReturn {
 	const { initialTimeRange = '12m', autoFetch = true } = options
+	const { uiConfig } = useTenant()
+	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+	const isAuthLoading = useAuthStore((state) => state.isLoading)
+	const isRealtimeEnabled = uiConfig?.enabledFeatures?.includes('realtime-sockets') ?? false
+	const shouldSubscribe = !isAuthLoading && isAuthenticated && isRealtimeEnabled
 
 	// Time range state
 	const [timeRange, setTimeRangeState] = useState<TimeRangePreset>(initialTimeRange)
@@ -161,6 +169,19 @@ export function useAnalyticsSummary(
 	const retry = useCallback(async () => {
 		await refetch()
 	}, [refetch])
+
+	const handleRealtimeUpdate = useCallback(
+		async (_payload: AnalyticsKpiUpdatedEvent) => {
+			await refetch()
+		},
+		[refetch]
+	)
+
+	useRealtimeSubscription<AnalyticsKpiUpdatedEvent>(
+		'analytics.kpi.updated',
+		handleRealtimeUpdate,
+		shouldSubscribe
+	)
 
 	return {
 		data,

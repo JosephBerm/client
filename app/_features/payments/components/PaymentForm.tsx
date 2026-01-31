@@ -42,8 +42,8 @@ import { formatAmountCents } from '../types'
 // =========================================================================
 
 export interface PaymentFormProps {
-	/** Order ID to create payment for */
-	orderId: number
+	/** Order ID (UUID/GUID) to create payment for */
+	orderId: string
 	/** Amount in cents to display (for confirmation) */
 	amountCents: number
 	/** Currency code (default: USD) */

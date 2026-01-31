@@ -20,7 +20,8 @@ import type Order from '@_classes/Order'
  * Contains only essential fields needed for orders list.
  */
 export interface OrderListItem {
-	id: number
+	/** UUID/GUID from backend */
+	id: string
 	orderNumber: string
 	customerName: string
 	customerEmail?: string
@@ -145,7 +146,7 @@ export interface UseOrderActionsReturn {
 		notes?: string
 	) => Promise<{ success: boolean }>
 	/** Add tracking to an order item */
-	addTracking: (orderItemId: number, trackingNumber: string, carrier?: string) => Promise<{ success: boolean }>
+	addTracking: (orderItemId: string, trackingNumber: string, carrier?: string) => Promise<{ success: boolean }>
 	/** Request cancellation (customer) */
 	requestCancellation: (reason: string) => Promise<{ success: boolean }>
 	/** Cancel order (manager) */

@@ -36,9 +36,10 @@ import { Routes } from '@_features/navigation'
 
 import { formatDate, API, notificationService } from '@_shared'
 
-import { QuoteStatus } from '@_classes/Enums'
+import QuoteStatusHelper from '@_classes/Helpers/QuoteStatusHelper'
 import type Quote from '@_classes/Quote'
 
+import { QuoteStatusBadge } from '@_components/common'
 import {
 	RichDataGrid,
 	createRichColumnHelper,
@@ -49,7 +50,6 @@ import {
 	type BulkAction,
 } from '@_components/tables/RichDataGrid'
 import type { RichSearchFilter, RichPagedResult, RichColumnDef } from '@_components/tables/RichDataGrid'
-import Badge from '@_components/ui/Badge'
 import Button from '@_components/ui/Button'
 import ConfirmationModal from '@_components/ui/ConfirmationModal'
 
@@ -210,12 +210,7 @@ export default function QuotesDataGrid() {
       header: 'Status',
       filterType: FilterType.Select,
       faceted: true,
-      cell: ({ row }) => {
-        const { status } = row.original
-        const variant = status === QuoteStatus.Read ? 'success' : 'warning'
-        const label = status === QuoteStatus.Read ? 'Read' : 'Unread'
-        return <Badge variant={variant}>{label}</Badge>
-      },
+      cell: ({ row }) => <QuoteStatusBadge status={row.original.status} />,
     }),
 
     // Created At - Date filter
@@ -276,7 +271,7 @@ export default function QuotesDataGrid() {
             onAction: async (rows: Quote[]) => {
               const headers = 'Quote ID,Company,Email,Phone,Status,Requested\n'
               const csv = rows.map(r =>
-                `"${r.id}","${r.companyName ?? ''}","${r.emailAddress ?? ''}","${r.phoneNumber ?? ''}",${r.status === QuoteStatus.Read ? 'Read' : 'Unread'},"${formatDate(r.createdAt)}"`
+                `"${r.id}","${r.companyName ?? ''}","${r.emailAddress ?? ''}","${r.phoneNumber ?? ''}","${QuoteStatusHelper.getDisplay(r.status)}","${formatDate(r.createdAt)}"`
               ).join('\n')
               const blob = new Blob([headers + csv], { type: 'text/csv' })
               const url = URL.createObjectURL(blob)

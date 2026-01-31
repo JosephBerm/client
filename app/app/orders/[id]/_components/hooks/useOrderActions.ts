@@ -154,7 +154,7 @@ export function useOrderActions(
 	// =========================================================================
 
 	const { submit: addTrackingSubmit, isSubmitting: isAddingTracking } = useFormSubmit(
-		async (data: { orderItemId: number; trackingNumber: string; carrier?: string }) => {
+		async (data: { orderItemId: string; trackingNumber: string; carrier?: string }) => {
 			if (!orderId) throw new Error('Order ID required')
 			return API.Orders.addTracking(orderId, data.orderItemId, data.trackingNumber, data.carrier)
 		},
@@ -170,7 +170,7 @@ export function useOrderActions(
 	)
 
 	const addTracking = useCallback(
-		async (orderItemId: number, trackingNumber: string, carrier?: string): Promise<{ success: boolean }> => {
+		async (orderItemId: string, trackingNumber: string, carrier?: string): Promise<{ success: boolean }> => {
 			return addTrackingSubmit({ orderItemId, trackingNumber, carrier })
 		},
 		[addTrackingSubmit]

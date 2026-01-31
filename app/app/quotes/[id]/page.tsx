@@ -167,7 +167,7 @@ export default function QuoteDetailsPage() {
 							quote={quote}
 							permissions={permissions}
 							customerId={
-								'customerId' in quote ? (quote as { customerId?: number }).customerId : undefined
+								'customerId' in quote ? (quote as { customerId?: string }).customerId : undefined
 							}
 							onRefresh={refresh}
 						/>

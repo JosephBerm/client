@@ -94,6 +94,8 @@ export { IntegrationsApi } from './integrations.api'
 
 export { SecurityPolicyApi } from './security-policy.api'
 
+export { TenantApi } from './tenant.api'
+
 export { PublicApi } from './public.api'
 
 export { ExternalAuthApi } from './external-auth.api'
@@ -129,6 +131,7 @@ import { RBACApi } from './rbac.api'
 import { PricingApi } from './pricing.api'
 import { IntegrationsApi } from './integrations.api'
 import { SecurityPolicyApi } from './security-policy.api'
+import { TenantApi } from './tenant.api'
 import { PublicApi } from './public.api'
 import { ExternalAuthApi } from './external-auth.api'
 import { PhoneAuthApi } from './phone-auth.api'
@@ -166,6 +169,9 @@ export const API = {
 
 	/** Security Policy Management API */
 	SecurityPolicy: SecurityPolicyApi,
+
+	/** Tenant Configuration API (public branding + UI config) */
+	Tenant: TenantApi,
 
 	/** Store Management API (Products) */
 	Store: StoreApi,

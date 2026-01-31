@@ -64,7 +64,7 @@ export const pricingKeys = {
 
 	// Price calculation keys
 	calculations: () => [...pricingKeys.all, 'calculations'] as const,
-	calculation: (productId: string, customerId?: number | null, quantity?: number) =>
+	calculation: (productId: string, customerId?: string | null, quantity?: number) =>
 		[...pricingKeys.calculations(), { productId, customerId, quantity }] as const,
 	bulkCalculation: (items: PricingRequest[]) => [...pricingKeys.calculations(), 'bulk', items] as const,
 
@@ -74,7 +74,7 @@ export const pricingKeys = {
 	priceList: (id: string) => [...pricingKeys.priceLists(), id] as const,
 
 	// Customer price list keys
-	customerPriceLists: (customerId: number) => [...pricingKeys.all, 'customers', customerId, 'price-lists'] as const,
+	customerPriceLists: (customerId: string) => [...pricingKeys.all, 'customers', customerId, 'price-lists'] as const,
 
 	// Volume tier keys
 	volumeTiers: () => [...pricingKeys.all, 'volume-tiers'] as const,
@@ -128,7 +128,7 @@ export const pricingKeys = {
  */
 export function useCalculatePrice(
 	productId: string,
-	customerId?: number | null,
+	customerId?: string | null,
 	quantity: number = 1,
 	includeBreakdown: boolean = false,
 	options?: Omit<UseQueryOptions<PricingResult, Error>, 'queryKey' | 'queryFn'>
@@ -461,7 +461,7 @@ export function useRemovePriceListItem() {
  * ```
  */
 export function useCustomerPriceLists(
-	customerId: number,
+	customerId: string,
 	options?: Omit<UseQueryOptions<PriceList[], Error>, 'queryKey' | 'queryFn'>
 ) {
 	return useQuery({
@@ -470,7 +470,7 @@ export function useCustomerPriceLists(
 			const response = await API.Pricing.getCustomerPriceLists(customerId)
 			return response.data.payload!
 		},
-		enabled: !!customerId && customerId > 0,
+		enabled: !!customerId && customerId.length > 0,
 		staleTime: PRICE_LIST_STALE_TIME,
 		...options,
 	})
@@ -496,7 +496,7 @@ export function useAssignCustomerPriceList() {
 	const queryClient = useQueryClient()
 
 	return useMutation({
-		mutationFn: async ({ customerId, priceListId }: { customerId: number; priceListId: string }) => {
+		mutationFn: async ({ customerId, priceListId }: { customerId: string; priceListId: string }) => {
 			const response = await API.Pricing.assignCustomerToPriceList(customerId, priceListId)
 			return response.data.payload!
 		},
@@ -528,7 +528,7 @@ export function useRemoveCustomerPriceList() {
 	const queryClient = useQueryClient()
 
 	return useMutation({
-		mutationFn: async ({ customerId, priceListId }: { customerId: number; priceListId: string }) => {
+		mutationFn: async ({ customerId, priceListId }: { customerId: string; priceListId: string }) => {
 			const response = await API.Pricing.removeCustomerFromPriceList(customerId, priceListId)
 			return response.data.payload!
 		},

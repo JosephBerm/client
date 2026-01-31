@@ -62,7 +62,7 @@ export default function AssignSalesRepModal({ isOpen, customer, onClose, onAssig
 	// State
 	const [salesReps, setSalesReps] = useState<UserType[]>([])
 	const [filteredReps, setFilteredReps] = useState<UserType[]>([])
-	const [selectedRepId, setSelectedRepId] = useState<number | null>(null)
+	const [selectedRepId, setSelectedRepId] = useState<string | null>(null)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [isLoading, setIsLoading] = useState(false)
 	const [isAssigning, setIsAssigning] = useState(false)
@@ -135,7 +135,7 @@ export default function AssignSalesRepModal({ isOpen, customer, onClose, onAssig
 
 	// Handle assignment
 	const handleAssign = useCallback(async () => {
-		if (!customer || selectedRepId === null) {
+		if (!customer || !customer.id || !selectedRepId) {
 			return
 		}
 
@@ -239,9 +239,8 @@ export default function AssignSalesRepModal({ isOpen, customer, onClose, onAssig
 					) : (
 						<ul className='divide-y divide-base-300'>
 							{filteredReps.map((rep) => {
-								const repIdNum = rep.id ? Number(rep.id) : null
-								const isSelected = selectedRepId === repIdNum
-								const isCurrent = customer?.primarySalesRepId === repIdNum
+								const isSelected = selectedRepId === rep.id
+								const isCurrent = customer?.primarySalesRepId === rep.id
 
 								return (
 									<li key={rep.id}>
@@ -250,7 +249,7 @@ export default function AssignSalesRepModal({ isOpen, customer, onClose, onAssig
 											className={`w-full flex items-center gap-3 p-3 justify-start h-auto rounded-none ${
 												isSelected ? 'bg-primary/10' : ''
 											}`}
-											onClick={() => setSelectedRepId(rep.id ? Number(rep.id) : null)}
+											onClick={() => setSelectedRepId(rep.id)}
 											disabled={isAssigning}>
 											<div className='flex-shrink-0'>
 												<div

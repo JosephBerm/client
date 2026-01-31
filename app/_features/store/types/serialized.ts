@@ -29,7 +29,7 @@ export interface SerializedProduct {
 	sku?: string
 	stock?: number
 	category?: string
-	categoryIds?: number[]
+	categoryIds?: string[]
 	manufacturer?: string
 	providerId?: string | null
 	createdAt?: string
@@ -61,9 +61,9 @@ export interface SerializedPagedResult {
  * Serialized category (plain object, not class instance)
  */
 export interface SerializedCategory {
-	id: number
+	id: string | null
 	name?: string
-	parentCategoryId?: number
+	parentCategoryId?: string | null
 	subCategories?: SerializedCategory[]
 	[key: string]: unknown
 }

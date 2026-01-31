@@ -221,7 +221,7 @@ export class QuoteFormDataBuilder {
   }
 
   // Authenticated user fields
-  withCustomerId(customerId: number): this {
+  withCustomerId(customerId: string): this {
     this.data.customerId = customerId
     this.data.isAuthenticated = true
     return this

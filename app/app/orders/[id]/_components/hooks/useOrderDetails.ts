@@ -25,8 +25,12 @@ import { useState, useEffect, useCallback } from 'react'
 
 import { useRouter } from 'next/navigation'
 
+import Guid from '@_classes/Base/Guid'
+import { useAuthStore } from '@_features/auth'
 import { Routes } from '@_features/navigation'
-import { API, notificationService, useRouteParam } from '@_shared'
+import { API, notificationService, useRouteParam, useTenant } from '@_shared'
+import { useRealtimeSubscription } from '@_shared/hooks'
+import type { OrderStatusChangedEvent, PaymentConfirmedEvent } from '@_shared/services/realtime/realtimeEventTypes'
 
 import Order from '@_classes/Order'
 
@@ -54,6 +58,12 @@ import type { UseOrderDetailsReturn } from '@_types/order.types'
 export function useOrderDetails(): UseOrderDetailsReturn {
 	const router = useRouter()
 	const orderIdParam = useRouteParam('id')
+	const { uiConfig } = useTenant()
+	const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+	const isAuthLoading = useAuthStore((state) => state.isLoading)
+
+	const isRealtimeEnabled = uiConfig?.enabledFeatures?.includes('realtime-sockets') ?? false
+	const shouldSubscribe = !isAuthLoading && isAuthenticated && isRealtimeEnabled
 
 	const [order, setOrder] = useState<Order | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
@@ -73,11 +83,9 @@ export function useOrderDetails(): UseOrderDetailsReturn {
 			setIsLoading(true)
 			setError(null)
 
-			const orderId = Number(orderIdParam)
-
-			// Validate parsed number
-			if (!Number.isFinite(orderId) || orderId <= 0) {
-				notificationService.error('Invalid order ID', {
+			// Validate UUID format (order IDs are GUIDs from backend)
+			if (!Guid.isValid(orderIdParam)) {
+				notificationService.error('Invalid order ID format', {
 					metadata: { orderId: orderIdParam },
 					component: 'useOrderDetails',
 					action: 'fetchOrder',
@@ -86,7 +94,7 @@ export function useOrderDetails(): UseOrderDetailsReturn {
 				return
 			}
 
-			const { data } = await API.Orders.get<Order>(orderId)
+			const { data } = await API.Orders.get<Order>(orderIdParam)
 
 			if (!data.payload) {
 				notificationService.error(data.message || 'Order not found', {
@@ -124,6 +132,26 @@ export function useOrderDetails(): UseOrderDetailsReturn {
 	useEffect(() => {
 		void fetchOrder()
 	}, [fetchOrder])
+
+	useRealtimeSubscription<OrderStatusChangedEvent>(
+		'order.status.changed',
+		(payload) => {
+			if (orderIdParam && payload.orderId === orderIdParam) {
+				void fetchOrder()
+			}
+		},
+		shouldSubscribe
+	)
+
+	useRealtimeSubscription<PaymentConfirmedEvent>(
+		'payment.confirmed',
+		(payload) => {
+			if (orderIdParam && payload.orderId === orderIdParam) {
+				void fetchOrder()
+			}
+		},
+		shouldSubscribe
+	)
 
 	return {
 		order,

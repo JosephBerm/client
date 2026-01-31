@@ -75,7 +75,7 @@ export interface QuotePricingEditorProps {
 	/** Permission flags from useQuotePermissions */
 	permissions: UseQuotePermissionsReturn
 	/** Customer ID for pricing engine lookup (optional) */
-	customerId?: number | null
+	customerId?: string | null
 	/** Callback to refresh quote data after pricing update */
 	onRefresh?: () => Promise<void>
 }

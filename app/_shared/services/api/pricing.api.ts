@@ -136,19 +136,19 @@ export const PricingApi = {
 	/**
 	 * Gets all price lists assigned to a customer.
 	 */
-	getCustomerPriceLists: async (customerId: number) =>
+	getCustomerPriceLists: async (customerId: string) =>
 		HttpService.get<PriceList[]>(`/pricing/customers/${customerId}/price-lists`),
 
 	/**
 	 * Assigns a price list to a customer.
 	 */
-	assignCustomerToPriceList: async (customerId: number, priceListId: string) =>
+	assignCustomerToPriceList: async (customerId: string, priceListId: string) =>
 		HttpService.post<boolean>(`/pricing/customers/${customerId}/price-lists`, { priceListId }),
 
 	/**
 	 * Removes a price list assignment from a customer.
 	 */
-	removeCustomerFromPriceList: async (customerId: number, priceListId: string) =>
+	removeCustomerFromPriceList: async (customerId: string, priceListId: string) =>
 		HttpService.delete<boolean>(`/pricing/customers/${customerId}/price-lists/${priceListId}`),
 
 	// =====================================================================

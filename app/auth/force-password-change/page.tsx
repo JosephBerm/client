@@ -39,8 +39,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import { KeyRound } from 'lucide-react'
 
-import { useAuthStore } from '@_features/auth'
-import { Routes } from '@_features/navigation'
+import { useAuthStore, useAuthRedirect } from '@_features/auth'
 
 import { changePasswordSchema, logger } from '@_core'
 import type { ChangePasswordFormData } from '@_core'
@@ -49,6 +48,7 @@ import { API, notificationService, useFormSubmit, useZodForm } from '@_shared'
 
 import FormInput from '@_components/forms/FormInput'
 import Button from '@_components/ui/Button'
+import Surface from '@_components/ui/Surface'
 
 /**
  * ForcePasswordChangePage Component
@@ -75,6 +75,7 @@ export default function ForcePasswordChangePage() {
 	const isRequired = searchParams.get('required') === 'true'
 
 	const user = useAuthStore((state) => state.user)
+	const { executePostAuthRedirect } = useAuthRedirect()
 
 	// Redirect to login if not authenticated
 	useEffect(() => {
@@ -120,7 +121,7 @@ export default function ForcePasswordChangePage() {
 			componentName: 'ForcePasswordChangePage',
 			actionName: 'changePassword',
 			onSuccess: () => {
-				logger.info('Password change successful, redirecting to dashboard', {
+				logger.info('Password change successful, redirecting', {
 					component: 'ForcePasswordChangePage',
 					userId: user?.id ?? undefined,
 				})
@@ -128,12 +129,21 @@ export default function ForcePasswordChangePage() {
 				// Reset form
 				form.reset()
 
-				// Redirect to dashboard after brief delay for success message
+				// Redirect using centralized AuthRedirectService
+				// Priority: Intent → Return URL → Dashboard (default)
 				setTimeout(() => {
-					router.push(Routes.Dashboard.location)
+					executePostAuthRedirect({
+						onRedirect: (result) => {
+							logger.info('Post-password-change redirect executed', {
+								component: 'ForcePasswordChangePage',
+								redirectType: result.type,
+								url: result.url,
+							})
+						},
+					})
 				}, 1500)
 			},
-		}
+		},
 	)
 
 	/**
@@ -149,7 +159,7 @@ export default function ForcePasswordChangePage() {
 				})
 			})
 		},
-		[submit]
+		[submit],
 	)
 
 	/**
@@ -169,7 +179,7 @@ export default function ForcePasswordChangePage() {
 				})
 			}
 		},
-		[form, handleSubmit]
+		[form, handleSubmit],
 	)
 
 	// Don't render if not authenticated
@@ -239,7 +249,9 @@ export default function ForcePasswordChangePage() {
 						/>
 
 						{/* Password Requirements */}
-						<div className='bg-base-200 rounded-lg p-4'>
+						<Surface
+							variant='inset'
+							padding='md'>
 							<p className='text-sm font-semibold mb-2'>Password Requirements:</p>
 							<ul className='text-xs text-base-content/70 space-y-1'>
 								<li>• At least 8 characters</li>
@@ -248,7 +260,7 @@ export default function ForcePasswordChangePage() {
 								<li>• One number (0-9)</li>
 								<li>• One special character (!@#$%^&*)</li>
 							</ul>
-						</div>
+						</Surface>
 
 						{/* Submit Button */}
 						<Button
@@ -272,7 +284,7 @@ export default function ForcePasswordChangePage() {
 					{!isRequired && (
 						<Button
 							type='button'
-							onClick={() => router.push(Routes.Dashboard.location)}
+							onClick={() => executePostAuthRedirect()}
 							variant='ghost'
 							size='sm'
 							className='text-sm text-center text-base-content/60 hover:text-base-content mt-2 h-auto p-0'

@@ -107,8 +107,8 @@ export interface SalesRepWorkload {
 export interface DashboardTask {
 	/** Quote ID (Guid? serialized as string when task is quote-related) */
 	quoteId: string | null
-	/** Order ID (int? when task is order-related) */
-	orderId: number | null
+	/** Order ID (UUID/GUID when task is order-related) */
+	orderId: string | null
 	/** Task type: "quote", "order", "payment", "fulfillment" */
 	type: 'quote' | 'order' | 'payment' | 'fulfillment'
 	/** Task title/headline */
@@ -129,8 +129,8 @@ export interface DashboardTask {
 export interface RecentItem {
 	/** Quote ID (Guid? serialized as string when type = "quote") */
 	quoteId: string | null
-	/** Order ID (int? when type = "order") */
-	orderId: number | null
+	/** Order ID (UUID/GUID when type = "order") */
+	orderId: string | null
 	/** Item type: "quote" or "order" */
 	type: 'quote' | 'order'
 	/** Display number (order number or quote reference) */

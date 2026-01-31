@@ -91,7 +91,7 @@ export interface CreateQuoteRequest {
 	// =========================================================================
 
 	/** Customer ID for authenticated users. Optional. */
-	customerId?: number
+	customerId?: string
 }
 
 /**

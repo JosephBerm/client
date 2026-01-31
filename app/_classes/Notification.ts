@@ -93,8 +93,8 @@ export default class Notification {
 	/** Last update timestamp */
 	public updatedAt?: Date | null = null
 	
-	/** User ID of notification recipient */
-	public userId: number = 0
+	/** User ID of notification recipient (GUID) */
+	public userId: string | null = null
 
 	/**
 	 * Creates a new Notification instance.

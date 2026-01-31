@@ -110,14 +110,14 @@ export class Product {
 	/** Manufacturer name */
 	manufacturer: string = ''  // Added for manufacturer reference
 	
-	/** Array of category IDs (for legacy support) */
-	categoryIds: number[] = []
+	/** Array of category IDs (GUID strings) */
+	categoryIds: string[] = []
 	
 	/** Array of category objects */
 	categories: ProductsCategory[] = []
 	
-	/** Provider/supplier ID (foreign key) */
-	providerId: number | null = null
+	/** Provider/supplier ID (GUID foreign key) */
+	providerId: string | null = null
 	
 	/** Provider/supplier object */
 	provider: Provider | null = null

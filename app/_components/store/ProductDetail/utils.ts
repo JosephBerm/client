@@ -44,7 +44,7 @@ export function buildProductBreadcrumbs(product: Product): BreadcrumbItem[] {
 	return [
 		{ label: BREADCRUMB_LABELS.STORE, href: Routes.Store.location },
 		// Use first category if available, with proper route builder
-		...(product.categories.length > 0
+		...(product.categories.length > 0 && product.categories[0].id
 			? [
 					{
 						label: product.categories[0].name ?? product.category ?? BREADCRUMB_LABELS.CATEGORY,

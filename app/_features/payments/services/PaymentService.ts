@@ -39,8 +39,9 @@ export class PaymentService {
 	/**
 	 * Creates a PaymentIntent for an order.
 	 * Returns client_secret for Stripe.js frontend.
+	 * @param orderId - UUID/GUID of the order
 	 */
-	static async createPaymentIntent(orderId: number): Promise<CreatePaymentIntentResponse> {
+	static async createPaymentIntent(orderId: string): Promise<CreatePaymentIntentResponse> {
 		const response = await API.Payments.createPaymentIntent(orderId)
 		return response.data.payload!
 	}
@@ -59,8 +60,9 @@ export class PaymentService {
 
 	/**
 	 * Records a manual payment (check, wire, cash).
+	 * @param orderId - UUID/GUID of the order
 	 */
-	static async recordManualPayment(orderId: number, request: RecordManualPaymentRequest): Promise<PaymentDTO> {
+	static async recordManualPayment(orderId: string, request: RecordManualPaymentRequest): Promise<PaymentDTO> {
 		const response = await API.Payments.recordManualPayment(orderId, request)
 		return response.data.payload!
 	}
@@ -79,16 +81,18 @@ export class PaymentService {
 
 	/**
 	 * Get all payments for an order.
+	 * @param orderId - UUID/GUID of the order
 	 */
-	static async getByOrderId(orderId: number): Promise<PaymentDTO[]> {
+	static async getByOrderId(orderId: string): Promise<PaymentDTO[]> {
 		const response = await API.Payments.getByOrderId(orderId)
 		return response.data.payload || []
 	}
 
 	/**
 	 * Get payment summary for an order.
+	 * @param orderId - UUID/GUID of the order
 	 */
-	static async getOrderPaymentSummary(orderId: number): Promise<PaymentSummary> {
+	static async getOrderPaymentSummary(orderId: string): Promise<PaymentSummary> {
 		const response = await API.Payments.getOrderSummary(orderId)
 		return response.data.payload!
 	}

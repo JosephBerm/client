@@ -59,14 +59,14 @@ export type SerializedProduct = {
 	stock: number
 	category: string
 	manufacturer: string
-	categoryIds: number[]
+	categoryIds: string[]
 	categories: Array<{
-		id: number
+		id: string | null
 		name: string
 	}>
-	providerId: number | null
+	providerId: string | null
 	provider: {
-		id: number
+		id: string | null
 		name: string
 		email: string | null
 		phone: string | null

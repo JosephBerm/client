@@ -77,15 +77,16 @@ export default function CategoryFilter({
 	emptyMessage = 'Categories load automatically once available.',
 }: CategoryFilterProps) {
 	// Track expanded/collapsed state (default: all collapsed)
-	const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set())
+	const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
 
 	/**
 	 * Toggle expand/collapse for a category
 	 */
-	const toggleExpand = useCallback((categoryId: number, event?: React.MouseEvent) => {
+	const toggleExpand = useCallback((categoryId: string | null, event?: React.MouseEvent) => {
 		if (event) {
 			event.stopPropagation()
 		}
+		if (!categoryId) return
 		setExpandedCategories((prev) => {
 			const newSet = new Set(prev)
 			if (newSet.has(categoryId)) {
@@ -100,8 +101,8 @@ export default function CategoryFilter({
 	/**
 	 * Get all descendant IDs for a category (recursive)
 	 */
-	const getAllDescendantIds = useCallback((category: ProductsCategory): number[] => {
-		const ids: number[] = [category.id]
+	const getAllDescendantIds = useCallback((category: ProductsCategory): (string | null)[] => {
+		const ids: (string | null)[] = [category.id]
 		if (category.subCategories && category.subCategories.length > 0) {
 			category.subCategories.forEach((child) => {
 				ids.push(...getAllDescendantIds(child))
@@ -217,7 +218,7 @@ export default function CategoryFilter({
 			const isPartial = isPartiallySelected(category)
 			const hasChildren = category.subCategories && category.subCategories.length > 0
 			// If not collapsible, treat all categories as expanded
-			const isExpanded = collapsible ? expandedCategories.has(category.id) : true
+			const isExpanded = collapsible ? (category.id ? expandedCategories.has(category.id) : false) : true
 
 			// Calculate indentation (20px per level - industry standard)
 			const indentWidth = depth * 20
@@ -338,7 +339,7 @@ export default function CategoryFilter({
 						{hasChildren && showCount && (
 							<Badge
 								variant='primary'
-								tone={isSelected ? 'solid' : isPartial ? 'subtle' : 'default'}
+								badgeStyle={isSelected ? 'solid' : 'soft'}
 								size='sm'>
 								{category.subCategories.length}
 							</Badge>
