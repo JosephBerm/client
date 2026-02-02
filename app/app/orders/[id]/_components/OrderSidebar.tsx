@@ -10,7 +10,6 @@
  * 
  * **Child Components:**
  * - OrderActions: Role-based workflow buttons
- * - OrderTimeline: Visual status progress
  * - OrderNotes: Order notes display
  * - OrderQuickInfo: Quick reference stats
  * 
@@ -27,7 +26,6 @@ import type { UseOrderActionsReturn } from '@_types/order.types'
 import { OrderActions } from './OrderActions'
 import { OrderNotes } from './OrderNotes'
 import { OrderQuickInfo } from './OrderQuickInfo'
-import { OrderTimeline } from './OrderTimeline'
 
 import type { UseOrderPermissionsReturn } from './hooks/useOrderPermissions'
 
@@ -58,9 +56,6 @@ export function OrderSidebar({ order, actions, permissions }: OrderSidebarProps)
 		<div className="space-y-6">
 			{/* Actions Card - Most important, at top */}
 			<OrderActions order={order} actions={actions} permissions={permissions} />
-
-			{/* Full Timeline - Visual progress */}
-			<OrderTimeline order={order} />
 
 			{/* Order Notes - Contextual information */}
 			<OrderNotes notes={order.notes} />

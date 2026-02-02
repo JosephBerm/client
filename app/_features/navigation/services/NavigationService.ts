@@ -60,15 +60,17 @@ export class NavigationService {
 	 * - Path for navigation
 	 * - Icon identifier for visual representation
 	 *
-	 * **Role Hierarchy (threshold-based):**
+	 * **Role Levels:**
 	 * - Customer: 1000 (base level)
-	 * - FulfillmentCoordinator: 2000
-	 * - SalesRep: 3000
-	 * - SalesManager: 4000
-	 * - Admin: 5000
-	 * - SuperAdmin: 9999
+	 * - FulfillmentCoordinator: 2000 (operations track - fulfillment, shipping)
+	 * - SalesRep: 3000 (sales track - customers, quotes, orders)
+	 * - SalesManager: 4000 (sales management - approvals, team oversight)
+	 * - Admin: 5000 (full access to all sections)
+	 * - SuperAdmin: 9999 (system administration + tenant management)
 	 *
-	 * Admin sections shown to any user with roleLevel >= Admin (5000)
+	 * **Important:** FulfillmentCoordinator and SalesRep are PARALLEL role tracks.
+	 * A SalesRep does NOT inherit FulfillmentCoordinator access automatically.
+	 * Only Admin+ has access to BOTH tracks.
 	 *
 	 * @param userRole - User's role level (number), null if not logged in
 	 * @returns Array of navigation sections filtered by role
@@ -134,28 +136,58 @@ export class NavigationService {
 			})
 		}
 
-		// Check role thresholds for different access levels
-		const isFulfillmentCoordinator = userRole != null && userRole >= RoleLevels.FulfillmentCoordinator
+		// Check role levels for different access
+		// Note: FulfillmentCoordinator and SalesRep are PARALLEL role tracks, not hierarchical
+		// FulfillmentCoordinator = operations track (fulfillment, shipping)
+		// SalesRep = sales track (customers, quotes, orders)
+		// Only Admin+ has access to BOTH tracks
+		const isFulfillmentCoordinator =
+			userRole != null && userRole >= RoleLevels.FulfillmentCoordinator && userRole < RoleLevels.SalesRep
 		const isSalesRep = userRole != null && userRole >= RoleLevels.SalesRep
 		const isSalesManager = userRole != null && userRole >= RoleLevels.SalesManager
 		const isSuperAdmin = userRole != null && userRole >= RoleLevels.SuperAdmin
 
-		// Operations section (FulfillmentCoordinator+ only)
-		// Includes fulfillment queue and approval workflows
+		// Operations section - ONLY for FulfillmentCoordinator role (not Sales track)
+		// PRD: Fulfillment Coordinator focuses on order fulfillment and shipping coordination
 		if (isFulfillmentCoordinator && !isAdmin) {
-			const operationsRoutes: NavigationRoute[] = [
+			sections.push({
+				id: 'operations',
+				title: 'Operations',
+				routes: [
+					{
+						id: 'fulfillment',
+						label: 'Fulfillment Queue',
+						href: Routes.Fulfillment.location,
+						icon: 'truck',
+						description: 'Process and ship orders',
+					},
+					{
+						id: 'inventory',
+						label: 'Inventory',
+						href: Routes.Inventory.location,
+						icon: 'archive',
+						description: 'View stock levels',
+					},
+				],
+			})
+		}
+
+		// Sales section - For SalesRep and SalesManager (sales track)
+		// PRD: Sales Rep manages customer relationships, quotes, and orders
+		if (isSalesRep && !isAdmin) {
+			const salesRoutes: NavigationRoute[] = [
 				{
-					id: 'fulfillment',
-					label: 'Fulfillment Queue',
-					href: Routes.Fulfillment.location,
-					icon: 'truck',
-					description: 'Process and ship orders',
+					id: 'customers',
+					label: 'Customers',
+					href: Routes.Customers.location,
+					icon: 'hospital',
+					description: 'Manage assigned customers',
 				},
 			]
 
-			// Add approval queue for SalesManager+
+			// Approval Queue for SalesManager+ only
 			if (isSalesManager) {
-				operationsRoutes.push({
+				salesRoutes.push({
 					id: 'approvals',
 					label: 'Approval Queue',
 					href: Routes.Approvals.location,
@@ -164,21 +196,10 @@ export class NavigationService {
 				})
 			}
 
-			// Add inventory view for SalesRep+
-			if (isSalesRep) {
-				operationsRoutes.push({
-					id: 'inventory',
-					label: 'Inventory',
-					href: Routes.Inventory.location,
-					icon: 'archive',
-					description: 'View stock levels',
-				})
-			}
-
 			sections.push({
-				id: 'operations',
-				title: 'Operations',
-				routes: operationsRoutes,
+				id: 'sales',
+				title: 'Sales',
+				routes: salesRoutes,
 			})
 		}
 
@@ -343,7 +364,7 @@ export class NavigationService {
 										icon: 'building' as const,
 										description: 'Multi-tenant management',
 									},
-								]
+							  ]
 							: []),
 					],
 					// Note: Section visibility controlled by isAdmin check (line 80), not roles array

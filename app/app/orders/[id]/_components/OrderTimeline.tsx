@@ -45,16 +45,7 @@
 import type { JSX } from 'react'
 
 import classNames from 'classnames'
-import {
-	CheckCircle2,
-	Circle,
-	Clock,
-	XCircle,
-	CreditCard,
-	Truck,
-	Home,
-	type LucideIcon,
-} from 'lucide-react'
+import { CheckCircle2, Circle, Clock, XCircle, CreditCard, Truck, Home, type LucideIcon } from 'lucide-react'
 
 import { formatDate } from '@_shared'
 
@@ -111,7 +102,6 @@ interface TimelineStep {
  */
 type StepState = 'complete' | 'current' | 'terminal' | 'pending'
 
-
 // ============================================================================
 // CONSTANTS
 // ============================================================================
@@ -158,7 +148,7 @@ const TIMELINE_DESCRIPTIONS: Record<OrderStatus, string> = {
  */
 const STEP_INDICATOR_CLASSES: Record<StepState, string> = {
 	complete: 'bg-success text-success-content',
-	current: 'bg-success text-success-content ring-4 ring-success/20',
+	current: 'bg-primary text-primary-content ring-4 ring-primary/25',
 	terminal: 'bg-success text-success-content', // Same as complete (checkmark, no ring)
 	pending: 'bg-base-200 text-base-content/40',
 } as const
@@ -168,18 +158,27 @@ const STEP_INDICATOR_CLASSES: Record<StepState, string> = {
  */
 const STEP_LABEL_CLASSES: Record<StepState, string> = {
 	complete: 'text-base-content font-medium',
-	current: 'text-success font-semibold',
+	current: 'text-primary font-semibold',
 	terminal: 'text-success font-semibold', // Emphasized like current (it's the destination)
 	pending: 'text-base-content/40',
 } as const
 
 /**
- * CSS classes for connector lines by next step state.
+ * CSS classes for connector lines.
+ *
+ * **Visual Logic:**
+ * - `filled` (solid green): Transition already completed (both steps done)
+ * - Dotted gray (CONNECTOR_DOTTED_EMPTY): Transition pending (next step not done)
+ *
+ * This ensures ALL pending/future transitions show as dotted lines,
+ * making it visually clear which parts of the workflow remain.
  */
 const CONNECTOR_CLASSES = {
 	filled: 'bg-success',
-	empty: 'bg-base-300',
 } as const
+
+/** Dotted connector for pending transitions; uses theme muted color for pending/future state. */
+const CONNECTOR_DOTTED_EMPTY = 'border-base-300 border-dotted'
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -247,11 +246,7 @@ function getStepAnnouncement(state: StepState): string {
  * @param currentStatus - The order's current status
  * @param timestamp - Optional timestamp for when this step was reached
  */
-function createTimelineStep(
-	status: OrderStatus,
-	currentStatus: OrderStatus,
-	timestamp?: Date | null
-): TimelineStep {
+function createTimelineStep(status: OrderStatus, currentStatus: OrderStatus, timestamp?: Date | null): TimelineStep {
 	return {
 		status,
 		label: OrderStatusHelper.getDisplay(status),
@@ -288,10 +283,7 @@ function buildTimelineSteps(order: Order): TimelineStep[] {
 
 	// For pending/waiting status, prepend Pending step
 	if (currentStatus < OrderStatus.Placed) {
-		return [
-			createTimelineStep(OrderStatus.Pending, currentStatus, order.createdAt),
-			...timeline,
-		]
+		return [createTimelineStep(OrderStatus.Pending, currentStatus, order.createdAt), ...timeline]
 	}
 
 	return timeline
@@ -333,14 +325,29 @@ function StepIndicator({
 	const renderIcon = () => {
 		if (state === 'complete' || state === 'terminal') {
 			// Completed and terminal steps show checkmark (industry standard)
-			return <CheckCircle2 className={iconSizeClasses} strokeWidth={2.5} />
+			return (
+				<CheckCircle2
+					className={iconSizeClasses}
+					strokeWidth={2.5}
+				/>
+			)
 		}
 		if (state === 'current') {
 			// Current step shows its specific icon
-			return <StepIcon className={iconSizeClasses} strokeWidth={2} />
+			return (
+				<StepIcon
+					className={iconSizeClasses}
+					strokeWidth={2}
+				/>
+			)
 		}
 		// Pending steps show empty circle
-		return <Circle className={iconSizeClasses} strokeWidth={1.5} />
+		return (
+			<Circle
+				className={iconSizeClasses}
+				strokeWidth={1.5}
+			/>
+		)
 	}
 
 	return (
@@ -350,8 +357,7 @@ function StepIndicator({
 				sizeClasses,
 				STEP_INDICATOR_CLASSES[state]
 			)}
-			aria-hidden="true"
-		>
+			aria-hidden='true'>
 			{renderIcon()}
 		</div>
 	)
@@ -361,16 +367,30 @@ function StepIndicator({
  * Horizontal connector line between steps.
  * Used in compact (horizontal) mode.
  *
+ * **Visual Logic:**
+ * - Solid green: next step is complete (transition already happened)
+ * - Dotted gray: next step is NOT complete (pending/future transition)
+ *
  * @param props - Whether the next step is complete
  */
 function HorizontalConnector({ isNextComplete }: { isNextComplete: boolean }) {
+	// Dotted line for all pending transitions (next step not yet complete)
+	if (!isNextComplete) {
+		return (
+			<div
+				className={classNames('h-0 flex-1 border-t-2', CONNECTOR_DOTTED_EMPTY)}
+				aria-hidden='true'
+			/>
+		)
+	}
+	// Solid green line for completed transitions
 	return (
 		<div
 			className={classNames(
-				'mx-1 h-1 flex-1 rounded-full transition-colors duration-300 motion-reduce:transition-none',
-				isNextComplete ? CONNECTOR_CLASSES.filled : CONNECTOR_CLASSES.empty
+				'h-1 flex-1 rounded-full transition-colors duration-300 motion-reduce:transition-none',
+				CONNECTOR_CLASSES.filled
 			)}
-			aria-hidden="true"
+			aria-hidden='true'
 		/>
 	)
 }
@@ -379,16 +399,30 @@ function HorizontalConnector({ isNextComplete }: { isNextComplete: boolean }) {
  * Vertical connector line between steps.
  * Used in full (vertical) mode.
  *
+ * **Visual Logic:**
+ * - Solid green: next step is complete (transition already happened)
+ * - Dotted gray: next step is NOT complete (pending/future transition)
+ *
  * @param props - Whether the next step is complete
  */
 function VerticalConnector({ isNextComplete }: { isNextComplete: boolean }) {
+	// Dotted line for all pending transitions (next step not yet complete)
+	if (!isNextComplete) {
+		return (
+			<div
+				className={classNames('mt-2 flex-1 w-0 self-stretch border-l-2', CONNECTOR_DOTTED_EMPTY)}
+				aria-hidden='true'
+			/>
+		)
+	}
+	// Solid green line for completed transitions
 	return (
 		<div
 			className={classNames(
 				'mt-2 w-0.5 flex-1 rounded-full transition-colors duration-300 motion-reduce:transition-none',
-				isNextComplete ? CONNECTOR_CLASSES.filled : CONNECTOR_CLASSES.empty
+				CONNECTOR_CLASSES.filled
 			)}
-			aria-hidden="true"
+			aria-hidden='true'
 		/>
 	)
 }
@@ -399,14 +433,17 @@ function VerticalConnector({ isNextComplete }: { isNextComplete: boolean }) {
  */
 function CancelledOrderDisplay() {
 	return (
-		<Card className="border border-error/30 bg-error/5 p-6 shadow-sm">
-			<div className="flex items-center gap-4">
-				<div className="flex size-12 items-center justify-center rounded-full bg-error/20">
-					<XCircle className="size-6 text-error" aria-hidden="true" />
+		<Card className='border border-error/30 bg-error/5 p-6 shadow-sm'>
+			<div className='flex items-center gap-4'>
+				<div className='flex size-12 items-center justify-center rounded-full bg-error/20'>
+					<XCircle
+						className='size-6 text-error'
+						aria-hidden='true'
+					/>
 				</div>
 				<div>
-					<h3 className="font-semibold text-base-content">Order Cancelled</h3>
-					<p className="text-sm text-base-content/60">
+					<h3 className='font-semibold text-base-content'>Order Cancelled</h3>
+					<p className='text-sm text-base-content/60'>
 						This order has been cancelled and will not be fulfilled.
 					</p>
 				</div>
@@ -421,9 +458,12 @@ function CancelledOrderDisplay() {
  */
 function CompletedOrderMessage() {
 	return (
-		<div className="mt-4 flex items-center gap-2 border-t border-base-200 pt-4 text-success">
-			<CheckCircle2 className="size-5" aria-hidden="true" />
-			<span className="font-medium">Order completed successfully!</span>
+		<div className='mt-4 flex items-center gap-2 border-t border-base-200 pt-4 text-success'>
+			<CheckCircle2
+				className='size-5'
+				aria-hidden='true'
+			/>
+			<span className='font-medium'>Order completed successfully!</span>
 		</div>
 	)
 }
@@ -434,83 +474,116 @@ function CompletedOrderMessage() {
 
 /**
  * Compact horizontal timeline stepper.
- * Displays steps in a row with connector lines.
- * Mobile-first: Stacks vertically on small screens.
+ * Mobile-first: vertical list with rail (vertical line connecting circles); desktop: horizontal row.
  *
- * **Layout Structure (Desktop):**
- * ```
- * [Circle]----[Circle]----[Circle]----[Circle]----[Circle]
- *  Placed       Paid     Processing   Shipped    Delivered
- * ```
- * Each step is a flex column (circle + label), with connectors between.
- * Connectors use self-center to align to the circle's vertical center.
+ * **Mobile (default):**
+ * - Vertical rail (h-4 = 16px) connecting circles seamlessly (gap-0)
+ * - Labels to the right, vertically centered with circles
+ * - "Current" badge only shown for non-terminal states (hidden when Delivered)
+ * - Compact density optimized for reduced scrolling
+ *
+ * **Desktop (sm:) Layout Strategy:**
+ * - Steps 1..N-1: `flex-1` containers with 96px node column + flex connector
+ * - Step N (last): `shrink-0 w-24` (96px) — no connector, no dead space
+ * - Result: circles evenly spaced, connectors equal length, last circle flush at end
+ * - Connectors use `-mx-6.5` to extend into adjacent node columns for seamless connection
+ *
+ * This follows Material Design / Apple HIG patterns where terminal anchors are flush.
  *
  * @param props - Steps array and order
  */
-function CompactTimeline({
-	steps,
-	order,
-}: {
-	steps: TimelineStep[]
-	order: Order
-}) {
+function CompactTimeline({ steps, order }: { steps: TimelineStep[]; order: Order }) {
 	return (
-		<Card className="border border-base-300 bg-base-100 p-4 shadow-sm sm:p-6">
-			{/* Accessible navigation wrapper */}
+		<Card className='border border-base-300 bg-base-100 p-4 shadow-sm sm:p-6'>
 			<nav aria-label={`Order ${order.id} progress`}>
-				<ol className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-0">
+				{/* pl-4 on mobile for subtle centering; gap-0 so rails touch circles; desktop resets padding */}
+				<ol className='flex flex-col pl-4 sm:flex-row sm:items-start sm:pl-0'>
 					{steps.map((step, index) => {
 						const state = getStepState(step)
 						const isLast = index === steps.length - 1
+						const isNextComplete = !isLast && steps[index + 1].isComplete
 
 						return (
 							<li
 								key={step.status}
 								className={classNames(
-									'flex items-center sm:flex-col sm:items-center',
-									// Desktop: All but last step should grow to fill space
-									!isLast && 'sm:flex-1'
+									'flex items-start sm:min-w-0 sm:flex-col sm:items-stretch',
+									// Last step shrinks to content; others flex-1 to share space with connectors
+									isLast ? 'sm:w-24 sm:shrink-0' : 'sm:flex-1'
 								)}
-								aria-current={step.isCurrent ? 'step' : undefined}
-							>
-								{/* Row container for indicator + connector (desktop only) */}
-								<div className="flex w-full items-center">
-									{/* Step indicator */}
-									<div className="shrink-0">
-										<StepIndicator step={step} state={state} size="compact" />
+								aria-current={step.isCurrent ? 'step' : undefined}>
+								<div className='flex w-full items-start'>
+									{/* Mobile: [circle + vertical rail segment]. Desktop: [circle + label below]. */}
+									<div className='flex shrink-0 flex-col items-center sm:w-24 sm:min-w-0 sm:flex-col sm:items-center'>
+										<StepIndicator
+											step={step}
+											state={state}
+											size='compact'
+										/>
+										{/* Mobile-only vertical rail: h-4 (16px) for compact mobile spacing */}
+										{/* Dotted for pending transitions, solid green for completed */}
+										{!isLast &&
+											(isNextComplete ? (
+												<div
+													className={classNames(
+														'h-4 w-0.5 shrink-0 rounded-full transition-colors duration-300 motion-reduce:transition-none sm:hidden',
+														CONNECTOR_CLASSES.filled
+													)}
+													aria-hidden='true'
+												/>
+											) : (
+												<div
+													className={classNames(
+														'h-4 w-0 shrink-0 border-l-2 sm:hidden',
+														CONNECTOR_DOTTED_EMPTY
+													)}
+													aria-hidden='true'
+												/>
+											))}
+										{/* Desktop label: below circle, centered; hidden on mobile */}
+										<span
+											className={classNames(
+												'hidden sm:mt-2 sm:block sm:text-center sm:text-xs',
+												STEP_LABEL_CLASSES[state]
+											)}>
+											{step.label}
+											<span className='sr-only'> - {getStepAnnouncement(state)}</span>
+										</span>
 									</div>
-
-									{/* Connector line - Desktop only, aligned to indicator center */}
+									{/* Mobile label: right of circle, vertically centered with circle (min-h-11 = 44px touch target); self-start keeps block from stretching */}
+									<span
+										className={classNames(
+											'ml-3 flex min-h-11 flex-1 items-center self-start text-sm sm:hidden',
+											STEP_LABEL_CLASSES[state]
+										)}>
+										{step.label}
+										<span className='sr-only'> - {getStepAnnouncement(state)}</span>
+									</span>
+									{/* Horizontal connector - Desktop only; -mx-6.5 extends line into node column gap so it touches circles (w-24, size-11 → 26px gap each side) */}
 									{!isLast && (
-										<div className="hidden flex-1 sm:block">
-											<HorizontalConnector isNextComplete={steps[index + 1].isComplete} />
+										<div className='hidden flex-1 sm:mt-5 sm:flex sm:items-center sm:-mx-6.5'>
+											<HorizontalConnector isNextComplete={isNextComplete} />
 										</div>
 									)}
 								</div>
-
-								{/* Label - beside on mobile, below on desktop */}
-								<span
-									className={classNames(
-										'ml-3 text-sm sm:ml-0 sm:mt-2 sm:text-center sm:text-xs',
-										STEP_LABEL_CLASSES[state]
-									)}
-								>
-									{step.label}
-									{/* Screen reader announcement for state */}
-									<span className="sr-only"> - {getStepAnnouncement(state)}</span>
-								</span>
 							</li>
 						)
 					})}
 				</ol>
 			</nav>
 
-			{/* Current step badge - Mobile only */}
-			<div className="mt-4 sm:hidden">
-				<Badge variant="success" size="sm" className="w-full justify-center">
-					Current: {steps.find((s) => s.isCurrent)?.label ?? 'Unknown'}
-				</Badge>
-			</div>
+			{/* Current step badge - Mobile only; hidden for terminal states (Delivered) since it's obvious */}
+			{!OrderStatusHelper.isTerminal(order.status) && (
+				<div className='mt-3 sm:hidden'>
+					<Badge
+						variant='primary'
+						badgeStyle='soft'
+						size='sm'
+						className='w-full justify-center'>
+						Current: {steps.find((s) => s.isCurrent)?.label ?? 'Unknown'}
+					</Badge>
+				</div>
+			)}
 		</Card>
 	)
 }
@@ -529,15 +602,13 @@ function FullTimeline({ steps, order }: { steps: TimelineStep[]; order: Order })
 	const isDelivered = order.status === OrderStatus.Delivered
 
 	return (
-		<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+		<Card className='border border-base-300 bg-base-100 p-6 shadow-sm'>
 			{/* Header */}
-			<h3 className="mb-6 text-sm font-semibold uppercase tracking-wide text-base-content/60">
-				Order Progress
-			</h3>
+			<h3 className='mb-6 text-sm font-semibold uppercase tracking-wide text-base-content/60'>Order Progress</h3>
 
 			{/* Accessible navigation wrapper */}
 			<nav aria-label={`Order ${order.id} progress details`}>
-				<ol className="relative">
+				<ol className='relative'>
 					{steps.map((step, index) => {
 						const state = getStepState(step)
 						const isLast = index === steps.length - 1
@@ -545,30 +616,30 @@ function FullTimeline({ steps, order }: { steps: TimelineStep[]; order: Order })
 						return (
 							<li
 								key={step.status}
-								className="flex gap-4 pb-6 last:pb-0"
-								aria-current={step.isCurrent ? 'step' : undefined}
-							>
+								className='flex gap-4 pb-6 last:pb-0'
+								aria-current={step.isCurrent ? 'step' : undefined}>
 								{/* Timeline rail (indicator + connector) */}
-								<div className="flex flex-col items-center">
-									<StepIndicator step={step} state={state} />
+								<div className='flex flex-col items-center'>
+									<StepIndicator
+										step={step}
+										state={state}
+									/>
 
 									{/* Vertical connector (not on last step) */}
-									{!isLast && (
-										<VerticalConnector
-											isNextComplete={steps[index + 1].isComplete}
-										/>
-									)}
+									{!isLast && <VerticalConnector isNextComplete={steps[index + 1].isComplete} />}
 								</div>
 
 								{/* Step content */}
-								<div className="flex-1 pt-2">
+								<div className='flex-1 pt-2'>
 									{/* Label row with optional "Current" badge */}
-									<div className="flex flex-wrap items-center gap-2">
+									<div className='flex flex-wrap items-center gap-2'>
 										<h4 className={classNames('font-semibold', STEP_LABEL_CLASSES[state])}>
 											{step.label}
 										</h4>
 										{step.isCurrent && (
-											<Badge variant="success" size="sm">
+											<Badge
+												variant='primary'
+												size='sm'>
 												Current
 											</Badge>
 										)}
@@ -578,17 +649,14 @@ function FullTimeline({ steps, order }: { steps: TimelineStep[]; order: Order })
 									<p
 										className={classNames(
 											'mt-1 text-sm',
-											state !== 'pending'
-												? 'text-base-content/70'
-												: 'text-base-content/40'
-										)}
-									>
+											state !== 'pending' ? 'text-base-content/70' : 'text-base-content/40'
+										)}>
 										{step.description}
 									</p>
 
 									{/* Timestamp if available */}
 									{step.timestamp && (
-										<p className="mt-1 text-xs text-base-content/50">
+										<p className='mt-1 text-xs text-base-content/50'>
 											<time dateTime={step.timestamp.toISOString()}>
 												{formatDate(step.timestamp)}
 											</time>
@@ -596,7 +664,7 @@ function FullTimeline({ steps, order }: { steps: TimelineStep[]; order: Order })
 									)}
 
 									{/* Screen reader announcement */}
-									<span className="sr-only">{getStepAnnouncement(state)}</span>
+									<span className='sr-only'>{getStepAnnouncement(state)}</span>
 								</div>
 							</li>
 						)
@@ -646,11 +714,7 @@ function FullTimeline({ steps, order }: { steps: TimelineStep[]; order: Order })
  * @param props - Component props
  * @returns OrderTimeline component
  */
-export function OrderTimeline({
-	order,
-	compact = false,
-	className,
-}: OrderTimelineProps): JSX.Element {
+export function OrderTimeline({ order, compact = false, className }: OrderTimelineProps): JSX.Element {
 	// Build timeline steps (pure function, no memo needed per React 19 guidelines)
 	const steps = buildTimelineSteps(order)
 
@@ -667,9 +731,15 @@ export function OrderTimeline({
 	return (
 		<div className={className}>
 			{compact ? (
-				<CompactTimeline steps={steps} order={order} />
+				<CompactTimeline
+					steps={steps}
+					order={order}
+				/>
 			) : (
-				<FullTimeline steps={steps} order={order} />
+				<FullTimeline
+					steps={steps}
+					order={order}
+				/>
 			)}
 		</div>
 	)
