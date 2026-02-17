@@ -67,6 +67,13 @@ export function getSettingsSections(
 					description: 'Reduce animations and transitions',
 					component: componentMap['reduced-motion'],
 				},
+				{
+					id: 'admin-view',
+					type: 'custom',
+					label: 'Admin View',
+					description: 'Show internal identifiers and debug metadata',
+					component: componentMap['admin-view'],
+				},
 			],
 		},
 	]

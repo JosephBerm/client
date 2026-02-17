@@ -43,6 +43,7 @@ import { checkReducedMotion, REDUCED_MOTION_VARIANTS, MODAL_ANIMATION } from '@_
 import Button from '@_components/ui/Button'
 
 import AppearanceSetting from './AppearanceSetting'
+import AdminViewSetting from './AdminViewSetting'
 import ReducedMotionSetting from './ReducedMotionSetting'
 import SettingRow from './SettingRow'
 
@@ -89,6 +90,7 @@ export default function SettingsModal({ isOpen, onClose, defaultSectionId }: Set
 	const componentMap = {
 		appearance: AppearanceSetting,
 		'reduced-motion': ReducedMotionSetting,
+		'admin-view': AdminViewSetting,
 	}
 
 	const sections = getSettingsSections(componentMap)

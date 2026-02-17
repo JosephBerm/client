@@ -69,6 +69,8 @@ export interface UserPreferences {
 	tablePageSize: number
 	/** Whether sidebar is collapsed (mobile/desktop) */
 	sidebarCollapsed: boolean
+	/** Global admin view mode for internal identifiers */
+	adminViewEnabled: boolean
 	/** Additional custom preferences can be added dynamically */
 	[key: string]: any
 }
@@ -139,6 +141,14 @@ interface UserSettingsActions {
 	 * @returns {void}
 	 */
 	setSidebarCollapsed: (collapsed: boolean) => void
+
+	/**
+	 * Sets the global admin view preference.
+	 *
+	 * @param {boolean} enabled - Whether admin view should be enabled
+	 * @returns {void}
+	 */
+	setAdminViewEnabled: (enabled: boolean) => void
 	
 	/**
 	 * Sets the reduced motion preference and updates DOM and persistence.
@@ -168,6 +178,7 @@ type UserSettingsStore = ThemeState & ReducedMotionState & PreferencesState & Us
 const DEFAULT_PREFERENCES: UserPreferences = {
 	tablePageSize: 10,
 	sidebarCollapsed: false,
+	adminViewEnabled: false,
 }
 
 /**
@@ -357,6 +368,29 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 		},
 
 		/**
+		 * Sets the admin view toggle state.
+		 * Used to reveal internal identifiers in privileged admin surfaces.
+		 */
+		setAdminViewEnabled: (enabled) => {
+			set((state) => ({
+				preferences: {
+					...state.preferences,
+					adminViewEnabled: enabled,
+				},
+			}))
+
+			try {
+				UserSettingsService.setSetting('adminViewEnabled', enabled)
+			} catch (error) {
+				logger.error('Failed to persist admin view state', {
+					error,
+					enabled,
+					component: 'useUserSettingsStore',
+				})
+			}
+		},
+
+		/**
 		 * Set reduced motion preference and update DOM and persistence.
 		 */
 		setPrefersReducedMotion: (prefersReduced) => {
@@ -420,11 +454,14 @@ export const useUserSettingsStore = create<UserSettingsStore>()((set, get) => {
 					sidebarCollapsed: settings.sidebarCollapsed !== undefined 
 						? settings.sidebarCollapsed 
 						: DEFAULT_PREFERENCES.sidebarCollapsed,
+					adminViewEnabled: settings.adminViewEnabled !== undefined
+						? settings.adminViewEnabled
+						: DEFAULT_PREFERENCES.adminViewEnabled,
 				}
 
 				// Copy any custom preferences
 				for (const [key, value] of Object.entries(settings)) {
-					if (!['theme', 'prefersReducedMotion', 'tablePageSize', 'sidebarCollapsed'].includes(key)) {
+					if (!['theme', 'prefersReducedMotion', 'tablePageSize', 'sidebarCollapsed', 'adminViewEnabled'].includes(key)) {
 						preferences[key] = value
 					}
 				}

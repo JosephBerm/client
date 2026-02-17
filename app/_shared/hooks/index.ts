@@ -60,6 +60,8 @@ export { useRealtimeSubscription } from './useRealtimeSubscription'
 // =============================================================================
 export { usePermissions, Resources, Actions, Contexts } from './usePermissions'
 export type { UsePermissionsReturn } from './usePermissions'
+export { useAdminView } from './useAdminView'
+export type { UseAdminViewReturn } from './useAdminView'
 
 // =============================================================================
 // DEV-ONLY HOOKS (Not exported from @_shared main barrel)

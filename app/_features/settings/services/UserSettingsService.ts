@@ -78,6 +78,13 @@ export interface UserSettings {
 	 */
 	prefersReducedMotion?: boolean
 	/**
+	 * Global admin view mode for internal/debug metadata.
+	 * When enabled, privileged UI surfaces can render internal identifiers.
+	 *
+	 * @default false
+	 */
+	adminViewEnabled?: boolean
+	/**
 	 * Custom settings can be added dynamically.
 	 * Allows for extensibility without schema changes.
 	 */
@@ -118,6 +125,7 @@ const DEFAULT_SETTINGS: UserSettings = {
 	tablePageSize: 10,
 	sidebarCollapsed: false,
 	prefersReducedMotion: false,
+	adminViewEnabled: false,
 }
 
 /**
@@ -375,6 +383,8 @@ export class UserSettingsService {
 			case 'sidebarCollapsed':
 				return typeof value === 'boolean'
 			case 'prefersReducedMotion':
+				return typeof value === 'boolean'
+			case 'adminViewEnabled':
 				return typeof value === 'boolean'
 			default:
 				// For custom settings, accept any value

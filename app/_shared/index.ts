@@ -363,6 +363,7 @@ export { useCopyToClipboard } from './hooks/useCopyToClipboard'
 
 // RBAC Hooks
 export { usePermissions, Resources, Actions, Contexts, type UsePermissionsReturn } from './hooks/usePermissions'
+export { useAdminView, type UseAdminViewReturn } from './hooks/useAdminView'
 
 // ============================================================================
 // CONSTANTS (Single Source of Truth)
