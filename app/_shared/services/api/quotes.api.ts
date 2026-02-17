@@ -79,6 +79,20 @@ export const QuotesApi = {
 	 */
 	archive: async (quoteId: string) => HttpService.post<boolean>(`/quotes/${quoteId}/archive`, null),
 
+	/**
+	 * Gets activity log entries for a quote approval/audit timeline.
+	 * @param quoteId - UUID string of the quote
+	 */
+	getActivity: async (quoteId: string) =>
+		HttpService.get<
+			{
+				action: string
+				actionDetails?: string | null
+				userId?: string | null
+				timestamp: string
+			}[]
+		>(`/quotes/${quoteId}/activity`),
+
 	// =========================================================================
 	// PRICING METHODS - Quote Pricing Workflow
 	// =========================================================================

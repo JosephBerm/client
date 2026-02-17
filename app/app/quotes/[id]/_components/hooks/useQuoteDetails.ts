@@ -100,7 +100,10 @@ export function useQuoteDetails(): UseQuoteDetailsReturn {
 	 */
 	const refresh = async () => {
 		if (quoteId) {
-			await queryClient.invalidateQueries({ queryKey: quoteKeys.detail(quoteId) })
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: quoteKeys.detail(quoteId) }),
+				queryClient.invalidateQueries({ queryKey: quoteKeys.activity(quoteId) }),
+			])
 		}
 	}
 

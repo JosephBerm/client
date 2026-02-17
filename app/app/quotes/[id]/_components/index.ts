@@ -58,12 +58,14 @@ export type { QuoteApprovalHistoryProps } from './QuoteApprovalHistory'
 
 export {
 	useQuoteDetails,
+	useQuoteActivity,
 	useQuotePermissions,
 	useQuoteActions,
 	useQuoteAssignment,
 	useAutoMarkQuoteAsRead,
 	useQuotePricing,
 	type UseQuoteDetailsReturn,
+	type QuoteActivityLogItem,
 	type UseQuotePermissionsReturn,
 	type UseQuoteActionsReturn,
 	type UseQuoteAssignmentReturn,

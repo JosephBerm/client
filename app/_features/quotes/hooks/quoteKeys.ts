@@ -18,7 +18,9 @@ export const quoteKeys = {
 	/** Key for a specific quote detail */
 	detail: (id: string) => [...quoteKeys.details(), id] as const,
 
+	/** Key for a specific quote activity feed */
+	activity: (id: string) => [...quoteKeys.detail(id), 'activity'] as const,
+
 	/** Keys for quote pricing summary */
 	pricingSummary: (quoteId: string) => [...quoteKeys.all, quoteId, 'pricing-summary'] as const,
 }
-

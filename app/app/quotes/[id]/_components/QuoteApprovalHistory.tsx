@@ -5,31 +5,24 @@
  * Displays status changes, approvals, rejections, and pricing overrides.
  *
  * **Features:**
- * - Status change timeline
- * - Approval/rejection history
- * - Pricing override records (when backend API available)
- * - User attribution for each action
- * - Timestamp for each event
- *
- * **Note:** Currently displays basic status history from quote data.
- * Full audit trail will be available when backend API is implemented.
+ * - Status change timeline from backend audit events
+ * - Approval/rejection history with exact event timestamps
+ * - User attribution for each action when available
  *
  * @module app/quotes/[id]/_components/QuoteApprovalHistory
  */
 
 'use client'
 
-import { useMemo } from 'react'
+import { CheckCircle, XCircle, Clock, FileCheck, User, AlertTriangle } from 'lucide-react'
 
-import { CheckCircle, XCircle, Clock, FileCheck, User, DollarSign } from 'lucide-react'
-
-import { formatDate } from '@_lib/dates'
-
-import type Quote from '@_classes/Quote'
-import { QuoteStatus } from '@_classes/Enums'
+import { formatDate, parseDateOrNow } from '@_lib/dates'
 
 import Card from '@_components/ui/Card'
 
+import { useQuoteActivity } from './hooks/useQuoteActivity'
+
+import type { QuoteActivityLogItem } from './hooks/useQuoteActivity'
 import type { QuoteWithPermissionsProps } from './types'
 
 /**
@@ -62,73 +55,74 @@ export interface QuoteApprovalHistoryProps extends QuoteWithPermissionsProps {
  * @returns QuoteApprovalHistory component
  */
 export default function QuoteApprovalHistory({ quote, permissions, className }: QuoteApprovalHistoryProps) {
-	if (!quote) return null
+	const { data: activity = [], isLoading: isActivityLoading } = useQuoteActivity(quote?.id ?? null)
 
-	// Build history entries from quote data
-	// TODO: Replace with backend audit trail API when available
-	const historyEntries = useMemo<HistoryEntry[]>(() => {
-		const entries: HistoryEntry[] = []
+	if (!quote) {
+		return null
+	}
 
-		// Quote created
-		if (quote.createdAt) {
-			entries.push({
-				action: 'Quote Created',
-				description: 'Quote request was submitted',
-				timestamp: quote.createdAt,
-				icon: FileCheck,
-				variant: 'info',
-			})
+	const mapActivityToHistoryEntry = (item: QuoteActivityLogItem): HistoryEntry => {
+		switch (item.action) {
+			case 'QUOTE_CREATED':
+				return {
+					action: 'Quote Created',
+					description: item.actionDetails ?? 'Quote request was submitted',
+					timestamp: item.timestamp,
+					user: item.userId ?? undefined,
+					icon: FileCheck,
+					variant: 'info',
+				}
+			case 'QUOTE_APPROVED':
+				return {
+					action: 'Approved',
+					description: item.actionDetails ?? 'Quote pricing was approved',
+					timestamp: item.timestamp,
+					user: item.userId ?? undefined,
+					icon: CheckCircle,
+					variant: 'success',
+				}
+			case 'QUOTE_REJECTED':
+				return {
+					action: 'Rejected',
+					description: item.actionDetails ?? 'Quote was rejected',
+					timestamp: item.timestamp,
+					user: item.userId ?? undefined,
+					icon: XCircle,
+					variant: 'error',
+				}
+			case 'QUOTE_CONVERTED':
+				return {
+					action: 'Converted to Order',
+					description: item.actionDetails ?? 'Quote was converted to an order',
+					timestamp: item.timestamp,
+					user: item.userId ?? undefined,
+					icon: CheckCircle,
+					variant: 'success',
+				}
+			case 'STATUS_CHANGED':
+				return {
+					action: 'Status Updated',
+					description: item.actionDetails ?? 'Quote status changed',
+					timestamp: item.timestamp,
+					user: item.userId ?? undefined,
+					icon: Clock,
+					variant: 'warning',
+				}
+			default:
+				return {
+					action: item.action.replaceAll('_', ' '),
+					description: item.actionDetails ?? 'Quote activity recorded',
+					timestamp: item.timestamp,
+					user: item.userId ?? undefined,
+					icon: AlertTriangle,
+					variant: 'info',
+				}
 		}
+	}
 
-		// Status changes based on current status
-		if (quote.status === QuoteStatus.Read) {
-			entries.push({
-				action: 'Marked as Read',
-				description: 'Quote was reviewed and ownership taken',
-				timestamp: quote.createdAt || new Date(),
-				user: quote.assignedSalesRepId || undefined,
-				icon: CheckCircle,
-				variant: 'info',
-			})
-		}
-
-		if (quote.status === QuoteStatus.Approved) {
-			entries.push({
-				action: 'Approved',
-				description: 'Quote pricing was approved',
-				timestamp: quote.createdAt || new Date(),
-				icon: CheckCircle,
-				variant: 'success',
-			})
-		}
-
-		if (quote.status === QuoteStatus.Rejected) {
-			entries.push({
-				action: 'Rejected',
-				description: 'Quote was rejected',
-				timestamp: quote.createdAt || new Date(),
-				icon: XCircle,
-				variant: 'error',
-			})
-		}
-
-		if (quote.status === QuoteStatus.Converted) {
-			entries.push({
-				action: 'Converted to Order',
-				description: 'Quote was converted to an order',
-				timestamp: quote.createdAt || new Date(),
-				icon: CheckCircle,
-				variant: 'success',
-			})
-		}
-
-		// Sort by timestamp (most recent first)
-		return entries.sort((a, b) => {
-			const timeA = new Date(a.timestamp).getTime()
-			const timeB = new Date(b.timestamp).getTime()
-			return timeB - timeA
-		})
-	}, [quote])
+	const historyEntries = activity
+		.map(mapActivityToHistoryEntry)
+		.sort((a, b) => parseDateOrNow(b.timestamp).getTime() - parseDateOrNow(a.timestamp).getTime())
 
 	if (historyEntries.length === 0) {
 		return null
@@ -141,7 +135,7 @@ export default function QuoteApprovalHistory({ quote, permissions, className }: 
 
 	return (
 		<Card
-			className={`border border-base-300 bg-base-100 p-6 shadow-sm ${className || ''}`}
+			className={`border border-base-300 bg-base-100 p-6 shadow-sm ${className ?? ''}`}
 			data-testid='approval-history'
 			data-audit-trail='true'>
 			{/* Header */}
@@ -157,6 +151,7 @@ export default function QuoteApprovalHistory({ quote, permissions, className }: 
 
 			{/* History Timeline */}
 			<div className='space-y-4'>
+				{isActivityLoading && <p className='text-sm text-base-content/60'>Loading quote activity...</p>}
 				{historyEntries.map((entry, index) => {
 					const Icon = entry.icon
 					const variantClasses = {
@@ -200,17 +195,6 @@ export default function QuoteApprovalHistory({ quote, permissions, className }: 
 					)
 				})}
 			</div>
-
-			{/* Note about full audit trail */}
-			{permissions.canUpdate && (
-				<div className='mt-6 p-3 rounded-lg bg-base-200/50 border border-base-200'>
-					<p className='text-xs text-base-content/60'>
-						<Clock className='h-3 w-3 inline mr-1' />
-						Full audit trail with detailed pricing overrides and user actions will be available when backend
-						API is implemented.
-					</p>
-				</div>
-			)}
 		</Card>
 	)
 }

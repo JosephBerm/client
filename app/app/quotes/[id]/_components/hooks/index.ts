@@ -34,6 +34,9 @@ export { quoteKeys } from './quoteKeys'
 export { useQuoteDetails } from './useQuoteDetails'
 export type { UseQuoteDetailsReturn } from './useQuoteDetails'
 
+export { useQuoteActivity } from './useQuoteActivity'
+export type { QuoteActivityLogItem } from './useQuoteActivity'
+
 // ============================================================================
 // PERMISSION HOOKS
 // ============================================================================
