@@ -188,6 +188,16 @@ export interface OrderTimelineStep {
 }
 
 /**
+ * Order activity log item (audit feed).
+ */
+export interface OrderActivityLogItem {
+	action: string
+	actionDetails?: string | null
+	userId?: string | null
+	timestamp: string
+}
+
+/**
  * Order action button configuration.
  * Used to render role-appropriate action buttons.
  */

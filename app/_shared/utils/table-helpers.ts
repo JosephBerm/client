@@ -20,7 +20,7 @@
  * import { createServerTableFetcher, formatCurrency, formatDate } from '@_shared';
  * 
  * // Create a fetcher for products
- * const fetchProducts = createServerTableFetcher<Product>('/api/products');
+ * const fetchProducts = createServerTableFetcher<Product>('/products');
  * 
  * // Use in table column
  * {
@@ -89,7 +89,7 @@ export function convertSortingToApi(sorting: SortingState): {
  * 
  * @template T - Type of data items returned from the server
  * 
- * @param {string} endpoint - Backend API endpoint (e.g., '/api/products/search')
+ * @param {string} endpoint - Backend API endpoint (e.g., '/products/search')
  * @param {Record<string, any>} additionalFilters - Optional custom filters to include in every request
  * 
  * @returns {Function} Async function compatible with useServerTable hook
@@ -98,7 +98,7 @@ export function convertSortingToApi(sorting: SortingState): {
  * ```typescript
  * // Create a fetcher for products with category filter
  * const fetchProducts = createServerTableFetcher<Product>(
- *   '/api/products/search',
+ *   '/products/search',
  *   { category: 'medical' }
  * );
  * 
@@ -109,7 +109,7 @@ export function convertSortingToApi(sorting: SortingState): {
  * 
  * // Or use directly with RichDataGrid
  * <RichDataGrid
- *   endpoint="/api/orders/search"
+ *   endpoint="/orders/search"
  *   columns={orderColumns}
  *   ariaLabel="Orders table"
  * />

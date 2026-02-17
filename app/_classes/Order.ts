@@ -89,7 +89,7 @@
  * @module Order
  */
 
-import { parseRequiredTimestamp } from '@_lib/dates'
+import { parseDateSafe, parseRequiredTimestamp } from '@_lib/dates'
 
 import { OrderStatus } from '@_classes/Enums'
 
@@ -139,6 +139,36 @@ export default class Order {
 	
 	/** Optional order notes/instructions */
 	notes: string = ""
+
+	/** Internal notes for staff (not visible to customers) */
+	internalNotes?: string | null = null
+
+	/** Assigned sales rep ID (for RBAC) */
+	assignedSalesRepId?: string | null = null
+
+	/** Payment confirmation timestamp */
+	paymentConfirmedAt?: Date | null = null
+
+	/** Payment confirmer user ID */
+	paymentConfirmedBy?: string | null = null
+
+	/** Payment reference (check #, transaction ID, etc.) */
+	paymentReference?: string | null = null
+
+	/** Order processing timestamp */
+	processingAt?: Date | null = null
+
+	/** Shipment tracking number (order-level) */
+	trackingNumber?: string | null = null
+
+	/** Order shipped timestamp */
+	shippedAt?: Date | null = null
+
+	/** Order delivered timestamp */
+	deliveredAt?: Date | null = null
+
+	/** Order cancelled timestamp */
+	cancelledAt?: Date | null = null
 
 	/**
 	 * Creates an order from an existing quote.
@@ -216,6 +246,13 @@ export default class Order {
 			
 			// Parse creation date from string if needed (required timestamp - always validate)
 			this.createdAt = parseRequiredTimestamp(param.createdAt, 'Order', 'createdAt')
+
+			// Optional timestamps (defensive parsing)
+			this.paymentConfirmedAt = parseDateSafe(param.paymentConfirmedAt) ?? null
+			this.processingAt = parseDateSafe(param.processingAt) ?? null
+			this.shippedAt = parseDateSafe(param.shippedAt) ?? null
+			this.deliveredAt = parseDateSafe(param.deliveredAt) ?? null
+			this.cancelledAt = parseDateSafe(param.cancelledAt) ?? null
 			
 			// Deep copy customer object
 			if (param.customer) {

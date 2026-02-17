@@ -93,20 +93,13 @@ export default function OrdersPage() {
 	const fetcher = async (filter: RichSearchFilter): Promise<RichPagedResult<OrderRow>> => {
 		const response = await API.Orders.richSearch(filter)
 
-		if (response.data?.payload) {
+		if (response.data?.statusCode === 200 && response.data.payload) {
 			return response.data.payload as unknown as RichPagedResult<OrderRow>
 		}
 
-		// Return empty result on error
-		return {
-			data: [],
-			page: 1,
-			pageSize: filter.pageSize,
-			total: 0,
-			totalPages: 0,
-			hasNext: false,
-			hasPrevious: false,
-		}
+		const statusCode = response.data?.statusCode ?? response.status
+		const message = response.data?.message ?? 'Failed to load orders'
+		throw new Error(`${message} (status: ${statusCode})`)
 	}
 
 	// Column helper for type-safe column definitions

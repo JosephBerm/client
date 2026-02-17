@@ -52,7 +52,7 @@ export interface ImageSize {
 
 /**
  * Gets the API base URL for image requests.
- * Returns the API base URL without any path prefix.
+ * Returns the API base URL including the versioned prefix.
  * 
  * **Industry Best Practice (MAANG-level):**
  * - Use environment variables for base URL configuration
@@ -60,15 +60,14 @@ export interface ImageSize {
  * - Provide clear error messages for debugging
  * - Follow Next.js Image optimization patterns (Vercel/Shopify/Amazon)
  * 
- * NOTE: API routes are at root level (e.g., /products/image), not under /api prefix.
- * This is the MAANG-standard approach where API paths are defined by route attributes.
+ * NOTE: API routes are versioned and prefixed (e.g., /api/v1/products/image).
  * 
- * @returns {string} API base URL (e.g., 'http://localhost:5254')
+ * @returns {string} API base URL (e.g., 'http://localhost:5254/api/v1')
  * 
  * @example
  * ```typescript
  * const baseUrl = getImageBaseUrl();
- * // Returns: 'http://localhost:5254' (dev) or 'https://prod-server20241205193558.azurewebsites.net' (prod)
+ * // Returns: 'http://localhost:5254/api/v1' (dev) or 'https://prod-server20241205193558.azurewebsites.net/api/v1' (prod)
  * ```
  */
 export function getImageBaseUrl(): string {
@@ -186,8 +185,8 @@ export function getProductImageUrl(
 
 	// Construct full image URL
 	// Format: {baseUrl}/products/image?productId={id}&image={name}
-	// Example: http://localhost:5254/products/image?productId=123&image=photo.jpg (dev)
-	// Example: https://prod-server20241205193558.azurewebsites.net/products/image?productId=123&image=photo.jpg (prod)
+	// Example: http://localhost:5254/api/v1/products/image?productId=123&image=photo.jpg (dev)
+	// Example: https://prod-server20241205193558.azurewebsites.net/api/v1/products/image?productId=123&image=photo.jpg (prod)
 	// This matches the API endpoint structure defined in backend ProductsController
 	const finalUrl = `${baseUrl}/products/image?${queryParts.join('&')}`
 

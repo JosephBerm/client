@@ -7,6 +7,7 @@
  * - useOrderActions: Workflow operations (confirm, update status, etc.)
  * - useOrderDetails: Data fetching and state management
  * - useOrderPermissions: Role-based permission checks (DRY pattern)
+ * - useOrderActivity: Activity feed (audit log) data
  * 
  * @see prd_orders.md - Order Management PRD
  * @module app/orders/[id]/_components/hooks
@@ -30,3 +31,9 @@ export { useOrderActions } from './useOrderActions'
 
 export { useOrderPermissions } from './useOrderPermissions'
 export type { UseOrderPermissionsReturn } from './useOrderPermissions'
+
+// =============================================================================
+// ACTIVITY HOOKS
+// =============================================================================
+
+export { useOrderActivity } from './useOrderActivity'

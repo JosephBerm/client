@@ -91,6 +91,8 @@ interface TimelineStep {
 	isCurrent: boolean
 	/** Timestamp when this step was reached (if available) */
 	timestamp?: Date | null
+	/** Whether to show a pulse animation for this step */
+	isPulsing?: boolean
 }
 
 /**
@@ -180,6 +182,9 @@ const CONNECTOR_CLASSES = {
 /** Dotted connector for pending transitions; uses theme muted color for pending/future state. */
 const CONNECTOR_DOTTED_EMPTY = 'border-base-300 border-dotted'
 
+/** Pulse window in milliseconds for live update feedback */
+const PULSE_WINDOW_MS = 6000
+
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
@@ -231,6 +236,13 @@ function getStepAnnouncement(state: StepState): string {
 	}
 }
 
+function getTimestampLabel(step: TimelineStep): string | null {
+	if (!step.timestamp) {
+		return null
+	}
+	return formatDate(step.timestamp, 'datetime')
+}
+
 /**
  * Builds the timeline steps based on order status.
  * Handles normal workflow and cancelled orders separately.
@@ -246,7 +258,12 @@ function getStepAnnouncement(state: StepState): string {
  * @param currentStatus - The order's current status
  * @param timestamp - Optional timestamp for when this step was reached
  */
-function createTimelineStep(status: OrderStatus, currentStatus: OrderStatus, timestamp?: Date | null): TimelineStep {
+function createTimelineStep(
+	status: OrderStatus,
+	currentStatus: OrderStatus,
+	timestamp?: Date | null,
+	isPulsing?: boolean
+): TimelineStep {
 	return {
 		status,
 		label: OrderStatusHelper.getDisplay(status),
@@ -255,6 +272,7 @@ function createTimelineStep(status: OrderStatus, currentStatus: OrderStatus, tim
 		isComplete: currentStatus >= status,
 		isCurrent: currentStatus === status,
 		timestamp: timestamp ?? null,
+		isPulsing,
 	}
 }
 
@@ -263,8 +281,13 @@ function buildTimelineSteps(order: Order): TimelineStep[] {
 
 	// Handle cancelled orders - show single cancelled state
 	if (currentStatus === OrderStatus.Cancelled) {
-		return [createTimelineStep(OrderStatus.Cancelled, currentStatus, order.createdAt)]
+		return [createTimelineStep(OrderStatus.Cancelled, currentStatus, order.cancelledAt ?? order.createdAt)]
 	}
+
+	const isRecentPaid =
+		order.status === OrderStatus.Paid &&
+		order.paymentConfirmedAt != null &&
+		Date.now() - order.paymentConfirmedAt.getTime() < PULSE_WINDOW_MS
 
 	// Normal workflow timeline (Placed → Paid → Processing → Shipped → Delivered)
 	const workflowStatuses: OrderStatus[] = [
@@ -276,9 +299,9 @@ function buildTimelineSteps(order: Order): TimelineStep[] {
 	]
 
 	const timeline: TimelineStep[] = workflowStatuses.map((status) => {
-		// Use order.createdAt for Placed step if complete
-		const timestamp = status === OrderStatus.Placed && currentStatus >= status ? order.createdAt : null
-		return createTimelineStep(status, currentStatus, timestamp)
+		const timestamp = getStatusTimestamp(order, status, currentStatus)
+		const isPulsing = status === OrderStatus.Paid ? isRecentPaid : false
+		return createTimelineStep(status, currentStatus, timestamp, isPulsing)
 	})
 
 	// For pending/waiting status, prepend Pending step
@@ -287,6 +310,27 @@ function buildTimelineSteps(order: Order): TimelineStep[] {
 	}
 
 	return timeline
+}
+
+function getStatusTimestamp(order: Order, status: OrderStatus, currentStatus: OrderStatus): Date | null {
+	if (currentStatus < status) {
+		return null
+	}
+
+	switch (status) {
+		case OrderStatus.Placed:
+			return order.createdAt ?? null
+		case OrderStatus.Paid:
+			return order.paymentConfirmedAt ?? null
+		case OrderStatus.Processing:
+			return order.processingAt ?? null
+		case OrderStatus.Shipped:
+			return order.shippedAt ?? null
+		case OrderStatus.Delivered:
+			return order.deliveredAt ?? null
+		default:
+			return null
+	}
 }
 
 // ============================================================================
@@ -317,6 +361,9 @@ function StepIndicator({
 	// WCAG 2.5.5: Minimum 44px touch target (size-11 = 44px, size-12 = 48px)
 	const sizeClasses = size === 'compact' ? 'size-11' : 'size-12'
 	const iconSizeClasses = size === 'compact' ? 'size-5' : 'size-6'
+	const pulseClasses = step.isPulsing
+		? 'ring-4 ring-success/30 animate-pulse motion-reduce:animate-none'
+		: ''
 
 	// Determine which icon to show based on state
 	// - Complete/Terminal: Show checkmark for clarity
@@ -355,7 +402,8 @@ function StepIndicator({
 			className={classNames(
 				'flex shrink-0 items-center justify-center rounded-full transition-all duration-200 motion-reduce:transition-none',
 				sizeClasses,
-				STEP_INDICATOR_CLASSES[state]
+				STEP_INDICATOR_CLASSES[state],
+				pulseClasses
 			)}
 			aria-hidden='true'>
 			{renderIcon()}
@@ -502,6 +550,7 @@ function CompactTimeline({ steps, order }: { steps: TimelineStep[]; order: Order
 						const state = getStepState(step)
 						const isLast = index === steps.length - 1
 						const isNextComplete = !isLast && steps[index + 1].isComplete
+						const timestampLabel = getTimestampLabel(step)
 
 						return (
 							<li
@@ -541,24 +590,38 @@ function CompactTimeline({ steps, order }: { steps: TimelineStep[]; order: Order
 												/>
 											))}
 										{/* Desktop label: below circle, centered; hidden on mobile */}
-										<span
+										<div
 											className={classNames(
 												'hidden sm:mt-2 sm:block sm:text-center sm:text-xs',
 												STEP_LABEL_CLASSES[state]
 											)}>
-											{step.label}
-											<span className='sr-only'> - {getStepAnnouncement(state)}</span>
-										</span>
+											<div>
+												{step.label}
+												<span className='sr-only'> - {getStepAnnouncement(state)}</span>
+											</div>
+											{timestampLabel && (
+												<div className="mt-1 text-[10px] text-base-content/50">
+													{timestampLabel}
+												</div>
+											)}
+										</div>
 									</div>
 									{/* Mobile label: right of circle, vertically centered with circle (min-h-11 = 44px touch target); self-start keeps block from stretching */}
-									<span
+									<div
 										className={classNames(
-											'ml-3 flex min-h-11 flex-1 items-center self-start text-sm sm:hidden',
+											'ml-3 flex min-h-11 flex-1 flex-col justify-center self-start text-sm sm:hidden',
 											STEP_LABEL_CLASSES[state]
 										)}>
-										{step.label}
-										<span className='sr-only'> - {getStepAnnouncement(state)}</span>
-									</span>
+										<div>
+											{step.label}
+											<span className='sr-only'> - {getStepAnnouncement(state)}</span>
+										</div>
+										{timestampLabel && (
+											<div className="mt-1 text-[10px] text-base-content/50">
+												{timestampLabel}
+											</div>
+										)}
+									</div>
 									{/* Horizontal connector - Desktop only; -mx-6.5 extends line into node column gap so it touches circles (w-24, size-11 → 26px gap each side) */}
 									{!isLast && (
 										<div className='hidden flex-1 sm:mt-5 sm:flex sm:items-center sm:-mx-6.5'>
@@ -658,7 +721,7 @@ function FullTimeline({ steps, order }: { steps: TimelineStep[]; order: Order })
 									{step.timestamp && (
 										<p className='mt-1 text-xs text-base-content/50'>
 											<time dateTime={step.timestamp.toISOString()}>
-												{formatDate(step.timestamp)}
+												{formatDate(step.timestamp, 'datetime')}
 											</time>
 										</p>
 									)}

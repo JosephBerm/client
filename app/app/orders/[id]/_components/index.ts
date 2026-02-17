@@ -6,17 +6,18 @@
  * **ARCHITECTURE PATTERN:**
  * ```
  * page.tsx (Orchestrator)
- *   ├── OrderTimeline (compact)
- *   └── Layout Grid
- *       ├── Main Content
- *       │   ├── OrderHeader
- *       │   ├── OrderLineItems
- *       │   └── OrderDeliveryDetails
- *       └── OrderSidebar (Composition)
- *           ├── OrderActions
- *           ├── OrderTimeline (full)
- *           ├── OrderNotes
- *           └── OrderQuickInfo
+ *   - OrderTimeline (compact)
+ *   - Layout Grid
+ *     - Main Content
+ *       - OrderHeader
+ *       - OrderLineItems
+ *       - OrderFinancialLedger
+ *       - OrderDeliveryDetails
+ *     - OrderSidebar (Composition)
+ *       - OrderActions
+ *       - OrderCustomerIntelligence
+ *       - OrderNotes
+ *       - OrderActivityFeed
  * ```
  * 
  * **IMPORT PATTERN:**
@@ -38,6 +39,12 @@ export type { OrderHeaderProps } from './OrderHeader'
 export { OrderTimeline } from './OrderTimeline'
 export type { OrderTimelineProps } from './OrderTimeline'
 
+export { OrderPrimaryAction } from './OrderPrimaryAction'
+export type { OrderPrimaryActionProps } from './OrderPrimaryAction'
+
+export { OrderCustomerView } from './OrderCustomerView'
+export type { OrderCustomerViewProps } from './OrderCustomerView'
+
 // =============================================================================
 // CONTENT
 // =============================================================================
@@ -47,6 +54,9 @@ export type { OrderLineItemsProps } from './OrderLineItems'
 
 export { OrderDeliveryDetails } from './OrderDeliveryDetails'
 export type { OrderDeliveryDetailsProps } from './OrderDeliveryDetails'
+
+export { OrderFinancialLedger } from './OrderFinancialLedger'
+export type { OrderFinancialLedgerProps } from './OrderFinancialLedger'
 
 // =============================================================================
 // SIDEBAR
@@ -58,8 +68,11 @@ export type { OrderActionsProps } from './OrderActions'
 export { OrderNotes } from './OrderNotes'
 export type { OrderNotesProps } from './OrderNotes'
 
-export { OrderQuickInfo } from './OrderQuickInfo'
-export type { OrderQuickInfoProps } from './OrderQuickInfo'
+export { OrderCustomerIntelligence } from './OrderCustomerIntelligence'
+export type { OrderCustomerIntelligenceProps } from './OrderCustomerIntelligence'
+
+export { OrderActivityFeed } from './OrderActivityFeed'
+export type { OrderActivityFeedProps } from './OrderActivityFeed'
 
 export { OrderSidebar } from './OrderSidebar'
 export type { OrderSidebarProps } from './OrderSidebar'

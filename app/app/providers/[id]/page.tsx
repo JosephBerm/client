@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
-import { API, useRouteParam, notificationService, HttpService } from '@_shared'
+import { API, useRouteParam, notificationService } from '@_shared'
 import { logger } from '@_core'
 
 import Guid from '@_classes/Base/Guid'
@@ -112,10 +112,9 @@ export default function ProviderDetailPage() {
 	const handleArchiveToggle = useCallback(async () => {
 		const action = provider.isArchived ? 'restore' : 'archive'
 		try {
-			const { data } = await HttpService.put<boolean>(
-				`/provider/${provider.id}/${action}`,
-				{}
-			)
+			const { data } = provider.isArchived
+				? await API.Providers.restore(provider.id as string)
+				: await API.Providers.archive(provider.id as string)
 			if (data.statusCode === 200) {
 				setProvider(new Provider({ ...provider, isArchived: !provider.isArchived }))
 				notificationService.success(`Provider ${action}d successfully`)

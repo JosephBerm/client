@@ -14,7 +14,7 @@
  * @example
  * ```tsx
  * <RichDataGrid<Product>
- *   endpoint="/api/products/search"
+ *   endpoint="/products/search"
  *   columns={columns}
  *   ariaLabel="Products"
  *   enableGlobalSearch

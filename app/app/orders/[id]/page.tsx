@@ -22,11 +22,11 @@
  * │ └───────────────────────────────┘ │ └─────────────────────┘│
  * │                                   │                        │
  * │ ┌───────────────────────────────┐ │ ┌─────────────────────┐│
- * │ │ OrderPaymentSection           │ │ │ OrderNotes         ││
+ * │ │ OrderFinancialLedger           │ │ │ OrderNotes         ││
  * │ │ (payments + refunds)          │ │ └─────────────────────┘│
  * │ └───────────────────────────────┘ │                        │
  * │                                   │ ┌─────────────────────┐│
- * │ ┌───────────────────────────────┐ │ │ OrderQuickInfo     ││
+ * │ ┌───────────────────────────────┐ │ │ OrderCustomerIntelligence     ││
  * │ │ OrderDeliveryDetails          │ │ └─────────────────────┘│
  * │ │ (conditional)                 │ │                        │
  * │ └───────────────────────────────┘ │                        │
@@ -66,14 +66,15 @@ import Button from '@_components/ui/Button'
 
 import { InternalPageHeader } from '../../_components'
 
-import { OrderPaymentSection } from '@_features/payments'
-
 import {
 	// Content Components
 	OrderHeader,
 	OrderTimeline,
 	OrderLineItems,
 	OrderDeliveryDetails,
+	OrderFinancialLedger,
+	OrderPrimaryAction,
+	OrderCustomerView,
 	// Sidebar (composed)
 	OrderSidebar,
 	// Loading State
@@ -186,15 +187,30 @@ function OrderDetailContent({
 	permissions,
 	isStaff,
 }: OrderDetailContentProps) {
+	if (!isStaff) {
+		return (
+			<OrderCustomerView
+				order={order}
+				actions={actions}
+				permissions={permissions}
+			/>
+		)
+	}
+
 	return (
 		<div className="space-y-6">
 			{/* Compact Timeline at Top - Shows progress at a glance */}
 			<OrderTimeline order={order} compact />
 
 			{/* Main Layout: Content + Sidebar */}
-			<div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+			<div className="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)]">
 				{/* Main Content Area */}
-				<OrderMainContent order={order} permissions={permissions} isStaff={isStaff} />
+				<OrderMainContent
+					order={order}
+					permissions={permissions}
+					isStaff={isStaff}
+					actions={actions}
+				/>
 
 				{/* Sidebar - Actions, timeline, notes, quick info */}
 				<OrderSidebar order={order} actions={actions} permissions={permissions} />
@@ -211,9 +227,10 @@ interface OrderMainContentProps {
 	order: NonNullable<ReturnType<typeof useOrderDetails>['order']>
 	permissions: ReturnType<typeof useOrderPermissions>
 	isStaff: boolean
+	actions: ReturnType<typeof useOrderActions>
 }
 
-function OrderMainContent({ order, permissions, isStaff }: OrderMainContentProps) {
+function OrderMainContent({ order, permissions, isStaff, actions }: OrderMainContentProps) {
 	// Payment permissions - customers can pay, staff can record manual payments and refund
 	const canPayByCard = !isStaff // Customers can pay by card
 	const canRecordPayment = permissions.canConfirmPayment // Staff who can confirm payments can record manual payments
@@ -221,22 +238,26 @@ function OrderMainContent({ order, permissions, isStaff }: OrderMainContentProps
 
 	return (
 		<div className="space-y-6">
-			{/* Order Header - Customer, status, financial summary */}
-			<OrderHeader order={order} showSalesRep={isStaff} showInternalNotes={isStaff} />
+			{/* Order Header - Status, metadata, primary action */}
+			<OrderHeader
+				order={order}
+				showSalesRep={isStaff}
+				primaryAction={
+					<OrderPrimaryAction order={order} actions={actions} permissions={permissions} />
+				}
+			/>
 
 			{/* Line Items - Products table with totals */}
 			<OrderLineItems order={order} showStaffColumns={isStaff} />
 
-			{/* Payment Section - Card payments, manual payments, history, refunds */}
-			{order.id && (
-				<OrderPaymentSection
-					orderId={order.id}
-					totalAmountCents={Math.round(order.total * 100)}
-					canPayByCard={canPayByCard}
-					canRecordPayment={canRecordPayment}
-					canRefund={canRefund}
-				/>
-			)}
+			{/* Unified Financial Ledger */}
+			<OrderFinancialLedger
+				order={order}
+				permissions={permissions}
+				canPayByCard={canPayByCard}
+				canRecordPayment={canRecordPayment}
+				canRefund={canRefund}
+			/>
 
 			{/* Delivery Details - Shipping info (conditional) */}
 			<OrderDeliveryDetails order={order} />

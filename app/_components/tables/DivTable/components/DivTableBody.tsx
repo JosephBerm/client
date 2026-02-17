@@ -71,15 +71,7 @@ export function DataGridBody<TData>({
     enabled: enableVirtualization,
   })
 
-  const virtualItems = (enableVirtualization && rowVirtualizer)
-    ? rowVirtualizer.getVirtualItems()
-    : rows.map((_, index) => ({
-        index,
-        start: index * estimatedRowHeight,
-        size: estimatedRowHeight,
-        end: (index + 1) * estimatedRowHeight,
-        key: index,
-      }))
+  const virtualItems = enableVirtualization ? rowVirtualizer.getVirtualItems() : []
 
   // Get consistent column count for grid layout
   const gridColumnCount = getGridColumnCount(table)
@@ -141,21 +133,33 @@ export function DataGridBody<TData>({
             items={rows.map((row) => row.id)}
             strategy={verticalListSortingStrategy}
           >
-            {virtualItems.map((virtualItem) => {
-              const row = rows[virtualItem.index]
-              if (!row) {return null}
+            {enableVirtualization
+              ? virtualItems.map((virtualItem) => {
+                  const row = rows[virtualItem.index]
+                  if (!row) {
+                    return null
+                  }
 
-              return (
-                <DataGridRow
-                  key={row.id}
-                  row={row}
-                  virtualRow={virtualItem as VirtualItem}
-                  enableDragDrop={true}
-                  dragHandlePosition={dragHandlePosition}
-                  enableComplexCells={enableComplexCells}
-                />
-              )
-            })}
+                  return (
+                    <DataGridRow
+                      key={row.id}
+                      row={row}
+                      virtualRow={virtualItem as VirtualItem}
+                      enableDragDrop={true}
+                      dragHandlePosition={dragHandlePosition}
+                      enableComplexCells={enableComplexCells}
+                    />
+                  )
+                })
+              : rows.map((row) => (
+                  <DataGridRow
+                    key={row.id}
+                    row={row}
+                    enableDragDrop={true}
+                    dragHandlePosition={dragHandlePosition}
+                    enableComplexCells={enableComplexCells}
+                  />
+                ))}
           </SortableContext>
         </div>
       </DndContext>
@@ -183,20 +187,31 @@ export function DataGridBody<TData>({
         gap: 0,
       }}
     >
-      {virtualItems.map((virtualItem) => {
-        const row = rows[virtualItem.index]
-        if (!row) {return null}
+      {enableVirtualization
+        ? virtualItems.map((virtualItem) => {
+            const row = rows[virtualItem.index]
+            if (!row) {
+              return null
+            }
 
-        return (
-          <DataGridRow
-            key={row.id}
-            row={row}
-            virtualRow={virtualItem as VirtualItem}
-            enableDragDrop={false}
-            enableComplexCells={enableComplexCells}
-          />
-        )
-      })}
+            return (
+              <DataGridRow
+                key={row.id}
+                row={row}
+                virtualRow={virtualItem as VirtualItem}
+                enableDragDrop={false}
+                enableComplexCells={enableComplexCells}
+              />
+            )
+          })
+        : rows.map((row) => (
+            <DataGridRow
+              key={row.id}
+              row={row}
+              enableDragDrop={false}
+              enableComplexCells={enableComplexCells}
+            />
+          ))}
     </div>
   )
 }

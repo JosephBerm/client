@@ -3,19 +3,17 @@
  * 
  * Displays order products in a data grid with pricing columns.
  * Shows staff-only cost column when applicable.
- * Includes summary totals section.
+ * Focused on product line items for high-density workflows.
  * 
  * **Features:**
  * - Product details with SKU
  * - Quantity, unit price, line total
  * - Staff-only cost column (conditional)
  * - Tracking number display
- * - Order totals summary (subtotal, tax, shipping, discount)
  * 
  * **Performance (Next.js 16 / React 19 Best Practices):**
  * - React.memo: YES - Renders DataGrid with many rows, expensive re-renders
  * - useMemo for columns: YES - Array creation with conditional logic
- * - useMemo for totals: YES - Array.reduce operation on products
  * 
  * @see prd_orders.md - Order Management PRD
  * @see https://nextjs.org/docs/app/getting-started/server-and-client-components
@@ -42,7 +40,7 @@ export interface OrderLineItemsProps {
 }
 
 /**
- * Order line items table with totals summary.
+ * Order line items table.
  * 
  * Memoized because:
  * - DataGrid renders potentially many rows
@@ -63,16 +61,6 @@ export const OrderLineItems = memo(function OrderLineItems({
 	// ─────────────────────────────────────────────────────────────────────────
 	// MEMOIZED: Totals calculation (Array.reduce on products)
 	// ─────────────────────────────────────────────────────────────────────────
-	const totals = useMemo(() => {
-		const subtotal = products.reduce((sum, item) => sum + (item.total ?? 0), 0)
-		const tax = order.salesTax ?? 0
-		const shipping = order.shipping ?? 0
-		const discount = order.discount ?? 0
-		const grandTotal = subtotal + tax + shipping - discount
-
-		return { subtotal, tax, shipping, discount, grandTotal }
-	}, [products, order.salesTax, order.shipping, order.discount])
-
 	// ─────────────────────────────────────────────────────────────────────────
 	// MEMOIZED: Column definitions (conditional array construction)
 	// ─────────────────────────────────────────────────────────────────────────
@@ -153,7 +141,7 @@ export const OrderLineItems = memo(function OrderLineItems({
 	// RENDER
 	// ─────────────────────────────────────────────────────────────────────────
 	return (
-		<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+		<Card className="border border-base-200 bg-base-100 p-6 shadow-sm">
 			<h3 className="text-lg font-semibold text-base-content mb-6">
 				Products ({products.length} items)
 			</h3>
@@ -169,8 +157,6 @@ export const OrderLineItems = memo(function OrderLineItems({
 				emptyMessage="No products are associated with this order."
 			/>
 
-			{/* Totals Summary */}
-			<OrderTotalsSummary totals={totals} />
 		</Card>
 	)
 })
@@ -178,67 +164,5 @@ export const OrderLineItems = memo(function OrderLineItems({
 // ─────────────────────────────────────────────────────────────────────────────
 // INTERNAL SUB-COMPONENTS (not exported)
 // ─────────────────────────────────────────────────────────────────────────────
-
-interface TotalsData {
-	subtotal: number
-	tax: number
-	shipping: number
-	discount: number
-	grandTotal: number
-}
-
-/**
- * Order totals summary section.
- * Not memoized: Small, simple component called once per render.
- */
-function OrderTotalsSummary({ totals }: { totals: TotalsData }) {
-	return (
-		<div className="mt-4 pt-4 border-t border-base-200">
-			<div className="flex justify-end">
-				<div className="w-64 space-y-2 text-sm">
-					<TotalRow label="Subtotal" value={totals.subtotal} />
-					<TotalRow label="Tax" value={totals.tax} />
-					<TotalRow label="Shipping" value={totals.shipping} />
-					{totals.discount > 0 && (
-						<TotalRow 
-							label="Discount" 
-							value={-totals.discount} 
-							valueClassName="text-success" 
-						/>
-					)}
-					<div className="flex justify-between border-t border-base-200 pt-2">
-						<span className="font-semibold">Total</span>
-						<span className="font-bold text-primary">
-							{formatCurrency(totals.grandTotal)}
-						</span>
-					</div>
-				</div>
-			</div>
-		</div>
-	)
-}
-
-/**
- * Individual total row.
- * Not memoized: Minimal render cost.
- */
-function TotalRow({ 
-	label, 
-	value, 
-	valueClassName = '' 
-}: { 
-	label: string
-	value: number
-	valueClassName?: string 
-}) {
-	return (
-		<div className="flex justify-between">
-			<span className="text-base-content/70">{label}</span>
-			<span className={`font-medium ${valueClassName}`}>
-				{formatCurrency(value)}
-			</span>
-		</div>
-	)
-}
 
 export default OrderLineItems

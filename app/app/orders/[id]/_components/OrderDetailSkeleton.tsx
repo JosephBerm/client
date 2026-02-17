@@ -52,18 +52,20 @@ export const OrderDetailSkeleton = memo(function OrderDetailSkeleton() {
 			</Card>
 
 			{/* Main Layout */}
-			<div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+			<div className="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)]">
 				{/* Main Content */}
 				<div className="space-y-6">
 					<HeaderSkeleton />
 					<LineItemsSkeleton />
+					<LedgerSkeleton />
 				</div>
 
 				{/* Sidebar */}
 				<div className="space-y-6">
 					<ActionsSkeleton />
-					<TimelineSkeleton />
-					<QuickInfoSkeleton />
+					<CustomerIntelligenceSkeleton />
+					<NotesSkeleton />
+					<ActivityFeedSkeleton />
 				</div>
 			</div>
 		</div>
@@ -77,7 +79,7 @@ export const OrderDetailSkeleton = memo(function OrderDetailSkeleton() {
 const TIMELINE_STEPS = [1, 2, 3, 4, 5] as const
 const LINE_ITEM_ROWS = [1, 2, 3] as const
 const TOTAL_ROWS = [1, 2, 3, 4] as const
-const TIMELINE_ITEMS = [1, 2, 3, 4] as const
+const ACTIVITY_ITEMS = [1, 2, 3] as const
 const INFO_ROWS = [1, 2, 3] as const
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -117,18 +119,6 @@ function LineItemsSkeleton() {
 					</div>
 				))}
 			</div>
-			<div className="mt-4 pt-4 border-t border-base-200">
-				<div className="flex justify-end">
-					<div className="w-64 space-y-2">
-						{TOTAL_ROWS.map((i) => (
-							<div key={i} className="flex justify-between">
-								<div className="h-4 w-20 bg-base-200 rounded" />
-								<div className="h-4 w-16 bg-base-200 rounded" />
-							</div>
-						))}
-					</div>
-				</div>
-			</div>
 		</Card>
 	)
 }
@@ -145,26 +135,7 @@ function ActionsSkeleton() {
 	)
 }
 
-function TimelineSkeleton() {
-	return (
-		<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
-			<div className="h-4 w-28 bg-base-200 rounded mb-6" />
-			<div className="space-y-4">
-				{TIMELINE_ITEMS.map((i) => (
-					<div key={i} className="flex gap-4">
-						<div className="w-10 h-10 rounded-full bg-base-200" />
-						<div className="flex-1 space-y-2">
-							<div className="h-4 w-20 bg-base-200 rounded" />
-							<div className="h-3 w-32 bg-base-200 rounded" />
-						</div>
-					</div>
-				))}
-			</div>
-		</Card>
-	)
-}
-
-function QuickInfoSkeleton() {
+function CustomerIntelligenceSkeleton() {
 	return (
 		<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
 			<div className="h-4 w-24 bg-base-200 rounded mb-4" />
@@ -175,6 +146,70 @@ function QuickInfoSkeleton() {
 						<div className="h-4 w-16 bg-base-200 rounded" />
 					</div>
 				))}
+			</div>
+		</Card>
+	)
+}
+
+function NotesSkeleton() {
+	return (
+		<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+			<div className="h-4 w-20 bg-base-200 rounded mb-4" />
+			<div className="space-y-2">
+				<div className="h-3 w-full bg-base-200 rounded" />
+				<div className="h-3 w-5/6 bg-base-200 rounded" />
+				<div className="h-3 w-2/3 bg-base-200 rounded" />
+			</div>
+		</Card>
+	)
+}
+
+function ActivityFeedSkeleton() {
+	return (
+		<Card className="border border-base-300 bg-base-100 p-6 shadow-sm">
+			<div className="h-4 w-28 bg-base-200 rounded mb-6" />
+			<div className="space-y-4">
+				{ACTIVITY_ITEMS.map((i) => (
+					<div key={i} className="flex gap-3">
+						<div className="mt-1 h-2 w-2 rounded-full bg-base-200" />
+						<div className="flex-1 space-y-2">
+							<div className="h-3 w-40 bg-base-200 rounded" />
+							<div className="h-3 w-24 bg-base-200 rounded" />
+						</div>
+					</div>
+				))}
+			</div>
+		</Card>
+	)
+}
+
+function LedgerSkeleton() {
+	return (
+		<Card className="border border-base-300 bg-base-200/40 p-6 shadow-sm">
+			<div className="flex items-center justify-between mb-6">
+				<div className="space-y-2">
+					<div className="h-3 w-32 bg-base-200 rounded" />
+					<div className="h-3 w-44 bg-base-200 rounded" />
+				</div>
+				<div className="h-8 w-40 bg-base-200 rounded" />
+			</div>
+			<div className="grid gap-6 lg:grid-cols-2">
+				<div className="space-y-2">
+					{TOTAL_ROWS.map((i) => (
+						<div key={i} className="flex justify-between">
+							<div className="h-3 w-20 bg-base-200 rounded" />
+							<div className="h-3 w-16 bg-base-200 rounded" />
+						</div>
+					))}
+				</div>
+				<div className="space-y-2">
+					{TOTAL_ROWS.map((i) => (
+						<div key={i} className="flex justify-between">
+							<div className="h-3 w-20 bg-base-200 rounded" />
+							<div className="h-3 w-16 bg-base-200 rounded" />
+						</div>
+					))}
+				</div>
 			</div>
 		</Card>
 	)

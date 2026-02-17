@@ -27,6 +27,8 @@ export interface ProductDocumentsSectionProps {
 export default function ProductDocumentsSection({
 	documents,
 }: ProductDocumentsSectionProps) {
+	const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5254/api/v1'
+
 	if (documents.length === 0) {
 		return null
 	}
@@ -50,7 +52,7 @@ export default function ProductDocumentsSection({
 					return (
 						<a
 							key={key}
-							href={`/api/files/${doc.name}`}
+							href={`${apiBaseUrl}/files/${encodeURIComponent(doc.name ?? '')}`}
 							target="_blank"
 							rel="noopener noreferrer"
 							className="group relative flex items-center gap-4 rounded-2xl border border-base-200 bg-base-100 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"

@@ -18,7 +18,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import {
 	CreditCard,
@@ -43,6 +43,7 @@ import Select from '@_components/ui/Select'
 import { SHIPPING_CARRIERS, type UseOrderActionsReturn } from '@_types/order.types'
 
 import type { UseOrderPermissionsReturn } from './hooks/useOrderPermissions'
+import { ORDER_ACTION_EVENTS } from './constants'
 
 export interface OrderActionsProps {
 	/** The order to display actions for */
@@ -87,6 +88,69 @@ export function OrderActions({ order, actions, permissions }: OrderActionsProps)
 		canCancel,
 		canRequestCancellation,
 	} = permissions
+
+	// Open modals via custom events (used by header CTA and keyboard shortcuts)
+	useEffect(() => {
+		const openPayment = () => {
+			if (canConfirmPayment) {
+				setShowPaymentModal(true)
+			}
+		}
+		const openShipping = () => {
+			if (canMarkShipped) {
+				setShowShipModal(true)
+			}
+		}
+		const openCancel = () => {
+			if (canCancel || canRequestCancellation) {
+				setShowCancelModal(true)
+			}
+		}
+
+		window.addEventListener(ORDER_ACTION_EVENTS.openPayment, openPayment)
+		window.addEventListener(ORDER_ACTION_EVENTS.openShipping, openShipping)
+		window.addEventListener(ORDER_ACTION_EVENTS.openCancel, openCancel)
+
+		return () => {
+			window.removeEventListener(ORDER_ACTION_EVENTS.openPayment, openPayment)
+			window.removeEventListener(ORDER_ACTION_EVENTS.openShipping, openShipping)
+			window.removeEventListener(ORDER_ACTION_EVENTS.openCancel, openCancel)
+		}
+	}, [canConfirmPayment, canMarkShipped, canCancel, canRequestCancellation])
+
+	// Keyboard shortcuts: Shift+P (confirm payment), Shift+S (shipping)
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (!event.shiftKey) {
+				return
+			}
+
+			const target = event.target as HTMLElement | null
+			if (
+				target &&
+				(target.tagName === 'INPUT' ||
+					target.tagName === 'TEXTAREA' ||
+					target.tagName === 'SELECT' ||
+					target.isContentEditable)
+			) {
+				return
+			}
+
+			const key = event.key.toLowerCase()
+			if (key === 'p' && canConfirmPayment) {
+				event.preventDefault()
+				setShowPaymentModal(true)
+			}
+
+			if (key === 's' && canMarkShipped) {
+				event.preventDefault()
+				setShowShipModal(true)
+			}
+		}
+
+		window.addEventListener('keydown', handleKeyDown)
+		return () => window.removeEventListener('keydown', handleKeyDown)
+	}, [canConfirmPayment, canMarkShipped])
 
 	// Check if any actions are available
 	const hasActions = canConfirmPayment || canMarkProcessing || canMarkShipped || 
@@ -192,7 +256,7 @@ export function OrderActions({ order, actions, permissions }: OrderActionsProps)
 							onClick={() => void handleMarkProcessing()}
 							loading={actions.isProcessing}
 						>
-							Mark Processing
+							Start Processing
 						</Button>
 					)}
 
@@ -204,7 +268,7 @@ export function OrderActions({ order, actions, permissions }: OrderActionsProps)
 							onClick={() => setShowShipModal(true)}
 							loading={actions.isProcessing}
 						>
-							Mark Shipped
+							Add Tracking & Ship
 						</Button>
 					)}
 
@@ -391,4 +455,3 @@ export function OrderActions({ order, actions, permissions }: OrderActionsProps)
 }
 
 export default OrderActions
-

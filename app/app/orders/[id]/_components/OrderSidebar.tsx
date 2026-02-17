@@ -11,7 +11,8 @@
  * **Child Components:**
  * - OrderActions: Role-based workflow buttons
  * - OrderNotes: Order notes display
- * - OrderQuickInfo: Quick reference stats
+ * - OrderCustomerIntelligence: Customer context
+ * - OrderActivityFeed: Recent actions
  * 
  * @see prd_orders.md - Order Management PRD
  * @module app/orders/[id]/_components/OrderSidebar
@@ -25,7 +26,8 @@ import type { UseOrderActionsReturn } from '@_types/order.types'
 
 import { OrderActions } from './OrderActions'
 import { OrderNotes } from './OrderNotes'
-import { OrderQuickInfo } from './OrderQuickInfo'
+import { OrderCustomerIntelligence } from './OrderCustomerIntelligence'
+import { OrderActivityFeed } from './OrderActivityFeed'
 
 import type { UseOrderPermissionsReturn } from './hooks/useOrderPermissions'
 
@@ -57,11 +59,19 @@ export function OrderSidebar({ order, actions, permissions }: OrderSidebarProps)
 			{/* Actions Card - Most important, at top */}
 			<OrderActions order={order} actions={actions} permissions={permissions} />
 
+			{/* Customer Intelligence */}
+			<OrderCustomerIntelligence order={order} />
+
 			{/* Order Notes - Contextual information */}
 			<OrderNotes notes={order.notes} />
 
-			{/* Quick Info - Reference data */}
-			<OrderQuickInfo order={order} />
+			{/* Internal Notes - Staff only */}
+			{permissions.canAddInternalNotes && (
+				<OrderNotes notes={order.internalNotes} title="Internal Notes" />
+			)}
+
+			{/* Activity Feed - Staff context */}
+			{permissions.isStaff && <OrderActivityFeed order={order} />}
 		</div>
 	)
 }
