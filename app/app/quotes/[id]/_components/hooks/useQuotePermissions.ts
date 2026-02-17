@@ -27,8 +27,8 @@ import { useMemo } from 'react'
 
 import { usePermissions, Resources, Actions, Contexts, RoleLevels } from '@_shared/hooks/usePermissions'
 
-import type Quote from '@_classes/Quote'
 import { QuoteStatus } from '@_classes/Enums'
+import type Quote from '@_classes/Quote'
 
 /**
  * Return type for useQuotePermissions hook
@@ -94,7 +94,7 @@ export interface UseQuotePermissionsReturn {
  * ```
  */
 export function useQuotePermissions(quote: Quote | null): UseQuotePermissionsReturn {
-	const { user, roleLevel, hasPermission, hasMinimumRole } = usePermissions()
+	const { user, hasPermission, hasMinimumRole } = usePermissions()
 
 	// Memoize all permission checks for efficiency
 	const permissions = useMemo(() => {
@@ -152,9 +152,13 @@ export function useQuotePermissions(quote: Quote | null): UseQuotePermissionsRet
 		const canUpdate = canUpdateOwn || canUpdateAssigned || canUpdateAll
 
 		// Specific Workflow Actions
-		const canMarkAsRead = canUpdate && quote.status === QuoteStatus.Unread
+		const isInternalQuoteHandler = isAssignedQuote || isTeamQuote || isAllQuote
+		const canMarkAsRead = isInternalQuoteHandler && canUpdate && quote.status === QuoteStatus.Unread
 		const canApprove = hasPermission(Resources.Quotes, Actions.Approve) && quote.status === QuoteStatus.Read
-		const canReject = canUpdate && (quote.status === QuoteStatus.Unread || quote.status === QuoteStatus.Read)
+		const canReject =
+			isInternalQuoteHandler &&
+			canUpdate &&
+			(quote.status === QuoteStatus.Unread || quote.status === QuoteStatus.Read)
 		const canAssign = hasPermission(Resources.Quotes, Actions.Assign)
 		const canConvert = hasPermission(Resources.Orders, Actions.Create) && quote.status === QuoteStatus.Approved
 		const canDelete = hasPermission(Resources.Quotes, Actions.Delete)
@@ -164,6 +168,7 @@ export function useQuotePermissions(quote: Quote | null): UseQuotePermissionsRet
 		// Submit for Approval: Sales Reps can submit quotes for manager approval
 		// When quote is Read status, has pricing, but user doesn't have approval permission
 		const canSubmitForApproval =
+			isInternalQuoteHandler &&
 			canUpdate &&
 			quote.status === QuoteStatus.Read &&
 			!hasPermission(Resources.Quotes, Actions.Approve) &&
@@ -188,7 +193,7 @@ export function useQuotePermissions(quote: Quote | null): UseQuotePermissionsRet
 				isAllQuote,
 			},
 		}
-	}, [user, quote, roleLevel, hasPermission, hasMinimumRole])
+	}, [user, quote, hasPermission, hasMinimumRole])
 
 	return permissions
 }

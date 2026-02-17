@@ -85,8 +85,12 @@ export default function QuoteActions({ quote, permissions, onRefresh }: QuoteAct
 	// Early return if no quote
 	if (!quote) return null
 
-	// Customer sees no actions (read-only)
-	if (!permissions.canUpdate) {
+	// Internal quote workflow is limited to assigned sales/internal staff contexts.
+	// Customers should never see workflow controls like reject/approve/submit/convert.
+	const canManageQuoteWorkflow =
+		permissions.context.isAssignedQuote || permissions.context.isTeamQuote || permissions.context.isAllQuote
+
+	if (!canManageQuoteWorkflow) {
 		return (
 			<Card className='border border-base-300 bg-base-100 p-6 shadow-sm'>
 				<Button
@@ -180,7 +184,11 @@ export default function QuoteActions({ quote, permissions, onRefresh }: QuoteAct
 							{permissions.canSubmitForApproval && (
 								<div
 									className='tooltip w-full'
-									data-tip={!hasPricing ? 'Set customer prices for all products first' : ''}>
+									data-tip={
+										!hasPricing
+											? 'Set customer prices for all products first'
+											: 'This action keeps status as Read and queues manager review'
+									}>
 									<Button
 										variant='primary'
 										onClick={handleSubmitForApproval}
@@ -191,6 +199,9 @@ export default function QuoteActions({ quote, permissions, onRefresh }: QuoteAct
 										<FileCheck className='h-4 w-4 mr-2' />
 										Submit for Approval
 									</Button>
+									<p className='text-xs text-base-content/60 mt-1'>
+										Submitting keeps status as <strong>Read</strong> while awaiting manager review.
+									</p>
 								</div>
 							)}
 							{permissions.canReject && (

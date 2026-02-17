@@ -353,9 +353,11 @@ export default function QuotePricingEditor({ quote, permissions, customerId, onR
 	// Don't render if no quote or no products
 	if (!quote || products.length === 0) return null
 
-	// Don't render for customers (they shouldn't see pricing editor)
-	// This is a safety check - the page should already hide this component for customers
-	if (!permissions.canUpdate && !permissions.canView) return null
+	// Internal pricing is restricted to internal quote handlers only.
+	// Customers should never see vendor cost, margin, or rule-breakdown internals.
+	const canViewInternalPricing =
+		permissions.context.isAssignedQuote || permissions.context.isTeamQuote || permissions.context.isAllQuote
+	if (!canViewInternalPricing) return null
 
 	const readyToSend = canSendToCustomer(quote)
 
@@ -505,6 +507,26 @@ function QuotePricingDataGrid({
 	expandedBreakdowns,
 	toggleBreakdown,
 }: QuotePricingDataGridProps) {
+	const getEffectivePrice = useCallback(
+		(productId: string, field: 'vendorCost' | 'customerPrice', persistedValue?: number | null): number | null => {
+			// While editable, prefer local input state so row metrics reflect current values.
+			if (isEditable) {
+				const inputValue = getDisplayValue(productId, field).trim()
+				if (inputValue.length === 0) {
+					return persistedValue ?? null
+				}
+
+				const parsed = Number.parseFloat(inputValue)
+				if (Number.isFinite(parsed)) {
+					return parsed
+				}
+			}
+
+			return persistedValue ?? null
+		},
+		[isEditable, getDisplayValue]
+	)
+
 	const columns = useMemo<ColumnDef<QuotePricingRow>[]>(
 		() => [
 			{
@@ -668,11 +690,17 @@ function QuotePricingDataGrid({
 							</div>
 						)
 					}
+
+					const productId = rowData.id ?? rowData.productId ?? ''
+					const customerPrice = getEffectivePrice(productId, 'customerPrice', rowData.customerPrice)
+					const computedLineTotal =
+						customerPrice != null ? Math.round(customerPrice * rowData.quantity * 100) / 100 : null
+
 					return (
 						<div className='text-right'>
-							{rowData.lineTotal != null ? (
+							{computedLineTotal != null ? (
 								<span className='font-medium text-base-content'>
-									{formatCurrency(rowData.lineTotal)}
+									{formatCurrency(computedLineTotal)}
 								</span>
 							) : (
 								<span className='text-base-content/40'>—</span>
@@ -707,7 +735,16 @@ function QuotePricingDataGrid({
 						)
 					}
 					const productId = rowData.id ?? rowData.productId ?? ''
-					const { margin, marginPercent: marginPct } = rowData
+					const vendorCost = getEffectivePrice(productId, 'vendorCost', rowData.vendorCost)
+					const customerPrice = getEffectivePrice(productId, 'customerPrice', rowData.customerPrice)
+					const margin =
+						vendorCost != null && customerPrice != null
+							? Math.round((customerPrice - vendorCost) * rowData.quantity * 100) / 100
+							: null
+					const marginPct =
+						vendorCost != null && customerPrice != null && vendorCost > 0
+							? Math.round(((customerPrice - vendorCost) / vendorCost) * 1000) / 10
+							: null
 					const suggested = getSuggested(productId)
 					return (
 						<div className='text-right'>
@@ -738,6 +775,7 @@ function QuotePricingDataGrid({
 			isPricingLoading,
 			errors,
 			getDisplayValue,
+			getEffectivePrice,
 			handleChange,
 			handleBlur,
 			handleApplySuggested,
