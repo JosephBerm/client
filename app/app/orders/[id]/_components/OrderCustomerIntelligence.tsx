@@ -11,6 +11,8 @@
 
 import type Order from '@_classes/Order'
 
+import { useAdminView } from '@_shared'
+
 import Card from '@_components/ui/Card'
 
 export interface OrderCustomerIntelligenceProps {
@@ -19,6 +21,7 @@ export interface OrderCustomerIntelligenceProps {
 
 export function OrderCustomerIntelligence({ order }: OrderCustomerIntelligenceProps) {
 	const customer = order.customer
+	const { isAdminViewActive } = useAdminView()
 
 	return (
 		<Card className="border border-base-200 bg-base-100 p-6 shadow-sm">
@@ -30,7 +33,9 @@ export function OrderCustomerIntelligence({ order }: OrderCustomerIntelligencePr
 				<InfoRow label="Customer" value={customer?.name || 'Unassigned'} />
 				<InfoRow label="Email" value={customer?.email} />
 				<InfoRow label="Phone" value={customer?.phone} />
-				<InfoRow label="Customer ID" value={order.customerId ? `#${order.customerId}` : '—'} mono />
+				{isAdminViewActive && (
+					<InfoRow label="Customer ID" value={order.customerId ? `#${order.customerId}` : '—'} mono />
+				)}
 			</div>
 		</Card>
 	)

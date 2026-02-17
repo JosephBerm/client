@@ -46,7 +46,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
 import classNames from 'classnames'
-import { Settings, ChevronDown, LogOut, X } from 'lucide-react'
+import { Settings, ChevronDown, LogOut, Shield, X } from 'lucide-react'
 
 import { useAuthStore } from '@_features/auth'
 import { logout as logoutService } from '@_features/auth/services/AuthService'
@@ -54,12 +54,13 @@ import { NavigationService, Routes } from '@_features/navigation'
 
 import { logger } from '@_core'
 
-import { useMediaQuery, useSidebarDrawer } from '@_shared'
+import { useAdminView, useMediaQuery, useSidebarDrawer } from '@_shared'
 
 import NavigationIcon from '@_components/navigation/NavigationIcon'
 import SettingsModal from '@_components/settings/SettingsModal'
 import Button from '@_components/ui/Button'
 import Logo from '@_components/ui/Logo'
+import Toggle from '@_components/ui/Toggle'
 
 /**
  * Internal Sidebar component props interface.
@@ -114,6 +115,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 	const router = useRouter()
 	const user = useAuthStore((state) => state.user)
 	const clearAuthState = useAuthStore((state) => state.logout)
+	const { isAdmin, isAdminViewActive, setAdminViewEnabled } = useAdminView()
 
 	// Logout loading state
 	const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -498,6 +500,32 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 
 					{/* Footer - Always visible with safe area padding for mobile browsers */}
 					<div className='p-4 pb-safe border-t border-base-300 space-y-2 shrink-0 bg-base-200'>
+						{isAdmin && (
+							<div className='flex items-center justify-between rounded-lg border border-base-300 bg-base-100 px-3 py-2'>
+								<div className='min-w-0'>
+									<div className='flex items-center gap-2 text-sm font-medium text-base-content'>
+										<Shield
+											className='h-4 w-4 text-info'
+											aria-hidden='true'
+										/>
+										<span className='truncate'>Admin View</span>
+									</div>
+									<p className='text-xs text-base-content/60'>
+										Show internal IDs
+									</p>
+								</div>
+								<Toggle
+									id='sidebar-admin-view-toggle'
+									variant='info'
+									size='sm'
+									className='sm:toggle-md'
+									checked={isAdminViewActive}
+									onChange={(e) => setAdminViewEnabled(e.target.checked)}
+									aria-label='Toggle admin view'
+								/>
+							</div>
+						)}
+
 						<Button
 							variant='ghost'
 							size='sm'

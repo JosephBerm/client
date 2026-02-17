@@ -33,7 +33,7 @@ import type User from '@_classes/User'
 
 import { RoleLevels } from '@_types/rbac'
 
-import { getRoleSelectOptions } from '@_shared'
+import { getRoleSelectOptions, useAdminView } from '@_shared'
 
 import AccountStatusBadge from '@_components/common/AccountStatusBadge'
 import RoleBadge from '@_components/common/RoleBadge'
@@ -209,6 +209,8 @@ export default function AccountProfileTab({
 	onConfirmRoleChange,
 	onConfirmStatusChange,
 }: AccountProfileTabProps) {
+	const { isAdminViewActive } = useAdminView()
+
 	// Determine if we should use confirmation flow
 	const useConfirmation = Boolean(onSetPendingRoleChange && onConfirmRoleChange)
 
@@ -244,9 +246,11 @@ export default function AccountProfileTab({
 							status={accountStatus}
 							showIcon
 						/>
-						<span className='text-xs uppercase tracking-wide text-base-content/60'>
-							Account {account.id ? `#${account.id}` : 'pending'}
-						</span>
+						{isAdminViewActive && (
+							<span className='text-xs uppercase tracking-wide text-base-content/60'>
+								Account {account.id ? `#${account.id}` : 'pending'}
+							</span>
+						)}
 					</div>
 
 					{/* Profile Update Form */}
@@ -294,7 +298,7 @@ export default function AccountProfileTab({
 									</span>
 								</div>
 							)}
-							{customerCompany.taxId && (
+							{isAdminViewActive && customerCompany.taxId && (
 								<div className='flex items-center justify-between py-2 border-b border-base-200'>
 									<span className='text-base-content/70'>Tax ID</span>
 									<span className='font-mono font-medium text-base-content'>

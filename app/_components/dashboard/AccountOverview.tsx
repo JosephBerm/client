@@ -10,6 +10,7 @@ import { useAuthStore } from '@_features/auth'
 import { Routes } from '@_features/navigation'
 
 import { logger } from '@_core'
+import { useAdminView } from '@_shared'
 
 import { formatDate } from '@_lib/dates'
 
@@ -95,6 +96,7 @@ const COMPONENT_NAME = 'AccountOverview'
  */
 export default function AccountOverview() {
 	const user = useAuthStore((state) => state.user)
+	const { isAdminViewActive } = useAdminView()
 
 	// Defensive programming: Log component mount (FAANG-level observability)
 	useEffect(() => {
@@ -189,9 +191,11 @@ export default function AccountOverview() {
 						<div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
 							{/* Use roleLevel directly from plain JSON object (Zustand doesn't deserialize to User class) */}
 							<RoleBadge role={user.roleLevel ?? 1000} />
-							<span className="text-xs uppercase tracking-wide text-base-content/60 whitespace-nowrap">
-								Account {user.id ? `#${user.id}` : 'pending'}
-							</span>
+							{isAdminViewActive && (
+								<span className="text-xs uppercase tracking-wide text-base-content/60 whitespace-nowrap">
+									Account {user.id ? `#${user.id}` : 'pending'}
+								</span>
+							)}
 						</div>
 						<Badge variant={accountStatusVariant} className="shrink-0 whitespace-nowrap">
 							{/* Status dot - pulsing for online, static for offline */}

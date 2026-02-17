@@ -27,6 +27,7 @@ import Card from '@_components/ui/Card'
 import Button from '@_components/ui/Button'
 import Input from '@_components/ui/Input'
 import { RichDataGrid, createRichColumnHelper, type RichColumnDef } from '@_components/tables/RichDataGrid'
+import { useAdminView } from '@_shared'
 
 import type { PermissionAuditEntryDto, AuditLogFilters } from '@_types/rbac-management'
 import type { PagedResult } from '@_classes/Base/PagedResult'
@@ -69,7 +70,7 @@ function formatDate(dateString: string): string {
 function TimestampCell({ value }: { value: string }) {
 	return (
 		<div className='flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-base-content/70'>
-			<Clock className='h-3 w-3 sm:h-4 sm:w-4 text-base-content/40 flex-shrink-0' />
+			<Clock className='h-3 w-3 sm:h-4 sm:w-4 text-base-content/40 shrink-0' />
 			<span className='whitespace-nowrap truncate'>{formatDate(value)}</span>
 		</div>
 	)
@@ -78,12 +79,24 @@ function TimestampCell({ value }: { value: string }) {
 /**
  * User cell with name and email - mobile optimized
  */
-function UserCell({ userName, userId, userEmail }: { userName: string; userId: number | null; userEmail: string }) {
+function UserCell({
+	userName,
+	userId,
+	userEmail,
+	isAdminViewActive,
+}: {
+	userName: string
+	userId: number | null
+	userEmail: string
+	isAdminViewActive: boolean
+}) {
+	const userDisplayName = userName || (isAdminViewActive && userId ? `User #${userId}` : 'Unknown User')
+
 	return (
 		<div className='flex flex-col min-w-0'>
 			<span className='flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-base-content truncate'>
-				<User className='h-3 w-3 sm:h-4 sm:w-4 text-base-content/40 flex-shrink-0' />
-				<span className='truncate'>{userName || `User #${userId}`}</span>
+				<User className='h-3 w-3 sm:h-4 sm:w-4 text-base-content/40 shrink-0' />
+				<span className='truncate'>{userDisplayName}</span>
 			</span>
 			{userEmail && <span className='ml-4 sm:ml-6 text-xs text-base-content/50 truncate'>{userEmail}</span>}
 		</div>
@@ -97,17 +110,21 @@ function PermissionCell({
 	resource,
 	action,
 	resourceId,
+	isAdminViewActive,
 }: {
 	resource: string
 	action: string
 	resourceId: number | null
+	isAdminViewActive: boolean
 }) {
 	return (
 		<div className='flex flex-wrap items-center gap-1 sm:gap-2 min-w-0'>
 			<span className='rounded-md bg-base-200 px-1.5 sm:px-2 py-0.5 sm:py-1 font-mono text-xs sm:text-sm text-base-content truncate'>
 				{resource}:{action}
 			</span>
-			{resourceId && <span className='text-xs text-base-content/50 whitespace-nowrap'>(ID: {resourceId})</span>}
+			{isAdminViewActive && resourceId && (
+				<span className='text-xs text-base-content/50 whitespace-nowrap'>(ID: {resourceId})</span>
+			)}
 		</div>
 	)
 }
@@ -140,7 +157,7 @@ function DetailsCell({ reason, ipAddress }: { reason: string | null; ipAddress?:
 			{reason && <span className='text-xs text-base-content/60 line-clamp-2'>{reason}</span>}
 			{ipAddress && (
 				<span className='flex items-center gap-1 text-xs text-base-content/40'>
-					<Globe className='h-3 w-3 flex-shrink-0' />
+					<Globe className='h-3 w-3 shrink-0' />
 					<span className='truncate'>{ipAddress}</span>
 				</span>
 			)}
@@ -158,9 +175,10 @@ interface FilterPanelProps {
 	onLocalFiltersChange: (filters: AuditLogFilters) => void
 	onApply: () => void
 	onClear: () => void
+	isAdminViewActive: boolean
 }
 
-function FilterPanel({ localFilters, onLocalFiltersChange, onApply, onClear }: FilterPanelProps) {
+function FilterPanel({ localFilters, onLocalFiltersChange, onApply, onClear, isAdminViewActive }: FilterPanelProps) {
 	return (
 		<motion.div
 			initial={{ height: 0, opacity: 0 }}
@@ -200,21 +218,23 @@ function FilterPanel({ localFilters, onLocalFiltersChange, onApply, onClear }: F
 				</div>
 
 				{/* User ID */}
-				<div>
-					<label className='mb-1 block text-xs font-medium text-base-content/60'>User ID</label>
-					<Input
-						type='number'
-						size='sm'
-						placeholder='Filter by user...'
-						value={localFilters.userId?.toString() || ''}
-						onChange={(e) =>
-							onLocalFiltersChange({
-								...localFilters,
-								userId: e.target.value ? parseInt(e.target.value) : undefined,
-							})
-						}
-					/>
-				</div>
+				{isAdminViewActive && (
+					<div>
+						<label className='mb-1 block text-xs font-medium text-base-content/60'>User ID</label>
+						<Input
+							type='number'
+							size='sm'
+							placeholder='Filter by user...'
+							value={localFilters.userId?.toString() || ''}
+							onChange={(e) =>
+								onLocalFiltersChange({
+									...localFilters,
+									userId: e.target.value ? parseInt(e.target.value) : undefined,
+								})
+							}
+						/>
+					</div>
+				)}
 
 				{/* Resource */}
 				<div>
@@ -262,7 +282,7 @@ const columnHelper = createRichColumnHelper<PermissionAuditEntryDto>()
  * Creates column definitions for the audit log grid.
  * Using createRichColumnHelper for type-safe column definitions.
  */
-function createAuditLogColumns(): RichColumnDef<PermissionAuditEntryDto, unknown>[] {
+function createAuditLogColumns(isAdminViewActive: boolean): RichColumnDef<PermissionAuditEntryDto, unknown>[] {
 	return [
 		columnHelper.accessor('timestamp', {
 			id: 'timestamp',
@@ -279,6 +299,7 @@ function createAuditLogColumns(): RichColumnDef<PermissionAuditEntryDto, unknown
 					userName={row.original.userName}
 					userId={row.original.userId}
 					userEmail={row.original.userEmail}
+					isAdminViewActive={isAdminViewActive}
 				/>
 			),
 			size: 180,
@@ -292,6 +313,7 @@ function createAuditLogColumns(): RichColumnDef<PermissionAuditEntryDto, unknown
 					resource={row.original.resource}
 					action={row.original.action}
 					resourceId={row.original.resourceId}
+					isAdminViewActive={isAdminViewActive}
 				/>
 			),
 			size: 180,
@@ -331,11 +353,12 @@ export function AuditLogDataGrid({
 	onFiltersChange,
 	onRefresh,
 }: AuditLogDataGridProps) {
+	const { isAdminViewActive } = useAdminView()
 	const [showFilters, setShowFilters] = useState(false)
 	const [localFilters, setLocalFilters] = useState<AuditLogFilters>(filters)
 
 	// Column definitions - React Compiler auto-memoizes based on dependencies
-	const columns = useMemo(() => createAuditLogColumns(), [])
+	const columns = useMemo(() => createAuditLogColumns(isAdminViewActive), [isAdminViewActive])
 
 	// Handlers - no useCallback needed in React 19
 	const handleApplyFilters = () => {
@@ -382,6 +405,7 @@ export function AuditLogDataGrid({
 					onLocalFiltersChange={setLocalFilters}
 					onApply={handleApplyFilters}
 					onClear={handleClearFilters}
+					isAdminViewActive={isAdminViewActive}
 				/>
 			)}
 

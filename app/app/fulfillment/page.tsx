@@ -34,7 +34,7 @@ import { Eye, Package, Truck } from 'lucide-react'
 import { useAuthStore } from '@_features/auth'
 import { Routes } from '@_features/navigation'
 
-import { formatDate, formatCurrency, API, notificationService, usePermissions, RoleLevels } from '@_shared'
+import { formatDate, formatCurrency, API, notificationService, usePermissions, RoleLevels, useAdminView } from '@_shared'
 
 import { OrderStatus } from '@_classes/Enums'
 
@@ -59,7 +59,7 @@ import { InternalPageHeader } from '../_components'
  */
 interface OrderRow {
 	id?: number
-	customerId?: number
+	customerId?: string | number | null
 	customerName?: string
 	total: number
 	status: number
@@ -74,6 +74,7 @@ interface OrderRow {
 
 export default function FulfillmentQueuePage() {
 	const user = useAuthStore((state) => state.user)
+	const { isAdminViewActive } = useAdminView()
 
 	// RBAC: Only FulfillmentCoordinator+ can access
 	const { isFulfillmentCoordinatorOrAbove, isSalesManagerOrAbove } = usePermissions()
@@ -123,7 +124,17 @@ export default function FulfillmentQueuePage() {
 		const response = await API.Orders.richSearch(enrichedFilter)
 
 		if (response.data?.payload) {
-			return response.data.payload as unknown as RichPagedResult<OrderRow>
+			const payload = response.data.payload as unknown as RichPagedResult<
+				OrderRow & { customer?: { name?: string | null } | null }
+			>
+			return {
+				...payload,
+				data: payload.data.map((row) => ({
+					...row,
+					customerName: row.customerName ?? row.customer?.name ?? 'N/A',
+					customerId: row.customerId ?? null,
+				})),
+			}
 		}
 
 		// Return empty result on error
@@ -168,7 +179,9 @@ export default function FulfillmentQueuePage() {
 			cell: ({ row }) => (
 				<div className='flex flex-col'>
 					<span className='font-medium'>{row.original.customerName ?? 'N/A'}</span>
-					<span className='text-xs text-base-content/60'>ID: {row.original.customerId}</span>
+					{isAdminViewActive && row.original.customerId && (
+						<span className='text-xs text-base-content/60'>ID: {row.original.customerId}</span>
+					)}
 				</div>
 			),
 		}),

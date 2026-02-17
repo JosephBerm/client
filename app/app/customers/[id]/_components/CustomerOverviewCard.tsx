@@ -30,6 +30,8 @@ import {
 import Company from '@_classes/Company'
 import { CustomerStatus, TypeOfBusiness } from '@_classes/Enums'
 
+import { useAdminView } from '@_shared'
+
 import Button from '@_components/ui/Button'
 
 /** Component props */
@@ -51,6 +53,8 @@ export function CustomerOverviewCard({
 	canAssignSalesRep,
 	onAssignSalesRep,
 }: CustomerOverviewCardProps) {
+	const { isAdminViewActive } = useAdminView()
+
 	return (
 		<div className="card bg-base-100 border border-base-300 shadow-sm">
 			<div className="card-body p-4 sm:p-6">
@@ -79,7 +83,7 @@ export function CustomerOverviewCard({
 									type={customer.typeOfBusiness ?? TypeOfBusiness.Other}
 									size="sm"
 								/>
-								{customer.taxId && (
+								{isAdminViewActive && customer.taxId && (
 									<span className="badge badge-outline badge-sm">
 										Tax ID: {customer.taxId}
 									</span>

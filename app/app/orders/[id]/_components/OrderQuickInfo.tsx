@@ -23,6 +23,8 @@
 import { OrderStatus } from '@_classes/Enums'
 import type Order from '@_classes/Order'
 
+import { useAdminView } from '@_shared'
+
 import Card from '@_components/ui/Card'
 
 export interface OrderQuickInfoProps {
@@ -39,6 +41,8 @@ export interface OrderQuickInfoProps {
  * ```
  */
 export function OrderQuickInfo({ order }: OrderQuickInfoProps) {
+	const { isAdminViewActive } = useAdminView()
+
 	// Determine high-level status
 	const statusLabel = getHighLevelStatus(order.status)
 
@@ -49,7 +53,7 @@ export function OrderQuickInfo({ order }: OrderQuickInfoProps) {
 			</h3>
 			<div className="space-y-3 text-sm">
 				<InfoRow label="Order ID" value={`#${order.id}`} mono />
-				<InfoRow label="Customer ID" value={`#${order.customerId}`} mono />
+				{isAdminViewActive && <InfoRow label="Customer ID" value={`#${order.customerId}`} mono />}
 				<InfoRow label="Status" value={statusLabel} />
 			</div>
 		</Card>

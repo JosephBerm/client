@@ -31,7 +31,7 @@ import { Download, Eye, FileSpreadsheet, Package, Plus, Truck } from 'lucide-rea
 import { useAuthStore } from '@_features/auth'
 import { Routes } from '@_features/navigation'
 
-import { formatDate, formatCurrency, API, notificationService, usePermissions, RoleLevels } from '@_shared'
+import { formatDate, formatCurrency, API, notificationService, usePermissions, RoleLevels, useAdminView } from '@_shared'
 
 import { OrderStatus } from '@_classes/Enums'
 
@@ -58,8 +58,8 @@ import { InternalPageHeader } from '../_components'
  * from backend API response
  */
 interface OrderRow {
-	id?: number
-	customerId?: number
+	id?: string | number
+	customerId?: string | number
 	customerName?: string
 	total: number
 	status: number
@@ -78,6 +78,7 @@ export default function OrdersPage() {
 	// RBAC: Use usePermissions hook for role-based checks
 	const { isCustomer, isSalesRepOrAbove, isFulfillmentCoordinatorOrAbove, isSalesManagerOrAbove, roleLevel } =
 		usePermissions()
+	const { isAdminViewActive } = useAdminView()
 
 	// Role checks using usePermissions() hook
 	const role = roleLevel ?? RoleLevels.Customer
@@ -94,7 +95,17 @@ export default function OrdersPage() {
 		const response = await API.Orders.richSearch(filter)
 
 		if (response.data?.statusCode === 200 && response.data.payload) {
-			return response.data.payload as unknown as RichPagedResult<OrderRow>
+			const payload = response.data.payload as unknown as RichPagedResult<
+				OrderRow & { customer?: { name?: string | null } | null }
+			>
+			return {
+				...payload,
+				data: payload.data.map((row) => ({
+					...row,
+					customerName: row.customerName ?? row.customer?.name ?? 'N/A',
+					customerId: row.customerId ?? 'N/A',
+				})),
+			}
 		}
 
 		const statusCode = response.data?.statusCode ?? response.status
@@ -136,7 +147,9 @@ export default function OrdersPage() {
 					cell: ({ row }) => (
 						<div className='flex flex-col'>
 							<span className='font-medium'>{row.original.customerName ?? 'N/A'}</span>
-							<span className='text-xs text-base-content/60'>ID: {row.original.customerId}</span>
+							{isAdminViewActive && (
+								<span className='text-xs text-base-content/60'>ID: {row.original.customerId}</span>
+							)}
 						</div>
 					),
 				})

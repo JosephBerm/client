@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 
 import { Routes } from '@_features/navigation'
-import { API, useRouteParam, notificationService } from '@_shared'
+import { API, useAdminView, useRouteParam, notificationService } from '@_shared'
 import { logger } from '@_core'
 
 import Guid from '@_classes/Base/Guid'
@@ -45,6 +45,7 @@ import { InternalPageHeader } from '../../_components'
 export default function ProviderDetailPage() {
 	const router = useRouter()
 	const providerId = useRouteParam('id')
+	const { isAdminViewActive } = useAdminView()
 
 	const [provider, setProvider] = useState<Provider>(new Provider({}))
 	const [isLoading, setIsLoading] = useState(true)
@@ -152,7 +153,9 @@ export default function ProviderDetailPage() {
 				description={
 					isCreateMode 
 						? 'Add a new medical supply vendor to the system'
-						: `Vendor ID: ${provider.identifier || provider.id}`
+						: isAdminViewActive
+						? `Vendor ID: ${provider.identifier || provider.id}`
+						: 'View and manage provider details'
 				}
 				actions={
 					<div className="flex items-center gap-2">
@@ -313,7 +316,9 @@ export default function ProviderDetailPage() {
 													</div>
 													<div>
 														<label className="text-xs text-base-content/60">Tax ID</label>
-														<p className="font-mono">{provider.taxId || '—'}</p>
+														<p className="font-mono">
+															{isAdminViewActive ? provider.taxId || '—' : 'Hidden'}
+														</p>
 													</div>
 												</div>
 											</div>
@@ -326,7 +331,7 @@ export default function ProviderDetailPage() {
 													Business Address
 												</h3>
 												<div className="flex items-start gap-3">
-													<div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+													<div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
 														<MapPin className="w-5 h-5 text-primary" />
 													</div>
 													<div>

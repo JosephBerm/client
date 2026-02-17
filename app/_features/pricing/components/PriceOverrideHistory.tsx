@@ -16,6 +16,7 @@ import { Clock, DollarSign, User, FileText, TrendingDown, TrendingUp } from 'luc
 
 import { formatCurrency } from '@_lib/formatters'
 import { formatDate } from '@_lib/dates'
+import { useAdminView } from '@_shared'
 import { usePriceOverrideHistory } from '../hooks/usePricing'
 
 import Card from '@_components/ui/Card'
@@ -38,6 +39,7 @@ export interface PriceOverrideHistoryProps {
 
 export default function PriceOverrideHistory({ cartProductId, className = '' }: PriceOverrideHistoryProps) {
 	const { data: history, isLoading, error } = usePriceOverrideHistory(cartProductId)
+	const { isAdminViewActive } = useAdminView()
 
 	// Loading state
 	if (isLoading) {
@@ -123,7 +125,7 @@ export default function PriceOverrideHistory({ cartProductId, className = '' }: 
 
 							{/* Reason */}
 							<div className="flex items-start gap-2 mb-2">
-								<FileText className="h-4 w-4 text-base-content/40 mt-0.5 flex-shrink-0" />
+								<FileText className="h-4 w-4 text-base-content/40 mt-0.5 shrink-0" />
 								<p className="text-sm text-base-content/70 line-clamp-2">
 									{item.reason}
 								</p>
@@ -131,10 +133,12 @@ export default function PriceOverrideHistory({ cartProductId, className = '' }: 
 
 							{/* Metadata */}
 							<div className="flex items-center gap-4 text-xs text-base-content/50">
-								<div className="flex items-center gap-1">
-									<User className="h-3 w-3" />
-									<span>{item.overriddenByUserId}</span>
-								</div>
+								{isAdminViewActive && (
+									<div className="flex items-center gap-1">
+										<User className="h-3 w-3" />
+										<span>{item.overriddenByUserId}</span>
+									</div>
+								)}
 								<div className="flex items-center gap-1">
 									<Clock className="h-3 w-3" />
 									<span>{formatDate(item.overriddenAt, 'MMM d, yyyy h:mm a')}</span>
