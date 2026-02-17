@@ -34,7 +34,15 @@ import { Eye, Package, Truck } from 'lucide-react'
 import { useAuthStore } from '@_features/auth'
 import { Routes } from '@_features/navigation'
 
-import { formatDate, formatCurrency, API, notificationService, usePermissions, RoleLevels, useAdminView } from '@_shared'
+import {
+	formatDate,
+	formatCurrency,
+	API,
+	notificationService,
+	usePermissions,
+	RoleLevels,
+	useAdminView,
+} from '@_shared'
 
 import { OrderStatus } from '@_classes/Enums'
 

@@ -227,7 +227,7 @@ export default function SettingsModal({ isOpen, onClose, defaultSectionId }: Set
 		const handleKeyDown = (e: KeyboardEvent) => {
 			const { activeElement } = document
 			const isSectionButton = Array.from(sectionButtonRefs.current.values()).includes(
-				activeElement as HTMLButtonElement
+				activeElement as HTMLButtonElement,
 			)
 
 			if (!isSectionButton) return
@@ -279,7 +279,7 @@ export default function SettingsModal({ isOpen, onClose, defaultSectionId }: Set
 				onClose()
 			}
 		},
-		[onClose]
+		[onClose],
 	)
 
 	const handleOverlayKeyDown = useCallback(
@@ -289,7 +289,7 @@ export default function SettingsModal({ isOpen, onClose, defaultSectionId }: Set
 				onClose()
 			}
 		},
-		[onClose]
+		[onClose],
 	)
 
 	const handleContentClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -480,6 +480,6 @@ export default function SettingsModal({ isOpen, onClose, defaultSectionId }: Set
 				</>
 			)}
 		</AnimatePresence>,
-		document.body
+		document.body,
 	)
 }

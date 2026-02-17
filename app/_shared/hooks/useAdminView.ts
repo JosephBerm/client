@@ -29,7 +29,7 @@ export function useAdminView(): UseAdminViewReturn {
 			}
 			setAdminViewPreference(enabled)
 		},
-		[isAdmin, setAdminViewPreference]
+		[isAdmin, setAdminViewPreference],
 	)
 
 	return {

@@ -237,7 +237,7 @@ export default function QuotePricingEditor({ quote, permissions, customerId, onR
 			const value = product?.[field]
 			return value != null ? value.toString() : ''
 		},
-		[localPricing, products]
+		[localPricing, products],
 	)
 
 	/**
@@ -291,7 +291,7 @@ export default function QuotePricingEditor({ quote, permissions, customerId, onR
 				return next
 			})
 		},
-		[getDisplayValue, validatePricing, updatePricing]
+		[getDisplayValue, validatePricing, updatePricing],
 	)
 
 	/**
@@ -311,7 +311,7 @@ export default function QuotePricingEditor({ quote, permissions, customerId, onR
 				},
 			}))
 		},
-		[getSuggested]
+		[getSuggested],
 	)
 
 	/**
@@ -343,7 +343,7 @@ export default function QuotePricingEditor({ quote, permissions, customerId, onR
 
 				return acc
 			},
-			{ vendorTotal: 0, customerTotal: 0, marginTotal: 0 }
+			{ vendorTotal: 0, customerTotal: 0, marginTotal: 0 },
 		)
 	}, [products])
 
@@ -524,7 +524,7 @@ function QuotePricingDataGrid({
 
 			return persistedValue ?? null
 		},
-		[isEditable, getDisplayValue]
+		[isEditable, getDisplayValue],
 	)
 
 	const columns = useMemo<ColumnDef<QuotePricingRow>[]>(
@@ -784,7 +784,7 @@ function QuotePricingDataGrid({
 			toggleBreakdown,
 			totals,
 			marginPercent,
-		]
+		],
 	)
 
 	// Prepare data with footer row using discriminated union types

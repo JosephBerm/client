@@ -132,7 +132,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 		.map((section) => ({
 			...section,
 			routes: section.routes.filter(
-				(route) => route.href.startsWith('/app') || route.id === 'profile' || route.id === 'notifications'
+				(route) => route.href.startsWith('/app') || route.id === 'profile' || route.id === 'notifications',
 			),
 		}))
 		.filter((section) => section.routes.length > 0)
@@ -354,7 +354,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 					{
 						'translate-x-0': isOpen || !isMobile,
 						'-translate-x-full': !isOpen && isMobile,
-					}
+					},
 				)}>
 				<div className='flex flex-col h-full max-h-dvh'>
 					{/* Header */}
@@ -472,7 +472,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 															{
 																'bg-primary/10 text-primary font-medium': isActive,
 																'text-base-content': !isActive,
-															}
+															},
 														)}
 														aria-current={isActive ? 'page' : undefined}>
 														<NavigationIcon
@@ -510,9 +510,7 @@ export default function InternalSidebar({ isOpen, onClose }: InternalSidebarProp
 										/>
 										<span className='truncate'>Admin View</span>
 									</div>
-									<p className='text-xs text-base-content/60'>
-										Show internal IDs
-									</p>
+									<p className='text-xs text-base-content/60'>Show internal IDs</p>
 								</div>
 								<Toggle
 									id='sidebar-admin-view-toggle'

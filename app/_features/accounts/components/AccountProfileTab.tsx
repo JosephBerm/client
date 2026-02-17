@@ -226,7 +226,7 @@ export default function AccountProfileTab({
 				onSetPendingStatusChange?.(null)
 			}
 		},
-		[pendingStatusChange, onStatusChange, onSetPendingStatusChange]
+		[pendingStatusChange, onStatusChange, onSetPendingStatusChange],
 	)
 
 	// Memoize modal close handler
@@ -546,12 +546,12 @@ export default function AccountProfileTab({
 							pendingStatusChange === AccountStatus.Locked
 								? 'Locked accounts are temporarily blocked and will auto-unlock after 30 minutes.'
 								: pendingStatusChange === AccountStatus.Archived
-								? 'Archived accounts are soft-deleted and cannot login. Data is preserved for compliance.'
-								: pendingStatusChange === AccountStatus.ForcePasswordChange
-								? 'User will be required to change their password on next login.'
-								: pendingStatusChange === AccountStatus.PendingVerification
-								? 'Pending accounts require email verification before gaining full access.'
-								: 'Active accounts have full access to the system based on their role.'
+									? 'Archived accounts are soft-deleted and cannot login. Data is preserved for compliance.'
+									: pendingStatusChange === AccountStatus.ForcePasswordChange
+										? 'User will be required to change their password on next login.'
+										: pendingStatusChange === AccountStatus.PendingVerification
+											? 'Pending accounts require email verification before gaining full access.'
+											: 'Active accounts have full access to the system based on their role.'
 						}
 					/>
 				)}

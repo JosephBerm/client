@@ -70,11 +70,4 @@ export type { UseAdminViewReturn } from './useAdminView'
 // because it's development-only and should not be bundled in production.
 // Import directly from '@_shared/hooks' when needed in dev components.
 export { useMcpChat } from './useMcpChat'
-export type {
-	McpMessage,
-	McpTool,
-	McpResource,
-	McpConnectionStatus,
-	UseMcpChatReturn,
-} from './useMcpChat'
-
+export type { McpMessage, McpTool, McpResource, McpConnectionStatus, UseMcpChatReturn } from './useMcpChat'

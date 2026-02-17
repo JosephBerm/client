@@ -31,7 +31,15 @@ import { Download, Eye, FileSpreadsheet, Package, Plus, Truck } from 'lucide-rea
 import { useAuthStore } from '@_features/auth'
 import { Routes } from '@_features/navigation'
 
-import { formatDate, formatCurrency, API, notificationService, usePermissions, RoleLevels, useAdminView } from '@_shared'
+import {
+	formatDate,
+	formatCurrency,
+	API,
+	notificationService,
+	usePermissions,
+	RoleLevels,
+	useAdminView,
+} from '@_shared'
 
 import { OrderStatus } from '@_classes/Enums'
 
@@ -152,7 +160,7 @@ export default function OrdersPage() {
 							)}
 						</div>
 					),
-				})
+				}),
 			)
 		}
 
@@ -165,7 +173,7 @@ export default function OrdersPage() {
 					cell: ({ row }) => (
 						<span className='text-sm text-base-content/80'>{row.original.assignedSalesRepName ?? '—'}</span>
 					),
-				})
+				}),
 			)
 		}
 
@@ -175,7 +183,7 @@ export default function OrdersPage() {
 				header: 'Total',
 				filterType: FilterType.Number,
 				cell: ({ row }) => <span className='font-semibold'>{formatCurrency(row.original.total ?? 0)}</span>,
-			})
+			}),
 		)
 
 		// Status column - Select filter, faceted
@@ -185,7 +193,7 @@ export default function OrdersPage() {
 				filterType: FilterType.Select,
 				faceted: true,
 				cell: ({ row }) => <OrderStatusBadge status={row.original.status} />,
-			})
+			}),
 		)
 
 		// Payment confirmed column for SalesRep and above
@@ -204,7 +212,7 @@ export default function OrdersPage() {
 						}
 						return <span className='text-base-content/40'>—</span>
 					},
-				})
+				}),
 			)
 		}
 
@@ -233,7 +241,7 @@ export default function OrdersPage() {
 						}
 						return <span className='text-base-content/40'>—</span>
 					},
-				})
+				}),
 			)
 		}
 
@@ -245,7 +253,7 @@ export default function OrdersPage() {
 				cell: ({ row }) => (
 					<span className='text-sm text-base-content/70'>{formatDate(row.original.createdAt)}</span>
 				),
-			})
+			}),
 		)
 
 		// Actions column - Display only
@@ -265,7 +273,7 @@ export default function OrdersPage() {
 						</Link>
 					</div>
 				),
-			})
+			}),
 		)
 
 		return baseColumns
@@ -275,10 +283,10 @@ export default function OrdersPage() {
 	const pageDescription = isCustomer
 		? 'View and track your orders'
 		: isSalesRep
-		? 'View orders for your assigned customers'
-		: isFulfillment
-		? 'Process and fulfill pending orders'
-		: 'Manage all orders in the system'
+			? 'View orders for your assigned customers'
+			: isFulfillment
+				? 'Process and fulfill pending orders'
+				: 'Manage all orders in the system'
 
 	return (
 		<>
@@ -314,66 +322,64 @@ export default function OrdersPage() {
 				</div>
 			)}
 
-			<Surface variant='subtle' padding='lg'>
-					<RichDataGrid<OrderRow>
-						columns={columns}
-						fetcher={fetcher}
-						defaultPageSize={10}
-						defaultSorting={[
-							{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending },
-						]}
-						enableGlobalSearch
-						enableColumnFilters
-						enableRowSelection={isManager}
-						enableColumnResizing
-						bulkActions={
-							isManager
-								? ([
-										{
-											id: 'export-csv',
-											label: 'Export CSV',
-											icon: <Download className='w-4 h-4' />,
-											variant: BulkActionVariant.Default,
-											onAction: async (rows: OrderRow[]) => {
-												const headers = 'Order ID,Customer,Total,Status,Created\n'
-												const csv = rows
-													.map(
-														(r) =>
-															`${r.id},"${r.customerName ?? ''}",${r.total},${
-																r.status
-															},"${formatDate(r.createdAt)}"`
-													)
-													.join('\n')
-												const blob = new Blob([headers + csv], { type: 'text/csv' })
-												const url = URL.createObjectURL(blob)
-												const a = document.createElement('a')
-												a.href = url
-												a.download = `orders-export-${
-													new Date().toISOString().split('T')[0]
-												}.csv`
-												a.click()
-												URL.revokeObjectURL(url)
-												notificationService.success(`Exported ${rows.length} orders`)
-											},
+			<Surface
+				variant='subtle'
+				padding='lg'>
+				<RichDataGrid<OrderRow>
+					columns={columns}
+					fetcher={fetcher}
+					defaultPageSize={10}
+					defaultSorting={[{ columnId: createColumnId('createdAt'), direction: SortDirection.Descending }]}
+					enableGlobalSearch
+					enableColumnFilters
+					enableRowSelection={isManager}
+					enableColumnResizing
+					bulkActions={
+						isManager
+							? ([
+									{
+										id: 'export-csv',
+										label: 'Export CSV',
+										icon: <Download className='w-4 h-4' />,
+										variant: BulkActionVariant.Default,
+										onAction: async (rows: OrderRow[]) => {
+											const headers = 'Order ID,Customer,Total,Status,Created\n'
+											const csv = rows
+												.map(
+													(r) =>
+														`${r.id},"${r.customerName ?? ''}",${r.total},${
+															r.status
+														},"${formatDate(r.createdAt)}"`,
+												)
+												.join('\n')
+											const blob = new Blob([headers + csv], { type: 'text/csv' })
+											const url = URL.createObjectURL(blob)
+											const a = document.createElement('a')
+											a.href = url
+											a.download = `orders-export-${new Date().toISOString().split('T')[0]}.csv`
+											a.click()
+											URL.revokeObjectURL(url)
+											notificationService.success(`Exported ${rows.length} orders`)
 										},
-								  ] satisfies BulkAction<OrderRow>[])
-								: undefined
-						}
-						searchPlaceholder='Search orders by customer...'
-						persistStateKey='orders-grid'
-						emptyState={
-							<div className='flex flex-col items-center gap-3 py-12'>
-								<Package className='w-12 h-12 text-base-content/30' />
-								<p className='text-base-content/60'>No orders found</p>
-								<p className='text-sm text-base-content/40'>
-									{isCustomer
-										? 'Your orders will appear here once placed.'
-										: 'Orders matching your filters will appear here.'}
-								</p>
-							</div>
-						}
-						ariaLabel='Orders table'
-					/>
+									},
+								] satisfies BulkAction<OrderRow>[])
+							: undefined
+					}
+					searchPlaceholder='Search orders by customer...'
+					persistStateKey='orders-grid'
+					emptyState={
+						<div className='flex flex-col items-center gap-3 py-12'>
+							<Package className='w-12 h-12 text-base-content/30' />
+							<p className='text-base-content/60'>No orders found</p>
+							<p className='text-sm text-base-content/40'>
+								{isCustomer
+									? 'Your orders will appear here once placed.'
+									: 'Orders matching your filters will appear here.'}
+							</p>
+						</div>
+					}
+					ariaLabel='Orders table'
+				/>
 			</Surface>
 		</>
 	)
@@ -401,25 +407,27 @@ function QuickFilterCard({ label, icon, variant = 'info', active = false, onClic
 	const variantStyles = {
 		info: classNames(
 			'border-info/30 text-info',
-			active ? 'bg-info/20 border-info/60 ring-2 ring-info/20' : 'bg-info/5 hover:bg-info/15 hover:border-info/50'
+			active
+				? 'bg-info/20 border-info/60 ring-2 ring-info/20'
+				: 'bg-info/5 hover:bg-info/15 hover:border-info/50',
 		),
 		warning: classNames(
 			'border-warning/30 text-warning',
 			active
 				? 'bg-warning/20 border-warning/60 ring-2 ring-warning/20'
-				: 'bg-warning/5 hover:bg-warning/15 hover:border-warning/50'
+				: 'bg-warning/5 hover:bg-warning/15 hover:border-warning/50',
 		),
 		success: classNames(
 			'border-success/30 text-success',
 			active
 				? 'bg-success/20 border-success/60 ring-2 ring-success/20'
-				: 'bg-success/5 hover:bg-success/15 hover:border-success/50'
+				: 'bg-success/5 hover:bg-success/15 hover:border-success/50',
 		),
 		error: classNames(
 			'border-error/30 text-error',
 			active
 				? 'bg-error/20 border-error/60 ring-2 ring-error/20'
-				: 'bg-error/5 hover:bg-error/15 hover:border-error/50'
+				: 'bg-error/5 hover:bg-error/15 hover:border-error/50',
 		),
 	}
 
@@ -434,7 +442,7 @@ function QuickFilterCard({ label, icon, variant = 'info', active = false, onClic
 				// Reset outline variant defaults, apply chip styles
 				'border shadow-none hover:shadow-none',
 				// Variant-specific colors
-				variantStyles[variant]
+				variantStyles[variant],
 			)}>
 			{label}
 		</Button>
