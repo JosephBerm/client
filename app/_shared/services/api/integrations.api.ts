@@ -35,9 +35,9 @@ import { HttpService } from '../httpService'
  * Connect to QuickBooks Online, NetSuite, and other accounting systems.
  *
  * Routes:
- * - Integration endpoints: /api/Integration/*
- * - QuickBooks OAuth: /api/QuickBooks/*
- * - NetSuite OAuth: /api/NetSuite/*
+ * - Integration endpoints: /Integration/*
+ * - QuickBooks OAuth: /QuickBooks/*
+ * - NetSuite OAuth: /NetSuite/*
  */
 export const IntegrationsApi = {
 	// =====================================================================
@@ -47,31 +47,31 @@ export const IntegrationsApi = {
 	/**
 	 * Gets all integration connections for the current tenant.
 	 */
-	getConnections: async () => HttpService.get<IntegrationConnectionDTO[]>('/api/Integration/connections'),
+	getConnections: async () => HttpService.get<IntegrationConnectionDTO[]>('/Integration/connections'),
 
 	/**
 	 * Gets a specific connection by ID.
 	 */
 	getConnection: async (connectionId: string) =>
-		HttpService.get<IntegrationConnectionDTO>(`/api/Integration/connections/${connectionId}`),
+		HttpService.get<IntegrationConnectionDTO>(`/Integration/connections/${connectionId}`),
 
 	/**
 	 * Updates connection settings.
 	 */
 	updateConnectionSettings: async (connectionId: string, request: UpdateConnectionSettingsRequest) =>
-		HttpService.put<IntegrationConnectionDTO>(`/api/Integration/connections/${connectionId}/settings`, request),
+		HttpService.put<IntegrationConnectionDTO>(`/Integration/connections/${connectionId}/settings`, request),
 
 	/**
 	 * Disconnects an integration.
 	 */
 	disconnect: async (connectionId: string) =>
-		HttpService.post<boolean>(`/api/Integration/connections/${connectionId}/disconnect`, {}),
+		HttpService.post<boolean>(`/Integration/connections/${connectionId}/disconnect`, {}),
 
 	/**
 	 * Tests a connection.
 	 */
 	testConnection: async (connectionId: string) =>
-		HttpService.post<{ success: boolean; message: string }>(`/api/Integration/connections/${connectionId}/test`, {}),
+		HttpService.post<{ success: boolean; message: string }>(`/Integration/connections/${connectionId}/test`, {}),
 
 	// =====================================================================
 	// SYNC OPERATIONS
@@ -81,19 +81,19 @@ export const IntegrationsApi = {
 	 * Triggers a manual sync operation.
 	 */
 	triggerSync: async (request: TriggerSyncRequest) =>
-		HttpService.post<SyncOperationResponse>('/api/Integration/sync', request),
+		HttpService.post<SyncOperationResponse>('/Integration/sync', request),
 
 	/**
 	 * Gets the status of a sync operation.
 	 */
 	getSyncStatus: async (correlationId: string) =>
-		HttpService.get<SyncOperationStatus>(`/api/Integration/sync/${correlationId}/status`),
+		HttpService.get<SyncOperationStatus>(`/Integration/sync/${correlationId}/status`),
 
 	/**
 	 * Gets sync checkpoints for a provider.
 	 */
 	getSyncCheckpoints: async (provider: string) =>
-		HttpService.get<IntegrationSyncCheckpointDTO[]>(`/api/Integration/checkpoints/${provider}`),
+		HttpService.get<IntegrationSyncCheckpointDTO[]>(`/Integration/checkpoints/${provider}`),
 
 	// =====================================================================
 	// ENTITY MAPPINGS
@@ -116,7 +116,7 @@ export const IntegrationsApi = {
 		params.append('pageNumber', pageNumber.toString())
 		params.append('pageSize', pageSize.toString())
 		return HttpService.get<PagedIntegrationResult<IntegrationEntityMappingDTO>>(
-			`/api/Integration/mappings?${params.toString()}`
+			`/Integration/mappings?${params.toString()}`
 		)
 	},
 
@@ -125,7 +125,7 @@ export const IntegrationsApi = {
 	 */
 	getExternalId: async (provider: string, entityType: string, prometheusId: string) =>
 		HttpService.get<{ externalId: string }>(
-			`/api/Integration/mappings/external-id?provider=${provider}&entityType=${entityType}&prometheusId=${prometheusId}`
+			`/Integration/mappings/external-id?provider=${provider}&entityType=${entityType}&prometheusId=${prometheusId}`
 		),
 
 	// =====================================================================
@@ -149,13 +149,13 @@ export const IntegrationsApi = {
 		params.append('pageSize', (filter.pageSize ?? 20).toString())
 		if (filter.sortBy) params.append('sortBy', filter.sortBy)
 		if (filter.sortDescending !== undefined) params.append('sortDescending', filter.sortDescending.toString())
-		return HttpService.get<PagedIntegrationResult<IntegrationSyncLogDTO>>(`/api/Integration/logs?${params.toString()}`)
+		return HttpService.get<PagedIntegrationResult<IntegrationSyncLogDTO>>(`/Integration/logs?${params.toString()}`)
 	},
 
 	/**
 	 * Gets a specific sync log entry.
 	 */
-	getSyncLogDetail: async (logId: string) => HttpService.get<IntegrationSyncLogDTO>(`/api/Integration/logs/${logId}`),
+	getSyncLogDetail: async (logId: string) => HttpService.get<IntegrationSyncLogDTO>(`/Integration/logs/${logId}`),
 
 	// =====================================================================
 	// DASHBOARD & STATS
@@ -164,12 +164,12 @@ export const IntegrationsApi = {
 	/**
 	 * Gets integration dashboard summary.
 	 */
-	getDashboardSummary: async () => HttpService.get<IntegrationDashboardSummary>('/api/Integration/dashboard'),
+	getDashboardSummary: async () => HttpService.get<IntegrationDashboardSummary>('/Integration/dashboard'),
 
 	/**
 	 * Gets integration statistics.
 	 */
-	getStats: async () => HttpService.get<IntegrationStats>('/api/Integration/stats'),
+	getStats: async () => HttpService.get<IntegrationStats>('/Integration/stats'),
 
 	// =====================================================================
 	// SETTINGS
@@ -179,13 +179,13 @@ export const IntegrationsApi = {
 	 * Gets integration settings for a provider.
 	 */
 	getSettings: async (provider: IntegrationProvider) =>
-		HttpService.get<IntegrationSettingsDTO>(`/api/Integration/settings/${provider}`),
+		HttpService.get<IntegrationSettingsDTO>(`/Integration/settings/${provider}`),
 
 	/**
 	 * Updates integration settings for a provider.
 	 */
 	updateSettings: async (provider: IntegrationProvider, settings: IntegrationSettingsDTO) =>
-		HttpService.put<IntegrationSettingsDTO>(`/api/Integration/settings/${provider}`, settings),
+		HttpService.put<IntegrationSettingsDTO>(`/Integration/settings/${provider}`, settings),
 
 	// =====================================================================
 	// OAUTH (QuickBooks / NetSuite)
@@ -195,13 +195,13 @@ export const IntegrationsApi = {
 	 * Initiates QuickBooks OAuth connection.
 	 */
 	initiateQuickBooksConnection: async () =>
-		HttpService.get<{ authorizationUrl: string; state: string }>('/api/QuickBooks/connect'),
+		HttpService.get<{ authorizationUrl: string; state: string }>('/QuickBooks/connect'),
 
 	/**
 	 * Initiates NetSuite OAuth connection.
 	 */
 	initiateNetSuiteConnection: async () =>
-		HttpService.get<{ authorizationUrl: string; state: string }>('/api/NetSuite/connect'),
+		HttpService.get<{ authorizationUrl: string; state: string }>('/NetSuite/connect'),
 
 	/**
 	 * Connects NetSuite using Token-Based Authentication.
@@ -212,7 +212,11 @@ export const IntegrationsApi = {
 		consumerSecret: string
 		tokenId: string
 		tokenSecret: string
-	}) => HttpService.post<boolean>('/api/NetSuite/connect', credentials),
+	}) =>
+		HttpService.post<boolean | { authorizationUrl: string; state: string }>(
+			'/NetSuite/connect',
+			credentials
+		),
 
 	// =====================================================================
 	// OUTBOX & INBOX
@@ -222,18 +226,18 @@ export const IntegrationsApi = {
 	 * Gets pending outbox items.
 	 */
 	getOutboxItems: async (pageNumber = 1, pageSize = 20) =>
-		HttpService.get<unknown[]>(`/api/Integration/outbox?pageNumber=${pageNumber}&pageSize=${pageSize}`),
+		HttpService.get<unknown[]>(`/Integration/outbox?pageNumber=${pageNumber}&pageSize=${pageSize}`),
 
 	/**
 	 * Retries a specific outbox item.
 	 */
-	retryOutboxItem: async (itemId: string) => HttpService.post<boolean>(`/api/Integration/outbox/${itemId}/retry`, {}),
+	retryOutboxItem: async (itemId: string) => HttpService.post<boolean>(`/Integration/outbox/${itemId}/retry`, {}),
 
 	/**
 	 * Gets inbox items (received webhooks).
 	 */
 	getInboxItems: async (pageNumber = 1, pageSize = 20) =>
 		HttpService.get<PagedIntegrationResult<unknown>>(
-			`/api/Integration/inbox?pageNumber=${pageNumber}&pageSize=${pageSize}`
+			`/Integration/inbox?pageNumber=${pageNumber}&pageSize=${pageSize}`
 		),
 }

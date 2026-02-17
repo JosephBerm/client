@@ -18,6 +18,13 @@
 
 import { API } from '@_shared'
 
+import {
+	ApiRequestError,
+	unwrapApiArrayPayload,
+	unwrapApiNullablePayload,
+	unwrapApiPayload,
+} from '@_shared/services'
+
 import type {
 	IntegrationConnectionDTO,
 	IntegrationDashboardSummary,
@@ -35,15 +42,6 @@ import type {
 	UpdateConnectionSettingsRequest,
 } from '../types'
 
-// Default empty paged result for fallback
-const EMPTY_PAGED_RESULT = <T>(): PagedIntegrationResult<T> => ({
-	items: [],
-	totalCount: 0,
-	pageNumber: 1,
-	pageSize: 20,
-	totalPages: 0,
-})
-
 /**
  * IntegrationService - Convenience Wrapper
  *
@@ -56,12 +54,12 @@ export const IntegrationService = {
 
 	async getConnections(): Promise<IntegrationConnectionDTO[]> {
 		const response = await API.Integrations.getConnections()
-		return response.data.payload ?? []
+		return unwrapApiArrayPayload<IntegrationConnectionDTO>(response, 'load integration connections')
 	},
 
 	async getConnection(connectionId: string): Promise<IntegrationConnectionDTO | null> {
 		const response = await API.Integrations.getConnection(connectionId)
-		return response.data.payload
+		return unwrapApiNullablePayload<IntegrationConnectionDTO>(response, 'load integration connection')
 	},
 
 	async updateConnectionSettings(
@@ -69,17 +67,23 @@ export const IntegrationService = {
 		request: UpdateConnectionSettingsRequest
 	): Promise<IntegrationConnectionDTO | null> {
 		const response = await API.Integrations.updateConnectionSettings(connectionId, request)
-		return response.data.payload
+		return unwrapApiNullablePayload<IntegrationConnectionDTO>(
+			response,
+			'update integration connection settings'
+		)
 	},
 
 	async disconnect(connectionId: string): Promise<boolean> {
 		const response = await API.Integrations.disconnect(connectionId)
-		return response.data.payload ?? false
+		return unwrapApiPayload<boolean>(response, 'disconnect integration')
 	},
 
 	async testConnection(connectionId: string): Promise<{ success: boolean; message: string }> {
 		const response = await API.Integrations.testConnection(connectionId)
-		return response.data.payload ?? { success: false, message: 'Unknown error' }
+		return unwrapApiPayload<{ success: boolean; message: string }>(
+			response,
+			'test integration connection'
+		)
 	},
 
 	// =========================================================================
@@ -88,17 +92,17 @@ export const IntegrationService = {
 
 	async triggerSync(request: TriggerSyncRequest): Promise<SyncOperationResponse | null> {
 		const response = await API.Integrations.triggerSync(request)
-		return response.data.payload
+		return unwrapApiNullablePayload<SyncOperationResponse>(response, 'trigger integration sync')
 	},
 
 	async getSyncStatus(correlationId: string): Promise<SyncOperationStatus | null> {
 		const response = await API.Integrations.getSyncStatus(correlationId)
-		return response.data.payload
+		return unwrapApiNullablePayload<SyncOperationStatus>(response, 'load integration sync status')
 	},
 
 	async getSyncCheckpoints(provider: string): Promise<IntegrationSyncCheckpointDTO[]> {
 		const response = await API.Integrations.getSyncCheckpoints(provider)
-		return response.data.payload ?? []
+		return unwrapApiArrayPayload<IntegrationSyncCheckpointDTO>(response, 'load integration sync checkpoints')
 	},
 
 	// =========================================================================
@@ -119,15 +123,22 @@ export const IntegrationService = {
 			pageSize,
 			prometheusEntityId
 		)
-		return response.data.payload ?? EMPTY_PAGED_RESULT<IntegrationEntityMappingDTO>()
+		return unwrapApiPayload<PagedIntegrationResult<IntegrationEntityMappingDTO>>(
+			response,
+			'load integration entity mappings'
+		)
 	},
 
 	async getExternalId(provider: string, entityType: string, prometheusId: string): Promise<string | null> {
 		try {
 			const response = await API.Integrations.getExternalId(provider, entityType, prometheusId)
-			return response.data.payload?.externalId ?? null
-		} catch {
-			return null
+			const payload = unwrapApiPayload<{ externalId?: string }>(response, 'load external entity ID')
+			return payload.externalId ?? null
+		} catch (error) {
+			if (error instanceof ApiRequestError && error.status === 404) {
+				return null
+			}
+			throw error
 		}
 	},
 
@@ -137,12 +148,15 @@ export const IntegrationService = {
 
 	async getSyncLogs(filter: SyncLogSearchFilter): Promise<PagedIntegrationResult<IntegrationSyncLogDTO>> {
 		const response = await API.Integrations.getSyncLogs(filter)
-		return response.data.payload ?? EMPTY_PAGED_RESULT<IntegrationSyncLogDTO>()
+		return unwrapApiPayload<PagedIntegrationResult<IntegrationSyncLogDTO>>(
+			response,
+			'load integration sync logs'
+		)
 	},
 
 	async getSyncLogDetail(logId: string): Promise<IntegrationSyncLogDTO | null> {
 		const response = await API.Integrations.getSyncLogDetail(logId)
-		return response.data.payload
+		return unwrapApiNullablePayload<IntegrationSyncLogDTO>(response, 'load integration sync log detail')
 	},
 
 	// =========================================================================
@@ -151,12 +165,12 @@ export const IntegrationService = {
 
 	async getDashboardSummary(): Promise<IntegrationDashboardSummary | null> {
 		const response = await API.Integrations.getDashboardSummary()
-		return response.data.payload
+		return unwrapApiNullablePayload<IntegrationDashboardSummary>(response, 'load integration dashboard summary')
 	},
 
 	async getStats(): Promise<IntegrationStats | null> {
 		const response = await API.Integrations.getStats()
-		return response.data.payload
+		return unwrapApiNullablePayload<IntegrationStats>(response, 'load integration stats')
 	},
 
 	// =========================================================================
@@ -165,7 +179,7 @@ export const IntegrationService = {
 
 	async getSettings(provider: IntegrationProvider): Promise<IntegrationSettingsDTO | null> {
 		const response = await API.Integrations.getSettings(provider)
-		return response.data.payload
+		return unwrapApiNullablePayload<IntegrationSettingsDTO>(response, 'load integration settings')
 	},
 
 	async updateSettings(
@@ -173,7 +187,7 @@ export const IntegrationService = {
 		settings: IntegrationSettingsDTO
 	): Promise<IntegrationSettingsDTO | null> {
 		const response = await API.Integrations.updateSettings(provider, settings)
-		return response.data.payload
+		return unwrapApiNullablePayload<IntegrationSettingsDTO>(response, 'update integration settings')
 	},
 
 	// =========================================================================
@@ -182,12 +196,18 @@ export const IntegrationService = {
 
 	async initiateQuickBooksConnection(): Promise<{ authorizationUrl: string; state: string }> {
 		const response = await API.Integrations.initiateQuickBooksConnection()
-		return response.data.payload ?? { authorizationUrl: '', state: '' }
+		return unwrapApiPayload<{ authorizationUrl: string; state: string }>(
+			response,
+			'initiate QuickBooks connection'
+		)
 	},
 
 	async initiateNetSuiteConnection(): Promise<{ authorizationUrl: string; state: string }> {
 		const response = await API.Integrations.initiateNetSuiteConnection()
-		return response.data.payload ?? { authorizationUrl: '', state: '' }
+		return unwrapApiPayload<{ authorizationUrl: string; state: string }>(
+			response,
+			'initiate NetSuite connection'
+		)
 	},
 
 	async connectNetSuite(credentials: {
@@ -199,7 +219,21 @@ export const IntegrationService = {
 	}): Promise<{ isSuccess: boolean; errorMessage?: string }> {
 		try {
 			const response = await API.Integrations.connectNetSuiteTBA(credentials)
-			return { isSuccess: response.data.payload ?? false }
+			const payload = unwrapApiPayload<unknown>(response, 'connect NetSuite')
+
+			// Compatibility path: backend may return OAuth redirect payload instead of a boolean.
+			if (payload && typeof payload === 'object' && 'authorizationUrl' in payload) {
+				const { authorizationUrl } = payload as { authorizationUrl?: string }
+				if (authorizationUrl) {
+					if (typeof window !== 'undefined') {
+						window.location.href = authorizationUrl
+					}
+					return { isSuccess: true }
+				}
+				return { isSuccess: false, errorMessage: 'Missing NetSuite authorization URL' }
+			}
+
+			return { isSuccess: Boolean(payload) }
 		} catch (error: unknown) {
 			const errorMessage = error instanceof Error ? error.message : 'Failed to connect'
 			return { isSuccess: false, errorMessage }
@@ -212,17 +246,17 @@ export const IntegrationService = {
 
 	async getOutboxItems(pageNumber = 1, pageSize = 20): Promise<unknown[]> {
 		const response = await API.Integrations.getOutboxItems(pageNumber, pageSize)
-		return response.data.payload ?? []
+		return unwrapApiArrayPayload<unknown>(response, 'load integration outbox items')
 	},
 
 	async retryOutboxItem(itemId: string): Promise<boolean> {
 		const response = await API.Integrations.retryOutboxItem(itemId)
-		return response.data.payload ?? false
+		return unwrapApiPayload<boolean>(response, 'retry integration outbox item')
 	},
 
 	async getInboxItems(pageNumber = 1, pageSize = 20): Promise<PagedIntegrationResult<unknown>> {
 		const response = await API.Integrations.getInboxItems(pageNumber, pageSize)
-		return response.data.payload ?? EMPTY_PAGED_RESULT<unknown>()
+		return unwrapApiPayload<PagedIntegrationResult<unknown>>(response, 'load integration inbox items')
 	},
 }
 

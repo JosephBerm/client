@@ -97,7 +97,7 @@ export function useStoreData(): UseStoreDataReturn {
 	 * Fetches product categories from API with global cache deduplication
 	 */
 	const fetchCategories = useCallback(async (): Promise<ProductsCategory[]> => {
-		const cacheKey = createCacheKey('/Products/categories/clean')
+		const cacheKey = createCacheKey('/products/categories/clean')
 
 		return requestCache.execute(
 			cacheKey,

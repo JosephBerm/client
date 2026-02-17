@@ -13,7 +13,7 @@ import { APIRequestContext, request } from '@playwright/test'
 // CONFIGURATION
 // =============================================
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:5254'
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:5254/api/v1'
 
 // =============================================
 // TYPES
@@ -145,11 +145,11 @@ export class ApiTestHelper {
 		if (!this.context) return
 
 		const endpoints: Record<string, string> = {
-			quote: `/api/quotes/${id}`,
-			order: `/api/orders/${id}`,
-			customer: `/api/customers/${id}`,
-			product: `/api/products/${id}`,
-			user: `/api/users/${id}`,
+			quote: `/quotes/${id}`,
+			order: `/orders/${id}`,
+			customer: `/customers/${id}`,
+			product: `/products/${id}`,
+			user: `/users/${id}`,
 		}
 
 		const endpoint = endpoints[type]
@@ -174,7 +174,7 @@ export class ApiTestHelper {
 	}): Promise<TestQuote> {
 		if (!this.context) throw new Error('API helper not initialized')
 
-		const response = await this.context.post('/api/quotes', {
+		const response = await this.context.post('/quotes', {
 			data: {
 				customerId: data.customerId,
 				items: data.items,
@@ -198,7 +198,7 @@ export class ApiTestHelper {
 	async updateQuoteStatus(quoteId: string, status: TestQuote['status']): Promise<TestQuote> {
 		if (!this.context) throw new Error('API helper not initialized')
 
-		const response = await this.context.patch(`/api/quotes/${quoteId}/status`, {
+		const response = await this.context.patch(`/quotes/${quoteId}/status`, {
 			data: { status },
 			headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {},
 		})
@@ -216,7 +216,7 @@ export class ApiTestHelper {
 	async getQuote(quoteId: string): Promise<TestQuote | null> {
 		if (!this.context) throw new Error('API helper not initialized')
 
-		const response = await this.context.get(`/api/quotes/${quoteId}`, {
+		const response = await this.context.get(`/quotes/${quoteId}`, {
 			headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {},
 		})
 
@@ -240,7 +240,7 @@ export class ApiTestHelper {
 	}): Promise<TestOrder> {
 		if (!this.context) throw new Error('API helper not initialized')
 
-		const response = await this.context.post('/api/orders', {
+		const response = await this.context.post('/orders', {
 			data: {
 				customerId: data.customerId,
 				quoteId: data.quoteId,
@@ -266,7 +266,7 @@ export class ApiTestHelper {
 	async updateOrderStatus(orderId: string, status: TestOrder['status']): Promise<TestOrder> {
 		if (!this.context) throw new Error('API helper not initialized')
 
-		const response = await this.context.patch(`/api/orders/${orderId}/status`, {
+		const response = await this.context.patch(`/orders/${orderId}/status`, {
 			data: { status },
 			headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {},
 		})
@@ -284,7 +284,7 @@ export class ApiTestHelper {
 	async updateOrderPaymentStatus(orderId: string, paymentStatus: TestOrder['paymentStatus']): Promise<TestOrder> {
 		if (!this.context) throw new Error('API helper not initialized')
 
-		const response = await this.context.patch(`/api/orders/${orderId}/payment`, {
+		const response = await this.context.patch(`/orders/${orderId}/payment`, {
 			data: { paymentStatus },
 			headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {},
 		})
@@ -302,7 +302,7 @@ export class ApiTestHelper {
 	async addOrderTracking(orderId: string, trackingNumber: string, carrier: string): Promise<TestOrder> {
 		if (!this.context) throw new Error('API helper not initialized')
 
-		const response = await this.context.patch(`/api/orders/${orderId}/tracking`, {
+		const response = await this.context.patch(`/orders/${orderId}/tracking`, {
 			data: { trackingNumber, carrier },
 			headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {},
 		})
@@ -320,7 +320,7 @@ export class ApiTestHelper {
 	async getOrder(orderId: string): Promise<TestOrder | null> {
 		if (!this.context) throw new Error('API helper not initialized')
 
-		const response = await this.context.get(`/api/orders/${orderId}`, {
+		const response = await this.context.get(`/orders/${orderId}`, {
 			headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {},
 		})
 
@@ -342,7 +342,7 @@ export class ApiTestHelper {
 	}): Promise<TestCustomer> {
 		if (!this.context) throw new Error('API helper not initialized')
 
-		const response = await this.context.post('/api/customers', {
+		const response = await this.context.post('/customers', {
 			data,
 			headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {},
 		})
@@ -362,7 +362,7 @@ export class ApiTestHelper {
 	async getCustomer(customerId: string): Promise<TestCustomer | null> {
 		if (!this.context) throw new Error('API helper not initialized')
 
-		const response = await this.context.get(`/api/customers/${customerId}`, {
+		const response = await this.context.get(`/customers/${customerId}`, {
 			headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {},
 		})
 
@@ -380,7 +380,7 @@ export class ApiTestHelper {
 	async getProduct(productId: string): Promise<TestProduct | null> {
 		if (!this.context) throw new Error('API helper not initialized')
 
-		const response = await this.context.get(`/api/products/${productId}`, {
+		const response = await this.context.get(`/products/${productId}`, {
 			headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {},
 		})
 
@@ -397,7 +397,7 @@ export class ApiTestHelper {
 	): Promise<TestProduct> {
 		if (!this.context) throw new Error('API helper not initialized')
 
-		const response = await this.context.patch(`/api/products/${productId}/inventory`, {
+		const response = await this.context.patch(`/products/${productId}/inventory`, {
 			data,
 			headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : {},
 		})

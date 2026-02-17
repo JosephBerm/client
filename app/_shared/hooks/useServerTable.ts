@@ -112,7 +112,7 @@ interface PagedResult<T> {
  *   setSorting
  * } = useServerTable(
  *   async ({ page, pageSize, sorting }) => {
- *     const response = await fetch(`/api/users?page=${page}&pageSize=${pageSize}`);
+ *     const response = await fetch(`/users?page=${page}&pageSize=${pageSize}`);
  *     return response.json();
  *   },
  *   { initialPageSize: 20 }

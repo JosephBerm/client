@@ -200,8 +200,12 @@ export const AccountsApi = {
 	 * Gets accounts by role level list.
 	 */
 	getByRole: async (roleLevels?: number[]) => {
-		const roleParam = roleLevels?.length ? `?roles=${encodeURIComponent(roleLevels.join('|'))}` : ''
-		return HttpService.get<User[]>(`/account/by-role${roleParam}`)
+		if (!roleLevels?.length) {
+			return HttpService.get<User[]>('/account/by-role')
+		}
+
+		const encodedRoles = encodeURIComponent(roleLevels.join('|'))
+		return HttpService.get<User[]>(`/account/by-role?roles=${encodedRoles}`)
 	},
 
 	/**

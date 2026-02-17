@@ -12,7 +12,7 @@
  *
  * NO hardcoded role levels or permissions.
  * All data comes from:
- * - GET /api/rbac/overview (roles, permissions, matrix)
+ * - GET /rbac/overview (roles, permissions, matrix)
  *
  * @module RBAC Permissions
  */

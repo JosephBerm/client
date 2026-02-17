@@ -13,6 +13,12 @@
 
 import { API } from '@_shared'
 
+import {
+	ensureApiSuccessStatus,
+	unwrapApiArrayPayload,
+	unwrapApiPayload,
+} from '@_shared/services'
+
 import type {
 	CreatePaymentIntentResponse,
 	CustomerPaymentSettingsDTO,
@@ -43,7 +49,10 @@ export class PaymentService {
 	 */
 	static async createPaymentIntent(orderId: string): Promise<CreatePaymentIntentResponse> {
 		const response = await API.Payments.createPaymentIntent(orderId)
-		return response.data.payload!
+		return unwrapApiPayload<CreatePaymentIntentResponse>(
+			response,
+			'create payment intent'
+		)
 	}
 
 	/**
@@ -51,7 +60,7 @@ export class PaymentService {
 	 */
 	static async confirmPaymentIntent(paymentIntentId: string): Promise<PaymentDTO> {
 		const response = await API.Payments.confirmPaymentIntent(paymentIntentId)
-		return response.data.payload!
+		return unwrapApiPayload<PaymentDTO>(response, 'confirm payment intent')
 	}
 
 	// =========================================================================
@@ -64,7 +73,7 @@ export class PaymentService {
 	 */
 	static async recordManualPayment(orderId: string, request: RecordManualPaymentRequest): Promise<PaymentDTO> {
 		const response = await API.Payments.recordManualPayment(orderId, request)
-		return response.data.payload!
+		return unwrapApiPayload<PaymentDTO>(response, 'record manual payment')
 	}
 
 	// =========================================================================
@@ -76,7 +85,7 @@ export class PaymentService {
 	 */
 	static async getById(paymentId: string): Promise<PaymentDTO> {
 		const response = await API.Payments.get(paymentId)
-		return response.data.payload!
+		return unwrapApiPayload<PaymentDTO>(response, 'load payment')
 	}
 
 	/**
@@ -85,7 +94,7 @@ export class PaymentService {
 	 */
 	static async getByOrderId(orderId: string): Promise<PaymentDTO[]> {
 		const response = await API.Payments.getByOrderId(orderId)
-		return response.data.payload || []
+		return unwrapApiArrayPayload<PaymentDTO>(response, 'load order payments')
 	}
 
 	/**
@@ -94,7 +103,7 @@ export class PaymentService {
 	 */
 	static async getOrderPaymentSummary(orderId: string): Promise<PaymentSummary> {
 		const response = await API.Payments.getOrderSummary(orderId)
-		return response.data.payload!
+		return unwrapApiPayload<PaymentSummary>(response, 'load order payment summary')
 	}
 
 	/**
@@ -102,7 +111,7 @@ export class PaymentService {
 	 */
 	static async getByCustomerId(customerId: number): Promise<PaymentDTO[]> {
 		const response = await API.Payments.getByCustomerId(customerId)
-		return response.data.payload || []
+		return unwrapApiArrayPayload<PaymentDTO>(response, 'load customer payments')
 	}
 
 	/**
@@ -110,7 +119,7 @@ export class PaymentService {
 	 */
 	static async search(filter: PaymentSearchFilter): Promise<PagedPaymentResult<PaymentDTO>> {
 		const response = await API.Payments.search(filter)
-		return response.data.payload!
+		return unwrapApiPayload<PagedPaymentResult<PaymentDTO>>(response, 'search payments')
 	}
 
 	// =========================================================================
@@ -122,7 +131,7 @@ export class PaymentService {
 	 */
 	static async refund(paymentId: string, request: RefundRequest): Promise<PaymentDTO> {
 		const response = await API.Payments.refund(paymentId, request)
-		return response.data.payload!
+		return unwrapApiPayload<PaymentDTO>(response, 'refund payment')
 	}
 
 	// =========================================================================
@@ -134,21 +143,23 @@ export class PaymentService {
 	 */
 	static async getSavedPaymentMethods(customerId: number): Promise<SavedPaymentMethodDTO[]> {
 		const response = await API.Payments.PaymentMethods.getAll(customerId)
-		return response.data.payload || []
+		return unwrapApiArrayPayload<SavedPaymentMethodDTO>(response, 'load saved payment methods')
 	}
 
 	/**
 	 * Set a payment method as default.
 	 */
 	static async setDefaultPaymentMethod(customerId: number, paymentMethodId: string): Promise<void> {
-		await API.Payments.PaymentMethods.setDefault(customerId, paymentMethodId)
+		const response = await API.Payments.PaymentMethods.setDefault(customerId, paymentMethodId)
+		ensureApiSuccessStatus(response, 'set default payment method')
 	}
 
 	/**
 	 * Delete a saved payment method.
 	 */
 	static async deletePaymentMethod(paymentMethodId: string): Promise<void> {
-		await API.Payments.PaymentMethods.delete(paymentMethodId)
+		const response = await API.Payments.PaymentMethods.delete(paymentMethodId)
+		ensureApiSuccessStatus(response, 'delete payment method')
 	}
 
 	// =========================================================================
@@ -160,7 +171,10 @@ export class PaymentService {
 	 */
 	static async getCustomerPaymentSettings(customerId: number): Promise<CustomerPaymentSettingsDTO> {
 		const response = await API.Payments.CustomerSettings.get(customerId)
-		return response.data.payload!
+		return unwrapApiPayload<CustomerPaymentSettingsDTO>(
+			response,
+			'load customer payment settings'
+		)
 	}
 
 	/**
@@ -171,6 +185,9 @@ export class PaymentService {
 		request: UpdateCustomerPaymentSettingsRequest
 	): Promise<CustomerPaymentSettingsDTO> {
 		const response = await API.Payments.CustomerSettings.update(customerId, request)
-		return response.data.payload!
+		return unwrapApiPayload<CustomerPaymentSettingsDTO>(
+			response,
+			'update customer payment settings'
+		)
 	}
 }

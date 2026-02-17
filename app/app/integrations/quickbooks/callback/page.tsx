@@ -24,6 +24,7 @@ export default function QuickBooksCallbackPage() {
 	const searchParams = useSearchParams()
 	const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing')
 	const [message, setMessage] = useState('')
+	const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5254/api/v1'
 
 	useEffect(() => {
 		const handleCallback = async () => {
@@ -51,7 +52,7 @@ export default function QuickBooksCallbackPage() {
 
 			try {
 				// Exchange code for tokens via backend
-				const response = await fetch('/api/quickbooks/callback', {
+				const response = await fetch(`${apiBaseUrl}/QuickBooks/callback`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -83,7 +84,7 @@ export default function QuickBooksCallbackPage() {
 		}
 
 		handleCallback()
-	}, [searchParams])
+	}, [apiBaseUrl, searchParams])
 
 	/**
 	 * Notifies the opener window (if this is a popup) about the OAuth result.

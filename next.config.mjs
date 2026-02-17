@@ -35,17 +35,16 @@ const isDevelopment = process.env.NODE_ENV === 'development'
  * Environment-specific configuration
  * In production, uses Azure backend. In development, uses localhost.
  *
- * NOTE: API URLs do NOT include /api prefix - routes are at root level.
- * This is the MAANG-standard approach where API paths are defined by route
- * attributes (e.g., /Products/..., /Accounts/...), not by a global path prefix.
+ * NOTE: API URLs include the versioned base path.
+ * All API routes are prefixed with /api/v1 (e.g., /api/v1/products, /api/v1/orders).
  */
 const Environments = {
 	development: {
-		NEXT_PUBLIC_API_URL: 'http://localhost:5254',
+		NEXT_PUBLIC_API_URL: 'http://localhost:5254/api/v1',
 		CLIENT_DOMAIN: 'http://localhost:3000',
 	},
 	production: {
-		NEXT_PUBLIC_API_URL: 'https://prod-server20241205193558.azurewebsites.net',
+		NEXT_PUBLIC_API_URL: 'https://prod-server20241205193558.azurewebsites.net/api/v1',
 		CLIENT_DOMAIN: 'https://www.medsourcepro.com',
 	},
 }

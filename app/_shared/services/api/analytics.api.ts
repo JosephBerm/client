@@ -34,7 +34,10 @@ export const AnalyticsApi = {
 		if (startDate) params.append('startDate', startDate)
 		if (endDate) params.append('endDate', endDate)
 		const query = params.toString()
-		return HttpService.get<AnalyticsSummary>(`/analytics/summary${query ? `?${query}` : ''}`)
+		if (!query) {
+			return HttpService.get<AnalyticsSummary>('/analytics/summary')
+		}
+		return HttpService.get<AnalyticsSummary>(`/analytics/summary?${query}`)
 	},
 
 	/**
@@ -46,7 +49,10 @@ export const AnalyticsApi = {
 		if (startDate) params.append('startDate', startDate)
 		if (endDate) params.append('endDate', endDate)
 		const query = params.toString()
-		return HttpService.get<SalesRepPerformanceType[]>(`/analytics/team${query ? `?${query}` : ''}`)
+		if (!query) {
+			return HttpService.get<SalesRepPerformanceType[]>('/analytics/team')
+		}
+		return HttpService.get<SalesRepPerformanceType[]>(`/analytics/team?${query}`)
 	},
 
 	/**
@@ -70,7 +76,17 @@ export const AnalyticsApi = {
 		if (startDate) params.append('startDate', startDate)
 		if (endDate) params.append('endDate', endDate)
 		const query = params.toString()
-		const path = salesRepId ? `/analytics/rep/${salesRepId}` : '/analytics/rep'
-		return HttpService.get<SalesRepPerformanceType>(`${path}${query ? `?${query}` : ''}`)
+
+		if (salesRepId) {
+			if (!query) {
+				return HttpService.get<SalesRepPerformanceType>(`/analytics/rep/${salesRepId}`)
+			}
+			return HttpService.get<SalesRepPerformanceType>(`/analytics/rep/${salesRepId}?${query}`)
+		}
+
+		if (!query) {
+			return HttpService.get<SalesRepPerformanceType>('/analytics/rep')
+		}
+		return HttpService.get<SalesRepPerformanceType>(`/analytics/rep?${query}`)
 	},
 }

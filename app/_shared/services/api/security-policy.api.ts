@@ -29,23 +29,23 @@ export const SecurityPolicyApi = {
 	/**
 	 * Gets the current tenant's security policy.
 	 */
-	get: async () => HttpService.get<SecurityPolicyResponse>('/api/tenant/security-policy'),
+	get: async () => HttpService.get<SecurityPolicyResponse>('/tenant/security-policy'),
 
 	/**
 	 * Updates the tenant's security policy.
 	 * This is a step-up protected endpoint - may require MFA re-verification.
 	 */
 	update: async (policy: UpdateSecurityPolicyRequest) =>
-		HttpService.put<SecurityPolicyResponse>('/api/tenant/security-policy', policy),
+		HttpService.put<SecurityPolicyResponse>('/tenant/security-policy', policy),
 
 	/**
 	 * Resets the tenant's security policy to default values.
 	 * This is a step-up protected endpoint - may require MFA re-verification.
 	 */
-	reset: async () => HttpService.post<SecurityPolicyResponse>('/api/tenant/security-policy/reset', {}),
+	reset: async () => HttpService.post<SecurityPolicyResponse>('/tenant/security-policy/reset', {}),
 
 	/**
 	 * Gets available policy templates.
 	 */
-	getTemplates: async () => HttpService.get<PolicyTemplatesResponse>('/api/tenant/security-policy/templates'),
+	getTemplates: async () => HttpService.get<PolicyTemplatesResponse>('/tenant/security-policy/templates'),
 }

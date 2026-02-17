@@ -184,7 +184,7 @@ export const PricingApi = {
 		quoteId: string,
 		cartProductId: string,
 		data: { overridePrice: number; overrideReason: string }
-	) => HttpService.put<CartProductResponse>(`/pricing/quotes/${quoteId}/items/${cartProductId}/override`, data),
+	) => HttpService.post<CartProductResponse>(`/pricing/quotes/${quoteId}/items/${cartProductId}/override`, data),
 
 	/**
 	 * Gets the price override history for a cart product.
@@ -214,9 +214,10 @@ export const PricingApi = {
 		if (filter.page) params.set('page', filter.page.toString())
 		if (filter.pageSize) params.set('pageSize', filter.pageSize.toString())
 		const queryString = params.toString()
-		return HttpService.get<PagedResult<PricingAuditLogResponse>>(
-			`/pricing/audit-logs${queryString ? `?${queryString}` : ''}`
-		)
+		if (!queryString) {
+			return HttpService.get<PagedResult<PricingAuditLogResponse>>('/pricing/audit-logs')
+		}
+		return HttpService.get<PagedResult<PricingAuditLogResponse>>(`/pricing/audit-logs?${queryString}`)
 	},
 
 	// =====================================================================
@@ -234,6 +235,9 @@ export const PricingApi = {
 		if (request.endDate)
 			params.set('endDate', request.endDate instanceof Date ? request.endDate.toISOString() : request.endDate)
 		const queryString = params.toString()
-		return HttpService.get<PricingAnalyticsResponse>(`/pricing/analytics${queryString ? `?${queryString}` : ''}`)
+		if (!queryString) {
+			return HttpService.get<PricingAnalyticsResponse>('/pricing/analytics')
+		}
+		return HttpService.get<PricingAnalyticsResponse>(`/pricing/analytics?${queryString}`)
 	},
 }

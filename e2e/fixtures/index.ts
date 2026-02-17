@@ -179,7 +179,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 
 	apiContext: async ({ browser }, use) => {
 		const context = await browser.newContext({
-			baseURL: process.env.API_BASE_URL ?? 'http://localhost:5254',
+			baseURL: process.env.API_BASE_URL ?? 'http://localhost:5254/api/v1',
 		})
 		await use(context)
 		await context.close()

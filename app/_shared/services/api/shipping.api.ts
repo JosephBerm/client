@@ -64,8 +64,9 @@ export const ShippingApi = {
 		const params = new URLSearchParams()
 		if (carrier) params.append('carrier', carrier)
 		const query = params.toString()
-		return HttpService.get<TrackingInfo>(
-			`/Shipping/tracking/${encodeURIComponent(trackingNumber)}${query ? `?${query}` : ''}`
-		)
+		if (!query) {
+			return HttpService.get<TrackingInfo>(`/Shipping/tracking/${encodeURIComponent(trackingNumber)}`)
+		}
+		return HttpService.get<TrackingInfo>(`/Shipping/tracking/${encodeURIComponent(trackingNumber)}?${query}`)
 	},
 }

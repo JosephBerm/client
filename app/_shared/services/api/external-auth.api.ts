@@ -68,7 +68,7 @@ export const ExternalAuthApi = {
 	 * @param returnUrl - URL to redirect back to after auth
 	 */
 	getChallengeUrl(provider: string, returnUrl?: string): string {
-		const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5254/api'
+		const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5254/api/v1'
 		const params = new URLSearchParams()
 		if (returnUrl) {
 			params.set('returnUrl', returnUrl)
@@ -96,7 +96,7 @@ export const ExternalAuthApi = {
 	 * @param returnUrl - URL to redirect back to after linking
 	 */
 	getLinkUrl(provider: string, returnUrl?: string): string {
-		const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5254/api'
+		const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5254/api/v1'
 		const params = new URLSearchParams()
 		if (returnUrl) {
 			params.set('returnUrl', returnUrl)

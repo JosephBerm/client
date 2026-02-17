@@ -119,20 +119,20 @@ export const ProductsApi = {
 	/**
 	 * Searches products with pagination and filtering (admin).
 	 */
-	search: async (search: GenericSearchFilter) => HttpService.post<PagedResult<Product>>(`/Products/search`, search),
+	search: async (search: GenericSearchFilter) => HttpService.post<PagedResult<Product>>(`/products/search`, search),
 
 	/**
 	 * Rich search for products with advanced filtering, sorting, and facets.
 	 */
 	richSearch: async (filter: RichSearchFilter) =>
-		HttpService.post<RichPagedResult<Product>>(`/Products/search/rich`, filter),
+		HttpService.post<RichPagedResult<Product>>(`/products/search/rich`, filter),
 
 	/**
 	 * Searches products with pagination and filtering (public).
 	 * No authentication required.
 	 */
 	searchPublic: async (search: GenericSearchFilter) =>
-		HttpService.post<PagedResult<Product>>(`/Products/search/public`, search),
+		HttpService.post<PagedResult<Product>>(`/products/search/public`, search),
 
 	/**
 	 * Searches products (public, cacheable).
@@ -140,19 +140,19 @@ export const ProductsApi = {
 	 * **SERVER COMPONENTS ONLY - Use with "use cache".**
 	 */
 	searchPublicCacheable: async (search: GenericSearchFilter) =>
-		HttpService.postPublic<PagedResult<Product>>(`/Products/search/public`, search),
+		HttpService.postPublic<PagedResult<Product>>(`/products/search/public`, search),
 
 	/**
 	 * Gets all product categories.
 	 */
-	getAllCategories: async () => HttpService.get<ProductsCategory[]>('/Products/categories/clean'),
+	getAllCategories: async () => HttpService.get<ProductsCategory[]>('/products/categories/clean'),
 
 	/**
 	 * Gets all product categories (public, cacheable).
 	 * NO AUTHENTICATION - Does not access cookies().
 	 * **SERVER COMPONENTS ONLY - Use with "use cache".**
 	 */
-	getCategoriesCacheable: async () => HttpService.getPublic<ProductsCategory[]>('/Products/categories/clean'),
+	getCategoriesCacheable: async () => HttpService.getPublic<ProductsCategory[]>('/products/categories/clean'),
 
 	/**
 	 * Gets a single product by ID (public, cacheable).

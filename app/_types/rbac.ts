@@ -42,7 +42,7 @@ export {
 
 /**
  * Role entity from database.
- * Fetched via GET /api/rbac/roles
+ * Fetched via GET /rbac/roles
  *
  * @remarks
  * This is the canonical Role type. All RBAC components should import from here.
@@ -63,7 +63,7 @@ export interface Role {
 
 /**
  * Permission entity from database.
- * Fetched via GET /api/rbac/permissions
+ * Fetched via GET /rbac/permissions
  *
  * @remarks
  * Named `PermissionEntity` to avoid collision with `Permission` string type below.
@@ -94,7 +94,7 @@ export interface RolePermission {
 
 /**
  * Role thresholds for level-based checks.
- * Fetched via GET /api/rbac/roles/thresholds
+ * Fetched via GET /rbac/roles/thresholds
  *
  * WHITE-LABEL: All values are configurable via backend appsettings.json.
  * No code changes needed for custom role structures.
@@ -123,7 +123,7 @@ export interface RoleThresholds {
 
 /**
  * Request body for creating a new role.
- * POST /api/rbac/roles
+ * POST /rbac/roles
  */
 export interface CreateRoleRequest {
 	name: string
@@ -135,7 +135,7 @@ export interface CreateRoleRequest {
 
 /**
  * Request body for updating an existing role.
- * PUT /api/rbac/roles/:id
+ * PUT /rbac/roles/:id
  */
 export interface UpdateRoleRequest {
 	name: string
@@ -147,7 +147,7 @@ export interface UpdateRoleRequest {
 
 /**
  * Result of attempting to delete a role.
- * DELETE /api/rbac/roles/:id
+ * DELETE /rbac/roles/:id
  */
 export interface RoleDeleteResult {
 	deleted: boolean
@@ -162,7 +162,7 @@ export interface RoleDeleteResult {
 
 /**
  * Request body for creating a new permission.
- * POST /api/rbac/permissions
+ * POST /rbac/permissions
  */
 export interface CreatePermissionRequest {
 	resource: string
@@ -173,7 +173,7 @@ export interface CreatePermissionRequest {
 
 /**
  * Request body for updating an existing permission.
- * PUT /api/rbac/permissions/:id
+ * PUT /rbac/permissions/:id
  */
 export interface UpdatePermissionRequest {
 	resource: string
@@ -183,7 +183,7 @@ export interface UpdatePermissionRequest {
 }
 
 /**
- * User permissions response from GET /api/rbac/my-permissions
+ * User permissions response from GET /rbac/my-permissions
  */
 export interface UserPermissionsResponse {
 	userId: number

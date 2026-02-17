@@ -20,7 +20,7 @@ import { HttpService } from '../httpService'
  * Tenant configuration API
  *
  * Routes:
- * - GET /api/tenant/config (public branding + UI config)
+ * - GET /tenant/config (public branding + UI config)
  */
 export const TenantApi = {
 	// =====================================================================
@@ -46,7 +46,7 @@ export const TenantApi = {
 	getConfig: async (
 		options: { signal?: AbortSignal; headers?: HeadersInit } = {}
 	): Promise<TenantConfigFormData> => {
-		const response = await HttpService.get<unknown>('/api/tenant/config', {
+		const response = await HttpService.get<unknown>('/tenant/config', {
 			headers: {
 				Accept: 'application/json',
 				...(options.headers as Record<string, string> | undefined),
@@ -70,7 +70,7 @@ export const TenantApi = {
 	getConfigPublic: async (
 		options: { signal?: AbortSignal; headers?: HeadersInit } = {}
 	): Promise<TenantConfigFormData> => {
-		const response = await HttpService.getPublic<unknown>('/api/tenant/config', {
+		const response = await HttpService.getPublic<unknown>('/tenant/config', {
 			headers: {
 				Accept: 'application/json',
 				...(options.headers as Record<string, string> | undefined),
@@ -95,7 +95,7 @@ export const TenantApi = {
 	getConfigPublicCacheable: async (
 		options: { signal?: AbortSignal; headers?: HeadersInit } = {}
 	): Promise<TenantConfigFormData> => {
-		const response = await HttpService.getPublic<unknown>('/api/tenant/config', {
+		const response = await HttpService.getPublic<unknown>('/tenant/config', {
 			headers: {
 				Accept: 'application/json',
 				...(options.headers as Record<string, string> | undefined),

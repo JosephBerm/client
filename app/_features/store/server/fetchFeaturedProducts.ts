@@ -68,7 +68,7 @@ export async function fetchFeaturedProducts(): Promise<SerializedProduct[]> {
 			total: number
 			page: number
 			pageSize: number
-		}>('/Products/search/public', filter)
+		}>('/products/search/public', filter)
 		
 		if (!response.data.payload || response.data.statusCode !== 200) {
 			logger.error('[fetchFeaturedProducts] API error', {

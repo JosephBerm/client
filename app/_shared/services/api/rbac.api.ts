@@ -188,7 +188,10 @@ export const RBACApi = {
 		if (filters.userId) params.append('userId', String(filters.userId))
 		if (filters.resource) params.append('resource', filters.resource)
 		const query = params.toString()
-		return HttpService.get<PagedResult<PermissionAuditEntryDto>>(`/rbac/audit${query ? `?${query}` : ''}`)
+		if (!query) {
+			return HttpService.get<PagedResult<PermissionAuditEntryDto>>('/rbac/audit')
+		}
+		return HttpService.get<PagedResult<PermissionAuditEntryDto>>(`/rbac/audit?${query}`)
 	},
 
 	/**
@@ -207,7 +210,10 @@ export const RBACApi = {
 		if (filters.roleFilter !== undefined) params.append('roleFilter', String(filters.roleFilter))
 		if (filters.search) params.append('search', filters.search)
 		const query = params.toString()
-		return HttpService.get<PagedResult<UserWithRole>>(`/rbac/users${query ? `?${query}` : ''}`)
+		if (!query) {
+			return HttpService.get<PagedResult<UserWithRole>>('/rbac/users')
+		}
+		return HttpService.get<PagedResult<UserWithRole>>(`/rbac/users?${query}`)
 	},
 
 	/**

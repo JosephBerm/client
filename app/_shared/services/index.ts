@@ -9,6 +9,15 @@
 // HTTP Service and Types
 export { HttpService, type ApiResponse, type AxiosResponse } from './httpService'
 
+// API response normalization helpers
+export {
+	ApiRequestError,
+	ensureApiSuccessStatus,
+	unwrapApiArrayPayload,
+	unwrapApiNullablePayload,
+	unwrapApiPayload,
+} from './responseUtils'
+
 // HTTP Service Constants (public-facing)
 // Internal constants (HTTP_STATUS, CONTENT_TYPE, etc.) are intentionally not exported
 export { AUTH_COOKIE_NAME, AUTH_HEADER_PREFIX, DEFAULT_API_BASE_URL } from './httpService.constants'

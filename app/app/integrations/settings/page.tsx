@@ -15,13 +15,15 @@
 
 import { useState, useEffect } from 'react'
 
-import { ArrowLeft, ShieldAlert } from 'lucide-react'
 import Link from 'next/link'
+
+import { AlertCircle, ArrowLeft, ShieldAlert } from 'lucide-react'
+
+import { IntegrationSettingsForm, useIntegrationConnections } from '@/app/_features/integrations'
 
 import { PermissionGuard, Resources, Actions } from '@_components/common/guards'
 import Button from '@_components/ui/Button'
 import Tabs, { TabsList, Tab, TabPanel } from '@_components/ui/Tabs'
-import { IntegrationSettingsForm, useIntegrationConnections } from '@/app/_features/integrations'
 
 import { InternalPageHeader } from '../../_components'
 
@@ -47,7 +49,7 @@ function PermissionDenied() {
 }
 
 export default function IntegrationSettingsPage() {
-	const { data: connections } = useIntegrationConnections()
+	const { data: connections, error: connectionsError } = useIntegrationConnections()
 
 	const hasQuickBooks = connections?.some((c) => c.provider === 'QuickBooks' && c.isConnected)
 	const hasNetSuite = connections?.some((c) => c.provider === 'NetSuite' && c.isConnected)
@@ -83,6 +85,13 @@ export default function IntegrationSettingsPage() {
 						</Link>
 					}
 				/>
+
+				{connectionsError && (
+					<div className="alert alert-warning">
+						<AlertCircle className="h-4 w-4" />
+						<span>{connectionsError.message}</span>
+					</div>
+				)}
 
 				<Tabs value={activeTab} onValueChange={setActiveTab}>
 					<TabsList>

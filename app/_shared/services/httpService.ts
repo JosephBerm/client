@@ -652,18 +652,19 @@ export class HttpService {
 	public static async download<T>(
 		url: string,
 		data: unknown = null,
-		options: RequestInit & { responseType?: 'blob' | 'arraybuffer' } = {}
+		options: RequestInit & { responseType?: 'blob' | 'arraybuffer'; method?: 'GET' | 'POST' } = {}
 	): Promise<AxiosResponse<T>> {
 		const fullUrl = `${HttpService.baseURL}${url}`
-		const { responseType = 'blob', ...fetchOptions } = options
+		const { responseType = 'blob', method = 'POST', ...fetchOptions } = options
 		const headers = await getHeaders(fetchOptions.headers as Record<string, string>)
 
 		try {
+			const body = method === 'GET' ? undefined : data ? JSON.stringify(data) : undefined
 			const response = await fetchWithTimeout(fullUrl, {
 				...fetchOptions,
-				method: 'POST',
+				method,
 				headers,
-				body: data ? JSON.stringify(data) : undefined,
+				body,
 			})
 
 			// Handle different response types

@@ -35,7 +35,10 @@ export const OrdersApi = {
 	 * @param orderId - UUID string of the order (e.g., '40000000-0000-0000-0000-000000000005')
 	 */
 	get: async <Order>(orderId?: string | null) => {
-		return HttpService.get<Order>(`/orders${orderId ? `/${orderId}` : ''}`)
+		if (!orderId) {
+			return HttpService.get<Order>('/orders')
+		}
+		return HttpService.get<Order>(`/orders/${orderId}`)
 	},
 
 	/**
@@ -172,6 +175,18 @@ export const OrdersApi = {
 			totalRevenue: number
 			requiresActionCount: number
 		}>('/orders/summary'),
+
+	/**
+	 * Gets activity log entries for an order.
+	 * @param orderId - UUID string of the order
+	 */
+	getActivity: async (orderId: string) =>
+		HttpService.get<{
+			action: string
+			actionDetails?: string | null
+			userId?: string | null
+			timestamp: string
+		}[]>(`/orders/${orderId}/activity`),
 
 	/**
 	 * Gets orders assigned to current sales rep.

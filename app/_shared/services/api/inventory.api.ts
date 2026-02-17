@@ -80,7 +80,10 @@ export const InventoryApi = {
 		if (options?.toDate) params.set('toDate', options.toDate.toISOString())
 		if (options?.limit) params.set('limit', options.limit.toString())
 		const query = params.toString()
-		return HttpService.get<InventoryTransaction[]>(`/inventory/${productId}/transactions${query ? `?${query}` : ''}`)
+		if (!query) {
+			return HttpService.get<InventoryTransaction[]>(`/inventory/${productId}/transactions`)
+		}
+		return HttpService.get<InventoryTransaction[]>(`/inventory/${productId}/transactions?${query}`)
 	},
 
 	/**
